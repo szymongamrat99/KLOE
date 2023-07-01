@@ -1,0 +1,51 @@
+#!/bin/bash
+
+# Neutral vertex
+cd Neutrec/
+
+root <<EOF
+.L six_gamma_selection.cpp
+for(Int_t zz = 530; zz <= 583; zz++){ six_gamma_selection(zz,"230623_mc","mc_stream62_mccard2_"); cout << "File done: " << zz << endl; };
+.q
+EOF
+
+root <<EOF
+.L four_gamma_selection.cpp
+for(Int_t zz = 530; zz <= 583; zz++){ four_gamma_selection(zz,"230623_mc","mc_stream62_mccard2_"); cout << "File done: " << zz << endl; };
+.q
+EOF
+
+# Semileptonic
+cd ../Semileptonic/
+
+root <<EOF
+.L semi_selection.cpp
+for(Int_t zz = 530; zz <= 583; zz++){ semi_selection(zz,"230623_mc","mc_stream62_mccard2_"); cout << "File done: " << zz << endl; };
+.q
+EOF
+
+# Double pipi
+cd ../Pipi/
+
+root <<EOF
+.L doublepipi_selection.cpp
+for(Int_t zz = 530; zz <= 583; zz++){ doublepipi_selection(zz,"230623_mc","mc_stream62_mccard2_"); cout << "File done: " << zz << endl; };
+.q
+EOF
+
+# Generated variables
+cd ../Generated_vars/
+
+root <<EOF
+.L generated_variables.cpp
+for(Int_t zz = 530; zz <= 583; zz++){ generated_variables(zz,"230623_mc","mc_stream62_mccard2_"); cout << "File done: " << zz << endl; };
+.q
+EOF
+
+root <<EOF
+.L pipi_find.cpp
+for(Int_t zz = 530; zz <= 583; zz++){ pipi_find(zz,"230623_mc","mc_stream62_mccard2_"); cout << "File done: " << zz << endl; };
+.q
+EOF
+
+cd ../
