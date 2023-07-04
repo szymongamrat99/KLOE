@@ -4,17 +4,17 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
                        Float_t min_lim = 0, Float_t max_lim = 0, TCut additional = "" )
 {
     TString fullname = "",
-            dirnamemc = "230531_mc", dirnamedata = "230531_data",
+            dirnamemc = "230623_mc", dirnamedata = "230623_data",
             filenamemc = "mc_stream62_mccard2_", filenamedata = "data_stream42_",
             extension = ".root";
 
     TChain chain("INTERF/h1");
 
-    for(Int_t i = 1; i <= 583; i++)
+    for(Int_t i = 1; i <= 50; i++)
     {
-	if( i != 100 && i != 64)	
+	if( i != 100 && i != 64 && i != 529 )	
 	{	
-        	fullname = "../../ROOT_files/" + dirnamemc + "/" + filenamemc + i + extension;
+        	fullname = "../../ROOT_files/" + dirnamemc + "/backup/" + filenamemc + i + extension;
         	chain.Add(fullname);
 	}
     }
@@ -48,7 +48,7 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
             else if(i == 2) sel_ev[i] = chain.GetEntries(cut && "mctruth == 4" && additional);
             else if(i == 3) sel_ev[i] = chain.GetEntries(cut && "mctruth == 5" && additional);
             else if(i == 4) sel_ev[i] = chain.GetEntries(cut && "mctruth == 6" && additional);
-	    else if(i == 5) sel_ev[i] = chain.GetEntries(cut && "mctruth_pipi == 1" && additional);
+	        else if(i == 5) sel_ev[i] = chain.GetEntries(cut && "mctruth_pipi == 1" && additional);
             else if(i == 6) sel_ev[i] = chain.GetEntries(cut && "mctruth == 7" && additional);
 
             eff[i][j] = sel_ev[i]/(Float_t)total_ev[i];
@@ -94,8 +94,9 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
     TString x_title;
 
     if(sign == ">") x_title = "|#alpha^{CM}_{#pi^{+},#pi^{-}} - 141#circ| more than [#circ]";
-    if(sign == "<") x_title = "|m^{inv}_{#pi^{+}#pi^{-},1} - m_{K_{0}}| less than [MeV/c^{2}]";
+    if(sign == "<") x_title = "m^{inv}_{#pi^{+}#pi^{-},1} cut window half-width [MeV/c^{2}]";
 
+    mg->GetXaxis()->SetMaxDigits(3);
     mg->GetXaxis()->SetTitle(x_title);
     mg->GetYaxis()->SetTitle("Efficiency");
     mg->GetXaxis()->CenterTitle(1);

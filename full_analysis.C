@@ -45,14 +45,21 @@ TH2 *hist2d[10][chann_num];
 
 TLegend *legend[10];
 
-TEfficiency* pEff_signal;
-TEfficiency* pEff_semi;
-TEfficiency* pEff_three;
-TEfficiency* pEff_pipi;
+TH1 *signal_before, *signal_after;
+
+TEfficiency *pEff_signal;
+TEfficiency *pEff_semi;
+TEfficiency *pEff_three;
+TEfficiency *pEff_pipi;
+
+TEfficiency *pEff_semimc;
+TEfficiency *pEff_threemc;
+TEfficiency *pEff_pipimc;
 
 Int_t entries[chann_num] = {0}, entries_sel[3][chann_num] = {};
 
 Double_t tot_br_semi = ((br_kl_piele + br_kl_pimu)/(br_kl_piele + br_kl_pimu + br_ks_piele + br_ks_pimu))*br_ks_pi0pi0 + ((br_ks_piele + br_ks_pimu)/(br_kl_piele + br_kl_pimu + br_ks_piele + br_ks_pimu))*br_kl_pi0pi0;
+Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pippim + ((br_ks_pippim)/(br_kl_pippim + br_ks_pippim))*br_kl_pippim;
 
 void full_analysis::Begin(TTree * /*tree*/)
 {
@@ -79,10 +86,10 @@ void full_analysis::Begin(TTree * /*tree*/)
   //    for(Int_t j = 0; j < chann_num-2; j++) canvaproj[i][j] = new TCanvas((chann_name[j] + " canvaproj" + to_string(i)).c_str(), "", 750, 750);
 
    for(Int_t j = 0; j < chann_num; j++) hist_semi[0][j] = new TH1F(chann_name[j] + "0semi", "", 201, -100, 100);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[1][j] = new TH1F(chann_name[j] + "1semi", "", 100, 0, 50);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[2][j] = new TH1F(chann_name[j] + "2semi", "", 100, 0, 50);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[3][j] = new TH1F(chann_name[j] + "3semi", "", 200, -10, 10);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[4][j] = new TH1F(chann_name[j] + "4semi", "", 200, -10, 10);
+   for(Int_t j = 0; j < chann_num; j++) hist_semi[1][j] = new TH1F(chann_name[j] + "1semi", "", 101, 0, 100);
+   for(Int_t j = 0; j < chann_num; j++) hist_semi[2][j] = new TH1F(chann_name[j] + "2semi", "", 101, 0, 100);
+   for(Int_t j = 0; j < chann_num; j++) hist_semi[3][j] = new TH1F(chann_name[j] + "3semi", "", 300, -100, 100);
+   for(Int_t j = 0; j < chann_num; j++) hist_semi[4][j] = new TH1F(chann_name[j] + "4semi", "", 150, 0, 180);
    for(Int_t j = 0; j < chann_num; j++) hist_semi[5][j] = new TH1F(chann_name[j] + "5semi", "", 150, 0, 220);
    for(Int_t j = 0; j < chann_num; j++) hist_semi[6][j] = new TH1F(chann_name[j] + "6semi", "", 200, 300, 1000);
    for(Int_t j = 0; j < chann_num; j++) hist_semi[7][j] = new TH1F(chann_name[j] + "7semi", "", 200, 300, 1000);
@@ -93,8 +100,8 @@ void full_analysis::Begin(TTree * /*tree*/)
    for(Int_t j = 0; j < chann_num; j++) hist_three[3][j] = new TH1F(chann_name[j] + "3three", "", 200, -10, 10);
    for(Int_t j = 0; j < chann_num; j++) hist_three[4][j] = new TH1F(chann_name[j] + "4three", "", 200, 0, 7000);
    for(Int_t j = 0; j < chann_num; j++) hist_three[5][j] = new TH1F(chann_name[j] + "5three", "", 30, -1.0, 0.0);
-   for(Int_t j = 0; j < chann_num; j++) hist_three[6][j] = new TH1F(chann_name[j] + "6three", "", 50, m_k0 - 5, m_k0 + 5);
-   for(Int_t j = 0; j < chann_num; j++) hist_three[7][j] = new TH1F(chann_name[j] + "7three", "", 50, m_k0 - 5, m_k0 + 5);
+   for(Int_t j = 0; j < chann_num; j++) hist_three[6][j] = new TH1F(chann_name[j] + "6three", "", 200, 300, 1000);
+   for(Int_t j = 0; j < chann_num; j++) hist_three[7][j] = new TH1F(chann_name[j] + "7three", "", 200, 300, 1000);
 
    for(Int_t j = 0; j < chann_num; j++) hist_pipi[0][j] = new TH1F(chann_name[j] + "0pipi", "", 201, -100, 100);
    for(Int_t j = 0; j < chann_num; j++) hist_pipi[1][j] = new TH1F(chann_name[j] + "1pipi", "", 100, 0, 50);
@@ -102,8 +109,8 @@ void full_analysis::Begin(TTree * /*tree*/)
    for(Int_t j = 0; j < chann_num; j++) hist_pipi[3][j] = new TH1F(chann_name[j] + "3pipi", "", 200, -10, 10);
    for(Int_t j = 0; j < chann_num; j++) hist_pipi[4][j] = new TH1F(chann_name[j] + "4pipi", "", 200, -10, 10);
    for(Int_t j = 0; j < chann_num; j++) hist_pipi[5][j] = new TH1F(chann_name[j] + "5pipi", "", 100, -100, 5);
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[6][j] = new TH1F(chann_name[j] + "6pipi", "", 12, m_k0-20.0, m_k0+20.0);
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[7][j] = new TH1F(chann_name[j] + "7pipi", "", 12, m_k0-20.0, m_k0+20.0);
+   for(Int_t j = 0; j < chann_num; j++) hist_pipi[6][j] = new TH1F(chann_name[j] + "6pipi", "", 12, m_k0 - 20, m_k0 + 20);
+   for(Int_t j = 0; j < chann_num; j++) hist_pipi[7][j] = new TH1F(chann_name[j] + "7pipi", "", 200, 300, 1000);
 
    hist_signal = new TH1F("Signal histo", "", 100, -100, 10);
    hist_signal_nocuts = new TH1F("Signal histo nocuts", "", 201, -100, 100);
@@ -122,6 +129,13 @@ void full_analysis::Begin(TTree * /*tree*/)
    pEff_semi = new TEfficiency("eff_semi",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
    pEff_three = new TEfficiency("eff_three",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
    pEff_pipi = new TEfficiency("eff_pipi",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
+
+   pEff_semimc = new TEfficiency("eff_semimc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
+   pEff_threemc = new TEfficiency("eff_threemc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
+   pEff_pipimc = new TEfficiency("eff_pipimc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
+
+   signal_before = new TH1F("signal before", ";#Deltat [#tau_{S}];Counts", 41, -20, 20);
+   signal_after = new TH1F("signal_after", ";#Deltat [#tau_{S}];Counts", 41, -20, 20);
 
    TString option = GetOption();
 }
@@ -378,9 +392,6 @@ Bool_t full_analysis::Process(Long64_t entry)
    k_path00_tri = sqrt(pow(pos_kaon_00_tri(0),2) + pow(pos_kaon_00_tri(1),2) + pow(pos_kaon_00_tri(2),2));
    k_beta00_tri = sqrt(pow(mom_kaon_00_tri(0),2) + pow(mom_kaon_00_tri(1),2) + pow(mom_kaon_00_tri(2),2))/mom_kaon_00_tri(3);
 
-   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/c_vel) - (k_path00_tri/(k_beta00_tri*c_vel));
-   trcv_sum = TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3];
-
    phi_boost = mom_phi.BoostVector();
 
    pos_phi.Boost(-phi_boost);
@@ -403,6 +414,9 @@ Bool_t full_analysis::Process(Long64_t entry)
    mom_kaon_l_alt.Boost(-phi_boost);
 
    mom_phi.Boost(-phi_boost);
+
+   k_pathpm = sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2));
+   k_betapm = sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3);
 
    phi_boost = mom_phi_mc.BoostVector();
    mom_kne_mc.Boost(-phi_boost);
@@ -434,27 +448,27 @@ Bool_t full_analysis::Process(Long64_t entry)
    pos_kch_mc.Boost(-kaon_pm_boost);
    pos_kne_mc.Boost(-kaon_00_std_boost);
 
-   k_pathpm = sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2));
-   k_betapm = sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3);
-   k_path00_tri = sqrt(pow(pos_kaon_00_std(0),2) + pow(pos_kaon_00_std(1),2) + pow(pos_kaon_00_std(2),2));
-   k_beta00_tri = sqrt(pow(mom_kaon_00_std(0),2) + pow(mom_kaon_00_std(1),2) + pow(mom_kaon_00_std(2),2))/mom_kaon_00_std(3);
+   //k_pathpm = sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2));
+   //k_betapm = sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3);
+   //k_path00_tri = sqrt(pow(pos_kaon_00_std(0),2) + pow(pos_kaon_00_std(1),2) + pow(pos_kaon_00_std(2),2));
+   //k_beta00_tri = sqrt(pow(mom_kaon_00_std(0),2) + pow(mom_kaon_00_std(1),2) + pow(mom_kaon_00_std(2),2))/mom_kaon_00_std(3);
 
    
 
    // Calculation of time difference
 
-   tpm = pos_kaon_pm(3)/tau_S_nonCPT;
-   t00_std = pos_kaon_00_std(3)/tau_S_nonCPT;
-   t00_tri = pos_kaon_00_tri(3)/tau_S_nonCPT;
-   ts = pos_kaon_s(3)/tau_S_nonCPT;
-   tl = pos_kaon_l(3)/tau_S_nonCPT;
-   tpm_mc = pos_kch_mc(3)/tau_S_nonCPT;
-   t00_mc = pos_kne_mc(3)/tau_S_nonCPT;  
+   tpm = pos_kaon_pm(3)/(tau_S_nonCPT*c_vel);
+   t00_std = pos_kaon_00_std(3)/(tau_S_nonCPT*c_vel);
+   t00_tri = pos_kaon_00_tri(3)/(tau_S_nonCPT*c_vel);
+   ts = pos_kaon_s(3)/(tau_S_nonCPT*c_vel);
+   tl = pos_kaon_l(3)/(tau_S_nonCPT*c_vel);
+   tpm_mc = pos_kch_mc(3)/(tau_S_nonCPT*c_vel);
+   t00_mc = pos_kne_mc(3)/(tau_S_nonCPT*c_vel);  
 
-   DeltaT_signal = (tpm - t00_std)/c_vel;
-   DeltaT_control = (tpm - t00_tri)/c_vel;
-   DeltaT_pipi = (ts - tl)/c_vel;
-   DeltaT_mc = (tpm_mc - t00_mc)/c_vel;
+   DeltaT_signal = (tpm - t00_std);
+   DeltaT_control = (tpm - t00_tri);
+   DeltaT_pipi = (tl - ts);
+   DeltaT_mc = (tpm_mc - t00_mc);
 
    ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -462,37 +476,45 @@ Bool_t full_analysis::Process(Long64_t entry)
 
    //trcv_sum = TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3];
 
-   cuts_semi[0] = 1;//abs(*Qmiss_inv - 115.31) < 13;
-   cuts_semi[1] = 1;//abs(*anglepipi_CM_kch - 141) < 30;
-
-   cuts_signal_neutral_cs[0] = 1;//(abs(fourKnetri[5] - m_k0) < 76);
-   cuts_signal_neutral_cs[1] = 1;//(trcv_sum > -5);
-
-   cuts_signal_charged_cs[0] = 1;//(abs(Kchrec[5] - m_k0) < 1.2);
-   cuts_signal_charged_cs[1] = 1;//(*Qmiss_inv < 3.75);
-   cuts_signal_charged_cs[2] = 1;//= (cos(M_PI**anglepipi_CM_kch/180.) < -0.8);
-
-   tot_cuts_semi = cuts_semi[0] && cuts_semi[1];
-   tot_cuts_neutral = cuts_signal_neutral_cs[0] && cuts_signal_neutral_cs[1];
-   tot_cuts_charged = cuts_signal_charged_cs[0] && cuts_signal_charged_cs[1] && cuts_signal_charged_cs[2];
-
-
+   
    ///////////////////////////////////////////////////////////////////////////////////////////////////
    //Signal truth check
    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
    if(*mctruth == 1)
 	{
-      trcv_sum_signal = trcv[g4taken[0]] + trcv[g4taken[1]] + trcv[g4taken[2]] + trcv[g4taken[3]];
-      pEff_signal->Fill(trcv_sum_signal > -1 && abs(*minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, DeltaT_signal);
+      trcv_sum_signal = trcv[g4taken[0]-1] + trcv[g4taken[1]-1] + trcv[g4taken[2]-1] + trcv[g4taken[3]-1];
+      pEff_signal->FillWeighted(trcv_sum_signal > -1 && abs(*minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, interf_function(DeltaT_mc,1,0), DeltaT_signal);
+
+      signal_before->Fill(DeltaT_signal, interf_function(DeltaT_mc,1,0));
+
+      if(trcv_sum_signal > -1 && abs(*minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8)
+      {
+         signal_after->Fill(DeltaT_signal, interf_function(DeltaT_mc,1,0));
+      }
+
    }
+
+   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/c_vel) - (k_path00_tri/(k_beta00_tri*c_vel));
+   trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
+
+   cuts_semi[0] = abs(*Qmiss_inv - 71.13) < 25;
+   cuts_semi[1] = abs(*anglepipi_CM_kch - 145.8) < 10;
+
+   cuts_signal_neutral_cs[0] = (abs(fourKnetri[5] - m_k0) < 76);
+   cuts_signal_neutral_cs[1] = (trcv_sum > -1.0);
+
+   cuts_signal_charged_cs[0] = (abs(Kchrec[5] - m_k0) < 1.2);
+   cuts_signal_charged_cs[1] = (*Qmiss_inv < 3.75);
+   cuts_signal_charged_cs[2] = (cos(M_PI*(*anglepipi_CM_kch)/180.) < -0.8);
+
+   tot_cuts_semi = cuts_semi[0] && cuts_semi[1];
+   tot_cuts_neutral = cuts_signal_neutral_cs[0] && cuts_signal_neutral_cs[1];
+   tot_cuts_charged = cuts_signal_charged_cs[0] && cuts_signal_charged_cs[1] && cuts_signal_charged_cs[2];
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////
    // Control samples selection
    ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-   k_pathpm = sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2));
-   k_path00_tri = sqrt(pow(pos_kaon_00_tri(0),2) + pow(pos_kaon_00_tri(1),2) + pow(pos_kaon_00_tri(2),2));
 
    if(*mctruth == 1) entries[0]++;
    if(*mctruth == 3) entries[1]++;
@@ -501,19 +523,19 @@ Bool_t full_analysis::Process(Long64_t entry)
    if(*mctruth == 6) entries[4]++;
    if(*mctruth_pipi == 1) entries[5]++;
    if(*mctruth == 7) entries[6]++;
+   if(*mcflag == 0) entries[7]++;
 
-   if(tot_cuts_semi)//&& *done4 == 1)
+   if(tot_cuts_semi && *done4 == 1)
    {
-      if(tot_cuts_neutral)
+      if(1/*tot_cuts_neutral*/)
       {
-
          if(*mctruth == 1)
          {
-            hist_semi[0][0]->Fill(DeltaT_signal,interf_function(DeltaT_mc,1,0));
-            hist_semi[1][0]->Fill(k_pathpm);
-            hist_semi[2][0]->Fill(k_path00_tri);
-            hist_semi[3][0]->Fill(*minv4gam);
-            hist_semi[4][0]->Fill(Kchboost[8]);
+            hist_semi[0][0]->Fill(DeltaT_control,tot_br_semi*interf_function(DeltaT_mc,1,0));
+            hist_semi[1][0]->Fill(tpm);
+            hist_semi[2][0]->Fill(t00_tri);
+            hist_semi[3][0]->Fill(trcv_sum);
+            hist_semi[4][0]->Fill(*anglepipi_CM_kch);
             hist_semi[5][0]->Fill(*Qmiss_inv);
             hist_semi[6][0]->Fill(Kchrec[5]);
             hist_semi[7][0]->Fill(fourKnetri[5]);
@@ -521,11 +543,11 @@ Bool_t full_analysis::Process(Long64_t entry)
          }
          if(*mctruth == 3)
          {
-            hist_semi[0][1]->Fill(DeltaT_signal);
-            hist_semi[1][1]->Fill(k_pathpm);
-            hist_semi[2][1]->Fill(k_path00_tri);
-            hist_semi[3][1]->Fill(*minv4gam);
-            hist_semi[4][1]->Fill(Kchboost[8]);
+            hist_semi[0][1]->Fill(DeltaT_control,tot_br_semi);
+            hist_semi[1][1]->Fill(tpm);
+            hist_semi[2][1]->Fill(t00_tri);
+            hist_semi[3][1]->Fill(trcv_sum);
+            hist_semi[4][1]->Fill(*anglepipi_CM_kch);
             hist_semi[5][1]->Fill(*Qmiss_inv);
             hist_semi[6][1]->Fill(Kchrec[5]);
             hist_semi[7][1]->Fill(fourKnetri[5]);
@@ -533,11 +555,11 @@ Bool_t full_analysis::Process(Long64_t entry)
          }
          if(*mctruth == 4)
          {
-            hist_semi[0][2]->Fill(DeltaT_signal);
-            hist_semi[1][2]->Fill(k_pathpm);
-            hist_semi[2][2]->Fill(k_path00_tri);
-            hist_semi[3][2]->Fill(*minv4gam);
-            hist_semi[4][2]->Fill(Kchboost[8]);
+            hist_semi[0][2]->Fill(DeltaT_control,tot_br_semi);
+            hist_semi[1][2]->Fill(tpm);
+            hist_semi[2][2]->Fill(t00_tri);
+            hist_semi[3][2]->Fill(trcv_sum);
+            hist_semi[4][2]->Fill(*anglepipi_CM_kch);
             hist_semi[5][2]->Fill(*Qmiss_inv);
             hist_semi[6][2]->Fill(Kchrec[5]);
             hist_semi[7][2]->Fill(fourKnetri[5]);
@@ -545,11 +567,11 @@ Bool_t full_analysis::Process(Long64_t entry)
          }
          if(*mctruth == 5)
          {
-            hist_semi[0][3]->Fill(DeltaT_signal);
-            hist_semi[1][3]->Fill(k_pathpm);
-            hist_semi[2][3]->Fill(k_path00_tri);
-            hist_semi[3][3]->Fill(*minv4gam);
-            hist_semi[4][3]->Fill(Kchboost[8]);
+            hist_semi[0][3]->Fill(DeltaT_control,tot_br_semi);
+            hist_semi[1][3]->Fill(tpm);
+            hist_semi[2][3]->Fill(t00_tri);
+            hist_semi[3][3]->Fill(trcv_sum);
+            hist_semi[4][3]->Fill(*anglepipi_CM_kch);
             hist_semi[5][3]->Fill(*Qmiss_inv);
             hist_semi[6][3]->Fill(Kchrec[5]);
             hist_semi[7][3]->Fill(fourKnetri[5]);
@@ -557,11 +579,11 @@ Bool_t full_analysis::Process(Long64_t entry)
          }
          if(*mctruth == 6)
          {
-            hist_semi[0][4]->Fill(DeltaT_signal);
-            hist_semi[1][4]->Fill(k_pathpm);
-            hist_semi[2][4]->Fill(k_path00_tri);
-            hist_semi[3][4]->Fill(*minv4gam);
-            hist_semi[4][4]->Fill(Kchboost[8]);
+            hist_semi[0][4]->Fill(DeltaT_control,tot_br_semi);
+            hist_semi[1][4]->Fill(tpm);
+            hist_semi[2][4]->Fill(t00_tri);
+            hist_semi[3][4]->Fill(trcv_sum);
+            hist_semi[4][4]->Fill(*anglepipi_CM_kch);
             hist_semi[5][4]->Fill(*Qmiss_inv);
             hist_semi[6][4]->Fill(Kchrec[5]);
             hist_semi[7][4]->Fill(fourKnetri[5]);
@@ -569,11 +591,11 @@ Bool_t full_analysis::Process(Long64_t entry)
          }
          if(*mctruth_pipi == 1)
          {
-            hist_semi[0][5]->Fill(DeltaT_signal);
-            hist_semi[1][5]->Fill(k_pathpm);
-            hist_semi[2][5]->Fill(k_path00_tri);
-            hist_semi[3][5]->Fill(*minv4gam);
-            hist_semi[4][5]->Fill(Kchboost[8]);
+            hist_semi[0][5]->Fill(DeltaT_control,tot_br_semi);
+            hist_semi[1][5]->Fill(tpm);
+            hist_semi[2][5]->Fill(t00_tri);
+            hist_semi[3][5]->Fill(trcv_sum);
+            hist_semi[4][5]->Fill(*anglepipi_CM_kch);
             hist_semi[5][5]->Fill(*Qmiss_inv);
             hist_semi[6][5]->Fill(Kchrec[5]);
             hist_semi[7][5]->Fill(fourKnetri[5]);
@@ -581,11 +603,11 @@ Bool_t full_analysis::Process(Long64_t entry)
          }
          if(*mctruth == 7)
          {
-            hist_semi[0][6]->Fill(DeltaT_signal);
-            hist_semi[1][6]->Fill(k_pathpm);
-            hist_semi[2][6]->Fill(k_path00_tri);
-            hist_semi[3][6]->Fill(*minv4gam);
-            hist_semi[4][6]->Fill(Kchboost[8]);
+            hist_semi[0][6]->Fill(DeltaT_control,tot_br_semi);
+            hist_semi[1][6]->Fill(tpm);
+            hist_semi[2][6]->Fill(t00_tri);
+            hist_semi[3][6]->Fill(trcv_sum);
+            hist_semi[4][6]->Fill(*anglepipi_CM_kch);
             hist_semi[5][6]->Fill(*Qmiss_inv);
             hist_semi[6][6]->Fill(Kchrec[5]);
             hist_semi[7][6]->Fill(fourKnetri[5]);
@@ -593,17 +615,234 @@ Bool_t full_analysis::Process(Long64_t entry)
          }
          if(*mcflag == 0)
                {
-                  hist_semi[0][7]->Fill(DeltaT_signal);
-                  hist_semi[1][7]->Fill(k_pathpm);
-                  hist_semi[2][7]->Fill(k_path00_tri);
-                  hist_semi[3][7]->Fill(*minv4gam);
-                  hist_semi[4][7]->Fill(Kchboost[8]);
+
+                  hist_semi[0][7]->Fill(DeltaT_control,tot_br_semi);
+                  hist_semi[1][7]->Fill(tpm);
+                  hist_semi[2][7]->Fill(t00_tri);
+                  hist_semi[3][7]->Fill(trcv_sum);
+                  hist_semi[4][7]->Fill(*anglepipi_CM_kch);
                   hist_semi[5][7]->Fill(*Qmiss_inv);
                   hist_semi[6][7]->Fill(Kchrec[5]);
                   hist_semi[7][7]->Fill(fourKnetri[5]);
          }
       }
    }
+
+   //Three selection
+   if(*done == 1 && *totalerr < 2000 && *done4 == 1)
+   {
+      if(1)//tot_cuts_charged)
+      {
+         if(*mctruth == 1)
+         {
+            hist_three[0][0]->Fill(DeltaT_control);
+            hist_three[1][0]->Fill(tpm);
+            hist_three[2][0]->Fill(t00_tri);
+            hist_three[3][0]->Fill(fourKnetri[8]);
+            hist_three[4][0]->Fill(*totalerr);
+            hist_three[5][0]->Fill(cos(M_PI*(*anglepipi_CM_kch)/180.));
+            hist_three[6][0]->Fill(Kchrec[5]);
+            hist_three[7][0]->Fill(fourKnetri[5]);
+            entries_sel[1][0]++;
+         }
+         if(*mctruth == 3)
+         {
+            hist_three[0][1]->Fill(DeltaT_control);
+            hist_three[1][1]->Fill(tpm);
+            hist_three[2][1]->Fill(t00_tri);
+            hist_three[3][1]->Fill(fourKnetri[8]);
+            hist_three[4][1]->Fill(*totalerr);
+            hist_three[5][1]->Fill(cos(M_PI*(*anglepipi_CM_kch)/180.));
+            hist_three[6][1]->Fill(Kchrec[5]);
+            hist_three[7][1]->Fill(fourKnetri[5]);
+            entries_sel[1][1]++;
+         }
+         if(*mctruth == 4)
+         {
+            hist_three[0][2]->Fill(DeltaT_control);
+            hist_three[1][2]->Fill(tpm);
+            hist_three[2][2]->Fill(t00_tri);
+            hist_three[3][2]->Fill(fourKnetri[8]);
+            hist_three[4][2]->Fill(*totalerr);
+            hist_three[5][2]->Fill(cos(M_PI*(*anglepipi_CM_kch)/180.));
+            hist_three[6][2]->Fill(Kchrec[5]);
+            hist_three[7][2]->Fill(fourKnetri[5]);
+            entries_sel[1][2]++;
+         }
+         if(*mctruth == 5)
+         {
+            hist_three[0][3]->Fill(DeltaT_control);
+            hist_three[1][3]->Fill(tpm);
+            hist_three[2][3]->Fill(t00_tri);
+            hist_three[3][3]->Fill(fourKnetri[8]);
+            hist_three[4][3]->Fill(*totalerr);
+            hist_three[5][3]->Fill(cos(M_PI*(*anglepipi_CM_kch)/180.));
+            hist_three[6][3]->Fill(Kchrec[5]);
+            hist_three[7][3]->Fill(fourKnetri[5]);
+            entries_sel[1][3]++;
+         }
+         if(*mctruth == 6)
+         {
+            hist_three[0][4]->Fill(DeltaT_control);
+            hist_three[1][4]->Fill(tpm);
+            hist_three[2][4]->Fill(t00_tri);
+            hist_three[3][4]->Fill(fourKnetri[8]);
+            hist_three[4][4]->Fill(*totalerr);
+            hist_three[5][4]->Fill(cos(M_PI*(*anglepipi_CM_kch)/180.));
+            hist_three[6][4]->Fill(Kchrec[5]);
+            hist_three[7][4]->Fill(fourKnetri[5]);
+            entries_sel[1][4]++;
+         }
+         if(*mctruth_pipi == 1)
+         {
+            hist_three[0][5]->Fill(DeltaT_control);
+            hist_three[1][5]->Fill(tpm);
+            hist_three[2][5]->Fill(t00_tri);
+            hist_three[3][5]->Fill(fourKnetri[8]);
+            hist_three[4][5]->Fill(*totalerr);
+            hist_three[5][5]->Fill(cos(M_PI*(*anglepipi_CM_kch)/180.));
+            hist_three[6][5]->Fill(Kchrec[5]);
+            hist_three[7][5]->Fill(fourKnetri[5]);
+            entries_sel[1][5]++;
+         }
+         if(*mctruth == 7)
+         {
+            hist_three[0][6]->Fill(DeltaT_control);
+            hist_three[1][6]->Fill(tpm);
+            hist_three[2][6]->Fill(t00_tri);
+            hist_three[3][6]->Fill(fourKnetri[8]);
+            hist_three[4][6]->Fill(*totalerr);
+            hist_three[5][6]->Fill(cos(M_PI*(*anglepipi_CM_kch)/180.));
+            hist_three[6][6]->Fill(Kchrec[5]);
+            hist_three[7][6]->Fill(fourKnetri[5]);
+            entries_sel[1][6]++;
+         }
+	 if(*mcflag == 0)
+         {
+            hist_three[0][7]->Fill(DeltaT_control);
+            hist_three[1][7]->Fill(tpm);
+            hist_three[2][7]->Fill(t00_tri);
+            hist_three[3][7]->Fill(fourKnetri[8]);
+            hist_three[4][7]->Fill(*totalerr);
+            hist_three[5][7]->Fill(cos(M_PI*(*anglepipi_CM_kch)/180.));
+            hist_three[6][7]->Fill(Kchrec[5]);
+            hist_three[7][7]->Fill(fourKnetri[5]);
+	 }
+      }
+   }
+
+   //Pipi selection
+   if(donepipi[0] == 1 && donepipi[1] == 1)// && abs(Kchrec1[5] - m_k0) < 2)
+   {
+      if(1)//tot_cuts_charged)
+      {
+
+         if(*mctruth == 1)
+         {
+            hist_pipi[0][0]->Fill(DeltaT_pipi);
+            hist_pipi[1][0]->Fill(ts);
+            hist_pipi[2][0]->Fill(tl);
+            hist_pipi[3][0]->Fill(fourKnetri[8]);
+            hist_pipi[4][0]->Fill(Kchboost[8]);
+            hist_pipi[5][0]->Fill(trcv_sum);
+            hist_pipi[6][0]->Fill(Kchrec1[5]);
+            hist_pipi[7][0]->Fill(Kchrec2[5]);
+            entries_sel[2][0]++;
+         }
+         if(*mctruth == 3)
+         {
+            hist_pipi[0][1]->Fill(DeltaT_pipi);
+            hist_pipi[1][1]->Fill(ts);
+            hist_pipi[2][1]->Fill(tl);
+            hist_pipi[3][1]->Fill(fourKnetri[8]);
+            hist_pipi[4][1]->Fill(Kchboost[8]);
+            hist_pipi[5][1]->Fill(trcv_sum);
+            hist_pipi[6][1]->Fill(Kchrec1[5]);
+            hist_pipi[7][1]->Fill(Kchrec2[5]);
+            entries_sel[2][1]++;
+         }
+         if(*mctruth == 4)
+         {
+            hist_pipi[0][2]->Fill(DeltaT_pipi);
+            hist_pipi[1][2]->Fill(ts);
+            hist_pipi[2][2]->Fill(tl);
+            hist_pipi[3][2]->Fill(fourKnetri[8]);
+            hist_pipi[4][2]->Fill(Kchboost[8]);
+            hist_pipi[5][2]->Fill(trcv_sum);
+            hist_pipi[6][2]->Fill(Kchrec1[5]);
+            hist_pipi[7][2]->Fill(Kchrec2[5]);
+            entries_sel[2][2]++;
+         }
+         if(*mctruth == 5)
+         {
+            hist_pipi[0][3]->Fill(DeltaT_pipi);
+            hist_pipi[1][3]->Fill(ts);
+            hist_pipi[2][3]->Fill(tl);
+            hist_pipi[3][3]->Fill(fourKnetri[8]);
+            hist_pipi[4][3]->Fill(Kchboost[8]);
+            hist_pipi[5][3]->Fill(trcv_sum);
+            hist_pipi[6][3]->Fill(Kchrec1[5]);
+            hist_pipi[7][3]->Fill(Kchrec2[5]);
+            entries_sel[2][3]++;
+         }
+         if(*mctruth == 6)
+         {
+            hist_pipi[0][4]->Fill(DeltaT_pipi);
+            hist_pipi[1][4]->Fill(ts);
+            hist_pipi[2][4]->Fill(tl);
+            hist_pipi[3][4]->Fill(fourKnetri[8]);
+            hist_pipi[4][4]->Fill(Kchboost[8]);
+            hist_pipi[5][4]->Fill(trcv_sum);
+            hist_pipi[6][4]->Fill(Kchrec1[5]);
+            hist_pipi[7][4]->Fill(Kchrec2[5]);
+            entries_sel[2][4]++;
+         }
+         if(*mctruth_pipi == 1)
+         {
+            hist_pipi[0][5]->Fill(DeltaT_pipi);
+            hist_pipi[1][5]->Fill(ts);
+            hist_pipi[2][5]->Fill(tl);
+            hist_pipi[3][5]->Fill(fourKnetri[8]);
+            hist_pipi[4][5]->Fill(Kchboost[8]);
+            hist_pipi[5][5]->Fill(trcv_sum);
+            hist_pipi[6][5]->Fill(Kchrec1[5]);
+            hist_pipi[7][5]->Fill(Kchrec2[5]);
+            entries_sel[2][5]++;
+         }
+         if(*mctruth == 7)
+         {
+            hist_pipi[0][6]->Fill(DeltaT_pipi);
+            hist_pipi[1][6]->Fill(ts);
+            hist_pipi[2][6]->Fill(tl);
+            hist_pipi[3][6]->Fill(fourKnetri[8]);
+            hist_pipi[4][6]->Fill(Kchboost[8]);
+            hist_pipi[5][6]->Fill(trcv_sum);
+            hist_pipi[6][6]->Fill(Kchrec1[5]);
+            hist_pipi[7][6]->Fill(Kchrec2[5]);
+            entries_sel[2][6]++;
+         }
+	 if(*mcflag == 0)
+         {
+            hist_pipi[0][7]->Fill(DeltaT_pipi);
+            hist_pipi[1][7]->Fill(ts);
+            hist_pipi[2][7]->Fill(tl);
+            hist_pipi[3][7]->Fill(fourKnetri[8]);
+            hist_pipi[4][7]->Fill(Kchboost[8]);
+            hist_pipi[5][7]->Fill(trcv_sum);
+            hist_pipi[6][7]->Fill(Kchrec1[5]);
+            hist_pipi[7][7]->Fill(Kchrec2[5]);
+	 }
+      }
+   }
+
+if(tot_cuts_semi && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_semimc->FillWeighted(tot_cuts_neutral, tot_br_semi, DeltaT_control);
+   if(*done == 1 && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_threemc->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
+   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - m_k0) < 2 && *mcflag == 1 && *mctruth != 0) pEff_pipimc->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
+
+   if(tot_cuts_semi && *mcflag == 0 && *done4 == 1) pEff_semi->FillWeighted(tot_cuts_neutral, tot_br_semi, DeltaT_control);
+   if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
+   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - m_k0) < 2 && *mcflag == 0) pEff_pipi->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
+
 
    return kTRUE;
 }
@@ -622,54 +861,57 @@ void full_analysis::Terminate()
    // a query. It always runs on the client, it can be used to present
    // the results graphically or save the results to file.
 
-   /*TObjArray *mc_semi[10];
-   TObjArray *mc_three[10];
-   TObjArray *mc_pipi[10];
+   TObjArray *mc_semi;
+   TObjArray *mc_three;
+   TObjArray *mc_pipi;
 
-   for(Int_t i = 0; i < 8; i++)
-   {
-	mc_three[i] = new TObjArray(chann_num-2);
-	mc_pipi[i] = new TObjArray(chann_num-2);
-	mc_semi[i] = new TObjArray(chann_num-2);
-   }
 
-   for(Int_t i = 0; i < 8; i++)
-	   for(Int_t j = 0; j < chann_num - 2; j++) mc_semi[i]->Add(hist_semi[i][j]);
+   hist_semi[0][0]->Scale(tot_br_semi*(Float_t)entries_sel[0][0]/hist_semi[0][0]->Integral(0,hist_semi[0][0]->GetNbinsX()+1));
+   mc_three = new TObjArray(chann_num-2);
+   mc_pipi = new TObjArray(chann_num-2);
+   mc_semi = new TObjArray(chann_num-3);
+   
+   cout << hist_semi[0][5]->GetEntries() << endl;
+   
+	mc_semi->Add(hist_semi[0][0]);
+   mc_semi->Add(hist_semi[0][1]);
+   mc_semi->Add(hist_semi[0][2]);
+   mc_semi->Add(hist_semi[0][3]);
+   mc_semi->Add(hist_semi[0][4]);
+   mc_semi->Add(hist_semi[0][6]);
 
-   for(Int_t i = 0; i < 8; i++)
+   /*for(Int_t i = 0; i < 8; i++)
 	   for(Int_t j = 0; j < chann_num - 2; j++) mc_three[i]->Add(hist_three[i][j]);
 
    for(Int_t i = 0; i < 8; i++)
-	   for(Int_t j = 0; j < chann_num - 2; j++) mc_pipi[i]->Add(hist_pipi[i][j]);
+	   for(Int_t j = 0; j < chann_num - 2; j++) mc_pipi[i]->Add(hist_pipi[i][j]);*/
 
-   TFractionFitter* fit_semi[10];
-   TFractionFitter* fit_three[10];
-   TFractionFitter* fit_pipi[10];
+   TFractionFitter* fit_semi;
+   //TFractionFitter* fit_three[10];
+   //TFractionFitter* fit_pipi[10];
 
    Int_t bins_data, bin_width_data;
    Double_t scaling_factor, factor_error, int_initial[chann_num], int_data, int_initial_tot;
 
-   for(Int_t i = 0; i < 8; i++)
-   {*/
-	//fit_semi[i] = new TFractionFitter(hist_semi[i][chann_num-2],mc_semi[i]);
+	fit_semi = new TFractionFitter(hist_semi[0][chann_num-2],mc_semi);
 	//fit_three[i] = new TFractionFitter(hist_three[i][chann_num-2],mc_three[i]);
 	//fit_pipi[i] = new TFractionFitter(hist_pipi[i][chann_num-2],mc_pipi[i]);
 
-	/*fit_semi[i]->Constrain(0,0.0,1.0);
-	fit_semi[i]->Constrain(1,0.0,1.0);
-	fit_semi[i]->Constrain(2,0.0,1.0);
-	fit_semi[i]->Constrain(3,0.0,1.0);
-	fit_semi[i]->Constrain(4,0.0,1.0);
-	fit_semi[i]->Constrain(5,0.0,1.0);
-	fit_semi[i]->Constrain(6,0.0,1.0);*/
+	fit_semi->Constrain(0,0.0,1.0);
+	fit_semi->Constrain(1,0.0,1.0);
+	fit_semi->Constrain(2,0.0,1.0);
+	fit_semi->Constrain(3,0.0,1.0);
+	fit_semi->Constrain(4,0.0,1.0);
+	fit_semi->Constrain(5,0.0,1.0);
+	//fit_semi->Constrain(6,0.0,1.0);
 		//fit_three[i]->Constrain(j,0.0,1.0);
 		//fit_pipi[i]->Constrain(j,0.0,1.0);
 
-	//fit_semi[i]->Fit();
+	//fit_semi->Fit();
 	//fit_three[i]->Fit();
 	//fit_pipi[i]->Fit();
 
-	//hist_semi[i][chann_num - 1] = (TH1F*) fit_semi[i]->GetPlot();
+	//hist_semi[0][chann_num - 1] = (TH1F*) fit_semi->GetPlot();
 	//hist_three[i][chann_num - 1] = (TH1F*) fit_three[i]->GetPlot();
 	//hist_pipi[i][chann_num - 1] = (TH1F*) fit_pipi[i]->GetPlot();
 	
@@ -702,7 +944,6 @@ void full_analysis::Terminate()
 		hist_semi[i][chann_num-1]->Add(hist_semi[i][j]);
 	}*/
 
-   //}
 
 
    for(Int_t i = 0; i < 10; i++)
@@ -728,17 +969,17 @@ void full_analysis::Terminate()
    TString title_semi[100], title_three[100], title_pipi[100];
 
    title_semi[0] = "#Deltat [#tau_{S}]";
-   title_semi[1] = "l_{K#rightarrow#pi^{+}#pi^{-}} [cm]";
-   title_semi[2] = "l_{K#rightarrow#pi^{0}#pi^{0}} [cm]";
-   title_semi[3] = "z_{neu} [cm]";
-   title_semi[4] = "z_{ch} [cm]";
-   title_semi[5] = "#sum_{i=1}^{4}t_{i,r} [ns]";
+   title_semi[1] = "t_{K#rightarrow#pi^{+}#pi^{-}} [#tau_{S}]";
+   title_semi[2] = "t_{K#rightarrow#pi^{0}#pi^{0}} [#tau_{S}]";
+   title_semi[3] = "t_{sum,r} [ns]";
+   title_semi[4] = "#alpha_{#pi^{+},#pi^{-}} [#circ]";
+   title_semi[5] = "Q_{miss} [MeV]";
    title_semi[6] = "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]";
    title_semi[7] = "m^{inv}_{4#gamma} [MeV/c^{2}]";
 
    title_three[0] = "#Deltat [#tau_{S}]";
-   title_three[1] = "l_{K#rightarrow#pi^{+}#pi^{-}} [cm]";
-   title_three[2] = "l_{K#rightarrow#pi^{0}#pi^{0}} [cm]";
+   title_three[1] = "t_{K#rightarrow#pi^{+}#pi^{-}} [#tau_{S}]";
+   title_three[2] = "t_{K#rightarrow#pi^{0}#pi^{0}} [#tau_{S}]";
    title_three[3] = "z_{neu} [cm]";
    title_three[4] = "R [cm]";
    title_three[5] = "cos(#alpha^{CM}_{#pi^{+},#pi^{-}})";
@@ -746,8 +987,8 @@ void full_analysis::Terminate()
    title_three[7] = "m^{inv}_{4#gamma} [MeV/c^{2}]";
 
    title_pipi[0] = "#Deltat [#tau_{S}]";
-   title_pipi[1] = "l_{K_{1}} [cm]";
-   title_pipi[2] = "l_{K_{2}} [cm]";
+   title_pipi[1] = "t_{K_{S}#rightarrow#pi^{+}#pi^{-}} [#tau_{S}]";
+   title_pipi[2] = "t_{K_{L}#rightarrow#pi^{+}#pi^{-}} [#tau_{S}]";
    title_pipi[3] = "z_{neu} [cm]";
    title_pipi[4] = "z_{ch} [cm]";
    title_pipi[5] = "#sum_{i=1}^{4}t_{i,r} [ns]";
@@ -788,17 +1029,17 @@ void full_analysis::Terminate()
 
    Float_t cut_value = 2; 
 
-   cout << hist_semi[5][4]->GetBinCenter(hist_semi[5][4]->GetMaximumBin()) << endl;
+   cout << hist_semi[4][4]->GetBinCenter(hist_semi[4][4]->GetMaximumBin()) << endl;
 
-   TLine *line_down = new TLine(m_k0-cut_value,0,m_k0-cut_value,1E8);
-   TLine *line_up = new TLine(m_k0+cut_value,0,m_k0+cut_value,1E8);
+   TLine *line_down = new TLine(m_k0-2,0,m_k0-2,1E10);
+   TLine *line_up = new TLine(m_k0+2,0,m_k0+2,1E10);
    line_up->SetLineWidth(3);
    line_down->SetLineWidth(3);
    line_up->SetLineStyle(10);
    line_down->SetLineStyle(10);
 
-   TBox *box_down = new TBox(m_k0-20.0,0,m_k0-cut_value,1E8);
-   TBox *box_up = new TBox(m_k0+cut_value,0,m_k0+20.0,1E8);
+   TBox *box_down = new TBox(m_k0-20,0,m_k0-2,1E10);
+   TBox *box_up = new TBox(m_k0+2,0,m_k0+20,1E10);
 
    box_down->SetFillStyle(3544);
    box_up->SetFillStyle(3544);
@@ -808,14 +1049,12 @@ void full_analysis::Terminate()
 
    for(Int_t i = 0; i < 8; i++)
    {
-      hist_semi[i][0]->Scale((Float_t)entries[0]/hist_semi[i][0]->Integral(0,hist_semi[i][0]->GetNbinsX()+1));
       for(Int_t j = 0; j < chann_num-2; j++)
       {
          canva1d_semi[i]->SetLeftMargin(0.15);
          canva1d_semi[i]->SetBottomMargin(0.15);
-	 canva1d_semi[i]->SetLogy(1);
+	      canva1d_semi[i]->SetLogy(1);
          canva1d_semi[i]->cd();
-
          hist_semi[i][j]->SetLineColor(chann_color[j]);
 
             if(j == 0)
@@ -841,11 +1080,11 @@ void full_analysis::Terminate()
          
       }
 
-	//box_up->Draw();
-	//box_down->Draw();
+	box_up->Draw();
+	box_down->Draw();
 
-	//line_up->Draw();
-	//line_down->Draw();
+	line_up->Draw();
+	line_down->Draw();
       legend[i]->Draw();
    }
 
@@ -922,11 +1161,11 @@ void full_analysis::Terminate()
          
       }
 
-	//box_up->Draw();
-	//box_down->Draw();
+	box_up->Draw();
+	box_down->Draw();
 
-	//line_up->Draw();
-	//line_down->Draw();
+	line_up->Draw();
+	line_down->Draw();
       legend[i]->Draw();
    }
 
@@ -959,7 +1198,7 @@ void full_analysis::Terminate()
 
    for(Int_t i = 0; i < 3; i++)
    {
-      legend_nocuts[i] = new TLegend(0.5,0.8,0.9,0.9);
+      legend_nocuts[i] = new TLegend(0.45,0.8,0.9,0.9);
       //legend_nocuts[i] = new TLegend(0.15,0.7,0.4,0.9);
    }
 
@@ -971,9 +1210,8 @@ void full_analysis::Terminate()
    canva1d_seminocuts->SetLeftMargin(0.15);
    canva1d_seminocuts->SetBottomMargin(0.15);
    canva1d_seminocuts->cd();
-   canva1d_seminocuts->SetLogy(1);
 
-   hist_semi[0][chann_num-1]->GetYaxis()->SetRangeUser(0.1,1E4);
+   hist_semi[0][chann_num-1]->GetYaxis()->SetRangeUser(0,1.3*hist_semi[0][chann_num-1]->GetMaximum());
    hist_semi[0][chann_num-1]->SetLineColor(kGray+1);
    hist_semi[0][chann_num-1]->GetYaxis()->SetTitle("Counts");
    hist_semi[0][chann_num-1]->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
@@ -986,7 +1224,7 @@ void full_analysis::Terminate()
    hist_semi[0][chann_num-2]->Draw("PE1SAME");
    legend_nocuts[0]->Draw();
 
-   canva1d_threenocuts->SetLeftMargin(0.15);
+   /*canva1d_threenocuts->SetLeftMargin(0.15);
    canva1d_threenocuts->SetBottomMargin(0.15);
    canva1d_threenocuts->cd();
 
@@ -996,7 +1234,7 @@ void full_analysis::Terminate()
    canva1d_pipinocuts->SetBottomMargin(0.15);
    canva1d_pipinocuts->cd();
 
-   hist_pipi_nocuts->Draw("HIST");
+   hist_pipi_nocuts->Draw("HIST");*/
 
    //hist_semi_nocuts->Add(hist_three_nocuts);
    //hist_semi_nocuts->Add(hist_pipi_nocuts);
@@ -1058,15 +1296,15 @@ void full_analysis::Terminate()
    canva1d_pipi[6]->Print("plots/Pipi/minvch_pipi_signal_cuts.png");
    canva1d_pipi[7]->Print("plots/Pipi/minvneu_pipi_signal_cuts.png");
 
-   canva1d_seminocuts->Print("plots/Semi/deltat_semi_nocuts.png");
+   canva1d_seminocuts->Print("plots/Semi/deltat_semi_fit_exp.png");
    canva1d_threenocuts->Print("plots/Three/deltat_three_nocuts.png");
    canva1d_pipinocuts->Print("plots/Pipi/deltat_pipi_nocuts.png");
    canva_efficiency->Print("efficiency_mc_cs.png");
 
    canva_eff_signal->Print("efficiency_mc.png");
 
-   cout << "Efficiency semi: " << 100*entries_sel[0][4]/(Float_t)entries[4] << "%" << endl; 
-   cout << "Purity semi: " << 100*entries_sel[0][4]/(Float_t)(entries_sel[0][4] + entries_sel[0][0] + entries_sel[0][1] + entries_sel[0][2] + entries_sel[0][3] + entries_sel[0][5] + entries_sel[0][6])<< "%" << endl << endl;
+   cout << "Efficiency three: " << 100*entries_sel[2][5]/(Float_t)entries[5] << "%" << endl; 
+   cout << "Purity three: " << 100*entries_sel[2][5]/(Float_t)(entries_sel[2][4] + entries_sel[2][0] + entries_sel[2][1] + entries_sel[2][2] + entries_sel[2][3] + entries_sel[2][5] + entries_sel[2][6])<< "%" << endl << endl;
 
    cout << "Signal: " << entries[0] << endl;
    cout << "Regen: " << entries[1] << endl;
@@ -1075,14 +1313,173 @@ void full_analysis::Terminate()
    cout << "Semi: " << entries[4] << endl;
    cout << "Pipi: " << entries[5] << endl;
    cout << "Else: " << entries[6] << endl;
+   cout << "DATA: " << entries[7] << endl;
 
-   /*TCanvas *canva = new TCanvas("canva","", 750, 750);
+   TLegend *legend_signal;
 
-   pEff->SetLineWidth(3);
-   pEff->Paint("APE1");
-   pEff->GetPaintedGraph()->GetXaxis()->SetLimits(-100.0, 100.0);
-   pEff->GetPaintedGraph()->GetYaxis()->SetRangeUser(0.0, 1.0);
+   legend_signal = new TLegend(0.15,0.75,0.65,0.9);
 
-   canva->Print("efficiency.png");*/
+   legend_signal->AddEntry(pEff_signal, "Efficiency of K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{0}#pi^{0} from MC", "PE1");
+
+   TCanvas *canvaefficiency = new TCanvas("canvaefficiency","", 750, 750);
+
+   pEff_signal->SetStatisticOption(TEfficiency::kFNormal);
+
+   pEff_signal->SetLineWidth(3);
+   pEff_signal->SetLineColor(kRed);
+   pEff_signal->Draw("APE1");
+
+   gPad->Update();
+   pEff_signal->GetPaintedGraph()->GetXaxis()->SetLimits(-100.0, 100.0);
+   pEff_signal->GetPaintedGraph()->GetYaxis()->SetRangeUser(0.0, 0.3);
+   pEff_signal->GetPaintedGraph()->GetXaxis()->CenterTitle(1);
+   pEff_signal->GetPaintedGraph()->GetYaxis()->CenterTitle(1);
+   gPad->Update();
+
+   legend_signal->Draw();
+
+   canvaefficiency->Print("efficiency_signal.png");
+
+   TH1 *passed_three, *passed_pipi, *passed_semi, *total_three, *total_pipi, *total_semi;
+
+   TH1 *passed_three_mc, *passed_pipi_mc, *passed_semi_mc, *total_three_mc, *total_pipi_mc, *total_semi_mc; 
+   
+   passed_pipi = pEff_pipi->GetCopyPassedHisto();
+   passed_three = pEff_three->GetCopyPassedHisto();
+   passed_semi = pEff_semi->GetCopyPassedHisto();
+   total_pipi = pEff_pipi->GetCopyTotalHisto();
+   total_three = pEff_three->GetCopyTotalHisto();
+   total_semi = pEff_semi->GetCopyTotalHisto();
+
+   passed_three->Add(passed_pipi);
+   passed_three->Add(passed_semi);
+   total_three->Add(total_pipi);
+   total_three->Add(total_semi);
+
+   passed_pipi_mc = pEff_pipimc->GetCopyPassedHisto();
+   passed_three_mc = pEff_threemc->GetCopyPassedHisto();
+   passed_semi_mc = pEff_semimc->GetCopyPassedHisto();
+   total_pipi_mc = pEff_pipimc->GetCopyTotalHisto();
+   total_three_mc = pEff_threemc->GetCopyTotalHisto();
+   total_semi_mc = pEff_semimc->GetCopyTotalHisto();
+
+   passed_three_mc->Add(passed_pipi_mc);
+   passed_three_mc->Add(passed_semi_mc);
+   total_three_mc->Add(total_pipi_mc);
+   total_three_mc->Add(total_semi_mc);
+
+   TEfficiency *total = new TEfficiency(*passed_three, *total_three);
+   TEfficiency *total_mc = new TEfficiency(*passed_three_mc, *total_three_mc);
+
+   total->SetStatisticOption(TEfficiency::kFNormal);
+   total_mc->SetStatisticOption(TEfficiency::kFNormal);
+
+   TLegend *legend_eff;
+
+   legend_eff = new TLegend(0.15,0.75,0.65,0.9);
+
+   legend_eff->AddEntry(total, "Efficiency of control samples from DATA", "PE1");
+   legend_eff->AddEntry(total_mc, "Efficiency of control samples from MC", "PE1");
+
+   TCanvas *canvaefficiencyresult = new TCanvas("canvaefficiencyresult","", 750, 750);
+
+   total->SetLineWidth(3);
+   total->SetLineColor(kBlack);
+   total->Draw("APE1");
+
+   total_mc->SetLineWidth(3);
+   total_mc->SetLineColor(kGray+1);
+   total_mc->Draw("PE1SAME");
+
+   legend_eff->Draw();
+
+   gPad->Update();
+   total->GetPaintedGraph()->GetXaxis()->SetLimits(-100.0, 100.0);
+   total->GetPaintedGraph()->GetYaxis()->SetRangeUser(0.0, 0.3);
+   total->GetPaintedGraph()->GetXaxis()->CenterTitle(1);
+   total->GetPaintedGraph()->GetYaxis()->CenterTitle(1);
+   gPad->Update();
+
+   canvaefficiencyresult->Print("efficiency_result.png");
+
+   //Division of plots of efficiency
+
+   Double_t deltat[201] = {0}, div[201] = {0}, err[2][201] = {0};
+   Double_t average = 0., denom = 0., nomin = 0., average_err = 0.;
+
+   for(Int_t i = 1; i <= 201; i++)
+   {
+      deltat[i] = -100. + i*200/201;
+      div[i] = total->GetEfficiency(i)/pEff_signal->GetEfficiency(i);
+      err[0][i] = 0;
+      err[1][i] = sqrt(pow(total->GetEfficiencyErrorUp(i)/pEff_signal->GetEfficiency(i),2) + pow(pEff_signal->GetEfficiencyErrorUp(i)*total->GetEfficiency(i)/pow(pEff_signal->GetEfficiency(i),2),2));
+
+      denom += 1/pow((Float_t)err[1][i],2);
+      nomin += div[i]/pow((Float_t)err[1][i],2);
+
+   }
+
+   average = nomin/denom;
+   average_err = sqrt(1/denom);
+
+   TLatex text_average;
+   text_average.SetTextSize(0.035);
+   TLine *line = new TLine(-100.0, average, 100.0, average);
+
+   TGraphErrors *division = new TGraphErrors(201, deltat, div, err[0], err[1]);
+
+   TCanvas *canvadivisionresult = new TCanvas("canvadivisionresult","", 750, 750);
+
+   division->SetLineWidth(3);
+   division->SetTitle("");
+   division->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
+   division->GetYaxis()->SetTitle("Correction factor");
+   division->GetXaxis()->CenterTitle(1);
+   division->GetYaxis()->CenterTitle(1);
+   division->SetLineWidth(3);
+   division->SetLineColor(kBlack);
+   division->Draw("APE1");
+
+   division->GetXaxis()->SetLimits(-100.0, 100.0);
+   division->GetYaxis()->SetRangeUser(0.0, 3.5);
+
+   line->Draw();
+   text_average.DrawLatex(-90., 3.2, Form("Average: %g#pm%g", average, average_err));
+
+   canvadivisionresult->Print("division_result.png");
+
+
+   TCanvas *canvasignal_after = new TCanvas("canvasignal_after","", 750, 750);
+   TCanvas *canvasignal_before = new TCanvas("canvasignal_before","", 750, 750);
+
+   signal_after->Scale((Float_t)signal_after->GetEntries()/signal_after->Integral(0,signal_after->GetNbinsX()+1));
+   signal_before->Scale((Float_t)signal_before->GetEntries()/signal_before->Integral(0,signal_before->GetNbinsX()+1));
+
+   signal_after->GetXaxis()->SetMaxDigits(3);
+   signal_after->GetYaxis()->SetMaxDigits(3);
+   signal_after->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
+   signal_after->GetYaxis()->SetTitle("Counts");
+   signal_after->GetXaxis()->CenterTitle(1);
+   signal_after->GetYaxis()->CenterTitle(1);
+   signal_after->GetYaxis()->SetRangeUser(0,1.3*signal_after->GetMaximum());
+   signal_after->SetLineColor(kRed);
+
+   signal_before->GetXaxis()->SetMaxDigits(3);
+   signal_before->GetYaxis()->SetMaxDigits(3);
+   signal_before->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
+   signal_before->GetYaxis()->SetTitle("Counts");
+   signal_before->GetXaxis()->CenterTitle(1);
+   signal_before->GetYaxis()->CenterTitle(1);
+   signal_before->GetYaxis()->SetRangeUser(0,1.3*signal_before->GetMaximum());
+   signal_before->SetLineColor(kRed);
+
+   canvasignal_after->cd();
+   signal_after->Draw("HIST");
+
+   canvasignal_before->cd();
+   signal_before->Draw("HIST");
+
+   canvasignal_after->Print("deltat_signal_after.png");
+   canvasignal_before->Print("deltat_signal_before.png");
 
 }

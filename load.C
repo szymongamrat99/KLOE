@@ -6,17 +6,17 @@
 
     TChain chain("INTERF/h1");
 
+    for(Int_t i = 1; i <= 286; i++)
+    {
+    	fullname = "../ROOT_files/" + dirnamedata + "/backup/" + filenamedata + i + extension;
+    	chain.Add(fullname);
+    }
     for(Int_t i = 1; i <= 583; i++)
     {
-        if(i != 64 && i != 100)
+        if(i != 64 && i != 100 && i != 529)
         {
             fullname = "../ROOT_files/" + dirnamemc + "/backup/" + filenamemc + i + extension;
             chain.Add(fullname);
         }
     }
-    /*for(Int_t i = 1; i <= 10; i++)
-    {
-    	fullname = "../ROOT_files/" + dirnamedata + "/backup/" + filenamedata + i + extension;
-    	chain.Add(fullname);
-    }*/
 }
