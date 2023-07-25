@@ -28,6 +28,19 @@
 #include "full_analysis.h"
 #include <TH2.h>
 #include <TStyle.h>
+#include <TLegend.h>
+#include <TEfficiency.h>
+#include <TCanvas.h>
+#include <TH1.h>
+#include <TLorentzVector.h>
+#include <TVector3.h>
+#include <TFractionFitter.h>
+#include <TMath.h>
+#include <TLine.h>
+#include <TBox.h>
+#include <TGraphAsymmErrors.h>
+#include <TGraphErrors.h>
+#include <TLatex.h>
 
 #include "../Include/const.h"
 #include "../Include/Codes/interf_function.h"
@@ -48,9 +61,13 @@ TLegend *legend[10];
 TH1 *signal_before, *signal_after;
 
 TEfficiency *pEff_signal;
+TEfficiency *pEff_signal_tri;
 TEfficiency *pEff_semi;
 TEfficiency *pEff_three;
 TEfficiency *pEff_pipi;
+
+TEfficiency *pEff_three_length;
+TEfficiency *pEff_pipi_length;
 
 TEfficiency *pEff_semimc;
 TEfficiency *pEff_threemc;
@@ -67,9 +84,9 @@ void full_analysis::Begin(TTree * /*tree*/)
    // When running with PROOF Begin() is only called on the client.
    // The tree argument is deprecated (on PROOF 0 is passed).
 
-   for(Int_t i = 0; i < 10; i++) canva1d_semi[i] = new TCanvas(("canva1d_semi" + to_string(i)).c_str(), "", 750, 750);
-   for(Int_t i = 0; i < 10; i++) canva1d_three[i] = new TCanvas(("canva1d_three" + to_string(i)).c_str(), "", 750, 750);
-   for(Int_t i = 0; i < 10; i++) canva1d_pipi[i] = new TCanvas(("canva1d_pipi" + to_string(i)).c_str(), "", 750, 750);
+   for(Int_t i = 0; i < 10; i++) canva1d_semi[i] = new TCanvas(("canva1d_semi" + std::to_string(i)).c_str(), "", 750, 750);
+   for(Int_t i = 0; i < 10; i++) canva1d_three[i] = new TCanvas(("canva1d_three" + std::to_string(i)).c_str(), "", 750, 750);
+   for(Int_t i = 0; i < 10; i++) canva1d_pipi[i] = new TCanvas(("canva1d_pipi" + std::to_string(i)).c_str(), "", 750, 750);
 
    canva_efficiency = new TCanvas("Canva efficiency", "", 750, 750);
    canva_eff_signal = new TCanvas("Canva eff signal", "", 750, 750);
@@ -126,9 +143,13 @@ void full_analysis::Begin(TTree * /*tree*/)
    //         hist2d[i][j] = new TH2F(chann_name[j] + " 2d" + to_string(i), "", 13, 0, 60, 100, -100, 300);
 
    pEff_signal = new TEfficiency("eff_signal",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
+   pEff_signal_tri = new TEfficiency("eff_signal_tri",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
    pEff_semi = new TEfficiency("eff_semi",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
    pEff_three = new TEfficiency("eff_three",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
    pEff_pipi = new TEfficiency("eff_pipi",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
+
+   pEff_three_length = new TEfficiency("eff_three_length",";Length of path of Kaon [cm];Efficiency",100,0.,50.);
+   pEff_pipi_length = new TEfficiency("eff_pipi_length",";Length of path of Kaon [cm];Efficiency",100,0.,50.);
 
    pEff_semimc = new TEfficiency("eff_semimc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
    pEff_threemc = new TEfficiency("eff_threemc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
@@ -481,10 +502,14 @@ Bool_t full_analysis::Process(Long64_t entry)
    //Signal truth check
    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/c_vel) - (k_path00_tri/(k_beta00_tri*c_vel));
+   trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
+
    if(*mctruth == 1)
 	{
       trcv_sum_signal = trcv[g4taken[0]-1] + trcv[g4taken[1]-1] + trcv[g4taken[2]-1] + trcv[g4taken[3]-1];
       pEff_signal->FillWeighted(trcv_sum_signal > -1 && abs(*minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, interf_function(DeltaT_mc,1,0), DeltaT_signal);
+      pEff_signal_tri->FillWeighted(trcv_sum > -1 && abs(fourKnetri[5] - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, interf_function(DeltaT_mc,1,0), DeltaT_signal);
 
       signal_before->Fill(DeltaT_signal, interf_function(DeltaT_mc,1,0));
 
@@ -494,9 +519,6 @@ Bool_t full_analysis::Process(Long64_t entry)
       }
 
    }
-
-   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/c_vel) - (k_path00_tri/(k_beta00_tri*c_vel));
-   trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
    cuts_semi[0] = abs(*Qmiss_inv - 71.13) < 25;
    cuts_semi[1] = abs(*anglepipi_CM_kch - 145.8) < 10;
@@ -843,6 +865,8 @@ if(tot_cuts_semi && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_semimc->F
    if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
    if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - m_k0) < 2 && *mcflag == 0) pEff_pipi->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
 
+   if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three_length->FillWeighted(tot_cuts_charged, br_ks_pippim, sqrt(pow(Kchrec[6] - *Bx,2) + pow(Kchrec[7] - *By,2) + pow(Kchrec[8] - *Bz,2)));
+   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - m_k0) < 2 && *mcflag == 0) pEff_pipi_length->FillWeighted(tot_cuts_charged, tot_br_pipi, sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)));
 
    return kTRUE;
 }
@@ -871,7 +895,7 @@ void full_analysis::Terminate()
    mc_pipi = new TObjArray(chann_num-2);
    mc_semi = new TObjArray(chann_num-3);
    
-   cout << hist_semi[0][5]->GetEntries() << endl;
+   std::cout << hist_semi[0][5]->GetEntries() << std::endl;
    
 	mc_semi->Add(hist_semi[0][0]);
    mc_semi->Add(hist_semi[0][1]);
@@ -1029,7 +1053,7 @@ void full_analysis::Terminate()
 
    Float_t cut_value = 2; 
 
-   cout << hist_semi[4][4]->GetBinCenter(hist_semi[4][4]->GetMaximumBin()) << endl;
+   std::cout << hist_semi[4][4]->GetBinCenter(hist_semi[4][4]->GetMaximumBin()) << std::endl;
 
    TLine *line_down = new TLine(m_k0-2,0,m_k0-2,1E10);
    TLine *line_up = new TLine(m_k0+2,0,m_k0+2,1E10);
@@ -1080,11 +1104,11 @@ void full_analysis::Terminate()
          
       }
 
-	box_up->Draw();
-	box_down->Draw();
+	//box_up->Draw();
+	//box_down->Draw();
 
-	line_up->Draw();
-	line_down->Draw();
+	//line_up->Draw();
+	//line_down->Draw();
       legend[i]->Draw();
    }
 
@@ -1121,8 +1145,8 @@ void full_analysis::Terminate()
             }
          
       }
-      box_down->Draw();
-      line_down->Draw();
+      //box_down->Draw();
+      //line_down->Draw();
       legend[i]->Draw();
    }
 
@@ -1161,11 +1185,11 @@ void full_analysis::Terminate()
          
       }
 
-	box_up->Draw();
-	box_down->Draw();
+	//box_up->Draw();
+	//box_down->Draw();
 
-	line_up->Draw();
-	line_down->Draw();
+	//line_up->Draw();
+	//line_down->Draw();
       legend[i]->Draw();
    }
 
@@ -1303,23 +1327,24 @@ void full_analysis::Terminate()
 
    canva_eff_signal->Print("efficiency_mc.png");
 
-   cout << "Efficiency three: " << 100*entries_sel[2][5]/(Float_t)entries[5] << "%" << endl; 
-   cout << "Purity three: " << 100*entries_sel[2][5]/(Float_t)(entries_sel[2][4] + entries_sel[2][0] + entries_sel[2][1] + entries_sel[2][2] + entries_sel[2][3] + entries_sel[2][5] + entries_sel[2][6])<< "%" << endl << endl;
+   std::cout << "Efficiency three: " << 100*entries_sel[2][5]/(Float_t)entries[5] << "%" << std::endl; 
+   std::cout << "Purity three: " << 100*entries_sel[2][5]/(Float_t)(entries_sel[2][4] + entries_sel[2][0] + entries_sel[2][1] + entries_sel[2][2] + entries_sel[2][3] + entries_sel[2][5] + entries_sel[2][6])<< "%" << std::endl << std::endl;
 
-   cout << "Signal: " << entries[0] << endl;
-   cout << "Regen: " << entries[1] << endl;
-   cout << "Omega: " << entries[2] << endl;
-   cout << "Three: " << entries[3] << endl;
-   cout << "Semi: " << entries[4] << endl;
-   cout << "Pipi: " << entries[5] << endl;
-   cout << "Else: " << entries[6] << endl;
-   cout << "DATA: " << entries[7] << endl;
+   std::cout << "Signal: " << entries[0] << std::endl;
+   std::cout << "Regen: " << entries[1] << std::endl;
+   std::cout << "Omega: " << entries[2] << std::endl;
+   std::cout << "Three: " << entries[3] << std::endl;
+   std::cout << "Semi: " << entries[4] << std::endl;
+   std::cout << "Pipi: " << entries[5] << std::endl;
+   std::cout << "Else: " << entries[6] << std::endl;
+   std::cout << "DATA: " << entries[7] << std::endl;
 
    TLegend *legend_signal;
 
    legend_signal = new TLegend(0.15,0.75,0.65,0.9);
 
-   legend_signal->AddEntry(pEff_signal, "Efficiency of K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{0}#pi^{0} from MC", "PE1");
+   legend_signal->AddEntry(pEff_signal, "Efficiency for time of flight method", "PE1");
+   legend_signal->AddEntry(pEff_signal_tri, "Efficiency for trilateration method", "PE1");
 
    TCanvas *canvaefficiency = new TCanvas("canvaefficiency","", 750, 750);
 
@@ -1329,6 +1354,14 @@ void full_analysis::Terminate()
    pEff_signal->SetLineColor(kRed);
    pEff_signal->Draw("APE1");
 
+   legend_signal->Draw();
+
+   pEff_signal_tri->SetStatisticOption(TEfficiency::kFNormal);
+
+   pEff_signal_tri->SetLineWidth(3);
+   pEff_signal_tri->SetLineColor(kBlue);
+   pEff_signal_tri->Draw("PE1SAME");
+
    gPad->Update();
    pEff_signal->GetPaintedGraph()->GetXaxis()->SetLimits(-100.0, 100.0);
    pEff_signal->GetPaintedGraph()->GetYaxis()->SetRangeUser(0.0, 0.3);
@@ -1336,9 +1369,39 @@ void full_analysis::Terminate()
    pEff_signal->GetPaintedGraph()->GetYaxis()->CenterTitle(1);
    gPad->Update();
 
-   legend_signal->Draw();
+   canvaefficiency->Print("efficiency_tri.png");
 
-   canvaefficiency->Print("efficiency_signal.png");
+   TLegend *legend_length;
+
+   legend_length = new TLegend(0.15,0.75,0.65,0.9);
+
+   legend_length->AddEntry(pEff_three_length, "Efficiency for K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}3#pi^{0}", "PE1");
+   legend_length->AddEntry(pEff_pipi_length, "Efficiency for K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{+}#pi^{-}", "PE1");
+
+   TCanvas *canvaefficiencylength = new TCanvas("canvaefficiencylength","", 750, 750);
+
+   pEff_three_length->SetStatisticOption(TEfficiency::kFNormal);
+
+   pEff_three_length->SetLineWidth(3);
+   pEff_three_length->SetLineColor(kCyan);
+   pEff_three_length->Draw("APE1");
+
+   pEff_pipi_length->SetStatisticOption(TEfficiency::kFNormal);
+
+   pEff_pipi_length->SetLineWidth(3);
+   pEff_pipi_length->SetLineColor(kYellow);
+   pEff_pipi_length->Draw("PE1SAME");
+
+   legend_length->Draw();
+
+   gPad->Update();
+   pEff_three_length->GetPaintedGraph()->GetXaxis()->SetLimits(0.0, 50.0);
+   pEff_three_length->GetPaintedGraph()->GetYaxis()->SetRangeUser(0.0, 0.3);
+   pEff_three_length->GetPaintedGraph()->GetXaxis()->CenterTitle(1);
+   pEff_three_length->GetPaintedGraph()->GetYaxis()->CenterTitle(1);
+   gPad->Update();
+
+   canvaefficiencylength->Print("efficiency_length.png");
 
    TH1 *passed_three, *passed_pipi, *passed_semi, *total_three, *total_pipi, *total_semi;
 
@@ -1410,9 +1473,9 @@ void full_analysis::Terminate()
    for(Int_t i = 1; i <= 201; i++)
    {
       deltat[i] = -100. + i*200/201;
-      div[i] = total->GetEfficiency(i)/pEff_signal->GetEfficiency(i);
+      div[i] = total->GetEfficiency(i)/total_mc->GetEfficiency(i);
       err[0][i] = 0;
-      err[1][i] = sqrt(pow(total->GetEfficiencyErrorUp(i)/pEff_signal->GetEfficiency(i),2) + pow(pEff_signal->GetEfficiencyErrorUp(i)*total->GetEfficiency(i)/pow(pEff_signal->GetEfficiency(i),2),2));
+      err[1][i] = sqrt(pow(total->GetEfficiencyErrorUp(i)/total_mc->GetEfficiency(i),2) + pow(total_mc->GetEfficiencyErrorUp(i)*total->GetEfficiency(i)/pow(total_mc->GetEfficiency(i),2),2));
 
       denom += 1/pow((Float_t)err[1][i],2);
       nomin += div[i]/pow((Float_t)err[1][i],2);
@@ -1441,10 +1504,13 @@ void full_analysis::Terminate()
    division->Draw("APE1");
 
    division->GetXaxis()->SetLimits(-100.0, 100.0);
-   division->GetYaxis()->SetRangeUser(0.0, 3.5);
+   division->GetYaxis()->SetRangeUser(0.0, 2);
 
+   line->SetLineWidth(3);
+   line->SetLineColor(kRed);
+   line->SetLineStyle(9);
    line->Draw();
-   text_average.DrawLatex(-90., 3.2, Form("Average: %g#pm%g", average, average_err));
+   text_average.DrawLatex(-90., 1.8, Form("Average: %.3g#pm%.1g", average, average_err));
 
    canvadivisionresult->Print("division_result.png");
 

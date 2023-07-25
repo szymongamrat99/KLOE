@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "full_analysis.C": "cpp",
+        "data_fit_interference.C": "cpp"
+    }
+}
