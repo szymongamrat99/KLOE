@@ -11,7 +11,13 @@
       "iostream": "cpp",
       "ostream": "cpp",
       "treefriend.C": "cpp",
-      "data_fit_interference.C": "cpp"
+      "data_fit_interference.C": "cpp",
+      "load.C": "cpp",
+      ".rootlogon.C": "cpp",
+      "correction_factor.C": "cpp",
+      "test.C": "cpp",
+      "cp_fit.C": "cpp",
+      "load_sel.C": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",

@@ -24,7 +24,6 @@
 // root> T->Process("full_analysis.C+")
 //
 
-
 #include "full_analysis.h"
 #include <TH2.h>
 #include <TStyle.h>
@@ -857,7 +856,7 @@ Bool_t full_analysis::Process(Long64_t entry)
       }
    }
 
-if(tot_cuts_semi && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_semimc->FillWeighted(tot_cuts_neutral, tot_br_semi, DeltaT_control);
+   if(tot_cuts_semi && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_semimc->FillWeighted(tot_cuts_neutral, tot_br_semi, DeltaT_control);
    if(*done == 1 && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_threemc->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
    if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - m_k0) < 2 && *mcflag == 1 && *mctruth != 0) pEff_pipimc->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
 
