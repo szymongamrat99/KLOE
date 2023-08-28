@@ -72,7 +72,9 @@
       "histos1.C": "cpp",
       "histos.C": "cpp",
       "trilateration.C": "cpp",
-      "correction_factor.C": "cpp"
+      "correction_factor.C": "cpp",
+      "chain_init.C": "cpp",
+      "forward_list": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",
