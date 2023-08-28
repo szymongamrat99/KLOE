@@ -13,7 +13,11 @@
     }
     for(Int_t i = 1; i <= 56; i++)
     {
-        fullname = "/internal/big_one/4/users/gamrat/old_root_files/" + dirnamemc + "/" + filenamemc + i + extension;
-    	chain.Add(fullname);
+        if( i != 7)
+        {
+            fullname = "/internal/big_one/4/users/gamrat/old_root_files/" + dirnamemc + "/" + filenamemc + i + extension;
+    	    chain.Add(fullname);
+        }
     }
+
 }

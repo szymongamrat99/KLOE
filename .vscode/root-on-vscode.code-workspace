@@ -1,28 +1,83 @@
 {
 	"folders": [
-		{
-			"path": "../"
-		}
+    {
+      "path": "../"
+    },
+    {
+      "path": "../../Include"
+    }
   ],
   "settings": {
     "files.associations": {
+      "cp_fit.C": "cpp",
+      ".rootlogon.C": "cpp",
+      "data_fit_interference.C": "cpp",
+      "cctype": "cpp",
+      "clocale": "cpp",
+      "cmath": "cpp",
+      "cstdarg": "cpp",
+      "cstddef": "cpp",
+      "cstdio": "cpp",
+      "cstdlib": "cpp",
+      "cstring": "cpp",
+      "ctime": "cpp",
+      "cwchar": "cpp",
+      "cwctype": "cpp",
+      "array": "cpp",
+      "atomic": "cpp",
+      "*.tcc": "cpp",
+      "chrono": "cpp",
+      "condition_variable": "cpp",
+      "cstdint": "cpp",
+      "deque": "cpp",
+      "list": "cpp",
+      "unordered_map": "cpp",
+      "unordered_set": "cpp",
+      "vector": "cpp",
+      "exception": "cpp",
+      "algorithm": "cpp",
+      "functional": "cpp",
+      "iterator": "cpp",
+      "map": "cpp",
+      "memory": "cpp",
+      "memory_resource": "cpp",
+      "numeric": "cpp",
+      "optional": "cpp",
+      "random": "cpp",
+      "ratio": "cpp",
+      "string": "cpp",
+      "string_view": "cpp",
+      "system_error": "cpp",
+      "tuple": "cpp",
+      "type_traits": "cpp",
+      "utility": "cpp",
+      "fstream": "cpp",
+      "initializer_list": "cpp",
+      "iomanip": "cpp",
+      "iosfwd": "cpp",
+      "iostream": "cpp",
+      "istream": "cpp",
+      "limits": "cpp",
+      "mutex": "cpp",
+      "new": "cpp",
+      "ostream": "cpp",
+      "sstream": "cpp",
+      "stdexcept": "cpp",
+      "streambuf": "cpp",
+      "thread": "cpp",
+      "cinttypes": "cpp",
+      "typeinfo": "cpp",
       "histos_1.C": "cpp",
       "full_analysis.C": "cpp",
-      "iostream": "cpp",
-      "ostream": "cpp",
-      "treefriend.C": "cpp",
-      "data_fit_interference.C": "cpp",
-      "load.C": "cpp",
-      ".rootlogon.C": "cpp",
-      "correction_factor.C": "cpp",
-      "test.C": "cpp",
-      "cp_fit.C": "cpp",
-      "load_sel.C": "cpp"
+      "histos1.C": "cpp",
+      "histos.C": "cpp",
+      "trilateration.C": "cpp",
+      "correction_factor.C": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",
       "/internal/big_one/4/users/gamrat/root_dirs/install_root/include",
-      "/internal/big_one/4/users/gamrat/scripts/include"
+      "/internal/big_one/4/users/gamrat/scripts/Include"
     ]
   },
   "extensions": {
