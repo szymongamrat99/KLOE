@@ -1,7 +1,5 @@
-#include "../../Include/Codes/interference.h"
-#include "../../Include/Codes/kloe_class.h"
-#include "../../Include/const.h"
-#include "chain_init.C"
+#include <iostream>
+#include <fstream>
 
 #include <TROOT.h>
 #include <TTree.h>
@@ -14,9 +12,14 @@
 #include <TMath.h>
 #include <TRatioPlot.h>
 
+#include "../../Include/Codes/interference.h"
+#include "../../Include/Codes/kloe_class.h"
+#include "../../Include/const.h"
+#include "chain_init.C"
+
 using namespace KLOE;
 
-void cp_fit(TString mode = "")
+void cp_fit(Bool_t check_corr = false, TString mode = "")
 {
     TFile file("../../../old_root_files/mctruth.root");
     TTree *tree = (TTree*)file.Get("h1");
@@ -53,7 +56,7 @@ void cp_fit(TString mode = "")
 
     Double_t split[3] = {-30.0, 0.0, 30.0};
 
-    interference event(mode, nbins, x_min, x_max, split);
+    interference event(mode, check_corr, nbins, x_min, x_max, split);
     
     
     for(UInt_t i = 0; i < nentries; i++)
@@ -123,7 +126,7 @@ void cp_fit(TString mode = "")
     const Double_t init_vars[num_of_vars] = {Re, M_PI*Im_nonCPT/180., 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, 
                    step[num_of_vars] = {1E-5, 1E-5, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
 
-    Double_t limit_span_signal = 0.3, limit_span = 0.3 , limit_pars = 0.3;
+    Double_t limit_span_signal = 0.3, limit_span = 0.3 , limit_pars = 1.0;
 
     minimum->SetLimitedVariable(0, "Real part",      init_vars[0], step[0], init_vars[0] - limit_pars*init_vars[0], init_vars[0] + limit_pars*init_vars[0]);
     minimum->SetLimitedVariable(1, "Imaginary part", init_vars[1], step[1], init_vars[1] - limit_pars*init_vars[1], init_vars[1] + limit_pars*init_vars[1]);
@@ -164,6 +167,22 @@ void cp_fit(TString mode = "")
     std::cout << "Norm semi" << " " << minimum->X()[9] << std::endl;
     std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;
 
+    std::ofstream myfile;
+    myfile.open ("results_split_fit.csv");
+    myfile << "Parameter,Value,Error\n";
+    myfile << "Real part," << minimum->X()[0] << "," << minimum->Errors()[0] << ",\n";
+    myfile << "Imaginary part," << minimum->X()[1] << "," << minimum->Errors()[1] << ",\n";
+    myfile << "Norm signal," << minimum->X()[2] << "," << minimum->Errors()[2] << ",\n";
+    myfile << "Norm left DC wall," << minimum->X()[3] << "," << minimum->Errors()[3] << ",\n";
+    myfile << "Norm left beam pipe," << minimum->X()[4] << "," << minimum->Errors()[4] << ",\n";
+    myfile << "Norm right beam pipe," << minimum->X()[5] << "," << minimum->Errors()[5] << ",\n";
+    myfile << "Norm right DC wall," << minimum->X()[6] << "," << minimum->Errors()[6] << ",\n";
+    myfile << "Norm omega," << minimum->X()[7] << "," << minimum->Errors()[7] << ",\n";
+    myfile << "Norm three," << minimum->X()[8] << "," << minimum->Errors()[8] << ",\n";
+    myfile << "Norm semi," << minimum->X()[9] << "," << minimum->Errors()[9] << ",\n";
+    myfile << "Norm other bcg," << minimum->X()[10] << "," << minimum->Errors()[10] << ",\n";
+    myfile.close();
+
     Double_t par[2] = {minimum->X()[0], minimum->X()[1]};
 
     for(UInt_t i = 0; i < chann_num; i++)
@@ -197,6 +216,11 @@ void cp_fit(TString mode = "")
     }
 
     event.frac[0]->Scale(minimum->X()[2]*event.frac[0]->GetEntries() / event.frac[0]->Integral(0, nbins + 1) );
+
+    for(Int_t i = 0; i < nbins; i++)
+    {
+        event.frac[0]->SetBinContent(i + 1, event.frac[0]->GetBinContent(i + 1)*event.corr_vals[i] );
+    }
 
     event.frac[2]->Scale(minimum->X()[7]*event.frac[2]->GetEntries() / event.frac[2]->Integral(0, nbins + 1) );
     event.frac[3]->Scale(minimum->X()[8]*event.frac[3]->GetEntries() / event.frac[3]->Integral(0, nbins + 1) );
