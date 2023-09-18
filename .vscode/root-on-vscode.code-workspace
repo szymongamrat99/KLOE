@@ -76,7 +76,11 @@
       "chain_init.C": "cpp",
       "forward_list": "cpp",
       "cp_fit copy.C": "cpp",
-      "cp_fit_mc.C": "cpp"
+      "cp_fit_mc.C": "cpp",
+      "resolutions.C": "cpp",
+      "load.C": "cpp",
+      "cp_fit_mc_tri.C": "cpp",
+      "cp_fit_tri.C": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",

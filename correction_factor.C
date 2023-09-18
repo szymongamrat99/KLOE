@@ -36,7 +36,8 @@
 #include <TGraphAsymmErrors.h>
 
 #include "../Include/const.h"
-#include "../Include/Codes/interf_function.h"
+#include "../Include/Codes/kloe_class.h"
+#include "../Include/Codes/interference.h"
 
 auto *corr_file = new TFile("corr_file.root","RECREATE");
 //auto *corr_tree = new TTree("corr","Correction factor histo");
@@ -53,6 +54,12 @@ TEfficiency *pEff_semimc;
 TEfficiency *pEff_threemc;
 TEfficiency *pEff_pipimc;
 
+const Double_t x_min = -90.0, x_max = 90.0;
+const UInt_t nbins = 1 + (x_max - x_min)/2.;
+
+using namespace KLOE;
+
+interference event;
 
 void correction_factor::Begin(TTree * /*tree*/)
 {
@@ -60,18 +67,18 @@ void correction_factor::Begin(TTree * /*tree*/)
    // When running with PROOF Begin() is only called on the client.
    // The tree argument is deprecated (on PROOF 0 is passed).
 
-   pEff_signal = new TEfficiency("eff_signal",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_signal_tri = new TEfficiency("eff_signal_tri",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_semi = new TEfficiency("eff_semi",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_three = new TEfficiency("eff_three",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_pipi = new TEfficiency("eff_pipi",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
+   pEff_signal = new TEfficiency("eff_signal",";#Deltat [#tau_{S}];Efficiency", nbins, x_min, x_max);
+   pEff_signal_tri = new TEfficiency("eff_signal_tri",";#Deltat [#tau_{S}];Efficiency", nbins, x_min, x_max);
+   pEff_semi = new TEfficiency("eff_semi",";#Deltat [#tau_{S}];Efficiency", nbins, x_min, x_max);
+   pEff_three = new TEfficiency("eff_three",";#Deltat [#tau_{S}];Efficiency", nbins, x_min, x_max);
+   pEff_pipi = new TEfficiency("eff_pipi",";#Deltat [#tau_{S}];Efficiency", nbins, x_min, x_max);
 
    pEff_three_length = new TEfficiency("eff_three_length",";Length of path of Kaon [cm];Efficiency",100,0.,50.);
    pEff_pipi_length = new TEfficiency("eff_pipi_length",";Length of path of Kaon [cm];Efficiency",100,0.,50.);
 
-   pEff_semimc = new TEfficiency("eff_semimc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_threemc = new TEfficiency("eff_threemc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_pipimc = new TEfficiency("eff_pipimc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
+   pEff_semimc = new TEfficiency("eff_semimc",";#Deltat [#tau_{S}];Efficiency", nbins, x_min, x_max);
+   pEff_threemc = new TEfficiency("eff_threemc",";#Deltat [#tau_{S}];Efficiency", nbins, x_min, x_max);
+   pEff_pipimc = new TEfficiency("eff_pipimc",";#Deltat [#tau_{S}];Efficiency", nbins, x_min, x_max);
 
    TString option = GetOption();
 }
@@ -405,8 +412,8 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    if(*mctruth == 1)
 	{
       trcv_sum_signal = trcv[g4taken[0]-1] + trcv[g4taken[1]-1] + trcv[g4taken[2]-1] + trcv[g4taken[3]-1];
-      pEff_signal->FillWeighted(trcv_sum_signal > -1 && abs(*minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, interf_function(DeltaT_mc,1,0), DeltaT_signal);
-      pEff_signal_tri->FillWeighted(trcv_sum > -1 && abs(fourKnetri[5] - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, interf_function(DeltaT_mc,1,0), DeltaT_signal);
+      pEff_signal->FillWeighted(trcv_sum_signal > -1 && abs(*minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, event.interf_function(DeltaT_mc,1,0), DeltaT_signal);
+      pEff_signal_tri->FillWeighted(trcv_sum > -1 && abs(fourKnetri[5] - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, event.interf_function(DeltaT_mc,1,0), DeltaT_signal);
 
    }
 
@@ -465,7 +472,7 @@ void correction_factor::Terminate()
    pEff_signal_tri->Draw("PE1SAME");
 
    gPad->Update();
-   pEff_signal->GetPaintedGraph()->GetXaxis()->SetLimits(-100.0, 100.0);
+   pEff_signal->GetPaintedGraph()->GetXaxis()->SetLimits(x_min, x_max);
    pEff_signal->GetPaintedGraph()->GetYaxis()->SetRangeUser(0.0, 0.3);
    pEff_signal->GetPaintedGraph()->GetXaxis()->CenterTitle(1);
    pEff_signal->GetPaintedGraph()->GetYaxis()->CenterTitle(1);
@@ -527,18 +534,18 @@ void correction_factor::Terminate()
    legend_eff->Draw();
 
    gPad->Update();
-   total->GetPaintedGraph()->GetXaxis()->SetLimits(-100.0, 100.0);
+   total->GetPaintedGraph()->GetXaxis()->SetLimits(x_min, x_max);
    total->GetPaintedGraph()->GetYaxis()->SetRangeUser(0.0, 0.3);
    total->GetPaintedGraph()->GetXaxis()->CenterTitle(1);
    total->GetPaintedGraph()->GetYaxis()->CenterTitle(1);
    gPad->Update();
 
-   Double_t deltat[201] = {0}, div[201] = {0}, err[2][201] = {0};
+   Double_t deltat[nbins], div[nbins], err[2][nbins];
    Double_t average = 0., denom = 0., nomin = 0., average_err = 0.;
 
-   for(Int_t i = 1; i <= 201; i++)
+   for(Int_t i = 0; i < nbins; i++)
    {
-      deltat[i] = -100. + i*200/201;
+      deltat[i] = x_min + 2*i;
       div[i] = total->GetEfficiency(i)/total_mc->GetEfficiency(i);
       err[0][i] = 0;
       err[1][i] = sqrt(pow(total->GetEfficiencyErrorUp(i)/total_mc->GetEfficiency(i),2) + pow(total_mc->GetEfficiencyErrorUp(i)*total->GetEfficiency(i)/pow(total_mc->GetEfficiency(i),2),2));
@@ -551,7 +558,7 @@ void correction_factor::Terminate()
    average = nomin/denom;
    average_err = sqrt(1/denom);
 
-   TGraphErrors *division = new TGraphErrors(201, deltat, div, err[0], err[1]);
+   TGraphErrors *division = new TGraphErrors(nbins, deltat, div, err[0], err[1]);
 
    division->SetLineWidth(3);
    division->SetTitle("");
@@ -563,7 +570,7 @@ void correction_factor::Terminate()
    division->SetLineColor(kBlack);
    division->Draw("APE1");
 
-   division->GetXaxis()->SetLimits(-100.0, 100.0);
+   division->GetXaxis()->SetLimits(x_min, x_max);
    division->GetYaxis()->SetRangeUser(0.0, 2);
 
    total->Write("cs_eff_total_data");

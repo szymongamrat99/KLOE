@@ -1,0 +1,11 @@
+Parameter,Value,Error
+Real part,0.00166,nan,
+Imaginary part,-3.66185e-09,nan,
+Norm signal,1,nan,
+Norm regen,1,nan,
+Norm omega,1,0,
+Norm three,1,0,
+Norm semi,1,0,
+Norm other bcg,1,0,
+χ²,89.5964,-,
+χ²/91,1.0067,-,

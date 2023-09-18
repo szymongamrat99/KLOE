@@ -11,6 +11,7 @@
 #include <TCanvas.h>
 #include <TMath.h>
 #include <TRatioPlot.h>
+#include <TStyle.h>
 
 #include "../../Include/Codes/interference.h"
 #include "../../Include/Codes/kloe_class.h"
@@ -52,7 +53,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     UInt_t nentries = chain->GetEntries();
 
     Double_t x_min = -90.0, x_max = 90.0;
-    UInt_t nbins = (x_max - x_min) + 1;
+    UInt_t nbins = 1 + ((x_max - x_min)/2.);
 
     Double_t split[3] = {-30.0, 0.0, 30.0};
 
@@ -153,6 +154,11 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     minimum->SetLimitedVariable(9, "Norm semi",      init_vars[9], step[9], init_vars[9] - limit_span*init_vars[9], init_vars[9] + limit_span*init_vars[9]);
     minimum->SetLimitedVariable(10, "Norm other bcg", init_vars[10], step[10], init_vars[10] - limit_span*init_vars[10], init_vars[10] + limit_span*init_vars[10]);
 
+    minimum->FixVariable(7);
+    minimum->FixVariable(8);
+    minimum->FixVariable(9);
+    minimum->FixVariable(10);
+
     minimum->Minimize();
 
     std::cout << "Real part" << " " << minimum->X()[0] << std::endl;
@@ -167,21 +173,24 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     std::cout << "Norm semi" << " " << minimum->X()[9] << std::endl;
     std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;
 
-    std::ofstream myfile;
-    myfile.open ("results_split_fit.csv");
-    myfile << "Parameter,Value,Error\n";
-    myfile << "Real part," << minimum->X()[0] << "," << minimum->Errors()[0] << ",\n";
-    myfile << "Imaginary part," << minimum->X()[1] << "," << minimum->Errors()[1] << ",\n";
-    myfile << "Norm signal," << minimum->X()[2] << "," << minimum->Errors()[2] << ",\n";
-    myfile << "Norm left DC wall," << minimum->X()[3] << "," << minimum->Errors()[3] << ",\n";
-    myfile << "Norm left beam pipe," << minimum->X()[4] << "," << minimum->Errors()[4] << ",\n";
-    myfile << "Norm right beam pipe," << minimum->X()[5] << "," << minimum->Errors()[5] << ",\n";
-    myfile << "Norm right DC wall," << minimum->X()[6] << "," << minimum->Errors()[6] << ",\n";
-    myfile << "Norm omega," << minimum->X()[7] << "," << minimum->Errors()[7] << ",\n";
-    myfile << "Norm three," << minimum->X()[8] << "," << minimum->Errors()[8] << ",\n";
-    myfile << "Norm semi," << minimum->X()[9] << "," << minimum->Errors()[9] << ",\n";
-    myfile << "Norm other bcg," << minimum->X()[10] << "," << minimum->Errors()[10] << ",\n";
-    myfile.close();
+    Double_t sum_of_events = 0., fractions[6] = {0.};
+
+    for(Int_t i = 0; i < chann_num; i++)
+      sum_of_events += event.time_diff[i].size();
+
+    for(Int_t i = 0; i < chann_num; i++)
+     fractions[i] = 100*event.time_diff[i].size()/sum_of_events;
+
+    std::ofstream myfile_num;
+    myfile_num.open ("num_of_events.csv");
+    myfile_num << "Channel,Number of events,Fraction\n";
+    myfile_num << "Signal," << event.time_diff[0].size() << "," << fractions[0] << "%,\n";
+    myfile_num << "Regeneration," << event.time_diff[1].size() << "," << fractions[1] << "%,\n";
+    myfile_num << "Omega," << event.time_diff[2].size() << "," << fractions[2] << "%,\n";
+    myfile_num << "Three," << event.time_diff[3].size() << "," << fractions[3] << "%,\n";
+    myfile_num << "Semi," << event.time_diff[4].size() << "," << fractions[4] << "%,\n";
+    myfile_num << "Other bcg," << event.time_diff[5].size() << "," << fractions[5] << "%,\n";
+    myfile_num.close();
 
     Double_t par[2] = {minimum->X()[0], minimum->X()[1]};
 
@@ -230,36 +239,111 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     for(UInt_t i = 0; i < chann_num; i++)
     {
         event.mc_sum->Add(event.frac[i]);
+
+        event.frac[i]->SetLineWidth(3);
         event.frac[i]->SetLineColor(chann_color[i]);
     }
 
+    std::ofstream myfile;
+    myfile.open ("results_split_fit.csv");
+    myfile << "Parameter,Value,Error\n";
+    myfile << "Real part," << minimum->X()[0] << "," << minimum->Errors()[0] << ",\n";
+    myfile << "Imaginary part," << minimum->X()[1] << "," << minimum->Errors()[1] << ",\n";
+    myfile << "Norm signal," << minimum->X()[2] << "," << minimum->Errors()[2] << ",\n";
+    myfile << "Norm left DC wall," << minimum->X()[3] << "," << minimum->Errors()[3] << ",\n";
+    myfile << "Norm left beam pipe," << minimum->X()[4] << "," << minimum->Errors()[4] << ",\n";
+    myfile << "Norm right beam pipe," << minimum->X()[5] << "," << minimum->Errors()[5] << ",\n";
+    myfile << "Norm right DC wall," << minimum->X()[6] << "," << minimum->Errors()[6] << ",\n";
+    myfile << "Norm omega," << minimum->X()[7] << "," << minimum->Errors()[7] << ",\n";
+    myfile << "Norm three," << minimum->X()[8] << "," << minimum->Errors()[8] << ",\n";
+    myfile << "Norm semi," << minimum->X()[9] << "," << minimum->Errors()[9] << ",\n";
+    myfile << "Norm other bcg," << minimum->X()[10] << "," << minimum->Errors()[10] << ",\n";
+    myfile << "\u03C7\u00B2," << event.data->Chi2Test(event.mc_sum,"UW CHI2") << ",-,\n";
+    myfile << "\u03C7\u00B2/" << (UInt_t)nbins << "," << event.data->Chi2Test(event.mc_sum,"UW CHI2/NDF") << ",-,\n";
+    myfile.close();
+
+    event.mc_sum->SetLineWidth(3);
     event.mc_sum->SetLineColor(mcsum_color);
+
+    event.data->SetLineWidth(3);
     event.data->SetLineColor(data_color);
 
     TCanvas *c1 = new TCanvas("c1", "", 790, 790);
+
+    gStyle->SetOptStat(0);
 
     TRatioPlot *rp = new TRatioPlot(event.mc_sum, event.data, "diffsig");
 
     rp->Draw();
 
-    //event.mc_sum->Draw("HIST");
-    //event.data->Draw("PE1SAME");
-
     rp->GetLowerRefGraph()->SetMinimum(-5);
     rp->GetLowerRefGraph()->SetMaximum(5);
+    rp->GetLowerRefGraph()->SetLineWidth(3);
+
+    rp->GetUpperRefXaxis()->SetTitle("#Deltat [#tau_{S}]");
+
+    rp->SetLowBottomMargin(0.5);
+    rp->SetLeftMargin(0.15);
 
     rp->GetLowerRefYaxis()->SetLabelSize(0.02);
 
-    rp->GetUpperRefYaxis()->SetRangeUser(0.0,2500.0);
+    Double_t max_height = event.mc_sum->GetMaximum();
+
+    rp->GetUpperRefYaxis()->SetRangeUser(0.0,1.2*max_height);
+    rp->GetUpperRefYaxis()->SetTitle("Counts/2#tau_{S}");
+
+    rp->GetLowerRefYaxis()->SetTitleSize(0.03);
+    rp->GetLowerRefYaxis()->SetTitle("Residuals");
 
     rp->GetUpperPad()->cd();
 
+    TLegend *legend_chann = new TLegend(0.6,0.5,0.9,0.9);
+    legend_chann->SetFillColor(kWhite);
     for(UInt_t i = 0; i < chann_num; i++)
     {
-        event.frac[i]->Draw("HISTSAME");
+      legend_chann->AddEntry(event.frac[i],chann_name[i],"l");
+      event.frac[i]->Draw("HISTSAME");
     }
 
+    legend_chann->AddEntry(event.mc_sum,mcsum_name,"l");
+    legend_chann->AddEntry(event.data,data_name,"le");
+    legend_chann->Draw();
+
     c1->Print("split_fit_with_corr.png");
+
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Residuals graph
+
+    TCanvas *c2 = new TCanvas("c2", "", 790, 790);
+    TH1 *residuals_hist = new TH1D("Residuals hist", "", 11, -5., 5.);
+
+    event.resi_vals = rp->GetLowerRefGraph()->GetY();
+
+    for(Int_t i = 0; i < event.bin_number; i++)
+    {
+      residuals_hist->Fill( event.resi_vals[i] );
+    }
+
+    residuals_hist->GetYaxis()->SetRangeUser(0,25);
+    residuals_hist->Fit("gaus");
+
+    c2->cd();
+
+    residuals_hist->SetXTitle("Residuals");
+    residuals_hist->SetYTitle("Counts");
+    residuals_hist->SetLineWidth(5);
+    residuals_hist->Draw();
+    residuals_hist->SetStats(1);
+    gStyle->SetOptStat(0);
+    gStyle->SetOptFit(1);
+
+    gStyle->SetFitFormat("6.2g");
+    gStyle->SetStatFormat("6.2g");
+
+    residuals_hist->Draw();
+
+    c2->Print("residuals_hist.png");
 
     delete rp;
 

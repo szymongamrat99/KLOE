@@ -4,6 +4,7 @@
 
 #include "../../Include/Codes/reconstructor.h"
 #include "../../Include/const.h"
+#include "chain_init.C"
 
 void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_data", TString rootname = "data_stream42_")
 {
