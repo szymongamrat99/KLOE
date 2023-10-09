@@ -170,21 +170,6 @@ public :
    TTreeReaderArray<Float_t> Neuvtx = {fReader, "Neuvtx"};
    TTreeReaderArray<Float_t> Phivtx = {fReader, "Phivtx"};
    TTreeReaderArray<Float_t> test = {fReader, "test"};
-   TTreeReaderArray<Float_t> fourgamma1tri = {fReader, "fourgamma1tri"};
-   TTreeReaderArray<Float_t> fourgamma2tri = {fReader, "fourgamma2tri"};
-   TTreeReaderArray<Float_t> fourgamma3tri = {fReader, "fourgamma3tri"};
-   TTreeReaderArray<Float_t> fourgamma4tri = {fReader, "fourgamma4tri"};
-   TTreeReaderArray<Float_t> fourKnetri = {fReader, "fourKnetri"};
-   TTreeReaderValue<Int_t> done4 = {fReader, "done4"};
-   TTreeReaderArray<Float_t> gamma1tri = {fReader, "gamma1tri"};
-   TTreeReaderArray<Float_t> gamma2tri = {fReader, "gamma2tri"};
-   TTreeReaderArray<Float_t> gamma3tri = {fReader, "gamma3tri"};
-   TTreeReaderArray<Float_t> gamma4tri = {fReader, "gamma4tri"};
-   TTreeReaderArray<Float_t> gamma5tri = {fReader, "gamma5tri"};
-   TTreeReaderArray<Float_t> gamma6tri = {fReader, "gamma6tri"};
-   TTreeReaderArray<Float_t> Knetri = {fReader, "Knetri"};
-   TTreeReaderValue<Int_t> done = {fReader, "done"};
-   TTreeReaderValue<Float_t> totalerr = {fReader, "totalerr"};
 
 
    kin_fits(TTree * /*tree*/ =0) { }

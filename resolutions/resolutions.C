@@ -12,6 +12,7 @@
 #include <TCanvas.h>
 #include <TMath.h>
 #include <TRatioPlot.h>
+#include <TF1.h>
 
 #include "../../Include/Codes/interference.h"
 #include "../../Include/Codes/kloe_class.h"
@@ -34,12 +35,22 @@ void resolutions()
     chain_init(chain);
 
     UChar_t mcflag;
-    Float_t Dtboostlor, Dtmc;
+    Float_t Dtboostlor, Dtmc, ip[3], phi_mom[4], Kchboost[9], Knerec[9];
 
     chain->SetBranchAddress("mcflag", &mcflag);
 
     chain->SetBranchAddress("Dtboostlor", &Dtboostlor);
     chain->SetBranchAddress("Dtmc", &Dtmc);
+
+    chain->SetBranchAddress("Broots", &phi_mom[0]);
+    chain->SetBranchAddress("Bpx", &phi_mom[1]);
+    chain->SetBranchAddress("Bpy", &phi_mom[2]);
+    chain->SetBranchAddress("Bpz", &phi_mom[3]);
+
+    chain->SetBranchAddress("ip", ip);
+
+    chain->SetBranchAddress("Kchboost", Kchboost);
+    chain->SetBranchAddress("Knerec", Knerec);
 
     chain->AddFriend("h = h1", "../../../old_root_files/mctruth.root");
 
