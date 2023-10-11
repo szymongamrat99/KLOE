@@ -29,7 +29,7 @@ Double_t trilateration_chi_square(const Double_t *x)
 	lambda[2] = x[3 * N + 2];
 	lambda[3] = x[3 * N + 3];
 
-	Double_t kaon_velocity, kaon_energy, kaon_mom, kaon_path;
+	Double_t kaon_velocity, kaon_energy, kaon_mom, kaon_path, kaon_inv_mass;
 	Double_t mass_inv[2];
 
 	for (Int_t i = 0; i < 4; i++)
@@ -73,11 +73,12 @@ Double_t trilateration_chi_square(const Double_t *x)
 	kaon_path = sqrt(pow(solution[0] - bhabha_vtx[0], 2) +
 									 pow(solution[1] - bhabha_vtx[1], 2) +
 									 pow(solution[2] - bhabha_vtx[2], 2));
+	kaon_inv_mass = sqrt(pow(kaon_energy,2) - pow(kaon_mom,2));
 
 	constraints[0] = pow(kaon_velocity * solution[3] - kaon_path, 2);
-	// constraints[1] = pow(mass_inv[0] - m_pi0, 2);
-	// constraints[2] = pow(mass_inv[1] - m_pi0, 2);
-	// constraints[3] = pow(kaon_path - 320, 2);
+	constraints[1] = pow(mass_inv[0] - m_pi0, 2);
+	constraints[2] = pow(mass_inv[1] - m_pi0, 2);
+	constraints[3] = pow(kaon_inv_mass - m_k0, 2);
 
 	for (Int_t i = 0; i < N; i++)
 	{
@@ -148,6 +149,8 @@ int main()
 	Int_t ind_gam[4], sort_index[2][3], sort_ind_gam[2][4], chosen_ind_gam[4];
 	Float_t neu_vtx[2][4], inv_m_pi0[2][3][2], gamma_mom[2][4][4], mass_pair[2][3];
 
+	Double_t P1[2][N], chi2[2], neu_vtx_min[2][2][4], clusters_min[2][4][5], neu_vtx_min_final[4];
+
 	// Variables
 	int selected[4] = {1, 2, 3, 4};
 
@@ -160,7 +163,7 @@ int main()
 	{
 		chain->GetEntry(i);
 
-		if (nclu >= 4)
+		if (nclu >= 4 && mctruth == 1)
 		{
 			for (Int_t j1 = 0; j1 < nclu - 3; j1++)
 				for (Int_t j2 = j1 + 1; j2 < nclu - 2; j2++)
@@ -373,15 +376,147 @@ int main()
 									// do the minimization
 									isConverged[l] = minimum->Minimize();
 
-									// if (isConverged[l])
-										
+									if (isConverged[l])
+									{
+										for (Int_t m = 0; m < N; m++)
+										{
+											chi2[l] = minimum->MinValue();
+											P1[l][m] = minimum->X()[m];
+										}
+									}
+									else
+									{
+										for (Int_t m = 0; m < N; m++)
+										{
+											chi2[l] = 999999;
+											P1[l][m] = -999.;
+										}
+									}
 
 									delete minimum;
 								}
 
+								if (isConverged[0] && isConverged[1])
+								{
+									for (Int_t m = 0; m < 2; m++)
+									{
+										// Setting clusters for a solution
+										for (Int_t l = 0; l < 4; l++)
+										{
+											clusters_min[m][l][0] = P1[m][l * 5];
+											clusters_min[m][l][1] = P1[m][l * 5 + 1];
+											clusters_min[m][l][2] = P1[m][l * 5 + 2];
+											clusters_min[m][l][3] = P1[m][l * 5 + 3];
+											clusters_min[m][l][4] = P1[m][l * 5 + 4];
+
+											R.SetClu(l, clusters_min[m][l][0],
+															 clusters_min[m][l][1],
+															 clusters_min[m][l][2],
+															 clusters_min[m][l][3],
+															 clusters_min[m][l][4]);
+										}
+
+										R.SetClu(4, 0., 0., 0., 0., 0.);
+										R.SetClu(5, 0., 0., 0., 0., 0.);
+
+										S = R.MySolve(selected);
+
+										neu_vtx_min[m][0][0] = S.sol[0][0];
+										neu_vtx_min[m][0][1] = S.sol[0][1];
+										neu_vtx_min[m][0][2] = S.sol[0][2];
+										neu_vtx_min[m][0][3] = S.sol[0][3];
+
+										neu_vtx_min[m][1][0] = S.sol[1][0];
+										neu_vtx_min[m][1][1] = S.sol[1][1];
+										neu_vtx_min[m][1][2] = S.sol[1][2];
+										neu_vtx_min[m][1][3] = S.sol[1][3];
+									}
+								}
+								else if (isConverged[0] && !isConverged[1])
+								{
+									// Setting clusters for a solution
+									for (Int_t l = 0; l < 4; l++)
+									{
+										clusters_min[0][l][0] = P1[0][l * 5];
+										clusters_min[0][l][1] = P1[0][l * 5 + 1];
+										clusters_min[0][l][2] = P1[0][l * 5 + 2];
+										clusters_min[0][l][3] = P1[0][l * 5 + 3];
+										clusters_min[0][l][4] = P1[0][l * 5 + 4];
+
+										R.SetClu(l, clusters_min[0][l][0],
+														 clusters_min[0][l][1],
+														 clusters_min[0][l][2],
+														 clusters_min[0][l][3],
+														 clusters_min[0][l][4]);
+									}
+
+									R.SetClu(4, 0., 0., 0., 0., 0.);
+									R.SetClu(5, 0., 0., 0., 0., 0.);
+
+									S = R.MySolve(selected);
+
+									neu_vtx_min_final[0] = S.sol[0][0];
+									neu_vtx_min_final[1] = S.sol[0][1];
+									neu_vtx_min_final[2] = S.sol[0][2];
+									neu_vtx_min_final[3] = S.sol[0][3];
+
+									std::cout << neu_vtx_min_final[0] << " " << neu_vtx_min_final[1] << " " << neu_vtx_min_final[2] << " " << neu_vtx_min_final[3] << std::endl;
+								}
+								else if (!isConverged[0] && isConverged[1])
+								{
+									// Setting clusters for a solution
+									for (Int_t l = 0; l < 4; l++)
+									{
+										clusters_min[1][l][0] = P1[1][l * 5];
+										clusters_min[1][l][1] = P1[1][l * 5 + 1];
+										clusters_min[1][l][2] = P1[1][l * 5 + 2];
+										clusters_min[1][l][3] = P1[1][l * 5 + 3];
+										clusters_min[1][l][4] = P1[1][l * 5 + 4];
+
+										R.SetClu(l, clusters_min[1][l][0],
+														 clusters_min[1][l][1],
+														 clusters_min[1][l][2],
+														 clusters_min[1][l][3],
+														 clusters_min[1][l][4]);
+									}
+
+									R.SetClu(4, 0., 0., 0., 0., 0.);
+									R.SetClu(5, 0., 0., 0., 0., 0.);
+
+									S = R.MySolve(selected);
+
+									neu_vtx_min_final[0] = S.sol[0][0];
+									neu_vtx_min_final[1] = S.sol[0][1];
+									neu_vtx_min_final[2] = S.sol[0][2];
+									neu_vtx_min_final[3] = S.sol[0][3];
+
+
+									std::cout << neu_vtx_min_final[0] << " " << neu_vtx_min_final[1] << " " << neu_vtx_min_final[2] << " " << neu_vtx_min_final[3] << std::endl;
+								}
+								else
+								{
+									neu_vtx_min_final[0] = -999.;
+									neu_vtx_min_final[1] = -999.;
+									neu_vtx_min_final[2] = -999.;
+									neu_vtx_min_final[3] = -999.;
+								}
+							}
+							else
+							{
+								neu_vtx_min_final[0] = -999.;
+								neu_vtx_min_final[1] = -999.;
+								neu_vtx_min_final[2] = -999.;
+								neu_vtx_min_final[3] = -999.;
 							}
 							///////////////////////////////////////////////////////////////////
 						}
+		}
+		else
+		{
+			neu_vtx_min_final[0] = -999.;
+			neu_vtx_min_final[1] = -999.;
+			neu_vtx_min_final[2] = -999.;
+			neu_vtx_min_final[3] = -999.;
 		}
 	}
 	return 0;
