@@ -18,19 +18,26 @@
 const Int_t N = 23, M = 4;
 Int_t loopcount = 4;
 
+Reconstructor R;
+Solution S;
+
+Int_t selected[4] = {1, 2, 3, 4};
+
 Double_t trilateration_chi_square(const Double_t *x)
 {
 	Double_t clusters[5][4], clusters_meas[5][4], clusters_err[5][4], bhabha_vtx[3];
+	Double_t kaon_velocity[2], kaon_energy[2], kaon_mom[2], kaon_path[2], kaon_inv_mass[2];
 
-	Float_t gamma_mom[4][4], solution[4], lambda[4];
+	Float_t gamma_mom[2][4][4], neu_vtx[2][4], lambda[4];
 
 	lambda[0] = x[3 * N];
 	lambda[1] = x[3 * N + 1];
 	lambda[2] = x[3 * N + 2];
 	lambda[3] = x[3 * N + 3];
 
-	Double_t kaon_velocity, kaon_energy, kaon_mom, kaon_path, kaon_inv_mass;
-	Double_t mass_inv[2];
+	bhabha_vtx[0] = x[20];
+	bhabha_vtx[1] = x[21];
+	bhabha_vtx[2] = x[22];
 
 	for (Int_t i = 0; i < 4; i++)
 		for (Int_t j = 0; j < 5; j++)
@@ -38,59 +45,69 @@ Double_t trilateration_chi_square(const Double_t *x)
 			clusters[j][i] = x[i * 5 + j];
 		}
 
-	bhabha_vtx[0] = x[20];
-	bhabha_vtx[1] = x[21];
-	bhabha_vtx[2] = x[22];
+	//! Trilateration for every iteration
+	for (Int_t i = 0; i < 4; i++)
+		R.SetClu(i, clusters[0][i],
+						 clusters[1][i],
+						 clusters[2][i],
+						 clusters[3][i],
+						 clusters[4][i]);
 
-	solution[0] = x[3 * N + M];
-	solution[1] = x[3 * N + M + 1];
-	solution[2] = x[3 * N + M + 2];
-	solution[3] = x[3 * N + M + 3];
+	R.SetClu(4, 0., 0., 0., 0., 0.);
+	R.SetClu(5, 0., 0., 0., 0., 0.);
 
-	Double_t value = 0, constraints[4] = {0.};
+	S = R.MySolve(selected);
 
-	for (Int_t k = 0; k < 4; k++)
+	for (Int_t i = 0; i < 2; i++)
+		for (Int_t j = 0; j < 4; j++)
+			neu_vtx[i][j] = S.sol[i][j];
+	//!
+
+	//! Parameters for function builder
+	Double_t value[2] = {0.}, constraints[2][4], min_value;
+	//!
+
+	//! Gamma 4-momentum reconstruction
+	for (Int_t i = 0; i < 2; i++)
+		for (Int_t j = 0; j < 4; j++)
+			neutral_mom(clusters[0][j], clusters[1][j], clusters[2][j], clusters[4][j], neu_vtx[i], gamma_mom[i][j]);
+	//!
+
+	//! Values without constraints
+	for (Int_t j = 0; j < N; j++)
+		value[0] += pow((x[j] - x[j + N]) / x[j + 2 * N], 2);
+	value[1] = value[0];
+	//!
+
+	for (Int_t i = 0; i < 2; i++)
 	{
-		neutral_mom(clusters[0][k], clusters[1][k], clusters[2][k], clusters[4][k], solution, gamma_mom[k]);
+		kaon_mom[i] = sqrt(pow(gamma_mom[i][0][0] + gamma_mom[i][1][0] + gamma_mom[i][2][0] + gamma_mom[i][3][0], 2) +
+											 pow(gamma_mom[i][0][1] + gamma_mom[i][1][1] + gamma_mom[i][2][1] + gamma_mom[i][3][1], 2) +
+											 pow(gamma_mom[i][0][2] + gamma_mom[i][1][2] + gamma_mom[i][2][2] + gamma_mom[i][3][2], 2));
 
-		neutral_mom(clusters[0][k], clusters[1][k], clusters[2][k], clusters[4][k], solution, gamma_mom[k]);
+		kaon_energy[i] = gamma_mom[i][0][3] + gamma_mom[i][1][3] + gamma_mom[i][2][3] + gamma_mom[i][3][3];
+		kaon_velocity[i] = c_vel * kaon_mom[i] / kaon_energy[i];
+		kaon_path[i] = sqrt(pow(neu_vtx[i][0] - bhabha_vtx[0], 2) +
+												pow(neu_vtx[i][1] - bhabha_vtx[1], 2) +
+												pow(neu_vtx[i][2] - bhabha_vtx[2], 2));
+		kaon_inv_mass[i] = sqrt(pow(kaon_energy[i], 2) - pow(kaon_mom[i], 2));
+
+		constraints[i][0] = pow(kaon_velocity[i] * neu_vtx[i][3] - kaon_path[i], 2);
+		constraints[i][1] = pow(kaon_inv_mass[i] - m_k0, 2);
+
+		value[i] += lambda[0] * constraints[i][0] + lambda[1] * constraints[i][1];
 	}
 
-	mass_inv[0] = sqrt(pow(gamma_mom[0][3] + gamma_mom[1][3], 2) -
-										 pow(gamma_mom[0][0] + gamma_mom[1][0], 2) -
-										 pow(gamma_mom[0][1] + gamma_mom[1][1], 2) -
-										 pow(gamma_mom[0][2] + gamma_mom[1][2], 2));
-	mass_inv[1] = sqrt(pow(gamma_mom[2][3] + gamma_mom[3][3], 2) -
-										 pow(gamma_mom[2][0] + gamma_mom[3][0], 2) -
-										 pow(gamma_mom[2][1] + gamma_mom[3][1], 2) -
-										 pow(gamma_mom[2][2] + gamma_mom[3][2], 2));
-
-	kaon_mom = sqrt(pow(gamma_mom[0][0] + gamma_mom[1][0] + gamma_mom[2][0] + gamma_mom[3][0], 2) +
-									pow(gamma_mom[0][1] + gamma_mom[1][1] + gamma_mom[2][1] + gamma_mom[3][1], 2) +
-									pow(gamma_mom[0][2] + gamma_mom[1][2] + gamma_mom[2][2] + gamma_mom[3][2], 2));
-	kaon_energy = gamma_mom[0][3] + gamma_mom[1][3] + gamma_mom[2][3] + gamma_mom[3][3];
-	kaon_velocity = c_vel * kaon_mom / kaon_energy;
-	kaon_path = sqrt(pow(solution[0] - bhabha_vtx[0], 2) +
-									 pow(solution[1] - bhabha_vtx[1], 2) +
-									 pow(solution[2] - bhabha_vtx[2], 2));
-	kaon_inv_mass = sqrt(pow(kaon_energy,2) - pow(kaon_mom,2));
-
-	constraints[0] = pow(kaon_velocity * solution[3] - kaon_path, 2);
-	constraints[1] = pow(mass_inv[0] - m_pi0, 2);
-	constraints[2] = pow(mass_inv[1] - m_pi0, 2);
-	constraints[3] = pow(kaon_inv_mass - m_k0, 2);
-
-	for (Int_t i = 0; i < N; i++)
+	if ( !TMath::IsNaN(value[0]) && !TMath::IsNaN(value[1]) )
 	{
-		value += pow((x[i] - x[i + N]) / x[i + 2 * N], 2);
+		if ( value[0] < value[1] ) min_value = value[0];
+		else if ( value[1] < value[0] ) min_value = value[1];
 	}
+	else if ( TMath::IsNaN(value[0]) && !TMath::IsNaN(value[1]) ) min_value = value[0];
+	else if ( !TMath::IsNaN(value[0]) && TMath::IsNaN(value[1]) ) min_value = value[1];
+	else min_value = 999999.;
 
-	value += lambda[0] * constraints[0];
-	value += lambda[1] * constraints[1];
-	value += lambda[2] * constraints[2];
-	value += lambda[3] * constraints[3];
-
-	return value;
+	return min_value;
 }
 
 int main()
@@ -489,7 +506,6 @@ int main()
 									neu_vtx_min_final[1] = S.sol[0][1];
 									neu_vtx_min_final[2] = S.sol[0][2];
 									neu_vtx_min_final[3] = S.sol[0][3];
-
 
 									std::cout << neu_vtx_min_final[0] << " " << neu_vtx_min_final[1] << " " << neu_vtx_min_final[2] << " " << neu_vtx_min_final[3] << std::endl;
 								}
