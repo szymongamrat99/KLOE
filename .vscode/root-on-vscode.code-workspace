@@ -83,7 +83,8 @@
       "cp_fit_mc_tri.C": "cpp",
       "cp_fit_tri.C": "cpp",
       "kin_fits.C": "cpp",
-      "load_sel.C": "cpp"
+      "load_sel.C": "cpp",
+      "neutral_vtx_resolutions.C": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",
