@@ -1,6 +1,6 @@
 CXX=g++
 CXXFLAGS=`root-config --cflags --glibs`
-LIBS=-L/internal/big_one/4/users/gamrat/scripts/Include -lrec -lm -llapack
+LIBS=-L/internal/big_one/4/users/gamrat/scripts/Include/ -lrec -lm -llapack
 PROJECT_KINFIT=tri_kinfit
 PROJECT_REC=tri_rec
 RM=rm

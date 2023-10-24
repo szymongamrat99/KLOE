@@ -14,10 +14,12 @@
 #include "../../Include/Codes/uncertainties.h"
 #include "../../Include/Codes/charged_mom.h"
 #include "../../Include/Codes/neutral_mom.h"
+#include "../../Include/Codes/lorentz_transf.h"
+#include "../../Include/Codes/plane_intersection.h"
 #include "chain_init.C"
 
-const Int_t N = 23, M = 6;
-Int_t loopcount = 4;
+const Int_t N = 24, M = 5;
+const Float_t Trf = 2.715; // ns - time of a bunch (correction)
 
 Reconstructor R;
 Solution S;
@@ -26,21 +28,32 @@ Int_t selected[4] = {1, 2, 3, 4};
 
 Double_t trilateration_chi_square(const Double_t *x)
 {
-	Double_t clusters[5][4], clusters_meas[5][4], clusters_err[5][4], bhabha_vtx[3];
-	Double_t kaon_velocity[2], kaon_energy[2], kaon_mom[2], kaon_path[2], kaon_inv_mass[2];
+	Float_t clusters[5][4], clusters_meas[5][4], clusters_err[5][4];
+	Float_t kaon_velocity[2][3], kaon_path[2][3], kaon_inv_mass[2], kaon_mom[2], kaon_mom_vec_lor[2][4];
 
+	Float_t boost_vec[3], bhabha_vtx[3], phi_mom[4], phi_vtx[3], z_axis[3] = {0., 0., 1.}, kaon_mom_vec[2][4], ip_rec[2][3];
 	Float_t gamma_mom[2][4][4], neu_vtx[2][4], lambda[M], neu_vtx_one[4], gamma_mom_one[4][4], gamma_path[2][4];
+
+	//! Momenta of gammas reconstructed w/o the coordinates of Phi vtx
 
 	lambda[0] = x[3 * N];
 	lambda[1] = x[3 * N + 1];
 	lambda[2] = x[3 * N + 2];
 	lambda[3] = x[3 * N + 3];
 	lambda[4] = x[3 * N + 4];
-	lambda[5] = x[3 * N + 5];
 
-	bhabha_vtx[0] = x[20];
-	bhabha_vtx[1] = x[21];
-	bhabha_vtx[2] = x[22];
+	bhabha_vtx[0] = x[3 * N + 5];
+	bhabha_vtx[1] = x[3 * N + 6];
+	bhabha_vtx[2] = x[3 * N + 7];
+
+	phi_mom[0] = x[20];
+	phi_mom[1] = x[21];
+	phi_mom[2] = x[22];
+	phi_mom[3] = x[23];
+
+	boost_vec[0] = phi_mom[0]/phi_mom[3];
+	boost_vec[1] = phi_mom[1]/phi_mom[3];
+	boost_vec[2] = phi_mom[2]/phi_mom[3];
 
 	for (Int_t i = 0; i < 4; i++)
 		for (Int_t j = 0; j < 5; j++)
@@ -82,39 +95,45 @@ Double_t trilateration_chi_square(const Double_t *x)
 	//! Gamma 4-momentum reconstruction
 	for (Int_t i = 0; i < 2; i++)
 		for (Int_t j = 0; j < 4; j++)
-		{
 			neutral_mom(clusters[0][j], clusters[1][j], clusters[2][j], clusters[4][j], neu_vtx[i], gamma_mom[i][j]);
-
-			gamma_path[i][j] = sqrt(pow(clusters[0][j] - neu_vtx[i][0], 2) +
-															pow(clusters[1][j] - neu_vtx[i][1], 2) +
-															pow(clusters[2][j] - neu_vtx[i][2], 2));
-		}
 	//!
 
 	for (Int_t i = 0; i < 2; i++)
 	{
-		kaon_mom[i] = sqrt(pow(gamma_mom[i][0][0] + gamma_mom[i][1][0] + gamma_mom[i][2][0] + gamma_mom[i][3][0], 2) +
-											 pow(gamma_mom[i][0][1] + gamma_mom[i][1][1] + gamma_mom[i][2][1] + gamma_mom[i][3][1], 2) +
-											 pow(gamma_mom[i][0][2] + gamma_mom[i][1][2] + gamma_mom[i][2][2] + gamma_mom[i][3][2], 2));
+		kaon_mom_vec[i][0] = gamma_mom[i][0][0] + gamma_mom[i][1][0] + gamma_mom[i][2][0] + gamma_mom[i][3][0];
+		kaon_mom_vec[i][1] = gamma_mom[i][0][1] + gamma_mom[i][1][1] + gamma_mom[i][2][1] + gamma_mom[i][3][1];
+		kaon_mom_vec[i][2] = gamma_mom[i][0][2] + gamma_mom[i][1][2] + gamma_mom[i][2][2] + gamma_mom[i][3][2];
+		kaon_mom_vec[i][3] = gamma_mom[i][0][3] + gamma_mom[i][1][3] + gamma_mom[i][2][3] + gamma_mom[i][3][3];
 
-		kaon_energy[i] = gamma_mom[i][0][3] + gamma_mom[i][1][3] + gamma_mom[i][2][3] + gamma_mom[i][3][3];
-		kaon_velocity[i] = c_vel * kaon_mom[i] / kaon_energy[i];
-		kaon_path[i] = sqrt(pow(neu_vtx[i][0] - bhabha_vtx[0], 2) +
-												pow(neu_vtx[i][1] - bhabha_vtx[1], 2) +
-												pow(neu_vtx[i][2] - bhabha_vtx[2], 2));
-		kaon_inv_mass[i] = sqrt(pow(kaon_energy[i], 2) - pow(kaon_mom[i], 2));
+		kaon_velocity[i][0] = c_vel * kaon_mom_vec[i][0] / kaon_mom_vec[i][3];
+		kaon_velocity[i][1] = c_vel * kaon_mom_vec[i][1] / kaon_mom_vec[i][3];
+		kaon_velocity[i][2] = c_vel * kaon_mom_vec[i][2] / kaon_mom_vec[i][3];
 
-		constraints[i][0] = pow(kaon_velocity[i] * neu_vtx[i][3] - kaon_path[i], 2);
-		constraints[i][1] = pow(kaon_inv_mass[i] - m_k0, 2);
+		kaon_mom[i] = sqrt(pow(kaon_mom_vec[i][0],2) + pow(kaon_mom_vec[i][1],2) + pow(kaon_mom_vec[i][2],2));
 
-		constraints[i][2] = pow(neu_vtx[i][3] + (gamma_path[i][0] / c_vel) - clusters[3][0], 2);
-		constraints[i][3] = pow(neu_vtx[i][3] + (gamma_path[i][1] / c_vel) - clusters[3][1], 2);
-		constraints[i][4] = pow(neu_vtx[i][3] + (gamma_path[i][2] / c_vel) - clusters[3][2], 2);
-		constraints[i][5] = pow(neu_vtx[i][3] + (gamma_path[i][3] / c_vel) - clusters[3][3], 2);
+		kaon_inv_mass[i] = sqrt(pow(kaon_mom_vec[i][3], 2) - pow(kaon_mom[i], 2));
 
-		value[i] += lambda[0] * constraints[i][0] + lambda[1] * constraints[i][1] +
-								lambda[2] * constraints[i][2] + lambda[3] * constraints[i][3] +
-								lambda[4] * constraints[i][4] + lambda[5] * constraints[i][5];
+		plane_intersection(bhabha_vtx, phi_mom, z_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Plane rec
+
+		kaon_path[i][0] = neu_vtx[i][0] - ip_rec[i][0];
+		kaon_path[i][1] = neu_vtx[i][1] - ip_rec[i][1];
+		kaon_path[i][2] = neu_vtx[i][2] - ip_rec[i][2];
+
+		lorentz_transf(boost_vec, kaon_mom_vec[i], kaon_mom_vec_lor[i]); //! Lorentz transformation
+
+		constraints[i][0] = pow(kaon_velocity[i][0] * neu_vtx[i][3] - kaon_path[i][0], 2);
+		constraints[i][1] = pow(kaon_velocity[i][1] * neu_vtx[i][3] - kaon_path[i][1], 2);
+		constraints[i][2] = pow(kaon_velocity[i][2] * neu_vtx[i][3] - kaon_path[i][2], 2);
+
+		constraints[i][3] = pow(kaon_inv_mass[i] - m_k0, 2);
+
+		constraints[i][4] = pow(kaon_mom_vec_lor[i][3] - (m_phi/2.),2);
+
+		value[i] += lambda[0] * constraints[i][0] + 
+								lambda[1] * constraints[i][1] +
+								lambda[2] * constraints[i][2] + 
+								lambda[3] * constraints[i][3] +
+								lambda[4] * constraints[i][4]; 
 	}
 
 	if (!TMath::IsNaN(value[0]) && !TMath::IsNaN(value[1]))
@@ -152,12 +171,17 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 	// Branches' addresses
 	// Bhabha vars
-	Float_t bhabha_mom[4], bhabha_vtx[3], bhabha_vtx_err[3];
+	Float_t bhabha_mom[4], bhabha_mom_err[4], bhabha_vtx[3], bhabha_vtx_err[3];
 
 	chain->SetBranchAddress("Bpx", &bhabha_mom[0]);
 	chain->SetBranchAddress("Bpy", &bhabha_mom[1]);
 	chain->SetBranchAddress("Bpz", &bhabha_mom[2]);
 	chain->SetBranchAddress("Broots", &bhabha_mom[3]);
+
+	chain->SetBranchAddress("Bwidpx", &bhabha_mom_err[0]);
+	chain->SetBranchAddress("Bwidpy", &bhabha_mom_err[1]);
+	chain->SetBranchAddress("Bwidpz", &bhabha_mom_err[2]);
+	chain->SetBranchAddress("Brootserr", &bhabha_mom_err[3]);
 
 	chain->SetBranchAddress("Bx", &bhabha_vtx[0]);
 	chain->SetBranchAddress("By", &bhabha_vtx[1]);
@@ -205,9 +229,9 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 	Float_t neu_vtx[2][4], inv_m_pi0[2][3][2], gamma_mom[2][4][4], mass_pair[2][3];
 
 	Float_t P1[N], min_value, min_value_def, neu_vtx_min[2][4], clusters_min[4][5], neu_vtx_min_final[4],
-			mom_kaon[2], ene_kaon[2], v_kaon[2], length_kaon[2], diff_kaon[2], length, length_mc, length_rec;
+			mom_kaon[2][4], ene_kaon[2], v_kaon[2], length_kaon[2], diff_kaon[2], length, length_mc, length_rec;
 
-	Float_t length_ch, time_ch, velocity_ch, gamma_mom_final[4][8], fourKnetri_kinfit[10], constraints[M], iptri_kinfit[3];
+	Float_t length_ch, time_ch, velocity_ch, gamma_mom_final[4][8], fourKnetri_kinfit[10], constraints[M], iptri_kinfit[3], z_axis[3] = {0.,0.,1.}, ip_tri[2][3], bhabha_mom_fit[4];
 	Int_t g4takentri_kinfit[4];
 
 	TBranch *b_gamma1tri = tree->Branch("fourgamma1tri_kinfit", gamma_mom_final[0], "fourgamma1tri_kinfit[8]/F");
@@ -283,11 +307,11 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 								// create function wrapper for minimizer
 								// a IMultiGenFunction type
-								ROOT::Math::Functor f(&trilateration_chi_square, 3 * N + M);
+								ROOT::Math::Functor f(&trilateration_chi_square, 3 * N + M + 3);
 
 								minimum->SetFunction(f);
 
-								for (Int_t l = 0; l < 3 * N + M; l++)
+								for (Int_t l = 0; l < 3 * N + M + 3; l++)
 								{
 									minimum->SetVariable(l, std::to_string(l), 0., 0.01);
 									if (l >= N)
@@ -305,18 +329,20 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 									DP[k * 5] = 1.2;		 // cm
 									DP[k * 5 + 1] = 1.2; // cm
-									DP[k * 5 + 2] = 1.2; // cm
+									DP[k * 5 + 2] = 1.2/sqrt(cluster[4][ind_gam[k]] * 1E-3); // cm
 									DP[k * 5 + 3] = clu_time_error(cluster[4][ind_gam[k]]);
 									DP[k * 5 + 4] = clu_ene_error(cluster[4][ind_gam[k]]);
 								}
 
-								P[20] = bhabha_vtx[0]; // X_phi
-								P[21] = bhabha_vtx[1]; // Y_phi
-								P[22] = bhabha_vtx[2]; // Z_phi
+								P[20] = bhabha_mom[0]; // Px_phi
+								P[21] = bhabha_mom[1]; // Py_phi
+								P[22] = bhabha_mom[2]; // Pz_phi
+								P[23] = bhabha_mom[3]; // Pz_phi
 
-								DP[20] = bhabha_vtx_err[0];
-								DP[21] = bhabha_vtx_err[1];
-								DP[22] = bhabha_vtx_err[2];
+								DP[20] = bhabha_mom_err[0];
+								DP[21] = bhabha_mom_err[1];
+								DP[22] = bhabha_mom_err[2];
+								DP[23] = bhabha_mom_err[3];
 
 								for (Int_t k = 0; k < N; k++)
 								{
@@ -328,8 +354,12 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 								for (Int_t k = 0; k < M; k++)
 								{
-									minimum->SetVariableValue(k + 3 * N, 10.0);
+									minimum->SetVariableValue(k + 3 * N, 100.0);
 								}
+
+								minimum->SetVariableValue(3 * N + M, bhabha_vtx[0]);
+								minimum->SetVariableValue(3 * N + M + 1, bhabha_vtx[1]);
+								minimum->SetVariableValue(3 * N + M + 2, bhabha_vtx[2]);
 								// do the minimization
 								isConverged = minimum->Minimize();
 			
@@ -398,14 +428,21 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 											neutral_mom(clusters_min[l][0], clusters_min[l][1], clusters_min[l][2], clusters_min[l][4], neu_vtx_min[k], gamma_mom[k][l]);
 										}
 
-										mom_kaon[k] = sqrt(pow(gamma_mom[k][0][0] + gamma_mom[k][1][0] + gamma_mom[k][2][0] + gamma_mom[k][3][0], 2) +
-																			 pow(gamma_mom[k][0][1] + gamma_mom[k][1][1] + gamma_mom[k][2][1] + gamma_mom[k][3][1], 2) + pow(gamma_mom[k][0][2] + gamma_mom[k][1][2] + gamma_mom[k][2][2] + gamma_mom[k][3][2], 2));
+										mom_kaon[k][0] = gamma_mom[k][0][0] + gamma_mom[k][1][0] + gamma_mom[k][2][0] + gamma_mom[k][3][0];
+										mom_kaon[k][1] = gamma_mom[k][0][1] + gamma_mom[k][1][1] + gamma_mom[k][2][1] + gamma_mom[k][3][1];
+										mom_kaon[k][2] = gamma_mom[k][0][2] + gamma_mom[k][1][2] + gamma_mom[k][2][2] + gamma_mom[k][3][2];
+										mom_kaon[k][3] = gamma_mom[k][0][3] + gamma_mom[k][1][3] + gamma_mom[k][2][3] + gamma_mom[k][3][3];
 
-										ene_kaon[k] = gamma_mom[k][0][3] + gamma_mom[k][1][3] + gamma_mom[k][2][3] + gamma_mom[k][3][3];
+										v_kaon[k] = c_vel * sqrt(pow(mom_kaon[k][0],2) + pow(mom_kaon[k][1],2) + pow(mom_kaon[k][2],2)) / mom_kaon[k][3];
 
-										v_kaon[k] = c_vel * mom_kaon[k] / ene_kaon[k];
+										bhabha_mom_fit[0] = P1[20];
+										bhabha_mom_fit[1] = P1[21];
+										bhabha_mom_fit[2] = P1[22];
+										bhabha_mom_fit[3] = P1[23];
 
-										length_kaon[k] = sqrt(pow(neu_vtx_min[k][0] - P1[20], 2) + pow(neu_vtx_min[k][1] - P1[21], 2) + pow(neu_vtx_min[k][2] - P1[22], 2));
+										plane_intersection(bhabha_vtx, bhabha_mom_fit, z_axis, neu_vtx_min[k], mom_kaon[k], ip_tri[k]); //! Plane rec
+
+										length_kaon[k] = sqrt(pow(neu_vtx_min[k][0] - ip_tri[k][0], 2) + pow(neu_vtx_min[k][1] - ip_tri[k][1], 2) + pow(neu_vtx_min[k][2] - ip_tri[k][2], 2));
 
 										diff_kaon[k] = v_kaon[k] * neu_vtx_min[k][3] - length_kaon[k];
 									}
@@ -470,9 +507,7 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 										g4takentri_kinfit[2] = ind_gam[2];
 										g4takentri_kinfit[3] = ind_gam[3];
 
-										iptri_kinfit[0] = P1[20];
-										iptri_kinfit[1] = P1[21];
-										iptri_kinfit[2] = P1[22];
+										plane_intersection(bhabha_vtx, bhabha_mom_fit, z_axis, neu_vtx_min[0], fourKnetri_kinfit, iptri_kinfit); //! Plane rec
 									}
 									else if (abs(diff_kaon[0]) > abs(diff_kaon[1]))
 									{
@@ -534,9 +569,7 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 										g4takentri_kinfit[2] = ind_gam[2];
 										g4takentri_kinfit[3] = ind_gam[3];
 
-										iptri_kinfit[0] = P1[20];
-										iptri_kinfit[1] = P1[21];
-										iptri_kinfit[2] = P1[22];
+										plane_intersection(bhabha_vtx, bhabha_mom_fit, z_axis, neu_vtx_min[1], fourKnetri_kinfit, iptri_kinfit); //! Plane rec
 									}
 								}
 
@@ -610,7 +643,7 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 	tree->Print();
 
-	tree->Write();
+	file->Write();
 	file->Close();
 	delete file;
 	return 0;
