@@ -27,7 +27,7 @@ int comp_of_methods()
   TTree *tree = (TTree *)file->Get("h_tri_kin_fit");
 
   Float_t Kchboost[9], Knereclor[9], Knerec[9],
-      Kchmc[9], Knemc[9], ip[3], ipmc[3], phi_mom[4], Dtmc;
+      Kchmc[9], Knemc[9], ip[3], ipmc[3], phi_mom[4], Dtmc, Tcl[50];
   UChar_t mctruth;
 
   chain->SetBranchAddress("Kchboost", Kchboost);
@@ -39,6 +39,8 @@ int comp_of_methods()
   chain->SetBranchAddress("ip", ip);
   chain->SetBranchAddress("ipmc", ipmc);
 
+  chain->SetBranchAddress("Tcl", Tcl);
+
   chain->SetBranchAddress("Bpx", &phi_mom[0]);
   chain->SetBranchAddress("Bpy", &phi_mom[1]);
   chain->SetBranchAddress("Bpz", &phi_mom[2]);
@@ -49,7 +51,7 @@ int comp_of_methods()
   chain->SetBranchAddress("Dtmc", &Dtmc);
 
   Float_t gamma_kinfit[4][8], ip_kinfit[3], Knetri_kinfit[10], chi2min;
-  Int_t done_kinfit;
+  Int_t done_kinfit, g4taken_kinfit[4];
 
   tree->SetBranchAddress("fourgamma1tri_kinfit", gamma_kinfit[0]);
   tree->SetBranchAddress("fourgamma2tri_kinfit", gamma_kinfit[1]);
@@ -60,6 +62,8 @@ int comp_of_methods()
 
   tree->SetBranchAddress("iptri_kinfit", ip_kinfit);
   tree->SetBranchAddress("done4_kinfit", &done_kinfit);
+
+  tree->SetBranchAddress("g4taken_kinfit", g4taken_kinfit);
 
   tree->SetBranchAddress("chi2min", &chi2min);
 
@@ -89,13 +93,13 @@ int comp_of_methods()
     neu_mom[i] = new TH2F(id_hist, "", 200, -300, 300, 200, -300, 300);
 
     id_hist = "IP coor" + std::to_string(i);
-    ip_coor[i] = new TH2F(id_hist, "", 100, -0.2, 0.5, 100, -0.2, 0.5);
+    ip_coor[i] = new TH2F(id_hist, "", 100, -100, 100, 100, -100, 100);
   }
 
   neu_vtx_corr[3] = new TH2F("Lengths", "", 100, 0, 20, 100, 0, 20);
   neu_mom[3] = new TH2F("Energies", "", 100, 504, 520, 100, 480, 600);
 
-  dttri_hist = new TH1F("Dttri", "", 100, 0, 50);
+  dttri_hist = new TH1F("Dttri", "", 100, 0, 100);
   prob_hist = new TH1F("Prob", "", 100, 0, 1);
 
   TCanvas *canvas[30];
@@ -145,6 +149,8 @@ int comp_of_methods()
 
   }
 
+  Float_t gamma_path[4], cluster_time[4];
+
   for (Int_t i = 0; i < 30; i++)
     canvas[i] = new TCanvas(("Canvas" + std::to_string(i)).c_str(), "", 750, 750);
 
@@ -152,7 +158,7 @@ int comp_of_methods()
   {
     chain->GetEntry(i);
 
-    if (done_kinfit == 1 && chi2min < 20)
+    if (done_kinfit == 1 && chi2min < 100)
     {
       ip_coor[0]->Fill(ipmc[0], ip_kinfit[0]);
       ip_coor[1]->Fill(ipmc[1], ip_kinfit[1]);
@@ -197,13 +203,23 @@ int comp_of_methods()
 
       neu_vtx_corr[3]->Fill(t_neumc, Knetri_kinfit[9]);
 
-      dttri_hist->Fill(chi2min);
+      cluster_time[0] = Tcl[g4taken_kinfit[0]];
+      cluster_time[1] = Tcl[g4taken_kinfit[1]];
+      cluster_time[2] = Tcl[g4taken_kinfit[2]];
+      cluster_time[3] = Tcl[g4taken_kinfit[3]];
+
+      cluster_time[0] = Tcl[g4taken_kinfit[0]];
+      cluster_time[1] = Tcl[g4taken_kinfit[1]];
+      cluster_time[2] = Tcl[g4taken_kinfit[2]];
+      cluster_time[3] = Tcl[g4taken_kinfit[3]];
+
+      dttri_hist->Fill(Knetri_kinfit[9]/tau_S_nonCPT);
       prob_hist->Fill(TMath::Prob(chi2min, 6));
 
-      sigmas_std[0]->Fill(abs(Knemc[6] - ipmc[0]), Knereclor[6] - Knemc[6]);
-      sigmas_std[1]->Fill(abs(Knemc[7] - ipmc[1]), Knereclor[7] - Knemc[7]);
-      sigmas_std[2]->Fill(abs(Knemc[8] - ipmc[2]), Knereclor[8] - Knemc[8]);
-      sigmas_std[3]->Fill(t_neumc/tau_S_nonCPT, (t_neurec - t_neumc)/tau_S_nonCPT);
+      sigmas_std[0]->Fill(abs(Knemc[6] - ipmc[0]), Knetri_kinfit[6] - Knemc[6]);
+      sigmas_std[1]->Fill(abs(Knemc[7] - ipmc[1]), Knetri_kinfit[7] - Knemc[7]);
+      sigmas_std[2]->Fill(abs(Knemc[8] - ipmc[2]), Knetri_kinfit[8] - Knemc[8]);
+      sigmas_std[3]->Fill(t_neumc/tau_S_nonCPT, (Knetri_kinfit[9] - t_neumc)/tau_S_nonCPT);
     }
   }
 
@@ -365,7 +381,7 @@ int comp_of_methods()
   canvas[0]->cd();
   res_std_hist[0]->SetXTitle(title_x[0]);
   res_std_hist[0]->SetYTitle(title_y[0]);
-  res_std_hist[0]->GetYaxis()->SetRangeUser(0.0, 5.0);
+  res_std_hist[0]->GetYaxis()->SetRangeUser(0.0, 15.0);
   res_std_hist[0]->Draw("PE1");
   res_std_hist[1]->Draw("PE1SAME");
   res_std_hist[2]->Draw("PE1SAME");
@@ -375,7 +391,7 @@ int comp_of_methods()
   canvas[1]->cd();
   res_std_hist[3]->SetXTitle(title_x[1]);
   res_std_hist[3]->SetYTitle(title_y[1]);
-  res_std_hist[3]->GetYaxis()->SetRangeUser(0.0, 5.0);
+  res_std_hist[3]->GetYaxis()->SetRangeUser(0.0, 15.0);
   res_std_hist[3]->Draw("PE1");
   canvas[1]->Print(("sigmas_std" + std::to_string(2) + ".png").c_str());
 
