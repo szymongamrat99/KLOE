@@ -19,8 +19,9 @@
 #include "../../Include/Codes/closest_approach.h"
 #include "chain_init.C"
 
-const Int_t N = 24, M = 5;
+const Int_t N = 27, M = 9;
 const Float_t Trf = 2.715; // ns - time of a bunch (correction)
+Float_t T0[2], T0_mean;
 
 Reconstructor R;
 Solution S;
@@ -32,26 +33,26 @@ Double_t trilateration_chi_square(const Double_t *x)
 	Float_t clusters[5][4], clusters_meas[5][4], clusters_err[5][4];
 	Float_t kaon_velocity[2][3], kaon_path[2][3], kaon_inv_mass[2], kaon_mom[2], kaon_mom_vec_lor[2][4], kaon_path_tot[2], kaon_velocity_tot[2];
 
-	Float_t boost_vec[3], bhabha_vtx[3], phi_mom[4], phi_vtx[3], z_axis[3] = {0., 0., 1.}, kaon_mom_vec[2][4], ip_rec[2][3];
-	Float_t gamma_mom[2][4][4], neu_vtx[2][4], lambda[M], neu_vtx_one[4], gamma_mom_one[4][4], gamma_path[2][4], time_diff[2][4];
+	Float_t boost_vec[3], bhabha_vtx[3], phi_mom[4], phi_vtx[3], y_axis[3] = {0., 1., 0.}, kaon_mom_vec[2][4], ip_rec[2][3];
+	Float_t gamma_mom[2][4][4], neu_vtx[2][4], lambda[M], neu_vtx_one[4], gamma_mom_one[4][4], gamma_path[2][4], time_diff[2], test[3][3];
 
 	//! Momenta of gammas reconstructed w/o the coordinates of Phi vtx
 
-	for(Int_t i = 0; i < M; i++)
+	for (Int_t i = 0; i < M; i++)
 		lambda[i] = x[3 * N + i];
 
-	bhabha_vtx[0] = x[3 * N + M];
-	bhabha_vtx[1] = x[3 * N + M + 1];
-	bhabha_vtx[2] = x[3 * N + M + 2];
+	bhabha_vtx[0] = x[24];
+	bhabha_vtx[1] = x[25];
+	bhabha_vtx[2] = x[26];
 
 	phi_mom[0] = x[20];
 	phi_mom[1] = x[21];
 	phi_mom[2] = x[22];
 	phi_mom[3] = x[23];
 
-	boost_vec[0] = phi_mom[0] / phi_mom[3];
-	boost_vec[1] = phi_mom[1] / phi_mom[3];
-	boost_vec[2] = phi_mom[2] / phi_mom[3];
+	boost_vec[0] = -phi_mom[0] / phi_mom[3];
+	boost_vec[1] = -phi_mom[1] / phi_mom[3];
+	boost_vec[2] = -phi_mom[2] / phi_mom[3];
 
 	for (Int_t i = 0; i < 4; i++)
 		for (Int_t j = 0; j < 5; j++)
@@ -78,11 +79,12 @@ Double_t trilateration_chi_square(const Double_t *x)
 	//!
 
 	//! Parameters for function builder
-	Double_t value[2] = {0.}, chi2[2] = {0.}, constraints[2][6], min_value;
+	Double_t value[2] = {0.}, chi2[2] = {0.}, constraints[2][M], min_value;
 	//!
 
 	//! Values without constraints
-	for (Int_t j = 0; j < N; j++){
+	for (Int_t j = 0; j < N; j++)
+	{
 		value[0] += pow((x[j] - x[j + N]) / x[j + 2 * N], 2);
 	}
 	value[1] = value[0];
@@ -94,8 +96,12 @@ Double_t trilateration_chi_square(const Double_t *x)
 	//! Gamma 4-momentum reconstruction
 	for (Int_t i = 0; i < 2; i++)
 		for (Int_t j = 0; j < 4; j++)
+		{
 			neutral_mom(clusters[0][j], clusters[1][j], clusters[2][j], clusters[4][j], neu_vtx[i], gamma_mom[i][j]);
+			gamma_path[i][j] = sqrt(pow(clusters[0][j] - neu_vtx[i][0], 2) + pow(clusters[1][j] - neu_vtx[i][1], 2) + pow(clusters[2][j] - neu_vtx[i][2], 2));
+		}
 	//!
+
 	for (Int_t i = 0; i < 2; i++)
 	{
 		kaon_mom_vec[i][0] = gamma_mom[i][0][0] + gamma_mom[i][1][0] + gamma_mom[i][2][0] + gamma_mom[i][3][0];
@@ -111,28 +117,27 @@ Double_t trilateration_chi_square(const Double_t *x)
 
 		kaon_inv_mass[i] = sqrt(pow(kaon_mom_vec[i][3], 2) - pow(kaon_mom[i], 2));
 
-		// plane_intersection(bhabha_vtx, phi_mom, z_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Plane rec
-		closest_approach(bhabha_vtx, z_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Plane rec
+		plane_intersection(bhabha_vtx, y_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Plane rec
+		// closest_approach(bhabha_vtx, z_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Plane rec
 
 		if (abs(ip_rec[i][2] - bhabha_vtx[2]) > 2)
 		{
-			ip_rec[i][0] = bhabha_vtx[0];
-			ip_rec[i][1] = bhabha_vtx[1];
 			ip_rec[i][2] = bhabha_vtx[2];
+		}
+
+		if (abs(ip_rec[i][0] - bhabha_vtx[0]) > 0.2)
+		{
+			ip_rec[i][0] = bhabha_vtx[0];
 		}
 
 		kaon_path[i][0] = neu_vtx[i][0] - ip_rec[i][0];
 		kaon_path[i][1] = neu_vtx[i][1] - ip_rec[i][1];
 		kaon_path[i][2] = neu_vtx[i][2] - ip_rec[i][2];
 
-		kaon_path_tot[i] = sqrt(pow(kaon_path[i][0],2) + pow(kaon_path[i][1],2) + pow(kaon_path[i][2],2));
-		kaon_velocity_tot[i] = sqrt(pow(kaon_velocity[i][0],2) + pow(kaon_velocity[i][1],2) + pow(kaon_velocity[i][2],2));
+		kaon_path_tot[i] = sqrt(pow(kaon_path[i][0], 2) + pow(kaon_path[i][1], 2) + pow(kaon_path[i][2], 2));
+		kaon_velocity_tot[i] = sqrt(pow(kaon_velocity[i][0], 2) + pow(kaon_velocity[i][1], 2) + pow(kaon_velocity[i][2], 2));
 
 		lorentz_transf(boost_vec, kaon_mom_vec[i], kaon_mom_vec_lor[i]); //! Lorentz transformation
-
-		constraints[i][0] = pow(kaon_velocity[i][0] * neu_vtx[i][3] - kaon_path[i][0], 2);
-		constraints[i][1] = pow(kaon_velocity[i][1] * neu_vtx[i][3] - kaon_path[i][1], 2);
-		constraints[i][2] = pow(kaon_velocity[i][2] * neu_vtx[i][3] - kaon_path[i][2], 2);
 
 		constraints[i][3] = pow(kaon_inv_mass[i] - m_k0, 2);
 
@@ -140,42 +145,66 @@ Double_t trilateration_chi_square(const Double_t *x)
 
 		constraints[i][4] = pow(kaon_mom_vec_lor[i][3] - (m_phi / 2.), 2);
 
+		constraints[i][5] = clusters[3][0] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][0] / c_vel);
+		constraints[i][6] = clusters[3][1] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][1] / c_vel);
+		constraints[i][7] = clusters[3][2] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][2] / c_vel);
+		constraints[i][8] = clusters[3][3] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][3] / c_vel);
+
+		T0[i] = TMath::Nint(constraints[i][5]/Trf)*Trf;
+
+		constraints[i][5] = pow(constraints[i][5], 2);
+		constraints[i][6] = pow(constraints[i][6], 2);
+		constraints[i][7] = pow(constraints[i][7], 2);
+		constraints[i][8] = pow(constraints[i][8], 2);
+
+		// std::cout << T0[i] << std::endl;
+
+		constraints[i][0] = pow(kaon_velocity[i][0] * (neu_vtx[i][3] - T0[i]) - kaon_path[i][0], 2);
+		constraints[i][1] = pow(kaon_velocity[i][1] * (neu_vtx[i][3] - T0[i]) - kaon_path[i][1], 2);
+		constraints[i][2] = pow(kaon_velocity[i][2] * (neu_vtx[i][3] - T0[i]) - kaon_path[i][2], 2);
+
 		value[i] += lambda[0] * constraints[i][0] +
 								lambda[1] * constraints[i][1] +
 								lambda[2] * constraints[i][2] +
-								lambda[3] * constraints[i][3];
-								//lambda[4] * constraints[i][4];
+								lambda[3] * constraints[i][3] +
+								lambda[4] * constraints[i][4];
+		// lambda[5] * constraints[i][5] +
+		// lambda[6] * constraints[i][6] +
+		// lambda[7] * constraints[i][7] +
+		// lambda[8] * constraints[i][8];
 	}
+
+	// std::cout << std::endl;
 
 	if (!TMath::IsNaN(value[0]) && !TMath::IsNaN(value[1]))
 	{
-		if (value[0] <= value[1])
+		if (value[0] < value[1])
 		{
 			min_value = value[0];
-			std::cout << chi2[0] << " " << constraints[0][0] << " " << constraints[0][1] << " " << constraints[0][2] << " " << constraints[0][3] << " " << constraints[0][4] << std::endl;
+			// std::cout << chi2[0] << " " << min_value << " " << constraints[0][0] << " " << constraints[0][1] << " " << constraints[0][2] << " " << constraints[0][3] << " " << constraints[0][4] << std::endl;
 		}
-		else if (value[1] <= value[0])
+		else if (value[1] < value[0])
 		{
-			std::cout << chi2[1] << " " << constraints[1][0] << " " << constraints[1][1] << " " << constraints[1][2] << " " << constraints[1][3] << " " << constraints[1][4] << std::endl;
+			// std::cout << chi2[1] << " " << min_value << " " << constraints[1][0] << " " << constraints[1][1] << " " << constraints[1][2] << " " << constraints[1][3] << " " << constraints[1][4] << std::endl;
 			min_value = value[1];
 		}
 	}
 	else if (TMath::IsNaN(value[0]) && !TMath::IsNaN(value[1]))
 	{
 		min_value = value[0];
-		std::cout << chi2[0] << " " << constraints[0][0] << " " << constraints[0][1] << " " << constraints[0][2] << " " << constraints[0][3] << " " << constraints[0][4] << std::endl;
+		// std::cout << chi2[0] << " " << min_value << " " << constraints[0][0] << " " << constraints[0][1] << " " << constraints[0][2] << " " << constraints[0][3] << " " << constraints[0][4] << std::endl;
 	}
 	else if (!TMath::IsNaN(value[0]) && TMath::IsNaN(value[1]))
 	{
 		min_value = value[1];
-		std::cout << chi2[1] << " " << constraints[1][0] << " " << constraints[1][1] << " " << constraints[1][2] << " " << constraints[1][3] << " " << constraints[1][4] << std::endl;
+		// std::cout << chi2[1] << " " << min_value << " " << constraints[1][0] << " " << constraints[1][1] << " " << constraints[1][2] << " " << constraints[1][3] << " " << constraints[1][4] << std::endl;
 	}
 	else
 	{
 		min_value = 999999.;
 	}
 
-	std::cout << std::endl;
+	// std::cout << std::endl;
 
 	return min_value;
 }
@@ -258,7 +287,7 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 	Float_t P1[3 * N + M + 3], min_value, min_value_def, neu_vtx_min[2][4], clusters_min[4][5], neu_vtx_min_final[4],
 			mom_kaon[2][4], ene_kaon[2], v_kaon[2], length_kaon[2], diff_kaon[2], length, length_mc, length_rec;
 
-	Float_t length_ch, time_ch, velocity_ch, gamma_mom_final[4][8], fourKnetri_kinfit[10], constraints[M], iptri_kinfit[3], z_axis[3] = {0., 0., 1.}, ip_tri[2][3], bhabha_mom_fit[4];
+	Float_t length_ch, time_ch, velocity_ch, gamma_mom_final[4][8], fourKnetri_kinfit[10], constraints[M], iptri_kinfit[3], y_axis[3] = {0., 1., 0.}, ip_tri[2][3], bhabha_mom_fit[4];
 	Int_t g4takentri_kinfit[4];
 
 	TBranch *b_gamma1tri = tree->Branch("fourgamma1tri_kinfit", gamma_mom_final[0], "fourgamma1tri_kinfit[8]/F");
@@ -280,7 +309,7 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 	else if (number_of_ev > nentries)
 		number_of_ev = nentries;
 
-	TH1 *chi2_hist = new TH1F("chi2", "", 100, 0, 50);
+	TH1 *chi2_hist = new TH1F("chi2", "", 50, 0, 1);
 
 	for (Int_t i = 0; i < number_of_ev; i++)
 	{
@@ -338,11 +367,11 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 								// create function wrapper for minimizer
 								// a IMultiGenFunction type
-								ROOT::Math::Functor f(&trilateration_chi_square, 3 * N + M + 3);
+								ROOT::Math::Functor f(&trilateration_chi_square, 3 * N + M);
 
 								minimum->SetFunction(f);
 
-								for (Int_t l = 0; l < 3 * N + M + 3; l++)
+								for (Int_t l = 0; l < 3 * N + M; l++)
 								{
 									minimum->SetVariable(l, std::to_string(l), 0., 0.001);
 									if (l >= N)
@@ -358,9 +387,9 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 									P[k * 5 + 3] = cluster[3][ind_gam[k]]; // T_k
 									P[k * 5 + 4] = cluster[4][ind_gam[k]]; // E_k
 
-									DP[k * 5] = 1.2;																					 // cm
-									DP[k * 5 + 1] = 1.2;																			 // cm
-									DP[k * 5 + 2] = 1.2 / sqrt(cluster[4][ind_gam[k]]/1000.); // cm
+									DP[k * 5] = 1.2;		 // cm
+									DP[k * 5 + 1] = 1.2; // cm
+									DP[k * 5 + 2] = 1.2; // / sqrt(cluster[4][ind_gam[k]]/1000.); // cm
 									DP[k * 5 + 3] = clu_time_error(cluster[4][ind_gam[k]]);
 									DP[k * 5 + 4] = clu_ene_error(cluster[4][ind_gam[k]]);
 								}
@@ -375,22 +404,34 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 								DP[22] = bhabha_mom_err[2];
 								DP[23] = bhabha_mom_err[3];
 
+								P[24] = bhabha_vtx[0]; // Px_phi
+								P[25] = bhabha_vtx[1]; // Py_phi
+								P[26] = bhabha_vtx[2]; // Pz_phi
+
+								DP[24] = bhabha_vtx_err[0];
+								DP[25] = bhabha_vtx_err[1];
+								DP[26] = 1.13;
+
 								for (Int_t k = 0; k < N; k++)
 								{
 									minimum->SetVariableValue(k, P[k]);
-									minimum->SetVariableLimits(k, P[k] - 5* DP[k], P[k] + 5* DP[k]);
+									minimum->SetVariableLimits(k, P[k] - 5 * DP[k], P[k] + 5 * DP[k]);
 									minimum->SetVariableValue(k + N, P[k]);
 									minimum->SetVariableValue(k + 2 * N, DP[k]);
 								}
 
 								for (Int_t k = 0; k < M; k++)
 								{
-									minimum->SetVariableValue(k + 3 * N, 100.0);
+									minimum->SetVariableValue(k + 3 * N, 1.0);
 								}
 
-								minimum->SetVariableValue(3 * N + M, bhabha_vtx[0]);
-								minimum->SetVariableValue(3 * N + M + 1, bhabha_vtx[1]);
-								minimum->SetVariableValue(3 * N + M + 2, bhabha_vtx[2]);
+								minimum->SetVariableStepSize(20,0.);
+								minimum->SetVariableStepSize(21,0.);
+								minimum->SetVariableStepSize(22,0.);
+								minimum->SetVariableStepSize(23,0.);
+								minimum->SetVariableStepSize(24,0.);
+								minimum->SetVariableStepSize(25,0.);
+								minimum->SetVariableStepSize(26,0.);
 								// do the minimization
 								isConverged = minimum->Minimize();
 
@@ -413,9 +454,9 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 									}
 								}
 
-								if (CHISQR < min_value_def)
+								if (min_value < min_value_def)
 								{
-									min_value_def = CHISQR;
+									min_value_def = min_value;
 									CHISQRMIN = CHISQR;
 									found_best = 1;
 
@@ -469,7 +510,12 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 										bhabha_mom_fit[2] = P1[22];
 										bhabha_mom_fit[3] = P1[23];
 
-										plane_intersection(bhabha_vtx, bhabha_mom_fit, z_axis, neu_vtx_min[k], mom_kaon[k], ip_tri[k]); //! Plane rec
+										plane_intersection(bhabha_vtx, y_axis, neu_vtx_min[k], mom_kaon[k], ip_tri[k]); //! Plane rec
+
+										if (abs(ip_tri[k][2] - bhabha_vtx[2]) > 2)
+											ip_tri[k][2] = bhabha_vtx[2];
+										if (abs(ip_tri[k][0] - bhabha_vtx[0]) > 0.2)
+											ip_tri[k][0] = bhabha_vtx[0];
 
 										length_kaon[k] = sqrt(pow(neu_vtx_min[k][0] - ip_tri[k][0], 2) + pow(neu_vtx_min[k][1] - ip_tri[k][1], 2) + pow(neu_vtx_min[k][2] - ip_tri[k][2], 2));
 
@@ -536,7 +582,12 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 										g4takentri_kinfit[2] = ind_gam[2];
 										g4takentri_kinfit[3] = ind_gam[3];
 
-										plane_intersection(bhabha_vtx, bhabha_mom_fit, z_axis, neu_vtx_min[0], fourKnetri_kinfit, iptri_kinfit); //! Plane rec
+										plane_intersection(bhabha_vtx, y_axis, neu_vtx_min[0], fourKnetri_kinfit, iptri_kinfit); //! Plane rec
+
+										if (abs(iptri_kinfit[2] - bhabha_vtx[2]) > 2)
+											iptri_kinfit[2] = bhabha_vtx[2];
+										if (abs(iptri_kinfit[0] - bhabha_vtx[0]) > 0.2)
+											iptri_kinfit[0] = bhabha_vtx[0];
 									}
 									else if (abs(diff_kaon[0]) > abs(diff_kaon[1]))
 									{
@@ -598,7 +649,12 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 										g4takentri_kinfit[2] = ind_gam[2];
 										g4takentri_kinfit[3] = ind_gam[3];
 
-										plane_intersection(bhabha_vtx, bhabha_mom_fit, z_axis, neu_vtx_min[1], fourKnetri_kinfit, iptri_kinfit); //! Plane rec
+										plane_intersection(bhabha_vtx, y_axis, neu_vtx_min[1], fourKnetri_kinfit, iptri_kinfit); //! Plane rec
+
+										if (abs(iptri_kinfit[2] - bhabha_vtx[2]) > 2)
+											iptri_kinfit[2] = bhabha_vtx[2];
+										if (abs(iptri_kinfit[0] - bhabha_vtx[0]) > 0.2)
+											iptri_kinfit[0] = bhabha_vtx[0];
 									}
 								}
 
@@ -609,7 +665,9 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 			if (found_best == 1)
 			{
-				chi2_hist->Fill(CHISQRMIN);
+				chi2_hist->Fill(TMath::Prob(CHISQRMIN,5));
+
+				std::cout << TMath::Prob(CHISQRMIN,5) << std::endl;
 			}
 		}
 
@@ -677,6 +735,8 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 	TCanvas *c1 = new TCanvas("c1", "", 750, 750);
 
+	chi2_hist->GetXaxis()->SetTitle("#chi^{2}(4)");
+	chi2_hist->GetYaxis()->SetTitle("Counts");
 	chi2_hist->Draw();
 
 	c1->Print("chi2_test.png");
