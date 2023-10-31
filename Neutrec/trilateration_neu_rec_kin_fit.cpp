@@ -32,7 +32,7 @@ Double_t trilateration_chi_square(const Double_t *x)
 	Float_t clusters[5][4], clusters_meas[5][4], clusters_err[5][4];
 	Float_t kaon_velocity[2][3], kaon_path[2][3], kaon_inv_mass[2], kaon_mom[2], kaon_mom_vec_lor[2][4], kaon_path_tot[2], kaon_velocity_tot[2];
 
-	Float_t boost_vec[3], bhabha_vtx[3], phi_mom[4], phi_vtx[3], z_axis[3] = {0., 0., 1.}, kaon_mom_vec[2][4], ip_rec[2][3];
+	Float_t boost_vec[3], bhabha_vtx[3], phi_mom[4], phi_vtx[3], y_axis[3] = {0., 1., 0.}, kaon_mom_vec[2][4], ip_rec[2][3];
 	Float_t gamma_mom[2][4][4], neu_vtx[2][4], lambda[M], neu_vtx_one[4], gamma_mom_one[4][4], gamma_path[2][4], time_diff[2][4];
 
 	//! Momenta of gammas reconstructed w/o the coordinates of Phi vtx
@@ -111,14 +111,17 @@ Double_t trilateration_chi_square(const Double_t *x)
 
 		kaon_inv_mass[i] = sqrt(pow(kaon_mom_vec[i][3], 2) - pow(kaon_mom[i], 2));
 
-		// plane_intersection(bhabha_vtx, phi_mom, z_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Plane rec
-		closest_approach(bhabha_vtx, z_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Plane rec
+		plane_intersection(bhabha_vtx, y_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Plane rec
+		//closest_approach(bhabha_vtx, z_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Plane rec
 
 		if (abs(ip_rec[i][2] - bhabha_vtx[2]) > 2)
 		{
-			ip_rec[i][0] = bhabha_vtx[0];
-			ip_rec[i][1] = bhabha_vtx[1];
 			ip_rec[i][2] = bhabha_vtx[2];
+		}
+
+		if (abs(ip_rec[i][0] - bhabha_vtx[0]) > 0.2)
+		{
+			ip_rec[i][0] = bhabha_vtx[0];
 		}
 
 		kaon_path[i][0] = neu_vtx[i][0] - ip_rec[i][0];
@@ -152,23 +155,23 @@ Double_t trilateration_chi_square(const Double_t *x)
 		if (value[0] <= value[1])
 		{
 			min_value = value[0];
-			std::cout << chi2[0] << " " << constraints[0][0] << " " << constraints[0][1] << " " << constraints[0][2] << " " << constraints[0][3] << " " << constraints[0][4] << std::endl;
+			// std::cout << chi2[0] << " " << constraints[0][0] << " " << constraints[0][1] << " " << constraints[0][2] << " " << constraints[0][3] << " " << constraints[0][4] << std::endl;
 		}
 		else if (value[1] <= value[0])
 		{
-			std::cout << chi2[1] << " " << constraints[1][0] << " " << constraints[1][1] << " " << constraints[1][2] << " " << constraints[1][3] << " " << constraints[1][4] << std::endl;
+			// std::cout << chi2[1] << " " << constraints[1][0] << " " << constraints[1][1] << " " << constraints[1][2] << " " << constraints[1][3] << " " << constraints[1][4] << std::endl;
 			min_value = value[1];
 		}
 	}
 	else if (TMath::IsNaN(value[0]) && !TMath::IsNaN(value[1]))
 	{
 		min_value = value[0];
-		std::cout << chi2[0] << " " << constraints[0][0] << " " << constraints[0][1] << " " << constraints[0][2] << " " << constraints[0][3] << " " << constraints[0][4] << std::endl;
+		// std::cout << chi2[0] << " " << constraints[0][0] << " " << constraints[0][1] << " " << constraints[0][2] << " " << constraints[0][3] << " " << constraints[0][4] << std::endl;
 	}
 	else if (!TMath::IsNaN(value[0]) && TMath::IsNaN(value[1]))
 	{
 		min_value = value[1];
-		std::cout << chi2[1] << " " << constraints[1][0] << " " << constraints[1][1] << " " << constraints[1][2] << " " << constraints[1][3] << " " << constraints[1][4] << std::endl;
+		// std::cout << chi2[1] << " " << constraints[1][0] << " " << constraints[1][1] << " " << constraints[1][2] << " " << constraints[1][3] << " " << constraints[1][4] << std::endl;
 	}
 	else
 	{
