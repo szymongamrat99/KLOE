@@ -17,6 +17,8 @@
 #include "../../Include/Codes/lorentz_transf.h"
 #include "../../Include/Codes/plane_intersection.h"
 #include "../../Include/Codes/closest_approach.h"
+#include "../../Include/Codes/kloe_class.h"
+#include "../../Include/Codes/kinematic_fits.h"
 #include "chain_init.C"
 
 const Int_t N = 27, M = 9;
@@ -275,6 +277,8 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 	Double_t CHISQR;
 	Float_t CHISQRMIN;
+
+
 
 	//!
 

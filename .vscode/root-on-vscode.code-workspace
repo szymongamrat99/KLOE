@@ -84,7 +84,9 @@
       "cp_fit_tri.C": "cpp",
       "kin_fits.C": "cpp",
       "load_sel.C": "cpp",
-      "neutral_vtx_resolutions.C": "cpp"
+      "neutral_vtx_resolutions.C": "cpp",
+      "ip_rec_neu.C": "cpp",
+      "cfenv": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",
