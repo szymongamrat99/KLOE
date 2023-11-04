@@ -42,7 +42,7 @@
 
 const UInt_t N = 3;
 const Float_t bin_width = 0.01;
-const Float_t x_min[N] = {-5.0, -0.1, -5.0}, x_max[N] = {5.0, 0.1, 5.0};
+const Float_t x_min[N] = {-1.0, -0.1, -5.0}, x_max[N] = {1.0, 0.1, 5.0};
 
 UInt_t binn[N];
 TString name;
@@ -186,8 +186,8 @@ void ip_rec_neu::Terminate()
 
       ip_bhabha_res[i]->GetXaxis()->SetTitle("X^{method}_{IP,i} - X^{gen}_{IP,i} [cm]");
       ip_bhabha_res[i]->GetYaxis()->SetTitle("Counts [cm]");
-      ip_bhabha_res[i]->GetYaxis()->SetRangeUser(0.0,1.2*ip_plane_res[i]->GetMaximum());
-      ip_bhabha_res[i]->Fit("gaus");
+      ip_bhabha_res[i]->GetYaxis()->SetRangeUser(0.0,1.2*ip_bhabha_res[i]->GetMaximum());
+      //ip_bhabha_res[i]->Fit("gaus");
       ip_bhabha_res[i]->Draw();
       ip_plane_res[i]->Draw("SAMES");
       ip_closest_res[i]->Draw("SAMES");

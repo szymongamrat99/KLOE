@@ -11,7 +11,7 @@ all: $(PROJECT_KINFIT) $(PROJECT_REC)
 $(PROJECT_KINFIT): tri_kinfit.o
 	$(CXX) $(CXXFLAGS) $(LIBS) -o $@ $^
 
-$(PROJECT_KINFIT).o: trilateration_neu_rec_kin_fit.cpp
+$(PROJECT_KINFIT).o: trilateration_neu_rec_kin_fit_aux.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(PROJECT_REC): tri_rec.o

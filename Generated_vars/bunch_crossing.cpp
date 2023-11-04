@@ -46,7 +46,7 @@ int bunch_crossing()
   //!
 
   //! Histograms
-  TH2 *vel_histo = new TH2F("vel_histo","",100,-20.0,5.0, 100.0, 0.0, 20.0);
+  TH1 *vel_histo = new TH1F("vel_histo","",100,-1.0,1.0);
   //!
 
   for(UInt_t i = 0; i < nentries; i++)
@@ -59,16 +59,18 @@ int bunch_crossing()
       phi_vel[1] = (Kchmc[1] + Knemc[1])/(Kchmc[3] + Knemc[3]);
       phi_vel[2] = (Kchmc[2] + Knemc[2])/(Kchmc[3] + Knemc[3]);
 
-      Knemc_init[0] = Knemc[0];
-      Knemc_init[1] = Knemc[1];
-      Knemc_init[2] = Knemc[2];
-      Knemc_init[3] = Knemc[3];
+      Knemc_init[0] = Knereclor[0];
+      Knemc_init[1] = Knereclor[1];
+      Knemc_init[2] = Knereclor[2];
+      Knemc_init[3] = Knereclor[3];
 
       lorentz_transf(phi_vel,Knemc_init,Knemc_lor);
 
       kaon_mom = sqrt(pow(Knemc_init[0],2) + pow(Knemc_init[1],2) + pow(Knemc_init[2],2));
       kaon_vel = c_vel*kaon_mom/Knemc_init[3];
-      kaon_path = sqrt(pow(Knemc[6] - ipmc[0],2) + pow(Knemc[7] - ipmc[1],2) + pow(Knemc[8] - ipmc[2],2));
+      kaon_path = sqrt(pow(Knereclor[6] - ip[0],2) + pow(Knereclor[7] - ip[1],2) + pow(Knereclor[8] - ip[2],2));
+
+      kaon_time = 0;
 
       for(Int_t j = 0; j < 4; j++)
       {
@@ -77,7 +79,7 @@ int bunch_crossing()
                             pow(Zcl[ncll[g4taken[j] - 1] - 1] - Knemc[8],2));
 
         // t0 = -1.*t_bunch;
-        kaon_time = Tcl[ncll[g4taken[j] - 1] - 1] - (gamma_path[j]/c_vel) - kaon_path/kaon_vel;
+        kaon_time += (Tcl[ncll[g4taken[j] - 1] - 1] - (gamma_path[j]/c_vel));
 
         // if(kaon_time < 2.715/2. && kaon_time > -2.715/2.) vel_histo->Fill(kaon_time);
         // else if(kaon_time < 2.715 + 2.715/2. && kaon_time > 2.715/2.) vel_histo->Fill(kaon_time - 2.715);
@@ -87,8 +89,10 @@ int bunch_crossing()
         // else if(kaon_time < -2.715/2. && kaon_time > -2.715 - 2.715/2.) vel_histo->Fill(kaon_time + 2.715);
         // else if(kaon_time < -2.715 - 2.715/2. && kaon_time > -2*2.715 - 2.715/2.) vel_histo->Fill(kaon_time + 2*2.715);
         // else vel_histo->Fill(kaon_time);
-        vel_histo->Fill(kaon_time/t_bunch,(gamma_path[j]/c_vel));
       }
+      kaon_time = kaon_time/4.;
+      vel_histo->Fill(kaon_path/(kaon_time*c_vel));
+
     }
   }
 
@@ -125,7 +129,7 @@ int bunch_crossing()
   func->SetParLimits(8,0.0001,100.);
 
   TCanvas *c1 = new TCanvas("c1","",750,750);
-  c1->SetLogz(1);
+  //c1->SetLogy(1);
 
   //vel_histo->GetYaxis()->SetRangeUser(1., 1.2*vel_histo->GetMaximum());
   // vel_histo->Fit(func);

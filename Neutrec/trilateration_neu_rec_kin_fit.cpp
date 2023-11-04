@@ -4,6 +4,7 @@
 #include "TTree.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TStyle.h"
 #include "TCanvas.h"
 #include "Math/Functor.h"
 #include "Math/Factory.h"
@@ -147,12 +148,14 @@ Double_t trilateration_chi_square(const Double_t *x)
 
 		constraints[i][4] = pow(kaon_mom_vec_lor[i][3] - (m_phi / 2.), 2);
 
-		constraints[i][5] = clusters[3][0] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][0] / c_vel);
-		constraints[i][6] = clusters[3][1] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][1] / c_vel);
-		constraints[i][7] = clusters[3][2] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][2] / c_vel);
-		constraints[i][8] = clusters[3][3] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][3] / c_vel);
+		constraints[i][5] = neu_vtx[i][3] - (kaon_path_tot[i] / kaon_velocity_tot[i]);//clusters[3][0] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][0] / c_vel);
+		// constraints[i][6] = //clusters[3][1] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][1] / c_vel);
+		// constraints[i][7] = //clusters[3][2] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][2] / c_vel);
+		// constraints[i][8] = //clusters[3][3] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][3] / c_vel);
 
 		T0[i] = TMath::Nint(constraints[i][5]/Trf)*Trf;
+
+		//std::cout << constraints[i][5]/Trf << std::endl;
 
 		constraints[i][5] = pow(constraints[i][5], 2);
 		constraints[i][6] = pow(constraints[i][6], 2);
@@ -161,19 +164,15 @@ Double_t trilateration_chi_square(const Double_t *x)
 
 		// std::cout << T0[i] << std::endl;
 
-		constraints[i][0] = pow(kaon_velocity[i][0] * (neu_vtx[i][3] - T0[i]) - kaon_path[i][0], 2);
-		constraints[i][1] = pow(kaon_velocity[i][1] * (neu_vtx[i][3] - T0[i]) - kaon_path[i][1], 2);
-		constraints[i][2] = pow(kaon_velocity[i][2] * (neu_vtx[i][3] - T0[i]) - kaon_path[i][2], 2);
+		constraints[i][0] = pow(kaon_velocity[i][0] * (neu_vtx[i][3] + T0[i]) - kaon_path[i][0], 2);
+		constraints[i][1] = pow(kaon_velocity[i][1] * (neu_vtx[i][3] + T0[i]) - kaon_path[i][1], 2);
+		constraints[i][2] = pow(kaon_velocity[i][2] * (neu_vtx[i][3] + T0[i]) - kaon_path[i][2], 2);
 
 		value[i] += lambda[0] * constraints[i][0] +
 								lambda[1] * constraints[i][1] +
 								lambda[2] * constraints[i][2] +
 								lambda[3] * constraints[i][3] +
 								lambda[4] * constraints[i][4];
-		// lambda[5] * constraints[i][5] +
-		// lambda[6] * constraints[i][6] +
-		// lambda[7] * constraints[i][7] +
-		// lambda[8] * constraints[i][8];
 	}
 
 	// std::cout << std::endl;
@@ -313,7 +312,8 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 	else if (number_of_ev > nentries)
 		number_of_ev = nentries;
 
-	TH1 *chi2_hist = new TH1F("chi2", "", 50, 0, 1);
+	TH1 *chi2_hist = new TH1F("chi2", "", 100, 0, 100);
+	TH2 *chi2_corr = new TH2F("chi2_corr", "", N, 1, N, N, 1, N);
 
 	for (Int_t i = 0; i < number_of_ev; i++)
 	{
@@ -393,7 +393,7 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 									DP[k * 5] = 1.2;		 // cm
 									DP[k * 5 + 1] = 1.2; // cm
-									DP[k * 5 + 2] = 1.2; // / sqrt(cluster[4][ind_gam[k]]/1000.); // cm
+									DP[k * 5 + 2] = 1.2 / sqrt(cluster[4][ind_gam[k]]/1000.); // cm
 									DP[k * 5 + 3] = clu_time_error(cluster[4][ind_gam[k]]);
 									DP[k * 5 + 4] = clu_ene_error(cluster[4][ind_gam[k]]);
 								}
@@ -414,7 +414,7 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 								DP[24] = bhabha_vtx_err[0];
 								DP[25] = bhabha_vtx_err[1];
-								DP[26] = 1.13;
+								DP[26] = bhabha_vtx_err[2];
 
 								for (Int_t k = 0; k < N; k++)
 								{
@@ -429,10 +429,10 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 									minimum->SetVariableValue(k + 3 * N, 1.0);
 								}
 
-								minimum->SetVariableStepSize(20,0.);
+								// minimum->SetVariableStepSize(20,0.);
 								minimum->SetVariableStepSize(21,0.);
-								minimum->SetVariableStepSize(22,0.);
-								minimum->SetVariableStepSize(23,0.);
+								// minimum->SetVariableStepSize(22,0.);
+								// minimum->SetVariableStepSize(23,0.);
 								minimum->SetVariableStepSize(24,0.);
 								minimum->SetVariableStepSize(25,0.);
 								minimum->SetVariableStepSize(26,0.);
@@ -446,6 +446,8 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 									{
 										P1[m] = minimum->X()[m];
 										CHISQR += pow((P1[m] - P[m]) / DP[m], 2);
+										for (Int_t n = 0; n < N; n++)
+											chi2_corr->SetBinContent(m+1,n+1,minimum->Correlation(m,n));
 									}
 								}
 								else
@@ -669,9 +671,9 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 			if (found_best == 1)
 			{
-				chi2_hist->Fill(TMath::Prob(CHISQRMIN,5));
+				chi2_hist->Fill(CHISQRMIN);
 
-				std::cout << TMath::Prob(CHISQRMIN,5) << std::endl;
+				std::cout << CHISQRMIN << std::endl;
 			}
 		}
 
@@ -736,14 +738,27 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 		tree->Fill();
 	}
-
 	TCanvas *c1 = new TCanvas("c1", "", 750, 750);
 
-	chi2_hist->GetXaxis()->SetTitle("#chi^{2}(4)");
+	name = "#chi^{2}(" + std::to_string(M-4) + ")";
+
+	chi2_hist->GetXaxis()->SetTitle(name);
 	chi2_hist->GetYaxis()->SetTitle("Counts");
+	chi2_hist->GetYaxis()->SetRangeUser(0,1.2*chi2_hist->GetMaximum());
 	chi2_hist->Draw();
 
 	c1->Print("chi2_test.png");
+
+	TCanvas *c2 = new TCanvas("c2", "", 750, 750);
+	c1->SetRightMargin(0.15);
+	gStyle->SetOptStat(0);
+
+	c2->SetLogz(0);
+	chi2_corr->GetXaxis()->SetTitle("");
+	chi2_corr->GetYaxis()->SetTitle("");
+	chi2_corr->Draw("COLZ");
+
+	c2->Print("chi2_corr.png");
 
 	tree->Print();
 
