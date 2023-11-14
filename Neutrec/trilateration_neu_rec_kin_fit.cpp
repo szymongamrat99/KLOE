@@ -20,6 +20,7 @@
 #include "../../Include/Codes/closest_approach.h"
 #include "../../Include/Codes/kloe_class.h"
 #include "../../Include/Codes/kinematic_fits.h"
+#include "../../Include/Codes/chi2_dist.h"
 #include "chain_init.C"
 
 const Int_t N = 27, M = 9;
@@ -128,10 +129,7 @@ Double_t trilateration_chi_square(const Double_t *x)
 			ip_rec[i][2] = bhabha_vtx[2];
 		}
 
-		if (abs(ip_rec[i][0] - bhabha_vtx[0]) > 0.2)
-		{
-			ip_rec[i][0] = bhabha_vtx[0];
-		}
+		ip_rec[i][0] = bhabha_vtx[0];
 
 		kaon_path[i][0] = neu_vtx[i][0] - ip_rec[i][0];
 		kaon_path[i][1] = neu_vtx[i][1] - ip_rec[i][1];
@@ -148,12 +146,12 @@ Double_t trilateration_chi_square(const Double_t *x)
 
 		constraints[i][4] = pow(kaon_mom_vec_lor[i][3] - (m_phi / 2.), 2);
 
-		constraints[i][5] = neu_vtx[i][3] - (kaon_path_tot[i] / kaon_velocity_tot[i]);//clusters[3][0] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][0] / c_vel);
-		// constraints[i][6] = //clusters[3][1] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][1] / c_vel);
-		// constraints[i][7] = //clusters[3][2] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][2] / c_vel);
-		// constraints[i][8] = //clusters[3][3] - (kaon_path_tot[i] / kaon_velocity_tot[i]) - (gamma_path[i][3] / c_vel);
+		constraints[i][5] = clusters[3][0] - neu_vtx[i][3] - (gamma_path[i][0] / c_vel);
+		constraints[i][6] = clusters[3][1] - neu_vtx[i][3] - (gamma_path[i][1] / c_vel);
+		constraints[i][7] = clusters[3][2] - neu_vtx[i][3] - (gamma_path[i][2] / c_vel);
+		constraints[i][8] = clusters[3][3] - neu_vtx[i][3] - (gamma_path[i][3] / c_vel);
 
-		T0[i] = TMath::Nint(constraints[i][5]/Trf)*Trf;
+		T0[i] = 0;//TMath::Nint(constraints[i][5]/Trf)*Trf;
 
 		//std::cout << constraints[i][5]/Trf << std::endl;
 
@@ -164,15 +162,19 @@ Double_t trilateration_chi_square(const Double_t *x)
 
 		// std::cout << T0[i] << std::endl;
 
-		constraints[i][0] = pow(kaon_velocity[i][0] * (neu_vtx[i][3] + T0[i]) - kaon_path[i][0], 2);
+		constraints[i][0] = pow(kaon_velocity_tot[i] * (neu_vtx[i][3] + T0[i]) - kaon_path_tot[i], 2);
 		constraints[i][1] = pow(kaon_velocity[i][1] * (neu_vtx[i][3] + T0[i]) - kaon_path[i][1], 2);
 		constraints[i][2] = pow(kaon_velocity[i][2] * (neu_vtx[i][3] + T0[i]) - kaon_path[i][2], 2);
 
 		value[i] += lambda[0] * constraints[i][0] +
-								lambda[1] * constraints[i][1] +
-								lambda[2] * constraints[i][2] +
+								/*lambda[1] * constraints[i][1]
+								lambda[2] * constraints[i][2] +*/
 								lambda[3] * constraints[i][3] +
-								lambda[4] * constraints[i][4];
+								//lambda[4] * constraints[i][4]
+								lambda[5] * constraints[i][5] +
+								lambda[6] * constraints[i][6] +
+								lambda[7] * constraints[i][7] +
+								lambda[8] * constraints[i][8];
 	}
 
 	// std::cout << std::endl;
@@ -365,7 +367,7 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 								minimum = ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
 
 								// set tolerance , etc...
-								minimum->SetMaxFunctionCalls(1000000); // for Minuit/Minuit2
+								minimum->SetMaxFunctionCalls(10000000); // for Minuit/Minuit2
 								minimum->SetTolerance(0.01);
 								minimum->SetPrintLevel(0);
 
@@ -430,16 +432,25 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 								}
 
 								// minimum->SetVariableStepSize(20,0.);
-								minimum->SetVariableStepSize(21,0.);
+								// minimum->SetVariableStepSize(21,0.);
 								// minimum->SetVariableStepSize(22,0.);
 								// minimum->SetVariableStepSize(23,0.);
 								minimum->SetVariableStepSize(24,0.);
 								minimum->SetVariableStepSize(25,0.);
 								minimum->SetVariableStepSize(26,0.);
+								// minimum->SetVariableStepSize(3*N,0.1);
+								// minimum->SetVariableStepSize(3*N + 1,0.1);
+								// minimum->SetVariableStepSize(3*N + 2,0.1);
+								// minimum->SetVariableStepSize(3*N + 3,0.1);
+								// minimum->SetVariableStepSize(3*N + 4,0.1);
+								// minimum->SetVariableStepSize(3*N + 5,0.1);
+								// minimum->SetVariableStepSize(3*N + 6,0.1);
+								// minimum->SetVariableStepSize(3*N + 7,0.1);
+								// minimum->SetVariableStepSize(3*N + 8,0.1);
 								// do the minimization
 								isConverged = minimum->Minimize();
 
-								if (isConverged == 1 || isConverged == 0)
+								if (isConverged == 1)
 								{
 									min_value = minimum->MinValue();
 									for (Int_t m = 0; m < N; m++)
@@ -738,6 +749,7 @@ int main(int argc, char *argv[]) //	arguments are: 1. Number of points
 
 		tree->Fill();
 	}
+
 	TCanvas *c1 = new TCanvas("c1", "", 750, 750);
 
 	name = "#chi^{2}(" + std::to_string(M-4) + ")";
