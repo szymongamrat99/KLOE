@@ -29,17 +29,23 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     tree->SetBranchAddress("mctruth", &mctruth);
 
+    TFile file_tri("../../../old_root_files/neuvtx_tri_rec.root");
+    TTree *tree_tri = (TTree*)file_tri.Get("h_tri");
+
+    Int_t done4 = 0;
+    Float_t fourKnetri[10] = {0.};
+
+    tree_tri->SetBranchAddress("done4", &done4);
+    tree_tri->SetBranchAddress("fourKnetri", fourKnetri);
+
     TChain *chain = new TChain("INTERF/h1");
 
     chain_init(chain);
 
     UChar_t mcflag;
-    Float_t Dtboostlor, Dtmc, Chi2, minv4gam, Kchrec[9], Qmiss;
+    Float_t Dtboostlor, Dtmc, Chi2, minv4gam, Kchrec[9], Qmiss, ip[3], Kchboost[9];
 
     chain->SetBranchAddress("mcflag", &mcflag);
-
-    chain->SetBranchAddress("Dtboostlor", &Dtboostlor);
-    chain->SetBranchAddress("Dtmc", &Dtmc);
 
     chain->SetBranchAddress("Dtmc", &Dtmc);
 
@@ -48,7 +54,10 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     chain->SetBranchAddress("Kchrec", Kchrec);
     chain->SetBranchAddress("Qmiss", &Qmiss);
 
-    chain->AddFriend("h = h1", "../../../old_root_files/mctruth.root");
+    chain->SetBranchAddress("ip", ip);
+
+    chain->AddFriend(tree);
+    chain->AddFriend(tree_tri);
 
     UInt_t nentries = chain->GetEntries();
 
@@ -59,14 +68,20 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     interference event(mode, check_corr, nbins, x_min, x_max, split);
     
+    Double_t velocity_kch, velocity_kne;
     
     for(UInt_t i = 0; i < nentries; i++)
     {
         chain->GetEntry(i);
-        tree->GetEntry(i);
 
-        if(Chi2 < 40 && abs(minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && Qmiss < 3.75)
+        if(done4 == 1)//Chi2 < 40 && abs(minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && Qmiss < 3.75)
         {
+            velocity_kch = c_vel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
+
+            velocity_kne = c_vel*sqrt(pow(fourKnetri[0],2) + pow(fourKnetri[1],2) + pow(fourKnetri[2],2))/fourKnetri[3];
+
+            Dtboostlor = ((sqrt(pow(Kchboost[6] - ip[0],2) + pow(Kchboost[7] - ip[1],2) + pow(Kchboost[8] - ip[2],2))/velocity_kch) - (sqrt(pow(fourKnetri[6] - ip[0],2) + pow(fourKnetri[7] - ip[1],2) + pow(fourKnetri[8] - ip[2],2))/velocity_kne))/tau_S_nonCPT;
+
             if(mcflag == 1)
             {
                 if(mctruth == 1)

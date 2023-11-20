@@ -1,3 +1,7 @@
+#include <TTree.h>
+#include <TFile.h>
+
+
 #include "../../Include/const.h"
 
 void generated_variables(UInt_t filenumber = 1, TString directory = "230531_data", TString rootname = "data_stream42_")

@@ -101,7 +101,7 @@ void full_analysis::Begin(TTree * /*tree*/)
   // for(Int_t i = 0; i < 10; i++)
   //    for(Int_t j = 0; j < chann_num-2; j++) canvaproj[i][j] = new TCanvas((chann_name[j] + " canvaproj" + to_string(i)).c_str(), "", 750, 750);
 
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[0][j] = new TH1F(chann_name[j] + "0semi", "", 201, -100, 100);
+   for(Int_t j = 0; j < chann_num; j++) hist_semi[0][j] = new TH1F(chann_name[j] + "0semi", "", 91, -90, 90);
    for(Int_t j = 0; j < chann_num; j++) hist_semi[1][j] = new TH1F(chann_name[j] + "1semi", "", 101, 0, 100);
    for(Int_t j = 0; j < chann_num; j++) hist_semi[2][j] = new TH1F(chann_name[j] + "2semi", "", 101, 0, 100);
    for(Int_t j = 0; j < chann_num; j++) hist_semi[3][j] = new TH1F(chann_name[j] + "3semi", "", 300, -100, 100);
@@ -110,7 +110,7 @@ void full_analysis::Begin(TTree * /*tree*/)
    for(Int_t j = 0; j < chann_num; j++) hist_semi[6][j] = new TH1F(chann_name[j] + "6semi", "", 200, 300, 1000);
    for(Int_t j = 0; j < chann_num; j++) hist_semi[7][j] = new TH1F(chann_name[j] + "7semi", "", 200, 300, 1000);
 
-   for(Int_t j = 0; j < chann_num; j++) hist_three[0][j] = new TH1F(chann_name[j] + "0three", "", 201, -100, 100);
+   for(Int_t j = 0; j < chann_num; j++) hist_three[0][j] = new TH1F(chann_name[j] + "0three", "", 91, -90, 90);
    for(Int_t j = 0; j < chann_num; j++) hist_three[1][j] = new TH1F(chann_name[j] + "1three", "", 100, 0, 50);
    for(Int_t j = 0; j < chann_num; j++) hist_three[2][j] = new TH1F(chann_name[j] + "2three", "", 100, 0, 50);
    for(Int_t j = 0; j < chann_num; j++) hist_three[3][j] = new TH1F(chann_name[j] + "3three", "", 200, -10, 10);
@@ -119,7 +119,7 @@ void full_analysis::Begin(TTree * /*tree*/)
    for(Int_t j = 0; j < chann_num; j++) hist_three[6][j] = new TH1F(chann_name[j] + "6three", "", 200, 300, 1000);
    for(Int_t j = 0; j < chann_num; j++) hist_three[7][j] = new TH1F(chann_name[j] + "7three", "", 200, 300, 1000);
 
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[0][j] = new TH1F(chann_name[j] + "0pipi", "", 201, -100, 100);
+   for(Int_t j = 0; j < chann_num; j++) hist_pipi[0][j] = new TH1F(chann_name[j] + "0pipi", "", 91, -90, 90);
    for(Int_t j = 0; j < chann_num; j++) hist_pipi[1][j] = new TH1F(chann_name[j] + "1pipi", "", 100, 0, 50);
    for(Int_t j = 0; j < chann_num; j++) hist_pipi[2][j] = new TH1F(chann_name[j] + "2pipi", "", 100, 0, 50);
    for(Int_t j = 0; j < chann_num; j++) hist_pipi[3][j] = new TH1F(chann_name[j] + "3pipi", "", 200, -10, 10);
@@ -129,33 +129,33 @@ void full_analysis::Begin(TTree * /*tree*/)
    for(Int_t j = 0; j < chann_num; j++) hist_pipi[7][j] = new TH1F(chann_name[j] + "7pipi", "", 200, 300, 1000);
 
    hist_signal = new TH1F("Signal histo", "", 100, -100, 10);
-   hist_signal_nocuts = new TH1F("Signal histo nocuts", "", 201, -100, 100);
-   hist_semi_nocuts = new TH1F("semi histo", "", 201, -100, 100);
-   hist_three_nocuts = new TH1F("three histo", "", 201, -100, 100);
-   hist_pipi_nocuts = new TH1F("pipi histo", "", 201, -100, 100);
-   hist_semi_withcuts = new TH1F("semi histo cuts", "", 201, -100, 100);
-   hist_three_withcuts = new TH1F("three histo cuts", "", 201, -100, 100);
-   hist_pipi_withcuts = new TH1F("pipi histo cuts", "", 201, -100, 100);
+   hist_signal_nocuts = new TH1F("Signal histo nocuts", "", 91, -90, 90);
+   hist_semi_nocuts = new TH1F("semi histo", "", 91, -90, 90);
+   hist_three_nocuts = new TH1F("three histo", "", 91, -90, 90);
+   hist_pipi_nocuts = new TH1F("pipi histo", "", 91, -90, 90);
+   hist_semi_withcuts = new TH1F("semi histo cuts", "", 91, -90, 90);
+   hist_three_withcuts = new TH1F("three histo cuts", "", 91, -90, 90);
+   hist_pipi_withcuts = new TH1F("pipi histo cuts", "", 91, -90, 90);
 
    //   for(Int_t i = 0; i < 10; i++)
    //      for(Int_t j = 0; j < chann_num; j++)
    //         hist2d[i][j] = new TH2F(chann_name[j] + " 2d" + to_string(i), "", 13, 0, 60, 100, -100, 300);
 
-   pEff_signal = new TEfficiency("eff_signal",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_signal_tri = new TEfficiency("eff_signal_tri",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_semi = new TEfficiency("eff_semi",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_three = new TEfficiency("eff_three",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_pipi = new TEfficiency("eff_pipi",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
+   pEff_signal = new TEfficiency("eff_signal",";#Deltat [#tau_{S}];Efficiency",91,-90.,90.);
+   pEff_signal_tri = new TEfficiency("eff_signal_tri",";#Deltat [#tau_{S}];Efficiency",91,-90.,90.);
+   pEff_semi = new TEfficiency("eff_semi",";#Deltat [#tau_{S}];Efficiency",91,-90.,90.);
+   pEff_three = new TEfficiency("eff_three",";#Deltat [#tau_{S}];Efficiency",91,-90.,90.);
+   pEff_pipi = new TEfficiency("eff_pipi",";#Deltat [#tau_{S}];Efficiency",91,-90.,90.);
 
    pEff_three_length = new TEfficiency("eff_three_length",";Length of path of Kaon [cm];Efficiency",100,0.,50.);
    pEff_pipi_length = new TEfficiency("eff_pipi_length",";Length of path of Kaon [cm];Efficiency",100,0.,50.);
 
-   pEff_semimc = new TEfficiency("eff_semimc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_threemc = new TEfficiency("eff_threemc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
-   pEff_pipimc = new TEfficiency("eff_pipimc",";#Deltat [#tau_{S}];Efficiency",201,-100.,100.);
+   pEff_semimc = new TEfficiency("eff_semimc",";#Deltat [#tau_{S}];Efficiency",91,-90.,90.);
+   pEff_threemc = new TEfficiency("eff_threemc",";#Deltat [#tau_{S}];Efficiency",91,-90.,90.);
+   pEff_pipimc = new TEfficiency("eff_pipimc",";#Deltat [#tau_{S}];Efficiency",91,-90.,90.);
 
-   signal_before = new TH1F("signal before", ";#Deltat [#tau_{S}];Counts", 41, -20, 20);
-   signal_after = new TH1F("signal_after", ";#Deltat [#tau_{S}];Counts", 41, -20, 20);
+   signal_before = new TH1F("signal before", ";#Deltat [#tau_{S}];Counts", 21, -20, 20);
+   signal_after = new TH1F("signal_after", ";#Deltat [#tau_{S}];Counts", 21, -20, 20);
 
    TString option = GetOption();
 }

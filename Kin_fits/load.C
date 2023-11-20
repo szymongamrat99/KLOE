@@ -6,7 +6,7 @@
 
     TChain chain("INTERF/h1");
 
-    for(Int_t i = 1; i <= 15; i++)
+    for(Int_t i = 1; i <= 1; i++)
     {
         if(i != 10)
         {

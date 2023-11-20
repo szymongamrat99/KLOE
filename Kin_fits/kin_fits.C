@@ -28,18 +28,31 @@
 #include "kin_fits.h"
 #include <TH2.h>
 #include <TStyle.h>
+#include <TVectorD.h>
+#include <TMatrixD.h>
+#include <TCanvas.h>
 
 #include "../../Include/Codes/uncertainties.h"
+#include "../../Include/Codes/kinematic_fits.h"
+#include "../../Include/Codes/charged_mom.h"
+#include "../../Include/Codes/neutral_mom.h"
 
-const Int_t N = 36, M = 10; 
-Double_t P[N], DP[N], CHISQR, C[M], *D[N], *MTX[N+M], Z[N+M];
-Int_t loopcount;
+TH1 *chi2 = new TH1D("chi2", "", 50, 0, 1);
 
-extern "C"
-{
-    void fit_interf_signal_(Int_t N, Int_t M, Double_t P[36], Double_t DP[36], Double_t CHISQR, Double_t C[10],
-                            Double_t *D[36], Double_t *MTX[36+10], Double_t Z[36+10], Int_t loopcount);
-}
+TH1 *pull = new TH1D("pull", "", 50, -10, 10);
+TH1 *pull_init = new TH1D("pull_init", "", 50, -10, 10);
+
+const Int_t N = 36, M = 10;
+Int_t loopcount = 10;
+
+Double_t P[N], DP[N];
+
+TMatrixD V_final(N,N);
+TVectorD P_final(N);
+
+Double_t CHISQR = 0;
+
+KLOE::kin_fits event(N, M, loopcount);
 
 void kin_fits::Begin(TTree * /*tree*/)
 {
@@ -78,62 +91,81 @@ Bool_t kin_fits::Process(Long64_t entry)
    //
    // The return value is currently not used.
 
-   CHISQR = 0.;
-   loopcount = 0;
-
    fReader.SetLocalEntry(entry);
 
-   for(Int_t i = 0; i < 2; i++)
+   if(*mctruth == 1 && *mcflag == 1)
    {
-      P[i*3] = Curv[vtaken[i] - 1];
-      P[i*3 + 1] = Phiv[vtaken[i] - 1];
-      P[i*3 + 2] = Cotv[vtaken[i] - 1];
 
-      DP[i*3] = 0.025;
-      DP[i*3 + 1] = 0.013;
-      DP[i*3 + 2] = 0.012;
+      P[0] = *Bpx;
+      P[1] = *Bpy;
+      P[2] = *Bpz;
+      P[3] = *Broots;
+
+      DP[0] = *Bwidpx;
+      DP[1] = *Bwidpy;
+      DP[2] = *Bwidpz;
+      DP[3] = *Brootserr;
+
+      for(Int_t i = 0; i < 2; i++)
+      {
+         P[i*3 + 4] = Curv[vtaken[i + 1] - 1];
+         P[i*3 + 5] = Phiv[vtaken[i + 1] - 1];
+         P[i*3 + 6] = Cotv[vtaken[i + 1] - 1];
+
+         DP[i*3 + 4] = 0.025;
+         DP[i*3 + 5] = 0.013;
+         DP[i*3 + 6] = 0.012;
+      }
+
+      for(Int_t i = 0; i < 4; i++)
+      {
+         P[10 + i*5] = Xcl[ncll[g4taken[i] - 1] - 1];
+         P[10 + i*5 + 1] = Ycl[ncll[g4taken[i] - 1] - 1];
+         P[10 + i*5 + 2] = Zcl[ncll[g4taken[i] - 1] - 1];
+         P[10 + i*5 + 3] = Tcl[ncll[g4taken[i] - 1] - 1];
+         P[10 + i*5 + 4] = Enecl[ncll[g4taken[i] - 1] - 1];
+
+         DP[10 + i*5] = 1.2;
+         DP[10 + i*5 + 1] = 1.2;
+         DP[10 + i*5 + 2] = 1.2;
+         DP[10 + i*5 + 3] = clu_time_error(Enecl[ncll[g4taken[i] - 1] - 1]);
+         DP[10 + i*5 + 4] = clu_ene_error(Enecl[ncll[g4taken[i] - 1] - 1]);
+      }
+
+      P[30] = Knerec[6];
+      P[31] = Knerec[7];
+      P[32] = Knerec[8];
+
+      DP[30] = 0.8;
+      DP[31] = 0.8;
+      DP[32] = 1.1;
+
+      P[33] = ip[0];
+      P[34] = ip[1];
+      P[35] = ip[2];
+
+      DP[33] = sqrt( pow(*Bwidpx,2) + pow(*Blumx,2) );
+      DP[34] = *Bsy;
+      DP[35] = 0.6;
+
+      event.FillConstructors(P, DP);
+
+      event.solution();
+
+      CHISQR = event.Chi2Final();
+
+      P_final = event.FinalPars();
+      V_final = event.FinalCovMtx();
+
+      if(1){
+         std::cout << TMath::Prob(CHISQR, M) << std::endl;
+
+         chi2->Fill(TMath::Prob(CHISQR, M));
+         pull->Fill((P[10] - P_final(10))/sqrt(pow(DP[10],2) - V_final(10,10)));
+         pull_init->Fill((P[32] - Knemc[8])/DP[32]);
+      }
+
    }
-
-   for(Int_t i = 0; i < 4; i++)
-   {
-      P[6 + i*4] = Enecl[ncll[g4taken[i] - 1] - 1];
-      P[6 + i*4 + 1] = Xcl[ncll[g4taken[i] - 1] - 1];
-      P[6 + i*4 + 2] = Ycl[ncll[g4taken[i] - 1] - 1];
-      P[6 + i*4 + 3] = Zcl[ncll[g4taken[i] - 1] - 1];
-      P[6 + i*4 + 4] = Tcl[ncll[g4taken[i] - 1] - 1];
-
-      DP[6 + i*4] = clu_ene_error(Enecl[ncll[g4taken[i] - 1] - 1]);
-      DP[6 + i*4 + 1] = 1.2;
-      DP[6 + i*4 + 2] = 1.2;
-      DP[6 + i*4 + 3] = 1.2;
-      DP[6 + i*4 + 4] = clu_time_error(Enecl[ncll[g4taken[i] - 1] - 1]);
-   }
-
-   P[26] = Knereclor[6];
-   P[27] = Knereclor[7];
-   P[28] = Knereclor[8];
-
-   DP[26] = 0.8;
-   DP[27] = 0.8;
-   DP[28] = 1.1;
-
-   P[29] = ip[0];
-   P[30] = ip[1];
-   P[31] = ip[2];
-
-   DP[29] = sqrt( pow(*Bwidpx,2) + pow(*Blumx,2) );
-   DP[30] = *Bsy;
-   DP[31] = 0.6;
-
-   P[32] = *Broots;
-   P[33] = *Bpx;
-   P[34] = *Bpy;
-   P[35] = *Bpz;
-
-   DP[32] = *Brootserr;
-   DP[33] = *Bwidpx;
-   DP[34] = *Bwidpy;
-   DP[35] = *Bwidpz;
 
    return kTRUE;
 }
@@ -148,10 +180,22 @@ void kin_fits::SlaveTerminate()
 
 void kin_fits::Terminate()
 {
-
-   fit_interf_signal_(N, M, P, DP, CHISQR, C, D, MTX, Z, loopcount);
    // The Terminate() function is the last function to be called during
    // a query. It always runs on the client, it can be used to present
    // the results graphically or save the results to file.
+
+   TCanvas *c1 = new TCanvas("c1", "", 790, 790);
+   chi2->Draw();
+
+   c1->Print("chi2.png");
+
+   TCanvas *c2 = new TCanvas("c2", "", 790, 790);
+
+   pull_init->SetLineColor(kRed);
+   pull->Fit("gaus");
+   pull->Draw();
+   //pull_init->Draw("SAME");
+
+   c2->Print("pull.png");
 
 }

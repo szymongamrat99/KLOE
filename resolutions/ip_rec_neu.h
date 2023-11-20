@@ -1,11 +1,11 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue May  9 14:18:54 2023 by ROOT version 6.26/10
+// Sun Oct 29 01:24:13 2023 by ROOT version 6.24/07
 // from TChain INTERF/h1/
 //////////////////////////////////////////////////////////
 
-#ifndef kin_fits_h
-#define kin_fits_h
+#ifndef ip_rec_neu_h
+#define ip_rec_neu_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -18,24 +18,24 @@
 // Headers needed by this particular selector
 
 
-class kin_fits : public TSelector {
+class ip_rec_neu : public TSelector {
 public :
    TTreeReader     fReader;  //!the tree reader
    TTree          *fChain = 0;   //!pointer to the analyzed TTree or TChain
 
    // Readers to access the data (delete the ones you do not need).
    TTreeReaderValue<Int_t> nev = {fReader, "nev"};
-   TTreeReaderValue<UInt_t> pileup = {fReader, "pileup"};
-   TTreeReaderValue<UInt_t> gcod = {fReader, "gcod"};
-   TTreeReaderValue<UInt_t> phid = {fReader, "phid"};
-   TTreeReaderValue<UInt_t> a1typ = {fReader, "a1typ"};
-   TTreeReaderValue<UInt_t> a2typ = {fReader, "a2typ"};
-   TTreeReaderValue<UInt_t> a3typ = {fReader, "a3typ"};
-   TTreeReaderValue<UInt_t> b1typ = {fReader, "b1typ"};
-   TTreeReaderValue<UInt_t> b2typ = {fReader, "b2typ"};
-   TTreeReaderValue<UInt_t> b3typ = {fReader, "b3typ"};
+   TTreeReaderValue<UChar_t> pileup = {fReader, "pileup"};
+   TTreeReaderValue<UChar_t> gcod = {fReader, "gcod"};
+   TTreeReaderValue<UChar_t> phid = {fReader, "phid"};
+   TTreeReaderValue<UChar_t> a1typ = {fReader, "a1typ"};
+   TTreeReaderValue<UChar_t> a2typ = {fReader, "a2typ"};
+   TTreeReaderValue<UChar_t> a3typ = {fReader, "a3typ"};
+   TTreeReaderValue<UChar_t> b1typ = {fReader, "b1typ"};
+   TTreeReaderValue<UChar_t> b2typ = {fReader, "b2typ"};
+   TTreeReaderValue<UChar_t> b3typ = {fReader, "b3typ"};
    TTreeReaderValue<Float_t> T0step1 = {fReader, "T0step1"};
-   TTreeReaderValue<UInt_t> mcflag = {fReader, "mcflag"};
+   TTreeReaderValue<UChar_t> mcflag = {fReader, "mcflag"};
    TTreeReaderValue<Float_t> Bx = {fReader, "Bx"};
    TTreeReaderValue<Float_t> By = {fReader, "By"};
    TTreeReaderValue<Float_t> Bz = {fReader, "Bz"};
@@ -73,17 +73,7 @@ public :
    TTreeReaderArray<Float_t> Zrmscl = {fReader, "Zrmscl"};
    TTreeReaderArray<Float_t> Trmscl = {fReader, "Trmscl"};
    TTreeReaderArray<Int_t> Flagcl = {fReader, "Flagcl"};
-   TTreeReaderValue<Int_t> ntv = {fReader, "ntv"};
-   TTreeReaderArray<UInt_t> iv = {fReader, "iv"};
-   TTreeReaderArray<UInt_t> trknumv = {fReader, "trknumv"};
-   TTreeReaderArray<Float_t> Curv = {fReader, "Curv"};
-   TTreeReaderArray<Float_t> Phiv = {fReader, "Phiv"};
-   TTreeReaderArray<Float_t> Cotv = {fReader, "Cotv"};
    TTreeReaderValue<Int_t> nv = {fReader, "nv"};
-   TTreeReaderArray<UInt_t> vtx = {fReader, "vtx"};
-   TTreeReaderArray<Float_t> xv = {fReader, "xv"};
-   TTreeReaderArray<Float_t> yv = {fReader, "yv"};
-   TTreeReaderArray<Float_t> zv = {fReader, "zv"};
    TTreeReaderArray<Float_t> chivtx = {fReader, "chivtx"};
    TTreeReaderArray<Int_t> qualv = {fReader, "qualv"};
    TTreeReaderArray<Int_t> fitidv = {fReader, "fitidv"};
@@ -91,25 +81,25 @@ public :
    TTreeReaderArray<Float_t> chi2fit = {fReader, "chi2fit"};
    TTreeReaderArray<Float_t> chi2ms = {fReader, "chi2ms"};
    TTreeReaderValue<Int_t> ntmc = {fReader, "ntmc"};
-   TTreeReaderArray<UInt_t> kine = {fReader, "kine"};
-   TTreeReaderArray<UInt_t> pidmc = {fReader, "pidmc"};
-   TTreeReaderArray<UInt_t> virmom = {fReader, "virmom"};
+   TTreeReaderArray<UChar_t> kine = {fReader, "kine"};
+   TTreeReaderArray<UChar_t> pidmc = {fReader, "pidmc"};
+   TTreeReaderArray<UChar_t> virmom = {fReader, "virmom"};
    TTreeReaderArray<Float_t> pxmc = {fReader, "pxmc"};
    TTreeReaderArray<Float_t> pymc = {fReader, "pymc"};
    TTreeReaderArray<Float_t> pzmc = {fReader, "pzmc"};
    TTreeReaderArray<Float_t> themc = {fReader, "themc"};
    TTreeReaderArray<Float_t> phimc = {fReader, "phimc"};
-   TTreeReaderArray<UInt_t> vtxmc = {fReader, "vtxmc"};
+   TTreeReaderArray<UChar_t> vtxmc = {fReader, "vtxmc"};
    TTreeReaderValue<Int_t> nvtxmc = {fReader, "nvtxmc"};
-   TTreeReaderArray<UInt_t> kinmom = {fReader, "kinmom"};
-   TTreeReaderArray<UInt_t> mother = {fReader, "mother"};
+   TTreeReaderArray<UChar_t> kinmom = {fReader, "kinmom"};
+   TTreeReaderArray<UChar_t> mother = {fReader, "mother"};
    TTreeReaderArray<Float_t> xvmc = {fReader, "xvmc"};
    TTreeReaderArray<Float_t> yvmc = {fReader, "yvmc"};
    TTreeReaderArray<Float_t> zvmc = {fReader, "zvmc"};
    TTreeReaderArray<Float_t> ntvtx = {fReader, "ntvtx"};
-   TTreeReaderValue<UInt_t> mctruth = {fReader, "mctruth"};
-   TTreeReaderValue<UInt_t> Errid = {fReader, "Errid"};
-   TTreeReaderValue<UInt_t> Cutid = {fReader, "Cutid"};
+   TTreeReaderValue<UChar_t> mctruth = {fReader, "mctruth"};
+   TTreeReaderValue<UChar_t> Errid = {fReader, "Errid"};
+   TTreeReaderValue<UChar_t> Cutid = {fReader, "Cutid"};
    TTreeReaderArray<Float_t> Kchmc = {fReader, "Kchmc"};
    TTreeReaderArray<Float_t> Knemc = {fReader, "Knemc"};
    TTreeReaderArray<Float_t> ipmc = {fReader, "ipmc"};
@@ -120,12 +110,12 @@ public :
    TTreeReaderArray<Float_t> ip = {fReader, "ip"};
    TTreeReaderValue<Float_t> chdist = {fReader, "chdist"};
    TTreeReaderValue<Float_t> cldist = {fReader, "cldist"};
-   TTreeReaderValue<UInt_t> mcisr = {fReader, "mcisr"};
-   TTreeReaderArray<UInt_t> vtaken = {fReader, "vtaken"};
+   TTreeReaderValue<UChar_t> mcisr = {fReader, "mcisr"};
+   TTreeReaderArray<UChar_t> vtaken = {fReader, "vtaken"};
    TTreeReaderValue<Int_t> ncl = {fReader, "ncl"};
-   TTreeReaderArray<UInt_t> ncll = {fReader, "ncll"};
+   TTreeReaderArray<UChar_t> ncll = {fReader, "ncll"};
    TTreeReaderValue<Int_t> nclwrong = {fReader, "nclwrong"};
-   TTreeReaderArray<UInt_t> ncllwrong = {fReader, "ncllwrong"};
+   TTreeReaderArray<UChar_t> ncllwrong = {fReader, "ncllwrong"};
    TTreeReaderValue<Float_t> Dlboostrec = {fReader, "Dlboostrec"};
    TTreeReaderValue<Float_t> Dtboostrec = {fReader, "Dtboostrec"};
    TTreeReaderValue<Float_t> Dlboostlor = {fReader, "Dlboostlor"};
@@ -159,11 +149,50 @@ public :
    TTreeReaderArray<Float_t> trk2 = {fReader, "trk2"};
    TTreeReaderValue<Float_t> costrk = {fReader, "costrk"};
    TTreeReaderValue<Float_t> Qmiss = {fReader, "Qmiss"};
-   TTreeReaderArray<UInt_t> g4taken = {fReader, "g4taken"};
+   TTreeReaderArray<UChar_t> g4taken = {fReader, "g4taken"};
+   TTreeReaderValue<Int_t> nparfit = {fReader, "nparfit"};
+   TTreeReaderArray<Float_t> Kchfit = {fReader, "Kchfit"};
+   TTreeReaderArray<Float_t> Knefit = {fReader, "Knefit"};
+   TTreeReaderArray<Float_t> Knereclorfit = {fReader, "Knereclorfit"};
+   TTreeReaderValue<Float_t> cldistfit = {fReader, "cldistfit"};
+   TTreeReaderArray<Float_t> ipfit = {fReader, "ipfit"};
+   TTreeReaderValue<Int_t> nclwrongfit = {fReader, "nclwrongfit"};
+   TTreeReaderArray<UChar_t> ncllwrongfit = {fReader, "ncllwrongfit"};
+   TTreeReaderValue<Float_t> Dlfit = {fReader, "Dlfit"};
+   TTreeReaderValue<Float_t> Dtfit = {fReader, "Dtfit"};
+   TTreeReaderValue<Float_t> Rcfit = {fReader, "Rcfit"};
+   TTreeReaderValue<Float_t> Rtcfit = {fReader, "Rtcfit"};
+   TTreeReaderValue<Float_t> Rnfit = {fReader, "Rnfit"};
+   TTreeReaderValue<Float_t> Rtnfit = {fReader, "Rtnfit"};
+   TTreeReaderValue<Int_t> nclfit = {fReader, "nclfit"};
+   TTreeReaderArray<Float_t> trcfit = {fReader, "trcfit"};
+   TTreeReaderArray<Float_t> trcvfit = {fReader, "trcvfit"};
+   TTreeReaderArray<Float_t> pi0fit = {fReader, "pi0fit"};
+   TTreeReaderArray<Float_t> Pgamrec1fit = {fReader, "Pgamrec1fit"};
+   TTreeReaderArray<Float_t> Pgamrec2fit = {fReader, "Pgamrec2fit"};
+   TTreeReaderArray<Float_t> Pgamrec3fit = {fReader, "Pgamrec3fit"};
+   TTreeReaderArray<Float_t> Pgamrec4fit = {fReader, "Pgamrec4fit"};
+   TTreeReaderArray<Int_t> gpairtakenfit = {fReader, "gpairtakenfit"};
+   TTreeReaderArray<Float_t> g4vtxerrfit = {fReader, "g4vtxerrfit"};
+   TTreeReaderValue<Float_t> minv4gamfit = {fReader, "minv4gamfit"};
+   TTreeReaderArray<Float_t> ominvfit = {fReader, "ominvfit"};
+   TTreeReaderArray<Float_t> Ppioomegafit = {fReader, "Ppioomegafit"};
+   TTreeReaderArray<Float_t> P4prirestfit = {fReader, "P4prirestfit"};
+   TTreeReaderArray<UChar_t> g4takenfit = {fReader, "g4takenfit"};
+   TTreeReaderValue<Int_t> Niter = {fReader, "Niter"};
+   TTreeReaderValue<Int_t> Niterw = {fReader, "Niterw"};
+   TTreeReaderValue<Float_t> Chi2 = {fReader, "Chi2"};
+   TTreeReaderValue<Float_t> Chi2w = {fReader, "Chi2w"};
+   TTreeReaderArray<Float_t> Fitpar = {fReader, "Fitpar"};
+   TTreeReaderArray<Float_t> Errpar = {fReader, "Errpar"};
+   TTreeReaderArray<Float_t> Bkgfitpar = {fReader, "Bkgfitpar"};
+   TTreeReaderArray<Float_t> Bkgerrpar = {fReader, "Bkgerrpar"};
+   TTreeReaderArray<Float_t> Fitparstart = {fReader, "Fitparstart"};
+   TTreeReaderArray<Float_t> Errparstart = {fReader, "Errparstart"};
    TTreeReaderValue<Int_t> simok = {fReader, "simok"};
-   TTreeReaderValue<UInt_t> Chvtxid = {fReader, "Chvtxid"};
-   TTreeReaderArray<UInt_t> Trkidx = {fReader, "Trkidx"};
-   TTreeReaderArray<UInt_t> Cluidx = {fReader, "Cluidx"};
+   TTreeReaderValue<UChar_t> Chvtxid = {fReader, "Chvtxid"};
+   TTreeReaderArray<UChar_t> Trkidx = {fReader, "Trkidx"};
+   TTreeReaderArray<UChar_t> Cluidx = {fReader, "Cluidx"};
    TTreeReaderArray<Float_t> Trkk1 = {fReader, "Trkk1"};
    TTreeReaderArray<Float_t> Trkk2 = {fReader, "Trkk2"};
    TTreeReaderArray<Float_t> Chavtx = {fReader, "Chavtx"};
@@ -172,8 +201,8 @@ public :
    TTreeReaderArray<Float_t> test = {fReader, "test"};
 
 
-   kin_fits(TTree * /*tree*/ =0) { }
-   virtual ~kin_fits() { }
+   ip_rec_neu(TTree * /*tree*/ =0) { }
+   virtual ~ip_rec_neu() { }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
    virtual void    SlaveBegin(TTree *tree);
@@ -188,14 +217,14 @@ public :
    virtual void    SlaveTerminate();
    virtual void    Terminate();
 
-   ClassDef(kin_fits,0);
+   ClassDef(ip_rec_neu,0);
 
 };
 
 #endif
 
-#ifdef kin_fits_cxx
-void kin_fits::Init(TTree *tree)
+#ifdef ip_rec_neu_cxx
+void ip_rec_neu::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the reader is initialized.
@@ -207,7 +236,7 @@ void kin_fits::Init(TTree *tree)
    fReader.SetTree(tree);
 }
 
-Bool_t kin_fits::Notify()
+Bool_t ip_rec_neu::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -219,4 +248,4 @@ Bool_t kin_fits::Notify()
 }
 
 
-#endif // #ifdef kin_fits_cxx
+#endif // #ifdef ip_rec_neu_cxx
