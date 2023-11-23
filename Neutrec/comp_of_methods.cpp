@@ -28,9 +28,9 @@ const Int_t M = 5;
 int comp_of_methods()
 {
   TChain *chain = new TChain("INTERF/h1");
-  chain_init(chain, 1, 56);
+  chain_init(chain, 1, 1);
 
-  TFile *file = new TFile("neuvtx_tri_kin_fit_1_56_100_5.root");
+  TFile *file = new TFile("neuvtx_tri_kin_fit_1_1_20_5.root");
   TTree *tree = (TTree *)file->Get("h_tri_kin_fit");
 
   Float_t Kchboost[9], Knereclor[9], Knerec[9],
@@ -58,7 +58,7 @@ int comp_of_methods()
   chain->SetBranchAddress("Dtmc", &Dtmc);
 
   Float_t gamma_kinfit[4][8], ip_kinfit[3], Knetri_kinfit[10], chi2min, bhabha_mom_err[4];
-  Int_t done_kinfit, g4taken_kinfit[4];
+  Int_t done_kinfit, g4taken_kinfit[4], bunchnum;
   TMatrixD *cov_matrix = new TMatrixD(27,27);
   TVectorD *min_const = new TVectorD(M);
   TVectorD *lag_mult = new TVectorD(M), *X_min = new TVectorD(27), *X_init = new TVectorD(27);
@@ -78,7 +78,7 @@ int comp_of_methods()
   tree->SetBranchAddress("iptri_kinfit", ip_kinfit);
   tree->SetBranchAddress("done4_kinfit", &done_kinfit);
 
-  //tree->SetBranchAddress("g4taken_kinfit", g4taken_kinfit);
+  tree->SetBranchAddress("bunchnum", &bunchnum);
 
   tree->SetBranchAddress("chi2min", &chi2min);
   tree->SetBranchAddress("min_cov", &cov_matrix);
@@ -105,6 +105,7 @@ int comp_of_methods()
   TH1 *neu_std_hist[5], *neu_tri_hist[5], *neu_tri_kin_fit_hist[5];
   TH1 *res_std_hist[5], *res_tri_hist[5], *res_tri_kin_fit_hist[5];
   TH1 *pulls[8];
+  TH1 *bunch = new TH1I("bunchnum", ";Number of bunch;Counts",101,-10,10);
 
   for (Int_t i = 0; i < 3; i++)
   {
@@ -115,41 +116,41 @@ int comp_of_methods()
     neu_mom[i] = new TH2F(id_hist, "", 200, -300, 300, 200, -300, 300);
 
     id_hist = "IP coor" + std::to_string(i);
-    ip_coor[i] = new TH2F(id_hist, "", 100, -100, 100, 100, -100, 100);
+    ip_coor[i] = new TH2F(id_hist, "", 100, -10, 10, 100, -10, 10);
   }
 
   for(Int_t i = 0; i < 24; i++)
   {
     id_hist = "Var" + std::to_string(i);
     if(i == 0)
-      pulls[i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,1} - #vec{p}^{gen}_{neu,1} [MeV/c];Counts", 50, -300, 300);
+      pulls[i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,1} - #vec{p}^{gen}_{neu,1} [MeV/c];Counts", 101, -400, 400);
     else if(i == 1)
-      pulls[i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,2} - #vec{p}^{gen}_{neu,2} [MeV/c];Counts", 50, -300, 300);
+      pulls[i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,2} - #vec{p}^{gen}_{neu,2} [MeV/c];Counts", 101, -400, 400);
     else if(i == 2)
-      pulls[i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,3} - #vec{p}^{gen}_{neu,3} [MeV/c];Counts", 50, -300, 300);
+      pulls[i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,3} - #vec{p}^{gen}_{neu,3} [MeV/c];Counts", 101, -400, 400);
     else if(i == 3)
-      pulls[i] = new TH1F(id_hist, ";E^{tri}_{neu} - E^{gen}_{neu,3} [MeV];Counts", 50, -30, 30);
+      pulls[i] = new TH1F(id_hist, ";E^{tri}_{neu} - E^{gen}_{neu,3} [MeV];Counts", 101, -30, 30);
     else if(i == 4)
-      pulls[i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,1} - #vec{X}^{gen}_{neu,1} [cm];Counts", 50, -30, 30);
+      pulls[i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,1} - #vec{X}^{gen}_{neu,1} [cm];Counts", 101, -30, 30);
     else if(i == 5)
-      pulls[i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,2} - #vec{X}^{gen}_{neu,2} [cm];Counts", 50, -30, 30);
+      pulls[i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,2} - #vec{X}^{gen}_{neu,2} [cm];Counts", 101, -30, 30);
     else if(i == 6)
-      pulls[i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,3} - #vec{X}^{gen}_{neu,3} [cm];Counts", 50, -30, 30);
+      pulls[i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,3} - #vec{X}^{gen}_{neu,3} [cm];Counts", 101, -30, 30);
     else if(i == 7)
-      pulls[i] = new TH1F(id_hist, ";t^{tri}_{neu} - t^{gen}_{neu} [#tau_{S}];Counts", 50, -20, 20);
+      pulls[i] = new TH1F(id_hist, ";t^{tri}_{neu} - t^{gen}_{neu} [#tau_{S}];Counts", 101, -10, 10);
   }
 
-  neu_vtx_corr[3] = new TH2F("Lengths", "", 100, 0.0, 1.0, 100, 0, 20.0);
+  neu_vtx_corr[3] = new TH2F("Lengths", "", 100, 0.0, 20.0, 100, 0.0, 20.0);
   neu_mom[3] = new TH2F("Energies", "", 100, 504, 520, 100, 507, 512);
 
   dttri_hist = new TH1F("Dttri", "", 200, 0.0, 50.0);
-  prob_hist = new TH1F("Prob", "", 200, 0.0, 1.0);
+  prob_hist = new TH1F("Prob", "", 100, 0.0, 1.0);
 
   TH2 *corr_matrix_plot = new TH2F("corr_matrix_plot", "", 24, 0, 24, 24, 0, 24);
 
   TCanvas *canvas[30];
 
-  const UInt_t number_of_points = 2;
+  const UInt_t number_of_points = 10;
 
   TString name[4] = {"x", "y", "z", "length"};
 
@@ -160,36 +161,36 @@ int comp_of_methods()
       neu_std_hist[i] = new TH1F(name[i] + " std coor", "", 100, -200, 200);
       neu_tri_hist[i] = new TH1F(name[i] + " tri coor", "", 100, -200, 200);
       neu_tri_kin_fit_hist[i] = new TH1F(name[i] + " kinfit coor", "", 100, -165, 165);
-      res_std_hist[i] = new TH1F(name[i] + " std res", "", number_of_points, 0, 10);
-      res_tri_hist[i] = new TH1F(name[i] + " tri res", "", number_of_points, 0, 10);
-      res_tri_kin_fit_hist[i] = new TH1F(name[i] + " kinfit res", "", number_of_points, 0, 10);
-      sigmas_std[i] = new TH2F(name[i] + " sigmas std", "", number_of_points, 0, 10, 25, -10, 10);
-      sigmas_tri[i] = new TH2F(name[i] + " sigmas tri", "", number_of_points, 0, 10, 25, -10, 10);
-      sigmas_tri_kin_fit[i] = new TH2F(name[i] + " sigmas kinfit", "", number_of_points, 0, 10, 25, -10, 10);
+      res_std_hist[i] = new TH1F(name[i] + " std res", "", number_of_points, 0, 50);
+      res_tri_hist[i] = new TH1F(name[i] + " tri res", "", number_of_points, 0, 50);
+      res_tri_kin_fit_hist[i] = new TH1F(name[i] + " kinfit res", "", number_of_points, 0, 50);
+      sigmas_std[i] = new TH2F(name[i] + " sigmas std", "", number_of_points, 0, 50, 25, -10, 10);
+      sigmas_tri[i] = new TH2F(name[i] + " sigmas tri", "", number_of_points, 0, 50, 25, -10, 10);
+      sigmas_tri_kin_fit[i] = new TH2F(name[i] + " sigmas kinfit", "", number_of_points, 0, 50, 25, -10, 10);
     }
     else if (i == 2)
     {
       neu_std_hist[i] = new TH1F(name[i] + " std", "", 100, 0, 5);
       neu_tri_hist[i] = new TH1F(name[i] + " tri", "", 100, 0, 5);
       neu_tri_kin_fit_hist[i] = new TH1F(name[i] + " kinfit", "", 100, 0, 5);
-      res_std_hist[i] = new TH1F(name[i] + " std res", "", number_of_points, 0, 10);
-      res_tri_hist[i] = new TH1F(name[i] + " tri res", "", number_of_points, 0, 10);
-      res_tri_kin_fit_hist[i] = new TH1F(name[i] + " kinfit res", "", number_of_points, 0, 10);
-      sigmas_std[i] = new TH2F(name[i] + " sigmas std", "", number_of_points, 0, 10, 25, -10, 10);
-      sigmas_tri[i] = new TH2F(name[i] + " sigmas tri", "", number_of_points, 0, 10, 25, -10, 10);
-      sigmas_tri_kin_fit[i] = new TH2F(name[i] + " sigmas kinfit", "", number_of_points, 0, 10, 25, -10, 10);
+      res_std_hist[i] = new TH1F(name[i] + " std res", "", number_of_points, 0, 50);
+      res_tri_hist[i] = new TH1F(name[i] + " tri res", "", number_of_points, 0, 50);
+      res_tri_kin_fit_hist[i] = new TH1F(name[i] + " kinfit res", "", number_of_points, 0, 50);
+      sigmas_std[i] = new TH2F(name[i] + " sigmas std", "", number_of_points, 0, 50, 25, -10, 10);
+      sigmas_tri[i] = new TH2F(name[i] + " sigmas tri", "", number_of_points, 0, 50, 25, -10, 10);
+      sigmas_tri_kin_fit[i] = new TH2F(name[i] + " sigmas kinfit", "", number_of_points, 0, 50, 25, -10, 10);
     }
     else if (i == 3)
     {
       neu_std_hist[i] = new TH1F(name[i] + " std", "", 100, 0, 5);
       neu_tri_hist[i] = new TH1F(name[i] + " tri", "", 100, 0, 5);
       neu_tri_kin_fit_hist[i] = new TH1F(name[i] + " kinfit", "", 100, 0, 5);
-      res_std_hist[i] = new TH1F(name[i] + " std res", "", number_of_points, 0, 10);
-      res_tri_hist[i] = new TH1F(name[i] + " tri res", "", number_of_points, 0, 10);
-      res_tri_kin_fit_hist[i] = new TH1F(name[i] + " kinfit res", "", number_of_points, 0, 10);
-      sigmas_std[i] = new TH2F(name[i] + " sigmas std", "", number_of_points, 0, 10, 50, -25, 25);
-      sigmas_tri[i] = new TH2F(name[i] + " sigmas tri", "", number_of_points, 0, 10, 50, -25, 25);
-      sigmas_tri_kin_fit[i] = new TH2F(name[i] + " sigmas kinfit", "", number_of_points, 0, 10, 50, -25, 25);
+      res_std_hist[i] = new TH1F(name[i] + " std res", "", number_of_points, 0, 50);
+      res_tri_hist[i] = new TH1F(name[i] + " tri res", "", number_of_points, 0, 50);
+      res_tri_kin_fit_hist[i] = new TH1F(name[i] + " kinfit res", "", number_of_points, 0, 50);
+      sigmas_std[i] = new TH2F(name[i] + " sigmas std", "", number_of_points, 0, 50, 50, -25, 25);
+      sigmas_tri[i] = new TH2F(name[i] + " sigmas tri", "", number_of_points, 0, 50, 50, -25, 25);
+      sigmas_tri_kin_fit[i] = new TH2F(name[i] + " sigmas kinfit", "", number_of_points, 0, 50, 50, -25, 25);
     }
 
   }
@@ -214,7 +215,7 @@ int comp_of_methods()
     chain->GetEntry(i);
     if((mctruth == 1 || mctruth == 2)) counts_all++;
 
-    if ((mctruth == 1 || mctruth == 2) && done_kinfit == 1 && chi2min < 40)
+    if ((mctruth == 1 || mctruth == 2) && done_kinfit == 1 && TMath::Prob(chi2min,M) > 0.0)
     {
       counts++;
 
@@ -295,7 +296,7 @@ int comp_of_methods()
       lengthneu_tri = sqrt(pow(vec_after[0] - ip_after[0], 2) + pow(vec_after[1] - ip_after[1], 2) + pow(vec_after[2] - ip_after[2], 2));
 
       //if((lengthneu_tri/(c_vel * vec_after[3])) > 0.25)
-      neu_vtx_corr[3]->Fill(TMath::Prob(chi2min,M), Knetri_kinfit[9]);
+      neu_vtx_corr[3]->Fill(/*lengthneu_tri/(c_vel * vec_after[3])*/t_neumc, Knetri_kinfit[9]);
       //else
       //neu_vtx_corr[3]->Fill(t_neumc, Knetri_kinfit[9]);
       // cluster_time[0] = Tcl[g4taken_kinfit[0]];
@@ -308,8 +309,8 @@ int comp_of_methods()
       // cluster_time[2] = Tcl[g4taken_kinfit[2]];
       // cluster_time[3] = Tcl[g4taken_kinfit[3]];
 
-      dttri_hist->Fill(chi2min/(Float_t)M);
-      prob_hist->Fill(lengthneu_tri/(c_vel * vec_after[3]));
+      dttri_hist->Fill(chi2min);
+      prob_hist->Fill(TMath::Prob(chi2min,M));//lengthneu_tri/(c_vel * vec_after[3]));
 
       sigmas_std[0]->Fill(abs(Knemc[6] - ipmc[0]), Knetri_kinfit[6] - Knemc[6]);
       sigmas_std[1]->Fill(abs(Knemc[7] - ipmc[1]), Knetri_kinfit[7] - Knemc[7]);
@@ -318,7 +319,7 @@ int comp_of_methods()
       //if(lengthneu_tri/(c_vel * Knetri_kinfit[9]) > 0.9 && lengthneu_tri/(c_vel * Knetri_kinfit[9]) < 1.0)
       //sigmas_std[3]->Fill(TMath::Prob(chi2min,M), Knetri_kinfit[9]);
       //else
-      sigmas_std[3]->Fill(t_neumc/tau_S_nonCPT, (Knetri_kinfit[9] - t_neumc)/tau_S_nonCPT);
+      sigmas_std[3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neumc)/tau_S_nonCPT);
 
       //sigmas_std[3]->Fill(t_neumc/tau_S_nonCPT, (Knetri_kinfit[9] - t_neumc)/tau_S_nonCPT);
 
@@ -331,6 +332,8 @@ int comp_of_methods()
       pulls[5]->Fill(Knetri_kinfit[7] - Knemc[7]);
       pulls[6]->Fill(Knetri_kinfit[8] - Knemc[8]);
       pulls[7]->Fill((Knetri_kinfit[9] - t_neumc)/tau_S_nonCPT);
+
+      bunch->Fill(bunchnum);
 
       /*for(Int_t k = 0; k < 24; k++)
       {
@@ -404,7 +407,7 @@ int comp_of_methods()
   c[3]->SetRightMargin(0.15);
   c[3]->cd();
 
-  x_title = Form("Prob(#chi^{2},%d)", M);
+  x_title = Form("t_{neu}^{gen} [ns]");
   y_title = Form("t_{neu}^{tri} [ns]");
 
   neu_vtx_corr[3]->GetXaxis()->SetTitle(x_title);
@@ -459,19 +462,106 @@ int comp_of_methods()
   c[5] = new TCanvas(id_canva, "", width, height);
   c[5]->SetRightMargin(0.15);
   c[5]->cd();
-  //c[5]->SetLogy();
+  c[5]->SetLogy();
 
   prob_hist->GetYaxis()->SetMaxDigits(3);
 
-  TString prob_title = Form("#beta^{CM}_{neu}");
+  TString prob_title = Form("Prob(#chi^2,5)");
 
   prob_hist->GetXaxis()->CenterTitle();
   prob_hist->GetYaxis()->CenterTitle();
   prob_hist->GetXaxis()->SetTitle(prob_title);
   prob_hist->GetYaxis()->SetTitle("Counts");
-  prob_hist->GetYaxis()->SetRangeUser(0.0, 1.2 * prob_hist->GetMaximum());
+  prob_hist->GetYaxis()->SetRangeUser(1.0, 1.2 * prob_hist->GetMaximum());
   prob_hist->Draw();
   c[5]->Print(id_canva + ".png");
+
+  TString fit_stats[3];
+  TPaveText *fit_text = new TPaveText(0.7, 0.7, 0.9, 0.9, "NDC");
+
+  TF1 *triple_fit = new TF1("triple_gaus", triple_gaus, -400.0, 400.0, 9, 1);
+  triple_fit->SetParNames("Norm1", "Avg1", "Std1", "Norm2", "Avg2", "Std2", "Norm3", "Avg3", "Std3");
+  triple_fit->SetLineWidth(4);
+
+  TFitResultPtr result;
+
+  for(Int_t i = 0; i < 8; i++)
+  {
+    canvas_pulls[i]->cd();
+
+    triple_fit->SetParameters(pulls[i]->Integral(), pulls[i]->GetMean(), pulls[i]->GetStdDev(), pulls[i]->Integral(), pulls[i]->GetMean(), pulls[i]->GetStdDev(), pulls[i]->Integral(), pulls[i]->GetMean(), pulls[i]->GetStdDev());
+
+    if(i < 3)
+    {
+      triple_fit->SetParLimits(0, 0.01*pulls[i]->Integral(), 1000.0*pulls[i]->Integral());
+      triple_fit->SetParLimits(3, 0.01*pulls[i]->Integral(), 1000.0*pulls[i]->Integral());
+      triple_fit->SetParLimits(6, 0.01*pulls[i]->Integral(), 1000.0*pulls[i]->Integral());
+
+      triple_fit->SetParLimits(2, 0.01*pulls[i]->GetStdDev(), 1000.0*pulls[i]->GetStdDev());
+      triple_fit->SetParLimits(5, 0.01*pulls[i]->GetStdDev(), 1000.0*pulls[i]->GetStdDev());
+      triple_fit->SetParLimits(8, 0.01*pulls[i]->GetStdDev(), 1000.0*pulls[i]->GetStdDev());
+    }
+    else if(i >= 3 && i < 7)
+    {
+      triple_fit->SetParLimits(0, 0.01*pulls[i]->Integral(), 1000.0*pulls[i]->Integral());
+      triple_fit->SetParLimits(3, 0.01*pulls[i]->Integral(), 1000.0*pulls[i]->Integral());
+      triple_fit->SetParLimits(6, 0.01*pulls[i]->Integral(), 1000.0*pulls[i]->Integral());
+
+      triple_fit->SetParLimits(2, 0.01*pulls[i]->GetStdDev(), 10.0*pulls[i]->GetStdDev());
+      triple_fit->SetParLimits(5, 0.01*pulls[i]->GetStdDev(), 10.0*pulls[i]->GetStdDev());
+      triple_fit->SetParLimits(8, 0.01*pulls[i]->GetStdDev(), 10.0*pulls[i]->GetStdDev());
+    }
+    else
+    {
+      triple_fit->SetParLimits(0, 0.01*pulls[i]->Integral(), 2.0*pulls[i]->Integral());
+      triple_fit->SetParLimits(3, 0.01*pulls[i]->Integral(), 2.0*pulls[i]->Integral());
+      triple_fit->SetParLimits(6, 0.01*pulls[i]->Integral(), 2.0*pulls[i]->Integral());
+
+      triple_fit->SetParLimits(2, 0.01*pulls[i]->GetStdDev(), 5.0*pulls[i]->GetStdDev());
+      triple_fit->SetParLimits(5, 0.01*pulls[i]->GetStdDev(), 5.0*pulls[i]->GetStdDev());
+      triple_fit->SetParLimits(8, 0.01*pulls[i]->GetStdDev(), 5.0*pulls[i]->GetStdDev());
+    }
+
+    // if(i == 7)
+    // {
+    //   result = pulls[i]->Fit(triple_fit, "SF");
+
+    //   fit_stats[0] = Form("#chi^{2}/%.2d = %.2f", result->Ndf(), result->Chi2()/Double_t(result->Ndf()));
+    //   fit_stats[1] = Form("Mean = %.2f#pm%.2f", result->Parameter(1), result->Error(1));
+    //   fit_stats[2] = Form("Std dev = %.2f#pm%.2f", result->Parameter(2), result->Error(2));
+    // }
+    // else
+    // {
+      result = pulls[i]->Fit(triple_fit, "SF");
+
+      fit_stats[2] = Form("Width = %.2f", comb_std_dev(result->GetParams()));
+    //}
+
+    fit_text->AddText(fit_stats[2]);
+
+    pulls[i]->GetYaxis()->CenterTitle(1);
+    pulls[i]->SetLineWidth(5);
+
+    pulls[i]->GetXaxis()->CenterTitle(1);
+
+    pulls[i]->GetYaxis()->SetMaxDigits(3);
+    pulls[i]->GetYaxis()->CenterTitle(1);
+
+    pulls[i]->Draw();
+    fit_text->Draw();
+
+    canvas_pulls[i]->Print(("pulls" + std::to_string(i + 1) +".png").c_str());
+
+    fit_text->Clear();
+  }
+
+  canvas[29]->cd();
+  bunch->GetYaxis()->SetRangeUser(0.0, 1.2*bunch->GetMaximum());
+  bunch->Draw();
+  canvas[29]->Print("bunchnum.png");
+
+  std::cout << "Events all: " << counts_all << " " << "Events: " << counts << std::endl;
+  std::cout << "Efficiency: " << counts/(Float_t)counts_all << std::endl;
 
   TFitResultPtr r;
   Float_t parameter[3];
@@ -531,58 +621,6 @@ int comp_of_methods()
   res_std_hist[3]->GetYaxis()->SetRangeUser(0.0, 3.0);
   res_std_hist[3]->Draw("PE1");
   canvas[1]->Print(("sigmas_std" + std::to_string(2) + ".png").c_str());
-
-  TString fit_stats[3];
-  TPaveText *fit_text = new TPaveText(0.7, 0.7, 0.9, 0.9, "NDC");
-
-  TF1 *triple_fit = new TF1("triple_gaus", triple_gaus, -1500.0, 1500.0, 9, 1);
-  triple_fit->SetParNames("Norm1", "Avg1", "Std1", "Norm2", "Avg2", "Std2", "Norm3", "Avg3", "Std3");
-
-  TFitResultPtr result;
-
-  for(Int_t i = 0; i < 8; i++)
-  {
-    canvas_pulls[i]->cd();
-
-    //triple_fit->SetParameters(2E5, 0.0, 10.0, 2E5, 0.0, 10.0, 2E5, 0.0, 10.0);
-
-    triple_fit->SetParLimits(0, 0.0, 5E6);
-    triple_fit->SetParLimits(3, 0.0, 5E6);
-    triple_fit->SetParLimits(6, 0.0, 5E6);
-    triple_fit->SetParLimits(2, 0.001, 30.0);
-    triple_fit->SetParLimits(5, 0.001, 30.0);
-    triple_fit->SetParLimits(8, 0.001, 30.0);
-
-    result = pulls[i]->Fit(triple_fit, "SF");
-
-    std::cout << comb_std_dev(result->GetParams()) << std::endl;
-
-    fit_stats[0] = Form("#chi^{2}/%.2d = %.2f", result->Ndf(), result->Chi2()/Double_t(result->Ndf()));
-    fit_stats[1] = Form("Mean = %.2f#pm%.2f", result->Parameter(1), result->Error(1));
-    fit_stats[2] = Form("Std dev = %.2f#pm%.2f", result->Parameter(2), result->Error(2));
-
-    fit_text->AddText(fit_stats[0]);
-    fit_text->AddText(fit_stats[1]);
-    fit_text->AddText(fit_stats[2]);
-
-    pulls[i]->GetYaxis()->CenterTitle(1);
-    pulls[i]->SetLineWidth(5);
-
-    pulls[i]->GetXaxis()->CenterTitle(1);
-
-    pulls[i]->GetYaxis()->SetMaxDigits(3);
-    pulls[i]->GetYaxis()->CenterTitle(1);
-
-    pulls[i]->Draw();
-    fit_text->Draw();
-
-    canvas_pulls[i]->Print(("pulls" + std::to_string(i + 1) +".png").c_str());
-
-    fit_text->Clear();
-  }
-
-  std::cout << "Events all: " << counts_all << " " << "Events: " << counts << std::endl;
-  std::cout << "Efficiency: " << counts/(Float_t)counts_all << std::endl;
 
   return 0;
 }
