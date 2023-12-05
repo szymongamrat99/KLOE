@@ -28,11 +28,11 @@
 
 using namespace std;
 
-const Int_t N_free = 24, N_const = 4, M = 5, jmin = 0, jmax = 0, range = (jmax - jmin) + 1;
+const Int_t N_free = 24, N_const = 4, M = 5, jmin = -10, jmax = 10, range = (jmax - jmin) + 1;
 Int_t j_ch, k_ch;
 const Float_t Trf = 2.715; // ns - time of a bunch (correction)
 
-const Int_t loopcount = 20;
+const Int_t loopcount = 30;
 
 TF1 *constraints[M];
 
@@ -297,7 +297,7 @@ Int_t main(int argc, char *argv[])
 											}
 										}
 
-										if (1)
+										if (fail == 0)
 										{
 											X[k] = X_final;
 											X_init_aux = X_init;
@@ -306,6 +306,10 @@ Int_t main(int argc, char *argv[])
 											C_aux[k] = C;
 											FUNVALTMP[k] = FUNVAL;
 											CHISQRTMP[k] = CHISQR;
+										}
+										else
+										{
+											break;
 										}
 
 									}
@@ -401,17 +405,17 @@ Int_t main(int argc, char *argv[])
 					value[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - m_k0, 2));
 
 					if (TMath::IsNaN(value[k]))
-						value[k] = 99999.;
+						value[k] = 999999.;
 				}
 
 				bunchnum = X_min(27);
 
 				if (value[0] < value[1])
 				{
-					neu_vtx_min[0] = S.sol[0][0];
-					neu_vtx_min[1] = S.sol[0][1];
-					neu_vtx_min[2] = S.sol[0][2];
-					neu_vtx_min[3] = S.sol[0][3];
+					neu_vtx_min[0] = neu_vtx[0][0];
+					neu_vtx_min[1] = neu_vtx[0][1];
+					neu_vtx_min[2] = neu_vtx[0][2];
+					neu_vtx_min[3] = neu_vtx[0][3];
 
 					for (Int_t l = 0; l < 4; l++)
 					{
@@ -425,10 +429,10 @@ Int_t main(int argc, char *argv[])
 						gamma_mom_final[l][7] = X_min.GetMatrixArray()[l * 5 + 3] - T0;
 					}
 
-					fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
-					fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
-					fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
-					fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
+					fourKnetri_kinfit[0] = fourKnetri_tmp[0][0];
+					fourKnetri_kinfit[1] = fourKnetri_tmp[0][1];
+					fourKnetri_kinfit[2] = fourKnetri_tmp[0][2];
+					fourKnetri_kinfit[3] = fourKnetri_tmp[0][3];
 					fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
 					fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
 					fourKnetri_kinfit[6] = neu_vtx_min[0];
@@ -442,10 +446,10 @@ Int_t main(int argc, char *argv[])
 				}
 				else
 				{
-					neu_vtx_min[0] = S.sol[1][0];
-					neu_vtx_min[1] = S.sol[1][1];
-					neu_vtx_min[2] = S.sol[1][2];
-					neu_vtx_min[3] = S.sol[1][3];
+					neu_vtx_min[0] = neu_vtx[1][0];
+					neu_vtx_min[1] = neu_vtx[1][1];
+					neu_vtx_min[2] = neu_vtx[1][2];
+					neu_vtx_min[3] = neu_vtx[1][3];
 
 					for (Int_t l = 0; l < 4; l++)
 					{
@@ -459,10 +463,10 @@ Int_t main(int argc, char *argv[])
 						gamma_mom_final[l][7] = X_min.GetMatrixArray()[l * 5 + 3] - T0;
 					}
 
-					fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
-					fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
-					fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
-					fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
+					fourKnetri_kinfit[0] = fourKnetri_tmp[1][0];
+					fourKnetri_kinfit[1] = fourKnetri_tmp[1][1];
+					fourKnetri_kinfit[2] = fourKnetri_tmp[1][2];
+					fourKnetri_kinfit[3] = fourKnetri_tmp[1][3];
 					fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
 					fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
 					fourKnetri_kinfit[6] = neu_vtx_min[0];
