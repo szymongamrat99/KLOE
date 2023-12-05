@@ -102,8 +102,8 @@ Int_t main(int argc, char *argv[])
 		number_of_ev = nentries;
 
 	Bool_t clusterEnergy, solError;
-	Int_t ind_gam[4], sort_index[2][3], sort_ind_gam[2][4], chosen_ind_gam[4], found_best, isConverged, n_bunch;
-	Float_t CHISQRMIN, min_value_def;
+	Int_t ind_gam[4], sort_index[range], sort_ind_gam[2][4], chosen_ind_gam[4], found_best, isConverged, n_bunch;
+	Float_t CHISQRMIN, min_value_def, value_first[range];
 	Double_t reinitialize[(N_free + N_const) * (N_free + N_const)] = {0.};
 	Float_t gamma_mom_min[4][4], neu_vtx_min[4], kaon_mom_min[4], kaon_vel[3], kaon_vel_tot, kaon_path_tot, bhabha_vtx_min[3], ip_min[3], time_diff[2][4], time_diff_fin, gamma_path[2][4], neu_vtx[2][4];
 
@@ -157,7 +157,7 @@ Int_t main(int argc, char *argv[])
 	{
 		chain->GetEntry(i);
 
-		min_value_def = 99999.;
+		min_value_def = 999999.;
 		FUNVALMIN = 999999.;
 		CHISQRMIN = 999999.;
 
@@ -191,6 +191,89 @@ Int_t main(int argc, char *argv[])
 
 							if (clusterEnergy)
 							{
+								n_bunch = jmin;
+
+								for (Int_t k = 0; k < range; k++)
+								{
+									n_bunch = n_bunch++;
+									T0 = n_bunch * Trf;
+
+									// Setting clusters for a solution
+									for (Int_t l = 0; l < 4; l++)
+									{
+										R.SetClu(l, cluster[0][ind_gam[l]],
+														 cluster[1][ind_gam[l]],
+														 cluster[2][ind_gam[l]],
+														 cluster[3][ind_gam[l]] - T0,
+														 cluster[4][ind_gam[l]]);
+
+										R.SetClu(4, 0., 0., 0., 0., 0.);
+										R.SetClu(5, 0., 0., 0., 0., 0.);
+									}
+
+									S = R.MySolve(selected);
+
+									for (Int_t l = 0; l < 2; l++)
+									{
+										if (!S.error[l])
+										{
+											neu_vtx[l][0] = S.sol[l][0];
+											neu_vtx[l][1] = S.sol[l][1];
+											neu_vtx[l][2] = S.sol[l][2];
+											neu_vtx[l][3] = S.sol[l][3];
+										}
+										else
+										{
+											neu_vtx[l][0] = 999.;
+											neu_vtx[l][1] = 999.;
+											neu_vtx[l][2] = 999.;
+											neu_vtx[l][3] = 999.;
+										}
+
+										neutral_mom(cluster[0][ind_gam[0]], cluster[1][ind_gam[0]], cluster[2][ind_gam[0]], cluster[4][ind_gam[0]], neu_vtx[l], gamma_mom_tmp[l][0]);
+										neutral_mom(cluster[0][ind_gam[1]], cluster[1][ind_gam[1]], cluster[2][ind_gam[1]], cluster[3][ind_gam[1]], neu_vtx[l], gamma_mom_tmp[l][1]);
+										neutral_mom(cluster[0][ind_gam[2]], cluster[1][ind_gam[2]], cluster[2][ind_gam[2]], cluster[3][ind_gam[2]], neu_vtx[l], gamma_mom_tmp[l][2]);
+										neutral_mom(cluster[0][ind_gam[3]], cluster[1][ind_gam[3]], cluster[2][ind_gam[3]], cluster[3][ind_gam[3]], neu_vtx[l], gamma_mom_tmp[l][3]);
+
+										fourKnetri_tmp[l][0] = gamma_mom_tmp[l][0][0] + gamma_mom_tmp[l][1][0] + gamma_mom_tmp[l][2][0] + gamma_mom_tmp[l][3][0];
+										fourKnetri_tmp[l][1] = gamma_mom_tmp[l][0][1] + gamma_mom_tmp[l][1][1] + gamma_mom_tmp[l][2][1] + gamma_mom_tmp[l][3][1];
+										fourKnetri_tmp[l][2] = gamma_mom_tmp[l][0][2] + gamma_mom_tmp[l][1][2] + gamma_mom_tmp[l][2][2] + gamma_mom_tmp[l][3][2];
+										fourKnetri_tmp[l][3] = gamma_mom_tmp[l][0][3] + gamma_mom_tmp[l][1][3] + gamma_mom_tmp[l][2][3] + gamma_mom_tmp[l][3][3];
+										fourKnetri_tmp[l][4] = sqrt(pow(fourKnetri_tmp[l][0], 2) + pow(fourKnetri_tmp[l][1], 2) + pow(fourKnetri_tmp[l][2], 2));
+										fourKnetri_tmp[l][5] = sqrt(pow(fourKnetri_tmp[l][3], 2) - pow(fourKnetri_tmp[l][4], 2));
+
+										kaon_vel_tmp[l] = c_vel * fourKnetri_tmp[l][4] / fourKnetri_tmp[l][3];
+
+										y_axis[0] = 0.;
+										y_axis[1] = bhabha_mom[1];
+										y_axis[2] = 0.;
+
+										plane_intersection(bhabha_vtx, y_axis, neu_vtx[l], fourKnetri_tmp[l], ip_tmp[l]);
+
+										ip_tmp[l][0] = bhabha_vtx[0];
+										ip_tmp[l][1] = bhabha_vtx[1];
+										if (abs(ip_tmp[l][2] - bhabha_vtx[2]) > 2)
+											ip_tmp[l][2] = bhabha_vtx[2];
+
+										dist_tmp[l] = sqrt(pow(neu_vtx[l][0] - ip_tmp[l][0], 2) +
+																			 pow(neu_vtx[l][1] - ip_tmp[l][1], 2) +
+																			 pow(neu_vtx[l][2] - ip_tmp[l][2], 2));
+
+										value[l] = sqrt(pow(neu_vtx[l][3] - (dist_tmp[l] / kaon_vel_tmp[l]), 2) + pow(fourKnetri_tmp[l][5] - m_k0, 2));
+
+										if (TMath::IsNaN(value[l]))
+											value[l] = 999999.;
+									}
+
+									if(value[0] < value[1])
+										value_first[k] = value[0];
+									else
+										value_first[k] = value[1];
+								}
+
+								TMath::Sort(range, value_first, sort_index, kFALSE);
+
+								T0 = ()
 
 								for (Int_t k = 0; k < 4; k++)
 								{
@@ -227,8 +310,6 @@ Int_t main(int argc, char *argv[])
 
 								V(27, 27) = 0.;
 
-								n_bunch = jmin;
-
 								for (Int_t k = 0; k < range; k++)
 								{
 									fail = 0;
@@ -249,8 +330,6 @@ Int_t main(int argc, char *argv[])
 												else
 													D(l, m) = 0;
 											}
-
-
 										}
 
 										if (1)
@@ -311,7 +390,6 @@ Int_t main(int argc, char *argv[])
 										{
 											break;
 										}
-
 									}
 
 									if (CHISQRTMP[k] < CHISQRMIN)
@@ -337,8 +415,6 @@ Int_t main(int argc, char *argv[])
 
 			if (isConverged)
 			{
-				cout << CHISQRMIN <<  " " << X_min(27) << endl;
-
 				T0 = X_min(27) * Trf;
 
 				// Setting clusters for a solution
