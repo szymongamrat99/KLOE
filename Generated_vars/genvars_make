@@ -1,0 +1,24 @@
+CXX=g++
+CXXFLAGS=`root-config --cflags --glibs`
+LIBS=-L/internal/big_one/4/users/gamrat/scripts/Include/ -lrec -lm -llapack
+PROJECT_GEN=gen_vars
+PROJECT_CLUS=clus_pair
+RM=rm
+RMFLAGS=-f
+
+all: $(PROJECT_GEN) $(PROJECT_CLUS)
+
+$(PROJECT_GEN): gen_vars.o
+	$(CXX) $(CXXFLAGS) $(LIBS) -o $@ $^
+
+$(PROJECT_GEN).o: generated_variables.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(PROJECT_CLUS): clus_pair.o
+	$(CXX) $(CXXFLAGS) $(LIBS) -o $@ $^
+
+$(PROJECT_CLUS).o: cluster_pairing.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+clean:
+	$(RM) $(RMFLAGS) *.o

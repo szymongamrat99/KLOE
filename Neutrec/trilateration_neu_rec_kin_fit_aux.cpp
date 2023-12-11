@@ -32,11 +32,12 @@ const Int_t N_free = 24, N_const = 4, M = 5, jmin = -10, jmax = 10, range = (jma
 Int_t j_ch, k_ch;
 const Float_t Trf = 2.715; // ns - time of a bunch (correction)
 
-const Int_t loopcount = 30;
+const Int_t loopcount = 10;
 
 TF1 *constraints[M];
 
-Float_t det, CHISQR, CHISQRTMP[range], FUNVAL, FUNVALTMP[range], FUNVALMIN, T0;
+Double_t det;
+Float_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, T0;
 Int_t fail;
 
 Reconstructor R;
@@ -107,16 +108,8 @@ Int_t main(int argc, char *argv[])
 	Double_t reinitialize[(N_free + N_const) * (N_free + N_const)] = {0.};
 	Float_t gamma_mom_min[4][4], neu_vtx_min[4], kaon_mom_min[4], kaon_vel[3], kaon_vel_tot, kaon_path_tot, bhabha_vtx_min[3], ip_min[3], time_diff[2][4], time_diff_fin, gamma_path[2][4], neu_vtx[2][4];
 
-	TMatrixD V(N_free + N_const, N_free + N_const), D(M, N_free + N_const), D_T(N_free + N_const, M), V_final(N_free + N_const, N_free + N_const), V_aux[range], V_min(N_free + N_const, N_free + N_const), Aux(M, M), V_invert(N_free, N_free), V_init(N_free + N_const, N_free + N_const);
-	TVectorD X[range], C(M), X_final(N_free + N_const), L(M), CORR(N_free + N_const), X_init(N_free + N_const), X_min(N_free + N_const), C_min(M), L_min(M), C_aux[range], L_aux[range], X_init_min(N_free + N_const), X_init_aux(N_free + N_const);
-
-	for (Int_t i = 0; i < range; i++)
-	{
-		X[i].ResizeTo(N_free + N_const);
-		L_aux[i].ResizeTo(M);
-		C_aux[i].ResizeTo(M);
-		V_aux[i].ResizeTo(N_free + N_const, N_free + N_const);
-	}
+	TMatrixD V(N_free + N_const, N_free + N_const), D(M, N_free + N_const), D_T(N_free + N_const, M), V_final(N_free + N_const, N_free + N_const), V_aux(N_free + N_const, N_free + N_const), V_min(N_free + N_const, N_free + N_const), Aux(M, M), V_invert(N_free, N_free), V_init(N_free + N_const, N_free + N_const);
+	TVectorD X(N_free + N_const), C(M), X_final(N_free + N_const), L(M), CORR(N_free + N_const), X_init(N_free + N_const), X_min(N_free + N_const), C_min(M), L_min(M), C_aux(M), L_aux(M), X_init_min(N_free + N_const), X_init_aux(N_free + N_const);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -143,23 +136,26 @@ Int_t main(int argc, char *argv[])
 
 	constraints[0] = new TF1("Ene consv", &ene_consv, 0, 1, N_free + N_const);
 	constraints[1] = new TF1("Minv consv", &minv_consv, 0, 1, N_free + N_const);
-	// constraints[5] = new TF1("gamma1 consv", &gamma1_consv, 0, 1, N_free + N_const);
-	// constraints[6] = new TF1("gamma2 consv", &gamma2_consv, 0, 1, N_free + N_const);
-	// constraints[7] = new TF1("gamma3 consv", &gamma3_consv, 0, 1, N_free + N_const);
-	// constraints[8] = new TF1("gamma4 consv", &gamma4_consv, 0, 1, N_free + N_const);
 	constraints[2] = new TF1("x consv", &x_consv, 0, 1, N_free + N_const);
 	constraints[3] = new TF1("y consv", &y_consv, 0, 1, N_free + N_const);
 	constraints[4] = new TF1("z consv", &z_consv, 0, 1, N_free + N_const);
 
+	// constraints[5] = new TF1("gamma1 consv", &gamma1_consv, 0, 1, N_free + N_const);
+	// constraints[6] = new TF1("gamma2 consv", &gamma2_consv, 0, 1, N_free + N_const);
+	// constraints[7] = new TF1("gamma3 consv", &gamma3_consv, 0, 1, N_free + N_const);
+	// constraints[8] = new TF1("gamma4 consv", &gamma4_consv, 0, 1, N_free + N_const);
+
 	TH1 *chi2 = new TH1F("chi2", "", 50, 0.0, 1.0);
+
+	Aux.SetTol(1E-23);
 
 	for (Int_t i = 0; i < number_of_ev; i++)
 	{
 		chain->GetEntry(i);
 
 		min_value_def = 999999.;
-		FUNVALMIN = 999999.;
-		CHISQRMIN = 999999.;
+		FUNVALMIN = 1E15;
+		CHISQRMIN = 1E15;
 
 		isConverged = 0;
 
@@ -175,12 +171,8 @@ Int_t main(int argc, char *argv[])
 							fail = 0;
 
 							CHISQR = 999999.;
-
-							for (Int_t k = 0; k < range; k++)
-							{
-								CHISQRTMP[k] = 999999.;
-								FUNVALTMP[k] = 999999.;
-							}
+							CHISQRTMP = 999999.;
+							FUNVALTMP = 999999.;
 
 							ind_gam[0] = j1;
 							ind_gam[1] = j2;
@@ -193,10 +185,9 @@ Int_t main(int argc, char *argv[])
 							{
 								n_bunch = jmin;
 
-								for (Int_t k = 0; k < range; k++)
+								for (Int_t k = 0; k <= range; k++)
 								{
-									n_bunch = n_bunch++;
-									T0 = n_bunch * Trf;
+									T0 = (n_bunch + k) * Trf;
 
 									// Setting clusters for a solution
 									for (Int_t l = 0; l < 4; l++)
@@ -204,7 +195,7 @@ Int_t main(int argc, char *argv[])
 										R.SetClu(l, cluster[0][ind_gam[l]],
 														 cluster[1][ind_gam[l]],
 														 cluster[2][ind_gam[l]],
-														 cluster[3][ind_gam[l]] - T0,
+														 cluster[3][ind_gam[l]] + T0,
 														 cluster[4][ind_gam[l]]);
 
 										R.SetClu(4, 0., 0., 0., 0., 0.);
@@ -231,9 +222,9 @@ Int_t main(int argc, char *argv[])
 										}
 
 										neutral_mom(cluster[0][ind_gam[0]], cluster[1][ind_gam[0]], cluster[2][ind_gam[0]], cluster[4][ind_gam[0]], neu_vtx[l], gamma_mom_tmp[l][0]);
-										neutral_mom(cluster[0][ind_gam[1]], cluster[1][ind_gam[1]], cluster[2][ind_gam[1]], cluster[3][ind_gam[1]], neu_vtx[l], gamma_mom_tmp[l][1]);
-										neutral_mom(cluster[0][ind_gam[2]], cluster[1][ind_gam[2]], cluster[2][ind_gam[2]], cluster[3][ind_gam[2]], neu_vtx[l], gamma_mom_tmp[l][2]);
-										neutral_mom(cluster[0][ind_gam[3]], cluster[1][ind_gam[3]], cluster[2][ind_gam[3]], cluster[3][ind_gam[3]], neu_vtx[l], gamma_mom_tmp[l][3]);
+										neutral_mom(cluster[0][ind_gam[1]], cluster[1][ind_gam[1]], cluster[2][ind_gam[1]], cluster[4][ind_gam[1]], neu_vtx[l], gamma_mom_tmp[l][1]);
+										neutral_mom(cluster[0][ind_gam[2]], cluster[1][ind_gam[2]], cluster[2][ind_gam[2]], cluster[4][ind_gam[2]], neu_vtx[l], gamma_mom_tmp[l][2]);
+										neutral_mom(cluster[0][ind_gam[3]], cluster[1][ind_gam[3]], cluster[2][ind_gam[3]], cluster[4][ind_gam[3]], neu_vtx[l], gamma_mom_tmp[l][3]);
 
 										fourKnetri_tmp[l][0] = gamma_mom_tmp[l][0][0] + gamma_mom_tmp[l][1][0] + gamma_mom_tmp[l][2][0] + gamma_mom_tmp[l][3][0];
 										fourKnetri_tmp[l][1] = gamma_mom_tmp[l][0][1] + gamma_mom_tmp[l][1][1] + gamma_mom_tmp[l][2][1] + gamma_mom_tmp[l][3][1];
@@ -259,13 +250,13 @@ Int_t main(int argc, char *argv[])
 																			 pow(neu_vtx[l][1] - ip_tmp[l][1], 2) +
 																			 pow(neu_vtx[l][2] - ip_tmp[l][2], 2));
 
-										value[l] = sqrt(pow(neu_vtx[l][3] - (dist_tmp[l] / kaon_vel_tmp[l]), 2) + pow(fourKnetri_tmp[l][5] - m_k0, 2));
+										value[l] = /*sqrt(pow(neu_vtx[l][3] - (dist_tmp[l]/kaon_vel_tmp[l]),2) +*/ abs(fourKnetri_tmp[l][5] - m_k0);
 
 										if (TMath::IsNaN(value[l]))
 											value[l] = 999999.;
 									}
 
-									if(value[0] < value[1])
+									if (value[0] < value[1])
 										value_first[k] = value[0];
 									else
 										value_first[k] = value[1];
@@ -273,7 +264,7 @@ Int_t main(int argc, char *argv[])
 
 								TMath::Sort(range, value_first, sort_index, kFALSE);
 
-								T0 = ()
+								X_init(27) = n_bunch + sort_index[0];
 
 								for (Int_t k = 0; k < 4; k++)
 								{
@@ -283,11 +274,11 @@ Int_t main(int argc, char *argv[])
 									X_init(k * 5 + 3) = cluster[3][ind_gam[k]];
 									X_init(k * 5 + 4) = cluster[4][ind_gam[k]];
 
-									V(k * 5, k * 5) = pow(1.2, 2);
-									V(k * 5 + 1, k * 5 + 1) = pow(1.2, 2);
-									V(k * 5 + 2, k * 5 + 2) = pow(1.2 / sqrt(X_init(k * 5 + 4) / 1000.), 2); // cm
-									V(k * 5 + 3, k * 5 + 3) = pow(clu_time_error(X_init(k * 5 + 4)), 2);		 // ns
-									V(k * 5 + 4, k * 5 + 4) = pow(clu_ene_error(X_init(k * 5 + 4)), 2);			 // MeV
+									V(k * 5, k * 5) = pow(clu_y_error(), 2);
+									V(k * 5 + 1, k * 5 + 1) = pow(clu_x_error(), 2);
+									V(k * 5 + 2, k * 5 + 2) = pow(clu_z_error(X_init(k * 5 + 4)), 2);		 // cm
+									V(k * 5 + 3, k * 5 + 3) = pow(clu_time_error(X_init(k * 5 + 4)), 2); // ns
+									V(k * 5 + 4, k * 5 + 4) = pow(clu_ene_error(X_init(k * 5 + 4)), 2);	 // MeV
 								}
 
 								X_init(20) = bhabha_mom[0];
@@ -308,107 +299,106 @@ Int_t main(int argc, char *argv[])
 								V(25, 25) = 0.;
 								V(26, 26) = 0.;
 
-								V(27, 27) = 0.;
+								X = X_init;
 
-								for (Int_t k = 0; k < range; k++)
+								V_invert = V.GetSub(0, N_free - 1, 0, N_free - 1).Invert();
+								V_invert.Abs();
+
+								for (Int_t j = 0; j < loopcount; j++)
 								{
-									fail = 0;
-									X_init(27) = n_bunch + k;
 
-									X[k] = X_init;
-
-									for (Int_t j = 0; j < loopcount; j++)
+									for (Int_t l = 0; l < M; l++)
 									{
-										for (Int_t l = 0; l < M; l++)
+										C(l) = constraints[l]->EvalPar(0, X.GetMatrixArray());
+										for (Int_t m = 0; m < N_free + N_const; m++)
 										{
-											C(l) = constraints[l]->EvalPar(0, X[k].GetMatrixArray());
-											for (Int_t m = 0; m < N_free + N_const; m++)
-											{
-												constraints[l]->SetParameters(X[k].GetMatrixArray());
-												if (m < N_free)
-													D(l, m) = constraints[l]->GradientPar(m, 0, 0.0001);
-												else
-													D(l, m) = 0;
-											}
+											constraints[l]->SetParameters(X.GetMatrixArray());
+											if (m < N_free)
+												D(l, m) = constraints[l]->GradientPar(m, 0, 0.01);//sqrt(V(m,m))/1000.);
+											else
+												D(l, m) = 0;
 										}
+									}
+
+									D_T.Transpose(D);
+
+									Aux = (D * V * D_T);
+
+									Aux.Invert(&det);
+
+									if (!TMath::IsNaN(det) && det != 0)
+									{
+
+										L = (Aux * C);
+
+										CORR = V * D_T * L;
 
 										if (1)
 										{
-											D_T.Transpose(D);
+											X_final = X - CORR;
+											V_final = V - V * D_T * Aux * D * V;
 
-											Aux = D * V * D_T;
+											if (X_final(4) < 20.)
+												X_final(4) = 20.;
+											if (X_final(9) < 20.)
+												X_final(9) = 20.;
+											if (X_final(14) < 20.)
+												X_final(14) = 20.;
+											if (X_final(19) < 20.)
+												X_final(19) = 20.;
 
-											det = Aux.Determinant();
+											for (Int_t l = 0; l < M; l++)
+												C(l) = constraints[l]->EvalPar(0, X_final.GetMatrixArray());
 
-											if (!TMath::IsNaN(det) && det != 0)
-											{
-												Aux.Invert();
+											FUNVAL = Dot((X_final - X_init).GetSub(0, N_free - 1), V_invert * (X_final - X_init).GetSub(0, N_free - 1)) + Dot(L, C);
 
-												L = (Aux * C);
-
-												CORR = V * D_T * L;
-
-												X_final = X[k] - CORR;
-												V_final = V - V * D_T * Aux * D * V;
-
-												// Avoiding small energy photons
-												/*if (X_final(4) < 20)
-													X_final(4) = 20;
-
-												if (X_final(9) < 20)
-													X_final(9) = 20;
-
-												if (X_final(14) < 20)
-													X_final(14) = 20;
-
-												if (X_final(19) < 20)
-													X_final(19) = 20;*/
-
-												V_invert = V.GetSub(0, N_free - 1, 0, N_free - 1).Invert();
-
-												FUNVAL = Dot((X_final - X_init).GetSub(0, N_free - 1), V_invert * (X_final - X_init).GetSub(0, N_free - 1));
-
-												CHISQR = Dot((X_final - X_init).GetSub(0, N_free - 1), V_invert * (X_final - X_init).GetSub(0, N_free - 1));
-											}
-											else
-											{
-												fail = 1;
-											}
-										}
-
-										if (fail == 0)
-										{
-											X[k] = X_final;
-											X_init_aux = X_init;
-											V_aux[k] = V_final;
-											L_aux[k] = L;
-											C_aux[k] = C;
-											FUNVALTMP[k] = FUNVAL;
-											CHISQRTMP[k] = CHISQR;
+											CHISQR = Dot((X_final - X_init).GetSub(0, N_free - 1), V_invert * (X_final - X_init).GetSub(0, N_free - 1));
 										}
 										else
 										{
 											break;
 										}
 									}
-
-									if (CHISQRTMP[k] < CHISQRMIN)
+									else
 									{
-										isConverged = 1;
-										FUNVALMIN = FUNVALTMP[k];
-										CHISQRMIN = CHISQRTMP[k];
-										X_min = X[k];
-										X_init_min = X_init_aux;
-										V_min = V_aux[k];
-										V_init = V;
-										C_min = C_aux[k];
-										L_min = L_aux[k];
-
-										g4takentri_kinfit[0] = ind_gam[0];
-										g4takentri_kinfit[1] = ind_gam[1];
-										g4takentri_kinfit[2] = ind_gam[2];
-										g4takentri_kinfit[3] = ind_gam[3];
+										fail = 1;
 									}
+
+									if (fail == 0)
+									{
+										X = X_final;
+										X_init_aux = X_init;
+										V_aux = V_final;
+										L_aux = L;
+										C_aux = C;
+										FUNVALTMP = FUNVAL;
+										CHISQRTMP = CHISQR;
+									}
+									else
+									{
+										break;
+									}
+								}
+
+								if (abs(FUNVALTMP) < abs(FUNVALMIN))
+								{
+									isConverged = 1;
+									FUNVALMIN = FUNVALTMP;
+									CHISQRMIN = CHISQRTMP;
+									X_min = X;
+									X_init_min = X_init_aux;
+									V_min = V_aux;
+									V_init = V;
+									C_min = C_aux;
+									L_min = L_aux;
+
+									C_min.Print();
+									std::cout << Dot(L_min,C_min) << std::endl;
+
+									g4takentri_kinfit[0] = ind_gam[0];
+									g4takentri_kinfit[1] = ind_gam[1];
+									g4takentri_kinfit[2] = ind_gam[2];
+									g4takentri_kinfit[3] = ind_gam[3];
 								}
 							}
 						}
@@ -423,7 +413,7 @@ Int_t main(int argc, char *argv[])
 					R.SetClu(k, X_min.GetMatrixArray()[k * 5],
 									 X_min.GetMatrixArray()[k * 5 + 1],
 									 X_min.GetMatrixArray()[k * 5 + 2],
-									 X_min.GetMatrixArray()[k * 5 + 3] - T0,
+									 X_min.GetMatrixArray()[k * 5 + 3] + T0,
 									 X_min.GetMatrixArray()[k * 5 + 4]);
 
 					R.SetClu(4, 0., 0., 0., 0., 0.);
@@ -502,7 +492,7 @@ Int_t main(int argc, char *argv[])
 						gamma_mom_final[l][4] = X_min.GetMatrixArray()[l * 5];
 						gamma_mom_final[l][5] = X_min.GetMatrixArray()[l * 5 + 1];
 						gamma_mom_final[l][6] = X_min.GetMatrixArray()[l * 5 + 2];
-						gamma_mom_final[l][7] = X_min.GetMatrixArray()[l * 5 + 3] - T0;
+						gamma_mom_final[l][7] = X_min.GetMatrixArray()[l * 5 + 3] + T0;
 					}
 
 					fourKnetri_kinfit[0] = fourKnetri_tmp[0][0];
@@ -536,7 +526,7 @@ Int_t main(int argc, char *argv[])
 						gamma_mom_final[l][4] = X_min.GetMatrixArray()[l * 5];
 						gamma_mom_final[l][5] = X_min.GetMatrixArray()[l * 5 + 1];
 						gamma_mom_final[l][6] = X_min.GetMatrixArray()[l * 5 + 2];
-						gamma_mom_final[l][7] = X_min.GetMatrixArray()[l * 5 + 3] - T0;
+						gamma_mom_final[l][7] = X_min.GetMatrixArray()[l * 5 + 3] + T0;
 					}
 
 					fourKnetri_kinfit[0] = fourKnetri_tmp[1][0];

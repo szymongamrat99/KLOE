@@ -23,18 +23,17 @@
 #include "../../Include/Codes/lorentz_transf.h"
 #include "../../Include/Codes/triple_gaus.h"
 
-const Int_t M = 5;
 const TString ext = ".png";
 
-int comp_of_methods(Int_t file_num = 0, Double_t cut_prob = 0.0)
+int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int_t file_num = 0, Double_t cut_prob = 0.0)
 {
   TChain *chain = new TChain("INTERF/h1");
-  chain_init(chain, 1, 56);
+  chain_init(chain, first, last);
 
   TString file_name[3];
 
   file_name[0] = "neuvtx_tri_kin_fit_1_56_100_5_no_time.root";
-  file_name[1] = "neuvtx_tri_kin_fit_1_56_30_5_time.root";
+  file_name[1] = "neuvtx_tri_kin_fit_" + std::to_string(first) + "_" + std::to_string(last) + "_" + std::to_string(loopcount) + "_" + std::to_string(M) + ".root";//"neuvtx_tri_kin_fit_1_56_30_5_time.root";
   file_name[2] = "neuvtx_tri_rec_1_56.root";
 
   TFile *file = new TFile(file_name[file_num]);
@@ -167,7 +166,7 @@ int comp_of_methods(Int_t file_num = 0, Double_t cut_prob = 0.0)
     }
 
     id_hist = "Coor" + std::to_string(j) + std::to_string(3);
-    neu_vtx_corr[j][3] = new TH2F(id_hist, "", 100, 0.0, 20.0, 100, 0.0, 20.0);
+    neu_vtx_corr[j][3] = new TH2F(id_hist, "", 200, 0.0, 20.0, 200, 00.0, 20.0);
 
     id_hist = "Mom" + std::to_string(j) + std::to_string(3);
     neu_mom[j][3] = new TH2F(id_hist, "", 100, 504, 520, 100, 507, 512);
@@ -334,7 +333,7 @@ int comp_of_methods(Int_t file_num = 0, Double_t cut_prob = 0.0)
       for (Int_t j = 0; j < 2; j++)
       {
         if (j == 0)
-          cut = TMath::Prob(chi2min, M) > 0.0;
+          cut = TMath::Prob(chi2min, M) > 0;
         else
           cut = TMath::Prob(chi2min, M) > cut_prob;
 
@@ -357,29 +356,35 @@ int comp_of_methods(Int_t file_num = 0, Double_t cut_prob = 0.0)
           {
             if (k < 3)
             {
-              if(abs(Knemc[6 + k] - Knetri_kinfit[6 + k]) < 10000)
+              if(1)//Knetri_kinfit[9] - t_neumc > 10)
+              {
                 neu_vtx_corr[j][k]->Fill(Knemc[6 + k], Knetri_kinfit[6 + k]);
-
-              sigmas_std[j][k]->Fill(abs(Knemc[6 + k] - ipmc[k]), Knetri_kinfit[6 + k] - Knemc[6 + k]);
-              pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - Knemc[6 + k]);
+                sigmas_std[j][k]->Fill(abs(Knemc[6 + k] - ipmc[k]), Knetri_kinfit[6 + k] - Knemc[6 + k]);
+                pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - Knemc[6 + k]);
+                neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
+              }
             }
             else if (k == 3)
             {
-              if(abs(Knemc[6] - Knetri_kinfit[6]) < 10000 && abs(Knemc[7] - Knetri_kinfit[7]) < 10000 && abs(Knemc[8] - Knetri_kinfit[8]) < 10000)
+              if(1)//Knetri_kinfit[9] - t_neumc > 10)
+              {
                 neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[6 + k]);
-
-              sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
-              pulls[j][4 + k]->Fill((Knetri_kinfit[6 + k] - t_neumc) / tau_S_nonCPT);
+                sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
+                pulls[j][4 + k]->Fill((Knetri_kinfit[6 + k] - t_neumc) / tau_S_nonCPT);
+                neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
+              }
             }
             else
             {
+              if(1)//Knetri_kinfit[9] - t_neumc > 10)
                 sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_tri - lengthneu_mc));
             }
 
-            neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
-
-            pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc[k]);
-            pulls[j][4 + k]->Fill(Knetri_kinfit[k] - Knemc[k]);
+            if(1)//Knetri_kinfit[9] - t_neumc > 10)
+            {
+              pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc[k]);
+              pulls[j][4 + k]->Fill(Knetri_kinfit[k] - Knemc[k]);
+            }
           }
         }
       }
