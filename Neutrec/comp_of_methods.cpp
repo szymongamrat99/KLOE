@@ -45,8 +45,11 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     tree = (TTree *)file->Get("h_tri");
 
   Float_t Kchboost[9], Knereclor[9], Knerec[9],
-      Kchmc[9], Knemc[9], ip[3], ipmc[3], phi_mom[4], Dtmc, Tcl[50];
-  UChar_t mctruth;
+      Kchmc[9], Knemc[9], ip[3], ipmc[3], phi_mom[4], Dtmc, Tcl[50],
+      cluster[5][200], bhabha_vtx[3], T0step1;
+  UChar_t mctruth, mcisr;
+  UChar_t pidmc[200], vtxmc[200], mother[200];
+  Int_t ntmc, nvtxmc, nclu;
 
   chain->SetBranchAddress("Kchboost", Kchboost);
   chain->SetBranchAddress("Knereclor", Knereclor);
@@ -54,10 +57,28 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
   chain->SetBranchAddress("Kchmc", Kchmc);
   chain->SetBranchAddress("Knemc", Knemc);
 
+  chain->SetBranchAddress("nclu", &nclu);
+  chain->SetBranchAddress("Xcl", cluster[0]);
+  chain->SetBranchAddress("Ycl", cluster[1]);
+  chain->SetBranchAddress("Zcl", cluster[2]);
+  chain->SetBranchAddress("Tcl", cluster[3]);
+  chain->SetBranchAddress("Enecl", cluster[4]);
+
+  chain->SetBranchAddress("Bx", &bhabha_vtx[0]);
+  chain->SetBranchAddress("By", &bhabha_vtx[1]);
+  chain->SetBranchAddress("Bz", &bhabha_vtx[2]);
+
   chain->SetBranchAddress("ip", ip);
   chain->SetBranchAddress("ipmc", ipmc);
 
-  chain->SetBranchAddress("Tcl", Tcl);
+  chain->SetBranchAddress("ntmc", &ntmc);
+	chain->SetBranchAddress("nvtxmc", &nvtxmc);
+  chain->SetBranchAddress("pidmc", pidmc);
+	chain->SetBranchAddress("vtxmc", vtxmc);
+	chain->SetBranchAddress("mother", mother);
+
+  chain->SetBranchAddress("mcisr", &mcisr);
+  chain->SetBranchAddress("T0step1", &T0step1);
 
   chain->SetBranchAddress("Bpx", &phi_mom[0]);
   chain->SetBranchAddress("Bpy", &phi_mom[1]);
@@ -121,7 +142,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   TString id_hist, id_canva;
 
-  TCanvas *canvas[2][30], *canvas_pulls[2][24];
+  TCanvas *canvas[2][40], *canvas_pulls[2][24];
   Int_t width = 750, height = 750;
 
   TH1 *chi2_hist[2], *prob_hist[2];
@@ -132,8 +153,8 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
   TH2 *sigmas_std[2][5], *sigmas_tri[2][5], *sigmas_tri_kin_fit[2][5];
   TH1 *neu_std_hist[2][5], *neu_tri_hist[2][5], *neu_tri_kin_fit_hist[2][5];
   TH1 *res_std_hist[2][5], *res_tri_hist[2][5], *res_tri_kin_fit_hist[2][5];
-  TH1 *pulls[2][8];
-  TH1 *bunch[2];
+  TH1 *pulls[2][8], *first_clus_hist[2];
+  TH1 *bunch[2], *pidmc_hist[2], *mcisr_hist[2], *tcl_hist[2];
 
   TString name[5] = {"x", "y", "z", "time", "length"};
 
@@ -141,7 +162,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   for (Int_t j = 0; j < 2; j++)
   {
-    for (Int_t i = 0; i < 30; i++)
+    for (Int_t i = 0; i < 40; i++)
     {
       id_canva = "Canva" + std::to_string(j) + std::to_string(i);
       canvas[j][i] = new TCanvas(id_canva, "", width, height);
@@ -166,10 +187,10 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     }
 
     id_hist = "Coor" + std::to_string(j) + std::to_string(3);
-    neu_vtx_corr[j][3] = new TH2F(id_hist, "", 200, 0.0, 20.0, 200, 00.0, 20.0);
+    neu_vtx_corr[j][3] = new TH2F(id_hist, "", 200, 0.0, 20.0, 200, 0.0, 20.0);
 
     id_hist = "Mom" + std::to_string(j) + std::to_string(3);
-    neu_mom[j][3] = new TH2F(id_hist, "", 100, 504, 520, 100, 507, 512);
+    neu_mom[j][3] = new TH2F(id_hist, "", 100, 504, 520, 100, 504, 520);
 
     for (Int_t i = 0; i < 8; i++)
     {
@@ -203,6 +224,18 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
     id_hist = "Bunch_num" + std::to_string(j);
     bunch[j] = new TH1I(id_hist, ";Number of bunch correction;Counts", 101, -10, 10);
+
+    id_hist = "Pidmc" + std::to_string(j);
+    pidmc_hist[j] = new TH1I(id_hist, ";PID;Counts", 101, 0, 20);
+
+    id_hist = "MCISR" + std::to_string(j);
+    mcisr_hist[j] = new TH1I(id_hist, ";ISR MC Flag;Counts", 101, -1, 2);
+
+    id_hist = "First_clus" + std::to_string(j);
+    first_clus_hist[j] = new TH1F(id_hist, ";T_{cl} - #frac{d_{cl}}{c} [ns];Counts", 101, -6.0, 6.0);
+
+    id_hist = "Tcl_diff" + std::to_string(j);
+    tcl_hist[j] = new TH1F(id_hist, ";T_{cl,min} - #frac{d_{cl}}{c} - t_{neu} [ns];Counts", 101, -20.0, 50.0);
 
     for (Int_t i = 0; i < 5; i++)
     {
@@ -259,7 +292,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
   }
 
   Int_t counts = 0, counts_all = 0;
-  Float_t vec_before[4], vec_after[4], boost[3], ip_before[4], ip_after[4];
+  Float_t vec_before[4], vec_after[4], boost[3], ip_before[4], ip_after[4], d_cl;
 
   Bool_t cut = true;
 
@@ -277,12 +310,12 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
       lengthneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2) + pow(Knemc[8] - ipmc[2], 2));
       lengthneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2) + pow(Knetri_kinfit[8] - ip_kinfit[2], 2));
-      lengthneu_rec = sqrt(pow(Knereclor[6] - ip[0], 2) + pow(Knereclor[7] - ip[1], 2) + pow(Knereclor[8] - ip[2], 2));
+      lengthneu_rec = sqrt(pow(Knetri_kinfit[6] - ip[0], 2) + pow(Knetri_kinfit[7] - ip[1], 2) + pow(Knetri_kinfit[8] - ip[2], 2));
       //
       // Kaon transverse radius
       Rtneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2));
       Rtneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2));
-      Rtneu_rec = sqrt(pow(Knereclor[6] - ip[0], 2) + pow(Knereclor[7] - ip[1], 2));
+      Rtneu_rec = sqrt(pow(Knetri_kinfit[6] - ip[0], 2) + pow(Knetri_kinfit[7] - ip[1], 2));
       //
       // Kaon velocity
       v_Kchmc = c_vel * Kchmc[4] / Kchmc[3];
@@ -290,7 +323,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
       v_Kneumc = c_vel * Knemc[4] / Knemc[3];
       v_Kneutri = c_vel * Knetri_kinfit[4] / Knetri_kinfit[3];
-      v_Kneurec = c_vel * Knereclor[4] / Knereclor[3];
+      v_Kneurec = c_vel * Knetri_kinfit[4] / Knetri_kinfit[3];
       //
       // Kaon flight times
       t_chrec = lengthch_rec / v_Kchrec;
@@ -345,46 +378,61 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
           chi2_hist[j]->Fill(chi2min);
           prob_hist[j]->Fill(TMath::Prob(chi2min, M));
 
-          beta_hist[j]->Fill(v_Kneutri_CM / c_vel);
+          beta_hist[j]->Fill(v_Kneurec / c_vel);
 
           bunch[j]->Fill(bunchnum);
 
           for (Int_t k = 0; k < 3; k++)
-            ip_coor[j][k]->Fill(ipmc[k], ip_kinfit[k]);
+            ip_coor[j][k]->Fill(ipmc[k], ip[k]);
 
           for (Int_t k = 0; k < 5; k++)
           {
             if (k < 3)
             {
-              if(1)//Knetri_kinfit[9] - t_neumc > 10)
+              if(1)//abs(Knemc[6]) <1 && abs(Knemc[7]) <1 && abs(Knemc[8]) <1)
               {
                 neu_vtx_corr[j][k]->Fill(Knemc[6 + k], Knetri_kinfit[6 + k]);
-                sigmas_std[j][k]->Fill(abs(Knemc[6 + k] - ipmc[k]), Knetri_kinfit[6 + k] - Knemc[6 + k]);
+                sigmas_std[j][k]->Fill(abs(Knemc[6 + k] - ip_kinfit[k]), Knetri_kinfit[6 + k] - Knemc[6 + k]);
                 pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - Knemc[6 + k]);
                 neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
               }
             }
             else if (k == 3)
             {
-              if(1)//Knetri_kinfit[9] - t_neumc > 10)
+              if(1)//abs(Knemc[6]) <1 && abs(Knemc[7]) <1 && abs(Knemc[8]) <1)
               {
-                neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[6 + k]);
+                neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[9]);//Knetri_kinfit[6 + k]);
                 sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
-                pulls[j][4 + k]->Fill((Knetri_kinfit[6 + k] - t_neumc) / tau_S_nonCPT);
+                pulls[j][4 + k]->Fill((Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
                 neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
               }
             }
             else
             {
-              if(1)//Knetri_kinfit[9] - t_neumc > 10)
+              if(1)//abs(Knemc[6]) <1 && abs(Knemc[7]) <1 && abs(Knemc[8]) <1)
                 sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_tri - lengthneu_mc));
             }
 
-            if(1)//Knetri_kinfit[9] - t_neumc > 10)
+            if(1)//abs(Knemc[6]) <1 && abs(Knemc[7]) <1 && abs(Knemc[8]) <1)
             {
               pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc[k]);
               pulls[j][4 + k]->Fill(Knetri_kinfit[k] - Knemc[k]);
             }
+          }
+
+          d_cl = sqrt(pow(cluster[0][0] - bhabha_vtx[0],2) + pow(cluster[1][0] - bhabha_vtx[1],2) + pow(cluster[2][0] - bhabha_vtx[2],2));
+
+          if(1)//abs(Knemc[6]) <1 && abs(Knemc[7]) <1 && abs(Knemc[8]) <1)
+          {
+            for(Int_t k = 0; k < ntmc; k++)
+              pidmc_hist[j]->Fill(pidmc[k]);
+
+            for(Int_t k = 0; k < 4; k++)
+              tcl_hist[j]->Fill(gamma_kinfit[k][7]);// - (sqrt(pow(gamma_kinfit[0][4] - Knetri_kinfit[6],2) + pow(gamma_kinfit[0][5] - Knetri_kinfit[7],2) + pow(gamma_kinfit[0][6] - Knetri_kinfit[8],2))/c_vel) - t_neurec);
+
+            first_clus_hist[j]->Fill(cluster[3][0] - (d_cl/c_vel));
+
+            mcisr_hist[j]->Fill(mcisr);
           }
         }
       }
@@ -409,6 +457,150 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   Color_t res_color[5] = {kRed, kBlue, kGreen, kBlack, kBlack};
   TLegend *legend = new TLegend(0.7, 0.7, 0.9, 0.9, "Axis");
+
+    //! Chi2 and Prob histos
+
+  canvas[0][11]->SetRightMargin(0.15);
+  canvas[0][11]->SetLeftMargin(0.17);
+  canvas[0][11]->cd();
+
+  chi2_hist[0]->GetYaxis()->SetMaxDigits(3);
+
+  id_canva = "chi2_dist";
+  x_title = "#chi^{2}_{tri}";
+  y_title = "Counts";
+
+  chi2_hist[0]->GetXaxis()->CenterTitle();
+  chi2_hist[0]->GetYaxis()->CenterTitle();
+  chi2_hist[0]->GetXaxis()->SetTitle(x_title);
+  chi2_hist[0]->GetYaxis()->SetTitle(y_title);
+  chi2_hist[0]->GetYaxis()->SetRangeUser(0.0, 1.3 * chi2_hist[0]->GetMaximum());
+  chi2_hist[0]->SetLineColor(kBlack);
+  chi2_hist[1]->SetLineColor(kRed);
+  chi2_hist[0]->Draw();
+  chi2_hist[1]->Draw("SAME");
+  canvas[0][11]->Print(id_canva + ext);
+  //!
+  canvas[0][12]->SetRightMargin(0.15);
+  canvas[0][12]->SetLeftMargin(0.17);
+  canvas[0][12]->cd();
+  canvas[0][12]->SetLogy();
+
+  prob_hist[0]->GetYaxis()->SetMaxDigits(3);
+
+  id_canva = "prob";
+  x_title = Form("Prob(#chi^{2}_{tri},%d)", M);
+  y_title = "Counts";
+
+  prob_hist[0]->GetXaxis()->CenterTitle();
+  prob_hist[0]->GetYaxis()->CenterTitle();
+  prob_hist[0]->GetXaxis()->SetTitle(x_title);
+  prob_hist[0]->GetYaxis()->SetTitle("Counts");
+  if (canvas[0][12]->GetLogy())
+    prob_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * prob_hist[0]->GetMaximum());
+  else
+    prob_hist[0]->GetYaxis()->SetRangeUser(0.0, 1.3 * prob_hist[0]->GetMaximum());
+  prob_hist[0]->SetLineColor(kBlack);
+  prob_hist[1]->SetLineColor(kRed);
+  prob_hist[0]->Draw();
+  prob_hist[1]->Draw("SAME");
+  canvas[0][12]->Print(id_canva + ext);
+  //!
+
+  //!
+  canvas[0][26]->SetRightMargin(0.15);
+  canvas[0][26]->SetLeftMargin(0.17);
+  canvas[0][26]->cd();
+  canvas[0][26]->SetLogy();
+
+  pidmc_hist[0]->GetYaxis()->SetMaxDigits(3);
+
+  id_canva = "pidmc";
+
+  pidmc_hist[0]->GetXaxis()->CenterTitle();
+  pidmc_hist[0]->GetYaxis()->CenterTitle();
+  //pidmc_hist[0]->GetXaxis()->SetTitle(x_title);
+  pidmc_hist[0]->GetYaxis()->SetTitle("Counts");
+  if (canvas[0][26]->GetLogy())
+    pidmc_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * pidmc_hist[0]->GetMaximum());
+  else
+    pidmc_hist[0]->GetYaxis()->SetRangeUser(0.0, 1.3 * pidmc_hist[0]->GetMaximum());
+  pidmc_hist[0]->SetLineColor(kBlack);
+  pidmc_hist[1]->SetLineColor(kRed);
+  pidmc_hist[0]->Draw();
+  pidmc_hist[1]->Draw("SAME");
+  canvas[0][26]->Print(id_canva + ext);
+  //!
+  canvas[0][27]->SetRightMargin(0.15);
+  canvas[0][27]->SetLeftMargin(0.17);
+  canvas[0][27]->cd();
+  canvas[0][27]->SetLogy();
+
+  mcisr_hist[0]->GetYaxis()->SetMaxDigits(3);
+
+  id_canva = "mcisr";
+
+  mcisr_hist[0]->GetXaxis()->CenterTitle();
+  mcisr_hist[0]->GetYaxis()->CenterTitle();
+  //mcisr_hist[0]->GetXaxis()->SetTitle(x_title);
+  mcisr_hist[0]->GetYaxis()->SetTitle("Counts");
+  if (canvas[0][27]->GetLogy())
+    mcisr_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * mcisr_hist[0]->GetMaximum());
+  else
+    mcisr_hist[0]->GetYaxis()->SetRangeUser(0.0, 1.3 * mcisr_hist[0]->GetMaximum());
+  mcisr_hist[0]->SetLineColor(kBlack);
+  mcisr_hist[1]->SetLineColor(kRed);
+  mcisr_hist[0]->Draw();
+  mcisr_hist[1]->Draw("SAME");
+  canvas[0][27]->Print(id_canva + ext);
+  //!
+  canvas[0][28]->SetRightMargin(0.15);
+  canvas[0][28]->SetLeftMargin(0.17);
+  canvas[0][28]->cd();
+  canvas[0][28]->SetLogy();
+
+  first_clus_hist[0]->GetYaxis()->SetMaxDigits(3);
+
+  id_canva = "first_clus";
+
+  first_clus_hist[0]->GetXaxis()->CenterTitle();
+  first_clus_hist[0]->GetYaxis()->CenterTitle();
+  //first_clus_hist[0]->GetXaxis()->SetTitle("T0step1 [ns]");
+  first_clus_hist[0]->GetYaxis()->SetTitle("Counts");
+  if (canvas[0][28]->GetLogy())
+    first_clus_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * first_clus_hist[0]->GetMaximum());
+  else
+    first_clus_hist[0]->GetYaxis()->SetRangeUser(0.0, 1.3 * first_clus_hist[0]->GetMaximum());
+  first_clus_hist[0]->SetLineColor(kBlack);
+  first_clus_hist[1]->SetLineColor(kRed);
+  first_clus_hist[0]->Draw();
+  first_clus_hist[1]->Draw("SAME");
+  canvas[0][28]->Print(id_canva + ext);
+  //!
+  //!
+  canvas[0][29]->SetRightMargin(0.15);
+  canvas[0][29]->SetLeftMargin(0.17);
+  canvas[0][29]->cd();
+  canvas[0][29]->SetLogy();
+
+  tcl_hist[0]->GetYaxis()->SetMaxDigits(3);
+
+  id_canva = "tcl";
+
+  tcl_hist[0]->GetXaxis()->CenterTitle();
+  tcl_hist[0]->GetYaxis()->CenterTitle();
+  //tcl_hist[0]->GetXaxis()->SetTitle("T0step1 [ns]");
+  tcl_hist[0]->GetYaxis()->SetTitle("Counts");
+  if (canvas[0][29]->GetLogy())
+    tcl_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * tcl_hist[0]->GetMaximum());
+  else
+    tcl_hist[0]->GetYaxis()->SetRangeUser(0.0, 1.3 * tcl_hist[0]->GetMaximum());
+  tcl_hist[0]->SetLineColor(kBlack);
+  tcl_hist[1]->SetLineColor(kRed);
+  tcl_hist[0]->Draw();
+  tcl_hist[1]->Draw("SAME");
+  canvas[0][29]->Print(id_canva + ext);
+  //!
 
   for (Int_t j = 0; j < 2; j++)
   {
@@ -639,55 +831,6 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
     legend->Clear();
   }
-
-  //! Chi2 and Prob histos
-
-  canvas[0][11]->SetRightMargin(0.15);
-  canvas[0][11]->SetLeftMargin(0.17);
-  canvas[0][11]->cd();
-
-  chi2_hist[0]->GetYaxis()->SetMaxDigits(3);
-
-  id_canva = "chi2_dist";
-  x_title = "#chi^{2}_{tri}";
-  y_title = "Counts";
-
-  chi2_hist[0]->GetXaxis()->CenterTitle();
-  chi2_hist[0]->GetYaxis()->CenterTitle();
-  chi2_hist[0]->GetXaxis()->SetTitle(x_title);
-  chi2_hist[0]->GetYaxis()->SetTitle(y_title);
-  chi2_hist[0]->GetYaxis()->SetRangeUser(0.0, 1.3 * chi2_hist[0]->GetMaximum());
-  chi2_hist[0]->SetLineColor(kBlack);
-  chi2_hist[1]->SetLineColor(kRed);
-  chi2_hist[0]->Draw();
-  chi2_hist[1]->Draw("SAME");
-  canvas[0][11]->Print(id_canva + ext);
-  //!
-  canvas[0][12]->SetRightMargin(0.15);
-  canvas[0][12]->SetLeftMargin(0.17);
-  canvas[0][12]->cd();
-  canvas[0][12]->SetLogy();
-
-  prob_hist[0]->GetYaxis()->SetMaxDigits(3);
-
-  id_canva = "prob";
-  x_title = Form("Prob(#chi^{2}_{tri},%d)", M);
-  y_title = "Counts";
-
-  prob_hist[0]->GetXaxis()->CenterTitle();
-  prob_hist[0]->GetYaxis()->CenterTitle();
-  prob_hist[0]->GetXaxis()->SetTitle(x_title);
-  prob_hist[0]->GetYaxis()->SetTitle("Counts");
-  if (canvas[0][12]->GetLogy())
-    prob_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * prob_hist[0]->GetMaximum());
-  else
-    prob_hist[0]->GetYaxis()->SetRangeUser(0.0, 1.3 * prob_hist[0]->GetMaximum());
-  prob_hist[0]->SetLineColor(kBlack);
-  prob_hist[1]->SetLineColor(kRed);
-  prob_hist[0]->Draw();
-  prob_hist[1]->Draw("SAME");
-  canvas[0][12]->Print(id_canva + ext);
-  //!
 
   std::cout << "Events all: " << counts_all << " "
             << "Events: " << counts << std::endl;

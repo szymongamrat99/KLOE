@@ -28,11 +28,11 @@
 
 using namespace std;
 
-const Int_t N_free = 24, N_const = 4, M = 5, jmin = -10, jmax = 10, range = (jmax - jmin) + 1;
+const Int_t N_free = 24, N_const = 4, M = 5, jmin = 0, jmax = 0, range = (jmax - jmin) + 1;
 Int_t j_ch, k_ch;
 const Float_t Trf = 2.715; // ns - time of a bunch (correction)
 
-const Int_t loopcount = 10;
+const Int_t loopcount = 100;
 
 TF1 *constraints[M];
 
@@ -139,7 +139,6 @@ Int_t main(int argc, char *argv[])
 	constraints[2] = new TF1("x consv", &x_consv, 0, 1, N_free + N_const);
 	constraints[3] = new TF1("y consv", &y_consv, 0, 1, N_free + N_const);
 	constraints[4] = new TF1("z consv", &z_consv, 0, 1, N_free + N_const);
-
 	// constraints[5] = new TF1("gamma1 consv", &gamma1_consv, 0, 1, N_free + N_const);
 	// constraints[6] = new TF1("gamma2 consv", &gamma2_consv, 0, 1, N_free + N_const);
 	// constraints[7] = new TF1("gamma3 consv", &gamma3_consv, 0, 1, N_free + N_const);
@@ -154,8 +153,8 @@ Int_t main(int argc, char *argv[])
 		chain->GetEntry(i);
 
 		min_value_def = 999999.;
-		FUNVALMIN = 1E15;
-		CHISQRMIN = 1E15;
+		FUNVALMIN = 999999.;
+		CHISQRMIN = 999999.;
 
 		isConverged = 0;
 
@@ -250,7 +249,7 @@ Int_t main(int argc, char *argv[])
 																			 pow(neu_vtx[l][1] - ip_tmp[l][1], 2) +
 																			 pow(neu_vtx[l][2] - ip_tmp[l][2], 2));
 
-										value[l] = /*sqrt(pow(neu_vtx[l][3] - (dist_tmp[l]/kaon_vel_tmp[l]),2) +*/ abs(fourKnetri_tmp[l][5] - m_k0);
+										value[l] = sqrt(pow(neu_vtx[l][3] - (dist_tmp[l]/kaon_vel_tmp[l]),2) + pow(fourKnetri_tmp[l][5] - m_k0,2));
 
 										if (TMath::IsNaN(value[l]))
 											value[l] = 999999.;
@@ -264,7 +263,7 @@ Int_t main(int argc, char *argv[])
 
 								TMath::Sort(range, value_first, sort_index, kFALSE);
 
-								X_init(27) = n_bunch + sort_index[0];
+								X_init(27) = 0;//n_bunch + sort_index[0];
 
 								for (Int_t k = 0; k < 4; k++)
 								{
@@ -391,9 +390,6 @@ Int_t main(int argc, char *argv[])
 									V_init = V;
 									C_min = C_aux;
 									L_min = L_aux;
-
-									C_min.Print();
-									std::cout << Dot(L_min,C_min) << std::endl;
 
 									g4takentri_kinfit[0] = ind_gam[0];
 									g4takentri_kinfit[1] = ind_gam[1];

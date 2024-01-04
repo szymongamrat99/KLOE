@@ -23,9 +23,9 @@ Int_t main(int argc, char *argv[])
 
 	// Branches' addresses
 	// Bhabha vars
-	Int_t ntmc, nvtxmc;
+	Int_t ntmc, nvtxmc, nclu;
 	UChar_t pidmc[200], vtxmc[200], mother[200], mctruth = 0, mcflag = 0;
-	Float_t pos_mc[3][200], mom_mc[3][200], Knemc[9];
+	Float_t pos_mc[3][200], mom_mc[3][200], Knemc[9], cluster_rec[3][200];
 
 	chain->SetBranchAddress("ntmc", &ntmc);
 	chain->SetBranchAddress("nvtxmc", &nvtxmc);
@@ -44,6 +44,11 @@ Int_t main(int argc, char *argv[])
 
 	chain->SetBranchAddress("Knemc", Knemc);
 
+	chain->SetBranchAddress("nclu", &nclu);
+	chain->SetBranchAddress("Xcl", cluster_rec[0]);
+	chain->SetBranchAddress("Ycl", cluster_rec[1]);
+	chain->SetBranchAddress("Zcl", cluster_rec[2]);
+
 	chain->SetBranchAddress("mctruth", &mctruth);
 	chain->SetBranchAddress("mcflag", &mcflag);
 
@@ -56,7 +61,9 @@ Int_t main(int argc, char *argv[])
 	TBranch *b_pgammc3 = tree->Branch("pgammc3", pgammc[2], "pgammc3[7]/F");
 	TBranch *b_pgammc4 = tree->Branch("pgammc4", pgammc[3], "pgammc4[7]/F");
 
-	Int_t count = 0;
+	Int_t count = 0, ind_gam[4];
+	const Int_t max_count = TMath::Factorial(4);
+	Float_t clus_diff[max_count], clus_diff_min;
 
 	for (Int_t i = 0; i < nentries; i++)
 	{
@@ -88,6 +95,19 @@ Int_t main(int argc, char *argv[])
 					count++;
 				}
 			}
+
+			for(Int_t j1 = 0; j1 < nclu - 3; j1++)
+				for(Int_t j2 = j1 + 1; j2 < nclu - 2; j2++)
+					for(Int_t j3 = j2 + 1; j3 < nclu - 1; j3++)
+						for(Int_t j4 = j3 + 1; j4 < nclu; j4++)
+						{
+							ind_gam[0] = j1;
+							ind_gam[1] = j2;
+							ind_gam[2] = j3;
+							ind_gam[3] = j4;
+
+
+						}
 
 			count = 0;
 		}
