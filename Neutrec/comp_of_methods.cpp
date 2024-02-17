@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+
 #include <TMath.h>
 #include <TLorentzVector.h>
 #include <TFile.h>
@@ -14,7 +16,7 @@
 #include <TVectorD.h>
 #include <TPaveText.h>
 
-#include "chain_init.C"
+#include "src/chain_init.C"
 #include "../../Include/const.h"
 #include "../../Include/Codes/kloe_class.h"
 #include "../../Include/Codes/interf_function.h"
@@ -22,10 +24,11 @@
 #include "../../Include/Codes/uncertainties.h"
 #include "../../Include/Codes/lorentz_transf.h"
 #include "../../Include/Codes/triple_gaus.h"
+#include "../../Include/Codes/arrays_equality.h"
 
 const TString ext = ".png";
 
-int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int_t file_num = 0, Double_t cut_prob = 0.0)
+int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int_t file_num = 0, Double_t cut_prob = 0.0, Double_t time_cut = 100.0)
 {
   TChain *chain = new TChain("INTERF/h1");
   chain_init(chain, first, last);
@@ -33,21 +36,24 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
   TString file_name[3];
 
   file_name[0] = "neuvtx_tri_kin_fit_1_56_100_5_no_time.root";
-  file_name[1] = "neuvtx_tri_kin_fit_" + std::to_string(first) + "_" + std::to_string(last) + "_" + std::to_string(loopcount) + "_" + std::to_string(M) + ".root";//"neuvtx_tri_kin_fit_1_56_30_5_time.root";
+  file_name[1] = "neuvtx_tri_kin_fit_" + std::to_string(first) + "_" + std::to_string(last) + "_" + std::to_string(loopcount) + "_" + std::to_string(M) + ".root"; //"neuvtx_tri_kin_fit_1_56_30_5_time.root";
   file_name[2] = "neuvtx_tri_rec_1_56.root";
 
   TFile *file = new TFile(file_name[file_num]);
   TTree *tree;
 
-  if(file_num == 0 || file_num == 1)
+  if (file_num == 0 || file_num == 1)
     tree = (TTree *)file->Get("h_tri_kin_fit");
   else
     tree = (TTree *)file->Get("h_tri");
 
+  TFile *file_gen = new TFile("../Generated_vars/gen_vars_1_56.root");
+  TTree *tree_gen = (TTree *)file_gen->Get("h_gen_vars");
+
   Float_t Kchboost[9], Knereclor[9], Knerec[9],
       Kchmc[9], Knemc[9], ip[3], ipmc[3], phi_mom[4], Dtmc, Tcl[50],
       cluster[5][200], bhabha_vtx[3], T0step1;
-  UChar_t mctruth, mcisr;
+  UChar_t mctruth, mcisr, g4taken[4];
   UChar_t pidmc[200], vtxmc[200], mother[200];
   Int_t ntmc, nvtxmc, nclu;
 
@@ -72,10 +78,10 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
   chain->SetBranchAddress("ipmc", ipmc);
 
   chain->SetBranchAddress("ntmc", &ntmc);
-	chain->SetBranchAddress("nvtxmc", &nvtxmc);
+  chain->SetBranchAddress("nvtxmc", &nvtxmc);
   chain->SetBranchAddress("pidmc", pidmc);
-	chain->SetBranchAddress("vtxmc", vtxmc);
-	chain->SetBranchAddress("mother", mother);
+  chain->SetBranchAddress("vtxmc", vtxmc);
+  chain->SetBranchAddress("mother", mother);
 
   chain->SetBranchAddress("mcisr", &mcisr);
   chain->SetBranchAddress("T0step1", &T0step1);
@@ -89,13 +95,15 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   chain->SetBranchAddress("Dtmc", &Dtmc);
 
-  Float_t gamma_kinfit[4][8], ip_kinfit[3], Knetri_kinfit[10], chi2min, bhabha_mom_err[4];
-  Int_t done_kinfit, g4taken_kinfit[4], bunchnum;
+  chain->SetBranchAddress("g4taken", g4taken);
+
+  Float_t gamma_kinfit[4][8], ip_kinfit[3], Knetri_kinfit[10], chi2min, bhabha_mom_err[4], sol1[4], sol2[4], sol1err, sol2err;
+  Int_t done_kinfit, g4taken_kinfit[4], bunchnum, chosen, region[4], clusindgood[4];
   TMatrixD *cov_matrix = new TMatrixD(27, 27);
   TVectorD *min_const = new TVectorD(M);
   TVectorD *lag_mult = new TVectorD(M), *X_min = new TVectorD(27), *X_init = new TVectorD(27);
 
-  if(file_num == 0 || file_num == 1)
+  if (file_num == 0 || file_num == 1)
   {
     tree->SetBranchAddress("fourgamma1tri_kinfit", gamma_kinfit[0]);
     tree->SetBranchAddress("fourgamma2tri_kinfit", gamma_kinfit[1]);
@@ -107,7 +115,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     tree->SetBranchAddress("iptri_kinfit", ip_kinfit);
     tree->SetBranchAddress("done4_kinfit", &done_kinfit);
 
-    if(file_num == 1)
+    tree->SetBranchAddress("g4takentri_kinfit", g4taken_kinfit);
+
+    if (file_num == 1)
       tree->SetBranchAddress("bunchnum", &bunchnum);
 
     tree->SetBranchAddress("chi2min", &chi2min);
@@ -127,11 +137,24 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
     tree->SetBranchAddress("fourKnetri", Knetri_kinfit);
 
+    tree->SetBranchAddress("sol1", sol1);
+    tree->SetBranchAddress("sol2", sol2);
+    tree->SetBranchAddress("sol1err", &sol1err);
+    tree->SetBranchAddress("sol2err", &sol2err);
+
+    tree->SetBranchAddress("chosen", &chosen);
+
+    tree->SetBranchAddress("fourg4taken", g4taken_kinfit);
+
     tree->SetBranchAddress("iptri", ip_kinfit);
     tree->SetBranchAddress("done4", &done_kinfit);
   }
 
+  tree_gen->SetBranchAddress("region", region);
+  tree_gen->SetBranchAddress("clusindgood", clusindgood);
+
   chain->AddFriend(tree);
+  chain->AddFriend(tree_gen);
 
   UInt_t nentries = (UInt_t)chain->GetEntries();
 
@@ -142,16 +165,16 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   TString id_hist, id_canva;
 
-  TCanvas *canvas[2][40], *canvas_pulls[2][24];
+  TCanvas *canvas[2][100], *canvas_pulls[2][24];
   Int_t width = 750, height = 750;
 
-  TH1 *chi2_hist[2], *prob_hist[2];
+  TH1 *chi2_hist[2], *prob_hist[2], *clusenergy_hist[2];
   TH1 *beta_hist[2];
   TH2 *neu_vtx_corr[2][4], *neu_mom[2][4], *ip_coor[2][3];
-  TH2 *beta_time[2][2];
+  TH2 *beta_time[2][2], *cluscorr_hist[2][2];
 
-  TH2 *sigmas_std[2][5], *sigmas_tri[2][5], *sigmas_tri_kin_fit[2][5];
-  TH1 *neu_std_hist[2][5], *neu_tri_hist[2][5], *neu_tri_kin_fit_hist[2][5];
+  TH2 *sigmas_std[2][5], *sigmas_tri[2][5], *sigmas_tri_kin_fit[2][5], *angle_vs_time[2][2], *dist_vs_time[2][2], *sol_err_hist[2];
+  TH1 *neu_std_hist[2][5], *neu_tri_hist[2][5], *neu_tri_kin_fit_hist[2][5], *chosen_hist[2];
   TH1 *res_std_hist[2][5], *res_tri_hist[2][5], *res_tri_kin_fit_hist[2][5];
   TH1 *pulls[2][8], *first_clus_hist[2];
   TH1 *bunch[2], *pidmc_hist[2], *mcisr_hist[2], *tcl_hist[2];
@@ -162,7 +185,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   for (Int_t j = 0; j < 2; j++)
   {
-    for (Int_t i = 0; i < 40; i++)
+    for (Int_t i = 0; i < 100; i++)
     {
       id_canva = "Canva" + std::to_string(j) + std::to_string(i);
       canvas[j][i] = new TCanvas(id_canva, "", width, height);
@@ -187,10 +210,10 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     }
 
     id_hist = "Coor" + std::to_string(j) + std::to_string(3);
-    neu_vtx_corr[j][3] = new TH2F(id_hist, "", 200, 0.0, 20.0, 200, 0.0, 20.0);
+    neu_vtx_corr[j][3] = new TH2F(id_hist, "", 200, 0.0, 20.0, 200, -10.0, 30.0);
 
     id_hist = "Mom" + std::to_string(j) + std::to_string(3);
-    neu_mom[j][3] = new TH2F(id_hist, "", 100, 504, 520, 100, 504, 520);
+    neu_mom[j][3] = new TH2F(id_hist, "", 100, 490, 550, 100, 490, 550);
 
     for (Int_t i = 0; i < 8; i++)
     {
@@ -204,11 +227,11 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
       else if (i == 3)
         pulls[j][i] = new TH1F(id_hist, ";E^{tri}_{neu} - E^{gen}_{neu,3} [MeV];Counts", 201, -100, 100);
       else if (i == 4)
-        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,1} - #vec{X}^{gen}_{neu,1} [cm];Counts", 201, -100, 100);
+        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,1} - #vec{X}^{gen}_{neu,1} [cm];Counts", 201, -300, 300);
       else if (i == 5)
-        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,2} - #vec{X}^{gen}_{neu,2} [cm];Counts", 201, -100, 100);
+        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,2} - #vec{X}^{gen}_{neu,2} [cm];Counts", 201, -300, 300);
       else if (i == 6)
-        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,3} - #vec{X}^{gen}_{neu,3} [cm];Counts", 201, -100, 100);
+        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,3} - #vec{X}^{gen}_{neu,3} [cm];Counts", 201, -300, 300);
       else if (i == 7)
         pulls[j][i] = new TH1F(id_hist, ";t^{tri}_{neu} - t^{gen}_{neu} [#tau_{S}];Counts", 101, -10, 10);
     }
@@ -225,6 +248,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     id_hist = "Bunch_num" + std::to_string(j);
     bunch[j] = new TH1I(id_hist, ";Number of bunch correction;Counts", 101, -10, 10);
 
+    id_hist = "Chosen" + std::to_string(j);
+    chosen_hist[j] = new TH1I(id_hist, ";Chosen solution;Counts", 101, -1, 3);
+
     id_hist = "Pidmc" + std::to_string(j);
     pidmc_hist[j] = new TH1I(id_hist, ";PID;Counts", 101, 0, 20);
 
@@ -235,7 +261,31 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     first_clus_hist[j] = new TH1F(id_hist, ";T_{cl} - #frac{d_{cl}}{c} [ns];Counts", 101, -6.0, 6.0);
 
     id_hist = "Tcl_diff" + std::to_string(j);
-    tcl_hist[j] = new TH1F(id_hist, ";T_{cl,min} - #frac{d_{cl}}{c} - t_{neu} [ns];Counts", 101, -20.0, 50.0);
+    tcl_hist[j] = new TH1F(id_hist, ";T_{cl} - #frac{d_{cl}}{c} - t_{neu} [ns];Counts", 201, -100.0, 50.0);
+
+    id_hist = "Energyofcl" + std::to_string(j);
+    clusenergy_hist[j] = new TH1F(id_hist, ";Inv mass [MeV/c^{2}];Counts", 201, 0.0, 1000.0);
+
+    id_hist = "Angle 0 vs time" + std::to_string(j);
+    angle_vs_time[j][0] = new TH2F(id_hist, ";min(#angle(#vec{p}_{#gamma,i},#vec{p}_{#gamma,j})) [#circ];t^{tri}_{neu} [ns]", 100, 0, 180, 100, -10, 25);
+
+    id_hist = "Angle 180 vs time" + std::to_string(j);
+    angle_vs_time[j][1] = new TH2F(id_hist, ";min(180#circ - #angle(#vec{p}_{#gamma,i},#vec{p}_{#gamma,j})) [#circ];t^{tri}_{neu} [ns]", 100, 0, 180, 100, -10, 25);
+
+    id_hist = "Min dist vs angle 0" + std::to_string(j);
+    dist_vs_time[j][0] = new TH2F(id_hist, ";min(dist(#vec{X}_{cl,i}),dist(#vec{X}_{cl,j})) [cm];min(#angle(#vec{p}_{#gamma,i},#vec{p}_{#gamma,j})) [#circ]", 100, 0, 500, 100, 0, 180);
+
+    id_hist = "Min dist vs angle 180" + std::to_string(j);
+    dist_vs_time[j][1] = new TH2F(id_hist, ";min(dist(#vec{X}_{cl,i}),dist(#vec{X}_{cl,j})) [cm];min(180#circ - #angle(#vec{p}_{#gamma,i},#vec{p}_{#gamma,j})) [#circ]", 100, 0, 500, 100, 0, 180);
+
+    id_hist = "Sol error" + std::to_string(j);
+    sol_err_hist[j] = new TH2F(id_hist, ";c#beta_{K^{0},1} t_{neu,1} - d_{neu,1} [cm];c#beta_{K^{0},2} t_{neu,2} - d_{neu,2} [cm]", 100, -200, 100, 100, -50, 500);
+
+    id_hist = "clus_corr_x_y" + std::to_string(j);
+    cluscorr_hist[j][0] = new TH2F(id_hist, ";x-axis [cm];y-axis [cm]", 100, -250, 250, 100, -250, 250);
+
+    id_hist = "clus_corr_x_z" + std::to_string(j);
+    cluscorr_hist[j][1] = new TH2F(id_hist, ";x-axis [cm];z-axis [cm]", 100, -250, 250, 100, -200, 200);
 
     for (Int_t i = 0; i < 5; i++)
     {
@@ -291,18 +341,21 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     }
   }
 
-  Int_t counts = 0, counts_all = 0;
-  Float_t vec_before[4], vec_after[4], boost[3], ip_before[4], ip_after[4], d_cl;
+  Int_t count_angle = 0, min_ind[6], min_ind_180[6], min_ind_dist[6], isEqual = 0, bad_clus = 0;
+  Float_t vec_before[4], vec_after[4], boost[3], ip_before[4], ip_after[4], d_cl, angle_min_0, angle_min_180, angle[6], angle_180[6], cos_tmp, num, den, dist[6], dist_min, tcl;
 
   Bool_t cut = true;
+
+  Int_t counts_cut = 0, counts_all = 0, counts_bad = 0, counts_good = 0, g4taken_corr[4], counts_bad_smaller = 0, counts_bad_bigger = 0, counts_bad1 = 0, counts_bad2 = 0, counts_bad3 = 0, counts_bad4 = 0;
 
   for (Int_t i = 0; i < nentries; i++)
   {
     chain->GetEntry(i);
 
+    count_angle = 0;
+
     if ((mctruth == 1 || mctruth == 2))
     {
-      counts_all++;
 
       // Kaon path length
       lengthch_mc = sqrt(pow(Kchmc[6] - ipmc[0], 2) + pow(Kchmc[7] - ipmc[1], 2) + pow(Kchmc[8] - ipmc[2], 2));
@@ -310,12 +363,12 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
       lengthneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2) + pow(Knemc[8] - ipmc[2], 2));
       lengthneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2) + pow(Knetri_kinfit[8] - ip_kinfit[2], 2));
-      lengthneu_rec = sqrt(pow(Knetri_kinfit[6] - ip[0], 2) + pow(Knetri_kinfit[7] - ip[1], 2) + pow(Knetri_kinfit[8] - ip[2], 2));
+      lengthneu_rec = sqrt(pow(Knerec[6] - ip[0], 2) + pow(Knerec[7] - ip[1], 2) + pow(Knerec[8] - ip[2], 2));
       //
       // Kaon transverse radius
       Rtneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2));
       Rtneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2));
-      Rtneu_rec = sqrt(pow(Knetri_kinfit[6] - ip[0], 2) + pow(Knetri_kinfit[7] - ip[1], 2));
+      Rtneu_rec = sqrt(pow(Knerec[6] - ip[0], 2) + pow(Knerec[7] - ip[1], 2));
       //
       // Kaon velocity
       v_Kchmc = c_vel * Kchmc[4] / Kchmc[3];
@@ -323,7 +376,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
       v_Kneumc = c_vel * Knemc[4] / Knemc[3];
       v_Kneutri = c_vel * Knetri_kinfit[4] / Knetri_kinfit[3];
-      v_Kneurec = c_vel * Knetri_kinfit[4] / Knetri_kinfit[3];
+      v_Kneurec = c_vel * Knerec[4] / Knerec[3];
       //
       // Kaon flight times
       t_chrec = lengthch_rec / v_Kchrec;
@@ -339,7 +392,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
       angle_path_mom = M_PI * acos(cos_path_mom) / 180.;
       //
       //! Lorentz transformation to get the beta in Phi's CM
-      if(file_num == 0 || file_num == 1)
+      if (file_num == 0 || file_num == 1)
       {
         boost[0] = -(*X_min)(20) / (*X_min)(23);
         boost[1] = -(*X_min)(21) / (*X_min)(23);
@@ -372,65 +425,158 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
         if (cut && done_kinfit == 1)
         {
-          if (j != 0)
-            counts++;
 
-          chi2_hist[j]->Fill(chi2min);
-          prob_hist[j]->Fill(TMath::Prob(chi2min, M));
+          for (Int_t k1 = 0; k1 < 3; k1++)
+            for (Int_t k2 = k1 + 1; k2 < 4; k2++)
+            {
+              num = (gamma_kinfit[k1][0] * gamma_kinfit[k2][0] +
+                     gamma_kinfit[k1][1] * gamma_kinfit[k2][1] +
+                     gamma_kinfit[k1][2] * gamma_kinfit[k2][2]);
 
-          beta_hist[j]->Fill(v_Kneurec / c_vel);
+              den = sqrt(pow(gamma_kinfit[k1][0], 2) +
+                         pow(gamma_kinfit[k1][1], 2) +
+                         pow(gamma_kinfit[k1][2], 2)) *
+                    sqrt(pow(gamma_kinfit[k2][0], 2) +
+                         pow(gamma_kinfit[k2][1], 2) +
+                         pow(gamma_kinfit[k2][2], 2));
 
-          bunch[j]->Fill(bunchnum);
+              cos_tmp = num / den;
+
+              angle[count_angle] = 180. * acos(cos_tmp) / M_PI;
+              angle_180[count_angle] = 180 - angle[count_angle];
+
+              dist[count_angle] = sqrt(pow(gamma_kinfit[k1][4] - gamma_kinfit[k2][4], 2) +
+                                       pow(gamma_kinfit[k1][5] - gamma_kinfit[k2][5], 2) +
+                                       pow(gamma_kinfit[k1][6] - gamma_kinfit[k2][6], 2));
+              count_angle++;
+            }
+
+          TMath::Sort(count_angle, angle, min_ind, kFALSE);
+          TMath::Sort(count_angle, angle_180, min_ind_180, kFALSE);
+          TMath::Sort(count_angle, dist, min_ind_dist, kFALSE);
+
+          count_angle = 0;
+
+          angle_min_0 = angle[min_ind[0]];
+          angle_min_180 = angle_180[min_ind_180[0]];
+          dist_min = dist[min_ind_dist[0]];
+
+          if (j == 0)
+          {
+            counts_all++;
+
+            if (Knetri_kinfit[9] > time_cut)
+              counts_cut++;
+
+            //! Check how many cluster sets are found good and which bad
+
+            for (Int_t k = 0; k < 4; k++)
+              g4taken_corr[k] = g4taken[k] - 1;
+
+            isEqual = arr_eq(clusindgood, g4taken_kinfit);
+
+            bad_clus = isEqual;
+
+            if (isEqual == 0)
+              counts_good++;
+            else
+            {
+              counts_bad++;
+
+              if (gamma_kinfit[0][7] > Knetri_kinfit[9] && gamma_kinfit[1][7] > Knetri_kinfit[9] &&
+                  gamma_kinfit[2][7] > Knetri_kinfit[9] && gamma_kinfit[3][7] > Knetri_kinfit[9])
+                counts_bad_bigger++;
+              else
+                counts_bad_smaller++;
+
+              if (bad_clus == 1)
+                counts_bad1++;
+              if (bad_clus == 2)
+                counts_bad2++;
+              if (bad_clus == 3)
+                counts_bad3++;
+              if (bad_clus == 4)
+                counts_bad4++;
+            }
+          }
+
+          if (isEqual >= 0)
+          {
+            chi2_hist[j]->Fill(chi2min);
+            prob_hist[j]->Fill(TMath::Prob(chi2min, M));
+
+            beta_hist[j]->Fill(v_Kneutri / c_vel);
+
+            bunch[j]->Fill(bunchnum);
+          }
 
           for (Int_t k = 0; k < 3; k++)
-            ip_coor[j][k]->Fill(ipmc[k], ip[k]);
+            ip_coor[j][k]->Fill(ipmc[k], ip_kinfit[k]);
 
           for (Int_t k = 0; k < 5; k++)
           {
             if (k < 3)
             {
-              if(1)//abs(Knemc[6]) <1 && abs(Knemc[7]) <1 && abs(Knemc[8]) <1)
+              if (isEqual >= 0)
               {
                 neu_vtx_corr[j][k]->Fill(Knemc[6 + k], Knetri_kinfit[6 + k]);
-                sigmas_std[j][k]->Fill(abs(Knemc[6 + k] - ip_kinfit[k]), Knetri_kinfit[6 + k] - Knemc[6 + k]);
+                sigmas_std[j][k]->Fill(abs(Knemc[6 + k] - ipmc[k]), Knetri_kinfit[6 + k] - Knemc[6 + k]);
                 pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - Knemc[6 + k]);
                 neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
               }
             }
             else if (k == 3)
             {
-              if(1)//abs(Knemc[6]) <1 && abs(Knemc[7]) <1 && abs(Knemc[8]) <1)
+              if (isEqual >= 0)
               {
-                neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[9]);//Knetri_kinfit[6 + k]);
-                sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
+                neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[9]); // Knetri_kinfit[6 + k]);
+                sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neurec) / tau_S_nonCPT);
                 pulls[j][4 + k]->Fill((Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
                 neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
               }
             }
             else
             {
-              if(1)//abs(Knemc[6]) <1 && abs(Knemc[7]) <1 && abs(Knemc[8]) <1)
+              if (isEqual >= 0)
                 sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_tri - lengthneu_mc));
             }
 
-            if(1)//abs(Knemc[6]) <1 && abs(Knemc[7]) <1 && abs(Knemc[8]) <1)
+            if (isEqual >= 0)
             {
               pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc[k]);
-              pulls[j][4 + k]->Fill(Knetri_kinfit[k] - Knemc[k]);
+              pulls[j][4 + k]->Fill(Knetri_kinfit[4 + k] - Knemc[4 + k]);
             }
           }
 
-          d_cl = sqrt(pow(cluster[0][0] - bhabha_vtx[0],2) + pow(cluster[1][0] - bhabha_vtx[1],2) + pow(cluster[2][0] - bhabha_vtx[2],2));
+          d_cl = sqrt(pow(cluster[0][0] - bhabha_vtx[0], 2) + pow(cluster[1][0] - bhabha_vtx[1], 2) + pow(cluster[2][0] - bhabha_vtx[2], 2));
 
-          if(1)//abs(Knemc[6]) <1 && abs(Knemc[7]) <1 && abs(Knemc[8]) <1)
+          if (isEqual >= 0)
           {
-            for(Int_t k = 0; k < ntmc; k++)
+
+            for (Int_t k = 0; k < ntmc; k++)
               pidmc_hist[j]->Fill(pidmc[k]);
 
-            for(Int_t k = 0; k < 4; k++)
-              tcl_hist[j]->Fill(gamma_kinfit[k][7]);// - (sqrt(pow(gamma_kinfit[0][4] - Knetri_kinfit[6],2) + pow(gamma_kinfit[0][5] - Knetri_kinfit[7],2) + pow(gamma_kinfit[0][6] - Knetri_kinfit[8],2))/c_vel) - t_neurec);
+            angle_vs_time[j][0]->Fill(angle_min_0, Knetri_kinfit[9]);
 
-            first_clus_hist[j]->Fill(cluster[3][0] - (d_cl/c_vel));
+            angle_vs_time[j][1]->Fill(angle_min_180, Knetri_kinfit[9]);
+            dist_vs_time[j][0]->Fill(dist_min, angle_min_0);
+            dist_vs_time[j][1]->Fill(dist_min, angle_min_180);
+
+            sol_err_hist[j]->Fill(sol1err, sol2err);
+            chosen_hist[j]->Fill(chosen);
+
+            for (Int_t k = 0; k < 4; k++)
+            {
+              tcl = gamma_kinfit[k][7] - (sqrt(pow(gamma_kinfit[k][4] - Knetri_kinfit[6], 2) + pow(gamma_kinfit[k][5] - Knetri_kinfit[7], 2) + pow(gamma_kinfit[k][6] - Knetri_kinfit[8], 2)) / c_vel) - Knetri_kinfit[9];
+              tcl_hist[j]->Fill(tcl);
+
+              cluscorr_hist[j][0]->Fill(gamma_kinfit[0][4], gamma_kinfit[1][4]);
+              cluscorr_hist[j][1]->Fill(gamma_kinfit[0][5], gamma_kinfit[1][5]);
+            }
+
+            clusenergy_hist[j]->Fill(Knetri_kinfit[5]);
+
+            first_clus_hist[j]->Fill(cluster[3][0] - (d_cl / c_vel));
 
             mcisr_hist[j]->Fill(mcisr);
           }
@@ -438,6 +584,26 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
       }
     }
   }
+
+  std::ofstream log_file;
+  log_file.open("tri.log");
+
+  log_file << "Events all: " << counts_all << std::endl;
+  log_file << "Events after tneu < 9 ns: " << counts_cut << std::endl;
+  log_file << "Efficiency after tneu < 9 ns: " << counts_cut / (Float_t)counts_all << std::endl;
+  log_file << "Good cluster sets eff: " << counts_good / (Float_t)counts_all << std::endl;
+  log_file << "Bad cluster sets: " << counts_bad << std::endl;
+  log_file << "Bad clusters 1: " << counts_bad1 / (Float_t)counts_bad << std::endl;
+  log_file << "Bad clusters 2: " << counts_bad2 / (Float_t)counts_bad << std::endl;
+  log_file << "Bad clusters 3: " << counts_bad3 / (Float_t)counts_bad << std::endl;
+  log_file << "Bad clusters 4: " << counts_bad4 / (Float_t)counts_bad << std::endl;
+  log_file << "Bad cluster smaller: " << counts_bad_smaller << std::endl;
+  log_file << "Bad cluster bigger: " << counts_bad_bigger << std::endl;
+  log_file << "Bad cluster sets eff: " << counts_bad / (Float_t)counts_all << std::endl;
+  log_file << "Bad cluster smaller eff: " << counts_bad_smaller / (Float_t)counts_bad << std::endl;
+  log_file << "Bad cluster bigger eff: " << counts_bad_bigger / (Float_t)counts_bad << std::endl;
+
+  log_file.close();
 
   TString fit_stats[3];
   TPaveText *fit_text = new TPaveText(0.7, 0.7, 0.9, 0.9, "NDC");
@@ -458,7 +624,25 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
   Color_t res_color[5] = {kRed, kBlue, kGreen, kBlack, kBlack};
   TLegend *legend = new TLegend(0.7, 0.7, 0.9, 0.9, "Axis");
 
-    //! Chi2 and Prob histos
+  //! sol1 and sol2 errors
+  canvas[0][74]->SetRightMargin(0.15);
+  canvas[0][74]->SetLeftMargin(0.17);
+  canvas[0][74]->cd();
+
+  chi2_hist[0]->GetYaxis()->SetMaxDigits(3);
+
+  id_canva = "chosen_solutions";
+
+  chosen_hist[0]->GetXaxis()->CenterTitle();
+  chosen_hist[0]->GetYaxis()->CenterTitle();
+  chosen_hist[0]->GetYaxis()->SetRangeUser(0.0, 1.3 * chosen_hist[0]->GetMaximum());
+  chosen_hist[0]->SetLineColor(kBlack);
+  chosen_hist[1]->SetLineColor(kRed);
+  chosen_hist[0]->Draw();
+  chosen_hist[1]->Draw("SAME");
+  canvas[0][74]->Print(id_canva + ext);
+
+  //! Chi2 and Prob histos
 
   canvas[0][11]->SetRightMargin(0.15);
   canvas[0][11]->SetLeftMargin(0.17);
@@ -519,7 +703,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   pidmc_hist[0]->GetXaxis()->CenterTitle();
   pidmc_hist[0]->GetYaxis()->CenterTitle();
-  //pidmc_hist[0]->GetXaxis()->SetTitle(x_title);
+  // pidmc_hist[0]->GetXaxis()->SetTitle(x_title);
   pidmc_hist[0]->GetYaxis()->SetTitle("Counts");
   if (canvas[0][26]->GetLogy())
     pidmc_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * pidmc_hist[0]->GetMaximum());
@@ -542,7 +726,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   mcisr_hist[0]->GetXaxis()->CenterTitle();
   mcisr_hist[0]->GetYaxis()->CenterTitle();
-  //mcisr_hist[0]->GetXaxis()->SetTitle(x_title);
+  // mcisr_hist[0]->GetXaxis()->SetTitle(x_title);
   mcisr_hist[0]->GetYaxis()->SetTitle("Counts");
   if (canvas[0][27]->GetLogy())
     mcisr_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * mcisr_hist[0]->GetMaximum());
@@ -565,7 +749,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   first_clus_hist[0]->GetXaxis()->CenterTitle();
   first_clus_hist[0]->GetYaxis()->CenterTitle();
-  //first_clus_hist[0]->GetXaxis()->SetTitle("T0step1 [ns]");
+  // first_clus_hist[0]->GetXaxis()->SetTitle("T0step1 [ns]");
   first_clus_hist[0]->GetYaxis()->SetTitle("Counts");
   if (canvas[0][28]->GetLogy())
     first_clus_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * first_clus_hist[0]->GetMaximum());
@@ -589,7 +773,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   tcl_hist[0]->GetXaxis()->CenterTitle();
   tcl_hist[0]->GetYaxis()->CenterTitle();
-  //tcl_hist[0]->GetXaxis()->SetTitle("T0step1 [ns]");
+  // tcl_hist[0]->GetXaxis()->SetTitle("T0step1 [ns]");
   tcl_hist[0]->GetYaxis()->SetTitle("Counts");
   if (canvas[0][29]->GetLogy())
     tcl_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * tcl_hist[0]->GetMaximum());
@@ -608,6 +792,86 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     gStyle->SetStatX(0.85);
     gStyle->SetStatY(0.9);
 
+    id_canva = "Angle0vstime" + std::to_string(j + 1);
+
+    canvas[j][70]->SetRightMargin(0.15);
+    canvas[j][70]->SetLeftMargin(0.17);
+    canvas[j][70]->cd();
+
+    angle_vs_time[j][0]->Draw("COLZ");
+
+    canvas[j][70]->Print(id_canva + ext);
+
+    id_canva = "Angle180vstime" + std::to_string(j + 1);
+
+    canvas[j][71]->SetRightMargin(0.15);
+    canvas[j][71]->SetLeftMargin(0.17);
+    canvas[j][71]->cd();
+
+    angle_vs_time[j][1]->Draw("COLZ");
+
+    canvas[j][71]->Print(id_canva + ext);
+
+    id_canva = "Distvsangle0" + std::to_string(j + 1);
+
+    canvas[j][72]->SetRightMargin(0.15);
+    canvas[j][72]->SetLeftMargin(0.17);
+    canvas[j][72]->cd();
+
+    dist_vs_time[j][0]->Draw("COLZ");
+
+    canvas[j][72]->Print(id_canva + ext);
+
+    id_canva = "Distvsangle180" + std::to_string(j + 1);
+
+    canvas[j][74]->SetRightMargin(0.15);
+    canvas[j][74]->SetLeftMargin(0.17);
+    canvas[j][74]->cd();
+
+    dist_vs_time[j][1]->Draw("COLZ");
+
+    canvas[j][74]->Print(id_canva + ext);
+
+    id_canva = "Solerr" + std::to_string(j + 1);
+
+    canvas[j][73]->SetRightMargin(0.15);
+    canvas[j][73]->SetLeftMargin(0.17);
+    canvas[j][73]->cd();
+
+    sol_err_hist[j]->Draw("COLZ");
+
+    canvas[j][73]->Print(id_canva + ext);
+
+    id_canva = "Clusenergy" + std::to_string(j + 1);
+
+    canvas[j][75]->SetRightMargin(0.15);
+    canvas[j][75]->SetLeftMargin(0.17);
+    canvas[j][75]->cd();
+
+    clusenergy_hist[j]->Draw();
+
+    canvas[j][75]->Print(id_canva + ext);
+
+    id_canva = "Cluscorr_x_y_" + std::to_string(j + 1);
+
+    canvas[j][76]->SetRightMargin(0.15);
+    canvas[j][76]->SetLeftMargin(0.17);
+    canvas[j][76]->cd();
+
+    cluscorr_hist[j][0]->Draw("COLZ");
+
+    canvas[j][76]->Print(id_canva + ext);
+
+    id_canva = "Cluscorr_x_z_" + std::to_string(j + 1);
+
+    canvas[j][77]->SetRightMargin(0.15);
+    canvas[j][77]->SetLeftMargin(0.17);
+    canvas[j][77]->cd();
+
+    cluscorr_hist[j][1]->Draw("COLZ");
+
+    canvas[j][77]->Print(id_canva + ext);
+
     for (Int_t i = 0; i < 3; i++)
     {
       canvas[j][i]->SetRightMargin(0.15);
@@ -615,8 +879,8 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
       canvas[j][i]->cd();
 
       id_canva = "coor" + std::to_string(j + 1) + std::to_string(i + 1);
-      x_title = Form("#vec{X}_{neu,%d}^{gen} [cm]", i + 1);
-      y_title = Form("#vec{X}_{neu,%d}^{tri} [cm]", i + 1);
+      x_title = Form("#vec{X}_{neu,%d}^{gen}[cm]", i + 1);
+      y_title = Form("#vec{X}_{neu,%d}^{tri}[cm]", i + 1);
 
       neu_vtx_corr[j][i]->GetXaxis()->SetTitle(x_title);
       neu_vtx_corr[j][i]->GetYaxis()->SetTitle(y_title);
@@ -658,8 +922,8 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     canvas[j][3]->cd();
 
     id_canva = "time_neutral" + std::to_string(j + 1);
-    x_title = Form("t_{neu}^{gen} [ns]");
-    y_title = Form("t_{neu}^{tri} [ns]");
+    x_title = Form("t_{neu}^{gen} - t_{neu}^{gen} [ns]");
+    y_title = Form("t_{neu}^{tri} - t_{neu}^{gen} [ns]");
 
     neu_vtx_corr[j][3]->GetXaxis()->SetTitle(x_title);
     neu_vtx_corr[j][3]->GetYaxis()->SetTitle(y_title);
@@ -777,7 +1041,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     //!
     id_canva = "sigmas_std_coordinates" + std::to_string(j + 1);
     x_title = "|#vec{X}^{gen}_{K#rightarrow#pi^{0}#pi^{0},i} - #vec{X}^{gen}_{#Phi,i}| [cm]";
-    y_title = "#sigma(#vec{X}^{rec}_{K#rightarrow#pi^{0}#pi^{0},i} - #vec{X}^{gen}_{K#rightarrow#pi^{0}#pi^{0},i}) [cm]";
+    y_title = "#sigma(#vec{X}^{tri}_{K#rightarrow#pi^{0}#pi^{0},i} - #vec{X}^{gen}_{K#rightarrow#pi^{0}#pi^{0},i}) [cm]";
 
     canvas[j][22]->cd();
     res_std_hist[j][0]->SetXTitle(x_title);
@@ -791,7 +1055,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     //!
     id_canva = "sigmas_std_times" + std::to_string(j + 1);
     x_title = "K#rightarrow#pi^{0}#pi^{0} path generated [cm]";
-    y_title = "#sigma(t_{K#rightarrow#pi^{0}#pi^{0}}^{rec} - t_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [#tau_{S}]";
+    y_title = "#sigma(t_{K#rightarrow#pi^{0}#pi^{0}}^{tri} - t_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [#tau_{S}]";
     canvas[j][23]->cd();
     res_std_hist[j][3]->SetXTitle(x_title);
     res_std_hist[j][3]->SetYTitle(y_title);
@@ -801,7 +1065,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     //!
     id_canva = "sigmas_std_length" + std::to_string(j + 1);
     x_title = "K#rightarrow#pi^{0}#pi^{0} path generated [cm]";
-    y_title = "#sigma(l_{K#rightarrow#pi^{0}#pi^{0}}^{rec} - l_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [#tau_{S}]";
+    y_title = "#sigma(l_{K#rightarrow#pi^{0}#pi^{0}}^{tri} - l_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [#tau_{S}]";
     canvas[j][24]->cd();
     res_std_hist[j][4]->SetXTitle(x_title);
     res_std_hist[j][4]->SetYTitle(y_title);
@@ -831,10 +1095,6 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
     legend->Clear();
   }
-
-  std::cout << "Events all: " << counts_all << " "
-            << "Events: " << counts << std::endl;
-  std::cout << "Efficiency: " << counts / (Float_t)counts_all << std::endl;
 
   return 0;
 }

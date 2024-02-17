@@ -55,7 +55,7 @@ Int_t main(int argc, char *argv[])
 	Int_t nentries = (Int_t)chain->GetEntries();
 
 	Float_t pgammc[4][7], neu_vtx[3], cluster[3];
-	Int_t good_clus_ind[4];
+	Int_t good_clus_ind[4],region[4];
 
 	TBranch *b_pgammc1 = tree->Branch("pgammc1", pgammc[0], "pgammc1[7]/F");
 	TBranch *b_pgammc2 = tree->Branch("pgammc2", pgammc[1], "pgammc2[7]/F");
@@ -64,9 +64,13 @@ Int_t main(int argc, char *argv[])
 
 	TBranch *b_clusindgood = tree->Branch("clusindgood", good_clus_ind, "clusindgood[4]/I");
 
+	TBranch *b_region = tree->Branch("region", region, "region[4]/I");
+
 	const Int_t max_count = TMath::Factorial(nclus);
 	Int_t count = 0, ind_gam[4], mc_ind[4] = {0,1,2,3}, min_ind[max_count];
 	Float_t clus_diff[max_count], clus_diff_min;
+
+	Bool_t clus_time[max_count];
 
 	for (Int_t i = 0; i < nentries; i++)
 	{
@@ -91,7 +95,7 @@ Int_t main(int argc, char *argv[])
 					neu_vtx[1] = Knemc[7];
 					neu_vtx[2] = Knemc[8];
 
-					inter_point(pgammc[count], neu_vtx, cluster);
+					region[count] = inter_point(pgammc[count], neu_vtx, cluster);
 
 					pgammc[count][4] = cluster[0];
 					pgammc[count][5] = cluster[1];
@@ -125,7 +129,10 @@ Int_t main(int argc, char *argv[])
 															 sqrt(pow(cluster_rec[0][ind_gam[3]] - pgammc[mc_ind[3]][4],2) +
 																		pow(cluster_rec[1][ind_gam[3]] - pgammc[mc_ind[3]][5],2) +
 																		pow(cluster_rec[2][ind_gam[3]] - pgammc[mc_ind[3]][6],2));
-								TMath::Permute(nclus, mc_ind);
+								
+								clus_time[k] = pgammc[mc_ind[0]][7] > 0. && pgammc[mc_ind[1]][7] > 0. && pgammc[mc_ind[2]][7] > 0. && pgammc[mc_ind[3]][7] > 0.;
+
+								std::next_permutation(mc_ind, mc_ind+4);
 							}
 
 							TMath::Sort(max_count, clus_diff, min_ind, kFALSE);
@@ -139,6 +146,7 @@ Int_t main(int argc, char *argv[])
 								good_clus_ind[2] = ind_gam[2];
 								good_clus_ind[3] = ind_gam[3];
 							}
+
 
 						}
 
