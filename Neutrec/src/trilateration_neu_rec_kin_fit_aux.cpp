@@ -29,7 +29,7 @@
 
 using namespace std;
 
-const Int_t N_free = 24, N_const = 4, M = 9, jmin = 0, jmax = 0, range = (jmax - jmin) + 1;
+const Int_t N_free = 24, N_const = 4, M = 9, jmin = -3, jmax = 3, range = (jmax - jmin) + 1;
 Int_t j_ch, k_ch;
 const Float_t Trf = 2.715; // ns - time of a bunch (correction)
 
@@ -45,6 +45,7 @@ Int_t selected[4] = {1, 2, 3, 4};
 
 void tri_neurec_kinfit_corr(int first_file, int last_file)
 {
+
 	gErrorIgnoreLevel = 6001;
 
 	TChain *chain = new TChain("INTERF/h1");
@@ -131,7 +132,7 @@ void tri_neurec_kinfit_corr(int first_file, int last_file)
 	constraints[7] = new TF1("gamma3 consv", &gamma3_consv, 0, 1, N_free + N_const);
 	constraints[8] = new TF1("gamma4 consv", &gamma4_consv, 0, 1, N_free + N_const);
 
-	TH1 *chi2 = new TH1F("chi2", "", 100, -500.0, 500.0);
+	TH1 *chi2 = new TH1F("chi2", "", 100, -10.0, 30.0);
 
 	for (Int_t i = 0; i < nentries; i++)
 	{
@@ -285,16 +286,18 @@ void tri_neurec_kinfit_corr(int first_file, int last_file)
 										}
 									}
 
+									T0 = X(27) * Trf;
+
 									Reconstructor R;
 									Solution S;
 
 									for (Int_t k = 0; k < 4; k++)
 									{
-										R.SetClu(k, X_min[k * 5],
-														 X_min[k * 5 + 1],
-														 X_min[k * 5 + 2],
-														 X_min[k * 5 + 3] + T0,
-														 X_min[k * 5 + 4]);
+										R.SetClu(k, X[k * 5],
+														 X[k * 5 + 1],
+														 X[k * 5 + 2],
+														 X[k * 5 + 3] + T0,
+														 X[k * 5 + 4]);
 
 										R.SetClu(4, 0., 0., 0., 0., 0.);
 										R.SetClu(5, 0., 0., 0., 0., 0.);
@@ -302,15 +305,82 @@ void tri_neurec_kinfit_corr(int first_file, int last_file)
 
 									S = R.MySolve(selected);
 
+									Float_t distance[4] = {0.};
+
+									for (Int_t k = 0; k < 2; k++)
+									{
+										if (!S.error[k])
+										{
+											neu_vtx[k][0] = S.sol[k][0];
+											neu_vtx[k][1] = S.sol[k][1];
+											neu_vtx[k][2] = S.sol[k][2];
+											neu_vtx[k][3] = S.sol[k][3];
+										}
+										else
+										{
+											neu_vtx[k][0] = 999.;
+											neu_vtx[k][1] = 999.;
+											neu_vtx[k][2] = 999.;
+											neu_vtx[k][3] = 999.;
+										}
+
+										for (Int_t l = 0; l < 4; l++)
+										{
+											distance[l] = sqrt(pow(X[l * 5] - neu_vtx[k][0], 2) +
+																				 pow(X[l * 5 + 1] - neu_vtx[k][1], 2) +
+																				 pow(X[l * 5 + 2] - neu_vtx[k][2], 2));
+
+											gamma_mom_tmp[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[k][0]) / distance[l]);
+											gamma_mom_tmp[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[k][1]) / distance[l]);
+											gamma_mom_tmp[l][2] = X[l * 5 + 4] * ((X[l * 5 + 2] - neu_vtx[k][2]) / distance[l]);
+											gamma_mom_tmp[l][3] = X[l * 5 + 4];
+
+											gamma_mom_tmp[l][4] = X[l * 5];
+											gamma_mom_tmp[l][5] = X[l * 5 + 1];
+											gamma_mom_tmp[l][6] = X[l * 5 + 2];
+											gamma_mom_tmp[l][7] = X[l * 5 + 3] + T0;
+										}
+
+										fourKnetri_tmp[k][0] = gamma_mom_tmp[0][0] + gamma_mom_tmp[1][0] + gamma_mom_tmp[2][0] + gamma_mom_tmp[3][0];
+										fourKnetri_tmp[k][1] = gamma_mom_tmp[0][1] + gamma_mom_tmp[1][1] + gamma_mom_tmp[2][1] + gamma_mom_tmp[3][1];
+										fourKnetri_tmp[k][2] = gamma_mom_tmp[0][2] + gamma_mom_tmp[1][2] + gamma_mom_tmp[2][2] + gamma_mom_tmp[3][2];
+										fourKnetri_tmp[k][3] = gamma_mom_tmp[0][3] + gamma_mom_tmp[1][3] + gamma_mom_tmp[2][3] + gamma_mom_tmp[3][3];
+
+										fourKnetri_tmp[k][4] = sqrt(pow(fourKnetri_tmp[k][0], 2) + pow(fourKnetri_tmp[k][1], 2) + pow(fourKnetri_tmp[k][2], 2));
+										fourKnetri_tmp[k][5] = sqrt(pow(fourKnetri_tmp[k][3], 2) - pow(fourKnetri_tmp[k][4], 2));
+
+										kaon_vel_tmp[k] = c_vel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
+
+										y_axis[0] = 0.;
+										y_axis[1] = X[21];
+										y_axis[2] = 0.;
+
+										plane_intersection(bhabha_vtx, y_axis, neu_vtx[k], fourKnetri_tmp[k], ip_tmp[k]);
+
+										ip_tmp[k][0] = bhabha_vtx[0];
+										ip_tmp[k][1] = bhabha_vtx[1];
+										if (abs(ip_tmp[k][2] - bhabha_vtx[2]) > 2)
+											ip_tmp[k][2] = bhabha_vtx[2];
+
+										dist_tmp[k] = sqrt(pow(neu_vtx[k][0] - ip_tmp[k][0], 2) +
+																			 pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
+																			 pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
+
+										value[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - m_k0, 2));
+
+										if (TMath::IsNaN(value[k]))
+											value[k] = 999999.;
+									}
+
 									Bool_t cond_time_clus[2];
 
-									cond_time_clus[0] = S.sol[0][3] < X(3) && S.sol[0][3] < X(8) && S.sol[0][3] < X(13) && S.sol[0][3] < X(18);
+									cond_time_clus[0] = S.sol[0][3] < X(3) + T0 && S.sol[0][3] < X(8) + T0 && S.sol[0][3] < X(13) + T0 && S.sol[0][3] < X(18) + T0;
 
-									cond_time_clus[1] = S.sol[1][3] < X(3) && S.sol[1][3] < X(8) && S.sol[1][3] < X(13) && S.sol[1][3] < X(18);
+									cond_time_clus[1] = S.sol[1][3] < X(3) + T0 && S.sol[1][3] < X(8) + T0 && S.sol[1][3] < X(13) + T0 && S.sol[1][3] < X(18) + T0;
 
 									if (abs(CHISQRTMP) < abs(CHISQRMIN))
 									{
-										if( cond_time_clus[0] )
+										if (cond_time_clus[0] && value[0] < value[1])
 										{
 											isConverged = 1;
 											FUNVALMIN = FUNVALTMP;
@@ -327,8 +397,46 @@ void tri_neurec_kinfit_corr(int first_file, int last_file)
 											g4takentri_kinfit[1] = ind_gam[1];
 											g4takentri_kinfit[2] = ind_gam[2];
 											g4takentri_kinfit[3] = ind_gam[3];
+
+											neu_vtx_min[0] = neu_vtx[0][0];
+											neu_vtx_min[1] = neu_vtx[0][1];
+											neu_vtx_min[2] = neu_vtx[0][2];
+											neu_vtx_min[3] = neu_vtx[0][3];
+
+											for (Int_t l = 0; l < 4; l++)
+											{
+												distance[l] = sqrt(pow(X[l * 5] - neu_vtx[0][0], 2) +
+																					 pow(X[l * 5 + 1] - neu_vtx[0][1], 2) +
+																					 pow(X[l * 5 + 2] - neu_vtx[0][2], 2));
+
+												gamma_mom_final[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[0][0]) / distance[l]);
+												gamma_mom_final[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[0][1]) / distance[l]);
+												gamma_mom_final[l][2] = X[l * 5 + 4] * ((X[l * 5 + 2] - neu_vtx[0][2]) / distance[l]);
+												gamma_mom_final[l][3] = X[l * 5 + 4];
+												gamma_mom_final[l][4] = X[l * 5];
+												gamma_mom_final[l][5] = X[l * 5 + 1];
+												gamma_mom_final[l][6] = X[l * 5 + 2];
+												gamma_mom_final[l][7] = X[l * 5 + 3] + T0;
+											}
+
+											fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
+											fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
+											fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
+											fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
+											fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
+											fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
+											fourKnetri_kinfit[6] = neu_vtx_min[0];
+											fourKnetri_kinfit[7] = neu_vtx_min[1];
+											fourKnetri_kinfit[8] = neu_vtx_min[2];
+											fourKnetri_kinfit[9] = neu_vtx_min[3];
+
+											iptri_kinfit[0] = ip_tmp[0][0];
+											iptri_kinfit[1] = ip_tmp[0][1];
+											iptri_kinfit[2] = ip_tmp[0][2];
+
+											bunchnum = X(27);
 										}
-										if( cond_time_clus[1] )
+										else if (cond_time_clus[1] && value[1] < value[0])
 										{
 											isConverged = 1;
 											FUNVALMIN = FUNVALTMP;
@@ -345,223 +453,87 @@ void tri_neurec_kinfit_corr(int first_file, int last_file)
 											g4takentri_kinfit[1] = ind_gam[1];
 											g4takentri_kinfit[2] = ind_gam[2];
 											g4takentri_kinfit[3] = ind_gam[3];
+
+											neu_vtx_min[0] = neu_vtx[1][0];
+											neu_vtx_min[1] = neu_vtx[1][1];
+											neu_vtx_min[2] = neu_vtx[1][2];
+											neu_vtx_min[3] = neu_vtx[1][3];
+
+											for (Int_t l = 0; l < 4; l++)
+											{
+												distance[l] = sqrt(pow(X[l * 5] - neu_vtx[1][0], 2) +
+																					 pow(X[l * 5 + 1] - neu_vtx[1][1], 2) +
+																					 pow(X[l * 5 + 2] - neu_vtx[1][2], 2));
+
+												gamma_mom_final[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[1][0]) / distance[l]);
+												gamma_mom_final[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[1][1]) / distance[l]);
+												gamma_mom_final[l][2] = X[l * 5 + 4] * ((X[l * 5 + 2] - neu_vtx[1][2]) / distance[l]);
+												gamma_mom_final[l][3] = X[l * 5 + 4];
+												gamma_mom_final[l][4] = X[l * 5];
+												gamma_mom_final[l][5] = X[l * 5 + 1];
+												gamma_mom_final[l][6] = X[l * 5 + 2];
+												gamma_mom_final[l][7] = X[l * 5 + 3] + T0;
+											}
+
+											fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
+											fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
+											fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
+											fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
+											fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
+											fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
+											fourKnetri_kinfit[6] = neu_vtx_min[0];
+											fourKnetri_kinfit[7] = neu_vtx_min[1];
+											fourKnetri_kinfit[8] = neu_vtx_min[2];
+											fourKnetri_kinfit[9] = neu_vtx_min[3];
+
+											iptri_kinfit[0] = ip_tmp[1][0];
+											iptri_kinfit[1] = ip_tmp[1][1];
+											iptri_kinfit[2] = ip_tmp[1][2];
+
+											bunchnum = X(27);
+										}
+										else
+										{
+											neu_vtx_min[0] = 0.;
+											neu_vtx_min[1] = 999;
+											neu_vtx_min[2] = 999;
+											neu_vtx_min[3] = 999;
+
+											for (Int_t l = 0; l < 4; l++)
+											{
+												gamma_mom_final[l][0] = 999.;
+												gamma_mom_final[l][1] = 999.;
+												gamma_mom_final[l][2] = 999.;
+												gamma_mom_final[l][3] = 999.;
+												gamma_mom_final[l][4] = 999.;
+												gamma_mom_final[l][5] = 999.;
+												gamma_mom_final[l][6] = 999.;
+												gamma_mom_final[l][7] = 999.;
+											}
+
+											fourKnetri_kinfit[0] = 999.;
+											fourKnetri_kinfit[1] = 999.;
+											fourKnetri_kinfit[2] = 999.;
+											fourKnetri_kinfit[3] = 999.;
+											fourKnetri_kinfit[4] = 999.;
+											fourKnetri_kinfit[5] = 999.;
+											fourKnetri_kinfit[6] = 999.;
+											fourKnetri_kinfit[7] = 999.;
+											fourKnetri_kinfit[8] = 999.;
+											fourKnetri_kinfit[9] = 999.;
+
+											iptri_kinfit[0] = 999.;
+											iptri_kinfit[1] = 999.;
+											iptri_kinfit[2] = 999.;
+
+											bunchnum = 999;
 										}
 									}
 								}
 							}
 						}
 
-			if (isConverged == 1)
-			{
-				Reconstructor R;
-				Solution S;
-				T0 = X_min(27) * Trf;
-
-				// Setting clusters for a solution
-				for (Int_t k = 0; k < 4; k++)
-				{
-					R.SetClu(k, X_min[k * 5],
-									 X_min[k * 5 + 1],
-									 X_min[k * 5 + 2],
-									 X_min[k * 5 + 3] + T0,
-									 X_min[k * 5 + 4]);
-
-					R.SetClu(4, 0., 0., 0., 0., 0.);
-					R.SetClu(5, 0., 0., 0., 0., 0.);
-				}
-
-				S = R.MySolve(selected);
-
-				Float_t distance[4] = {0.};
-
-				for (Int_t k = 0; k < 2; k++)
-				{
-
-					if (!S.error[k])
-					{
-						neu_vtx[k][0] = S.sol[k][0];
-						neu_vtx[k][1] = S.sol[k][1];
-						neu_vtx[k][2] = S.sol[k][2];
-						neu_vtx[k][3] = S.sol[k][3];
-					}
-					else
-					{
-						neu_vtx[k][0] = 999.;
-						neu_vtx[k][1] = 999.;
-						neu_vtx[k][2] = 999.;
-						neu_vtx[k][3] = 999.;
-					}
-
-					fourKnetri_tmp[k][0] = 0.;
-					fourKnetri_tmp[k][1] = 0.;
-					fourKnetri_tmp[k][2] = 0.;
-					fourKnetri_tmp[k][3] = 0.;
-
-					for (Int_t l = 0; l < 4; l++)
-					{
-						distance[l] = sqrt(pow(X_min[l * 5] - neu_vtx[k][0], 2) +
-															 pow(X_min[l * 5 + 1] - neu_vtx[k][1], 2) +
-															 pow(X_min[l * 5 + 2] - neu_vtx[k][2], 2));
-
-						// neutral_mom(X_min[l * 5], X_min[l * 5 + 1], X_min[l * 5 + 2], X_min[l * 5 + 4], neu_vtx[k], gamma_mom_tmp[l]);
-
-						gamma_mom_tmp[l][0] = X_min[l * 5 + 4] * ((X_min[l * 5] - neu_vtx[k][0]) / distance[l]);
-						gamma_mom_tmp[l][1] = X_min[l * 5 + 4] * ((X_min[l * 5 + 1] - neu_vtx[k][1]) / distance[l]);
-						gamma_mom_tmp[l][2] = X_min[l * 5 + 4] * ((X_min[l * 5 + 2] - neu_vtx[k][2]) / distance[l]);
-						gamma_mom_tmp[l][3] = X_min[l * 5 + 4];
-
-						gamma_mom_tmp[l][4] = X_min[l * 5];
-						gamma_mom_tmp[l][5] = X_min[l * 5 + 1];
-						gamma_mom_tmp[l][6] = X_min[l * 5 + 2];
-						gamma_mom_tmp[l][7] = X_min[l * 5 + 3] + T0;
-					}
-
-					fourKnetri_tmp[k][0] = gamma_mom_tmp[0][0] + gamma_mom_tmp[1][0] + gamma_mom_tmp[2][0] + gamma_mom_tmp[3][0];
-					fourKnetri_tmp[k][1] = gamma_mom_tmp[0][1] + gamma_mom_tmp[1][1] + gamma_mom_tmp[2][1] + gamma_mom_tmp[3][1];
-					fourKnetri_tmp[k][2] = gamma_mom_tmp[0][2] + gamma_mom_tmp[1][2] + gamma_mom_tmp[2][2] + gamma_mom_tmp[3][2];
-					fourKnetri_tmp[k][3] = gamma_mom_tmp[0][3] + gamma_mom_tmp[1][3] + gamma_mom_tmp[2][3] + gamma_mom_tmp[3][3];
-
-					fourKnetri_tmp[k][4] = sqrt(pow(fourKnetri_tmp[k][0], 2) + pow(fourKnetri_tmp[k][1], 2) + pow(fourKnetri_tmp[k][2], 2));
-					fourKnetri_tmp[k][5] = sqrt(pow(fourKnetri_tmp[k][3], 2) - pow(fourKnetri_tmp[k][4], 2));
-
-					kaon_vel_tmp[k] = c_vel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
-
-					y_axis[0] = 0.;
-					y_axis[1] = X_min[21];
-					y_axis[2] = 0.;
-
-					plane_intersection(bhabha_vtx, y_axis, neu_vtx[k], fourKnetri_tmp[k], ip_tmp[k]);
-
-					ip_tmp[k][0] = bhabha_vtx[0];
-					ip_tmp[k][1] = bhabha_vtx[1];
-					if (abs(ip_tmp[k][2] - bhabha_vtx[2]) > 2)
-						ip_tmp[k][2] = bhabha_vtx[2];
-
-					dist_tmp[k] = sqrt(pow(neu_vtx[k][0] - ip_tmp[k][0], 2) +
-														 pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
-														 pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
-
-					value[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - m_k0, 2));
-
-					if (TMath::IsNaN(value[k]))
-						value[k] = 999999.;
-				}
-
-				bunchnum = X_min(27);
-
-				if (value[0] < value[1])
-				{
-					neu_vtx_min[0] = neu_vtx[0][0];
-					neu_vtx_min[1] = neu_vtx[0][1];
-					neu_vtx_min[2] = neu_vtx[0][2];
-					neu_vtx_min[3] = neu_vtx[0][3];
-
-					for (Int_t l = 0; l < 4; l++)
-					{
-						distance[l] = sqrt(pow(X_min[l * 5] - neu_vtx[0][0], 2) +
-															 pow(X_min[l * 5 + 1] - neu_vtx[0][1], 2) +
-															 pow(X_min[l * 5 + 2] - neu_vtx[0][2], 2));
-
-						gamma_mom_final[l][0] = X_min[l * 5 + 4] * ((X_min[l * 5] - neu_vtx[0][0]) / distance[l]);
-						gamma_mom_final[l][1] = X_min[l * 5 + 4] * ((X_min[l * 5 + 1] - neu_vtx[0][1]) / distance[l]);
-						gamma_mom_final[l][2] = X_min[l * 5 + 4] * ((X_min[l * 5 + 2] - neu_vtx[0][2]) / distance[l]);
-						gamma_mom_final[l][3] = X_min[l * 5 + 4];
-						gamma_mom_final[l][4] = X_min[l * 5];
-						gamma_mom_final[l][5] = X_min[l * 5 + 1];
-						gamma_mom_final[l][6] = X_min[l * 5 + 2];
-						gamma_mom_final[l][7] = X_min[l * 5 + 3] + T0;
-					}
-
-					fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
-					fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
-					fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
-					fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
-					fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
-					fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
-					fourKnetri_kinfit[6] = neu_vtx_min[0];
-					fourKnetri_kinfit[7] = neu_vtx_min[1];
-					fourKnetri_kinfit[8] = neu_vtx_min[2];
-					fourKnetri_kinfit[9] = neu_vtx_min[3];
-
-					iptri_kinfit[0] = ip_tmp[0][0];
-					iptri_kinfit[1] = ip_tmp[0][1];
-					iptri_kinfit[2] = ip_tmp[0][2];
-				}
-				else if (value[1] < value[0])
-				{
-					neu_vtx_min[0] = neu_vtx[1][0];
-					neu_vtx_min[1] = neu_vtx[1][1];
-					neu_vtx_min[2] = neu_vtx[1][2];
-					neu_vtx_min[3] = neu_vtx[1][3];
-
-					for (Int_t l = 0; l < 4; l++)
-					{
-						distance[l] = sqrt(pow(X_min[l * 5] - neu_vtx[1][0], 2) +
-															 pow(X_min[l * 5 + 1] - neu_vtx[1][1], 2) +
-															 pow(X_min[l * 5 + 2] - neu_vtx[1][2], 2));
-
-						gamma_mom_final[l][0] = X_min[l * 5 + 4] * ((X_min[l * 5] - neu_vtx[1][0]) / distance[l]);
-						gamma_mom_final[l][1] = X_min[l * 5 + 4] * ((X_min[l * 5 + 1] - neu_vtx[1][1]) / distance[l]);
-						gamma_mom_final[l][2] = X_min[l * 5 + 4] * ((X_min[l * 5 + 2] - neu_vtx[1][2]) / distance[l]);
-						gamma_mom_final[l][3] = X_min[l * 5 + 4];
-						gamma_mom_final[l][4] = X_min[l * 5];
-						gamma_mom_final[l][5] = X_min[l * 5 + 1];
-						gamma_mom_final[l][6] = X_min[l * 5 + 2];
-						gamma_mom_final[l][7] = X_min[l * 5 + 3] + T0;
-					}
-
-					fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
-					fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
-					fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
-					fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
-					fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
-					fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
-					fourKnetri_kinfit[6] = neu_vtx_min[0];
-					fourKnetri_kinfit[7] = neu_vtx_min[1];
-					fourKnetri_kinfit[8] = neu_vtx_min[2];
-					fourKnetri_kinfit[9] = neu_vtx_min[3];
-
-					iptri_kinfit[0] = ip_tmp[1][0];
-					iptri_kinfit[1] = ip_tmp[1][1];
-					iptri_kinfit[2] = ip_tmp[1][2];
-				}
-				else
-				{
-					neu_vtx_min[0] = 999.;
-					neu_vtx_min[1] = 999;
-					neu_vtx_min[2] = 999;
-					neu_vtx_min[3] = 999;
-
-					for (Int_t l = 0; l < 4; l++)
-					{
-						gamma_mom_final[l][0] = 999.;
-						gamma_mom_final[l][1] = 999.;
-						gamma_mom_final[l][2] = 999.;
-						gamma_mom_final[l][3] = 999.;
-						gamma_mom_final[l][4] = 999.;
-						gamma_mom_final[l][5] = 999.;
-						gamma_mom_final[l][6] = 999.;
-						gamma_mom_final[l][7] = 999.;
-					}
-
-					fourKnetri_kinfit[0] = 999.;
-					fourKnetri_kinfit[1] = 999.;
-					fourKnetri_kinfit[2] = 999.;
-					fourKnetri_kinfit[3] = 999.;
-					fourKnetri_kinfit[4] = 999.;
-					fourKnetri_kinfit[5] = 999.;
-					fourKnetri_kinfit[6] = 999.;
-					fourKnetri_kinfit[7] = 999.;
-					fourKnetri_kinfit[8] = 999.;
-					fourKnetri_kinfit[9] = 999.;
-
-					iptri_kinfit[0] = 999.;
-					iptri_kinfit[1] = 999.;
-					iptri_kinfit[2] = 999.;
-				}
-
-				chi2->Fill(fourKnetri_kinfit[0]);
-			}
+			chi2->Fill(neu_vtx_min[3]);
 		}
 
 		tree->Fill();

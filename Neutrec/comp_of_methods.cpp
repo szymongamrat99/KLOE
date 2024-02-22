@@ -500,7 +500,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
             }
           }
 
-          if (isEqual >= 0)
+          if (isEqual == 0)
           {
             chi2_hist[j]->Fill(chi2min);
             prob_hist[j]->Fill(TMath::Prob(chi2min, M));
@@ -517,7 +517,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
           {
             if (k < 3)
             {
-              if (isEqual >= 0)
+              if (isEqual == 0)
               {
                 neu_vtx_corr[j][k]->Fill(Knemc[6 + k], Knetri_kinfit[6 + k]);
                 sigmas_std[j][k]->Fill(abs(Knemc[6 + k] - ipmc[k]), Knetri_kinfit[6 + k] - Knemc[6 + k]);
@@ -527,21 +527,21 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
             }
             else if (k == 3)
             {
-              if (isEqual >= 0)
+              if (isEqual == 0)
               {
                 neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[9]); // Knetri_kinfit[6 + k]);
-                sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neurec) / tau_S_nonCPT);
+                sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
                 pulls[j][4 + k]->Fill((Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
                 neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
               }
             }
             else
             {
-              if (isEqual >= 0)
+              if (isEqual == 0)
                 sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_tri - lengthneu_mc));
             }
 
-            if (isEqual >= 0)
+            if (isEqual == 0)
             {
               pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc[k]);
               pulls[j][4 + k]->Fill(Knetri_kinfit[4 + k] - Knemc[4 + k]);
@@ -550,7 +550,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
           d_cl = sqrt(pow(cluster[0][0] - bhabha_vtx[0], 2) + pow(cluster[1][0] - bhabha_vtx[1], 2) + pow(cluster[2][0] - bhabha_vtx[2], 2));
 
-          if (isEqual >= 0)
+          if (isEqual == 0)
           {
 
             for (Int_t k = 0; k < ntmc; k++)
@@ -922,8 +922,8 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     canvas[j][3]->cd();
 
     id_canva = "time_neutral" + std::to_string(j + 1);
-    x_title = Form("t_{neu}^{gen} - t_{neu}^{gen} [ns]");
-    y_title = Form("t_{neu}^{tri} - t_{neu}^{gen} [ns]");
+    x_title = Form("t_{neu}^{gen} [ns]");
+    y_title = Form("t_{neu}^{tri} [ns]");
 
     neu_vtx_corr[j][3]->GetXaxis()->SetTitle(x_title);
     neu_vtx_corr[j][3]->GetYaxis()->SetTitle(y_title);

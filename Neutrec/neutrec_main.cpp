@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 #include <TMath.h>
 
@@ -8,6 +9,11 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+  using std::chrono::duration;
+  using std::chrono::duration_cast;
+  using std::chrono::high_resolution_clock;
+  using std::chrono::minutes;
+
   Int_t first = atoi(argv[1]), last = atoi(argv[2]), good_clus = atoi(argv[3]);
 
   cout << "Choose the reconstruction method: " << endl;
@@ -19,23 +25,35 @@ int main(int argc, char *argv[])
 
   cin >> mode;
 
+  auto t1 = high_resolution_clock::now();
+
   switch (mode)
   {
 
-    case 1:
-      cout << "Analysis started." << endl;
-      tri_neurec(first, last, good_clus);
-      break;
+  case 1:
+    cout << "Analysis started." << endl;
+    tri_neurec(first, last, good_clus);
+    break;
 
-    case 2:
-      cout << "Analysis started." << endl;
-      tri_neurec_kinfit_corr(first, last);
-      break;
+  case 2:
+    cout << "Analysis started." << endl;
+    tri_neurec_kinfit_corr(first, last);
+    break;
 
-    default:
-      cout << "No option chosen, exiting..." << endl;
-      break;
+  default:
+    cout << "No option chosen, exiting..." << endl;
+    break;
   }
+
+  auto t2 = high_resolution_clock::now();
+
+  /* Getting number of minutes as an integer. */
+  auto ms_int = duration_cast<minutes>(t2 - t1);
+
+  /* Getting number of minutes as a double. */
+  duration<double, std::milli> ms_double = t2 - t1;
+
+  std::cout << ms_int.count() << " minutes\n";
 
   return 0;
 }
