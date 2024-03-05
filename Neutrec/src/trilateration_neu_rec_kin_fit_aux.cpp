@@ -29,7 +29,7 @@
 
 using namespace std;
 
-const Int_t N_free = 24, N_const = 4, M = 9, jmin = -3, jmax = 3, range = (jmax - jmin) + 1;
+const Int_t N_free = 24, N_const = 4, M = 7, jmin = 0, jmax = 0;
 Int_t j_ch, k_ch;
 const Float_t Trf = 2.715; // ns - time of a bunch (correction)
 
@@ -43,7 +43,7 @@ Int_t fail;
 
 Int_t selected[4] = {1, 2, 3, 4};
 
-void tri_neurec_kinfit_corr(int first_file, int last_file)
+void tri_neurec_kinfit_corr(Short_t first_file, Short_t last_file, Short_t loopcount, Short_t jmin, Short_t jmax)
 {
 
 	gErrorIgnoreLevel = 6001;
@@ -51,7 +51,19 @@ void tri_neurec_kinfit_corr(int first_file, int last_file)
 	TChain *chain = new TChain("INTERF/h1");
 	chain_init(chain, first_file, last_file);
 
-	TString name = "neuvtx_tri_kin_fit_" + std::to_string(first_file) + "_" + std::to_string(last_file) + "_" + loopcount + "_" + M + ".root";
+	TString name = "";
+
+	const Int_t range = (jmax - jmin) + 1;
+
+	if(range == 1)
+	{
+		name = "neuvtx_tri_kin_fit_" + std::to_string(first_file) + "_" + std::to_string(last_file) + "_" + loopcount + "_" + M + ".root";
+	}
+	else
+	{
+		name = "neuvtx_tri_kin_fit_" + std::to_string(first_file) + "_" + std::to_string(last_file) + "_" + loopcount + "_" + M + "_" + range + ".root";
+	}
+
 
 	TFile *file = new TFile(name, "recreate");
 	TTree *tree = new TTree("h_tri_kin_fit", "Neu vtx rec with trilateration kin fit");
@@ -125,12 +137,12 @@ void tri_neurec_kinfit_corr(int first_file, int last_file)
 	constraints[0] = new TF1("Ene consv", &ene_consv, 0, 1, N_free + N_const);
 	constraints[1] = new TF1("Minv consv", &minv_consv, 0, 1, N_free + N_const);
 	constraints[2] = new TF1("x consv", &x_consv, 0, 1, N_free + N_const);
-	constraints[3] = new TF1("y consv", &y_consv, 0, 1, N_free + N_const);
-	constraints[4] = new TF1("z consv", &z_consv, 0, 1, N_free + N_const);
-	constraints[5] = new TF1("gamma1 consv", &gamma1_consv, 0, 1, N_free + N_const);
-	constraints[6] = new TF1("gamma2 consv", &gamma2_consv, 0, 1, N_free + N_const);
-	constraints[7] = new TF1("gamma3 consv", &gamma3_consv, 0, 1, N_free + N_const);
-	constraints[8] = new TF1("gamma4 consv", &gamma4_consv, 0, 1, N_free + N_const);
+	constraints[7] = new TF1("y consv", &y_consv, 0, 1, N_free + N_const);
+	constraints[8] = new TF1("z consv", &z_consv, 0, 1, N_free + N_const);
+	constraints[3] = new TF1("gamma1 consv", &gamma1_consv, 0, 1, N_free + N_const);
+	constraints[4] = new TF1("gamma2 consv", &gamma2_consv, 0, 1, N_free + N_const);
+	constraints[5] = new TF1("gamma3 consv", &gamma3_consv, 0, 1, N_free + N_const);
+	constraints[6] = new TF1("gamma4 consv", &gamma4_consv, 0, 1, N_free + N_const);
 
 	TH1 *chi2 = new TH1F("chi2", "", 100, -10.0, 30.0);
 
@@ -176,9 +188,9 @@ void tri_neurec_kinfit_corr(int first_file, int last_file)
 									X_init(k * 5 + 3) = cluster[3][ind_gam[k]];
 									X_init(k * 5 + 4) = cluster[4][ind_gam[k]];
 
-									V(k * 5, k * 5) = pow(clu_x_error(X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
-									V(k * 5 + 1, k * 5 + 1) = pow(clu_y_error(X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
-									V(k * 5 + 2, k * 5 + 2) = pow(clu_z_error(X_init(k * 5 + 2), X_init(k * 5 + 4)), 2); // cm
+									V(k * 5, k * 5) = pow(clu_x_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
+									V(k * 5 + 1, k * 5 + 1) = pow(clu_y_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
+									V(k * 5 + 2, k * 5 + 2) = pow(clu_z_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2); // cm
 									V(k * 5 + 3, k * 5 + 3) = pow(clu_time_error(X_init(k * 5 + 4)), 2);								 // ns
 									V(k * 5 + 4, k * 5 + 4) = pow(clu_ene_error(X_init(k * 5 + 4)), 2);									 // MeV
 								}

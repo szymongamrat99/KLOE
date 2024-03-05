@@ -28,7 +28,9 @@
 
 const TString ext = ".png";
 
-int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int_t file_num = 0, Double_t cut_prob = 0.0, Double_t time_cut = 100.0)
+#define T0 2.715
+
+int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, const Int_t range, Int_t file_num = 0, Double_t cut_prob = 0.0, Double_t time_cut = 100.0)
 {
   TChain *chain = new TChain("INTERF/h1");
   chain_init(chain, first, last);
@@ -36,7 +38,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
   TString file_name[3];
 
   file_name[0] = "neuvtx_tri_kin_fit_1_56_100_5_no_time.root";
-  file_name[1] = "neuvtx_tri_kin_fit_" + std::to_string(first) + "_" + std::to_string(last) + "_" + std::to_string(loopcount) + "_" + std::to_string(M) + ".root"; //"neuvtx_tri_kin_fit_1_56_30_5_time.root";
+  file_name[1] = "neuvtx_tri_kin_fit_" + std::to_string(first) + "_" + std::to_string(last) + "_" + std::to_string(loopcount) + "_" + std::to_string(M) + "_7.root";
   file_name[2] = "neuvtx_tri_rec_1_56.root";
 
   TFile *file = new TFile(file_name[file_num]);
@@ -181,7 +183,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
   TString name[5] = {"x", "y", "z", "time", "length"};
 
-  const UInt_t number_of_points = 10;
+  const UInt_t number_of_points = 5;
 
   for (Int_t j = 0; j < 2; j++)
   {
@@ -243,7 +245,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     prob_hist[j] = new TH1F(id_hist, "", 100, 0.0, 1.0);
 
     id_hist = "Beta" + std::to_string(j);
-    beta_hist[j] = new TH1F(id_hist, ";#beta^{CM}_{K#rightarrow#pi^{0}#pi^{0}};Counts", 100, 0.1, 0.4);
+    beta_hist[j] = new TH1F(id_hist, ";#beta^{CM}_{K#rightarrow#pi^{0}#pi^{0}};Counts", 100, 0.1, 0.3);
 
     id_hist = "Bunch_num" + std::to_string(j);
     bunch[j] = new TH1I(id_hist, ";Number of bunch correction;Counts", 101, -10, 10);
@@ -375,7 +377,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
       v_Kchrec = c_vel * Kchboost[4] / Kchboost[3];
 
       v_Kneumc = c_vel * Knemc[4] / Knemc[3];
-      v_Kneutri = c_vel * Knetri_kinfit[4] / Knetri_kinfit[3];
+      v_Kneutri = c_vel * lengthneu_tri / (Knetri_kinfit[9] - T0 * bunchnum);
       v_Kneurec = c_vel * Knerec[4] / Knerec[3];
       //
       // Kaon flight times
@@ -419,9 +421,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
       for (Int_t j = 0; j < 2; j++)
       {
         if (j == 0)
-          cut = TMath::Prob(chi2min, M) > 0;
+          cut = chi2min < 10000000000.;// && abs(Knetri_kinfit[9] - t_neumc) < 2.375/2.;
         else
-          cut = TMath::Prob(chi2min, M) > cut_prob;
+          cut = chi2min < 40.0;// && abs(Knetri_kinfit[9] - t_neumc) < 2.375/2.;
 
         if (cut && done_kinfit == 1)
         {
@@ -475,6 +477,11 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
             isEqual = arr_eq(clusindgood, g4taken_kinfit);
 
+            std::cout << clusindgood[0] << " " << clusindgood[1] << " " << clusindgood[2] << " " << clusindgood[3] << std::endl;
+            std::cout << g4taken_kinfit[0] << " " << g4taken_kinfit[1] << " " << g4taken_kinfit[2] << " " << g4taken_kinfit[3] << std::endl << std::endl;
+
+
+
             bad_clus = isEqual;
 
             if (isEqual == 0)
@@ -500,12 +507,12 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
             }
           }
 
-          if (isEqual == 0)
+          if (isEqual >= 0 && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) < -2.715 / 2. && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) > -2*2.715 / 2.)
           {
             chi2_hist[j]->Fill(chi2min);
             prob_hist[j]->Fill(TMath::Prob(chi2min, M));
 
-            beta_hist[j]->Fill(v_Kneutri / c_vel);
+            beta_hist[j]->Fill(v_Kneutri_CM / c_vel);
 
             bunch[j]->Fill(bunchnum);
           }
@@ -517,7 +524,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
           {
             if (k < 3)
             {
-              if (isEqual == 0)
+              if (isEqual >= 0 && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) < -2.715 / 2. && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) > -2*2.715 / 2.)
               {
                 neu_vtx_corr[j][k]->Fill(Knemc[6 + k], Knetri_kinfit[6 + k]);
                 sigmas_std[j][k]->Fill(abs(Knemc[6 + k] - ipmc[k]), Knetri_kinfit[6 + k] - Knemc[6 + k]);
@@ -527,21 +534,21 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
             }
             else if (k == 3)
             {
-              if (isEqual == 0)
+              if (isEqual >= 0 && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) < -2.715 / 2. && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) > -2*2.715 / 2.)
               {
-                neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[9]); // Knetri_kinfit[6 + k]);
-                sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
+                neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[9] - bunchnum * T0); // Knetri_kinfit[6 + k]);
+                sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - bunchnum * T0 - t_neumc) / tau_S_nonCPT);
                 pulls[j][4 + k]->Fill((Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
                 neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
               }
             }
             else
             {
-              if (isEqual == 0)
+              if (isEqual >= 0 && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) < -2.715 / 2. && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) > -2*2.715 / 2.)
                 sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_tri - lengthneu_mc));
             }
 
-            if (isEqual == 0)
+            if (isEqual >= 0 && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) < -2.715 / 2. && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) > -2*2.715 / 2.)
             {
               pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc[k]);
               pulls[j][4 + k]->Fill(Knetri_kinfit[4 + k] - Knemc[4 + k]);
@@ -550,7 +557,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
           d_cl = sqrt(pow(cluster[0][0] - bhabha_vtx[0], 2) + pow(cluster[1][0] - bhabha_vtx[1], 2) + pow(cluster[2][0] - bhabha_vtx[2], 2));
 
-          if (isEqual == 0)
+          if (isEqual >= 0 && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) < -2.715 / 2. && (Knetri_kinfit[9] - T0 * bunchnum - t_neumc) > -2*2.715 / 2.)
           {
 
             for (Int_t k = 0; k < ntmc; k++)
@@ -1014,6 +1021,26 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
 
     id_canva = "bunchnum" + std::to_string(j + 1);
     canvas[j][21]->Print(id_canva + ext);
+
+    canvas[j][25]->SetRightMargin(0.15);
+    canvas[j][25]->SetLeftMargin(0.17);
+    canvas[j][25]->cd();
+
+    beta_hist[j]->GetYaxis()->SetMaxDigits(3);
+
+    id_canva = "beta_CM" + std::to_string(j + 1);
+    x_title = "#beta^{CM}_{K#rightarrow#pi^{0}#pi^{0}}";
+    y_title = "Counts";
+
+    beta_hist[j]->GetXaxis()->CenterTitle();
+    beta_hist[j]->GetYaxis()->CenterTitle();
+    beta_hist[j]->GetXaxis()->SetTitle(x_title);
+    beta_hist[j]->GetYaxis()->SetTitle(y_title);
+    beta_hist[j]->GetYaxis()->SetRangeUser(0.0, 1.3 * beta_hist[j]->GetMaximum());
+    beta_hist[j]->SetLineColor(kBlack);
+    beta_hist[j]->Draw();
+    canvas[j][25]->Print(id_canva + ext);
+
     //!
     for (Int_t k = 0; k < 5; k++)
     {
@@ -1073,25 +1100,6 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, Int
     res_std_hist[j][4]->Draw("PE1");
     canvas[j][24]->Print(id_canva + ext);
     //!
-
-    canvas[j][25]->SetRightMargin(0.15);
-    canvas[j][25]->SetLeftMargin(0.17);
-    canvas[j][25]->cd();
-
-    beta_hist[j]->GetYaxis()->SetMaxDigits(3);
-
-    id_canva = "beta_CM" + std::to_string(j + 1);
-    x_title = "#beta^{CM}_{K#rightarrow#pi^{0}#pi^{0}}";
-    y_title = "Counts";
-
-    beta_hist[j]->GetXaxis()->CenterTitle();
-    beta_hist[j]->GetYaxis()->CenterTitle();
-    beta_hist[j]->GetXaxis()->SetTitle(x_title);
-    beta_hist[j]->GetYaxis()->SetTitle(y_title);
-    beta_hist[j]->GetYaxis()->SetRangeUser(0.0, 1.3 * beta_hist[j]->GetMaximum());
-    beta_hist[j]->SetLineColor(kBlack);
-    beta_hist[j]->Draw();
-    canvas[j][25]->Print(id_canva + ext);
 
     legend->Clear();
   }

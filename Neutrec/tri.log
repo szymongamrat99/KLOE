@@ -1,14 +1,14 @@
-Events all: 158651
-Events after tneu < 9 ns: 158651
-Efficiency after tneu < 9 ns: 1
-Good cluster sets eff: 0.637437
-Bad cluster sets: 57521
-Bad clusters 1: 0.675892
-Bad clusters 2: 0.317658
-Bad clusters 3: 0.00592827
-Bad clusters 4: 0.000521549
-Bad cluster smaller: 0
-Bad cluster bigger: 57521
-Bad cluster sets eff: 0.362563
-Bad cluster smaller eff: 0
-Bad cluster bigger eff: 1
+Events all: 176082
+Events after tneu < 9 ns: 0
+Efficiency after tneu < 9 ns: 0
+Good cluster sets eff: 0.689963
+Bad cluster sets: 54592
+Bad clusters 1: 0.74564
+Bad clusters 2: 0.241043
+Bad clusters 3: 0.0127125
+Bad clusters 4: 0.000604484
+Bad cluster smaller: 21573
+Bad cluster bigger: 33019
+Bad cluster sets eff: 0.310037
+Bad cluster smaller eff: 0.395168
+Bad cluster bigger eff: 0.604832
