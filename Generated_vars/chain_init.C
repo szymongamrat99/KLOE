@@ -11,14 +11,14 @@ inline void chain_init(TChain *chain_init, UInt_t first, UInt_t last)
 
     for(Int_t i = first; i <= last; i++)
     {
-    	fullname = "/internal/big_one/4/users/gamrat/old_root_files/" + dirnamedata + "/" + filenamedata + i + extension;
+    	fullname = "/home/szymon/Pulpit/KLOE/old_root_files/" + dirnamedata + "/" + filenamedata + i + extension;
     	chain_init->Add(fullname);
     }
     for(Int_t i = first; i <= last; i++)
     {
         if( i != 7)
         {
-            fullname = "/internal/big_one/4/users/gamrat/old_root_files/" + dirnamemc + "/" + filenamemc + i + extension;
+            fullname = "/home/szymon/Pulpit/KLOE/old_root_files/" + dirnamemc + "/" + filenamemc + i + extension;
     	    chain_init->Add(fullname);
         }
     }

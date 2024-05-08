@@ -1,11 +1,16 @@
-#include "../../Include/const.h"
 #include <TMath.h>
 #include <TROOT.h>
 #include <TFile.h>
 #include <TTree.h>
 
-Int_t split_channels()
+#include "../../Include/const.h"
+#include "chain_init.C"
+
+Int_t split_channels(UInt_t first, UInt_t last)
 {
+    TChain *chain = new TChain("INTERF/h1");
+	chain_init(chain, first, last);
+
     TFile file("mctruth.root", "recreate");
     TTree *tree = new TTree("h1", "Mctruth for all channels");
 
@@ -16,17 +21,17 @@ Int_t split_channels()
     Int_t ntmc, nvtxmc;
     UChar_t pidmc[200], vtxmc[200], mother[200], mctruth, mcflag;
 
-    chain.SetBranchAddress("ntmc", &ntmc);
-    chain.SetBranchAddress("nvtxmc", &nvtxmc);
+    chain->SetBranchAddress("ntmc", &ntmc);
+    chain->SetBranchAddress("nvtxmc", &nvtxmc);
 
-    chain.SetBranchAddress("pidmc", pidmc);
-    chain.SetBranchAddress("vtxmc", vtxmc);
-    chain.SetBranchAddress("mother", mother);
+    chain->SetBranchAddress("pidmc", pidmc);
+    chain->SetBranchAddress("vtxmc", vtxmc);
+    chain->SetBranchAddress("mother", mother);
 
-    chain.SetBranchAddress("mcflag", &mcflag);
-    chain.SetBranchAddress("mctruth", &mctruth);
+    chain->SetBranchAddress("mcflag", &mcflag);
+    chain->SetBranchAddress("mctruth", &mctruth);
 
-    Int_t nentries = (Int_t)chain.GetEntries();
+    Int_t nentries = (Int_t)chain->GetEntries();
 
     UInt_t Ks = 0, Kl = 0, Ksregen = 0, piplusks = 0, pipluskl = 0, piminusks = 0, piminuskl = 0, 
            muonplusks = 0, muonpluskl = 0, muonminusks = 0, muonminuskl = 0, electronks = 0, electronkl = 0, 
@@ -37,7 +42,7 @@ Int_t split_channels()
 
     for(Int_t i = 0; i < nentries; i++)
     {
-        chain.GetEntry(i);
+        chain->GetEntry(i);
 
         if(mcflag == 1 && mctruth != 0 && mctruth != 2)
         {

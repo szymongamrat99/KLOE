@@ -4,68 +4,60 @@ Choose the reconstruction method:
 3. Trilateration with kinematic fit and T0 correction.
 Analysis started.
 ******************************************************************************
-*Tree    :h_tri_kin_fit: Neu vtx rec with trilateration kin fit                 *
-*Entries :  1273146 : Total =      9230209697 bytes  File  Size =  912471939 *
-*        :          : Tree compression factor =  10.10                       *
+*Tree    :h_tri     : Neu vtx rec with trilateration                         *
+*Entries :  1273146 : Total =       311435674 bytes  File  Size =   35682796 *
+*        :          : Tree compression factor =   8.01                       *
 ******************************************************************************
-*Br    0 :fourgamma1tri_kinfit : fourgamma1tri_kinfit[8]/F                   *
-*Entries :  1273146 : Total  Size=   40777971 bytes  File Size  =    4750583 *
-*Baskets :      306 : Basket Size=     212480 bytes  Compression=   8.57     *
+*Br    0 :fourgamma1tri : fourgamma1tri[8]/F                                 *
+*Entries :  1273146 : Total  Size=   40846193 bytes  File Size  =    5094831 *
+*Baskets :     1000 : Basket Size=    5456384 bytes  Compression=   7.34     *
 *............................................................................*
-*Br    1 :fourgamma2tri_kinfit : fourgamma2tri_kinfit[8]/F                   *
-*Entries :  1273146 : Total  Size=   40777971 bytes  File Size  =    4744040 *
-*Baskets :      306 : Basket Size=     212480 bytes  Compression=   8.58     *
+*Br    1 :fourgamma2tri : fourgamma2tri[8]/F                                 *
+*Entries :  1273146 : Total  Size=   40846193 bytes  File Size  =    5095341 *
+*Baskets :     1000 : Basket Size=    5456384 bytes  Compression=   7.34     *
 *............................................................................*
-*Br    2 :fourgamma3tri_kinfit : fourgamma3tri_kinfit[8]/F                   *
-*Entries :  1273146 : Total  Size=   40777971 bytes  File Size  =    4736759 *
-*Baskets :      306 : Basket Size=     212480 bytes  Compression=   8.60     *
+*Br    2 :fourgamma3tri : fourgamma3tri[8]/F                                 *
+*Entries :  1273146 : Total  Size=   40846193 bytes  File Size  =    5090566 *
+*Baskets :     1000 : Basket Size=    5456384 bytes  Compression=   7.35     *
 *............................................................................*
-*Br    3 :fourgamma4tri_kinfit : fourgamma4tri_kinfit[8]/F                   *
-*Entries :  1273146 : Total  Size=   40777971 bytes  File Size  =    4726594 *
-*Baskets :      306 : Basket Size=     212480 bytes  Compression=   8.61     *
+*Br    3 :fourgamma4tri : fourgamma4tri[8]/F                                 *
+*Entries :  1273146 : Total  Size=   40846193 bytes  File Size  =    5085318 *
+*Baskets :     1000 : Basket Size=    5456384 bytes  Compression=   7.36     *
 *............................................................................*
-*Br    4 :iptri_kinfit : iptri_kinfit[3]/F                                   *
-*Entries :  1273146 : Total  Size=   15303371 bytes  File Size  =    1140435 *
-*Baskets :      224 : Basket Size=      79872 bytes  Compression=  13.40     *
+*Br    4 :fourKnetri : fourKnetri[10]/F                                      *
+*Entries :  1273146 : Total  Size=   51053845 bytes  File Size  =    6399017 *
+*Baskets :     1250 : Basket Size=    6819840 bytes  Compression=   7.31     *
 *............................................................................*
-*Br    5 :fourKnetri_kinfit : fourKnetri_kinfit[10]/F                        *
-*Entries :  1273146 : Total  Size=   50966066 bytes  File Size  =    5835799 *
-*Baskets :      339 : Basket Size=     265216 bytes  Compression=   8.72     *
+*Br    5 :iptri     : iptri[3]/F                                             *
+*Entries :  1273146 : Total  Size=   15314697 bytes  File Size  =     269580 *
+*Baskets :      376 : Basket Size=    2045952 bytes  Compression=  52.03     *
 *............................................................................*
-*Br    6 :done4_kinfit : done4_kinfit/I                                      *
-*Entries :  1273146 : Total  Size=    5105653 bytes  File Size  =     362452 *
-*Baskets :      112 : Basket Size=      51200 bytes  Compression=  14.02     *
+*Br    6 :done4     : done4/I                                                *
+*Entries :  1273146 : Total  Size=    5105273 bytes  File Size  =     315965 *
+*Baskets :      126 : Basket Size=     681984 bytes  Compression=  14.80     *
 *............................................................................*
-*Br    7 :g4takentri_kinfit : g4takentri_kinfit[4]/I                         *
-*Entries :  1273146 : Total  Size=   20398977 bytes  File Size  =     829397 *
-*Baskets :      240 : Basket Size=     105984 bytes  Compression=  24.55     *
+*Br    7 :sol1      : sol1[4]/F                                              *
+*Entries :  1273146 : Total  Size=   20418899 bytes  File Size  =    2850525 *
+*Baskets :      501 : Basket Size=    2727424 bytes  Compression=   6.56     *
 *............................................................................*
-*Br    8 :bunchnum  : bunchnum/I                                             *
-*Entries :  1273146 : Total  Size=    5105181 bytes  File Size  =     416079 *
-*Baskets :      112 : Basket Size=      51200 bytes  Compression=  12.21     *
+*Br    8 :sol2      : sol2[4]/F                                              *
+*Entries :  1273146 : Total  Size=   20418899 bytes  File Size  =    2814920 *
+*Baskets :      501 : Basket Size=    2727424 bytes  Compression=   6.64     *
 *............................................................................*
-*Br    9 :lag_mult  : TVectorT<double>                                       *
-*Entries :  1273146 : Total  Size=  128647183 bytes  File Size  =   16848990 *
-*Baskets :      508 : Basket Size=    1716736 bytes  Compression=   7.56     *
+*Br    9 :sol1err   : sol1err/F                                              *
+*Entries :  1273146 : Total  Size=    5105537 bytes  File Size  =     811536 *
+*Baskets :      126 : Basket Size=     681984 bytes  Compression=   5.76     *
 *............................................................................*
-*Br   10 :const_min : TVectorT<double>                                       *
-*Entries :  1273146 : Total  Size=  128647697 bytes  File Size  =   12336891 *
-*Baskets :      508 : Basket Size=    1716736 bytes  Compression=  10.32     *
+*Br   10 :sol2err   : sol2err/F                                              *
+*Entries :  1273146 : Total  Size=    5105537 bytes  File Size  =     786267 *
+*Baskets :      126 : Basket Size=     681984 bytes  Compression=   5.95     *
 *............................................................................*
-*Br   11 :min_vars  : TVectorT<double>                                       *
-*Entries :  1273146 : Total  Size=  322242051 bytes  File Size  =   40644805 *
-*Baskets :     1169 : Basket Size=    2723840 bytes  Compression=   7.87     *
+*Br   11 :chosen    : chosen/I                                               *
+*Entries :  1273146 : Total  Size=    5105405 bytes  File Size  =      38251 *
+*Baskets :      126 : Basket Size=     681984 bytes  Compression= 122.23     *
 *............................................................................*
-*Br   12 :min_cov   : TMatrixT<double>                                       *
-*Entries :1273146 : Total  Size= 8063332684 bytes  File Size  = 787125516 *
-*Baskets :    26477 : Basket Size=   25600000 bytes  Compression=  10.23     *
+*Br   12 :fourg4taken : fourg4taken[4]/I                                     *
+*Entries :  1273146 : Total  Size=   20422448 bytes  File Size  =     970889 *
+*Baskets :      501 : Basket Size=    2727936 bytes  Compression=  19.26     *
 *............................................................................*
-*Br   13 :init_vars : TVectorT<double>                                       *
-*Entries :  1273146 : Total  Size=  322243226 bytes  File Size  =   26721191 *
-*Baskets :     1169 : Basket Size=    2723840 bytes  Compression=  11.97     *
-*............................................................................*
-*Br   14 :chi2min   : chi2min/F                                              *
-*Entries :  1273146 : Total  Size=    5105063 bytes  File Size  =    1076348 *
-*Baskets :      112 : Basket Size=      51200 bytes  Compression=   4.72     *
-*............................................................................*
-8885 minutes
+0 minutes

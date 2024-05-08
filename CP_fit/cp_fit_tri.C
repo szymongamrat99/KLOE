@@ -20,9 +20,9 @@
 
 using namespace KLOE;
 
-void cp_fit(Bool_t check_corr = false, TString mode = "")
+void cp_fit(UInt_t first, UInt_t last, Bool_t check_corr = false, TString mode = "")
 {
-    TFile file("../../../old_root_files/mctruth.root");
+    TFile file("../Generated_vars/mctruth.root");
     TTree *tree = (TTree*)file.Get("h1");
 
     Int_t mctruth = 0;
@@ -39,8 +39,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     tree_tri->SetBranchAddress("fourKnetri", fourKnetri);
 
     TChain *chain = new TChain("INTERF/h1");
-
-    chain_init(chain);
+    chain_init(chain, first, last);
 
     UChar_t mcflag;
     Float_t Dtboostlor, Dtmc, Chi2, minv4gam, Kchrec[9], Qmiss, ip[3], Kchboost[9];

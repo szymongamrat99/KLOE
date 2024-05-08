@@ -25,7 +25,7 @@ Int_t main(int argc, char *argv[])
 	// Bhabha vars
 	Int_t ntmc, nvtxmc, nclu;
 	UChar_t pidmc[200], vtxmc[200], mother[200], mctruth = 0, mcflag = 0;
-	Float_t pos_mc[3][200], mom_mc[3][200], Knemc[9], cluster_rec[3][200];
+	Float_t pos_mc[3][200], mom_mc[3][200], Knemc[9], cluster_rec[3][200], ipmc[3];
 
 	chain->SetBranchAddress("ntmc", &ntmc);
 	chain->SetBranchAddress("nvtxmc", &nvtxmc);
@@ -51,16 +51,17 @@ Int_t main(int argc, char *argv[])
 
 	chain->SetBranchAddress("mctruth", &mctruth);
 	chain->SetBranchAddress("mcflag", &mcflag);
+	chain->SetBranchAddress("ipmc", ipmc);
 
 	Int_t nentries = (Int_t)chain->GetEntries();
 
-	Float_t pgammc[4][7], neu_vtx[3], cluster[3];
+	Float_t pgammc[4][8], neu_vtx[3], cluster[3];
 	Int_t good_clus_ind[4],region[4];
 
-	TBranch *b_pgammc1 = tree->Branch("pgammc1", pgammc[0], "pgammc1[7]/F");
-	TBranch *b_pgammc2 = tree->Branch("pgammc2", pgammc[1], "pgammc2[7]/F");
-	TBranch *b_pgammc3 = tree->Branch("pgammc3", pgammc[2], "pgammc3[7]/F");
-	TBranch *b_pgammc4 = tree->Branch("pgammc4", pgammc[3], "pgammc4[7]/F");
+	TBranch *b_pgammc1 = tree->Branch("pgammc1", pgammc[0], "pgammc1[8]/F");
+	TBranch *b_pgammc2 = tree->Branch("pgammc2", pgammc[1], "pgammc2[8]/F");
+	TBranch *b_pgammc3 = tree->Branch("pgammc3", pgammc[2], "pgammc3[8]/F");
+	TBranch *b_pgammc4 = tree->Branch("pgammc4", pgammc[3], "pgammc4[8]/F");
 
 	TBranch *b_clusindgood = tree->Branch("clusindgood", good_clus_ind, "clusindgood[4]/I");
 
@@ -101,6 +102,15 @@ Int_t main(int argc, char *argv[])
 					pgammc[count][5] = cluster[1];
 					pgammc[count][6] = cluster[2];
 
+					Float_t beta_c = c_vel * Knemc[4] / Knemc[3], length = sqrt(pow(Knemc[6] - ipmc[0],2) + pow(Knemc[7] - ipmc[1],2) + pow(Knemc[8] - ipmc[2],2)), time_K = length / beta_c;
+
+					Float_t length_clus = sqrt(pow(cluster[0] - Knemc[6],2) + pow(cluster[1] - Knemc[7],2) + pow(cluster[2] - Knemc[8] ,2));
+
+					pgammc[count][7] = time_K + (length_clus / c_vel);
+
+
+
+
 					count++;
 				}
 			}
@@ -137,7 +147,7 @@ Int_t main(int argc, char *argv[])
 
 							TMath::Sort(max_count, clus_diff, min_ind, kFALSE);
 
-							if(clus_diff_min > clus_diff[min_ind[0]])
+							if(clus_diff_min > clus_diff[min_ind[0]] && clus_diff[min_ind[0]] < 10)
 							{
 								clus_diff_min = clus_diff[min_ind[0]];
 
@@ -145,6 +155,13 @@ Int_t main(int argc, char *argv[])
 								good_clus_ind[1] = ind_gam[1];
 								good_clus_ind[2] = ind_gam[2];
 								good_clus_ind[3] = ind_gam[3];
+							}
+							else
+							{
+								good_clus_ind[0] = 999;
+								good_clus_ind[1] = 999;
+								good_clus_ind[2] = 999;
+								good_clus_ind[3] = 999;
 							}
 
 
