@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
   using std::chrono::high_resolution_clock;
   using std::chrono::minutes;
 
-  Short_t first = atoi(argv[1]), last = atoi(argv[2]), good_clus = atoi(argv[3]), loopcount = atoi(argv[4]), jmin = atoi(argv[5]), jmax = atoi(argv[6]);
+  Short_t first = atoi(argv[1]), last = atoi(argv[2]), good_clus = atoi(argv[3]), loopcount = atoi(argv[4]), jmin = atoi(argv[5]), jmax = atoi(argv[6]), ind_data_mc = atoi(argv[7]);
 
   cout << "Choose the reconstruction method: " << endl;
   cout << "1. Bare trilateration." << endl;
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 
   case 2:
     cout << "Analysis started." << endl;
-    tri_neurec_kinfit_corr(first, last, loopcount, jmin, jmax);
+    tri_neurec_kinfit_corr(ind_data_mc, first, last, loopcount, jmin, jmax);
     break;
 
   default:

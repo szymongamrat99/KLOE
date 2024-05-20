@@ -53,6 +53,12 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 	chain->SetBranchAddress("mctruth", &mctruth);
 
 	Int_t good_clus_ind[4];
+	Float_t pgammc[4][8];
+
+	tree_gen->SetBranchAddress("pgammc1", pgammc[0]);
+	tree_gen->SetBranchAddress("pgammc2", pgammc[1]);
+	tree_gen->SetBranchAddress("pgammc3", pgammc[2]);
+	tree_gen->SetBranchAddress("pgammc4", pgammc[3]);
 
 	tree_gen->SetBranchAddress("clusindgood", good_clus_ind);
 
@@ -384,7 +390,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 								}
 							}
 			}
-			else
+			else if (good_clus == 1)
 			{
 				ene_sum = 0.;
 				error = 2;
@@ -395,7 +401,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 				ind_gam[2] = good_clus_ind[2];
 				ind_gam[3] = good_clus_ind[3];
 
-				cond_ene = 1;//cluster[4][ind_gam[0]] > MIN_CLU_ENE && cluster[4][ind_gam[1]] > MIN_CLU_ENE &&
+				cond_ene = cluster[4][ind_gam[0]] > MIN_CLU_ENE && cluster[4][ind_gam[1]] > MIN_CLU_ENE &&
 									 cluster[4][ind_gam[2]] > MIN_CLU_ENE && cluster[4][ind_gam[3]] > MIN_CLU_ENE;
 
 				cond_clus[0] = cluster[3][ind_gam[0]] > 0 && cluster[0][ind_gam[0]] != 0 && cluster[1][ind_gam[0]] != 0 && cluster[2][ind_gam[0]] != 0;
@@ -403,7 +409,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 				cond_clus[2] = cluster[3][ind_gam[2]] > 0 && cluster[0][ind_gam[2]] != 0 && cluster[1][ind_gam[2]] != 0 && cluster[2][ind_gam[2]] != 0;
 				cond_clus[3] = cluster[3][ind_gam[3]] > 0 && cluster[0][ind_gam[3]] != 0 && cluster[1][ind_gam[3]] != 0 && cluster[2][ind_gam[3]] != 0;
 
-				if (cond_ene == true /*&& cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3]*/)
+				if (cond_ene == true && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3])
 				{
 					for (Int_t l = 0; l < 4; l++)
 					{
@@ -577,6 +583,282 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 								Knetri_tmp[3] += gammatri_tmp[l][3];
 
 								eqn_check[l] = c_vel * (cluster[3][ind_gam[l]] - solution[3]) - gamma_len_tmp[l];
+							}
+
+							Knetri_tmp[4] = sqrt(pow(Knetri_tmp[0], 2) + pow(Knetri_tmp[1], 2) + pow(Knetri_tmp[2], 2));
+							Knetri_tmp[5] = sqrt(pow(Knetri_tmp[3], 2) - pow(Knetri_tmp[0], 2) - pow(Knetri_tmp[1], 2) - pow(Knetri_tmp[2], 2));
+							Knetri_tmp[6] = solution[0];
+							Knetri_tmp[7] = solution[1];
+							Knetri_tmp[8] = solution[2];
+							Knetri_tmp[9] = solution[3];
+
+							total_err += abs(Knetri_tmp[5] - m_k0);
+															// + pow(eqn_check[0], 2) +
+															//   pow(eqn_check[1], 2) +
+															//   pow(eqn_check[2], 2) +
+															//   pow(eqn_check[3], 2));
+						}
+						else
+						{
+							error = 3;
+						}
+					}
+
+					if (total_err < total_err_def)
+					{
+						total_err_def = total_err;
+
+						done = 1;
+
+						fourg4taken[0] = ind_gam[0];
+						fourg4taken[1] = ind_gam[1];
+						fourg4taken[2] = ind_gam[2];
+						fourg4taken[3] = ind_gam[3];
+
+						Knetri[0] = 0.;
+						Knetri[1] = 0.;
+						Knetri[2] = 0.;
+						Knetri[3] = 0.;
+
+						for (Int_t l = 0; l < 4; l++)
+						{
+							gammatri[l][0] = gammatri_tmp[l][0];
+							gammatri[l][1] = gammatri_tmp[l][1];
+							gammatri[l][2] = gammatri_tmp[l][2];
+							gammatri[l][3] = gammatri_tmp[l][3];
+							gammatri[l][4] = gammatri_tmp[l][4];
+							gammatri[l][5] = gammatri_tmp[l][5];
+							gammatri[l][6] = gammatri_tmp[l][6];
+							gammatri[l][7] = gammatri_tmp[l][7];
+
+							Knetri[0] += gammatri[l][0];
+							Knetri[1] += gammatri[l][1];
+							Knetri[2] += gammatri[l][2];
+							Knetri[3] += gammatri[l][3];
+						}
+
+						Knetri[4] = Knetri_tmp[4];
+						Knetri[5] = Knetri_tmp[5];
+						Knetri[6] = Knetri_tmp[6];
+						Knetri[7] = Knetri_tmp[7];
+						Knetri[8] = Knetri_tmp[8];
+						Knetri[9] = Knetri_tmp[9];
+
+						y_axis[0] = 0.;
+						y_axis[1] = bhabha_mom[1];
+						y_axis[2] = 0.;
+
+						neu_vtx[0] = Knetri[6];
+						neu_vtx[1] = Knetri[7];
+						neu_vtx[2] = Knetri[8];
+
+						plane_intersection(bhabha_vtx, y_axis, neu_vtx, Knetri, ip_tri); //! Plane rec
+
+						if (abs(ip_tri[2] - bhabha_vtx[2]) > 2)
+							ip_tri[2] = bhabha_vtx[2];
+
+						ip_tri[0] = bhabha_vtx[0];
+						ip_tri[1] = bhabha_vtx[1];
+					}
+
+					R.SetClu(0, 0, 0, 0, 0, 0);
+					R.SetClu(1, 0, 0, 0, 0, 0);
+					R.SetClu(2, 0, 0, 0, 0, 0);
+					R.SetClu(3, 0, 0, 0, 0, 0);
+					R.SetClu(4, 0, 0, 0, 0, 0);
+					R.SetClu(5, 0, 0, 0, 0, 0);
+				}
+			}
+			else
+			{
+				ene_sum = 0.;
+				error = 2;
+				total_err = 999999.;
+
+				cond_ene = pgammc[0][3] > MIN_CLU_ENE && pgammc[1][3] > MIN_CLU_ENE &&
+									 pgammc[2][3] > MIN_CLU_ENE && pgammc[3][3] > MIN_CLU_ENE;
+
+				cond_clus[0] = pgammc[0][7] > 0 && pgammc[0][4] != 0 && pgammc[0][5] != 0 && pgammc[0][6] != 0;
+				cond_clus[1] = pgammc[1][7] > 0 && pgammc[1][4] != 0 && pgammc[1][5] != 0 && pgammc[1][6] != 0;
+				cond_clus[2] = pgammc[2][7] > 0 && pgammc[2][4] != 0 && pgammc[2][5] != 0 && pgammc[2][6] != 0;
+				cond_clus[3] = pgammc[3][7] > 0 && pgammc[3][4] != 0 && pgammc[3][5] != 0 && pgammc[3][6] != 0;
+
+				if (cond_ene == true && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3])
+				{
+					for (Int_t l = 0; l < 4; l++)
+					{
+						R.SetClu(l, pgammc[l][4],
+										 pgammc[l][5],
+										 pgammc[l][6],
+										 pgammc[l][7],
+										 pgammc[l][3]);
+					}
+
+					R.SetClu(4, 0, 0, 0, 0, 0);
+					R.SetClu(5, 0, 0, 0, 0, 0);
+
+					S = R.MySolve(selected);
+
+					if (S.error[0] == false || S.error[1] == false) // && cond_ene_sum == true)
+					{
+
+						kaon_mom[0][0] = 0.;
+						kaon_mom[0][1] = 0.;
+						kaon_mom[0][2] = 0.;
+						kaon_mom[0][3] = 0.;
+
+						kaon_mom[1][0] = 0.;
+						kaon_mom[1][1] = 0.;
+						kaon_mom[1][2] = 0.;
+						kaon_mom[1][3] = 0.;
+
+						error = 1;
+
+						for (Int_t l1 = 0; l1 < 2; l1++)
+						{
+							for (Int_t l2 = 0; l2 < 4; l2++)
+							{
+								gamma_len[l1][l2] = sqrt(pow(pgammc[l2][4] - S.sol[l1][0], 2) +
+																				 pow(pgammc[l2][5] - S.sol[l1][1], 2) +
+																				 pow(pgammc[l2][6] - S.sol[l1][2], 2));
+
+								gamma_mom[l1][l2][0] = pgammc[l2][3] * (pgammc[l2][4] - S.sol[l1][0]) / gamma_len[l1][l2];
+								gamma_mom[l1][l2][1] = pgammc[l2][3] * (pgammc[l2][5] - S.sol[l1][1]) / gamma_len[l1][l2];
+								gamma_mom[l1][l2][2] = pgammc[l2][3] * (pgammc[l2][6] - S.sol[l1][2]) / gamma_len[l1][l2];
+								gamma_mom[l1][l2][3] = pgammc[l2][3];
+
+								kaon_mom[l1][0] += gamma_mom[l1][l2][0];
+								kaon_mom[l1][1] += gamma_mom[l1][l2][1];
+								kaon_mom[l1][2] += gamma_mom[l1][l2][2];
+								kaon_mom[l1][3] += gamma_mom[l1][l2][3];
+							}
+
+							y_axis[0] = 0.;
+							y_axis[1] = bhabha_mom[1];
+							y_axis[2] = 0.;
+
+							plane_intersection(bhabha_vtx, y_axis, S.sol[l1], kaon_mom[l1], ip_tri); //! Plane rec
+
+							if (abs(ip_tri[2] - bhabha_vtx[2]) > 2)
+								ip_tri[2] = bhabha_vtx[2];
+
+							ip_tri[0] = bhabha_vtx[0];
+							ip_tri[1] = bhabha_vtx[1];
+
+							kaon_vel[l1] = c_vel * sqrt(pow(kaon_mom[l1][0], 2) + pow(kaon_mom[l1][1], 2) + pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
+							kaon_len[l1] = sqrt(pow(S.sol[l1][0] - ip_tri[0], 2) + pow(S.sol[l1][1] - ip_tri[1], 2) + pow(S.sol[l1][2] - ip_tri[2], 2));
+						}
+
+						std::cout << pgammc[0][7] << " " << pgammc[1][7] << " " << pgammc[2][7] << " " << pgammc[3][7] << std::endl; 
+
+						cond_sol[0][0] = 1;//(S.sol[0][3] < pgammc[0][7]) && (S.sol[0][3] < pgammc[1][7]) && (S.sol[0][3] < pgammc[2][7]) && (S.sol[0][3] < pgammc[3][7]);
+
+						cond_sol[0][1] = (sqrt(pow(S.sol[0][0] - bhabha_vtx[0], 2) + pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
+						path_diff[0] = kaon_vel[0] * S.sol[0][3] - kaon_len[0];
+						eqn_check_tmp[0][0] = c_vel * (pgammc[0][7] - S.sol[0][3]) - gamma_len[0][0];
+						eqn_check_tmp[0][1] = c_vel * (pgammc[1][7] - S.sol[0][3]) - gamma_len[0][1];
+						eqn_check_tmp[0][2] = c_vel * (pgammc[2][7] - S.sol[0][3]) - gamma_len[0][2];
+						eqn_check_tmp[0][3] = c_vel * (pgammc[3][7] - S.sol[0][3]) - gamma_len[0][3];
+
+						eqn_check_tmp_tot[0] = sqrt(pow(eqn_check_tmp[0][0], 2) +
+																				pow(eqn_check_tmp[0][1], 2) +
+																				pow(eqn_check_tmp[0][2], 2) +
+																				pow(eqn_check_tmp[0][3], 2));
+
+						cond_sol[1][0] = 1;//(S.sol[1][3] < pgammc[0][7]) && (S.sol[1][3] < pgammc[1][7]) && (S.sol[1][3] < pgammc[2][7]) && (S.sol[1][3] < pgammc[3][7]);
+						cond_sol[1][1] = (sqrt(pow(S.sol[1][0] - bhabha_vtx[0], 2) + pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
+						path_diff[1] = kaon_vel[1] * S.sol[1][3] - kaon_len[1];
+						eqn_check_tmp[1][0] = c_vel * (pgammc[0][7] - S.sol[1][3]) - gamma_len[1][0];
+						eqn_check_tmp[1][1] = c_vel * (pgammc[1][7] - S.sol[1][3]) - gamma_len[1][1];
+						eqn_check_tmp[1][2] = c_vel * (pgammc[2][7] - S.sol[1][3]) - gamma_len[1][2];
+						eqn_check_tmp[1][3] = c_vel * (pgammc[3][7] - S.sol[1][3]) - gamma_len[1][3];
+
+						eqn_check_tmp_tot[1] = sqrt(pow(eqn_check_tmp[1][0], 2) +
+																				pow(eqn_check_tmp[1][1], 2) +
+																				pow(eqn_check_tmp[1][2], 2) +
+																				pow(eqn_check_tmp[1][3], 2));
+
+						sol1[0] = S.sol[0][0];
+						sol1[1] = S.sol[0][1];
+						sol1[2] = S.sol[0][2];
+						sol1[3] = S.sol[0][3];
+
+						sol2[0] = S.sol[1][0];
+						sol2[1] = S.sol[1][1];
+						sol2[2] = S.sol[1][2];
+						sol2[3] = S.sol[1][3];
+
+						sol1err = path_diff[0];
+						sol2err = path_diff[1];
+
+						/*std::cout << "2. Script: " << std::endl;
+
+						std::cout << S.sol[0][0] << " " << S.sol[0][1] << " " << S.sol[0][2] << " " << S.sol[0][3] << std::endl;
+						std::cout << S.sol[1][0] << " " << S.sol[1][1] << " " << S.sol[1][2] << " " << S.sol[1][3] << std::endl;
+
+						std::cout << eqn_check_tmp[0][0] << " " << eqn_check_tmp[1][0] << std::endl << std::endl;*/
+
+						// We have to choose solutions
+
+						if ((cond_sol[1][0] == true && cond_sol[1][1] == true) &&
+										 abs(path_diff[1]) < abs(path_diff[0]))
+						{
+							solution[0] = S.sol[1][0];
+							solution[1] = S.sol[1][1];
+							solution[2] = S.sol[1][2];
+							solution[3] = S.sol[1][3];
+
+							total_err = abs(path_diff[1]);
+
+							chosen = 2;
+							error = 0;
+						}
+						else if ((cond_sol[0][0] == true && cond_sol[0][1] == true) &&
+										 abs(path_diff[0]) < abs(path_diff[1]))
+						{
+							solution[0] = S.sol[0][0];
+							solution[1] = S.sol[0][1];
+							solution[2] = S.sol[0][2];
+							solution[3] = S.sol[0][3];
+
+							total_err = abs(path_diff[0]);
+
+							chosen = 1;
+							error = 0;
+						}
+						else
+						{
+							error = 1;
+						}
+
+						if (error == 0)
+						{
+							Knetri_tmp[0] = 0.;
+							Knetri_tmp[1] = 0.;
+							Knetri_tmp[2] = 0.;
+							Knetri_tmp[3] = 0.;
+
+							for (Int_t l = 0; l < 4; l++)
+							{
+								gamma_len_tmp[l] = sqrt(pow(pgammc[l][4] - solution[0], 2) +
+																				pow(pgammc[l][5] - solution[1], 2) +
+																				pow(pgammc[l][6] - solution[2], 2));
+
+								gammatri_tmp[l][0] = pgammc[l][3] * (pgammc[l][4] - solution[0]) / gamma_len_tmp[l];
+								gammatri_tmp[l][1] = pgammc[l][3] * (pgammc[l][5] - solution[1]) / gamma_len_tmp[l];
+								gammatri_tmp[l][2] = pgammc[l][3] * (pgammc[l][6] - solution[2]) / gamma_len_tmp[l];
+								gammatri_tmp[l][3] = pgammc[l][3];
+								gammatri_tmp[l][4] = pgammc[l][4];
+								gammatri_tmp[l][5] = pgammc[l][5];
+								gammatri_tmp[l][6] = pgammc[l][6];
+								gammatri_tmp[l][7] = pgammc[l][7];
+
+								Knetri_tmp[0] += gammatri_tmp[l][0];
+								Knetri_tmp[1] += gammatri_tmp[l][1];
+								Knetri_tmp[2] += gammatri_tmp[l][2];
+								Knetri_tmp[3] += gammatri_tmp[l][3];
+
+								eqn_check[l] = c_vel * (pgammc[l][7] - solution[3]) - gamma_len_tmp[l];
 							}
 
 							Knetri_tmp[4] = sqrt(pow(Knetri_tmp[0], 2) + pow(Knetri_tmp[1], 2) + pow(Knetri_tmp[2], 2));
