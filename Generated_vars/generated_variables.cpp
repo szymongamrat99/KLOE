@@ -1,370 +1,190 @@
+<<<<<<< HEAD
 #include <TTree.h>
 #include <TFile.h>
 
 
+=======
+#include <iostream>
+
+#include <TTree.h>
+#include <TFile.h>
+
+#include "chain_init.C"
+#include "../../Include/Codes/cylinder_intersection.h"
+>>>>>>> 4630ebfab26916a2a88f3e482d412ced5b7e88b8
 #include "../../Include/const.h"
 
-void generated_variables(UInt_t filenumber = 1, TString directory = "230531_data", TString rootname = "data_stream42_")
+Int_t main(int argc, char *argv[])
 {
-    TString treedir = "INTERF", treename = "h1", fulltree = "",
-            extension = ".root", fullname = "";
+	const UInt_t first = atoi(argv[1]), last = atoi(argv[2]), nclus = atoi(argv[3]);
 
-    fullname = "../../ROOT_files/" + directory + "/backup/" + rootname + filenumber + extension;
-    fulltree = treedir + "/" + treename;
+	TString first_s = argv[1], last_s = argv[2];
 
-    TFile *file = new TFile(fullname, "UPDATE");
-    TTree *tree = (TTree*)file->Get(fulltree);
+	TChain *chain = new TChain("INTERF/h1");
+	chain_init(chain, first, last);
 
-    //Branches' addresses
-    //Bhabha vars
-    Int_t ntmc, nvtxmc;
-    UInt_t pidmc[200], vtxmc[200], mother[200], mctruth = 0, mcflag = 0;
-    Float_t pos_mc[3][200], mom_mc[3][200];
+	TString name = "gen_vars_" + first_s + "_" + last_s + ".root";
 
-    tree->SetBranchAddress("ntmc", &ntmc);
-    tree->SetBranchAddress("nvtxmc", &nvtxmc);
+	TFile *file = new TFile(name, "recreate");
+	TTree *tree = new TTree("h_gen_vars", "Gen vars for klspm00");
 
-    tree->SetBranchAddress("pidmc", pidmc);
-    tree->SetBranchAddress("vtxmc", vtxmc);
-    tree->SetBranchAddress("mother", mother);
+	// Branches' addresses
+	// Bhabha vars
+	Int_t ntmc, nvtxmc, nclu;
+	UChar_t pidmc[200], vtxmc[200], mother[200], mctruth = 0, mcflag = 0;
+	Float_t pos_mc[3][200], mom_mc[3][200], Knemc[9], cluster_rec[3][200], ipmc[3];
 
-    tree->SetBranchAddress("xvmc", pos_mc[0]);
-    tree->SetBranchAddress("yvmc", pos_mc[1]);
-    tree->SetBranchAddress("zvmc", pos_mc[2]);
+	chain->SetBranchAddress("ntmc", &ntmc);
+	chain->SetBranchAddress("nvtxmc", &nvtxmc);
 
-    tree->SetBranchAddress("pxmc", mom_mc[0]);
-    tree->SetBranchAddress("pymc", mom_mc[1]);
-    tree->SetBranchAddress("pzmc", mom_mc[2]);
+	chain->SetBranchAddress("pidmc", pidmc);
+	chain->SetBranchAddress("vtxmc", vtxmc);
+	chain->SetBranchAddress("mother", mother);
 
-    tree->SetBranchAddress("mctruth", &mctruth);
-    tree->SetBranchAddress("mcflag", &mcflag);
+	chain->SetBranchAddress("xvmc", pos_mc[0]);
+	chain->SetBranchAddress("yvmc", pos_mc[1]);
+	chain->SetBranchAddress("zvmc", pos_mc[2]);
 
-    Int_t nentries = (Int_t)tree->GetEntries();
+	chain->SetBranchAddress("pxmc", mom_mc[0]);
+	chain->SetBranchAddress("pymc", mom_mc[1]);
+	chain->SetBranchAddress("pzmc", mom_mc[2]);
 
-    Float_t Ks_three[9], Kl_three[9], Ks_semi[9], Kl_semi[9], Ks_regen[9], Kl_regen[9];
+	chain->SetBranchAddress("Knemc", Knemc);
 
-    Float_t ipmc_three[3], ipmc_semi[3], ipmc_regen[3], ipmc_omega[3], ipmc_other[3],
-            Knemc_three[9], Knemc_semi[9], Knemc_regen[9], Kchmc_three[9], Kchmc_semi[9], Kchmc_regen[9];
+	chain->SetBranchAddress("nclu", &nclu);
+	chain->SetBranchAddress("Xcl", cluster_rec[0]);
+	chain->SetBranchAddress("Ycl", cluster_rec[1]);
+	chain->SetBranchAddress("Zcl", cluster_rec[2]);
 
-    TBranch *b_ipmcthree = tree->Branch("ipmc_three", ipmc_three, "ipmc_three[3]/F");
-    TBranch *b_ipmcsemi = tree->Branch("ipmc_semi", ipmc_semi, "ipmc_semi[3]/F");
-    TBranch *b_ipmcregen = tree->Branch("ipmc_regen", ipmc_regen, "ipmc_regen[3]/F");
-    TBranch *b_ipmcomega = tree->Branch("ipmc_omega", ipmc_omega, "ipmc_omega[3]/F");
-    TBranch *b_ipmcother = tree->Branch("ipmc_other", ipmc_other, "ipmc_other[3]/F");
+	chain->SetBranchAddress("mctruth", &mctruth);
+	chain->SetBranchAddress("mcflag", &mcflag);
+	chain->SetBranchAddress("ipmc", ipmc);
 
-    TBranch *b_Knemcthree = tree->Branch("Knemc_three", Knemc_three, "Knemc_three[9]/F");
-    TBranch *b_Knemcsemi = tree->Branch("Knemc_semi", Knemc_semi, "Knemc_semi[9]/F");
-    TBranch *b_Knemcregen = tree->Branch("Knemc_regen", Knemc_regen, "Knemc_regen[9]/F");
+	Int_t nentries = (Int_t)chain->GetEntries();
 
-    TBranch *b_Kchmcthree = tree->Branch("Kchmc_three", Kchmc_three, "Kchmc_three[9]/F");
-    TBranch *b_Kchmcsemi = tree->Branch("Kchmc_semi", Kchmc_semi, "Kchmc_semi[9]/F");
-    TBranch *b_Kchmcregen = tree->Branch("Kchmc_regen", Kchmc_regen, "Kchmc_regen[9]/F");
-    for(Int_t i = 0; i < nentries; i++)
-    {
-        tree->GetEntry(i);
+	Float_t pgammc[4][8], neu_vtx[3], cluster[3];
+	Int_t good_clus_ind[4],region[4];
+
+	TBranch *b_pgammc1 = tree->Branch("pgammc1", pgammc[0], "pgammc1[8]/F");
+	TBranch *b_pgammc2 = tree->Branch("pgammc2", pgammc[1], "pgammc2[8]/F");
+	TBranch *b_pgammc3 = tree->Branch("pgammc3", pgammc[2], "pgammc3[8]/F");
+	TBranch *b_pgammc4 = tree->Branch("pgammc4", pgammc[3], "pgammc4[8]/F");
+
+	TBranch *b_clusindgood = tree->Branch("clusindgood", good_clus_ind, "clusindgood[4]/I");
+
+	TBranch *b_region = tree->Branch("region", region, "region[4]/I");
+
+	const Int_t max_count = TMath::Factorial(nclus);
+	Int_t count = 0, ind_gam[4], mc_ind[4] = {0,1,2,3}, min_ind[max_count];
+	Float_t clus_diff[max_count], clus_diff_min;
+
+	Bool_t clus_time[max_count];
+
+	for (Int_t i = 0; i < nentries; i++)
+	{
+		chain->GetEntry(i);
+
+		clus_diff_min = 999999.;
+
+		if (mctruth == 1 || mctruth == 2)
+		{
+			for (Int_t j = 0; j < ntmc; j++)
+			{
+				if ((mother[vtxmc[j] - 1] == 7) && pidmc[j] == 1)
+				{
+					pgammc[count][0] = mom_mc[0][j];
+					pgammc[count][1] = mom_mc[1][j];
+					pgammc[count][2] = mom_mc[2][j];
+					pgammc[count][3] = sqrt(pow(pgammc[count][0], 2) +
+																	pow(pgammc[count][1], 2) +
+																	pow(pgammc[count][2], 2));
+
+					neu_vtx[0] = Knemc[6];
+					neu_vtx[1] = Knemc[7];
+					neu_vtx[2] = Knemc[8];
+
+					region[count] = inter_point(pgammc[count], neu_vtx, cluster);
+
+					pgammc[count][4] = cluster[0];
+					pgammc[count][5] = cluster[1];
+					pgammc[count][6] = cluster[2];
+
+					Float_t beta_c = c_vel * Knemc[4] / Knemc[3], length = sqrt(pow(Knemc[6] - ipmc[0],2) + pow(Knemc[7] - ipmc[1],2) + pow(Knemc[8] - ipmc[2],2)), time_K = length / beta_c;
+
+					Float_t length_clus = sqrt(pow(cluster[0] - Knemc[6],2) + pow(cluster[1] - Knemc[7],2) + pow(cluster[2] - Knemc[8] ,2));
+
+					pgammc[count][7] = time_K + (length_clus / c_vel);
 
 
-        for(Int_t j = 0; j < 3; j++) ipmc_three[j] = -999.;
-        for(Int_t j = 0; j < 3; j++) ipmc_semi[j] = -999.;
-        for(Int_t j = 0; j < 3; j++) ipmc_regen[j] = -999.;
-        for(Int_t j = 0; j < 3; j++) ipmc_omega[j] = -999.;
-        for(Int_t j = 0; j < 3; j++) ipmc_other[j] = -999.;
 
-        for(Int_t j = 0; j < 9; j++) Knemc_three[j] = -999.;
-        for(Int_t j = 0; j < 9; j++) Knemc_semi[j] = -999.;
-        for(Int_t j = 0; j < 9; j++) Knemc_regen[j] = -999.;
 
-        for(Int_t j = 0; j < 9; j++) Kchmc_three[j] = -999.;
-        for(Int_t j = 0; j < 9; j++) Kchmc_semi[j] = -999.;
-        for(Int_t j = 0; j < 9; j++) Kchmc_regen[j] = -999.;
+					count++;
+				}
+			}
 
-        if(mcflag == 1)
-        {
-            if(mctruth == 4)
-            {
-                for(Int_t j = 0; j < ntmc; j++)
-                {
-                    if(mother[vtxmc[j] - 1] == 50)
-                    {
-                        ipmc_omega[0] = pos_mc[0][vtxmc[j] - 1];
-                        ipmc_omega[1] = pos_mc[1][vtxmc[j] - 1];
-                        ipmc_omega[2] = pos_mc[2][vtxmc[j] - 1];
-                    }
-                }
-            }
+			for(Int_t j1 = 0; j1 < nclu - 3; j1++)
+				for(Int_t j2 = j1 + 1; j2 < nclu - 2; j2++)
+					for(Int_t j3 = j2 + 1; j3 < nclu - 1; j3++)
+						for(Int_t j4 = j3 + 1; j4 < nclu; j4++)
+						{
+							ind_gam[0] = j1;
+							ind_gam[1] = j2;
+							ind_gam[2] = j3;
+							ind_gam[3] = j4;
 
-            if(mctruth == 7)
-            {
-                for(Int_t j = 0; j < ntmc; j++)
-                {
-                    if(mother[vtxmc[j] - 1] == 50)
-                    {
-                        ipmc_other[0] = pos_mc[0][vtxmc[j] - 1];
-                        ipmc_other[1] = pos_mc[1][vtxmc[j] - 1];
-                        ipmc_other[2] = pos_mc[2][vtxmc[j] - 1];
-                    }
-                }
-            }
+							for(Int_t k = 0; k < max_count; k++)
+							{	
+								clus_diff[k] = sqrt(pow(cluster_rec[0][ind_gam[0]] - pgammc[mc_ind[0]][4],2) +
+																		pow(cluster_rec[1][ind_gam[0]] - pgammc[mc_ind[0]][5],2) +
+																		pow(cluster_rec[2][ind_gam[0]] - pgammc[mc_ind[0]][6],2)) +
+															 sqrt(pow(cluster_rec[0][ind_gam[1]] - pgammc[mc_ind[1]][4],2) +
+																		pow(cluster_rec[1][ind_gam[1]] - pgammc[mc_ind[1]][5],2) +
+																		pow(cluster_rec[2][ind_gam[1]] - pgammc[mc_ind[1]][6],2)) +
+															 sqrt(pow(cluster_rec[0][ind_gam[2]] - pgammc[mc_ind[2]][4],2) +
+																		pow(cluster_rec[1][ind_gam[2]] - pgammc[mc_ind[2]][5],2) +
+																		pow(cluster_rec[2][ind_gam[2]] - pgammc[mc_ind[2]][6],2)) +
+															 sqrt(pow(cluster_rec[0][ind_gam[3]] - pgammc[mc_ind[3]][4],2) +
+																		pow(cluster_rec[1][ind_gam[3]] - pgammc[mc_ind[3]][5],2) +
+																		pow(cluster_rec[2][ind_gam[3]] - pgammc[mc_ind[3]][6],2));
+								
+								clus_time[k] = pgammc[mc_ind[0]][7] > 0. && pgammc[mc_ind[1]][7] > 0. && pgammc[mc_ind[2]][7] > 0. && pgammc[mc_ind[3]][7] > 0.;
 
-            if(mctruth == 3)
-            {
-                for(Int_t j = 0; j < ntmc; j++)
-                {
-                    if(mother[vtxmc[j] - 1] == 50)
-                    {
-                        ipmc_regen[0] = pos_mc[0][vtxmc[j] - 1];
-                        ipmc_regen[1] = pos_mc[1][vtxmc[j] - 1];
-                        ipmc_regen[2] = pos_mc[2][vtxmc[j] - 1];
-                    }
+								std::next_permutation(mc_ind, mc_ind+4);
+							}
 
-                    if(mother[vtxmc[j] - 1] == 50 && pidmc[j] == 10)
-                    {
-                        Kl_regen[0] = mom_mc[0][j];
-                        Kl_regen[1] = mom_mc[1][j];
-                        Kl_regen[2] = mom_mc[2][j];
-                    }
+							TMath::Sort(max_count, clus_diff, min_ind, kFALSE);
 
-                    if(mother[vtxmc[j] - 1] == 50 && pidmc[j] == 16)
-                    {
-                        Ks_regen[0] = mom_mc[0][j];
-                        Ks_regen[1] = mom_mc[1][j];
-                        Ks_regen[2] = mom_mc[2][j];
-                    }
+							if(clus_diff_min > clus_diff[min_ind[0]] && clus_diff[min_ind[0]] < 10)
+							{
+								clus_diff_min = clus_diff[min_ind[0]];
 
-                    if(mother[vtxmc[j] - 1] == 10 && pidmc[j] == 7)
-                    {
-                        Knemc_regen[0] = Kl_regen[0];
-                        Knemc_regen[1] = Kl_regen[1];
-                        Knemc_regen[2] = Kl_regen[2];
-                        Knemc_regen[3] = sqrt(pow(Kl_regen[0],2) + pow(Kl_regen[1],2) + pow(Kl_regen[2],2) + pow(m_k0,2));
-                        Knemc_regen[4] = sqrt(pow(Kl_regen[0],2) + pow(Kl_regen[1],2) + pow(Kl_regen[2],2));
-                        Knemc_regen[5] = m_k0;
-                        Knemc_regen[6] = pos_mc[0][vtxmc[j] - 1];
-                        Knemc_regen[7] = pos_mc[1][vtxmc[j] - 1];
-                        Knemc_regen[8] = pos_mc[2][vtxmc[j] - 1];
-                    }
+								good_clus_ind[0] = ind_gam[0];
+								good_clus_ind[1] = ind_gam[1];
+								good_clus_ind[2] = ind_gam[2];
+								good_clus_ind[3] = ind_gam[3];
+							}
+							else
+							{
+								good_clus_ind[0] = 999;
+								good_clus_ind[1] = 999;
+								good_clus_ind[2] = 999;
+								good_clus_ind[3] = 999;
+							}
 
-                    if(mother[vtxmc[j] - 1] == 16 && pidmc[j] == 7)
-                    {
-                        Knemc_regen[0] = Ks_regen[0];
-                        Knemc_regen[1] = Ks_regen[1];
-                        Knemc_regen[2] = Ks_regen[2];
-                        Knemc_regen[3] = sqrt(pow(Ks_regen[0],2) + pow(Ks_regen[1],2) + pow(Ks_regen[2],2) + pow(m_k0,2));
-                        Knemc_regen[4] = sqrt(pow(Ks_regen[0],2) + pow(Ks_regen[1],2) + pow(Ks_regen[2],2));
-                        Knemc_regen[5] = m_k0;
-                        Knemc_regen[6] = pos_mc[0][vtxmc[j] - 1];
-                        Knemc_regen[7] = pos_mc[1][vtxmc[j] - 1];
-                        Knemc_regen[8] = pos_mc[2][vtxmc[j] - 1];
-                    }
 
-                    if(mother[vtxmc[j] - 1] == 10 && (pidmc[j] == 8 || pidmc[j] == 9))
-                    {
-                        Kchmc_regen[0] = Kl_regen[0];
-                        Kchmc_regen[1] = Kl_regen[1];
-                        Kchmc_regen[2] = Kl_regen[2];
-                        Kchmc_regen[3] = sqrt(pow(Kl_regen[0],2) + pow(Kl_regen[1],2) + pow(Kl_regen[2],2) + pow(m_k0,2));
-                        Kchmc_regen[4] = sqrt(pow(Kl_regen[0],2) + pow(Kl_regen[1],2) + pow(Kl_regen[2],2));
-                        Kchmc_regen[5] = m_k0;
-                        Kchmc_regen[6] = pos_mc[0][vtxmc[j] - 1];
-                        Kchmc_regen[7] = pos_mc[1][vtxmc[j] - 1];
-                        Kchmc_regen[8] = pos_mc[2][vtxmc[j] - 1];
-                    }
+						}
 
-                    if(mother[vtxmc[j] - 1] == 16 && (pidmc[j] == 8 || pidmc[j] == 9))
-                    {
-                        Kchmc_regen[0] = Ks_regen[0];
-                        Kchmc_regen[1] = Ks_regen[1];
-                        Kchmc_regen[2] = Ks_regen[2];
-                        Kchmc_regen[3] = sqrt(pow(Ks_regen[0],2) + pow(Ks_regen[1],2) + pow(Ks_regen[2],2) + pow(m_k0,2));
-                        Kchmc_regen[4] = sqrt(pow(Ks_regen[0],2) + pow(Ks_regen[1],2) + pow(Ks_regen[2],2));
-                        Kchmc_regen[5] = m_k0;
-                        Kchmc_regen[6] = pos_mc[0][vtxmc[j] - 1];
-                        Kchmc_regen[7] = pos_mc[1][vtxmc[j] - 1];
-                        Kchmc_regen[8] = pos_mc[2][vtxmc[j] - 1];
-                    }
-                }
-            }
+			count = 0;
+		}
 
-            if(mctruth == 5)
-            {
-                for(Int_t j = 0; j < ntmc; j++)
-                {
-                    if(mother[vtxmc[j] - 1] == 50)
-                    {
-                        ipmc_three[0] = pos_mc[0][j];
-                        ipmc_three[1] = pos_mc[1][j];
-                        ipmc_three[2] = pos_mc[2][j];
-                    }
+		tree->Fill();
+	}
 
-                    if(mother[vtxmc[j] - 1] == 50 && pidmc[j] == 10)
-                    {
-                        Kl_three[0] = mom_mc[0][j];
-                        Kl_three[1] = mom_mc[1][j];
-                        Kl_three[2] = mom_mc[2][j];
-                    }
+	tree->Print();
 
-                    if(mother[vtxmc[j] - 1] == 50 && pidmc[j] == 16)
-                    {
-                        Ks_three[0] = mom_mc[0][j];
-                        Ks_three[1] = mom_mc[1][j];
-                        Ks_three[2] = mom_mc[2][j];
-                    }
+	file->Write();
+	file->Close();
+	delete file;
 
-                    if(mother[vtxmc[j] - 1] == 10 && pidmc[j] == 7)
-                    {
-                        Knemc_three[0] = Kl_three[0];
-                        Knemc_three[1] = Kl_three[1];
-                        Knemc_three[2] = Kl_three[2];
-                        Knemc_three[3] = sqrt(pow(Kl_three[0],2) + pow(Kl_three[1],2) + pow(Kl_three[2],2) + pow(m_k0,2));
-                        Knemc_three[4] = sqrt(pow(Kl_three[0],2) + pow(Kl_three[1],2) + pow(Kl_three[2],2));
-                        Knemc_three[5] = m_k0;
-                        Knemc_three[6] = pos_mc[0][vtxmc[j] - 1];
-                        Knemc_three[7] = pos_mc[1][vtxmc[j] - 1];
-                        Knemc_three[8] = pos_mc[2][vtxmc[j] - 1];
-
-                    }
-
-                    if(mother[vtxmc[j] - 1] == 16 && pidmc[j] == 7)
-                    {
-                        Knemc_three[0] = Ks_three[0];
-                        Knemc_three[1] = Ks_three[1];
-                        Knemc_three[2] = Ks_three[2];
-                        Knemc_three[3] = sqrt(pow(Ks_three[0],2) + pow(Ks_three[1],2) + pow(Ks_three[2],2) + pow(m_k0,2));
-                        Knemc_three[4] = sqrt(pow(Ks_three[0],2) + pow(Ks_three[1],2) + pow(Ks_three[2],2));
-                        Knemc_three[5] = m_k0;
-                        Knemc_three[6] = pos_mc[0][vtxmc[j] - 1];
-                        Knemc_three[7] = pos_mc[1][vtxmc[j] - 1];
-                        Knemc_three[8] = pos_mc[2][vtxmc[j] - 1];
-
-                    }
-
-                    if(mother[vtxmc[j] - 1] == 10 && (pidmc[j] == 8 || pidmc[j] == 9))
-                    {
-                        Kchmc_three[0] = Kl_three[0];
-                        Kchmc_three[1] = Kl_three[1];
-                        Kchmc_three[2] = Kl_three[2];
-                        Kchmc_three[3] = sqrt(pow(Kl_three[0],2) + pow(Kl_three[1],2) + pow(Kl_three[2],2) + pow(m_k0,2));
-                        Kchmc_three[4] = sqrt(pow(Kl_three[0],2) + pow(Kl_three[1],2) + pow(Kl_three[2],2));
-                        Kchmc_three[5] = m_k0;
-                        Kchmc_three[6] = pos_mc[0][vtxmc[j] - 1];
-                        Kchmc_three[7] = pos_mc[1][vtxmc[j] - 1];
-                        Kchmc_three[8] = pos_mc[2][vtxmc[j] - 1];
-                    }
-
-                    if(mother[vtxmc[j] - 1] == 16 && (pidmc[j] == 8 || pidmc[j] == 9))
-                    {
-                        Kchmc_three[0] = Ks_three[0];
-                        Kchmc_three[1] = Ks_three[1];
-                        Kchmc_three[2] = Ks_three[2];
-                        Kchmc_three[3] = sqrt(pow(Ks_three[0],2) + pow(Ks_three[1],2) + pow(Ks_three[2],2) + pow(m_k0,2));
-                        Kchmc_three[4] = sqrt(pow(Ks_three[0],2) + pow(Ks_three[1],2) + pow(Ks_three[2],2));
-                        Kchmc_three[5] = m_k0;
-                        Kchmc_three[6] = pos_mc[0][vtxmc[j] - 1];
-                        Kchmc_three[7] = pos_mc[1][vtxmc[j] - 1];
-                        Kchmc_three[8] = pos_mc[2][vtxmc[j] - 1];
-                    }
-                }
-            }
-
-            if(mctruth == 6)
-            {
-                for(Int_t j = 0; j < ntmc; j++)
-                {
-                    if(mother[vtxmc[j] - 1] == 50)
-                    {
-                        ipmc_semi[0] = pos_mc[0][vtxmc[j] - 1];
-                        ipmc_semi[1] = pos_mc[1][vtxmc[j] - 1];
-                        ipmc_semi[2] = pos_mc[2][vtxmc[j] - 1];
-                    }
-
-                    if(mother[vtxmc[j] - 1] == 50 && pidmc[j] == 10)
-                    {
-                        Kl_semi[0] = mom_mc[0][j];
-                        Kl_semi[1] = mom_mc[1][j];
-                        Kl_semi[2] = mom_mc[2][j];
-                    }
-
-                    if(mother[vtxmc[j] - 1] == 50 && pidmc[j] == 16)
-                    {
-                        Ks_semi[0] = mom_mc[0][j];
-                        Ks_semi[1] = mom_mc[1][j];
-                        Ks_semi[2] = mom_mc[2][j];
-                    }
-
-                    if(mother[vtxmc[j] - 1] == 10 && pidmc[j] == 7)
-                    {
-                        Knemc_semi[0] = Kl_semi[0];
-                        Knemc_semi[1] = Kl_semi[1];
-                        Knemc_semi[2] = Kl_semi[2];
-                        Knemc_semi[3] = sqrt(pow(Kl_semi[0],2) + pow(Kl_semi[1],2) + pow(Kl_semi[2],2) + pow(m_k0,2));
-                        Knemc_semi[4] = sqrt(pow(Kl_semi[0],2) + pow(Kl_semi[1],2) + pow(Kl_semi[2],2));
-                        Knemc_semi[5] = m_k0;
-                        Knemc_semi[6] = pos_mc[0][vtxmc[j] - 1];
-                        Knemc_semi[7] = pos_mc[1][vtxmc[j] - 1];
-                        Knemc_semi[8] = pos_mc[2][vtxmc[j] - 1];
-                    }
-
-                    if(mother[vtxmc[j] - 1] == 16 && pidmc[j] == 7)
-                    {
-                        Knemc_semi[0] = Ks_semi[0];
-                        Knemc_semi[1] = Ks_semi[1];
-                        Knemc_semi[2] = Ks_semi[2];
-                        Knemc_semi[3] = sqrt(pow(Ks_semi[0],2) + pow(Ks_semi[1],2) + pow(Ks_semi[2],2) + pow(m_k0,2));
-                        Knemc_semi[4] = sqrt(pow(Ks_semi[0],2) + pow(Ks_semi[1],2) + pow(Ks_semi[2],2));
-                        Knemc_semi[5] = m_k0;
-                        Knemc_semi[6] = pos_mc[0][vtxmc[j] - 1];
-                        Knemc_semi[7] = pos_mc[1][vtxmc[j] - 1];
-                        Knemc_semi[8] = pos_mc[2][vtxmc[j] - 1];
-                    }
-
-                    if(mother[vtxmc[j] - 1] == 10 && (pidmc[j] == 8 || pidmc[j] == 9))
-                    {
-                        Kchmc_semi[0] = Kl_semi[0];
-                        Kchmc_semi[1] = Kl_semi[1];
-                        Kchmc_semi[2] = Kl_semi[2];
-                        Kchmc_semi[3] = sqrt(pow(Kl_semi[0],2) + pow(Kl_semi[1],2) + pow(Kl_semi[2],2) + pow(m_k0,2));
-                        Kchmc_semi[4] = sqrt(pow(Kl_semi[0],2) + pow(Kl_semi[1],2) + pow(Kl_semi[2],2));
-                        Kchmc_semi[5] = m_k0;
-                        Kchmc_semi[6] = pos_mc[0][vtxmc[j] - 1];
-                        Kchmc_semi[7] = pos_mc[1][vtxmc[j] - 1];
-                        Kchmc_semi[8] = pos_mc[2][vtxmc[j] - 1];
-                    }
-
-                    if(mother[vtxmc[j] - 1] == 16 && (pidmc[j] == 8 || pidmc[j] == 9))
-                    {
-                        Kchmc_semi[0] = Ks_semi[0];
-                        Kchmc_semi[1] = Ks_semi[1];
-                        Kchmc_semi[2] = Ks_semi[2];
-                        Kchmc_semi[3] = sqrt(pow(Ks_semi[0],2) + pow(Ks_semi[1],2) + pow(Ks_semi[2],2) + pow(m_k0,2));
-                        Kchmc_semi[4] = sqrt(pow(Ks_semi[0],2) + pow(Ks_semi[1],2) + pow(Ks_semi[2],2));
-                        Kchmc_semi[5] = m_k0;
-                        Kchmc_semi[6] = pos_mc[0][vtxmc[j] - 1];
-                        Kchmc_semi[7] = pos_mc[1][vtxmc[j] - 1];
-                        Kchmc_semi[8] = pos_mc[2][vtxmc[j] - 1];
-                    }
-                }
-            }
-
-        }
-
-        b_ipmcthree->Fill();
-        b_ipmcsemi->Fill();
-        b_ipmcregen->Fill();
-        b_ipmcomega->Fill();
-        b_ipmcother->Fill();
-
-        b_Knemcthree->Fill();
-        b_Knemcsemi->Fill();
-        b_Knemcregen->Fill();
-
-        b_Kchmcthree->Fill();
-        b_Kchmcsemi->Fill();
-        b_Kchmcregen->Fill();
-    }
-
-    file->cd(treedir);
-    tree->Write();
-    file->Close();
-    delete file;
-
+	return 0;
 }

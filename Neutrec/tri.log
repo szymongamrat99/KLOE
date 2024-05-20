@@ -1,0 +1,26 @@
+All events: 1088980
+Events after nclu >= 4 and nv >= 1: 0.760374
+Events at the starting point of analysis: 0.171963
+
+Rejected events: 67562
+
+Good cluster sets: 0
+Good cluster sets for 0 bunch: 0
+Good cluster sets for +1 bunch: 0
+Good cluster sets for -1 bunch: 0
+Good cluster sets for blob: 0
+Good cluster sets eff: 0
+Bad cluster sets: 153483
+Bad cluster sets for 0 bunch: 114942
+Bad cluster sets for +1 bunch: 1567
+Bad cluster sets for -1 bunch: 14327
+Bad cluster sets for blob: 205
+Bad clusters 1: 0
+Bad clusters 2: 0
+Bad clusters 3: 0
+Bad clusters 4: 0.819608
+Bad cluster smaller: 0
+Bad cluster bigger: 0
+Bad cluster sets eff: 0.819608
+Bad cluster smaller eff: 0
+Bad cluster bigger eff: 0
