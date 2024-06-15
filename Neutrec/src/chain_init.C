@@ -4,6 +4,10 @@
 
 inline void chain_init(TChain *chain_init, UInt_t first, UInt_t last)
 {
+    char* env = "ROOTFILES";
+
+    
+
     TString fullname = "",
     dirnamemc = "MONTE_CARLO", dirnamedata = "DATA",
     filenamemc = "mc_stream62_mccard2_", filenamedata = "data_stream42_",

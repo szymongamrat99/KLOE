@@ -20,6 +20,7 @@ int main(int argc, char *argv[])
   cout << "1. Bare trilateration." << endl;
   cout << "2. Trilateration with kinematic fit." << endl;
   cout << "3. Trilateration with kinematic fit and T0 correction." << endl;
+  cout << "4. Trilateration with triangle." << endl;
 
   Int_t mode;
 
@@ -38,6 +39,11 @@ int main(int argc, char *argv[])
   case 2:
     cout << "Analysis started." << endl;
     tri_neurec_kinfit_corr(ind_data_mc, first, last, loopcount, jmin, jmax);
+    break;
+
+  case 4:
+    cout << "Analysis started." << endl;
+    triangle_neurec(first, last, good_clus);
     break;
 
   default:

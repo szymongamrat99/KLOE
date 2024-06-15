@@ -152,7 +152,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
             trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
-            if(mcflag == 1 && trcv_sum > -5. && (minv4gam - m_k0) < 76 && abs(Kchboost[5] - m_k0) < 1.2 && Qmiss < 3.75)
+            if(mcflag == 1)
             {
                 if(mctruth == 1)
                 {
@@ -186,7 +186,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
                 }
             }
 
-            if(mcflag == 0 && (minv4gam - m_k0) < 76 && abs(Kchboost[5] - m_k0) < 1.2 && Qmiss < 3.75)
+            if(mcflag == 0)
             {
                 event.time_diff_data.push_back(Dtboostlor);
             }

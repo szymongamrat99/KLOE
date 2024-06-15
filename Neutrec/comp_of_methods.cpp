@@ -32,7 +32,7 @@ const TString ext = ".png";
 
 #define T0 2.715
 
-int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, const Int_t range, const Int_t ind_data_mc = 0, Int_t file_num = 0, Double_t cut_prob = 0.0, Double_t time_cut = 100.0)
+int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, const Int_t range, const Int_t ind_data_mc = 0, Int_t file_num = 0, Int_t bunch_int = 9, Double_t cut_prob = 0.0, Double_t time_cut = 100.0)
 {
   TChain *chain = new TChain("INTERF/h1");
   chain_init(chain, first, last);
@@ -209,11 +209,11 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   Int_t width = 750, height = 750;
 
   TH1 *chi2_hist[2], *chi2_no_bunch_hist[2], *chi2add[2], *chi2subst[2], *chi2div[2], *prob_hist[2], *clusenergy_hist[2];
-  TH1 *beta_hist[2];
+  TH1 *betadt_hist[2], *betadtover90_hist[2], *betapm_hist[2], *betapmover90_hist[2];
   TH2 *neu_vtx_corr[2][4], *neu_mom[2][4], *ip_coor[2][3];
   TH2 *beta_time[2][2], *cluscorr_hist[2][2];
 
-  TH2 *sigmas_std[2][5], *sigmas_tri[2][5], *sigmas_tri_kin_fit[2][5], *angle_vs_time[2][2], *dist_vs_time[2][2], *sol_err_hist[2];
+  TH2 *sigmas_std[2][5], *sigmas_tri[2][5], *sigmas_tri_kin_fit[2][5], *angle_vs_time[2][2], *dist_vs_time[2][2], *sol_err_hist[2], *beta1_hist[2], *beta2_hist[2];
   TH1 *neu_std_hist[2][5], *neu_tri_hist[2][5], *neu_tri_kin_fit_hist[2][5], *chosen_hist[2];
   TH1 *res_std_hist[2][5], *res_tri_hist[2][5], *res_tri_kin_fit_hist[2][5];
   TH1 *pulls[2][8], *first_clus_hist[2];
@@ -264,6 +264,12 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       ip_coor[j][i] = new TH2F(id_hist, "", 100, -10, 10, 100, -10, 10);
     }
 
+    id_hist = "Beta1" + std::to_string(j);
+    beta1_hist[j] = new TH2F(id_hist, "", 200, 0.15, 0.3, 200, 0.15, 0.3);
+
+    id_hist = "Beta2" + std::to_string(j);
+    beta2_hist[j] = new TH2F(id_hist, "", 200, 0.15, 0.3, 200, 0.15, 0.3);
+
     id_hist = "Coor" + std::to_string(j) + std::to_string(3);
     neu_vtx_corr[j][3] = new TH2F(id_hist, "", 200, 0.0, 15.0, 200, 0.15, 0.3);
 
@@ -288,7 +294,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       else if (i == 6)
         pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,3} - #vec{X}^{gen}_{neu,3} [cm];Counts", 201, -300, 300);
       else if (i == 7)
-        pulls[j][i] = new TH1F(id_hist, ";t^{tri}_{neu} - t^{gen}_{neu} [#tau_{S}];Counts", 101, -100, 100);
+        pulls[j][i] = new TH1F(id_hist, ";t^{tri}_{neu} - t^{gen}_{neu} [#tau_{S}];Counts", 101, -1.0, 0.5);
     }
 
     id_hist = "Chi2" + std::to_string(j);
@@ -309,8 +315,17 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     id_hist = "Prob" + std::to_string(j);
     prob_hist[j] = new TH1F(id_hist, "", 100, 0.0, 1.0);
 
-    id_hist = "Beta" + std::to_string(j);
-    beta_hist[j] = new TH1F(id_hist, ";#beta_{K#rightarrow#pi^{0}#pi^{0}};Counts", 100, 0.15, 0.3);
+    id_hist = "Betadt" + std::to_string(j);
+    betadt_hist[j] = new TH1F(id_hist, ";#beta_{K#rightarrow#pi^{0}#pi^{0}};Counts", 100, 0.15, 0.6);
+
+    id_hist = "Betadtover90" + std::to_string(j);
+    betadtover90_hist[j] = new TH1F(id_hist, ";#beta_{K#rightarrow#pi^{0}#pi^{0}};Counts", 100, 0.15, 0.6);
+
+    id_hist = "Betapm" + std::to_string(j);
+    betapm_hist[j] = new TH1F(id_hist, ";#beta_{K#rightarrow#pi^{0}#pi^{0}};Counts", 100, 0.15, 0.6);
+
+    id_hist = "Betapmover90" + std::to_string(j);
+    betapmover90_hist[j] = new TH1F(id_hist, ";#beta_{K#rightarrow#pi^{0}#pi^{0}};Counts", 100, 0.15, 0.6);
 
     id_hist = "Bunch_num" + std::to_string(j);
     bunch[j] = new TH1I(id_hist, ";Number of bunch correction;Counts", 11, -5, 5);
@@ -389,9 +404,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
         res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 50);
         res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 50);
         res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 50);
-        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -20, 20);
-        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -20, 20);
-        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -20, 20);
+        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -0.2, 0.2);
+        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -0.2, 0.2);
+        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -0.2, 0.2);
       }
       else if (i == 4)
       {
@@ -411,7 +426,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   Int_t count_angle = 0, min_ind[6], min_ind_180[6], min_ind_dist[6], isEqual = 0, bad_clus = 0;
   Float_t vec_before[4], vec_after[4], boost[3], ip_before[4], ip_after[4], d_cl, angle_min_0, angle_min_180, angle[6], angle_180[6], cos_tmp, num, den, dist[6], dist_min, tcl, cos_boost_kaon_mom, angle_boost_kaon_mom;
 
-  Bool_t cut = true, bunch_0 = true, bunch_plus1 = true, bunch_minus1 = true, blob = true;
+  Bool_t cut = true, bunch_0 = true, bunch_plus1 = true, bunch_minus1 = true, blob = true, chosen_bunch = true;
 
   Int_t counts_cut = 0, counts_all = 0, counts_bad = 0, counts_good = 0, counts_goodzero = 0, counts_goodpone = 0, counts_goodmone = 0, g4taken_corr[4], counts_bad_smaller = 0, counts_bad_bigger = 0, counts_bad1 = 0, counts_bad2 = 0, counts_bad3 = 0, counts_bad4 = 0, counts_blob = 0, counts_rej = 0, counts_badblob = 0, counts_badzero = 0, counts_badpone = 0, counts_badmone = 0;
 
@@ -614,14 +629,38 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
             }
           }
 
-          if (isEqual == 0 && bunch_minus1)
+          if( bunch_int == 0 )
+            chosen_bunch = bunch_0;
+          else if(bunch_int == 1 )
+            chosen_bunch = bunch_plus1;
+          else if(bunch_int == -1 )
+            chosen_bunch = bunch_minus1;
+          else if(bunch_int == 2 )
+            chosen_bunch = blob;
+          else
+            chosen_bunch = true;
+
+          if (isEqual >= 0 && chosen_bunch)
           {
             chi2_hist[j]->Fill(chi2min);
             prob_hist[j]->Fill(TMath::Prob(chi2min, M));
 
             chi2_no_bunch_hist[j]->Fill(chi2min_no_bunch);
 
-            beta_hist[j]->Fill(v_Kneutri / c_vel);
+            if(angle_boost_kaon_mom < 90.)
+            {
+              betadt_hist[j]->Fill(lengthneu_tri / (c_vel * Knetri_kinfit[9]));
+              betapm_hist[j]->Fill(v_Kneutri / c_vel);
+            }
+            else if(angle_boost_kaon_mom > 90.)
+            {
+              betadtover90_hist[j]->Fill(lengthneu_tri / (c_vel * Knetri_kinfit[9]));
+              betapmover90_hist[j]->Fill(v_Kneutri / c_vel);
+            }
+
+            beta1_hist[j]->Fill(v_Kneumc / c_vel, v_Kneutri / c_vel);
+
+            beta2_hist[j]->Fill(v_Kneumc / c_vel, lengthneu_tri / (c_vel * Knetri_kinfit[9]) );
 
             bunch[j]->Fill(bunchnum);
           }
@@ -633,7 +672,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
           {
             if (k < 3)
             {
-              if (isEqual == 0 && bunch_minus1)
+              if (isEqual >= 0 && chosen_bunch)
               {
                 neu_vtx_corr[j][k]->Fill(Knemc[6 + k], Knetri_kinfit[6 + k]);
                 sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - Knemc[6 + k]);
@@ -643,21 +682,21 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
             }
             else if (k == 3)
             {
-              if (isEqual == 0 && bunch_minus1)
+              if (isEqual >= 0 && chosen_bunch)
               {
                 neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[9]); // Knetri_kinfit[6 + k]);
-                sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - 0 - t_neumc) / tau_S_nonCPT);
-                pulls[j][4 + k]->Fill((Knetri_kinfit[9] - 0 - t_neumc) / tau_S_nonCPT);
+                sigmas_std[j][3]->Fill(lengthneu_mc, (v_Kneutri / c_vel) - v_Kneumc/c_vel);
+                pulls[j][4 + k]->Fill((v_Kneutri / c_vel) - v_Kneumc/c_vel);
                 neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
               }
             }
             else
             {
-              if (isEqual == 0 && bunch_minus1)
+              if (isEqual >= 0 && chosen_bunch)
                 sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_tri - lengthneu_mc));
             }
 
-            if (isEqual == 0 && bunch_minus1)
+            if (isEqual >= 0 && chosen_bunch)
             {
               pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc[k]);
               pulls[j][4 + k]->Fill(Knetri_kinfit[4 + k] - Knemc[4 + k]);
@@ -666,7 +705,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
           d_cl = sqrt(pow(cluster[0][0] - bhabha_vtx[0], 2) + pow(cluster[1][0] - bhabha_vtx[1], 2) + pow(cluster[2][0] - bhabha_vtx[2], 2));
 
-          if (isEqual == 0 && bunch_minus1)
+          if (isEqual >= 0 && chosen_bunch)
           {
 
             for (Int_t k = 0; k < ntmc; k++)
@@ -755,7 +794,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
   TFitResultPtr result;
 
-  TString x_title, y_title, x_title_list[5] = {"X^{tri}_{neu,1} - X^{gen}_{neu,1} [cm]", "X^{tri}_{neu,2} - X^{gen}_{neu,2} [cm]", "X^{tri}_{neu,3} - X^{gen}_{neu,3} [cm]", "t^{tri}_{neu} - t^{gen}_{neu} [#tau_{S}]", "d^{tri}_{neu} - d^{gen}_{neu} [cm]"}, hist_title[5] = {"d^{gen}_{neu}#in[0,10] cm", "d^{gen}_{neu}#in(10,20] cm", "d^{gen}_{neu}#in(20,30] cm", "d^{gen}_{neu}#in(30,40] cm", "d^{gen}_{neu}#in(40,50] cm"};
+  TString x_title, y_title, x_title_list[5] = {"X^{tri}_{neu,1} - X^{gen}_{neu,1} [cm]", "X^{tri}_{neu,2} - X^{gen}_{neu,2} [cm]", "X^{tri}_{neu,3} - X^{gen}_{neu,3} [cm]", "#beta^{p/E}_{neu} - #beta^{gen}_{neu} [-]", "d^{tri}_{neu} - d^{gen}_{neu} [cm]"}, hist_title[5] = {"d^{gen}_{neu}#in[0,10] cm", "d^{gen}_{neu}#in(10,20] cm", "d^{gen}_{neu}#in(20,30] cm", "d^{gen}_{neu}#in(30,40] cm", "d^{gen}_{neu}#in(40,50] cm"};
 
   Float_t parameter[3];
 
@@ -1214,42 +1253,120 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     canvas[j][25]->SetLeftMargin(0.17);
     canvas[j][25]->cd();
 
-    beta_hist[j]->GetYaxis()->SetMaxDigits(3);
+    betadt_hist[j]->GetYaxis()->SetMaxDigits(3);
 
-    id_canva = "beta" + std::to_string(j + 1);
-    x_title = "#beta_{K#rightarrow#pi^{0}#pi^{0}} [-]";
+    id_canva = "betadt" + std::to_string(j + 1);
+    x_title = "#beta^{p/E}_{K#rightarrow#pi^{0}#pi^{0}} [-]";
     y_title = "Counts";
 
-    beta_hist[j]->GetXaxis()->CenterTitle();
-    beta_hist[j]->GetYaxis()->CenterTitle();
-    beta_hist[j]->GetXaxis()->SetTitle(x_title);
-    beta_hist[j]->GetYaxis()->SetTitle(y_title);
-    beta_hist[j]->GetYaxis()->SetRangeUser(0.0, 1.3 * beta_hist[j]->GetMaximum());
-    beta_hist[j]->SetLineColor(kBlack);
-    beta_hist[j]->Draw();
+    legend->AddEntry(betadt_hist[j], "#theta < 90^{#circ}", "l");
+    legend->AddEntry(betadtover90_hist[j], "#theta > 90^{#circ}", "l");
+
+    betadt_hist[j]->GetXaxis()->CenterTitle();
+    betadt_hist[j]->GetYaxis()->CenterTitle();
+    betadt_hist[j]->GetXaxis()->SetTitle(x_title);
+    betadt_hist[j]->GetYaxis()->SetTitle(y_title);
+    betadt_hist[j]->GetYaxis()->SetRangeUser(0.0, 1.3 * betadt_hist[j]->GetMaximum());
+    betadt_hist[j]->SetLineColor(kBlack);
+    betadtover90_hist[j]->SetLineColor(kRed);
+    betadt_hist[j]->Draw();
+    betadtover90_hist[j]->Draw("SAME");
+    legend->Draw();
     canvas[j][25]->Print(id_canva + ext);
+
+    legend->Clear();
+    
+    canvas[j][81]->SetRightMargin(0.15);
+    canvas[j][81]->SetLeftMargin(0.17);
+    canvas[j][81]->cd();
+
+    betapm_hist[j]->GetYaxis()->SetMaxDigits(3);
+
+    id_canva = "betapm" + std::to_string(j + 1);
+    x_title = "#beta^{p/E}_{K#rightarrow#pi^{0}#pi^{0}} [-]";
+    y_title = "Counts";
+
+    legend->AddEntry(betapm_hist[j], "#theta < 90^{#circ}", "l");
+    legend->AddEntry(betapmover90_hist[j], "#theta > 90^{#circ}", "l");
+
+    betapm_hist[j]->GetXaxis()->CenterTitle();
+    betapm_hist[j]->GetYaxis()->CenterTitle();
+    betapm_hist[j]->GetXaxis()->SetTitle(x_title);
+    betapm_hist[j]->GetYaxis()->SetTitle(y_title);
+    betapm_hist[j]->GetYaxis()->SetRangeUser(0.0, 1.3 * betapm_hist[j]->GetMaximum());
+    betapm_hist[j]->SetLineColor(kBlack);
+    betapmover90_hist[j]->SetLineColor(kRed);
+    betapm_hist[j]->Draw();
+    betapmover90_hist[j]->Draw("SAME");
+    legend->Draw();
+    canvas[j][81]->Print(id_canva + ext);
+
+    legend->Clear();
+
+
+    canvas[j][26]->SetRightMargin(0.15);
+    canvas[j][26]->SetLeftMargin(0.17);
+    canvas[j][26]->cd();
+
+    beta1_hist[j]->GetYaxis()->SetMaxDigits(3);
+
+    id_canva = "beta1" + std::to_string(j + 1);
+    x_title = "#beta^{gen}_{K#rightarrow#pi^{0}#pi^{0}} [-]";
+    y_title = "#beta^{rec, p/E}_{K#rightarrow#pi^{0}#pi^{0}} [-]";
+
+    beta1_hist[j]->GetXaxis()->CenterTitle();
+    beta1_hist[j]->GetYaxis()->CenterTitle();
+    beta1_hist[j]->GetXaxis()->SetTitle(x_title);
+    beta1_hist[j]->GetYaxis()->SetTitle(y_title);
+    beta1_hist[j]->Draw("COLZ");
+    canvas[j][26]->Print(id_canva + ext);
+
+    canvas[j][26]->SetRightMargin(0.15);
+    canvas[j][26]->SetLeftMargin(0.17);
+    canvas[j][26]->cd();
+
+    id_canva = "beta2" + std::to_string(j + 1);
+    x_title = "#beta^{gen}_{K#rightarrow#pi^{0}#pi^{0}} [-]";
+    y_title = "#beta^{rec, p/E}_{K#rightarrow#pi^{0}#pi^{0}} [-]";
+
+    beta2_hist[j]->GetXaxis()->CenterTitle();
+    beta2_hist[j]->GetYaxis()->CenterTitle();
+    beta2_hist[j]->GetXaxis()->SetTitle(x_title);
+    beta2_hist[j]->GetYaxis()->SetTitle(y_title);
+    beta2_hist[j]->Draw("COLZ");
+    canvas[j][26]->Print(id_canva + ext);
 
     //!
     for (Int_t k = 0; k < 5; k++)
     {
       for (Int_t i = 1; i <= number_of_points; i++)
       {
-        parameter[0] = sigmas_std[j][k]->ProjectionY("_py", i, i)->Integral();
+        parameter[0] = sigmas_std[j][k]->ProjectionY("_py", i, i)->GetEntries();
         parameter[1] = sigmas_std[j][k]->ProjectionY("_py", i, i)->GetBinCenter(sigmas_std[j][k]->ProjectionY("_py", i, i)->GetMaximumBin());
         parameter[2] = sigmas_std[j][k]->ProjectionY("_py", i, i)->GetStdDev();
 
-        triple_fit->SetParameters(parameter[0], parameter[1], parameter[2], parameter[0], parameter[1]+2.0, parameter[2]+2.0, parameter[0], parameter[1]-2.0, parameter[2]-2.0);
+        triple_fit->SetParameters(0.15*parameter[0], parameter[1], parameter[2], 0.15*parameter[0], parameter[1]-0.1, parameter[2], 0.15*parameter[0], parameter[1]+0.1, parameter[2]);
 
-        triple_fit->SetParLimits(0, 0.01 * sigmas_std[j][k]->ProjectionY("_py", i, i)->Integral(), 100.0 * sigmas_std[j][k]->ProjectionY("_py", i, i)->Integral());
-        triple_fit->SetParLimits(3, 0.01 * sigmas_std[j][k]->ProjectionY("_py", i, i)->Integral(), 100.0 * sigmas_std[j][k]->ProjectionY("_py", i, i)->Integral());
-        triple_fit->SetParLimits(6, 0.01 * sigmas_std[j][k]->ProjectionY("_py", i, i)->Integral(), 100.0 * sigmas_std[j][k]->ProjectionY("_py", i, i)->Integral());
+        triple_fit->SetParLimits(0, 0.0, 100.0 * parameter[0]);
+        triple_fit->SetParLimits(3, 0.0, 100.0 * parameter[0]);
+        triple_fit->SetParLimits(6, 0.0, 100.0 * parameter[0]);
+        // triple_fit->FixParameter(3, 0.0);
+        // triple_fit->FixParameter(6, 0.0);
 
-        triple_fit->SetParLimits(2, 0.01 * sigmas_std[j][k]->ProjectionY("_py", i, i)->GetStdDev(), 10.0 * sigmas_std[j][k]->ProjectionY("_py", i, i)->GetStdDev());
-        triple_fit->SetParLimits(5, 0.01 * sigmas_std[j][k]->ProjectionY("_py", i, i)->GetStdDev(), 10.0 * sigmas_std[j][k]->ProjectionY("_py", i, i)->GetStdDev());
-        triple_fit->SetParLimits(8, 0.01 * sigmas_std[j][k]->ProjectionY("_py", i, i)->GetStdDev(), 10.0 * sigmas_std[j][k]->ProjectionY("_py", i, i)->GetStdDev());
+        triple_fit->SetParLimits(1, parameter[1] - 0.1, parameter[1] + 0.1);
+        triple_fit->SetParLimits(4, parameter[1] - 0.1, parameter[1] + 0.1);
+        triple_fit->SetParLimits(7, parameter[1] - 0.1, parameter[1] + 0.1);
+        //triple_fit->FixParameter(4, 0.0);
+        //triple_fit->FixParameter(7, 0.0);
+
+        triple_fit->SetParLimits(2, 0.1 * parameter[2], 6.0 * parameter[2]);
+        triple_fit->SetParLimits(5, 0.1 * parameter[2], 6.0 * parameter[2]);
+        triple_fit->SetParLimits(8, 0.1 * parameter[2], 6.0 * parameter[2]);
+        // triple_fit->FixParameter(5, 1.0);
+        // triple_fit->FixParameter(8, 1.0);
  
-
-        result = sigmas_std[j][k]->ProjectionY("_py", i, i)->Fit(triple_fit, "S");
+        TH1 *hist_temp = sigmas_std[j][k]->ProjectionY("_py", i, i);
+        result = hist_temp->Fit(triple_fit, "LMES");
         res_std_hist[j][k]->SetBinContent(i, comb_std_dev(result->GetParams()));
         res_std_hist[j][k]->SetBinError(i, comb_std_dev(result->GetErrors()));
 
@@ -1261,9 +1378,6 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
         x_title = x_title_list[k];
         y_title = "Counts";
 
-        TH1 *hist_temp = sigmas_std[j][k]->ProjectionY("_py", i, i);
-
-        hist_temp->Fit(triple_fit, "S");
 
         hist_temp->GetYaxis()->SetMaxDigits(3);
         hist_temp->GetXaxis()->CenterTitle();
@@ -1318,12 +1432,13 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     //!
     id_canva = "sigmas_std_times" + std::to_string(j + 1);
     x_title = "K#rightarrow#pi^{0}#pi^{0} path generated [cm]";
-    y_title = "#sigma(t_{K#rightarrow#pi^{0}#pi^{0}}^{tri} - t_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [#tau_{S}]";
+    y_title = "#sigma(#beta_{K#rightarrow#pi^{0}#pi^{0}}^{p/E} - #beta_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [-]";//"#sigma(t_{K#rightarrow#pi^{0}#pi^{0}}^{tri} - t_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [#tau_{S}]";
     canvas[j][23]->cd();
     canvas_std[j][23]->SetLeftMargin(0.2);
     res_std_hist[j][3]->SetXTitle(x_title);
     res_std_hist[j][3]->SetYTitle(y_title);
-    res_std_hist[j][3]->GetYaxis()->SetRangeUser(0.0, 6.0);
+    res_std_hist[j][3]->GetYaxis()->SetMaxDigits(3);
+    res_std_hist[j][3]->GetYaxis()->SetRangeUser(0.0, 0.04);
     res_std_hist[j][3]->Draw("PE1");
     canvas[j][23]->Print(id_canva + ext);
     //!
@@ -1334,7 +1449,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     canvas_std[j][24]->SetLeftMargin(0.2);
     res_std_hist[j][4]->SetXTitle(x_title);
     res_std_hist[j][4]->SetYTitle(y_title);
-    res_std_hist[j][4]->GetYaxis()->SetRangeUser(0.0, 100.0);
+    res_std_hist[j][4]->GetYaxis()->SetRangeUser(0.0, 10.0);
     res_std_hist[j][4]->Draw("PE1");
     canvas[j][24]->Print(id_canva + ext);
     //!
