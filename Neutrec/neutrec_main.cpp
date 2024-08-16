@@ -14,7 +14,8 @@ int main(int argc, char *argv[])
   using std::chrono::high_resolution_clock;
   using std::chrono::minutes;
 
-  Short_t first = atoi(argv[1]), last = atoi(argv[2]), good_clus = atoi(argv[3]), loopcount = atoi(argv[4]), jmin = atoi(argv[5]), jmax = atoi(argv[6]), ind_data_mc = atoi(argv[7]);
+  Int_t first = atoi(argv[1]), last = atoi(argv[2]);
+  Short_t good_clus = atoi(argv[3]), loopcount = atoi(argv[4]), jmin = atoi(argv[5]), jmax = atoi(argv[6]), ind_data_mc = atoi(argv[7]);
 
   cout << "Choose the reconstruction method: " << endl;
   cout << "1. Bare trilateration." << endl;

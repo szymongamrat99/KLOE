@@ -51,12 +51,14 @@ Double_t interf_function(Double_t *x, Double_t *par)
     return (pow(Epsilon, 2) / (2. * Gamma)) * Value * 100000;
 }
 
-void interf_function_draw()
+void interf_function_draw(Int_t mult = 1.)
 {
+    Double_t propIm = mult*M_PI * Im_nonCPT / 180.;
+
     TCanvas *canva = new TCanvas();
     TF1 *func_with_im = new TF1("Interference function2", &interf_function, -20.0, 20.0, 2);
-    func_with_im->SetParameter(0, Re);
-    func_with_im->SetParameter(1, M_PI * ((phi_pm_nonCPT - phi_00_nonCPT) / 3.) / 180.);
+    func_with_im->SetParameter(0, 4*Re);
+    func_with_im->SetParameter(1, propIm);
 
     TF1 *func_wo_im = new TF1("Interference function1", &interf_function, -20.0, 20.0, 2);
     func_wo_im->SetParameter(0, 0);
@@ -89,8 +91,16 @@ void interf_function_draw()
 
     TLegend *legend = new TLegend(0.6, 0.73, 0.9, 0.9,"");
 
-    legend->AddEntry(func_wo_im, "#varepsilon'/#varepsilon = 0", "l");
-    legend->AddEntry(func_with_im, "#splitline{Re(#varepsilon'/#varepsilon) = 1.66#times10^{-3}}{Im(#varepsilon'/#varepsilon) = -1.73#times10^{-3}}", "l");
+    TString name_0, name_1;
+
+    const Int_t expRe = floor(log10(abs(4*Re))), expIm = floor(log10(abs(propIm)));
+    const Double_t frontRe = 4*Re / pow(10, expRe), frontIm = propIm / pow(10, expIm);  
+
+    name_0 = "#varepsilon'/#varepsilon = 0";
+    name_1 = Form("#splitline{Re(#varepsilon'/#varepsilon) = %.2f#times10^{%d}}{Im(#varepsilon'/#varepsilon) = %.2f#times10^{%d}}",frontRe,expRe,frontIm,expIm);
+
+    legend->AddEntry(func_wo_im, name_0, "l");
+    legend->AddEntry(func_with_im, name_1, "l");
 
     legend->SetTextSize(0.025);
     legend->SetTextFont(42);

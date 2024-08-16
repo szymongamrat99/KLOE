@@ -13,6 +13,7 @@
 #include <TRatioPlot.h>
 #include <TStyle.h>
 #include <TGraphAsymmErrors.h>
+#include <TEfficiency.h>
 
 #include "../../Include/Codes/interference.h"
 #include "../../Include/Codes/kloe_class.h"
@@ -22,7 +23,9 @@
 
 using namespace KLOE;
 
-void cp_fit(Bool_t check_corr = false, TString mode = "")
+TString ext = ".svg";
+
+void cp_fit(Bool_t check_corr = false, TString mode = "split")
 {
     TFile file_corr("../Efficiency_analysis/correction_factor.root");
 
@@ -32,14 +35,14 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     eff_vals = eff_signal->GetY();
 
     TFile file("../../../old_root_files/mctruth.root");
-    TTree *tree = (TTree*)file.Get("h1");
+    TTree *tree = (TTree *)file.Get("h1");
 
     Int_t mctruth = 0;
 
     tree->SetBranchAddress("mctruth", &mctruth);
 
-    TFile file_tri("../Neutrec/neuvtx_tri_kin_fit_1_56_10_9_1_2_bunch_corr_automatic.root");
-    TTree *tree_tri = (TTree*)file_tri.Get("h_tri_kin_fit");
+    TFile file_tri("../Neutrec/root_files/neuvtx_tri_kin_fit_1_56_10_9_1_2_bunch_corr_automatic.root");
+    TTree *tree_tri = (TTree *)file_tri.Get("h_tri_kin_fit");
 
     Int_t done4 = 0, g4takentri_kinfit[4];
     Float_t fourKnetri[10] = {0.};
@@ -53,15 +56,18 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     chain_init(chain);
 
     UChar_t mcflag;
-    Float_t Dtboostlor, Dtmc, Chi2, minv4gam, Kchrec[9], Qmiss, ip[3], Kchboost[9], phi_mom[4], Xcl[50], Ycl[50], Zcl[50], Tcl[50];;
+    Float_t Dtboostlor, Dtmc, Chi2, minv4gam, Kchrec[9], Qmiss, ip[3], Kchboost[9], phi_mom[4], Xcl[50], Ycl[50], Zcl[50], Tcl[50], Dtboostlor_triangle, Knereclor[9];
+    ;
 
     chain->SetBranchAddress("mcflag", &mcflag);
 
     chain->SetBranchAddress("Dtmc", &Dtmc);
+    chain->SetBranchAddress("Dtboostlor", &Dtboostlor_triangle);
 
     chain->SetBranchAddress("Chi2", &Chi2);
     chain->SetBranchAddress("minv4gam", &minv4gam);
     chain->SetBranchAddress("Kchboost", Kchboost);
+    chain->SetBranchAddress("Knereclor", Knereclor);
     chain->SetBranchAddress("Qmiss", &Qmiss);
 
     chain->SetBranchAddress("Xcl", &Xcl);
@@ -82,24 +88,29 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     UInt_t nentries = chain->GetEntries();
 
     Double_t x_min = -90.0, x_max = 90.0;
-    UInt_t nbins = 1 + ((x_max - x_min)/2.);
+    UInt_t nbins = 1 + ((x_max - x_min) / 2.);
 
     Double_t split[3] = {-30.0, 0.0, 30.0};
 
     interference event(mode, check_corr, nbins, x_min, x_max, split);
-    
+
     Double_t velocity_kch, velocity_kne, tch_LAB, tch_CM, tne_LAB, tne_CM, trcv_sum, TRCV[4];
     Float_t Kch_LAB[4], Kne_LAB[4], Kch_CM[4], Kne_CM[4], Kch_CMCM[4], Kne_CMCM[4], Kne_boost[3], Kch_boost[3], Phi_boost[3], Kchmom_LAB[4], Knemom_LAB[4], Kchmom_CM[4], Knemom_CM[4];
 
-    for(UInt_t i = 0; i < nentries; i++)
+    TH1 *sig_total = new TH1D("sig_tot", ";#Delta t;Counts", nbins, x_min, x_max);
+    TH1 *sig_pass = new TH1D("sig_pass", ";#Delta t;Counts", nbins, x_min, x_max);
+
+    std::vector<Float_t> no_cuts_sig[2];
+
+    for (UInt_t i = 0; i < nentries; i++)
     {
         chain->GetEntry(i);
 
-        if(done4 == 1)
+        if (1)//done4 == 1)
         {
-            velocity_kch = c_vel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
-            
-            tch_LAB = sqrt(pow(Kchboost[6] - ip[0],2) + pow(Kchboost[7] - ip[1],2) + pow(Kchboost[8] - ip[2],2))/velocity_kch;
+            velocity_kch = c_vel * sqrt(pow(Kchboost[0], 2) + pow(Kchboost[1], 2) + pow(Kchboost[2], 2)) / Kchboost[3];
+
+            tch_LAB = sqrt(pow(Kchboost[6] - ip[0], 2) + pow(Kchboost[7] - ip[1], 2) + pow(Kchboost[8] - ip[2], 2)) / velocity_kch;
             tne_LAB = fourKnetri[9];
 
             Kch_LAB[0] = Kchboost[6] - ip[0];
@@ -124,7 +135,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
             Phi_boost[0] = -phi_mom[0] / phi_mom[3];
             Phi_boost[1] = -phi_mom[1] / phi_mom[3];
-            Phi_boost[2] = -phi_mom[2] / phi_mom[3]; 
+            Phi_boost[2] = -phi_mom[2] / phi_mom[3];
 
             lorentz_transf(Phi_boost, Kch_LAB, Kch_CM);
             lorentz_transf(Phi_boost, Kne_LAB, Kne_CM);
@@ -139,62 +150,104 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
             Kne_boost[1] = Kchmom_CM[1] / Kchmom_CM[3];
             Kne_boost[2] = Kchmom_CM[2] / Kchmom_CM[3];
 
-            // std::cout << Kch_boost[0] << " " << Kne_boost[0] << std::endl; 
-            // std::cout << Kch_boost[1] << " " << Kne_boost[1] << std::endl; 
-            // std::cout << Kch_boost[2] << " " << Kne_boost[2] << std::endl << std::endl; 
+            // std::cout << Kch_boost[0] << " " << Kne_boost[0] << std::endl;
+            // std::cout << Kch_boost[1] << " " << Kne_boost[1] << std::endl;
+            // std::cout << Kch_boost[2] << " " << Kne_boost[2] << std::endl << std::endl;
 
             lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
             lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
 
-            Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3])/(c_vel * tau_S_nonCPT);
+            Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (c_vel * tau_S_nonCPT);
 
-            for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[g4takentri_kinfit[i]-1] - (sqrt(pow(Xcl[g4takentri_kinfit[i]-1] - fourKnetri[6],2) + pow(Ycl[g4takentri_kinfit[i]-1] - fourKnetri[7],2) + pow(Zcl[g4takentri_kinfit[i]-1] - fourKnetri[8],2))/c_vel) - fourKnetri[9];
+            for (Int_t i = 0; i < 4; i++)
+                TRCV[i] = Tcl[g4takentri_kinfit[i] - 1] - (sqrt(pow(Xcl[g4takentri_kinfit[i] - 1] - fourKnetri[6], 2) + pow(Ycl[g4takentri_kinfit[i] - 1] - fourKnetri[7], 2) + pow(Zcl[g4takentri_kinfit[i] - 1] - fourKnetri[8], 2)) / c_vel) - fourKnetri[9];
 
             trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
-            if(mcflag == 1)
+            Double_t radius[2] = {0., 0.}, radius_ch[2] = {0., 0.};
+
+            Double_t sphere_bound = 10, bp_bound = 4.4;
+
+            Double_t sigma = 1.5;
+
+            Bool_t cuts[4] = {false, false, false, false};
+
+            for (Int_t i = 0; i < 3; i++)
             {
-                if(mctruth == 1)
-                {
-                    event.time_diff_gen.push_back(Dtmc);
-                    event.time_diff[0].push_back(Dtboostlor);
-                }
+                radius[0] += pow(fourKnetri[6 + i], 2);
+                radius_ch[0] += pow(Kchboost[6 + i], 2);
 
-                if(mctruth == 3)
+                if (i < 2)
                 {
-                    event.time_diff[1].push_back(Dtboostlor);
-                }
-
-                if(mctruth == 4)
-                {
-                    event.time_diff[2].push_back(Dtboostlor);
-                }
-
-                if(mctruth == 5)
-                {
-                    event.time_diff[3].push_back(Dtboostlor);
-                }
-
-                if(mctruth == 6)
-                {
-                    event.time_diff[4].push_back(Dtboostlor);
-                }
-
-                if(mctruth == 7)
-                {
-                    event.time_diff[5].push_back(Dtboostlor);
+                    radius[1] += pow(fourKnetri[6 + i], 2);
+                    radius_ch[1] += pow(Kchboost[6 + i], 2);
                 }
             }
 
-            if(mcflag == 0)
+            radius[0] = sqrt(radius[0]);
+            radius[1] = sqrt(radius[1]);
+
+            radius_ch[0] = sqrt(radius_ch[0]);
+            radius_ch[1] = sqrt(radius_ch[1]);
+
+            cuts[0] = abs(radius[0] - 10.9554) > 1.19279 * sigma;
+            cuts[1] = 1;//abs(radius[1] - 4.5) > 1.5 * sigma;
+            cuts[2] = abs(radius_ch[0] - 10.5840) > 0.681656 * sigma;
+            cuts[3] = 1;//abs(radius_ch[1] - 4.45238) > 1.29837 * sigma;
+            // cuts[4] = abs(radius_tri[0] - 10.5326) > 1.67392 * sigma;
+            // cuts[5] = abs(radius_tri[1] - 6.54173) > 1.06618 * sigma;
+
+            if (mcflag == 1)
+            {
+                if (mctruth == 1)
+                {
+                    no_cuts_sig[0].push_back(Dtmc);
+                    no_cuts_sig[1].push_back(Dtboostlor);
+                }
+
+                if (cuts[0] && cuts[1] && cuts[2] && cuts[3])
+                {
+                    if (mctruth == 1)
+                    {
+                        event.time_diff_gen.push_back(Dtmc);
+                        event.time_diff[0].push_back(Dtboostlor);
+                    }
+
+                    if (mctruth == 3)
+                    {
+                        event.time_diff[1].push_back(Dtboostlor);
+                    }
+
+                    if (mctruth == 4)
+                    {
+                        event.time_diff[2].push_back(Dtboostlor);
+                    }
+
+                    if (mctruth == 5)
+                    {
+                        event.time_diff[3].push_back(Dtboostlor);
+                    }
+
+                    if (mctruth == 6)
+                    {
+                        event.time_diff[4].push_back(Dtboostlor);
+                    }
+
+                    if (mctruth == 7)
+                    {
+                        event.time_diff[5].push_back(Dtboostlor);
+                    }
+                }
+            }
+
+            if (mcflag == 0 && cuts[0] && cuts[1] && cuts[2] && cuts[3])
             {
                 event.time_diff_data.push_back(Dtboostlor);
             }
         }
-
     }
 
-    ROOT::Math::Minimizer* minimum = 
+    ROOT::Math::Minimizer *minimum =
         ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
 
     // set tolerance , etc...
@@ -206,63 +259,62 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     const UInt_t num_of_vars = 11;
 
     ROOT::Math::Functor minimized_function(&event, &interference::interf_chi2, num_of_vars);
- 
+
     minimum->SetFunction(minimized_function);
 
-    const Double_t init_vars[num_of_vars] = {Re, M_PI*Im_nonCPT/180., 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, 
+    const Double_t init_vars[num_of_vars] = {Re, M_PI * Im_nonCPT / 180., 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
                    step[num_of_vars] = {1E-5, 1E-5, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
 
-    Double_t limit_span_signal = 0.3, limit_span = 0.3 , limit_pars = 1.0;
+    Double_t limit_span_signal = 0.3, limit_span = 0.3, limit_pars = 1.0;
 
-    minimum->SetVariable(0, "Real part",      init_vars[0], step[0]);//, init_vars[0] - limit_pars*init_vars[0], init_vars[0] + limit_pars*init_vars[0]);
-    minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]);//, init_vars[1] - limit_pars*init_vars[1], init_vars[1] + limit_pars*init_vars[1]);
-    minimum->SetLimitedVariable(2, "Norm signal",    init_vars[2], step[2], init_vars[2] - limit_span_signal*init_vars[2], init_vars[2] + limit_span_signal*init_vars[2]);
+    minimum->SetVariable(0, "Real part", init_vars[0], step[0]);      //, init_vars[0] - limit_pars*init_vars[0], init_vars[0] + limit_pars*init_vars[0]);
+    minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]); //, init_vars[1] - limit_pars*init_vars[1], init_vars[1] + limit_pars*init_vars[1]);
+    minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - limit_span_signal * init_vars[2], init_vars[2] + limit_span_signal * init_vars[2]);
 
-    if(x_min > -30.0 && x_max < 30.0)
+    if (x_min > -30.0 && x_max < 30.0)
     {
-        minimum->SetFixedVariable(3, "Norm left DC wall",     init_vars[3]);
-        minimum->SetLowerLimitedVariable(4, "Norm left beam pipe",     init_vars[4], step[4], 0.0);
-        minimum->SetLowerLimitedVariable(5, "Norm right beam pipe",     init_vars[5], step[5], 0.0);
-        minimum->SetFixedVariable(6, "Norm right DC wall",     init_vars[6]);
+        minimum->SetFixedVariable(3, "Norm left DC wall", init_vars[3]);
+        minimum->SetLowerLimitedVariable(4, "Norm left beam pipe", init_vars[4], step[4], 0.0);
+        minimum->SetLowerLimitedVariable(5, "Norm right beam pipe", init_vars[5], step[5], 0.0);
+        minimum->SetFixedVariable(6, "Norm right DC wall", init_vars[6]);
     }
     else
     {
-        minimum->SetLowerLimitedVariable(3, "Norm left DC wall",     init_vars[3], step[3], 0.0);
-        minimum->SetLowerLimitedVariable(4, "Norm left beam pipe",     init_vars[4], step[4], 0.0);
-        minimum->SetLowerLimitedVariable(5, "Norm right beam pipe",     init_vars[5], step[5], 0.0);
-        minimum->SetLowerLimitedVariable(6, "Norm right DC wall",     init_vars[6], step[6], 0.0);
+        minimum->SetLowerLimitedVariable(3, "Norm left DC wall", init_vars[3], step[3], 0.0);
+        minimum->SetLowerLimitedVariable(4, "Norm left beam pipe", init_vars[4], step[4], 0.0);
+        minimum->SetLowerLimitedVariable(5, "Norm right beam pipe", init_vars[5], step[5], 0.0);
+        minimum->SetLowerLimitedVariable(6, "Norm right DC wall", init_vars[6], step[6], 0.0);
     }
 
-
-    minimum->SetLimitedVariable(7, "Norm omega",     init_vars[7], step[7], init_vars[7] - limit_span*init_vars[7], init_vars[7] + limit_span*init_vars[7]);
-    minimum->SetLimitedVariable(8, "Norm three",     init_vars[8], step[8], init_vars[8] - limit_span*init_vars[8], init_vars[8] + limit_span*init_vars[8]);
-    minimum->SetLimitedVariable(9, "Norm semi",      init_vars[9], step[9], init_vars[9] - limit_span*init_vars[9], init_vars[9] + limit_span*init_vars[9]);
-    minimum->SetLimitedVariable(10, "Norm other bcg", init_vars[10], step[10], init_vars[10] - limit_span*init_vars[10], init_vars[10] + limit_span*init_vars[10]);
+    minimum->SetLimitedVariable(7, "Norm omega", init_vars[7], step[7], init_vars[7] - limit_span * init_vars[7], init_vars[7] + limit_span * init_vars[7]);
+    minimum->SetLimitedVariable(8, "Norm three", init_vars[8], step[8], init_vars[8] - limit_span * init_vars[8], init_vars[8] + limit_span * init_vars[8]);
+    minimum->SetLimitedVariable(9, "Norm semi", init_vars[9], step[9], init_vars[9] - limit_span * init_vars[9], init_vars[9] + limit_span * init_vars[9]);
+    minimum->SetLimitedVariable(10, "Norm other bcg", init_vars[10], step[10], init_vars[10] - limit_span * init_vars[10], init_vars[10] + limit_span * init_vars[10]);
 
     minimum->Minimize();
 
-        /*std::cout << "Real part" << " " << minimum->X()[0] << std::endl;
-    std::cout << "Imaginary part" << " " << minimum->X()[1] << std::endl;
-    std::cout << "Norm signal" << " " << minimum->X()[2] << std::endl;
-    std::cout << "Norm left DC wall" << " " << minimum->X()[3] << std::endl;
-    std::cout << "Norm left beam pipe" << " " << minimum->X()[4] << std::endl;
-    std::cout << "Norm right beam pipe" << " " << minimum->X()[5] << std::endl;
-    std::cout << "Norm right DC wall" << " " << minimum->X()[6] << std::endl;
-    std::cout << "Norm omega" << " " << minimum->X()[7] << std::endl;
-    std::cout << "Norm three" << " " << minimum->X()[8] << std::endl;
-    std::cout << "Norm semi" << " " << minimum->X()[9] << std::endl;
-    std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
+    /*std::cout << "Real part" << " " << minimum->X()[0] << std::endl;
+std::cout << "Imaginary part" << " " << minimum->X()[1] << std::endl;
+std::cout << "Norm signal" << " " << minimum->X()[2] << std::endl;
+std::cout << "Norm left DC wall" << " " << minimum->X()[3] << std::endl;
+std::cout << "Norm left beam pipe" << " " << minimum->X()[4] << std::endl;
+std::cout << "Norm right beam pipe" << " " << minimum->X()[5] << std::endl;
+std::cout << "Norm right DC wall" << " " << minimum->X()[6] << std::endl;
+std::cout << "Norm omega" << " " << minimum->X()[7] << std::endl;
+std::cout << "Norm three" << " " << minimum->X()[8] << std::endl;
+std::cout << "Norm semi" << " " << minimum->X()[9] << std::endl;
+std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
 
     Double_t sum_of_events = 0., fractions[6] = {0.};
 
-    for(Int_t i = 0; i < chann_num; i++)
-      sum_of_events += event.time_diff[i].size();
+    for (Int_t i = 0; i < chann_num; i++)
+        sum_of_events += event.time_diff[i].size();
 
-    for(Int_t i = 0; i < chann_num; i++)
-     fractions[i] = 100*event.time_diff[i].size()/sum_of_events;
+    for (Int_t i = 0; i < chann_num; i++)
+        fractions[i] = 100 * event.time_diff[i].size() / sum_of_events;
 
     std::ofstream myfile_num;
-    myfile_num.open ("num_of_events.csv");
+    myfile_num.open("num_of_events.csv");
     myfile_num << "Channel,Number of events,Fraction\n";
     myfile_num << "Signal," << event.time_diff[0].size() << "," << fractions[0] << "%,\n";
     myfile_num << "Regeneration," << event.time_diff[1].size() << "," << fractions[1] << "%,\n";
@@ -272,26 +324,32 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     myfile_num << "Other bcg," << event.time_diff[5].size() << "," << fractions[5] << "%,\n";
     myfile_num.close();
 
-
     Double_t par[2] = {minimum->X()[0], minimum->X()[1]};
 
-
-    for(UInt_t i = 0; i < chann_num; i++)
+    for (UInt_t i = 0; i < no_cuts_sig[1].size(); i++)
     {
-        for(UInt_t j = 0; j < event.time_diff[i].size(); j++)
+        sig_total->Fill(no_cuts_sig[1][i]);
+    }
+
+    for (UInt_t i = 0; i < chann_num; i++)
+    {
+        for (UInt_t j = 0; j < event.time_diff[i].size(); j++)
         {
-            if(i == 0){
+            if (i == 0)
+            {
+                sig_pass->Fill(event.time_diff[i][j]);
+
                 event.frac[i]->Fill(event.time_diff[i][j], event.interf_function(event.time_diff_gen[j], 0, par));
             }
-            else if(i == 1)
-            {  
-                if(event.time_diff[i][j] < event.left_x_split)
+            else if (i == 1)
+            {
+                if (event.time_diff[i][j] < event.left_x_split)
                     event.frac[i]->Fill(event.time_diff[i][j], minimum->X()[3]);
-                else if(event.time_diff[i][j] > event.left_x_split && event.time_diff[i][j] < event.center_x_split)
+                else if (event.time_diff[i][j] > event.left_x_split && event.time_diff[i][j] < event.center_x_split)
                     event.frac[i]->Fill(event.time_diff[i][j], minimum->X()[4]);
-                else if(event.time_diff[i][j] > event.center_x_split && event.time_diff[i][j] < event.right_x_split)
+                else if (event.time_diff[i][j] > event.center_x_split && event.time_diff[i][j] < event.right_x_split)
                     event.frac[i]->Fill(event.time_diff[i][j], minimum->X()[5]);
-                else if(event.time_diff[i][j] > event.right_x_split)
+                else if (event.time_diff[i][j] > event.right_x_split)
                     event.frac[i]->Fill(event.time_diff[i][j], minimum->X()[6]);
             }
             else
@@ -301,26 +359,27 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
         }
     }
 
-
-    for(UInt_t j = 0; j < event.time_diff_data.size(); j++)
+    for (UInt_t j = 0; j < event.time_diff_data.size(); j++)
     {
         event.data->Fill(event.time_diff_data[j]);
     }
-    
-    
-    event.frac[0]->Scale(minimum->X()[2]*event.frac[0]->GetEntries() / event.frac[0]->Integral(0, nbins + 1) );
 
-    for(Int_t i = 0; i < nbins; i++)
+    event.frac[0]->Scale(minimum->X()[2] * event.frac[0]->GetEntries() / event.frac[0]->Integral(0, nbins + 1));
+
+    if (check_corr == true)
     {
-        event.frac[0]->SetBinContent(i + 1, event.frac[0]->GetBinContent(i + 1)*event.corr_vals[i] );
+        for (Int_t i = 0; i < nbins; i++)
+        {
+            event.frac[0]->SetBinContent(i + 1, event.frac[0]->GetBinContent(i + 1) * event.corr_vals[i]);
+        }
     }
 
-    event.frac[2]->Scale(minimum->X()[7]*event.frac[2]->GetEntries() / event.frac[2]->Integral(0, nbins + 1) );
-    event.frac[3]->Scale(minimum->X()[8]*event.frac[3]->GetEntries() / event.frac[3]->Integral(0, nbins + 1) );
-    event.frac[4]->Scale(minimum->X()[9]*event.frac[4]->GetEntries() / event.frac[4]->Integral(0, nbins + 1) );
-    event.frac[5]->Scale(minimum->X()[10]*event.frac[5]->GetEntries() / event.frac[5]->Integral(0, nbins + 1) );
+    event.frac[2]->Scale(minimum->X()[7] * event.frac[2]->GetEntries() / event.frac[2]->Integral(0, nbins + 1));
+    event.frac[3]->Scale(minimum->X()[8] * event.frac[3]->GetEntries() / event.frac[3]->Integral(0, nbins + 1));
+    event.frac[4]->Scale(minimum->X()[9] * event.frac[4]->GetEntries() / event.frac[4]->Integral(0, nbins + 1));
+    event.frac[5]->Scale(minimum->X()[10] * event.frac[5]->GetEntries() / event.frac[5]->Integral(0, nbins + 1));
 
-    for(UInt_t i = 0; i < chann_num; i++)
+    for (UInt_t i = 0; i < chann_num; i++)
     {
         event.mc_sum->Add(event.frac[i]);
 
@@ -328,9 +387,8 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
         event.frac[i]->SetLineColor(chann_color[i]);
     }
 
-
     std::ofstream myfile;
-    myfile.open ("results_split_fit.csv");
+    myfile.open("results_split_fit.csv");
     myfile << "Parameter,Value,Error\n";
     myfile << "Real part," << minimum->X()[0] << "," << minimum->Errors()[0] << ",\n";
     myfile << "Imaginary part," << minimum->X()[1] << "," << minimum->Errors()[1] << ",\n";
@@ -343,8 +401,8 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     myfile << "Norm three," << minimum->X()[8] << "," << minimum->Errors()[8] << ",\n";
     myfile << "Norm semi," << minimum->X()[9] << "," << minimum->Errors()[9] << ",\n";
     myfile << "Norm other bcg," << minimum->X()[10] << "," << minimum->Errors()[10] << ",\n";
-    myfile << "\u03C7\u00B2," << event.data->Chi2Test(event.mc_sum,"UW CHI2") << ",-,\n";
-    myfile << "\u03C7\u00B2/" << (UInt_t)nbins << "," << event.data->Chi2Test(event.mc_sum,"UW CHI2/NDF") << ",-,\n";
+    myfile << "\u03C7\u00B2," << event.data->Chi2Test(event.mc_sum, "UW CHI2") << ",-,\n";
+    myfile << "\u03C7\u00B2/" << (UInt_t)nbins << "," << event.data->Chi2Test(event.mc_sum, "UW CHI2/NDF") << ",-,\n";
     myfile.close();
 
     event.mc_sum->SetLineWidth(3);
@@ -353,28 +411,65 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     event.data->SetLineWidth(3);
     event.data->SetLineColor(data_color);
 
-    TCanvas *c1 = new TCanvas("c1", "", 790, 790);
+    TCanvas *c1 = new TCanvas("c1", "", 790, 1200);
+
+    c1->SetBottomMargin(0.5);
+    c1->Draw();
+
+    TPad *padup_c1 = new TPad("pad_up_c1", "", 0.0, 0.3, 1.0, 1.0);
+    TPad *paddown_c1 = new TPad("pad_down_c1", "", 0.0, 0.0, 1.0, 0.3);
+    paddown_c1->SetBottomMargin(0.3);
 
     gStyle->SetOptStat(0);
 
+    TGraphAsymmErrors *sig_eff = new TGraphAsymmErrors();
+
+    sig_eff->Divide(sig_pass, sig_total, "cl=0.683 b(1,1) mode");
+
+    c1->cd();
+    paddown_c1->Draw();
+    paddown_c1->cd();
+    sig_eff->GetXaxis()->SetRangeUser(x_min, x_max);
+    sig_eff->GetYaxis()->SetRangeUser(0.0, 1.0);
+    sig_eff->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
+    sig_eff->GetYaxis()->SetTitle("#varepsilon(#Deltat)");
+
+    sig_eff->GetYaxis()->SetTitleSize(0.1);
+    sig_eff->GetYaxis()->SetTitleOffset(0.5);
+    sig_eff->GetXaxis()->SetTitleSize(0.1);
+    sig_eff->GetYaxis()->SetLabelSize(0.05);
+    sig_eff->GetXaxis()->SetLabelSize(0.08);
+
+    sig_eff->Draw("APE");
+
     TRatioPlot *rp = new TRatioPlot(event.mc_sum, event.data, "diffsig");
 
+    c1->cd();
+    padup_c1->Draw();
+    padup_c1->cd();
+
     rp->Draw();
+
+    // rp->GetUpperPad()->SetPad(0.0,0.2,1.0,1.0);
+    // rp->GetLowerPad()->SetPad(0.0,0.0,1.0,0.2);
+
+    rp->SetSplitFraction(0.2);
 
     rp->GetLowerRefGraph()->SetMinimum(-5);
     rp->GetLowerRefGraph()->SetMaximum(5);
     rp->GetLowerRefGraph()->SetLineWidth(3);
 
-    rp->GetUpperRefXaxis()->SetTitle("#Deltat [#tau_{S}]");
+    // rp->GetUpperRefXaxis()->SetTitle("#Deltat [#tau_{S}]");
 
-    rp->SetLowBottomMargin(0.5);
+    rp->SetLowBottomMargin(0.0);
     rp->SetLeftMargin(0.15);
 
     rp->GetLowerRefYaxis()->SetLabelSize(0.02);
+    rp->GetLowerRefXaxis()->SetLabelSize(0.0);
 
     Double_t max_height = event.mc_sum->GetMaximum();
 
-    rp->GetUpperRefYaxis()->SetRangeUser(0.0,1.2*max_height);
+    rp->GetUpperRefYaxis()->SetRangeUser(0.0, 2 * max_height);
     rp->GetUpperRefYaxis()->SetTitle("Counts/2#tau_{S}");
 
     rp->GetLowerRefYaxis()->SetTitleSize(0.03);
@@ -382,19 +477,19 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     rp->GetUpperPad()->cd();
 
-    TLegend *legend_chann = new TLegend(0.6,0.5,0.9,0.9);
+    TLegend *legend_chann = new TLegend(0.6, 0.5, 0.9, 0.9);
     legend_chann->SetFillColor(kWhite);
-    for(UInt_t i = 0; i < chann_num; i++)
+    for (UInt_t i = 0; i < chann_num; i++)
     {
-      legend_chann->AddEntry(event.frac[i],chann_name[i],"l");
-      event.frac[i]->Draw("HISTSAME");
+        legend_chann->AddEntry(event.frac[i], chann_name[i], "l");
+        event.frac[i]->Draw("HISTSAME");
     }
 
-    legend_chann->AddEntry(event.mc_sum,mcsum_name,"l");
-    legend_chann->AddEntry(event.data,data_name,"le");
+    legend_chann->AddEntry(event.mc_sum, mcsum_name, "l");
+    legend_chann->AddEntry(event.data, data_name, "le");
     legend_chann->Draw();
 
-    c1->Print("split_fit_with_corr.png");
+    c1->Print("split_fit_with_corr" + ext);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -405,12 +500,12 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     event.resi_vals = rp->GetLowerRefGraph()->GetY();
 
-    for(Int_t i = 0; i < event.bin_number; i++)
+    for (Int_t i = 0; i < event.bin_number; i++)
     {
-      residuals_hist->Fill( event.resi_vals[i] );
+        residuals_hist->Fill(event.resi_vals[i]);
     }
 
-    residuals_hist->GetYaxis()->SetRangeUser(0,25);
+    residuals_hist->GetYaxis()->SetRangeUser(0, 25);
     residuals_hist->Fit("gaus");
 
     c2->cd();
@@ -428,7 +523,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     residuals_hist->Draw();
 
-    c2->Print("residuals_hist.png");
+    c2->Print("residuals_hist" + ext);
 
     delete residuals_hist;
     delete c1;
@@ -436,27 +531,27 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     delete rp;
 
-//////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     interference event_final("final", true, nbins, x_min, x_max, split);
 
-    for(Int_t i = 0; i < 8; i++)
-        event_final.tmp_norm[i] = minimum->X()[i+3];
+    for (Int_t i = 0; i < 8; i++)
+        event_final.tmp_norm[i] = minimum->X()[i + 3];
 
     minimum->Clear();
 
-    for(UInt_t i = 0; i < nentries; i++)
+    for (UInt_t i = 0; i < nentries; i++)
     {
         chain->GetEntry(i);
 
-        if(done4 == 1)
+        if (done4 == 1)
         {
-            velocity_kch = c_vel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
-            
-            tch_LAB = sqrt(pow(Kchboost[6] - ip[0],2) + pow(Kchboost[7] - ip[1],2) + pow(Kchboost[8] - ip[2],2))/velocity_kch;
+            velocity_kch = c_vel * sqrt(pow(Kchboost[0], 2) + pow(Kchboost[1], 2) + pow(Kchboost[2], 2)) / Kchboost[3];
+
+            tch_LAB = sqrt(pow(Kchboost[6] - ip[0], 2) + pow(Kchboost[7] - ip[1], 2) + pow(Kchboost[8] - ip[2], 2)) / velocity_kch;
             tne_LAB = fourKnetri[9];
 
             Kch_LAB[0] = Kchboost[6] - ip[0];
@@ -481,7 +576,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
             Phi_boost[0] = -phi_mom[0] / phi_mom[3];
             Phi_boost[1] = -phi_mom[1] / phi_mom[3];
-            Phi_boost[2] = -phi_mom[2] / phi_mom[3]; 
+            Phi_boost[2] = -phi_mom[2] / phi_mom[3];
 
             lorentz_transf(Phi_boost, Kch_LAB, Kch_CM);
             lorentz_transf(Phi_boost, Kne_LAB, Kne_CM);
@@ -496,105 +591,141 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
             Kne_boost[1] = Kchmom_CM[1] / Kchmom_CM[3];
             Kne_boost[2] = Kchmom_CM[2] / Kchmom_CM[3];
 
-            // std::cout << Kch_boost[0] << " " << Kne_boost[0] << std::endl; 
-            // std::cout << Kch_boost[1] << " " << Kne_boost[1] << std::endl; 
-            // std::cout << Kch_boost[2] << " " << Kne_boost[2] << std::endl << std::endl; 
+            // std::cout << Kch_boost[0] << " " << Kne_boost[0] << std::endl;
+            // std::cout << Kch_boost[1] << " " << Kne_boost[1] << std::endl;
+            // std::cout << Kch_boost[2] << " " << Kne_boost[2] << std::endl << std::endl;
 
             lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
             lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
 
-            Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3])/(c_vel * tau_S_nonCPT);
+            Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (c_vel * tau_S_nonCPT);
 
-            for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[g4takentri_kinfit[i]-1] - (sqrt(pow(Xcl[g4takentri_kinfit[i]-1] - fourKnetri[6],2) + pow(Ycl[g4takentri_kinfit[i]-1] - fourKnetri[7],2) + pow(Zcl[g4takentri_kinfit[i]-1] - fourKnetri[8],2))/c_vel) - fourKnetri[9];
+            for (Int_t i = 0; i < 4; i++)
+                TRCV[i] = Tcl[g4takentri_kinfit[i] - 1] - (sqrt(pow(Xcl[g4takentri_kinfit[i] - 1] - fourKnetri[6], 2) + pow(Ycl[g4takentri_kinfit[i] - 1] - fourKnetri[7], 2) + pow(Zcl[g4takentri_kinfit[i] - 1] - fourKnetri[8], 2)) / c_vel) - fourKnetri[9];
 
             trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
-            if(mcflag == 1 && (minv4gam - m_k0) < 76 && abs(Kchboost[5] - m_k0) < 1.2 && Qmiss < 3.75)
+            Double_t radius[2] = {0., 0.}, radius_ch[2] = {0., 0.};
+
+            Double_t sphere_bound = 10, bp_bound = 4.4;
+
+            Double_t sigma = 1.5;
+
+            Bool_t cuts[4] = {false, false, false, false};
+
+            cuts[0] = abs(radius[0] - 10.5326) > 1.67392 * sigma;
+            cuts[1] = abs(radius[1] - 6.54173) > 1.06618 * sigma;
+            cuts[2] = abs(radius_ch[0] - 10.5195) > 0.982962 * sigma;
+            cuts[3] = abs(radius_ch[1] - 4.85379) > 1.06893 * sigma;
+            // cuts[4] = abs(radius_tri[0] - 10.5326) > 1.67392 * sigma;
+            // cuts[5] = abs(radius_tri[1] - 6.54173) > 1.06618 * sigma;
+
+            for (Int_t i = 0; i < 3; i++)
             {
-                if(mctruth == 1)
+                radius[0] += pow(Knereclor[6 + i], 2);
+                radius_ch[0] += pow(Kchboost[6 + i], 2);
+
+                if (i < 2)
+                {
+                    radius[1] += pow(Knereclor[6 + i], 2);
+                    radius_ch[1] += pow(Kchboost[6 + i], 2);
+                }
+            }
+
+            radius[0] = sqrt(radius[0]);
+            radius[1] = sqrt(radius[1]);
+
+            radius_ch[0] = sqrt(radius_ch[0]);
+            radius_ch[1] = sqrt(radius_ch[1]);
+
+            cuts[0] = abs(radius[0] - 11.1134) > 1.48753 * sigma;
+            cuts[1] = abs(radius[1] - 4.9646) > 0.652839 * sigma;
+            cuts[2] = abs(radius_ch[0] - 10.5195) > 0.982962 * sigma;
+            cuts[3] = abs(radius_ch[1] - 4.85379) > 1.06893 * sigma;
+
+            if (mcflag == 1 && cuts[0] && cuts[1] && cuts[2] && cuts[3])
+            {
+                if (mctruth == 1)
                 {
                     event_final.time_diff_gen.push_back(Dtmc);
                     event_final.time_diff[0].push_back(Dtboostlor);
                 }
 
-                if(mctruth == 3)
+                if (mctruth == 3)
                 {
                     event_final.time_diff[1].push_back(Dtboostlor);
                 }
 
-                if(mctruth == 4)
+                if (mctruth == 4)
                 {
                     event_final.time_diff[2].push_back(Dtboostlor);
                 }
 
-                if(mctruth == 5)
+                if (mctruth == 5)
                 {
                     event_final.time_diff[3].push_back(Dtboostlor);
                 }
 
-                if(mctruth == 6)
+                if (mctruth == 6)
                 {
                     event_final.time_diff[4].push_back(Dtboostlor);
                 }
 
-                if(mctruth == 7)
+                if (mctruth == 7)
                 {
                     event_final.time_diff[5].push_back(Dtboostlor);
                 }
             }
 
-            if(mcflag == 0 && (minv4gam - m_k0) < 76 && abs(Kchboost[5] - m_k0) < 1.2 && Qmiss < 3.75)
+            if (mcflag == 0 && cuts[0] && cuts[1] && cuts[2] && cuts[3])
             {
                 event_final.time_diff_data.push_back(Dtboostlor);
             }
         }
-
     }
 
     const UInt_t num_of_vars_final = 3;
 
     ROOT::Math::Functor minimized_function_final(&event_final, &interference::interf_chi2, num_of_vars_final);
- 
+
     minimum->SetFunction(minimized_function_final);
 
-    const Double_t init_vars_final[num_of_vars_final] = {Re, M_PI*Im_nonCPT/180., 1.0}, 
+    const Double_t init_vars_final[num_of_vars_final] = {Re, M_PI * Im_nonCPT / 180., 1.0},
                    step_final[num_of_vars_final] = {1E-5, 1E-5, 0.05};
 
     limit_span_signal = 0.2;
 
-    minimum->SetVariable(0, "Real part",      init_vars_final[0], step_final[0]);
+    minimum->SetVariable(0, "Real part", init_vars_final[0], step_final[0]);
     minimum->SetVariable(1, "Imaginary part", init_vars_final[1], step_final[1]);
-    minimum->SetLimitedVariable(2, "Norm signal",    init_vars_final[2], step_final[2], init_vars_final[2] - limit_span_signal*init_vars_final[2], init_vars_final[2] + limit_span_signal*init_vars_final[2]);
+    minimum->SetLimitedVariable(2, "Norm signal", init_vars_final[2], step_final[2], init_vars_final[2] - limit_span_signal * init_vars_final[2], init_vars_final[2] + limit_span_signal * init_vars_final[2]);
 
     minimum->Minimize();
-
 
     par[0] = minimum->X()[0];
     par[1] = minimum->X()[1];
 
-    for(UInt_t j = 0; j < event_final.time_diff_data.size(); j++)
+    for (UInt_t j = 0; j < event_final.time_diff_data.size(); j++)
     {
         event_final.data->Fill(event_final.time_diff_data[j]);
     }
 
-
     for (Int_t i = 0; i < chann_num; i++)
     {
-        for(UInt_t j = 0; j < event_final.time_diff[i].size(); j++)
-        {   
-            if(i == 0)
-            { 
+        for (UInt_t j = 0; j < event_final.time_diff[i].size(); j++)
+        {
+            if (i == 0)
+            {
                 event_final.frac[i]->Fill(event_final.time_diff[i][j], event_final.interf_function(event_final.time_diff_gen[j], 0, par));
             }
-            else if(i == 1)
-            { 
-                if(event_final.time_diff[i][j] < event_final.left_x_split)
+            else if (i == 1)
+            {
+                if (event_final.time_diff[i][j] < event_final.left_x_split)
                     event_final.frac[i]->Fill(event_final.time_diff[i][j], event_final.tmp_norm[0]);
-                else if(event_final.time_diff[i][j] > event_final.left_x_split && event_final.time_diff[i][j] < event_final.center_x_split)
+                else if (event_final.time_diff[i][j] > event_final.left_x_split && event_final.time_diff[i][j] < event_final.center_x_split)
                     event_final.frac[i]->Fill(event_final.time_diff[i][j], event_final.tmp_norm[1]);
-                else if(event_final.time_diff[i][j] > event_final.center_x_split && event_final.time_diff[i][j] < event_final.right_x_split)
+                else if (event_final.time_diff[i][j] > event_final.center_x_split && event_final.time_diff[i][j] < event_final.right_x_split)
                     event_final.frac[i]->Fill(event_final.time_diff[i][j], event_final.tmp_norm[2]);
-                else if(event_final.time_diff[i][j] > event_final.right_x_split)
+                else if (event_final.time_diff[i][j] > event_final.right_x_split)
                     event_final.frac[i]->Fill(event_final.time_diff[i][j], event_final.tmp_norm[3]);
             }
             else
@@ -603,30 +734,28 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
             }
         }
 
-        if(i != 0)
-            event_final.data->Add(event_final.frac[i],-1.);
+        if (i != 0)
+            event_final.data->Add(event_final.frac[i], -1.);
     }
-
 
     event_final.frac[0]->Scale(minimum->X()[2] * event_final.frac[0]->GetEntries() / event_final.frac[0]->Integral());
     event_final.frac[0]->SetLineWidth(3);
     event_final.frac[0]->SetLineColor(chann_color[0]);
 
-    for(Int_t k = 1; k <= event_final.bin_number; k++)
-					event_final.frac[0]->SetBinContent(k, event_final.frac[0]->GetBinContent(k) / event_final.corr_vals[k-1]);
+    for (Int_t k = 1; k <= event_final.bin_number; k++)
+        event_final.frac[0]->SetBinContent(k, event_final.frac[0]->GetBinContent(k) / event_final.corr_vals[k - 1]);
 
-    for(Int_t k = 1; k <= event_final.bin_number; k++)
-					event_final.data->SetBinContent(k, event_final.data->GetBinContent(k) / event_final.corr_vals[k-1]);
-
+    for (Int_t k = 1; k <= event_final.bin_number; k++)
+        event_final.data->SetBinContent(k, event_final.data->GetBinContent(k) / event_final.corr_vals[k - 1]);
 
     std::ofstream myfile1;
-    myfile.open ("results_split_fit_final.csv");
+    myfile.open("results_split_fit_final.csv");
     myfile << "Parameter,Value,Error\n";
     myfile << "Real part," << minimum->X()[0] << "," << minimum->Errors()[0] << ",\n";
     myfile << "Imaginary part," << minimum->X()[1] << "," << minimum->Errors()[1] << ",\n";
     myfile << "Norm signal," << minimum->X()[2] << "," << minimum->Errors()[2] << ",\n";
-    myfile << "\u03C7\u00B2," << event_final.data->Chi2Test(event_final.frac[0],"UW CHI2") << ",-,\n";
-    myfile << "\u03C7\u00B2/" << (UInt_t)nbins << "," << event_final.data->Chi2Test(event_final.frac[0],"UW CHI2/NDF") << ",-,\n";
+    myfile << "\u03C7\u00B2," << event_final.data->Chi2Test(event_final.frac[0], "UW CHI2") << ",-,\n";
+    myfile << "\u03C7\u00B2/" << (UInt_t)nbins << "," << event_final.data->Chi2Test(event_final.frac[0], "UW CHI2/NDF") << ",-,\n";
     myfile.close();
 
     event_final.data->SetLineWidth(3);
@@ -653,7 +782,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     max_height = event_final.data->GetMaximum();
 
-    rp_final->GetUpperRefYaxis()->SetRangeUser(0.0,1.5*max_height);
+    rp_final->GetUpperRefYaxis()->SetRangeUser(0.0, 1.5 * max_height);
     rp_final->GetUpperRefYaxis()->SetTitle("Counts/2#tau_{S}");
 
     rp_final->GetLowerRefYaxis()->SetTitleSize(0.03);
@@ -661,16 +790,16 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     rp_final->GetUpperPad()->cd();
 
-    TLegend *legend_chann_final = new TLegend(0.6,0.5,0.9,0.9);
+    TLegend *legend_chann_final = new TLegend(0.6, 0.5, 0.9, 0.9);
     legend_chann_final->SetFillColor(kWhite);
-      
-    legend_chann_final->AddEntry(event_final.frac[0],chann_name[0],"l");
+
+    legend_chann_final->AddEntry(event_final.frac[0], chann_name[0], "l");
     event_final.frac[0]->Draw("HISTSAME");
 
-    legend_chann_final->AddEntry(event_final.data,data_name,"le");
+    legend_chann_final->AddEntry(event_final.data, data_name, "le");
     legend_chann_final->Draw();
 
-    c1_final->Print("split_fit_with_corr_final.png");
+    c1_final->Print("split_fit_with_corr_final" + ext);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -681,12 +810,12 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     event_final.resi_vals = rp_final->GetLowerRefGraph()->GetY();
 
-    for(Int_t i = 0; i < event_final.bin_number; i++)
+    for (Int_t i = 0; i < event_final.bin_number; i++)
     {
-      residuals_hist_final->Fill( event_final.resi_vals[i] );
+        residuals_hist_final->Fill(event_final.resi_vals[i]);
     }
 
-    residuals_hist_final->GetYaxis()->SetRangeUser(0,25);
+    residuals_hist_final->GetYaxis()->SetRangeUser(0, 25);
     residuals_hist_final->Fit("gaus");
 
     c2_final->cd();
@@ -704,8 +833,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     residuals_hist_final->Draw();
 
-    c2_final->Print("residuals_hist_final.png");
+    c2_final->Print("residuals_hist_final" + ext);
 
     delete rp_final;
-
 }

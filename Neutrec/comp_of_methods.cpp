@@ -17,8 +17,9 @@
 #include <TPaveText.h>
 #include <TLine.h>
 #include <TBranch.h>
+#include <TChain.h>
 
-#include "src/chain_init.C"
+//#include "../../Include/Codes/chain_init.cpp"
 #include "../../Include/const.h"
 #include "../../Include/Codes/kloe_class.h"
 #include "../../Include/Codes/interf_function.h"
@@ -28,21 +29,57 @@
 #include "../../Include/Codes/triple_gaus.h"
 #include "../../Include/Codes/arrays_equality.h"
 
-const TString ext = ".png";
+inline void chain_init(TChain *chain_init, UInt_t first, UInt_t last)
+{
+    //char *env = "KLOEFILES";
+    //char *path_tmp = std::getenv(env);
+
+    char *path_tmp ="/internal/big_one/4/users/gamrat/old_root_files";
+
+    TString path(path_tmp);
+
+    TString fullname = "",
+    dirnamemc = "MONTE_CARLO", dirnamedata = "DATA",
+    filenamemc = "mc_stream62_mccard2_", filenamedata = "data_stream42_",
+    extension = ".root";
+
+    for(Int_t i = first; i <= last; i++)
+    {
+      if(i != 7)
+      {
+    	  fullname = path + "/" + dirnamedata + "/" + filenamedata + i + extension;
+    	  chain_init->Add(fullname);
+      }
+    }
+    for(Int_t i = first; i <= last; i++)
+    {
+      if(i != 7)
+      {
+        fullname = path + "/" + dirnamemc + "/" + filenamemc + i + extension;
+    	  chain_init->Add(fullname);
+      }
+    }
+};
+
+const TString ext = ".svg";
+const TString dir = "bin/";//"root_files/";
+const TString img_dir = "img/";
 
 #define T0 2.715
 
-int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, const Int_t range, const Int_t ind_data_mc = 0, Int_t file_num = 0, Int_t bunch_int = 9, Double_t cut_prob = 0.0, Double_t time_cut = 100.0)
+int comp_of_methods(Int_t first, Int_t last, Int_t loopcount = 10, const Int_t M = 9, const Int_t range = 1, const Int_t ind_data_mc = 1, Int_t file_num = 1, Int_t bunch_int = 9, Double_t cut_prob = 0.0, Double_t time_cut = 100.0)
 {
   TChain *chain = new TChain("INTERF/h1");
   chain_init(chain, first, last);
 
   TString file_name[3];
 
-  file_name[0] = "neuvtx_tri_kin_fit_1_56_100_5_no_time.root";
+  file_name[0] = dir + "neuvtx_tri_kin_fit_1_56_100_5_no_time.root";
   /*file_name[1] = "neuvtx_tri_kin_fit_" + std::to_string(first) + "_" + std::to_string(last) + "_" + std::to_string(loopcount) + "_" + std::to_string(M) + "_" + std::to_string(range) + "_" + std::to_string(ind_data_mc) +  "_" + "blob_corr_before" + + ".root";*/
-  file_name[1] = "neuvtx_tri_kin_fit_" + std::to_string(first) + "_" + std::to_string(last) + "_" + std::to_string(loopcount) + "_" + std::to_string(M) + "_" + std::to_string(range) /*+ "_" + std::to_string(ind_data_mc) +  "_" + "blob_corr_before" +*/ + ".root";
-  file_name[2] = "neuvtx_tri_rec_1_56.root";
+  //file_name[1] = dir + "neuvtx_tri_kin_fit_" + first + "_" + last + "_" + loopcount + "_" + M + "_" + range + "_" + ind_data_mc + "_"+ "new.root";
+
+  file_name[1] = dir + "neuvtx_tri_kin_fit_" + first + "_" + last + "_" + loopcount + "_" + M + "_" + range + "_" + ind_data_mc + "_new.root";
+  file_name[2] = dir + "neuvtx_tri_rec_1_56.root";
 
   TFile *file = new TFile(file_name[file_num]);
   TTree *tree;
@@ -54,12 +91,6 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
   TFile *file_gen = new TFile("../Generated_vars/gen_vars_1_56.root");
   TTree *tree_gen = (TTree *)file_gen->Get("h_gen_vars");
-
-  TFile *file_no_bunch = new TFile("neuvtx_tri_kin_fit_1_56_10_9_1.root");
-  TTree *tree_no_bunch = (TTree *)file_no_bunch->Get("h_tri_kin_fit");
-
-  TFile *file_corr = new TFile("bunch_corr.root", "recreate");
-  TTree *tree_corr = new TTree("h_bunch_corr", "Bunch corr");
 
   Float_t Kchboost[9], Knereclor[9], Knerec[9],
       Kchmc[9], Knemc[9], ip[3], ipmc[3], phi_mom[4], Dtmc, Tcl[50],
@@ -111,7 +142,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   chain->SetBranchAddress("g4taken", g4taken);
 
   Float_t gamma_kinfit[4][8], ip_kinfit[3], Knetri_kinfit[10], chi2min, bhabha_mom_err[4], sol1[4], sol2[4], sol1err, sol2err;
-  Int_t done_kinfit, g4taken_kinfit[4], bunchnum, chosen, region[4], clusindgood[4];
+  Int_t done_kinfit = 10, g4taken_kinfit[4], bunchnum, chosen, region[4], clusindgood[4];
   TMatrixD *cov_matrix = new TMatrixD(27, 27);
   TVectorD *min_const = new TVectorD(M);
   TVectorD *lag_mult = new TVectorD(M), *X_min = new TVectorD(27), *X_init = new TVectorD(27);
@@ -136,18 +167,6 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     tree->SetBranchAddress("g4takentri_kinfit", g4taken_kinfit);
 
-    tree_no_bunch->SetBranchAddress("fourgamma1tri_kinfit", gamma_kinfit_no_bunch[0]);
-    tree_no_bunch->SetBranchAddress("fourgamma2tri_kinfit", gamma_kinfit_no_bunch[1]);
-    tree_no_bunch->SetBranchAddress("fourgamma3tri_kinfit", gamma_kinfit_no_bunch[2]);
-    tree_no_bunch->SetBranchAddress("fourgamma4tri_kinfit", gamma_kinfit_no_bunch[3]);
-
-    tree_no_bunch->SetBranchAddress("fourKnetri_kinfit", Knetri_kinfit_no_bunch);
-
-    tree_no_bunch->SetBranchAddress("iptri_kinfit", ip_kinfit_no_bunch);
-    tree_no_bunch->SetBranchAddress("done4_kinfit", &done_kinfit_no_bunch);
-
-    tree_no_bunch->SetBranchAddress("g4takentri_kinfit", g4taken_kinfit_no_bunch);
-
     if (file_num == 1)
       tree->SetBranchAddress("bunchnum", &bunchnum);
 
@@ -158,14 +177,6 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     tree->SetBranchAddress("min_vars", &X_min);
     tree->SetBranchAddress("init_vars", &X_init);
-
-    tree_no_bunch->SetBranchAddress("chi2min", &chi2min_no_bunch);
-    tree_no_bunch->SetBranchAddress("min_cov", &cov_matrix_no_bunch);
-    tree_no_bunch->SetBranchAddress("const_min", &min_const_no_bunch);
-    tree_no_bunch->SetBranchAddress("lag_mult", &lag_mult_no_bunch);
-
-    tree_no_bunch->SetBranchAddress("min_vars", &X_min_no_bunch);
-    tree_no_bunch->SetBranchAddress("init_vars", &X_init_no_bunch);
   }
   else
   {
@@ -189,12 +200,16 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     tree->SetBranchAddress("done4", &done_kinfit);
   }
 
+  Float_t Knemc_bcg[9], Kchmc_bcg[9], ipmc_bcg[3];
+
   tree_gen->SetBranchAddress("region", region);
   tree_gen->SetBranchAddress("clusindgood", clusindgood);
+  //tree_gen->SetBranchAddress("Knemc", Knemc_bcg);
+  //tree_gen->SetBranchAddress("Kchmc", Kchmc_bcg);
+  //tree_gen->SetBranchAddress("ipmc", ipmc_bcg);
 
   chain->AddFriend(tree);
   chain->AddFriend(tree_gen);
-  chain->AddFriend(tree_no_bunch);
 
   UInt_t nentries = (UInt_t)chain->GetEntries();
 
@@ -216,8 +231,10 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   TH2 *sigmas_std[2][5], *sigmas_tri[2][5], *sigmas_tri_kin_fit[2][5], *angle_vs_time[2][2], *dist_vs_time[2][2], *sol_err_hist[2], *beta1_hist[2], *beta2_hist[2];
   TH1 *neu_std_hist[2][5], *neu_tri_hist[2][5], *neu_tri_kin_fit_hist[2][5], *chosen_hist[2];
   TH1 *res_std_hist[2][5], *res_tri_hist[2][5], *res_tri_kin_fit_hist[2][5];
-  TH1 *pulls[2][8], *first_clus_hist[2];
+  TH1 *pulls[2][10], *first_clus_hist[2];
   TH1 *bunch[2], *pidmc_hist[2], *mcisr_hist[2], *tcl_hist[2];
+
+  TH1 *chi2_bunch_hist[2][4];
 
   TString name[5] = {"x", "y", "z", "time", "length"};
 
@@ -243,13 +260,12 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
         id_canva = "Canva_std" + std::to_string(j) + std::to_string(i);
         canvas_std[j][i] = new TCanvas(id_canva, "", width, height);
 
-        for(Int_t k = 0; k < 5; k++)
+        for (Int_t k = 0; k < 5; k++)
         {
           id_canva = "Canva_proj" + std::to_string(j) + std::to_string(i) + std::to_string(k);
           canvas_proj[j][i][k] = new TCanvas(id_canva, "", width, height);
         }
       }
-      
     }
 
     for (Int_t i = 0; i < 3; i++)
@@ -271,34 +287,44 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     beta2_hist[j] = new TH2F(id_hist, "", 200, 0.15, 0.3, 200, 0.15, 0.3);
 
     id_hist = "Coor" + std::to_string(j) + std::to_string(3);
-    neu_vtx_corr[j][3] = new TH2F(id_hist, "", 200, 0.0, 15.0, 200, 0.15, 0.3);
+    neu_vtx_corr[j][3] = new TH2F(id_hist, "", 200, 0.0, 20.0, 200, -5.0, 20.0);
 
     id_hist = "Mom" + std::to_string(j) + std::to_string(3);
     neu_mom[j][3] = new TH2F(id_hist, "", 100, 490, 550, 100, 490, 550);
 
-    for (Int_t i = 0; i < 8; i++)
+    for (Int_t i = 0; i < 10; i++)
     {
       id_hist = "Var" + std::to_string(j) + std::to_string(i);
       if (i == 0)
-        pulls[j][i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,1} - #vec{p}^{gen}_{neu,1} [MeV/c];Counts", 101, -400, 400);
+        pulls[j][i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,1} - #vec{p}^{gen}_{neu,1} [MeV/c];Counts", 101, -40, 40);
       else if (i == 1)
-        pulls[j][i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,2} - #vec{p}^{gen}_{neu,2} [MeV/c];Counts", 101, -400, 400);
+        pulls[j][i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,2} - #vec{p}^{gen}_{neu,2} [MeV/c];Counts", 101, -40, 40);
       else if (i == 2)
-        pulls[j][i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,3} - #vec{p}^{gen}_{neu,3} [MeV/c];Counts", 101, -400, 400);
+        pulls[j][i] = new TH1F(id_hist, ";#vec{p}^{tri}_{neu,3} - #vec{p}^{gen}_{neu,3} [MeV/c];Counts", 101, -40, 40);
       else if (i == 3)
-        pulls[j][i] = new TH1F(id_hist, ";E^{tri}_{neu} - E^{gen}_{neu,3} [MeV];Counts", 201, -100, 100);
+        pulls[j][i] = new TH1F(id_hist, ";E^{tri}_{neu} - E^{gen}_{neu,3} [MeV];Counts", 201, -6, 6);
       else if (i == 4)
-        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,1} - #vec{X}^{gen}_{neu,1} [cm];Counts", 201, -300, 300);
+        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,1} - #vec{X}^{gen}_{neu,1} [cm];Counts", 201, -8, 8);
       else if (i == 5)
-        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,2} - #vec{X}^{gen}_{neu,2} [cm];Counts", 201, -300, 300);
+        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,2} - #vec{X}^{gen}_{neu,2} [cm];Counts", 201, -8, 8);
       else if (i == 6)
-        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,3} - #vec{X}^{gen}_{neu,3} [cm];Counts", 201, -300, 300);
+        pulls[j][i] = new TH1F(id_hist, ";#vec{X}^{tri}_{neu,3} - #vec{X}^{gen}_{neu,3} [cm];Counts", 201, -20, 20);
       else if (i == 7)
-        pulls[j][i] = new TH1F(id_hist, ";t^{tri}_{neu} - t^{gen}_{neu} [#tau_{S}];Counts", 101, -1.0, 0.5);
+        pulls[j][i] = new TH1F(id_hist, ";t^{tri}_{neu} - t^{gen}_{neu} [#tau_{S}];Counts", 101, -5, 10);
+      else if (i == 8)
+        pulls[j][i] = new TH1F(id_hist, ";#rho^{tri}_{neu} - #rho^{gen}_{neu} [cm];Counts", 101, -5, 15);
+      else if (i == 9)
+        pulls[j][i] = new TH1F(id_hist, ";d^{tri}_{neu} - d^{gen}_{neu} [cm];Counts", 101, -5, 15);
     }
 
     id_hist = "Chi2" + std::to_string(j);
     chi2_hist[j] = new TH1F(id_hist, "", 200, -1.0, 100.0);
+
+    for(Int_t i = 0; i < 4; i++)
+    {
+      id_hist = "Chi2" + std::to_string(j) + std::to_string(i);
+      chi2_bunch_hist[j][i] = new TH1F(id_hist, "", 200, -1.0, 100.0);
+    }
 
     id_hist = "Chi2_no_bunch" + std::to_string(j);
     chi2_no_bunch_hist[j] = new TH1F(id_hist, "", 200, -1.0, 100.0);
@@ -364,25 +390,25 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     sol_err_hist[j] = new TH2F(id_hist, ";c#beta_{K^{0},1} t_{neu,1} - d_{neu,1} [cm];c#beta_{K^{0},2} t_{neu,2} - d_{neu,2} [cm]", 100, -200, 100, 100, -50, 500);
 
     id_hist = "clus_corr_x_y" + std::to_string(j);
-    cluscorr_hist[j][0] = new TH2F(id_hist, ";x-axis [cm];y-axis [cm]", 100, -250, 250, 100, -250, 250);
+    cluscorr_hist[j][0] = new TH2F(id_hist, ";x-axis [cm];y-axis [cm]", 100, -50, 50, 100, -50, 50);
 
     id_hist = "clus_corr_x_z" + std::to_string(j);
-    cluscorr_hist[j][1] = new TH2F(id_hist, ";x-axis [cm];z-axis [cm]", 100, -250, 250, 100, -200, 200);
+    cluscorr_hist[j][1] = new TH2F(id_hist, ";x-axis [cm];z-axis [cm]", 100, -50, 50, 100, -50, 50);
 
     for (Int_t i = 0; i < 5; i++)
     {
       id_hist = Form(name[i] + "%d%d", j + 1, i + 1);
       if (i < 2)
       {
-        neu_std_hist[j][i] = new TH1F(id_hist + " std coor", "", 100, -200, 200);
-        neu_tri_hist[j][i] = new TH1F(id_hist + " tri coor", "", 100, -200, 200);
-        neu_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit coor", "", 100, -165, 165);
+        neu_std_hist[j][i] = new TH1F(id_hist + " std coor", "", 100, -50, 50);
+        neu_tri_hist[j][i] = new TH1F(id_hist + " tri coor", "", 100, -50, 50);
+        neu_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit coor", "", 100, -50, 50);
         res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 50);
         res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 50);
         res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 50);
-        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -80, 80);
-        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -80, 80);
-        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -80, 80);
+        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -8, 8);
+        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -8, 8);
+        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -8, 8);
       }
       else if (i == 2)
       {
@@ -392,9 +418,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
         res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 50);
         res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 50);
         res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 50);
-        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -80, 80);
-        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -80, 80);
-        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -80, 80);
+        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -8, 8);
+        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -8, 8);
+        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -8, 8);
       }
       else if (i == 3)
       {
@@ -404,9 +430,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
         res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 50);
         res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 50);
         res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 50);
-        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -0.2, 0.2);
-        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -0.2, 0.2);
-        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -0.2, 0.2);
+        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -5, 10);
+        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -5, 10);
+        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -5, 10);
       }
       else if (i == 4)
       {
@@ -416,9 +442,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
         res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 50);
         res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 50);
         res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 50);
-        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -10, 10);
-        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -10, 10);
-        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -10, 10);
+        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -5, 5);
+        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -5, 5);
+        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -5, 5);
       }
     }
   }
@@ -432,10 +458,10 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
   Float_t bunch_corr = 0;
 
-  TBranch *b_bunchcorr = tree_corr->Branch("bunchcorr", &bunch_corr, "bunchcorr/F");
-
   // General statistics
   Int_t counts_sig_all = 0, counts_sig_rec = 0, counts_sig_sel = 0;
+
+    std::cout << tree->GetEntries() << " " << chain->GetEntries() << std::endl;
 
   for (Int_t i = 0; i < nentries; i++)
   {
@@ -449,8 +475,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       {
         counts_sig_rec++;
 
-        if (mctruth == 1 || mctruth == 2)
-          counts_sig_sel++;
+        
       }
     }
 
@@ -458,25 +483,50 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     if (mcflag == 1 && (mctruth == 1 || mctruth == 2))
     {
-
       // Kaon path length
-      lengthch_mc = sqrt(pow(Kchmc[6] - ipmc[0], 2) + pow(Kchmc[7] - ipmc[1], 2) + pow(Kchmc[8] - ipmc[2], 2));
+
+      counts_sig_sel++;
+
+      if(mctruth == 1 || mctruth == 2)
+      {
+
+        lengthch_mc = sqrt(pow(Kchmc[6] - ipmc[0], 2) + pow(Kchmc[7] - ipmc[1], 2) + pow(Kchmc[8] - ipmc[2], 2));
+        lengthneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2) + pow(Knemc[8] - ipmc[2], 2));
+        Rtneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2));
+      }
+      else if(mctruth == 6)
+      {
+        lengthch_mc = sqrt(pow(Kchmc_bcg[6] - ipmc_bcg[0], 2) + pow(Kchmc_bcg[7] - ipmc_bcg[1], 2) + pow(Kchmc_bcg[8] - ipmc_bcg[2], 2));
+        lengthneu_mc = sqrt(pow(Knemc_bcg[6] - ipmc_bcg[0], 2) + pow(Knemc_bcg[7] - ipmc_bcg[1], 2) + pow(Knemc_bcg[8] - ipmc_bcg[2], 2));
+        Rtneu_mc = sqrt(pow(Knemc_bcg[6] - ipmc_bcg[0], 2) + pow(Knemc_bcg[7] - ipmc_bcg[1], 2));
+      }
+
+      
       lengthch_rec = sqrt(pow(Kchboost[6] - ip[0], 2) + pow(Kchboost[7] - ip[1], 2) + pow(Kchboost[8] - ip[2], 2));
 
-      lengthneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2) + pow(Knemc[8] - ipmc[2], 2));
       lengthneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2) + pow(Knetri_kinfit[8] - ip_kinfit[2], 2));
-      lengthneu_rec = sqrt(pow(Knerec[6] - ip[0], 2) + pow(Knerec[7] - ip[1], 2) + pow(Knerec[8] - ip[2], 2));
+      lengthneu_rec = sqrt(pow(Knereclor[6] - ip[0], 2) + pow(Knereclor[7] - ip[1], 2) + pow(Knereclor[8] - ip[2], 2));
+
       //
       // Kaon transverse radius
-      Rtneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2));
+      //Rtneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2));
       Rtneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2));
-      Rtneu_rec = sqrt(pow(Knerec[6] - ip[0], 2) + pow(Knerec[7] - ip[1], 2));
+      Rtneu_rec = sqrt(pow(Knereclor[6] - ip[0], 2) + pow(Knereclor[7] - ip[1], 2));
       //
       // Kaon velocity
-      v_Kchmc = c_vel * Kchmc[4] / Kchmc[3];
+      if(mctruth == 1 || mctruth == 2)
+        v_Kchmc = c_vel * Kchmc[4] / Kchmc[3];
+      else
+        v_Kchmc = c_vel * Kchmc_bcg[4] / Kchmc_bcg[3];
+
       v_Kchrec = c_vel * Kchboost[4] / Kchboost[3];
 
-      v_Kneumc = c_vel * Knemc[4] / Knemc[3];
+      if(mctruth == 1 || mctruth == 2)
+        v_Kneumc = c_vel * Knemc[4] / Knemc[3];
+      else
+        v_Kneumc = c_vel * Knemc_bcg[4] / Knemc_bcg[3];
+
+
       v_Kneutri = c_vel * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)) / Knetri_kinfit[3];
       v_Kneurec = c_vel * Knereclor[4] / Knereclor[3];
       //
@@ -486,7 +536,10 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
       t_neurec = lengthneu_rec / v_Kneurec;
       t_neutri = lengthneu_tri / v_Kneutri;
+
       t_neumc = lengthneu_mc / v_Kneumc;
+
+
       //
       // Angle between vector between IP and neuvtx and Kaon's momentum vector
       cos_path_mom = ((Knetri_kinfit[6] - ip_kinfit[0]) * Knetri_kinfit[0] + (Knetri_kinfit[7] - ip_kinfit[1]) * Knetri_kinfit[1] + (Knetri_kinfit[8] - ip_kinfit[2]) * Knetri_kinfit[2]) / (lengthneu_tri * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)));
@@ -512,8 +565,6 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       vec_before[2] = Knetri_kinfit[8] - ip_kinfit[2];
       vec_before[3] = Knetri_kinfit[9];
 
-      
-
       lorentz_transf(boost, vec_before, vec_after);
 
       lengthneu_tri_CM = sqrt(pow(vec_after[0], 2) + pow(vec_after[1], 2) + pow(vec_after[2], 2));
@@ -533,9 +584,8 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
         else
           cut = chi2min < 40.0; // && abs(Knetri_kinfit[9] - t_neumc) < 2.375/2.;
 
-        if (done_kinfit == 1)
+        if (done_kinfit == 1 && cut)
         {
-
           for (Int_t k1 = 0; k1 < 3; k1++)
             for (Int_t k2 = k1 + 1; k2 < 4; k2++)
             {
@@ -629,13 +679,13 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
             }
           }
 
-          if( bunch_int == 0 )
+          if (bunch_int == 0)
             chosen_bunch = bunch_0;
-          else if(bunch_int == 1 )
+          else if (bunch_int == 1)
             chosen_bunch = bunch_plus1;
-          else if(bunch_int == -1 )
+          else if (bunch_int == -1)
             chosen_bunch = bunch_minus1;
-          else if(bunch_int == 2 )
+          else if (bunch_int == 2)
             chosen_bunch = blob;
           else
             chosen_bunch = true;
@@ -645,14 +695,24 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
             chi2_hist[j]->Fill(chi2min);
             prob_hist[j]->Fill(TMath::Prob(chi2min, M));
 
+            if(bunch_0)
+              chi2_bunch_hist[j][0]->Fill(chi2min);
+            else if(bunch_minus1)
+              chi2_bunch_hist[j][1]->Fill(chi2min);
+            else if(bunch_plus1) 
+              chi2_bunch_hist[j][2]->Fill(chi2min);
+            else
+              chi2_bunch_hist[j][3]->Fill(chi2min);
+
+
             chi2_no_bunch_hist[j]->Fill(chi2min_no_bunch);
 
-            if(angle_boost_kaon_mom < 90.)
+            if (angle_boost_kaon_mom < 90.)
             {
               betadt_hist[j]->Fill(lengthneu_tri / (c_vel * Knetri_kinfit[9]));
               betapm_hist[j]->Fill(v_Kneutri / c_vel);
             }
-            else if(angle_boost_kaon_mom > 90.)
+            else if (angle_boost_kaon_mom > 90.)
             {
               betadtover90_hist[j]->Fill(lengthneu_tri / (c_vel * Knetri_kinfit[9]));
               betapmover90_hist[j]->Fill(v_Kneutri / c_vel);
@@ -660,13 +720,13 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
             beta1_hist[j]->Fill(v_Kneumc / c_vel, v_Kneutri / c_vel);
 
-            beta2_hist[j]->Fill(v_Kneumc / c_vel, lengthneu_tri / (c_vel * Knetri_kinfit[9]) );
+            beta2_hist[j]->Fill(v_Kneumc / c_vel, lengthneu_tri / (c_vel * Knetri_kinfit[9]));
 
             bunch[j]->Fill(bunchnum);
           }
 
           for (Int_t k = 0; k < 3; k++)
-            ip_coor[j][k]->Fill(ipmc[k], ip_kinfit[k]);
+            ip_coor[j][k]->Fill(ipmc[k], ip[k]);
 
           for (Int_t k = 0; k < 5; k++)
           {
@@ -674,33 +734,73 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
             {
               if (isEqual >= 0 && chosen_bunch)
               {
-                neu_vtx_corr[j][k]->Fill(Knemc[6 + k], Knetri_kinfit[6 + k]);
-                sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - Knemc[6 + k]);
-                pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - Knemc[6 + k]);
-                neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
+                if(mctruth == 1 || mctruth == 2)
+                {
+                  neu_vtx_corr[j][k]->Fill(Knemc[6 + k], Knereclor[6 + k]);
+                  sigmas_std[j][k]->Fill(lengthneu_mc, Knereclor[6 + k] - Knemc[6 + k]);
+                  pulls[j][4 + k]->Fill(Knereclor[6 + k] - Knemc[6 + k]);
+                  pulls[j][k]->Fill(Knereclor[k] - Knemc[k]);
+                  neu_mom[j][k]->Fill(Knemc[k], Knereclor[k]);
+                }
+                else
+                {
+                  neu_vtx_corr[j][k]->Fill(Knemc_bcg[6 + k], Knereclor[6 + k]);
+                  sigmas_std[j][k]->Fill(lengthneu_mc, Knereclor[6 + k] - Knemc_bcg[6 + k]);
+                  pulls[j][4 + k]->Fill(Knereclor[6 + k] - Knemc_bcg[6 + k]);
+                  pulls[j][k]->Fill(Knereclor[k] - Knemc[k]);
+                  neu_mom[j][k]->Fill(Knemc_bcg[k], Knereclor[k]);
+                }
               }
             }
             else if (k == 3)
             {
               if (isEqual >= 0 && chosen_bunch)
               {
-                neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[9]); // Knetri_kinfit[6 + k]);
-                sigmas_std[j][3]->Fill(lengthneu_mc, (v_Kneutri / c_vel) - v_Kneumc/c_vel);
-                pulls[j][4 + k]->Fill((v_Kneutri / c_vel) - v_Kneumc/c_vel);
-                neu_mom[j][k]->Fill(Knemc[k], Knetri_kinfit[k]);
+                if(mctruth == 1 || mctruth == 2)
+                {
+                  neu_vtx_corr[j][3]->Fill(t_neumc, t_neurec); // Knereclor[6 + k]);
+                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_neurec - t_neumc)/tau_S_nonCPT);
+                  pulls[j][4 + k]->Fill((t_neurec - t_neumc)/tau_S_nonCPT);
+                  pulls[j][k]->Fill(Knereclor[k] - Knemc[k]);
+                  neu_mom[j][k]->Fill(Knemc[k], Knereclor[k]);
+                }
+                else
+                {
+                  neu_vtx_corr[j][3]->Fill(t_neumc, t_neurec); // Knereclor[6 + k]);
+                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_neurec - t_neumc)/tau_S_nonCPT);
+                  pulls[j][4 + k]->Fill((t_neurec - t_neumc)/tau_S_nonCPT);
+                  pulls[j][k]->Fill(Knereclor[k] - Knemc[k]);
+                  neu_mom[j][k]->Fill(Knemc_bcg[k], Knereclor[k]);
+                }
               }
             }
             else
             {
               if (isEqual >= 0 && chosen_bunch)
-                sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_tri - lengthneu_mc));
+              {
+                sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_rec - lengthneu_mc));
+              }
             }
 
-            if (isEqual >= 0 && chosen_bunch)
+            /*if (isEqual >= 0 && chosen_bunch)
             {
-              pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc[k]);
-              pulls[j][4 + k]->Fill(Knetri_kinfit[4 + k] - Knemc[4 + k]);
-            }
+              if(mctruth == 1 || mctruth == 2)
+              {
+                pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc[k]);
+                pulls[j][5 + k]->Fill(Knetri_kinfit[6 + k] - Knemc[6 + k]);
+              }
+              else if(mctruth == 6)
+              {
+                pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc_bcg[k]);
+                pulls[j][5 + k]->Fill(Knetri_kinfit[6 + k] - Knemc_bcg[6 + k]);
+              }
+            }*/
+          }
+
+          if (isEqual >= 0 && chosen_bunch)
+          {
+            pulls[j][8]->Fill(Rtneu_rec - Rtneu_mc);
+            pulls[j][9]->Fill(lengthneu_rec - lengthneu_mc);
           }
 
           d_cl = sqrt(pow(cluster[0][0] - bhabha_vtx[0], 2) + pow(cluster[1][0] - bhabha_vtx[1], 2) + pow(cluster[2][0] - bhabha_vtx[2], 2));
@@ -711,9 +811,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
             for (Int_t k = 0; k < ntmc; k++)
               pidmc_hist[j]->Fill(pidmc[k]);
 
-            angle_vs_time[j][0]->Fill(angle_min_0, Knetri_kinfit[9]);
+            angle_vs_time[j][0]->Fill(angle_min_0, t_neutri);
 
-            angle_vs_time[j][1]->Fill(angle_min_180, Knetri_kinfit[9]);
+            angle_vs_time[j][1]->Fill(angle_min_180, t_neutri);
             dist_vs_time[j][0]->Fill(dist_min, angle_min_0);
             dist_vs_time[j][1]->Fill(dist_min, angle_min_180);
 
@@ -722,7 +822,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
             for (Int_t k = 0; k < 4; k++)
             {
-              tcl = gamma_kinfit[k][7] - (sqrt(pow(gamma_kinfit[k][4] - Knetri_kinfit[6], 2) + pow(gamma_kinfit[k][5] - Knetri_kinfit[7], 2) + pow(gamma_kinfit[k][6] - Knetri_kinfit[8], 2)) / c_vel) - Knetri_kinfit[9];
+              tcl = gamma_kinfit[k][7] - (sqrt(pow(gamma_kinfit[k][4] - Knetri_kinfit[6], 2) + pow(gamma_kinfit[k][5] - Knetri_kinfit[7], 2) + pow(gamma_kinfit[k][6] - Knetri_kinfit[8], 2)) / c_vel) - t_neutri;
               tcl_hist[j]->Fill(tcl);
 
               cluscorr_hist[j][0]->Fill(gamma_kinfit[0][4], gamma_kinfit[1][4]);
@@ -746,8 +846,6 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     {
       bunch_corr = 999.;
     }
-
-    tree_corr->Fill();
   }
 
   std::ofstream log_file;
@@ -759,6 +857,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
            << std::endl;
 
   log_file << "Rejected events: " << counts_rej << std::endl
+           << std::endl;
+
+  log_file << "Total signal events: " << counts_sig_sel << std::endl
            << std::endl;
 
   log_file << "Good cluster sets: " << counts_good << std::endl;
@@ -794,7 +895,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
   TFitResultPtr result;
 
-  TString x_title, y_title, x_title_list[5] = {"X^{tri}_{neu,1} - X^{gen}_{neu,1} [cm]", "X^{tri}_{neu,2} - X^{gen}_{neu,2} [cm]", "X^{tri}_{neu,3} - X^{gen}_{neu,3} [cm]", "#beta^{p/E}_{neu} - #beta^{gen}_{neu} [-]", "d^{tri}_{neu} - d^{gen}_{neu} [cm]"}, hist_title[5] = {"d^{gen}_{neu}#in[0,10] cm", "d^{gen}_{neu}#in(10,20] cm", "d^{gen}_{neu}#in(20,30] cm", "d^{gen}_{neu}#in(30,40] cm", "d^{gen}_{neu}#in(40,50] cm"};
+  TString x_title, y_title, x_title_list[5] = {"X^{tri}_{neu,1} - X^{gen}_{neu,1} [cm]", "X^{tri}_{neu,2} - X^{gen}_{neu,2} [cm]", "X^{tri}_{neu,3} - X^{gen}_{neu,3} [cm]", "t_{K#rightarrow#pi^{0}#pi^{0}}^{tri} - t_{K#rightarrow#pi^{0}#pi^{0}}^{gen} [#tau_{S}]", "d^{tri}_{neu} - d^{gen}_{neu} [cm]"}, hist_title[5] = {"d^{gen}_{neu}#in[0,10] cm", "d^{gen}_{neu}#in(10,20] cm", "d^{gen}_{neu}#in(20,30] cm", "d^{gen}_{neu}#in(30,40] cm", "d^{gen}_{neu}#in(40,50] cm"};
 
   Float_t parameter[3];
 
@@ -820,7 +921,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   chosen_hist[1]->SetLineColor(kRed);
   chosen_hist[0]->Draw();
   chosen_hist[1]->Draw("SAME");
-  canvas[0][74]->Print(id_canva + ext);
+  canvas[0][74]->Print(img_dir + id_canva + ext);
 
   //! Chi2 and Prob histos
 
@@ -843,8 +944,46 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   chi2_hist[1]->SetLineColor(kRed);
   chi2_hist[0]->Draw();
   chi2_hist[1]->Draw("SAME");
-  canvas[0][11]->Print(id_canva + ext);
+  canvas[0][11]->Print(img_dir + id_canva + ext);
   //!
+  //! Chi2 and Prob histos
+
+  canvas[0][89]->SetRightMargin(0.15);
+  canvas[0][89]->SetLeftMargin(0.17);
+  canvas[0][89]->cd();
+
+  chi2_bunch_hist[0][0]->GetYaxis()->SetMaxDigits(3);
+
+  id_canva = "chi2_dist_bunches";
+  x_title = "#chi^{2} [-]";
+  y_title = "Counts";
+
+  legend->AddEntry(chi2_bunch_hist[0][0], "Bunch 0", "l");
+  legend->AddEntry(chi2_bunch_hist[0][1], "Bunch -1", "l");
+  legend->AddEntry(chi2_bunch_hist[0][2], "Bunch 1", "l");
+  legend->AddEntry(chi2_bunch_hist[0][3], "Others", "l");
+
+  chi2_bunch_hist[0][0]->GetXaxis()->CenterTitle();
+  chi2_bunch_hist[0][0]->GetYaxis()->CenterTitle();
+  chi2_bunch_hist[0][0]->GetXaxis()->SetTitle(x_title);
+  chi2_bunch_hist[0][0]->GetYaxis()->SetTitle(y_title);
+  chi2_bunch_hist[0][0]->GetYaxis()->SetRangeUser(0.0, 1.3 * chi2_bunch_hist[0][0]->GetMaximum());
+  chi2_bunch_hist[0][0]->SetLineColor(kGreen);
+  chi2_bunch_hist[0][1]->SetLineColor(kBlue);
+  chi2_bunch_hist[0][2]->SetLineColor(kRed);
+  chi2_bunch_hist[0][3]->SetLineColor(kBlack);
+  chi2_bunch_hist[0][0]->Draw();
+  chi2_bunch_hist[0][1]->Draw("SAMES");
+  chi2_bunch_hist[0][2]->Draw("SAMES");
+  chi2_bunch_hist[0][3]->Draw("SAMES");
+
+  legend->Draw();
+
+  canvas[0][89]->Print(img_dir + id_canva + ext);
+
+  legend->Clear();
+  //!
+
   canvas[0][12]->SetRightMargin(0.15);
   canvas[0][12]->SetLeftMargin(0.17);
   canvas[0][12]->cd();
@@ -868,7 +1007,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   prob_hist[1]->SetLineColor(kRed);
   prob_hist[0]->Draw();
   prob_hist[1]->Draw("SAME");
-  canvas[0][12]->Print(id_canva + ext);
+  canvas[0][12]->Print(img_dir + id_canva + ext);
   //!
 
   //!
@@ -893,7 +1032,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   pidmc_hist[1]->SetLineColor(kRed);
   pidmc_hist[0]->Draw();
   pidmc_hist[1]->Draw("SAME");
-  canvas[0][26]->Print(id_canva + ext);
+  canvas[0][26]->Print(img_dir + id_canva + ext);
   //!
   canvas[0][27]->SetRightMargin(0.15);
   canvas[0][27]->SetLeftMargin(0.17);
@@ -916,7 +1055,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   mcisr_hist[1]->SetLineColor(kRed);
   mcisr_hist[0]->Draw();
   mcisr_hist[1]->Draw("SAME");
-  canvas[0][27]->Print(id_canva + ext);
+  canvas[0][27]->Print(img_dir + id_canva + ext);
   //!
   canvas[0][28]->SetRightMargin(0.15);
   canvas[0][28]->SetLeftMargin(0.17);
@@ -939,7 +1078,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   first_clus_hist[1]->SetLineColor(kRed);
   first_clus_hist[0]->Draw();
   first_clus_hist[1]->Draw("SAME");
-  canvas[0][28]->Print(id_canva + ext);
+  canvas[0][28]->Print(img_dir + id_canva + ext);
   //!
   //!
   canvas[0][29]->SetRightMargin(0.15);
@@ -963,7 +1102,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
   tcl_hist[1]->SetLineColor(kRed);
   tcl_hist[0]->Draw();
   tcl_hist[1]->Draw("SAME");
-  canvas[0][29]->Print(id_canva + ext);
+  canvas[0][29]->Print(img_dir + id_canva + ext);
   //!
 
   for (Int_t j = 0; j < 2; j++)
@@ -980,7 +1119,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     angle_vs_time[j][0]->Draw("COLZ");
 
-    canvas[j][70]->Print(id_canva + ext);
+    canvas[j][70]->Print(img_dir + id_canva + ext);
 
     id_canva = "Angle180vstime" + std::to_string(j + 1);
 
@@ -990,7 +1129,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     angle_vs_time[j][1]->Draw("COLZ");
 
-    canvas[j][71]->Print(id_canva + ext);
+    canvas[j][71]->Print(img_dir + id_canva + ext);
 
     id_canva = "Distvsangle0" + std::to_string(j + 1);
 
@@ -1000,7 +1139,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     dist_vs_time[j][0]->Draw("COLZ");
 
-    canvas[j][72]->Print(id_canva + ext);
+    canvas[j][72]->Print(img_dir + id_canva + ext);
 
     id_canva = "Distvsangle180" + std::to_string(j + 1);
 
@@ -1010,7 +1149,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     dist_vs_time[j][1]->Draw("COLZ");
 
-    canvas[j][74]->Print(id_canva + ext);
+    canvas[j][74]->Print(img_dir + id_canva + ext);
 
     id_canva = "Solerr" + std::to_string(j + 1);
 
@@ -1020,7 +1159,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     sol_err_hist[j]->Draw("COLZ");
 
-    canvas[j][73]->Print(id_canva + ext);
+    canvas[j][73]->Print(img_dir + id_canva + ext);
 
     id_canva = "Clusenergy" + std::to_string(j + 1);
 
@@ -1030,7 +1169,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     clusenergy_hist[j]->Draw();
 
-    canvas[j][75]->Print(id_canva + ext);
+    canvas[j][75]->Print(img_dir + id_canva + ext);
 
     id_canva = "Cluscorr_x_y_" + std::to_string(j + 1);
 
@@ -1040,7 +1179,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     cluscorr_hist[j][0]->Draw("COLZ");
 
-    canvas[j][76]->Print(id_canva + ext);
+    canvas[j][76]->Print(img_dir + id_canva + ext);
 
     id_canva = "Cluscorr_x_z_" + std::to_string(j + 1);
 
@@ -1050,7 +1189,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     cluscorr_hist[j][1]->Draw("COLZ");
 
-    canvas[j][77]->Print(id_canva + ext);
+    canvas[j][77]->Print(img_dir + id_canva + ext);
 
     id_canva = "Time_projection" + std::to_string(j + 1);
 
@@ -1060,7 +1199,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     neu_vtx_corr[j][3]->ProjectionY()->Draw("HIST");
 
-    canvas[j][78]->Print(id_canva + ext);
+    canvas[j][78]->Print(img_dir + id_canva + ext);
 
     id_canva = "Chi2_substraction" + std::to_string(j + 1);
 
@@ -1072,7 +1211,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     chi2subst[j]->Draw("HIST");
 
-    canvas[j][79]->Print(id_canva + ext);
+    canvas[j][79]->Print(img_dir + id_canva + ext);
 
     id_canva = "Chi2_division" + std::to_string(j + 1);
 
@@ -1086,7 +1225,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
     chi2div[j]->Draw("HIST");
 
-    canvas[j][80]->Print(id_canva + ext);
+    canvas[j][80]->Print(img_dir + id_canva + ext);
 
     for (Int_t i = 0; i < 3; i++)
     {
@@ -1102,7 +1241,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       neu_vtx_corr[j][i]->GetYaxis()->SetTitle(y_title);
       neu_vtx_corr[j][i]->Draw("COLZ");
 
-      canvas[j][i]->Print(id_canva + ext);
+      canvas[j][i]->Print(img_dir + id_canva + ext);
       //!
       canvas[j][i + 4]->SetRightMargin(0.15);
       canvas[j][i + 4]->SetLeftMargin(0.17);
@@ -1116,7 +1255,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       ip_coor[j][i]->GetYaxis()->SetTitle(y_title);
       ip_coor[j][i]->Draw("COLZ");
 
-      canvas[j][i + 4]->Print(id_canva + ext);
+      canvas[j][i + 4]->Print(img_dir + id_canva + ext);
       //!
       canvas[j][i + 7]->SetRightMargin(0.15);
       canvas[j][i + 7]->SetLeftMargin(0.17);
@@ -1130,7 +1269,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       neu_mom[j][i]->GetYaxis()->SetTitle(y_title);
       neu_mom[j][i]->Draw("COLZ");
 
-      canvas[j][i + 7]->Print(id_canva + ext);
+      canvas[j][i + 7]->Print(img_dir + id_canva + ext);
     }
     //!
     gStyle->SetOptStat(0);
@@ -1160,7 +1299,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     line_3.Draw("SAME");
     line_4.Draw("SAME");*/
 
-    canvas[j][3]->Print(id_canva + ext);
+    canvas[j][3]->Print(img_dir + id_canva + ext);
 
     gStyle->SetOptStat(1);
     //!
@@ -1176,21 +1315,21 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     neu_mom[j][3]->GetYaxis()->SetTitle(y_title);
     neu_mom[j][3]->Draw("COLZ");
 
-    canvas[j][10]->Print(id_canva + ext);
+    canvas[j][10]->Print(img_dir + id_canva + ext);
     //!
 
     gStyle->SetOptStat(0);
-    for (Int_t i = 0; i < 8; i++)
+    for (Int_t i = 0; i < 10; i++)
     {
       canvas[j][i + 13]->cd();
 
-      triple_fit->SetParameters(pulls[j][i]->Integral(), pulls[j][i]->GetMean(), pulls[j][i]->GetStdDev(), pulls[j][i]->Integral(), pulls[j][i]->GetMean(), pulls[j][i]->GetStdDev(), pulls[j][i]->Integral(), pulls[j][i]->GetMean(), pulls[j][i]->GetStdDev());
+      triple_fit->SetParameters(0.15*pulls[j][i]->Integral(), pulls[j][i]->GetMean(), pulls[j][i]->GetStdDev(), 0.15*pulls[j][i]->Integral(), pulls[j][i]->GetMean() - 2.0, pulls[j][i]->GetStdDev(), 0.15*pulls[j][i]->Integral(), pulls[j][i]->GetMean() + 2.0, pulls[j][i]->GetStdDev());
 
       if (i < 3)
       {
-        triple_fit->SetParLimits(0, 0.01 * pulls[j][i]->Integral(), 1000.0 * pulls[j][i]->Integral());
-        triple_fit->SetParLimits(3, 0.01 * pulls[j][i]->Integral(), 1000.0 * pulls[j][i]->Integral());
-        triple_fit->SetParLimits(6, 0.01 * pulls[j][i]->Integral(), 1000.0 * pulls[j][i]->Integral());
+        triple_fit->SetParLimits(0, 0.0, 1000.0 * pulls[j][i]->Integral());
+        triple_fit->SetParLimits(3, 0.0, 1000.0 * pulls[j][i]->Integral());
+        triple_fit->SetParLimits(6, 0.0, 1000.0 * pulls[j][i]->Integral());
 
         triple_fit->SetParLimits(2, 0.01 * pulls[j][i]->GetStdDev(), 1000.0 * pulls[j][i]->GetStdDev());
         triple_fit->SetParLimits(5, 0.01 * pulls[j][i]->GetStdDev(), 1000.0 * pulls[j][i]->GetStdDev());
@@ -1198,9 +1337,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       }
       else if (i >= 3 && i < 7)
       {
-        triple_fit->SetParLimits(0, 0.01 * pulls[j][i]->Integral(), 1000.0 * pulls[j][i]->Integral());
-        triple_fit->SetParLimits(3, 0.01 * pulls[j][i]->Integral(), 1000.0 * pulls[j][i]->Integral());
-        triple_fit->SetParLimits(6, 0.01 * pulls[j][i]->Integral(), 1000.0 * pulls[j][i]->Integral());
+        triple_fit->SetParLimits(0, 0.0, 1000.0 * pulls[j][i]->Integral());
+        triple_fit->SetParLimits(3, 0.0, 1000.0 * pulls[j][i]->Integral());
+        triple_fit->SetParLimits(6, 0.0, 1000.0 * pulls[j][i]->Integral());
 
         triple_fit->SetParLimits(2, 0.01 * pulls[j][i]->GetStdDev(), 100.0 * pulls[j][i]->GetStdDev());
         triple_fit->SetParLimits(5, 0.01 * pulls[j][i]->GetStdDev(), 100.0 * pulls[j][i]->GetStdDev());
@@ -1208,9 +1347,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       }
       else
       {
-        triple_fit->SetParLimits(0, 0.01 * pulls[j][i]->Integral(), 100.0 * pulls[j][i]->Integral());
-        triple_fit->SetParLimits(3, 0.01 * pulls[j][i]->Integral(), 100.0 * pulls[j][i]->Integral());
-        triple_fit->SetParLimits(6, 0.01 * pulls[j][i]->Integral(), 100.0 * pulls[j][i]->Integral());
+        triple_fit->SetParLimits(0, 0.0, 100.0 * pulls[j][i]->Integral());
+        triple_fit->SetParLimits(3, 0.0, 100.0 * pulls[j][i]->Integral());
+        triple_fit->SetParLimits(6, 0.0, 100.0 * pulls[j][i]->Integral());
 
         triple_fit->SetParLimits(2, 0.01 * pulls[j][i]->GetStdDev(), 5.0 * pulls[j][i]->GetStdDev());
         triple_fit->SetParLimits(5, 0.01 * pulls[j][i]->GetStdDev(), 5.0 * pulls[j][i]->GetStdDev());
@@ -1219,7 +1358,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
 
       result = pulls[j][i]->Fit(triple_fit, "SF");
 
-      fit_stats[2] = Form("Width = %.2f", comb_std_dev(result->GetParams()));
+      fit_stats[2] = Form("Width = %.2f#pm%.2f", comb_std_dev(result->GetParams()), comb_std_dev_err(result->GetParams(),result->GetErrors()));
 
       fit_text->AddText(fit_stats[2]);
 
@@ -1235,19 +1374,19 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       fit_text->Draw();
 
       id_canva = "pull" + std::to_string(j + 1) + std::to_string(i + 1);
-      canvas[j][i + 13]->Print(id_canva + ext);
+      canvas[j][i + 13]->Print(img_dir + id_canva + ext);
 
       fit_text->Clear();
     }
     //!
-    canvas[j][21]->cd();
-    canvas[j][21]->SetLogy(1);
+    canvas[j][23]->cd();
+    canvas[j][23]->SetLogy(1);
     bunch[j]->GetYaxis()->SetRangeUser(10.0, 10.3 * bunch[j]->GetMaximum());
     bunch[j]->SetLineColor(kBlack);
     bunch[j]->Draw();
 
     id_canva = "bunchnum" + std::to_string(j + 1);
-    canvas[j][21]->Print(id_canva + ext);
+    canvas[j][23]->Print(img_dir + id_canva + ext);
 
     canvas[j][25]->SetRightMargin(0.15);
     canvas[j][25]->SetLeftMargin(0.17);
@@ -1272,10 +1411,10 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     betadt_hist[j]->Draw();
     betadtover90_hist[j]->Draw("SAME");
     legend->Draw();
-    canvas[j][25]->Print(id_canva + ext);
+    canvas[j][25]->Print(img_dir + id_canva + ext);
 
     legend->Clear();
-    
+
     canvas[j][81]->SetRightMargin(0.15);
     canvas[j][81]->SetLeftMargin(0.17);
     canvas[j][81]->cd();
@@ -1299,10 +1438,9 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     betapm_hist[j]->Draw();
     betapmover90_hist[j]->Draw("SAME");
     legend->Draw();
-    canvas[j][81]->Print(id_canva + ext);
+    canvas[j][81]->Print(img_dir + id_canva + ext);
 
     legend->Clear();
-
 
     canvas[j][26]->SetRightMargin(0.15);
     canvas[j][26]->SetLeftMargin(0.17);
@@ -1319,7 +1457,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     beta1_hist[j]->GetXaxis()->SetTitle(x_title);
     beta1_hist[j]->GetYaxis()->SetTitle(y_title);
     beta1_hist[j]->Draw("COLZ");
-    canvas[j][26]->Print(id_canva + ext);
+    canvas[j][26]->Print(img_dir + id_canva + ext);
 
     canvas[j][26]->SetRightMargin(0.15);
     canvas[j][26]->SetLeftMargin(0.17);
@@ -1334,7 +1472,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     beta2_hist[j]->GetXaxis()->SetTitle(x_title);
     beta2_hist[j]->GetYaxis()->SetTitle(y_title);
     beta2_hist[j]->Draw("COLZ");
-    canvas[j][26]->Print(id_canva + ext);
+    canvas[j][26]->Print(img_dir + id_canva + ext);
 
     //!
     for (Int_t k = 0; k < 5; k++)
@@ -1345,49 +1483,48 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
         parameter[1] = sigmas_std[j][k]->ProjectionY("_py", i, i)->GetBinCenter(sigmas_std[j][k]->ProjectionY("_py", i, i)->GetMaximumBin());
         parameter[2] = sigmas_std[j][k]->ProjectionY("_py", i, i)->GetStdDev();
 
-        triple_fit->SetParameters(0.15*parameter[0], parameter[1], parameter[2], 0.15*parameter[0], parameter[1]-0.1, parameter[2], 0.15*parameter[0], parameter[1]+0.1, parameter[2]);
+        triple_fit->SetParameters(0.15 * parameter[0], parameter[1], parameter[2], 0.15 * parameter[0], parameter[1] - 1.0, parameter[2], parameter[0], parameter[1] + 1.0, parameter[2]);
 
         triple_fit->SetParLimits(0, 0.0, 100.0 * parameter[0]);
         triple_fit->SetParLimits(3, 0.0, 100.0 * parameter[0]);
         triple_fit->SetParLimits(6, 0.0, 100.0 * parameter[0]);
         // triple_fit->FixParameter(3, 0.0);
-        // triple_fit->FixParameter(6, 0.0);
+        // triple_fit->FixParameter(6, parameter[0]);
 
-        triple_fit->SetParLimits(1, parameter[1] - 0.1, parameter[1] + 0.1);
-        triple_fit->SetParLimits(4, parameter[1] - 0.1, parameter[1] + 0.1);
-        triple_fit->SetParLimits(7, parameter[1] - 0.1, parameter[1] + 0.1);
-        //triple_fit->FixParameter(4, 0.0);
-        //triple_fit->FixParameter(7, 0.0);
+        triple_fit->SetParLimits(1, parameter[1] - 2.0, parameter[1] + 2.0);
+        triple_fit->SetParLimits(4, parameter[1] - 2.0, parameter[1] + 2.0);
+        triple_fit->SetParLimits(7, parameter[1] - 2.0, parameter[1] + 2.0);
+        // triple_fit->FixParameter(4, 0.0);
+        // triple_fit->FixParameter(7, 0.0);
 
         triple_fit->SetParLimits(2, 0.1 * parameter[2], 6.0 * parameter[2]);
         triple_fit->SetParLimits(5, 0.1 * parameter[2], 6.0 * parameter[2]);
         triple_fit->SetParLimits(8, 0.1 * parameter[2], 6.0 * parameter[2]);
         // triple_fit->FixParameter(5, 1.0);
         // triple_fit->FixParameter(8, 1.0);
- 
+
         TH1 *hist_temp = sigmas_std[j][k]->ProjectionY("_py", i, i);
         result = hist_temp->Fit(triple_fit, "LMES");
         res_std_hist[j][k]->SetBinContent(i, comb_std_dev(result->GetParams()));
-        res_std_hist[j][k]->SetBinError(i, comb_std_dev(result->GetErrors()));
+        res_std_hist[j][k]->SetBinError(i, comb_std_dev_err(result->GetParams(),result->GetErrors()));
 
-        canvas_proj[j][k][i-1]->SetRightMargin(0.15);
-        canvas_proj[j][k][i-1]->SetLeftMargin(0.17);
-        canvas_proj[j][k][i-1]->cd();
+        canvas_proj[j][k][i - 1]->SetRightMargin(0.15);
+        canvas_proj[j][k][i - 1]->SetLeftMargin(0.17);
+        canvas_proj[j][k][i - 1]->cd();
 
         id_canva = "std_devs_proj" + std::to_string(j + 1) + std::to_string(k + 1) + std::to_string(i);
         x_title = x_title_list[k];
         y_title = "Counts";
 
-
         hist_temp->GetYaxis()->SetMaxDigits(3);
         hist_temp->GetXaxis()->CenterTitle();
         hist_temp->GetYaxis()->CenterTitle();
-        hist_temp->SetTitle(hist_title[i-1]);
+        hist_temp->SetTitle(hist_title[i - 1]);
         hist_temp->GetXaxis()->SetTitle(x_title);
         hist_temp->GetYaxis()->SetTitle(y_title);
 
         hist_temp->Draw();
-        canvas_proj[j][k][i-1]->Print(id_canva + ext);
+        canvas_proj[j][k][i - 1]->Print(img_dir + id_canva + ext);
       }
 
       canvas_std[j][k]->SetRightMargin(0.15);
@@ -1406,7 +1543,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
       sigmas_std[j][k]->GetYaxis()->SetTitle(y_title);
       sigmas_std[j][k]->GetYaxis()->SetRangeUser(-10.0, 10.0);
       sigmas_std[j][k]->Draw("COLZ");
-      canvas_std[j][k]->Print(id_canva + ext);
+      canvas_std[j][k]->Print(img_dir + id_canva + ext);
 
       res_std_hist[j][k]->SetLineColor(res_color[k]);
     }
@@ -1423,24 +1560,24 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     canvas_std[j][22]->SetLeftMargin(0.2);
     res_std_hist[j][0]->SetXTitle(x_title);
     res_std_hist[j][0]->SetYTitle(y_title);
-    res_std_hist[j][0]->GetYaxis()->SetRangeUser(0.0, 50.0);
+    res_std_hist[j][0]->GetYaxis()->SetRangeUser(0.0, 30.0);
     res_std_hist[j][0]->Draw("PE1");
     res_std_hist[j][1]->Draw("PE1SAME");
     res_std_hist[j][2]->Draw("PE1SAME");
     legend->Draw();
-    canvas[j][22]->Print(id_canva + ext);
+    canvas[j][22]->Print(img_dir + id_canva + ext);
     //!
     id_canva = "sigmas_std_times" + std::to_string(j + 1);
     x_title = "K#rightarrow#pi^{0}#pi^{0} path generated [cm]";
-    y_title = "#sigma(#beta_{K#rightarrow#pi^{0}#pi^{0}}^{p/E} - #beta_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [-]";//"#sigma(t_{K#rightarrow#pi^{0}#pi^{0}}^{tri} - t_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [#tau_{S}]";
+    y_title = "#sigma(t_{K#rightarrow#pi^{0}#pi^{0}}^{tri} - t_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [#tau_{S}]";
     canvas[j][23]->cd();
     canvas_std[j][23]->SetLeftMargin(0.2);
     res_std_hist[j][3]->SetXTitle(x_title);
     res_std_hist[j][3]->SetYTitle(y_title);
     res_std_hist[j][3]->GetYaxis()->SetMaxDigits(3);
-    res_std_hist[j][3]->GetYaxis()->SetRangeUser(0.0, 0.04);
+    res_std_hist[j][3]->GetYaxis()->SetRangeUser(0.0, 5.0);
     res_std_hist[j][3]->Draw("PE1");
-    canvas[j][23]->Print(id_canva + ext);
+    canvas[j][23]->Print(img_dir + id_canva + ext);
     //!
     id_canva = "sigmas_std_length" + std::to_string(j + 1);
     x_title = "K#rightarrow#pi^{0}#pi^{0} path generated [cm]";
@@ -1449,19 +1586,13 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount, const Int_t M, con
     canvas_std[j][24]->SetLeftMargin(0.2);
     res_std_hist[j][4]->SetXTitle(x_title);
     res_std_hist[j][4]->SetYTitle(y_title);
-    res_std_hist[j][4]->GetYaxis()->SetRangeUser(0.0, 10.0);
+    res_std_hist[j][4]->GetYaxis()->SetRangeUser(0.0, 5.0);
     res_std_hist[j][4]->Draw("PE1");
-    canvas[j][24]->Print(id_canva + ext);
+    canvas[j][24]->Print(img_dir + id_canva + ext);
     //!
 
     legend->Clear();
   }
-
-  tree_corr->Print();
-
-  file_corr->Write();
-  file_corr->Close();
-  delete file_corr;
 
   return 0;
 }

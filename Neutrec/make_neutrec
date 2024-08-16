@@ -4,20 +4,21 @@ CXXFLAGS=`root-config --cflags --glibs`
 OBJPATH=obj
 SRCPATH=src
 INCPATH=/internal/big_one/4/users/gamrat/scripts/Include/
+BINPATH=bin
 
 LIBS=-L$(INCPATH) -lrec -lm -llapack
 
 SRC=$(SRCPATH)/trilateration_neu_rec.cpp $(SRCPATH)/trilateration_neu_rec_kin_fit_aux.cpp $(SRCPATH)/triangle_neu_rec.cpp
 OBJ=$(OBJPATH)/trilateration_neu_rec.o $(OBJPATH)/trilateration_neu_rec_kin_fit_aux.o $(OBJPATH)/triangle_neu_rec.o
 
-PROJECT=tri_rec
+PROJECT=tri_rec.exe
 
 RM=rm
 RMFLAGS=-f
 
-all: $(OBJ) $(PROJECT)
+all: $(OBJ) $(BINPATH)/$(PROJECT)
 
-$(PROJECT): $(OBJPATH)/main.o $(OBJ)
+$(BINPATH)/$(PROJECT): $(OBJPATH)/main.o $(OBJ)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 
 $(OBJPATH)/trilateration_neu_rec.o : $(SRCPATH)/trilateration_neu_rec.cpp

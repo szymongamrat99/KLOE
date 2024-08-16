@@ -14,6 +14,7 @@
 #include "TVectorD.h"
 #include "TError.h"
 
+#include "../../../Include/Codes/chain_init.cpp"
 #include "../../../Include/Codes/reconstructor.h"
 #include "../../../Include/const.h"
 #include "../../../Include/Codes/uncertainties.h"
@@ -29,7 +30,7 @@
 
 using namespace std;
 
-const Int_t N_free = 24, N_const = 4, M = 9, jmin = 0, jmax = 0;
+const Int_t N_free = 24, N_const = 4, M = 5, jmin = 0, jmax = 0;
 Int_t j_ch, k_ch;
 const Float_t Trf = 2.715; // ns - time of a bunch (correction)
 
@@ -43,7 +44,7 @@ Int_t fail;
 
 Int_t selected[4] = {1, 2, 3, 4};
 
-void tri_neurec_kinfit_corr(Short_t ind_data_mc, Short_t first_file, Short_t last_file, Short_t loopcount, Short_t jmin, Short_t jmax)
+void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_file, Short_t loopcount, Short_t jmin, Short_t jmax)
 {
 
 	gErrorIgnoreLevel = 6001;
@@ -55,13 +56,13 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Short_t first_file, Short_t las
 
 	const Int_t range = (jmax - jmin) + 1;
 
-	name = "neuvtx_tri_kin_fit_" + std::to_string(first_file) + "_" + std::to_string(last_file) + "_" + loopcount + "_" + M + "_" + range + "_" + ind_data_mc + "_" + "bunch_corr_automatic" + ".root";
+	name = "neuvtx_tri_kin_fit_" + std::to_string(first_file) + "_" + std::to_string(last_file) + "_" + loopcount + "_" + M + "_" + range + "_" + ind_data_mc + "_" + "new" + ".root";
 
 	TFile *file = new TFile(name, "recreate");
 	TTree *tree = new TTree("h_tri_kin_fit", "Neu vtx rec with trilateration kin fit");
 
-	TFile *file_corr = new TFile("bunch_corr.root");
-  TTree *tree_corr = (TTree *)file_corr->Get("h_bunch_corr");
+	// TFile *file_corr = new TFile("bunch_corr.root");
+	// TTree *tree_corr = (TTree *)file_corr->Get("h_bunch_corr");
 
 	// Branches' addresses
 	// Bhabha vars
@@ -96,8 +97,8 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Short_t first_file, Short_t las
 	chain->SetBranchAddress("mctruth", &mctruth);
 	chain->SetBranchAddress("mcflag", &mcflag);
 
-	tree_corr->SetBranchAddress("bunchcorr", &bunch_corr);
-	chain->AddFriend(tree_corr);
+	// tree_corr->SetBranchAddress("bunchcorr", &bunch_corr);
+	// chain->AddFriend(tree_corr);
 
 	Int_t nentries = (Int_t)chain->GetEntries();
 
@@ -161,12 +162,14 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Short_t first_file, Short_t las
 		if (ind_data_mc == 0)
 			data_flag = (mcflag == 1 && (mctruth == 1 || mctruth == 2));
 		else if (ind_data_mc == 1)
-			data_flag = (mcflag == 1 && (mctruth == 1 || mctruth == 3));
+			data_flag = (mcflag == 1 && mctruth != 0);
 		else if (ind_data_mc == 2)
-			data_flag = (mcflag == 1 && (mctruth == 1 || mctruth == 3)) || mcflag == 0;
+			data_flag = mcflag == 0 || (mcflag = 1 && mctruth != 0);
 
 		if (nclu >= 4 && data_flag)
 		{
+
+			std::cout << int(mctruth) << std::endl;
 			std::cout << 100 * i / (Float_t)nentries << "% done" << std::endl;
 
 			for (Int_t j1 = 0; j1 < nclu - 3; j1++)
@@ -566,7 +569,43 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Short_t first_file, Short_t las
 								}
 							}
 						}
-			chi2->Fill(neu_vtx_min[3]);
+			chi2->Fill(CHISQRMIN);
+		}
+		else
+		{
+			neu_vtx_min[0] = 0.;
+			neu_vtx_min[1] = 999;
+			neu_vtx_min[2] = 999;
+			neu_vtx_min[3] = 999;
+
+			for (Int_t l = 0; l < 4; l++)
+			{
+				gamma_mom_final[l][0] = 999.;
+				gamma_mom_final[l][1] = 999.;
+				gamma_mom_final[l][2] = 999.;
+				gamma_mom_final[l][3] = 999.;
+				gamma_mom_final[l][4] = 999.;
+				gamma_mom_final[l][5] = 999.;
+				gamma_mom_final[l][6] = 999.;
+				gamma_mom_final[l][7] = 999.;
+			}
+
+			fourKnetri_kinfit[0] = 999.;
+			fourKnetri_kinfit[1] = 999.;
+			fourKnetri_kinfit[2] = 999.;
+			fourKnetri_kinfit[3] = 999.;
+			fourKnetri_kinfit[4] = 999.;
+			fourKnetri_kinfit[5] = 999.;
+			fourKnetri_kinfit[6] = 999.;
+			fourKnetri_kinfit[7] = 999.;
+			fourKnetri_kinfit[8] = 999.;
+			fourKnetri_kinfit[9] = 999.;
+
+			iptri_kinfit[0] = 999.;
+			iptri_kinfit[1] = 999.;
+			iptri_kinfit[2] = 999.;
+
+			bunchnum = 999;
 		}
 
 		tree->Fill();
@@ -583,9 +622,9 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Short_t first_file, Short_t las
 
 	TCanvas *c1 = new TCanvas("c1", "", 750, 750);
 	// chi2->Fit(func);
-	c1->SetLogy(1);
+	//c1->SetLogy(1);
 
-	chi2->GetYaxis()->SetRangeUser(1, 1.2 * chi2->GetMaximum());
+	chi2->GetYaxis()->SetRangeUser(0, 1.2 * chi2->GetMaximum());
 	chi2->Draw();
 	c1->Print("test_chi2.png");
 

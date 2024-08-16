@@ -5,6 +5,7 @@
 #include "TTree.h"
 #include "TH1.h"
 
+#include "../../../Include/Codes/chain_init.cpp"
 #include "../../../Include/Codes/reconstructor.h"
 #include "../../../Include/Codes/neu_triangle.h"
 #include "../../../Include/const.h"
