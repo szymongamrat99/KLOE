@@ -50,13 +50,13 @@ int main()
   for (Int_t i = 0; i < kch_hist.max_size(); i++)
   {
     hist_name = "Kch_inv_mass_" + to_string(i);
-    kch_hist[i] = new TH1D(hist_name, hist_name, 50, m_k0 - 10., m_k0 + 10.);
+    kch_hist[i] = new TH1D(hist_name, hist_name, 50, mK0 - 10., mK0 + 10.);
   }
 
   for (Int_t i = 0; i < kne_hist.max_size(); i++)
   {
     hist_name = "Kne_inv_mass_" + to_string(i);
-    kne_hist[i] = new TH1D(hist_name, hist_name, 50, m_k0 - 100., m_k0 + 100.);
+    kne_hist[i] = new TH1D(hist_name, hist_name, 50, mK0 - 100., mK0 + 100.);
   }
 
   for (Int_t i = 0; i < nentries; i++)

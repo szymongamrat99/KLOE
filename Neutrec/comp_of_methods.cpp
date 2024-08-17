@@ -515,20 +515,20 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount = 10, const Int_t M
       //
       // Kaon velocity
       if(mctruth == 1 || mctruth == 2)
-        v_Kchmc = c_vel * Kchmc[4] / Kchmc[3];
+        v_Kchmc = cVel * Kchmc[4] / Kchmc[3];
       else
-        v_Kchmc = c_vel * Kchmc_bcg[4] / Kchmc_bcg[3];
+        v_Kchmc = cVel * Kchmc_bcg[4] / Kchmc_bcg[3];
 
-      v_Kchrec = c_vel * Kchboost[4] / Kchboost[3];
+      v_Kchrec = cVel * Kchboost[4] / Kchboost[3];
 
       if(mctruth == 1 || mctruth == 2)
-        v_Kneumc = c_vel * Knemc[4] / Knemc[3];
+        v_Kneumc = cVel * Knemc[4] / Knemc[3];
       else
-        v_Kneumc = c_vel * Knemc_bcg[4] / Knemc_bcg[3];
+        v_Kneumc = cVel * Knemc_bcg[4] / Knemc_bcg[3];
 
 
-      v_Kneutri = c_vel * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)) / Knetri_kinfit[3];
-      v_Kneurec = c_vel * Knereclor[4] / Knereclor[3];
+      v_Kneutri = cVel * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)) / Knetri_kinfit[3];
+      v_Kneurec = cVel * Knereclor[4] / Knereclor[3];
       //
       // Kaon flight times
       t_chrec = lengthch_rec / v_Kchrec;
@@ -709,18 +709,18 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount = 10, const Int_t M
 
             if (angle_boost_kaon_mom < 90.)
             {
-              betadt_hist[j]->Fill(lengthneu_tri / (c_vel * Knetri_kinfit[9]));
-              betapm_hist[j]->Fill(v_Kneutri / c_vel);
+              betadt_hist[j]->Fill(lengthneu_tri / (cVel * Knetri_kinfit[9]));
+              betapm_hist[j]->Fill(v_Kneutri / cVel);
             }
             else if (angle_boost_kaon_mom > 90.)
             {
-              betadtover90_hist[j]->Fill(lengthneu_tri / (c_vel * Knetri_kinfit[9]));
-              betapmover90_hist[j]->Fill(v_Kneutri / c_vel);
+              betadtover90_hist[j]->Fill(lengthneu_tri / (cVel * Knetri_kinfit[9]));
+              betapmover90_hist[j]->Fill(v_Kneutri / cVel);
             }
 
-            beta1_hist[j]->Fill(v_Kneumc / c_vel, v_Kneutri / c_vel);
+            beta1_hist[j]->Fill(v_Kneumc / cVel, v_Kneutri / cVel);
 
-            beta2_hist[j]->Fill(v_Kneumc / c_vel, lengthneu_tri / (c_vel * Knetri_kinfit[9]));
+            beta2_hist[j]->Fill(v_Kneumc / cVel, lengthneu_tri / (cVel * Knetri_kinfit[9]));
 
             bunch[j]->Fill(bunchnum);
           }
@@ -822,7 +822,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount = 10, const Int_t M
 
             for (Int_t k = 0; k < 4; k++)
             {
-              tcl = gamma_kinfit[k][7] - (sqrt(pow(gamma_kinfit[k][4] - Knetri_kinfit[6], 2) + pow(gamma_kinfit[k][5] - Knetri_kinfit[7], 2) + pow(gamma_kinfit[k][6] - Knetri_kinfit[8], 2)) / c_vel) - t_neutri;
+              tcl = gamma_kinfit[k][7] - (sqrt(pow(gamma_kinfit[k][4] - Knetri_kinfit[6], 2) + pow(gamma_kinfit[k][5] - Knetri_kinfit[7], 2) + pow(gamma_kinfit[k][6] - Knetri_kinfit[8], 2)) / cVel) - t_neutri;
               tcl_hist[j]->Fill(tcl);
 
               cluscorr_hist[j][0]->Fill(gamma_kinfit[0][4], gamma_kinfit[1][4]);
@@ -831,7 +831,7 @@ int comp_of_methods(Int_t first, Int_t last, Int_t loopcount = 10, const Int_t M
 
             clusenergy_hist[j]->Fill(Knetri_kinfit[5]);
 
-            first_clus_hist[j]->Fill(cluster[3][0] - (d_cl / c_vel));
+            first_clus_hist[j]->Fill(cluster[3][0] - (d_cl / cVel));
 
             mcisr_hist[j]->Fill(mcisr);
           }

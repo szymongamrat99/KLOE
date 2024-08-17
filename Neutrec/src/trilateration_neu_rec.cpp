@@ -208,7 +208,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 												kaon_mom[l1][3] += gamma_mom[l1][l2][3];
 											}
 
-											kaon_inv_mass_tmp[l1] = abs(sqrt(pow(kaon_mom[l1][3],2) - pow(kaon_mom[l1][0],2) - pow(kaon_mom[l1][1],2) - pow(kaon_mom[l1][2],2)) - m_k0);
+											kaon_inv_mass_tmp[l1] = abs(sqrt(pow(kaon_mom[l1][3],2) - pow(kaon_mom[l1][0],2) - pow(kaon_mom[l1][1],2) - pow(kaon_mom[l1][2],2)) - mK0);
 
 											y_axis[0] = 0.;
 											y_axis[1] = bhabha_mom[1];
@@ -222,7 +222,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 											ip_tri[0] = bhabha_vtx[0];
 											ip_tri[1] = bhabha_vtx[1];
 
-											kaon_vel[l1] = c_vel * sqrt(pow(kaon_mom[l1][0], 2) + pow(kaon_mom[l1][1], 2) + pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
+											kaon_vel[l1] = cVel * sqrt(pow(kaon_mom[l1][0], 2) + pow(kaon_mom[l1][1], 2) + pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
 											kaon_len[l1] = sqrt(pow(S.sol[l1][0] - ip_tri[0], 2) + pow(S.sol[l1][1] - ip_tri[1], 2) + pow(S.sol[l1][2] - ip_tri[2], 2));
 										}
 
@@ -307,7 +307,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 												Knetri_tmp[2] += gammatri_tmp[l][2];
 												Knetri_tmp[3] += gammatri_tmp[l][3];
 
-												eqn_check[l] = abs(c_vel * (cluster[3][ind_gam[l]] - solution[3]) - gamma_len_tmp[l]);
+												eqn_check[l] = abs(cVel * (cluster[3][ind_gam[l]] - solution[3]) - gamma_len_tmp[l]);
 											}
 
 											Knetri_tmp[4] = sqrt(pow(Knetri_tmp[0], 2) + pow(Knetri_tmp[1], 2) + pow(Knetri_tmp[2], 2));
@@ -317,7 +317,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 											Knetri_tmp[8] = solution[2];
 											Knetri_tmp[9] = solution[3];
 
-											total_err += abs(Knetri_tmp[5] - m_k0);
+											total_err += abs(Knetri_tmp[5] - mK0);
 										}
 										else
 										{
@@ -472,7 +472,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 							ip_tri[0] = bhabha_vtx[0];
 							ip_tri[1] = bhabha_vtx[1];
 
-							kaon_vel[l1] = c_vel * sqrt(pow(kaon_mom[l1][0], 2) + pow(kaon_mom[l1][1], 2) + pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
+							kaon_vel[l1] = cVel * sqrt(pow(kaon_mom[l1][0], 2) + pow(kaon_mom[l1][1], 2) + pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
 							kaon_len[l1] = sqrt(pow(S.sol[l1][0] - ip_tri[0], 2) + pow(S.sol[l1][1] - ip_tri[1], 2) + pow(S.sol[l1][2] - ip_tri[2], 2));
 						}
 
@@ -480,10 +480,10 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 
 						cond_sol[0][1] = (sqrt(pow(S.sol[0][0] - bhabha_vtx[0], 2) + pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
 						path_diff[0] = kaon_vel[0] * S.sol[0][3] - kaon_len[0];
-						eqn_check_tmp[0][0] = c_vel * (cluster[3][ind_gam[0]] - S.sol[0][3]) - gamma_len[0][0];
-						eqn_check_tmp[0][1] = c_vel * (cluster[3][ind_gam[1]] - S.sol[0][3]) - gamma_len[0][1];
-						eqn_check_tmp[0][2] = c_vel * (cluster[3][ind_gam[2]] - S.sol[0][3]) - gamma_len[0][2];
-						eqn_check_tmp[0][3] = c_vel * (cluster[3][ind_gam[3]] - S.sol[0][3]) - gamma_len[0][3];
+						eqn_check_tmp[0][0] = cVel * (cluster[3][ind_gam[0]] - S.sol[0][3]) - gamma_len[0][0];
+						eqn_check_tmp[0][1] = cVel * (cluster[3][ind_gam[1]] - S.sol[0][3]) - gamma_len[0][1];
+						eqn_check_tmp[0][2] = cVel * (cluster[3][ind_gam[2]] - S.sol[0][3]) - gamma_len[0][2];
+						eqn_check_tmp[0][3] = cVel * (cluster[3][ind_gam[3]] - S.sol[0][3]) - gamma_len[0][3];
 
 						eqn_check_tmp_tot[0] = sqrt(pow(eqn_check_tmp[0][0], 2) +
 																				pow(eqn_check_tmp[0][1], 2) +
@@ -493,10 +493,10 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 						cond_sol[1][0] = (S.sol[1][3] < cluster[3][ind_gam[0]]) && (S.sol[1][3] < cluster[3][ind_gam[1]]) && (S.sol[1][3] < cluster[3][ind_gam[2]]) && (S.sol[1][3] < cluster[3][ind_gam[3]]);
 						cond_sol[1][1] = (sqrt(pow(S.sol[1][0] - bhabha_vtx[0], 2) + pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
 						path_diff[1] = kaon_vel[1] * S.sol[1][3] - kaon_len[1];
-						eqn_check_tmp[1][0] = c_vel * (cluster[3][ind_gam[0]] - S.sol[1][3]) - gamma_len[1][0];
-						eqn_check_tmp[1][1] = c_vel * (cluster[3][ind_gam[1]] - S.sol[1][3]) - gamma_len[1][1];
-						eqn_check_tmp[1][2] = c_vel * (cluster[3][ind_gam[2]] - S.sol[1][3]) - gamma_len[1][2];
-						eqn_check_tmp[1][3] = c_vel * (cluster[3][ind_gam[3]] - S.sol[1][3]) - gamma_len[1][3];
+						eqn_check_tmp[1][0] = cVel * (cluster[3][ind_gam[0]] - S.sol[1][3]) - gamma_len[1][0];
+						eqn_check_tmp[1][1] = cVel * (cluster[3][ind_gam[1]] - S.sol[1][3]) - gamma_len[1][1];
+						eqn_check_tmp[1][2] = cVel * (cluster[3][ind_gam[2]] - S.sol[1][3]) - gamma_len[1][2];
+						eqn_check_tmp[1][3] = cVel * (cluster[3][ind_gam[3]] - S.sol[1][3]) - gamma_len[1][3];
 
 						eqn_check_tmp_tot[1] = sqrt(pow(eqn_check_tmp[1][0], 2) +
 																				pow(eqn_check_tmp[1][1], 2) +
@@ -583,7 +583,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 								Knetri_tmp[2] += gammatri_tmp[l][2];
 								Knetri_tmp[3] += gammatri_tmp[l][3];
 
-								eqn_check[l] = c_vel * (cluster[3][ind_gam[l]] - solution[3]) - gamma_len_tmp[l];
+								eqn_check[l] = cVel * (cluster[3][ind_gam[l]] - solution[3]) - gamma_len_tmp[l];
 							}
 
 							Knetri_tmp[4] = sqrt(pow(Knetri_tmp[0], 2) + pow(Knetri_tmp[1], 2) + pow(Knetri_tmp[2], 2));
@@ -593,7 +593,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 							Knetri_tmp[8] = solution[2];
 							Knetri_tmp[9] = solution[3];
 
-							total_err += abs(Knetri_tmp[5] - m_k0);
+							total_err += abs(Knetri_tmp[5] - mK0);
 															// + pow(eqn_check[0], 2) +
 															//   pow(eqn_check[1], 2) +
 															//   pow(eqn_check[2], 2) +
@@ -746,7 +746,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 							ip_tri[0] = bhabha_vtx[0];
 							ip_tri[1] = bhabha_vtx[1];
 
-							kaon_vel[l1] = c_vel * sqrt(pow(kaon_mom[l1][0], 2) + pow(kaon_mom[l1][1], 2) + pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
+							kaon_vel[l1] = cVel * sqrt(pow(kaon_mom[l1][0], 2) + pow(kaon_mom[l1][1], 2) + pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
 							kaon_len[l1] = sqrt(pow(S.sol[l1][0] - ip_tri[0], 2) + pow(S.sol[l1][1] - ip_tri[1], 2) + pow(S.sol[l1][2] - ip_tri[2], 2));
 						}
 
@@ -756,10 +756,10 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 
 						cond_sol[0][1] = (sqrt(pow(S.sol[0][0] - bhabha_vtx[0], 2) + pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
 						path_diff[0] = kaon_vel[0] * S.sol[0][3] - kaon_len[0];
-						eqn_check_tmp[0][0] = c_vel * (pgammc[0][7] - S.sol[0][3]) - gamma_len[0][0];
-						eqn_check_tmp[0][1] = c_vel * (pgammc[1][7] - S.sol[0][3]) - gamma_len[0][1];
-						eqn_check_tmp[0][2] = c_vel * (pgammc[2][7] - S.sol[0][3]) - gamma_len[0][2];
-						eqn_check_tmp[0][3] = c_vel * (pgammc[3][7] - S.sol[0][3]) - gamma_len[0][3];
+						eqn_check_tmp[0][0] = cVel * (pgammc[0][7] - S.sol[0][3]) - gamma_len[0][0];
+						eqn_check_tmp[0][1] = cVel * (pgammc[1][7] - S.sol[0][3]) - gamma_len[0][1];
+						eqn_check_tmp[0][2] = cVel * (pgammc[2][7] - S.sol[0][3]) - gamma_len[0][2];
+						eqn_check_tmp[0][3] = cVel * (pgammc[3][7] - S.sol[0][3]) - gamma_len[0][3];
 
 						eqn_check_tmp_tot[0] = sqrt(pow(eqn_check_tmp[0][0], 2) +
 																				pow(eqn_check_tmp[0][1], 2) +
@@ -769,10 +769,10 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 						cond_sol[1][0] = 1;//(S.sol[1][3] < pgammc[0][7]) && (S.sol[1][3] < pgammc[1][7]) && (S.sol[1][3] < pgammc[2][7]) && (S.sol[1][3] < pgammc[3][7]);
 						cond_sol[1][1] = (sqrt(pow(S.sol[1][0] - bhabha_vtx[0], 2) + pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
 						path_diff[1] = kaon_vel[1] * S.sol[1][3] - kaon_len[1];
-						eqn_check_tmp[1][0] = c_vel * (pgammc[0][7] - S.sol[1][3]) - gamma_len[1][0];
-						eqn_check_tmp[1][1] = c_vel * (pgammc[1][7] - S.sol[1][3]) - gamma_len[1][1];
-						eqn_check_tmp[1][2] = c_vel * (pgammc[2][7] - S.sol[1][3]) - gamma_len[1][2];
-						eqn_check_tmp[1][3] = c_vel * (pgammc[3][7] - S.sol[1][3]) - gamma_len[1][3];
+						eqn_check_tmp[1][0] = cVel * (pgammc[0][7] - S.sol[1][3]) - gamma_len[1][0];
+						eqn_check_tmp[1][1] = cVel * (pgammc[1][7] - S.sol[1][3]) - gamma_len[1][1];
+						eqn_check_tmp[1][2] = cVel * (pgammc[2][7] - S.sol[1][3]) - gamma_len[1][2];
+						eqn_check_tmp[1][3] = cVel * (pgammc[3][7] - S.sol[1][3]) - gamma_len[1][3];
 
 						eqn_check_tmp_tot[1] = sqrt(pow(eqn_check_tmp[1][0], 2) +
 																				pow(eqn_check_tmp[1][1], 2) +
@@ -859,7 +859,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 								Knetri_tmp[2] += gammatri_tmp[l][2];
 								Knetri_tmp[3] += gammatri_tmp[l][3];
 
-								eqn_check[l] = c_vel * (pgammc[l][7] - solution[3]) - gamma_len_tmp[l];
+								eqn_check[l] = cVel * (pgammc[l][7] - solution[3]) - gamma_len_tmp[l];
 							}
 
 							Knetri_tmp[4] = sqrt(pow(Knetri_tmp[0], 2) + pow(Knetri_tmp[1], 2) + pow(Knetri_tmp[2], 2));
@@ -869,7 +869,7 @@ void tri_neurec(int first_file, int last_file, int good_clus) //	arguments are: 
 							Knetri_tmp[8] = solution[2];
 							Knetri_tmp[9] = solution[3];
 
-							total_err += abs(Knetri_tmp[5] - m_k0);
+							total_err += abs(Knetri_tmp[5] - mK0);
 															// + pow(eqn_check[0], 2) +
 															//   pow(eqn_check[1], 2) +
 															//   pow(eqn_check[2], 2) +

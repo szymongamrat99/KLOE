@@ -31,21 +31,21 @@
 
 #include "../Include/const.h"
 
-TCanvas *canva1d_semi[10], *canva1d_three[10], *canva1d_pipi[10], *canva2d[10][chann_num], *canvaproj[10][chann_num];
+TCanvas *canva1d_semi[10], *canva1d_three[10], *canva1d_pipi[10], *canva2d[10][channNum], *canvaproj[10][channNum];
 TCanvas *canva1d_seminocuts, *canva1d_threenocuts, *canva1d_pipinocuts;
 TCanvas *canva1d_semiwithcuts, *canva1d_threewithcuts, *canva1d_pipiwithcuts;
 TCanvas *canva_efficiency, *canva_eff_signal;
 
 
-TH1 *hist_semi[10][chann_num], *hist_three[10][chann_num], *hist_pipi[10][chann_num];
+TH1 *hist_semi[10][channNum], *hist_three[10][channNum], *hist_pipi[10][channNum];
 TH1 *hist_signal, *hist_signal_nocuts;
 TH1 *hist_semi_nocuts, *hist_three_nocuts, *hist_pipi_nocuts;
 TH1 *hist_semi_withcuts, *hist_three_withcuts, *hist_pipi_withcuts;
-TH2 *hist2d[10][chann_num];
+TH2 *hist2d[10][channNum];
 
 TLegend *legend[10];
 
-Int_t entries[chann_num] = {0}, entries_sel[chann_num] = {0}, pred_entries_sel[chann_num] = {0};
+Int_t entries[channNum] = {0}, entries_sel[channNum] = {0}, pred_entries_sel[channNum] = {0};
 void histos::Begin(TTree * /*tree*/)
 {
    // The Begin() function is called at the start of the query.
@@ -66,36 +66,36 @@ void histos::Begin(TTree * /*tree*/)
    canva1d_pipiwithcuts = new TCanvas("Canva pipi cuts", "", 750, 750);
 
   // for(Int_t i = 0; i < 10; i++)
-  //    for(Int_t j = 0; j < chann_num-2; j++) canva2d[i][j] = new TCanvas((chann_name[j] + " canva2d" + to_string(i)).c_str(), "", 750, 750);
+  //    for(Int_t j = 0; j < channNum-2; j++) canva2d[i][j] = new TCanvas((channName[j] + " canva2d" + to_string(i)).c_str(), "", 750, 750);
   // for(Int_t i = 0; i < 10; i++)
-  //    for(Int_t j = 0; j < chann_num-2; j++) canvaproj[i][j] = new TCanvas((chann_name[j] + " canvaproj" + to_string(i)).c_str(), "", 750, 750);
+  //    for(Int_t j = 0; j < channNum-2; j++) canvaproj[i][j] = new TCanvas((channName[j] + " canvaproj" + to_string(i)).c_str(), "", 750, 750);
 
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[0][j] = new TH1F(chann_name[j] + "0semi", "", 201, -100, 100);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[1][j] = new TH1F(chann_name[j] + "1semi", "", 100, 0, 50);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[2][j] = new TH1F(chann_name[j] + "2semi", "", 100, 0, 50);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[3][j] = new TH1F(chann_name[j] + "3semi", "", 200, -10, 10);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[4][j] = new TH1F(chann_name[j] + "4semi", "", 200, -10, 10);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[5][j] = new TH1F(chann_name[j] + "5semi", "", 100, -100, 5);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[6][j] = new TH1F(chann_name[j] + "6semi", "", 200, 300, 1000);
-   for(Int_t j = 0; j < chann_num; j++) hist_semi[7][j] = new TH1F(chann_name[j] + "7semi", "", 200, 300, 1000);
+   for(Int_t j = 0; j < channNum; j++) hist_semi[0][j] = new TH1F(channName[j] + "0semi", "", 201, -100, 100);
+   for(Int_t j = 0; j < channNum; j++) hist_semi[1][j] = new TH1F(channName[j] + "1semi", "", 100, 0, 50);
+   for(Int_t j = 0; j < channNum; j++) hist_semi[2][j] = new TH1F(channName[j] + "2semi", "", 100, 0, 50);
+   for(Int_t j = 0; j < channNum; j++) hist_semi[3][j] = new TH1F(channName[j] + "3semi", "", 200, -10, 10);
+   for(Int_t j = 0; j < channNum; j++) hist_semi[4][j] = new TH1F(channName[j] + "4semi", "", 200, -10, 10);
+   for(Int_t j = 0; j < channNum; j++) hist_semi[5][j] = new TH1F(channName[j] + "5semi", "", 100, -100, 5);
+   for(Int_t j = 0; j < channNum; j++) hist_semi[6][j] = new TH1F(channName[j] + "6semi", "", 200, 300, 1000);
+   for(Int_t j = 0; j < channNum; j++) hist_semi[7][j] = new TH1F(channName[j] + "7semi", "", 200, 300, 1000);
 
-   for(Int_t j = 0; j < chann_num; j++) hist_three[0][j] = new TH1F(chann_name[j] + "0three", "", 201, -100, 100);
-   for(Int_t j = 0; j < chann_num; j++) hist_three[1][j] = new TH1F(chann_name[j] + "1three", "", 100, 0, 50);
-   for(Int_t j = 0; j < chann_num; j++) hist_three[2][j] = new TH1F(chann_name[j] + "2three", "", 100, 0, 50);
-   for(Int_t j = 0; j < chann_num; j++) hist_three[3][j] = new TH1F(chann_name[j] + "3three", "", 200, -10, 10);
-   for(Int_t j = 0; j < chann_num; j++) hist_three[4][j] = new TH1F(chann_name[j] + "4three", "", 200, -10, 10);
-   for(Int_t j = 0; j < chann_num; j++) hist_three[5][j] = new TH1F(chann_name[j] + "5three", "", 30, -1.0, 0.0);
-   for(Int_t j = 0; j < chann_num; j++) hist_three[6][j] = new TH1F(chann_name[j] + "6three", "", 50, m_k0 - 5, m_k0 + 5);
-   for(Int_t j = 0; j < chann_num; j++) hist_three[7][j] = new TH1F(chann_name[j] + "7three", "", 50, m_k0 - 5, m_k0 + 5);
+   for(Int_t j = 0; j < channNum; j++) hist_three[0][j] = new TH1F(channName[j] + "0three", "", 201, -100, 100);
+   for(Int_t j = 0; j < channNum; j++) hist_three[1][j] = new TH1F(channName[j] + "1three", "", 100, 0, 50);
+   for(Int_t j = 0; j < channNum; j++) hist_three[2][j] = new TH1F(channName[j] + "2three", "", 100, 0, 50);
+   for(Int_t j = 0; j < channNum; j++) hist_three[3][j] = new TH1F(channName[j] + "3three", "", 200, -10, 10);
+   for(Int_t j = 0; j < channNum; j++) hist_three[4][j] = new TH1F(channName[j] + "4three", "", 200, -10, 10);
+   for(Int_t j = 0; j < channNum; j++) hist_three[5][j] = new TH1F(channName[j] + "5three", "", 30, -1.0, 0.0);
+   for(Int_t j = 0; j < channNum; j++) hist_three[6][j] = new TH1F(channName[j] + "6three", "", 50, mK0 - 5, mK0 + 5);
+   for(Int_t j = 0; j < channNum; j++) hist_three[7][j] = new TH1F(channName[j] + "7three", "", 50, mK0 - 5, mK0 + 5);
 
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[0][j] = new TH1F(chann_name[j] + "0pipi", "", 201, -100, 100);
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[1][j] = new TH1F(chann_name[j] + "1pipi", "", 100, 0, 50);
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[2][j] = new TH1F(chann_name[j] + "2pipi", "", 100, 0, 50);
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[3][j] = new TH1F(chann_name[j] + "3pipi", "", 200, -10, 10);
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[4][j] = new TH1F(chann_name[j] + "4pipi", "", 200, -10, 10);
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[5][j] = new TH1F(chann_name[j] + "5pipi", "", 100, -100, 5);
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[6][j] = new TH1F(chann_name[j] + "6pipi", "", 200, 300, 1000);
-   for(Int_t j = 0; j < chann_num; j++) hist_pipi[7][j] = new TH1F(chann_name[j] + "7pipi", "", 200, 300, 1000);
+   for(Int_t j = 0; j < channNum; j++) hist_pipi[0][j] = new TH1F(channName[j] + "0pipi", "", 201, -100, 100);
+   for(Int_t j = 0; j < channNum; j++) hist_pipi[1][j] = new TH1F(channName[j] + "1pipi", "", 100, 0, 50);
+   for(Int_t j = 0; j < channNum; j++) hist_pipi[2][j] = new TH1F(channName[j] + "2pipi", "", 100, 0, 50);
+   for(Int_t j = 0; j < channNum; j++) hist_pipi[3][j] = new TH1F(channName[j] + "3pipi", "", 200, -10, 10);
+   for(Int_t j = 0; j < channNum; j++) hist_pipi[4][j] = new TH1F(channName[j] + "4pipi", "", 200, -10, 10);
+   for(Int_t j = 0; j < channNum; j++) hist_pipi[5][j] = new TH1F(channName[j] + "5pipi", "", 100, -100, 5);
+   for(Int_t j = 0; j < channNum; j++) hist_pipi[6][j] = new TH1F(channName[j] + "6pipi", "", 200, 300, 1000);
+   for(Int_t j = 0; j < channNum; j++) hist_pipi[7][j] = new TH1F(channName[j] + "7pipi", "", 200, 300, 1000);
 
    hist_signal = new TH1F("Signal histo", "", 100, -100, 10);
    hist_signal_nocuts = new TH1F("Signal histo nocuts", "", 201, -100, 100);
@@ -107,8 +107,8 @@ void histos::Begin(TTree * /*tree*/)
    hist_pipi_withcuts = new TH1F("pipi histo cuts", "", 201, -100, 100);
 
 //   for(Int_t i = 0; i < 10; i++)
-//      for(Int_t j = 0; j < chann_num; j++)
-//         hist2d[i][j] = new TH2F(chann_name[j] + " 2d" + to_string(i), "", 13, 0, 60, 100, -100, 300);
+//      for(Int_t j = 0; j < channNum; j++)
+//         hist2d[i][j] = new TH2F(channName[j] + " 2d" + to_string(i), "", 13, 0, 60, 100, -100, 300);
 
 
    for(Int_t i = 0; i < 10; i++)
@@ -116,10 +116,10 @@ void histos::Begin(TTree * /*tree*/)
       //legend[i] = new TLegend(0.65,0.65,0.9,0.9);
       legend[i] = new TLegend(0.65,0.25,0.9,0.5);
 
-      for(Int_t j = 0; j < chann_num; j++)
+      for(Int_t j = 0; j < channNum; j++)
       {
-         if(j == 6) legend[i]->AddEntry(hist_semi[i][j], chann_name[j], "PE1");
-         else legend[i]->AddEntry(hist_semi[i][j], chann_name[j], "L");
+         if(j == 6) legend[i]->AddEntry(hist_semi[i][j], channName[j], "PE1");
+         else legend[i]->AddEntry(hist_semi[i][j], channName[j], "L");
       }
    }
 
@@ -166,7 +166,7 @@ Bool_t histos::Process(Long64_t entry)
    k_beta00 = sqrt(pow(fourKnetri[0],2) + pow(fourKnetri[1],2) + pow(fourKnetri[2],2))/fourKnetri[3];
    k_path00 = sqrt(pow(fourKnetri[6] - *Bx,2) + pow(fourKnetri[7] - *By,2) + pow(fourKnetri[8] - *Bz,2));
 
-   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/c_vel) - (k_path00/(k_beta00*c_vel));
+   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00/(k_beta00*cVel));
 
    trcv_sum = TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3];
 	
@@ -177,17 +177,17 @@ Bool_t histos::Process(Long64_t entry)
    //Calculation of time difference
 
    t00 = fourKnetri[9]/tau_S_nonCPT;
-   tpm = k_pathpm/(k_betapm*c_vel*tau_S_nonCPT); 
+   tpm = k_pathpm/(k_betapm*cVel*tau_S_nonCPT); 
 
    DeltaT = tpm - t00;
 
    cuts_semi[0] = abs(*Qmiss_inv - 104.6) < 15;
    cuts_semi[1] = abs(*anglepipi_CM_kch - 145) < 25;
 
-   cuts_signal_neutral_cs[0] = (abs(fourKnetri[5] - m_k0) < 30);
+   cuts_signal_neutral_cs[0] = (abs(fourKnetri[5] - mK0) < 30);
    cuts_signal_neutral_cs[1] = (trcv_sum > -5);
 
-   cuts_signal_charged_cs[0] = (abs(Kchrec[5] - m_k0) < 1.2);
+   cuts_signal_charged_cs[0] = (abs(Kchrec[5] - mK0) < 1.2);
    cuts_signal_charged_cs[1] = (*Qmiss_inv < 3.75);
    cuts_signal_charged_cs[2] = (cos(M_PI**anglepipi_CM_kch/180.) < -0.8);
 
@@ -204,7 +204,7 @@ Bool_t histos::Process(Long64_t entry)
 		hist_signal_nocuts->Fill(*Dtrec);
    }
 
-   if(abs(*minv4gam - m_k0) < 150 && trcv_sum_signal > -1 && abs(Kchrec[5] - m_k0) < 2 && *Qmiss_inv < 3.75 && cos(M_PI**anglepipi_CM_kch/180.) < -0.8)
+   if(abs(*minv4gam - mK0) < 150 && trcv_sum_signal > -1 && abs(Kchrec[5] - mK0) < 2 && *Qmiss_inv < 3.75 && cos(M_PI**anglepipi_CM_kch/180.) < -0.8)
    {
    	if(*mctruth == 1)
 	   {
@@ -415,7 +415,7 @@ Bool_t histos::Process(Long64_t entry)
    }
 
    //Pipi selection
-   if(donepipi[0] == 1 && donepipi[1] == 1 /*&& abs(Kchrec1[5] - m_k0) < 5*/ && *done4 == 1)
+   if(donepipi[0] == 1 && donepipi[1] == 1 /*&& abs(Kchrec1[5] - mK0) < 5*/ && *done4 == 1)
    {
       hist_pipi_nocuts->Fill(DeltaT, br_ks_pippim + br_kl_pippim);
 
@@ -539,19 +539,19 @@ void histos::Terminate()
 
    for(Int_t i = 0; i < 8; i++)
    {
-	mc_three[i] = new TObjArray(chann_num-2);
-	mc_pipi[i] = new TObjArray(chann_num-2);
-	mc_semi[i] = new TObjArray(chann_num-2);
+	mc_three[i] = new TObjArray(channNum-2);
+	mc_pipi[i] = new TObjArray(channNum-2);
+	mc_semi[i] = new TObjArray(channNum-2);
    }
 
    for(Int_t i = 0; i < 8; i++)
-	   for(Int_t j = 0; j < chann_num - 2; j++) mc_semi[i]->Add(hist_semi[i][j]);
+	   for(Int_t j = 0; j < channNum - 2; j++) mc_semi[i]->Add(hist_semi[i][j]);
 
    for(Int_t i = 0; i < 8; i++)
-	   for(Int_t j = 0; j < chann_num - 2; j++) mc_three[i]->Add(hist_three[i][j]);
+	   for(Int_t j = 0; j < channNum - 2; j++) mc_three[i]->Add(hist_three[i][j]);
 
    for(Int_t i = 0; i < 8; i++)
-	   for(Int_t j = 0; j < chann_num - 2; j++) mc_pipi[i]->Add(hist_pipi[i][j]);
+	   for(Int_t j = 0; j < channNum - 2; j++) mc_pipi[i]->Add(hist_pipi[i][j]);
 
    TFractionFitter* fit_semi[10];
    TFractionFitter* fit_three[10];
@@ -559,11 +559,11 @@ void histos::Terminate()
 
    for(Int_t i = 0; i < 8; i++)
    {
-	fit_semi[i] = new TFractionFitter(hist_semi[i][chann_num-1-1],mc_semi[i]);
-	fit_three[i] = new TFractionFitter(hist_three[i][chann_num-1-1],mc_three[i]);
-	fit_pipi[i] = new TFractionFitter(hist_pipi[i][chann_num-1-1],mc_pipi[i]);
+	fit_semi[i] = new TFractionFitter(hist_semi[i][channNum-1-1],mc_semi[i]);
+	fit_three[i] = new TFractionFitter(hist_three[i][channNum-1-1],mc_three[i]);
+	fit_pipi[i] = new TFractionFitter(hist_pipi[i][channNum-1-1],mc_pipi[i]);
 
-   	for(Int_t j = 0; j < chann_num - 2; j++)
+   	for(Int_t j = 0; j < channNum - 2; j++)
    	{
 		fit_semi[i]->Constrain(j,0.0,1.0);
 		fit_three[i]->Constrain(j,0.0,1.0);
@@ -574,9 +574,9 @@ void histos::Terminate()
 	fit_three[i]->Fit();
 	fit_pipi[i]->Fit();
 
-	hist_semi[i][chann_num - 1] = (TH1F*) fit_semi[i]->GetPlot();
-	hist_three[i][chann_num - 1] = (TH1F*) fit_three[i]->GetPlot();
-	hist_pipi[i][chann_num - 1] = (TH1F*) fit_pipi[i]->GetPlot();
+	hist_semi[i][channNum - 1] = (TH1F*) fit_semi[i]->GetPlot();
+	hist_three[i][channNum - 1] = (TH1F*) fit_three[i]->GetPlot();
+	hist_pipi[i][channNum - 1] = (TH1F*) fit_pipi[i]->GetPlot();
    }
 
    gStyle->SetStatX(0.9);
@@ -584,8 +584,8 @@ void histos::Terminate()
    gStyle->SetStatH(0.15);
    gStyle->SetStatW(0.25);
 
-   Int_t index_sort_semi[10][chann_num], index_sort_three[10][chann_num], index_sort_pipi[10][chann_num];
-   Double_t max_counts_semi[10][chann_num], max_counts_three[10][chann_num], max_counts_pipi[10][chann_num];
+   Int_t index_sort_semi[10][channNum], index_sort_three[10][channNum], index_sort_pipi[10][channNum];
+   Double_t max_counts_semi[10][channNum], max_counts_three[10][channNum], max_counts_pipi[10][channNum];
    TString title_semi[100], title_three[100], title_pipi[100];
 
    title_semi[0] = "#Deltat [#tau_{S}]";
@@ -618,44 +618,44 @@ void histos::Terminate()
    Float_t y1d_semi[10][2], y1d_three[10][2], y1d_pipi[10][2], x2d[2], y2d[2]; 
 
    for(Int_t i = 0; i < 8; i++)
-      for(Int_t j = 0; j < chann_num; j++) max_counts_semi[i][j] = hist_semi[i][j]->GetMaximum();
+      for(Int_t j = 0; j < channNum; j++) max_counts_semi[i][j] = hist_semi[i][j]->GetMaximum();
 
    for(Int_t i = 0; i < 8; i++)
-      for(Int_t j = 0; j < chann_num; j++) max_counts_three[i][j] = hist_three[i][j]->GetMaximum();
+      for(Int_t j = 0; j < channNum; j++) max_counts_three[i][j] = hist_three[i][j]->GetMaximum();
    
    for(Int_t i = 0; i < 8; i++)
-      for(Int_t j = 0; j < chann_num; j++) max_counts_pipi[i][j] = hist_pipi[i][j]->GetMaximum();
+      for(Int_t j = 0; j < channNum; j++) max_counts_pipi[i][j] = hist_pipi[i][j]->GetMaximum();
 
    for(Int_t i = 0; i < 8; i++)
    {
-      TMath::Sort(chann_num, max_counts_semi[i], index_sort_semi[i]);
+      TMath::Sort(channNum, max_counts_semi[i], index_sort_semi[i]);
       y1d_semi[i][0] = 0;
       y1d_semi[i][1] = max_counts_semi[i][index_sort_semi[i][0]] + 200.;
    }
 
    for(Int_t i = 0; i < 8; i++)
    {
-      TMath::Sort(chann_num, max_counts_three[i], index_sort_three[i]);
+      TMath::Sort(channNum, max_counts_three[i], index_sort_three[i]);
       y1d_three[i][0] = 0;
       y1d_three[i][1] = max_counts_three[i][index_sort_three[i][0]] + 200.;
    }
 
    for(Int_t i = 0; i < 8; i++)
    {
-      TMath::Sort(chann_num, max_counts_pipi[i], index_sort_pipi[i]);
+      TMath::Sort(channNum, max_counts_pipi[i], index_sort_pipi[i]);
       y1d_pipi[i][0] = 0;
       y1d_pipi[i][1] = max_counts_pipi[i][index_sort_pipi[i][0]] + 200.;
    }
 
    for(Int_t i = 0; i < 8; i++)
    {
-      for(Int_t j = 0; j < chann_num; j++)
+      for(Int_t j = 0; j < channNum; j++)
       {
          canva1d_semi[i]->SetLeftMargin(0.15);
          canva1d_semi[i]->SetBottomMargin(0.15);
          canva1d_semi[i]->cd();
 
-         hist_semi[i][j]->SetLineColor(chann_color[j]);
+         hist_semi[i][j]->SetLineColor(channColor[j]);
 
             if(j == 0)
             {
@@ -682,13 +682,13 @@ void histos::Terminate()
 
    for(Int_t i = 0; i < 8; i++)
    {
-      for(Int_t j = 0; j < chann_num; j++)
+      for(Int_t j = 0; j < channNum; j++)
       {
          canva1d_three[i]->SetLeftMargin(0.15);
          canva1d_three[i]->SetBottomMargin(0.15);
          canva1d_three[i]->cd();
 
-         hist_three[i][j]->SetLineColor(chann_color[j]);
+         hist_three[i][j]->SetLineColor(channColor[j]);
 
             if(j == 0)
             {
@@ -715,13 +715,13 @@ void histos::Terminate()
 
    for(Int_t i = 0; i < 8; i++)
    {
-      for(Int_t j = 0; j < chann_num; j++)
+      for(Int_t j = 0; j < channNum; j++)
       {
          canva1d_pipi[i]->SetLeftMargin(0.15);
          canva1d_pipi[i]->SetBottomMargin(0.15);
          canva1d_pipi[i]->cd();
 
-         hist_pipi[i][j]->SetLineColor(chann_color[j]);
+         hist_pipi[i][j]->SetLineColor(channColor[j]);
 
             if(j == 0)
             {
@@ -748,7 +748,7 @@ void histos::Terminate()
 
    /*for(Int_t i = 0; i < 8; i++)
    {
-      for(Int_t j = 0; j < chann_num-2; j++)
+      for(Int_t j = 0; j < channNum-2; j++)
       {
          canva2d[i][j]->SetLeftMargin(0.15);
          canva2d[i][j]->SetRightMargin(0.15);

@@ -60,9 +60,9 @@ void semi_selection(UInt_t filenumber = 1, TString directory = "230531_data", TS
 
             kch_length_LAB = sqrt( pow(Kchboost[6] - ip[0],2) + pow(Kchboost[7] - ip[1],2) + pow(Kchboost[8] - ip[2],2) );
 
-            Kchanother[0] = sqrt(pow(Kchboost[3],2) - pow(m_k0,2))*(Kchboost[6] - ip[0])/kch_length_LAB;
-            Kchanother[1] = sqrt(pow(Kchboost[3],2) - pow(m_k0,2))*(Kchboost[7] - ip[1])/kch_length_LAB;
-            Kchanother[2] = sqrt(pow(Kchboost[3],2) - pow(m_k0,2))*(Kchboost[8] - ip[2])/kch_length_LAB;
+            Kchanother[0] = sqrt(pow(Kchboost[3],2) - pow(mK0,2))*(Kchboost[6] - ip[0])/kch_length_LAB;
+            Kchanother[1] = sqrt(pow(Kchboost[3],2) - pow(mK0,2))*(Kchboost[7] - ip[1])/kch_length_LAB;
+            Kchanother[2] = sqrt(pow(Kchboost[3],2) - pow(mK0,2))*(Kchboost[8] - ip[2])/kch_length_LAB;
             Kchanother[3] = Kchboost[3];
 
             //Initialization of Lorentz vectors

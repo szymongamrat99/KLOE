@@ -128,7 +128,7 @@ Int_t main(int argc, char *argv[])
 					Kl[0] = mom_mc[0][j];
 					Kl[1] = mom_mc[1][j];
 					Kl[2] = mom_mc[2][j];
-					Kl[5] = m_k0;
+					Kl[5] = mK0;
 					Kl[4] = pow(Kl[0], 2) + pow(Kl[1], 2) + pow(Kl[2], 2);
 					Kl[3] = sqrt(Kl[4] + pow(Kl[5], 2));
 					Kl[4] = sqrt(Kl[4]);
@@ -142,7 +142,7 @@ Int_t main(int argc, char *argv[])
 					Ks[0] = mom_mc[0][j];
 					Ks[1] = mom_mc[1][j];
 					Ks[2] = mom_mc[2][j];
-					Ks[5] = m_k0;
+					Ks[5] = mK0;
 					Ks[4] = pow(Ks[0], 2) + pow(Ks[1], 2) + pow(Ks[2], 2);
 					Ks[3] = sqrt(Ks[4] + pow(Ks[5], 2));
 					Ks[4] = sqrt(Ks[4]);
@@ -193,11 +193,11 @@ Int_t main(int argc, char *argv[])
 					pgammc[count][5] = cluster[1];
 					pgammc[count][6] = cluster[2];
 
-					Float_t beta_c = c_vel * Knemc[4] / Knemc[3], length = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2) + pow(Knemc[8] - ipmc[2], 2)), time_K = length / beta_c;
+					Float_t beta_c = cVel * Knemc[4] / Knemc[3], length = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2) + pow(Knemc[8] - ipmc[2], 2)), time_K = length / beta_c;
 
 					Float_t length_clus = sqrt(pow(cluster[0] - Knemc[6], 2) + pow(cluster[1] - Knemc[7], 2) + pow(cluster[2] - Knemc[8], 2));
 
-					pgammc[count][7] = time_K + (length_clus / c_vel);
+					pgammc[count][7] = time_K + (length_clus / cVel);
 
 					count++;
 				}

@@ -111,9 +111,9 @@ Double_t trilateration_chi_square(const Double_t *x)
 		kaon_mom_vec[i][2] = gamma_mom[i][0][2] + gamma_mom[i][1][2] + gamma_mom[i][2][2] + gamma_mom[i][3][2];
 		kaon_mom_vec[i][3] = gamma_mom[i][0][3] + gamma_mom[i][1][3] + gamma_mom[i][2][3] + gamma_mom[i][3][3];
 
-		kaon_velocity[i][0] = c_vel * kaon_mom_vec[i][0] / kaon_mom_vec[i][3];
-		kaon_velocity[i][1] = c_vel * kaon_mom_vec[i][1] / kaon_mom_vec[i][3];
-		kaon_velocity[i][2] = c_vel * kaon_mom_vec[i][2] / kaon_mom_vec[i][3];
+		kaon_velocity[i][0] = cVel * kaon_mom_vec[i][0] / kaon_mom_vec[i][3];
+		kaon_velocity[i][1] = cVel * kaon_mom_vec[i][1] / kaon_mom_vec[i][3];
+		kaon_velocity[i][2] = cVel * kaon_mom_vec[i][2] / kaon_mom_vec[i][3];
 
 		kaon_mom[i] = sqrt(pow(kaon_mom_vec[i][0], 2) + pow(kaon_mom_vec[i][1], 2) + pow(kaon_mom_vec[i][2], 2));
 
@@ -140,14 +140,14 @@ Double_t trilateration_chi_square(const Double_t *x)
 		constraints[i][1] = pow(kaon_velocity[i][1] * neu_vtx[i][3] - kaon_path[i][1], 2);
 		constraints[i][2] = pow(kaon_velocity[i][2] * neu_vtx[i][3] - kaon_path[i][2], 2);
 
-		constraints[i][3] = pow(pow(kaon_inv_mass[i],2) - pow(m_k0,2), 2);
+		constraints[i][3] = pow(pow(kaon_inv_mass[i],2) - pow(mK0,2), 2);
 
 		constraints[i][4] = pow(kaon_mom_vec_lor[i][3] - (phi_mom[3] / 2.), 2);
 
-		constraints[i][5] = pow(clusters[3][0] - neu_vtx[i][3] - (gamma_path[i][0] / c_vel),2);
-		constraints[i][6] = pow(clusters[3][1] - neu_vtx[i][3] - (gamma_path[i][1] / c_vel),2);
-		constraints[i][7] = pow(clusters[3][2] - neu_vtx[i][3] - (gamma_path[i][2] / c_vel),2);
-		constraints[i][8] = pow(clusters[3][3] - neu_vtx[i][3] - (gamma_path[i][3] / c_vel),2);
+		constraints[i][5] = pow(clusters[3][0] - neu_vtx[i][3] - (gamma_path[i][0] / cVel),2);
+		constraints[i][6] = pow(clusters[3][1] - neu_vtx[i][3] - (gamma_path[i][1] / cVel),2);
+		constraints[i][7] = pow(clusters[3][2] - neu_vtx[i][3] - (gamma_path[i][2] / cVel),2);
+		constraints[i][8] = pow(clusters[3][3] - neu_vtx[i][3] - (gamma_path[i][3] / cVel),2);
 
 		value[i] += lambda[0] * constraints[i][0] + // X-axis path
 								lambda[1] * constraints[i][1] + // Y-axis path

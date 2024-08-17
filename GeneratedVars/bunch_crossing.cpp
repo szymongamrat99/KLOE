@@ -67,7 +67,7 @@ int bunch_crossing()
       lorentz_transf(phi_vel,Knemc_init,Knemc_lor);
 
       kaon_mom = sqrt(pow(Knemc_init[0],2) + pow(Knemc_init[1],2) + pow(Knemc_init[2],2));
-      kaon_vel = c_vel*kaon_mom/Knemc_init[3];
+      kaon_vel = cVel*kaon_mom/Knemc_init[3];
       kaon_path = sqrt(pow(Knereclor[6] - ip[0],2) + pow(Knereclor[7] - ip[1],2) + pow(Knereclor[8] - ip[2],2));
 
       kaon_time = 0;
@@ -79,7 +79,7 @@ int bunch_crossing()
                             pow(Zcl[ncll[g4taken[j] - 1] - 1] - Knemc[8],2));
 
         // t0 = -1.*t_bunch;
-        kaon_time += (Tcl[ncll[g4taken[j] - 1] - 1] - (gamma_path[j]/c_vel));
+        kaon_time += (Tcl[ncll[g4taken[j] - 1] - 1] - (gamma_path[j]/cVel));
 
         // if(kaon_time < 2.715/2. && kaon_time > -2.715/2.) vel_histo->Fill(kaon_time);
         // else if(kaon_time < 2.715 + 2.715/2. && kaon_time > 2.715/2.) vel_histo->Fill(kaon_time - 2.715);
@@ -91,7 +91,7 @@ int bunch_crossing()
         // else vel_histo->Fill(kaon_time);
       }
       kaon_time = kaon_time/4.;
-      vel_histo->Fill(kaon_path/(kaon_time*c_vel));
+      vel_histo->Fill(kaon_path/(kaon_time*cVel));
 
     }
   }

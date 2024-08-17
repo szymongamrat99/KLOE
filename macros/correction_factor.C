@@ -114,7 +114,7 @@ Bool_t correction_factor::Process(Long64_t entry)
    //Lorentz vectors
    TLorentzVector mom_kaon_pm, mom_kaon_00_std, mom_kaon_00_tri, mom_kaon_s, mom_kaon_l, 
                   mom_kaon_pm_alt, mom_kaon_00_std_alt, mom_kaon_00_tri_alt, mom_kaon_s_alt, mom_kaon_l_alt, 
-                  mom_kne_mc, mom_kch_mc, mom_phi, mom_phi_mc;
+                  mom_kne_mc, mom_kch_mc, momPhi, momPhi_mc;
    TLorentzVector pos_kaon_pm, pos_kaon_00_std, pos_kaon_00_tri, pos_kaon_s, pos_kaon_l, pos_phi, pos_kne_mc, pos_kch_mc;
 
    TVector3 phi_boost, kaon_00_std_boost, kaon_00_tri_boost, kaon_s_boost, kaon_l_boost, kaon_pm_boost;
@@ -148,23 +148,23 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    fReader.SetLocalEntry(entry);
 
    //Momentum and position of Phi in LAB
-   mom_phi_mc(0) = Kchmc[0] + Knemc[0];
-   mom_phi_mc(1) = Kchmc[1] + Knemc[1];
-   mom_phi_mc(2) = Kchmc[2] + Knemc[2];
-   mom_phi_mc(3) = Kchmc[3] + Knemc[3];
+   momPhi_mc(0) = Kchmc[0] + Knemc[0];
+   momPhi_mc(1) = Kchmc[1] + Knemc[1];
+   momPhi_mc(2) = Kchmc[2] + Knemc[2];
+   momPhi_mc(3) = Kchmc[3] + Knemc[3];
 
    //Momentum and position of Phi in LAB
-   mom_phi(0) = *Bpx;
-   mom_phi(1) = *Bpy;
-   mom_phi(2) = *Bpz;
-   mom_phi(3) = *Broots;
+   momPhi(0) = *Bpx;
+   momPhi(1) = *Bpy;
+   momPhi(2) = *Bpz;
+   momPhi(3) = *Broots;
 
-   phi_vel = c_vel*(sqrt(pow(mom_phi(0),2) + pow(mom_phi(1),2) + pow(mom_phi(2),2))/mom_phi(3));
+   phi_vel = cVel*(sqrt(pow(momPhi(0),2) + pow(momPhi(1),2) + pow(momPhi(2),2))/momPhi(3));
 
    pos_phi(0) = 0.;
    pos_phi(1) = 0.;
    pos_phi(2) = 0.;
-   pos_phi(3) = c_vel*(sqrt(pow(pos_phi(0),2) + pow(pos_phi(1),2) + pow(pos_phi(2),2))/phi_vel);
+   pos_phi(3) = cVel*(sqrt(pow(pos_phi(0),2) + pow(pos_phi(1),2) + pow(pos_phi(2),2))/phi_vel);
 
    //Momentum and position of charged kaon MC
    mom_kch_mc(0) = Kchmc[0];
@@ -172,12 +172,12 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    mom_kch_mc(2) = Kchmc[2];
    mom_kch_mc(3) = Kchmc[3];
 
-   kaon_pm_vel = c_vel*(sqrt(pow(mom_kch_mc(0),2) + pow(mom_kch_mc(1),2) + pow(mom_kch_mc(2),2))/mom_kch_mc(3));
+   kaon_pm_vel = cVel*(sqrt(pow(mom_kch_mc(0),2) + pow(mom_kch_mc(1),2) + pow(mom_kch_mc(2),2))/mom_kch_mc(3));
 
    pos_kch_mc(0) = Kchmc[6] - ipmc[0];
    pos_kch_mc(1) = Kchmc[7] - ipmc[1];
    pos_kch_mc(2) = Kchmc[8] - ipmc[2];
-   pos_kch_mc(3) = c_vel*(sqrt(pow(pos_kch_mc(0),2) + pow(pos_kch_mc(1),2) + pow(pos_kch_mc(2),2))/kaon_pm_vel);
+   pos_kch_mc(3) = cVel*(sqrt(pow(pos_kch_mc(0),2) + pow(pos_kch_mc(1),2) + pow(pos_kch_mc(2),2))/kaon_pm_vel);
 
    //Momentum and position of neutral kaon MC
    mom_kne_mc(0) = Knemc[0];
@@ -185,12 +185,12 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    mom_kne_mc(2) = Knemc[2];
    mom_kne_mc(3) = Knemc[3];
 
-   kaon_pm_vel = c_vel*(sqrt(pow(mom_kne_mc(0),2) + pow(mom_kne_mc(1),2) + pow(mom_kne_mc(2),2))/mom_kne_mc(3));
+   kaon_pm_vel = cVel*(sqrt(pow(mom_kne_mc(0),2) + pow(mom_kne_mc(1),2) + pow(mom_kne_mc(2),2))/mom_kne_mc(3));
 
    pos_kne_mc(0) = Knemc[6] - ipmc[0];
    pos_kne_mc(1) = Knemc[7] - ipmc[1];
    pos_kne_mc(2) = Knemc[8] - ipmc[2];
-   pos_kne_mc(3) = c_vel*(sqrt(pow(pos_kne_mc(0),2) + pow(pos_kne_mc(1),2) + pow(pos_kne_mc(2),2))/kaon_pm_vel);
+   pos_kne_mc(3) = cVel*(sqrt(pow(pos_kne_mc(0),2) + pow(pos_kne_mc(1),2) + pow(pos_kne_mc(2),2))/kaon_pm_vel);
 
    //Momentum and position of charged kaon
    mom_kaon_pm(0) = Kchboost[0];
@@ -198,17 +198,17 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    mom_kaon_pm(2) = Kchboost[2];
    mom_kaon_pm(3) = Kchboost[3];
 
-   kaon_pm_vel = c_vel*(sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3));
+   kaon_pm_vel = cVel*(sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3));
 
    pos_kaon_pm(0) = Kchboost[6] - *Bx;
    pos_kaon_pm(1) = Kchboost[7] - *By;
    pos_kaon_pm(2) = Kchboost[8] - *Bz;
-   pos_kaon_pm(3) = c_vel*(pos_phi(3) + sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2))/kaon_pm_vel);
+   pos_kaon_pm(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2))/kaon_pm_vel);
 
    //Momentum and position of charged kaon
-   mom_kaon_pm_alt(0) = sqrt(pow(mom_kaon_pm(3),2) - pow(m_k0,2))*(pos_kaon_pm(0) - pos_phi(0))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
-   mom_kaon_pm_alt(1) = sqrt(pow(mom_kaon_pm(3),2) - pow(m_k0,2))*(pos_kaon_pm(1) - pos_phi(1))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
-   mom_kaon_pm_alt(2) = sqrt(pow(mom_kaon_pm(3),2) - pow(m_k0,2))*(pos_kaon_pm(2) - pos_phi(2))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
+   mom_kaon_pm_alt(0) = sqrt(pow(mom_kaon_pm(3),2) - pow(mK0,2))*(pos_kaon_pm(0) - pos_phi(0))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
+   mom_kaon_pm_alt(1) = sqrt(pow(mom_kaon_pm(3),2) - pow(mK0,2))*(pos_kaon_pm(1) - pos_phi(1))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
+   mom_kaon_pm_alt(2) = sqrt(pow(mom_kaon_pm(3),2) - pow(mK0,2))*(pos_kaon_pm(2) - pos_phi(2))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
    mom_kaon_pm_alt(3) = mom_kaon_pm(3);
 
    if(sqrt(pow(Kchrec1[6] - *Bx,2) + pow(Kchrec1[7] - *By,2) + pow(Kchrec1[8] - *Bz,2)) < sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)))
@@ -219,17 +219,17 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
       mom_kaon_s(2) = Kchrec1[2];
       mom_kaon_s(3) = Kchrec1[3];
 
-      kaon_s_vel = c_vel*(sqrt(pow(mom_kaon_s(0),2) + pow(mom_kaon_s(1),2) + pow(mom_kaon_s(2),2))/mom_kaon_s(3));
+      kaon_s_vel = cVel*(sqrt(pow(mom_kaon_s(0),2) + pow(mom_kaon_s(1),2) + pow(mom_kaon_s(2),2))/mom_kaon_s(3));
 
       pos_kaon_s(0) = Kchrec1[6] - *Bx;
       pos_kaon_s(1) = Kchrec1[7] - *By;
       pos_kaon_s(2) = Kchrec1[8] - *Bz;
-      pos_kaon_s(3) = c_vel*(pos_phi(3) + sqrt(pow(pos_kaon_s(0),2) + pow(pos_kaon_s(1),2) + pow(pos_kaon_s(2),2))/kaon_s_vel);
+      pos_kaon_s(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_s(0),2) + pow(pos_kaon_s(1),2) + pow(pos_kaon_s(2),2))/kaon_s_vel);
 
       //Momentum and position of charged kaon_s alternative
-      mom_kaon_s_alt(0) = sqrt(pow(mom_kaon_s(3),2) - pow(m_k0,2))*(pos_kaon_s(0) - pos_phi(0))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));
-      mom_kaon_s_alt(1) = sqrt(pow(mom_kaon_s(3),2) - pow(m_k0,2))*(pos_kaon_s(1) - pos_phi(1))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
-      mom_kaon_s_alt(2) = sqrt(pow(mom_kaon_s(3),2) - pow(m_k0,2))*(pos_kaon_s(2) - pos_phi(2))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(0) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(0) - pos_phi(0))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));
+      mom_kaon_s_alt(1) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(1) - pos_phi(1))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(2) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(2) - pos_phi(2))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
       mom_kaon_s_alt(3) = mom_kaon_s(3);
 
       //Momentum and position of charged kaon_l
@@ -238,17 +238,17 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
       mom_kaon_l(2) = Kchrec2[2];
       mom_kaon_l(3) = Kchrec2[3];
 
-      kaon_l_vel = c_vel*(sqrt(pow(mom_kaon_l(0),2) + pow(mom_kaon_l(1),2) + pow(mom_kaon_l(2),2))/mom_kaon_l(3));
+      kaon_l_vel = cVel*(sqrt(pow(mom_kaon_l(0),2) + pow(mom_kaon_l(1),2) + pow(mom_kaon_l(2),2))/mom_kaon_l(3));
 
       pos_kaon_l(0) = Kchrec2[6] - *Bx;
       pos_kaon_l(1) = Kchrec2[7] - *By;
       pos_kaon_l(2) = Kchrec2[8] - *Bz;
-      pos_kaon_l(3) = c_vel*(pos_phi(3) + sqrt(pow(pos_kaon_l(0),2) + pow(pos_kaon_l(1),2) + pow(pos_kaon_l(2),2))/kaon_l_vel);
+      pos_kaon_l(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_l(0),2) + pow(pos_kaon_l(1),2) + pow(pos_kaon_l(2),2))/kaon_l_vel);
 
       //Momentum and position of charged kaon_l alternative
-      mom_kaon_l_alt(0) = sqrt(pow(mom_kaon_l(3),2) - pow(m_k0,2))*(pos_kaon_l(0) - pos_phi(0))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));
-      mom_kaon_l_alt(1) = sqrt(pow(mom_kaon_l(3),2) - pow(m_k0,2))*(pos_kaon_l(1) - pos_phi(1))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
-      mom_kaon_l_alt(2) = sqrt(pow(mom_kaon_l(3),2) - pow(m_k0,2))*(pos_kaon_l(2) - pos_phi(2))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(0) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(0) - pos_phi(0))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));
+      mom_kaon_l_alt(1) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(1) - pos_phi(1))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(2) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(2) - pos_phi(2))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
       mom_kaon_l_alt(3) = mom_kaon_l(3);
    }
    else
@@ -259,17 +259,17 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
       mom_kaon_s(2) = Kchrec2[2];
       mom_kaon_s(3) = Kchrec2[3];
 
-      kaon_s_vel = c_vel*(sqrt(pow(mom_kaon_s(0),2) + pow(mom_kaon_s(1),2) + pow(mom_kaon_s(2),2))/mom_kaon_s(3));
+      kaon_s_vel = cVel*(sqrt(pow(mom_kaon_s(0),2) + pow(mom_kaon_s(1),2) + pow(mom_kaon_s(2),2))/mom_kaon_s(3));
 
       pos_kaon_s(0) = Kchrec2[6] - *Bx;
       pos_kaon_s(1) = Kchrec2[7] - *By;
       pos_kaon_s(2) = Kchrec2[8] - *Bz;
-      pos_kaon_s(3) = c_vel*(pos_phi(3) + sqrt(pow(pos_kaon_s(0),2) + pow(pos_kaon_s(1),2) + pow(pos_kaon_s(2),2))/kaon_s_vel);
+      pos_kaon_s(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_s(0),2) + pow(pos_kaon_s(1),2) + pow(pos_kaon_s(2),2))/kaon_s_vel);
 
       //Momentum and position of charged kaon_s alternative
-      mom_kaon_s_alt(0) = sqrt(pow(mom_kaon_s(3),2) - pow(m_k0,2))*(pos_kaon_s(0) - pos_phi(0))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));
-      mom_kaon_s_alt(1) = sqrt(pow(mom_kaon_s(3),2) - pow(m_k0,2))*(pos_kaon_s(1) - pos_phi(1))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
-      mom_kaon_s_alt(2) = sqrt(pow(mom_kaon_s(3),2) - pow(m_k0,2))*(pos_kaon_s(2) - pos_phi(2))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(0) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(0) - pos_phi(0))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));
+      mom_kaon_s_alt(1) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(1) - pos_phi(1))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(2) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(2) - pos_phi(2))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
       mom_kaon_s_alt(3) = mom_kaon_s(3);
 
       //Momentum and position of charged kaon_l
@@ -278,17 +278,17 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
       mom_kaon_l(2) = Kchrec1[2];
       mom_kaon_l(3) = Kchrec1[3];
 
-      kaon_l_vel = c_vel*(sqrt(pow(mom_kaon_l(0),2) + pow(mom_kaon_l(1),2) + pow(mom_kaon_l(2),2))/mom_kaon_l(3));
+      kaon_l_vel = cVel*(sqrt(pow(mom_kaon_l(0),2) + pow(mom_kaon_l(1),2) + pow(mom_kaon_l(2),2))/mom_kaon_l(3));
 
       pos_kaon_l(0) = Kchrec1[6] - *Bx;
       pos_kaon_l(1) = Kchrec1[7] - *By;
       pos_kaon_l(2) = Kchrec1[8] - *Bz;
-      pos_kaon_l(3) = c_vel*(pos_phi(3) + sqrt(pow(pos_kaon_l(0),2) + pow(pos_kaon_l(1),2) + pow(pos_kaon_l(2),2))/kaon_l_vel);
+      pos_kaon_l(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_l(0),2) + pow(pos_kaon_l(1),2) + pow(pos_kaon_l(2),2))/kaon_l_vel);
 
       //Momentum and position of charged kaon_l alternative
-      mom_kaon_l_alt(0) = sqrt(pow(mom_kaon_l(3),2) - pow(m_k0,2))*(pos_kaon_l(0) - pos_phi(0))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));
-      mom_kaon_l_alt(1) = sqrt(pow(mom_kaon_l(3),2) - pow(m_k0,2))*(pos_kaon_l(1) - pos_phi(1))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
-      mom_kaon_l_alt(2) = sqrt(pow(mom_kaon_l(3),2) - pow(m_k0,2))*(pos_kaon_l(2) - pos_phi(2))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(0) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(0) - pos_phi(0))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));
+      mom_kaon_l_alt(1) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(1) - pos_phi(1))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(2) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(2) - pos_phi(2))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
       mom_kaon_l_alt(3) = mom_kaon_l(3);
    }
 
@@ -298,17 +298,17 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    mom_kaon_00_std(2) = Knereclor[2];
    mom_kaon_00_std(3) = Knereclor[3];
 
-   kaon_00_std_vel = c_vel*(sqrt(pow(mom_kaon_00_std(0),2) + pow(mom_kaon_00_std(1),2) + pow(mom_kaon_00_std(2),2))/mom_kaon_00_std(3));
+   kaon_00_std_vel = cVel*(sqrt(pow(mom_kaon_00_std(0),2) + pow(mom_kaon_00_std(1),2) + pow(mom_kaon_00_std(2),2))/mom_kaon_00_std(3));
 
    pos_kaon_00_std(0) = Knereclor[6] - *Bx;
    pos_kaon_00_std(1) = Knereclor[7] - *By;
    pos_kaon_00_std(2) = Knereclor[8] - *Bz;
-   pos_kaon_00_std(3) = c_vel*(pos_phi(3) + sqrt(pow(pos_kaon_00_std(0),2) + pow(pos_kaon_00_std(1),2) + pow(pos_kaon_00_std(2),2))/kaon_00_std_vel);
+   pos_kaon_00_std(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_00_std(0),2) + pow(pos_kaon_00_std(1),2) + pow(pos_kaon_00_std(2),2))/kaon_00_std_vel);
 
    //Momentum and position of neutral standard kaon
-   mom_kaon_00_std_alt(0) = sqrt(pow(mom_kaon_00_std(3),2) - pow(m_k0,2))*(pos_kaon_00_std(0) - pos_phi(0))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));
-   mom_kaon_00_std_alt(1) = sqrt(pow(mom_kaon_00_std(3),2) - pow(m_k0,2))*(pos_kaon_00_std(1) - pos_phi(1))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));;
-   mom_kaon_00_std_alt(2) = sqrt(pow(mom_kaon_00_std(3),2) - pow(m_k0,2))*(pos_kaon_00_std(2) - pos_phi(2))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));;
+   mom_kaon_00_std_alt(0) = sqrt(pow(mom_kaon_00_std(3),2) - pow(mK0,2))*(pos_kaon_00_std(0) - pos_phi(0))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));
+   mom_kaon_00_std_alt(1) = sqrt(pow(mom_kaon_00_std(3),2) - pow(mK0,2))*(pos_kaon_00_std(1) - pos_phi(1))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));;
+   mom_kaon_00_std_alt(2) = sqrt(pow(mom_kaon_00_std(3),2) - pow(mK0,2))*(pos_kaon_00_std(2) - pos_phi(2))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));;
    mom_kaon_00_std_alt(3) = mom_kaon_00_std(3);
 
    //Momentum and position of neutral trilateration kaon
@@ -317,17 +317,17 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    mom_kaon_00_tri(2) = fourKnetri[2];
    mom_kaon_00_tri(3) = fourKnetri[3];
 
-   kaon_00_tri_vel = c_vel*mom_kaon_00_tri.BoostVector().Mag();
+   kaon_00_tri_vel = cVel*mom_kaon_00_tri.BoostVector().Mag();
 
    pos_kaon_00_tri(0) = fourKnetri[6] - *Bx;
    pos_kaon_00_tri(1) = fourKnetri[7] - *By;
    pos_kaon_00_tri(2) = fourKnetri[8] - *Bz;
-   pos_kaon_00_tri(3) = c_vel*(pos_phi(3) + sqrt(pow(pos_kaon_00_tri(0),2) + pow(pos_kaon_00_tri(1),2) + pow(pos_kaon_00_tri(2),2))/kaon_00_tri_vel);
+   pos_kaon_00_tri(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_00_tri(0),2) + pow(pos_kaon_00_tri(1),2) + pow(pos_kaon_00_tri(2),2))/kaon_00_tri_vel);
 
    //Momentum and position of neutral standard kaon
-   mom_kaon_00_tri_alt(0) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(m_k0,2))*(pos_kaon_00_tri(0) - pos_phi(0))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));
-   mom_kaon_00_tri_alt(1) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(m_k0,2))*(pos_kaon_00_tri(1) - pos_phi(1))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
-   mom_kaon_00_tri_alt(2) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(m_k0,2))*(pos_kaon_00_tri(2) - pos_phi(2))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
+   mom_kaon_00_tri_alt(0) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(mK0,2))*(pos_kaon_00_tri(0) - pos_phi(0))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));
+   mom_kaon_00_tri_alt(1) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(mK0,2))*(pos_kaon_00_tri(1) - pos_phi(1))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
+   mom_kaon_00_tri_alt(2) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(mK0,2))*(pos_kaon_00_tri(2) - pos_phi(2))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
    mom_kaon_00_tri_alt(3) = mom_kaon_00_tri(3);
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Lorentz transformation to CM of Phi
@@ -337,7 +337,7 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    k_path00_tri = sqrt(pow(pos_kaon_00_tri(0),2) + pow(pos_kaon_00_tri(1),2) + pow(pos_kaon_00_tri(2),2));
    k_beta00_tri = sqrt(pow(mom_kaon_00_tri(0),2) + pow(mom_kaon_00_tri(1),2) + pow(mom_kaon_00_tri(2),2))/mom_kaon_00_tri(3);
 
-   phi_boost = mom_phi.BoostVector();
+   phi_boost = momPhi.BoostVector();
 
    pos_phi.Boost(-phi_boost);
    pos_kaon_pm.Boost(-phi_boost);
@@ -358,12 +358,12 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    mom_kaon_s_alt.Boost(-phi_boost);
    mom_kaon_l_alt.Boost(-phi_boost);
 
-   mom_phi.Boost(-phi_boost);
+   momPhi.Boost(-phi_boost);
 
    k_pathpm = sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2));
    k_betapm = sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3);
 
-   phi_boost = mom_phi_mc.BoostVector();
+   phi_boost = momPhi_mc.BoostVector();
    mom_kne_mc.Boost(-phi_boost);
    mom_kch_mc.Boost(-phi_boost);
    pos_kne_mc.Boost(-phi_boost);
@@ -393,37 +393,37 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    pos_kch_mc.Boost(-kaon_pm_boost);
    pos_kne_mc.Boost(-kaon_00_std_boost);
 
-   tpm = pos_kaon_pm(3)/(tau_S_nonCPT*c_vel);
-   t00_std = pos_kaon_00_std(3)/(tau_S_nonCPT*c_vel);
-   t00_tri = pos_kaon_00_tri(3)/(tau_S_nonCPT*c_vel);
-   ts = pos_kaon_s(3)/(tau_S_nonCPT*c_vel);
-   tl = pos_kaon_l(3)/(tau_S_nonCPT*c_vel);
-   tpm_mc = pos_kch_mc(3)/(tau_S_nonCPT*c_vel);
-   t00_mc = pos_kne_mc(3)/(tau_S_nonCPT*c_vel);  
+   tpm = pos_kaon_pm(3)/(tau_S_nonCPT*cVel);
+   t00_std = pos_kaon_00_std(3)/(tau_S_nonCPT*cVel);
+   t00_tri = pos_kaon_00_tri(3)/(tau_S_nonCPT*cVel);
+   ts = pos_kaon_s(3)/(tau_S_nonCPT*cVel);
+   tl = pos_kaon_l(3)/(tau_S_nonCPT*cVel);
+   tpm_mc = pos_kch_mc(3)/(tau_S_nonCPT*cVel);
+   t00_mc = pos_kne_mc(3)/(tau_S_nonCPT*cVel);  
 
    DeltaT_signal = (tpm - t00_std);
    DeltaT_control = (tpm - t00_tri);
    DeltaT_pipi = (tl - ts);
    DeltaT_mc = (tpm_mc - t00_mc);
 
-   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/c_vel) - (k_path00_tri/(k_beta00_tri*c_vel));
+   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00_tri/(k_beta00_tri*cVel));
    trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
    if(*mctruth == 1)
 	{
       trcv_sum_signal = trcv[g4taken[0]-1] + trcv[g4taken[1]-1] + trcv[g4taken[2]-1] + trcv[g4taken[3]-1];
-      pEff_signal->FillWeighted(trcv_sum_signal > -1 && abs(*minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, event.interf_function(DeltaT_mc,1,0), DeltaT_signal);
-      pEff_signal_tri->FillWeighted(trcv_sum > -1 && abs(fourKnetri[5] - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, event.interf_function(DeltaT_mc,1,0), DeltaT_signal);
+      pEff_signal->FillWeighted(trcv_sum_signal > -1 && abs(*minv4gam - mK0) < 76 && abs(Kchrec[5] - mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, event.interf_function(DeltaT_mc,1,0), DeltaT_signal);
+      pEff_signal_tri->FillWeighted(trcv_sum > -1 && abs(fourKnetri[5] - mK0) < 76 && abs(Kchrec[5] - mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, event.interf_function(DeltaT_mc,1,0), DeltaT_signal);
 
    }
 
    cuts_semi[0] = abs(*Qmiss_inv - 71.13) < 25;
    cuts_semi[1] = abs(*anglepipi_CM_kch - 145.8) < 10;
 
-   cuts_signal_neutral_cs[0] = (abs(fourKnetri[5] - m_k0) < 76);
+   cuts_signal_neutral_cs[0] = (abs(fourKnetri[5] - mK0) < 76);
    cuts_signal_neutral_cs[1] = (trcv_sum > -1.0);
 
-   cuts_signal_charged_cs[0] = (abs(Kchrec[5] - m_k0) < 1.2);
+   cuts_signal_charged_cs[0] = (abs(Kchrec[5] - mK0) < 1.2);
    cuts_signal_charged_cs[1] = (*Qmiss_inv < 3.75);
    cuts_signal_charged_cs[2] = (cos(M_PI*(*anglepipi_CM_kch)/180.) < -0.8);
 
@@ -433,14 +433,14 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
 
    if(tot_cuts_semi && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_semimc->FillWeighted(tot_cuts_neutral, tot_br_semi, DeltaT_control);
    if(*done == 1 && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_threemc->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
-   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - m_k0) < 2 && *mcflag == 1 && *mctruth != 0) pEff_pipimc->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
+   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - mK0) < 2 && *mcflag == 1 && *mctruth != 0) pEff_pipimc->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
 
    if(tot_cuts_semi && *mcflag == 0 && *done4 == 1) pEff_semi->FillWeighted(tot_cuts_neutral, tot_br_semi, DeltaT_control);
    if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
-   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - m_k0) < 2 && *mcflag == 0) pEff_pipi->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
+   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - mK0) < 2 && *mcflag == 0) pEff_pipi->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
 
    if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three_length->FillWeighted(tot_cuts_charged, br_ks_pippim, sqrt(pow(Kchrec[6] - *Bx,2) + pow(Kchrec[7] - *By,2) + pow(Kchrec[8] - *Bz,2)));
-   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - m_k0) < 2 && *mcflag == 0) pEff_pipi_length->FillWeighted(tot_cuts_charged, tot_br_pipi, sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)));
+   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - mK0) < 2 && *mcflag == 0) pEff_pipi_length->FillWeighted(tot_cuts_charged, tot_br_pipi, sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)));
 
    return kTRUE;
 }

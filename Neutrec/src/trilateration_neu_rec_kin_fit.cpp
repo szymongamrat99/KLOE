@@ -101,7 +101,7 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 
 	Bool_t clusterEnergy, solError, cond_clus[4];
 	Int_t ind_gam[4], sort_index[2][3], sort_ind_gam[2][4], chosen_ind_gam[4], found_best, isConverged;
-	Float_t neu_vtx[2][4], inv_m_pi0[2][3][2], gamma_mom[2][4][4], mass_pair[2][3];
+	Float_t neu_vtx[2][4], inv_mPi0[2][3][2], gamma_mom[2][4][4], mass_pair[2][3];
 
 	Float_t P1[3 * N + M + 3], min_value, min_value_def, neu_vtx_min[2][4], clusters_min[4][5], neu_vtx_min_final[4],
 			mom_kaon[2][4], ene_kaon[2], v_kaon[2], length_kaon[2], diff_kaon[2], length, length_mc, length_rec;
@@ -333,7 +333,7 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 											mom_kaon[k][2] = gamma_mom[k][0][2] + gamma_mom[k][1][2] + gamma_mom[k][2][2] + gamma_mom[k][3][2];
 											mom_kaon[k][3] = gamma_mom[k][0][3] + gamma_mom[k][1][3] + gamma_mom[k][2][3] + gamma_mom[k][3][3];
 
-											v_kaon[k] = c_vel * sqrt(pow(mom_kaon[k][0], 2) + pow(mom_kaon[k][1], 2) + pow(mom_kaon[k][2], 2)) / mom_kaon[k][3];
+											v_kaon[k] = cVel * sqrt(pow(mom_kaon[k][0], 2) + pow(mom_kaon[k][1], 2) + pow(mom_kaon[k][2], 2)) / mom_kaon[k][3];
 
 											bhabha_mom_fit[0] = P1[20];
 											bhabha_mom_fit[1] = P1[21];

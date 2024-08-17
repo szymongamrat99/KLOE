@@ -19,7 +19,7 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
 	}
     }
 
-    UInt_t sel_ev[chann_num - 2], total_ev[chann_num - 2];
+    UInt_t sel_ev[channNum - 2], total_ev[channNum - 2];
     TCut cut;
 
     //Total num of events
@@ -31,13 +31,13 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
     total_ev[5] = chain.GetEntries("mctruth_pipi == 1");
     total_ev[6] = chain.GetEntries("mctruth == 7");
 
-    Float_t step, x_val[chann_num - 2][points_num + 1], eff[chann_num - 2][points_num + 1], purity[points_num + 1];
+    Float_t step, x_val[channNum - 2][points_num + 1], eff[channNum - 2][points_num + 1], purity[points_num + 1];
 
     step = (max_lim - min_lim)/(Float_t)points_num;
 
     for(Int_t j = 0; j <= points_num; j++)
     {
-        for(Int_t i = 0; i < chann_num - 2; i++)
+        for(Int_t i = 0; i < channNum - 2; i++)
         {
             x_val[i][j] = min_lim + j*step;
 
@@ -60,26 +60,26 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
 
     auto legend = new TLegend(0.48,0.7,0.85,0.9);
 
-    TGraph *eff_graphs[chann_num - 2];
+    TGraph *eff_graphs[channNum - 2];
     TGraph *purity_graph;
 
-    for(Int_t i = 0; i < chann_num - 2; i++)
+    for(Int_t i = 0; i < channNum - 2; i++)
     {
         eff_graphs[i] = new TGraph(points_num + 1, x_val[i], eff[i]);
-        eff_graphs[i]->SetTitle(chann_name[i] + " efficiency");
-        eff_graphs[i]->SetLineColor(chann_color[i]);
+        eff_graphs[i]->SetTitle(channName[i] + " efficiency");
+        eff_graphs[i]->SetLineColor(channColor[i]);
         eff_graphs[i]->SetLineWidth(3);
 
-        legend->AddEntry(eff_graphs[i], chann_name[i] + " eff");
+        legend->AddEntry(eff_graphs[i], channName[i] + " eff");
     }
 
     purity_graph = new TGraph(points_num + 1, x_val[0], purity);
     purity_graph->SetLineColor(kBlack);
-    purity_graph->SetTitle(chann_name[4] + " purity");
+    purity_graph->SetTitle(channName[4] + " purity");
     purity_graph->SetLineWidth(3);
     purity_graph->SetLineStyle(9);
 
-    legend->AddEntry(purity_graph, chann_name[4] + " purity");
+    legend->AddEntry(purity_graph, channName[4] + " purity");
 
     TCanvas *canva = new TCanvas();
     canva->SetRightMargin(0.15);
@@ -87,7 +87,7 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
 
     TMultiGraph *mg = new TMultiGraph();
 
-    for(Int_t i = 0; i < chann_num - 2; i++) mg->Add(eff_graphs[i]);
+    for(Int_t i = 0; i < channNum - 2; i++) mg->Add(eff_graphs[i]);
 
     mg->Add(purity_graph);
 

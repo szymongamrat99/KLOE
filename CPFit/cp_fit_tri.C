@@ -108,7 +108,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "split")
 
         if (1)//done4 == 1)
         {
-            velocity_kch = c_vel * sqrt(pow(Kchboost[0], 2) + pow(Kchboost[1], 2) + pow(Kchboost[2], 2)) / Kchboost[3];
+            velocity_kch = cVel * sqrt(pow(Kchboost[0], 2) + pow(Kchboost[1], 2) + pow(Kchboost[2], 2)) / Kchboost[3];
 
             tch_LAB = sqrt(pow(Kchboost[6] - ip[0], 2) + pow(Kchboost[7] - ip[1], 2) + pow(Kchboost[8] - ip[2], 2)) / velocity_kch;
             tne_LAB = fourKnetri[9];
@@ -116,7 +116,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "split")
             Kch_LAB[0] = Kchboost[6] - ip[0];
             Kch_LAB[1] = Kchboost[7] - ip[1];
             Kch_LAB[2] = Kchboost[8] - ip[2];
-            Kch_LAB[3] = tch_LAB * c_vel;
+            Kch_LAB[3] = tch_LAB * cVel;
 
             Kchmom_LAB[0] = Kchboost[0];
             Kchmom_LAB[1] = Kchboost[1];
@@ -126,7 +126,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "split")
             Kne_LAB[0] = fourKnetri[6] - ip[0];
             Kne_LAB[1] = fourKnetri[7] - ip[1];
             Kne_LAB[2] = fourKnetri[8] - ip[2];
-            Kne_LAB[3] = tne_LAB * c_vel;
+            Kne_LAB[3] = tne_LAB * cVel;
 
             Knemom_LAB[0] = fourKnetri[0];
             Knemom_LAB[1] = fourKnetri[1];
@@ -157,10 +157,10 @@ void cp_fit(Bool_t check_corr = false, TString mode = "split")
             lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
             lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
 
-            Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (c_vel * tau_S_nonCPT);
+            Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (cVel * tau_S_nonCPT);
 
             for (Int_t i = 0; i < 4; i++)
-                TRCV[i] = Tcl[g4takentri_kinfit[i] - 1] - (sqrt(pow(Xcl[g4takentri_kinfit[i] - 1] - fourKnetri[6], 2) + pow(Ycl[g4takentri_kinfit[i] - 1] - fourKnetri[7], 2) + pow(Zcl[g4takentri_kinfit[i] - 1] - fourKnetri[8], 2)) / c_vel) - fourKnetri[9];
+                TRCV[i] = Tcl[g4takentri_kinfit[i] - 1] - (sqrt(pow(Xcl[g4takentri_kinfit[i] - 1] - fourKnetri[6], 2) + pow(Ycl[g4takentri_kinfit[i] - 1] - fourKnetri[7], 2) + pow(Zcl[g4takentri_kinfit[i] - 1] - fourKnetri[8], 2)) / cVel) - fourKnetri[9];
 
             trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
@@ -307,10 +307,10 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
 
     Double_t sum_of_events = 0., fractions[6] = {0.};
 
-    for (Int_t i = 0; i < chann_num; i++)
+    for (Int_t i = 0; i < channNum; i++)
         sum_of_events += event.time_diff[i].size();
 
-    for (Int_t i = 0; i < chann_num; i++)
+    for (Int_t i = 0; i < channNum; i++)
         fractions[i] = 100 * event.time_diff[i].size() / sum_of_events;
 
     std::ofstream myfile_num;
@@ -331,7 +331,7 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
         sig_total->Fill(no_cuts_sig[1][i]);
     }
 
-    for (UInt_t i = 0; i < chann_num; i++)
+    for (UInt_t i = 0; i < channNum; i++)
     {
         for (UInt_t j = 0; j < event.time_diff[i].size(); j++)
         {
@@ -379,12 +379,12 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
     event.frac[4]->Scale(minimum->X()[9] * event.frac[4]->GetEntries() / event.frac[4]->Integral(0, nbins + 1));
     event.frac[5]->Scale(minimum->X()[10] * event.frac[5]->GetEntries() / event.frac[5]->Integral(0, nbins + 1));
 
-    for (UInt_t i = 0; i < chann_num; i++)
+    for (UInt_t i = 0; i < channNum; i++)
     {
         event.mc_sum->Add(event.frac[i]);
 
         event.frac[i]->SetLineWidth(3);
-        event.frac[i]->SetLineColor(chann_color[i]);
+        event.frac[i]->SetLineColor(channColor[i]);
     }
 
     std::ofstream myfile;
@@ -406,10 +406,10 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
     myfile.close();
 
     event.mc_sum->SetLineWidth(3);
-    event.mc_sum->SetLineColor(mcsum_color);
+    event.mc_sum->SetLineColor(mcSumColor);
 
     event.data->SetLineWidth(3);
-    event.data->SetLineColor(data_color);
+    event.data->SetLineColor(dataColor);
 
     TCanvas *c1 = new TCanvas("c1", "", 790, 1200);
 
@@ -479,14 +479,14 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
 
     TLegend *legend_chann = new TLegend(0.6, 0.5, 0.9, 0.9);
     legend_chann->SetFillColor(kWhite);
-    for (UInt_t i = 0; i < chann_num; i++)
+    for (UInt_t i = 0; i < channNum; i++)
     {
-        legend_chann->AddEntry(event.frac[i], chann_name[i], "l");
+        legend_chann->AddEntry(event.frac[i], channName[i], "l");
         event.frac[i]->Draw("HISTSAME");
     }
 
-    legend_chann->AddEntry(event.mc_sum, mcsum_name, "l");
-    legend_chann->AddEntry(event.data, data_name, "le");
+    legend_chann->AddEntry(event.mc_sum, mcSumName, "l");
+    legend_chann->AddEntry(event.data, dataName, "le");
     legend_chann->Draw();
 
     c1->Print("split_fit_with_corr" + ext);
@@ -549,7 +549,7 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
 
         if (done4 == 1)
         {
-            velocity_kch = c_vel * sqrt(pow(Kchboost[0], 2) + pow(Kchboost[1], 2) + pow(Kchboost[2], 2)) / Kchboost[3];
+            velocity_kch = cVel * sqrt(pow(Kchboost[0], 2) + pow(Kchboost[1], 2) + pow(Kchboost[2], 2)) / Kchboost[3];
 
             tch_LAB = sqrt(pow(Kchboost[6] - ip[0], 2) + pow(Kchboost[7] - ip[1], 2) + pow(Kchboost[8] - ip[2], 2)) / velocity_kch;
             tne_LAB = fourKnetri[9];
@@ -557,7 +557,7 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
             Kch_LAB[0] = Kchboost[6] - ip[0];
             Kch_LAB[1] = Kchboost[7] - ip[1];
             Kch_LAB[2] = Kchboost[8] - ip[2];
-            Kch_LAB[3] = tch_LAB * c_vel;
+            Kch_LAB[3] = tch_LAB * cVel;
 
             Kchmom_LAB[0] = Kchboost[0];
             Kchmom_LAB[1] = Kchboost[1];
@@ -567,7 +567,7 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
             Kne_LAB[0] = fourKnetri[6] - ip[0];
             Kne_LAB[1] = fourKnetri[7] - ip[1];
             Kne_LAB[2] = fourKnetri[8] - ip[2];
-            Kne_LAB[3] = tne_LAB * c_vel;
+            Kne_LAB[3] = tne_LAB * cVel;
 
             Knemom_LAB[0] = fourKnetri[0];
             Knemom_LAB[1] = fourKnetri[1];
@@ -598,10 +598,10 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
             lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
             lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
 
-            Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (c_vel * tau_S_nonCPT);
+            Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (cVel * tau_S_nonCPT);
 
             for (Int_t i = 0; i < 4; i++)
-                TRCV[i] = Tcl[g4takentri_kinfit[i] - 1] - (sqrt(pow(Xcl[g4takentri_kinfit[i] - 1] - fourKnetri[6], 2) + pow(Ycl[g4takentri_kinfit[i] - 1] - fourKnetri[7], 2) + pow(Zcl[g4takentri_kinfit[i] - 1] - fourKnetri[8], 2)) / c_vel) - fourKnetri[9];
+                TRCV[i] = Tcl[g4takentri_kinfit[i] - 1] - (sqrt(pow(Xcl[g4takentri_kinfit[i] - 1] - fourKnetri[6], 2) + pow(Ycl[g4takentri_kinfit[i] - 1] - fourKnetri[7], 2) + pow(Zcl[g4takentri_kinfit[i] - 1] - fourKnetri[8], 2)) / cVel) - fourKnetri[9];
 
             trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
@@ -709,7 +709,7 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
         event_final.data->Fill(event_final.time_diff_data[j]);
     }
 
-    for (Int_t i = 0; i < chann_num; i++)
+    for (Int_t i = 0; i < channNum; i++)
     {
         for (UInt_t j = 0; j < event_final.time_diff[i].size(); j++)
         {
@@ -740,7 +740,7 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
 
     event_final.frac[0]->Scale(minimum->X()[2] * event_final.frac[0]->GetEntries() / event_final.frac[0]->Integral());
     event_final.frac[0]->SetLineWidth(3);
-    event_final.frac[0]->SetLineColor(chann_color[0]);
+    event_final.frac[0]->SetLineColor(channColor[0]);
 
     for (Int_t k = 1; k <= event_final.bin_number; k++)
         event_final.frac[0]->SetBinContent(k, event_final.frac[0]->GetBinContent(k) / event_final.corr_vals[k - 1]);
@@ -759,7 +759,7 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
     myfile.close();
 
     event_final.data->SetLineWidth(3);
-    event_final.data->SetLineColor(data_color);
+    event_final.data->SetLineColor(dataColor);
 
     TCanvas *c1_final = new TCanvas("c1_final", "", 790, 790);
 
@@ -793,10 +793,10 @@ std::cout << "Norm other bcg" << " " << minimum->X()[10] << std::endl;*/
     TLegend *legend_chann_final = new TLegend(0.6, 0.5, 0.9, 0.9);
     legend_chann_final->SetFillColor(kWhite);
 
-    legend_chann_final->AddEntry(event_final.frac[0], chann_name[0], "l");
+    legend_chann_final->AddEntry(event_final.frac[0], channName[0], "l");
     event_final.frac[0]->Draw("HISTSAME");
 
-    legend_chann_final->AddEntry(event_final.data, data_name, "le");
+    legend_chann_final->AddEntry(event_final.data, dataName, "le");
     legend_chann_final->Draw();
 
     c1_final->Print("split_fit_with_corr_final" + ext);

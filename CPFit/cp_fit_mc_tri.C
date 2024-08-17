@@ -29,26 +29,36 @@ void cp_fit(Bool_t check = false, TString mode = "")
 
     tree->SetBranchAddress("mctruth", &mctruth);
 
+    TFile file_tri("../../../old_root_files/neuvtx_tri_rec.root");
+    TTree *tree_tri = (TTree*)file_tri.Get("h_tri");
+
+    Int_t done4 = 0;
+    Float_t fourKnetri[10] = {0.};
+
+    tree_tri->SetBranchAddress("done4", &done4);
+    tree_tri->SetBranchAddress("fourKnetri", fourKnetri);
+
     TChain *chain = new TChain("INTERF/h1");
 
     chain_init(chain);
 
     UChar_t mcflag;
-    Float_t Dtboostlor, Dtmc, Chi2, minv4gam, Kchrec[9], Qmiss;
+    Float_t Dtboostlor, Dtmc, Chi2, minv4gam, Kchrec[9], Qmiss, ip[3], Kchboost[9];
 
     chain->SetBranchAddress("mcflag", &mcflag);
-
-    chain->SetBranchAddress("Dtboostlor", &Dtboostlor);
-    chain->SetBranchAddress("Dtmc", &Dtmc);
 
     chain->SetBranchAddress("Dtmc", &Dtmc);
 
     chain->SetBranchAddress("Chi2", &Chi2);
     chain->SetBranchAddress("minv4gam", &minv4gam);
     chain->SetBranchAddress("Kchrec", Kchrec);
+    chain->SetBranchAddress("Kchboost", Kchboost);
     chain->SetBranchAddress("Qmiss", &Qmiss);
 
-    chain->AddFriend("h = h1", "../../../old_root_files/mctruth.root");
+    chain->SetBranchAddress("ip", ip);
+
+    chain->AddFriend(tree);
+    chain->AddFriend(tree_tri);
 
     UInt_t nentries = chain->GetEntries();
 
@@ -58,15 +68,21 @@ void cp_fit(Bool_t check = false, TString mode = "")
     Double_t split[3] = {-30.0, 0.0, 30.0};
 
     interference event(mode, check, nbins, x_min, x_max, split);
-    
+
+    Double_t velocity_kch, velocity_kne;
     
     for(UInt_t i = 0; i < nentries; i++)
     {
         chain->GetEntry(i);
-        tree->GetEntry(i);
 
-        if(Chi2 < 40 && abs(minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && Qmiss < 3.75)
+        if(done4 == 1)// && Chi2 < 40 && abs(fourKnetri[5] - mK0) < 76 && abs(Kchrec[5] - mK0) < 1.2 && Qmiss < 3.75)
         {
+            velocity_kch = cVel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
+
+            velocity_kne = cVel*sqrt(pow(fourKnetri[0],2) + pow(fourKnetri[1],2) + pow(fourKnetri[2],2))/fourKnetri[3];
+
+            Dtboostlor = ((sqrt(pow(Kchboost[6] - ip[0],2) + pow(Kchboost[7] - ip[1],2) + pow(Kchboost[8] - ip[2],2))/velocity_kch) - (sqrt(pow(fourKnetri[6] - ip[0],2) + pow(fourKnetri[7] - ip[1],2) + pow(fourKnetri[8] - ip[2],2))/velocity_kne))/tau_S_nonCPT;
+
             if(mcflag == 1)
             {
                 if(mctruth == 1)
@@ -158,7 +174,7 @@ void cp_fit(Bool_t check = false, TString mode = "")
 
     Double_t par[2] = {minimum->X()[0], minimum->X()[1]};
 
-    for(UInt_t i = 0; i < chann_num; i++)
+    for(UInt_t i = 0; i < channNum; i++)
     {
 
         std::cout <<  event.time_diff_rand_mc[i].size() << std::endl;
@@ -189,7 +205,7 @@ void cp_fit(Bool_t check = false, TString mode = "")
         event.frac[i]->Scale(minimum->X()[i + 2]*event.frac[i]->GetEntries() / event.frac[i]->Integral(0, nbins + 1) );
         event.frac_data[i]->Scale(event.frac_data[i]->GetEntries() / event.frac_data[i]->Integral(0, nbins + 1) );
 
-        event.frac[i]->SetLineColor(chann_color[i]);
+        event.frac[i]->SetLineColor(channColor[i]);
 
         event.mc_sum->Add(event.frac[i]);
         event.data->Add(event.frac_data[i]);
@@ -210,8 +226,8 @@ void cp_fit(Bool_t check = false, TString mode = "")
     myfile << "\u03C7\u00B2/" << (UInt_t)nbins << "," << event.data->Chi2Test(event.mc_sum,"WW CHI2/NDF") << ",-,\n";
     myfile.close();
 
-    event.mc_sum->SetLineColor(mcsum_color);
-    event.data->SetLineColor(data_color);
+    event.mc_sum->SetLineColor(mcSumColor);
+    event.data->SetLineColor(dataColor);
 
     TCanvas *c1 = new TCanvas("c1", "", 790, 790);
 
@@ -242,21 +258,21 @@ void cp_fit(Bool_t check = false, TString mode = "")
 
     rp->GetUpperPad()->cd();
 
-    for(UInt_t i = 0; i < chann_num; i++)
+    for(UInt_t i = 0; i < channNum; i++)
     {
         event.frac[i]->Draw("HISTSAME");
     }
 
     TLegend *legend_chann = new TLegend(0.6,0.5,0.9,0.9);
     legend_chann->SetFillColor(kWhite);
-    for(UInt_t i = 0; i < chann_num; i++)
+    for(UInt_t i = 0; i < channNum; i++)
     {
-      legend_chann->AddEntry(event.frac[i],chann_name[i],"l");
+      legend_chann->AddEntry(event.frac[i],channName[i],"l");
       event.frac[i]->Draw("HISTSAME");
     }
 
-    legend_chann->AddEntry(event.mc_sum,mcsum_name,"l");
-    legend_chann->AddEntry(event.data,data_name,"le");
+    legend_chann->AddEntry(event.mc_sum,mcSumName,"l");
+    legend_chann->AddEntry(event.data,dataName,"le");
     legend_chann->Draw();
 
     //gStyle->SetOptStat(0);

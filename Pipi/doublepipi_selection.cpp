@@ -124,7 +124,7 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                                 pow(mom_vec[0][0] + mom_vec[1][0],2) - 
                                                 pow(mom_vec[0][1] + mom_vec[1][1],2) -
                                                 pow(mom_vec[0][2] + mom_vec[1][2],2) );
-                                inv_mass_diff = abs(inv_mass - m_k0);
+                                inv_mass_diff = abs(inv_mass - mK0);
                             }
                             else
                             {
@@ -193,7 +193,7 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                                 pow(mom_vec[0][0] + mom_vec[1][0],2) - 
                                                 pow(mom_vec[0][1] + mom_vec[1][1],2) -
                                                 pow(mom_vec[0][2] + mom_vec[1][2],2) );
-                                inv_mass_diff = abs(inv_mass - m_k0);
+                                inv_mass_diff = abs(inv_mass - mK0);
                             }
                             else
                             {

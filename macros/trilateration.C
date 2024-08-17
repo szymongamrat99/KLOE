@@ -31,16 +31,16 @@
 
 #include "../Include/const.h"
 
-TCanvas *canva1d, *canva2d[chann_num], *canvaproj;
+TCanvas *canva1d, *canva2d[channNum], *canvaproj;
 
-TH1 *hist1d[2][chann_num];
-TH2 *hist2d[2][chann_num];
+TH1 *hist1d[2][channNum];
+TH2 *hist2d[2][channNum];
 
 TH1 *hist;
 
 TLegend *legend;
 
-Int_t entries[chann_num-2] = {0}, entries_sel[chann_num-2] = {0}, pred_entries_sel[chann_num-2] = {0};
+Int_t entries[channNum-2] = {0}, entries_sel[channNum-2] = {0}, pred_entries_sel[channNum-2] = {0};
 
 void trilateration::Begin(TTree * /*tree*/)
 {
@@ -50,23 +50,23 @@ void trilateration::Begin(TTree * /*tree*/)
    
    canva1d = new TCanvas("canva1d", "canva1d", 750, 750);
    canvaproj = new TCanvas("canvaproj", "canvaproj", 750, 750); 
-   for(Int_t i = 0; i < chann_num-2; i++) canva2d[i] = new TCanvas(chann_name[i] + " canva2d", chann_name[i] + " canva2d", 750, 750);
+   for(Int_t i = 0; i < channNum-2; i++) canva2d[i] = new TCanvas(channName[i] + " canva2d", channName[i] + " canva2d", 750, 750);
 
    for(Int_t i = 0; i < 2; i++)
-      for(Int_t j = 0; j < chann_num; j++)
-         hist1d[i][j] = new TH1F(chann_name[j] + i, "", 100, -50, 300);
+      for(Int_t j = 0; j < channNum; j++)
+         hist1d[i][j] = new TH1F(channName[j] + i, "", 100, -50, 300);
    for(Int_t i = 0; i < 2; i++)
-      for(Int_t j = 0; j < chann_num; j++)
-         hist2d[i][j] = new TH2F(chann_name[j] + " 2d" + i, "", 50, 0, 60, 100, 0, 300);
+      for(Int_t j = 0; j < channNum; j++)
+         hist2d[i][j] = new TH2F(channName[j] + " 2d" + i, "", 50, 0, 60, 100, 0, 300);
 
    hist = new TH1F("Std Devs", "Std Devs", 13, 0, 60);
 
    legend = new TLegend(0.65,0.65,0.9,0.9);
 
-   for(Int_t i = 0; i < chann_num-2; i++)
+   for(Int_t i = 0; i < channNum-2; i++)
    {
-      if(i == 8) legend->AddEntry(hist1d[1][i], chann_name[i], "PE1");
-      else legend->AddEntry(hist1d[1][i], chann_name[i], "L");
+      if(i == 8) legend->AddEntry(hist1d[1][i], channName[i], "PE1");
+      else legend->AddEntry(hist1d[1][i], channName[i], "L");
    }
 
    TString option = GetOption();
@@ -238,8 +238,8 @@ void trilateration::Terminate()
    canva1d->cd();
    canva1d->SetLogy(1);
 
-   Int_t index_sort[chann_num];
-   Double_t max_counts[chann_num];
+   Int_t index_sort[channNum];
+   Double_t max_counts[channNum];
    TString title[100];
 
    title[0] = "|V_{K^{0}}^{rec} - V_{#phi}^{rec}|" + units[0];
@@ -250,9 +250,9 @@ void trilateration::Terminate()
 
    Float_t x1d[2], y1d[2], x2d[2], y2d[2];
 
-   for(Int_t i = 0; i < chann_num; i++) max_counts[i] = hist1d[0][i]->GetMaximum();
+   for(Int_t i = 0; i < channNum; i++) max_counts[i] = hist1d[0][i]->GetMaximum();
 
-   TMath::Sort(chann_num, max_counts, index_sort);
+   TMath::Sort(channNum, max_counts, index_sort);
 
    x1d[0] = -50;
    x1d[1] = 300;
@@ -264,9 +264,9 @@ void trilateration::Terminate()
    y2d[0] = 0;
    y2d[1] = 300;
 
-   for(Int_t i = 0; i < chann_num-2; i++)
+   for(Int_t i = 0; i < channNum-2; i++)
    {
-      hist1d[1][i]->SetLineColor(chann_color[i]);
+      hist1d[1][i]->SetLineColor(channColor[i]);
 
          if(i == 0)
          {
@@ -292,7 +292,7 @@ void trilateration::Terminate()
 
    legend->Draw();
 
-   for(Int_t i = 0; i < chann_num-2; i++)
+   for(Int_t i = 0; i < channNum-2; i++)
    {
       canva2d[i]->SetLeftMargin(0.15);
       canva2d[i]->SetRightMargin(0.15);
@@ -349,6 +349,6 @@ void trilateration::Terminate()
    cout << "Predicted efficiency: " << entries_sel[3]/(Float_t)(entries[3]) << endl;
 
    canva1d->Print("tri_error.png");
-   for(Int_t i = 0; i < chann_num - 2; i++) canva2d[i]->Print(("tri_2d_plane_corr_" + to_string(i) + ".png").c_str());
+   for(Int_t i = 0; i < channNum - 2; i++) canva2d[i]->Print(("tri_2d_plane_corr_" + to_string(i) + ".png").c_str());
    canvaproj->Print("sigma_tri.png");
 }

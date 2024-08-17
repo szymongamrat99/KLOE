@@ -65,7 +65,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
         chain->GetEntry(i);
         tree->GetEntry(i);
 
-        if(Chi2 < 40 && abs(minv4gam - m_k0) < 76 && abs(Kchrec[5] - m_k0) < 1.2 && Qmiss < 3.75)
+        if(Chi2 < 40 && abs(minv4gam - mK0) < 76 && abs(Kchrec[5] - mK0) < 1.2 && Qmiss < 3.75)
         {
             if(mcflag == 1)
             {
@@ -175,10 +175,10 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     Double_t sum_of_events = 0., fractions[6] = {0.};
 
-    for(Int_t i = 0; i < chann_num; i++)
+    for(Int_t i = 0; i < channNum; i++)
       sum_of_events += event.time_diff[i].size();
 
-    for(Int_t i = 0; i < chann_num; i++)
+    for(Int_t i = 0; i < channNum; i++)
      fractions[i] = 100*event.time_diff[i].size()/sum_of_events;
 
     std::ofstream myfile_num;
@@ -194,7 +194,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     Double_t par[2] = {minimum->X()[0], minimum->X()[1]};
 
-    for(UInt_t i = 0; i < chann_num; i++)
+    for(UInt_t i = 0; i < channNum; i++)
     {
         for(UInt_t j = 0; j < event.time_diff[i].size(); j++)
         {
@@ -236,12 +236,12 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     event.frac[4]->Scale(minimum->X()[9]*event.frac[4]->GetEntries() / event.frac[4]->Integral(0, nbins + 1) );
     event.frac[5]->Scale(minimum->X()[10]*event.frac[5]->GetEntries() / event.frac[5]->Integral(0, nbins + 1) );
 
-    for(UInt_t i = 0; i < chann_num; i++)
+    for(UInt_t i = 0; i < channNum; i++)
     {
         event.mc_sum->Add(event.frac[i]);
 
         event.frac[i]->SetLineWidth(3);
-        event.frac[i]->SetLineColor(chann_color[i]);
+        event.frac[i]->SetLineColor(channColor[i]);
     }
 
     std::ofstream myfile;
@@ -263,10 +263,10 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     myfile.close();
 
     event.mc_sum->SetLineWidth(3);
-    event.mc_sum->SetLineColor(mcsum_color);
+    event.mc_sum->SetLineColor(mcSumColor);
 
     event.data->SetLineWidth(3);
-    event.data->SetLineColor(data_color);
+    event.data->SetLineColor(dataColor);
 
     TCanvas *c1 = new TCanvas("c1", "", 790, 790);
 
@@ -299,14 +299,14 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     TLegend *legend_chann = new TLegend(0.6,0.5,0.9,0.9);
     legend_chann->SetFillColor(kWhite);
-    for(UInt_t i = 0; i < chann_num; i++)
+    for(UInt_t i = 0; i < channNum; i++)
     {
-      legend_chann->AddEntry(event.frac[i],chann_name[i],"l");
+      legend_chann->AddEntry(event.frac[i],channName[i],"l");
       event.frac[i]->Draw("HISTSAME");
     }
 
-    legend_chann->AddEntry(event.mc_sum,mcsum_name,"l");
-    legend_chann->AddEntry(event.data,data_name,"le");
+    legend_chann->AddEntry(event.mc_sum,mcSumName,"l");
+    legend_chann->AddEntry(event.data,dataName,"le");
     legend_chann->Draw();
 
     c1->Print("split_fit_with_corr.png");
