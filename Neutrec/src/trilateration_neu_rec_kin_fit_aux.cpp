@@ -14,7 +14,6 @@
 #include "TVectorD.h"
 #include "TError.h"
 
-#include "../../../Include/Codes/chain_init.cpp"
 #include "../../../Include/Codes/reconstructor.h"
 #include "../../../Include/const.h"
 #include "../../../Include/Codes/uncertainties.h"

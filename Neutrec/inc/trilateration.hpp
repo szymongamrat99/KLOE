@@ -1,9 +1,16 @@
 #ifndef TRILATERATION_H
 #define TRILATERATION_H
 
-void tri_neurec(int, int, int);
-void triangle_neurec(int, int, int);
-void tri_neurec_kinfit(int, int);
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+#include "../../../Include/const.h"
+#include "../../../Include/Codes/chain_init.cpp"
+
+void tri_neurec(int, int, int, int);
+int triangle_neurec(int, int, int, int);
+void tri_neurec_kinfit(int, int, int);
 void tri_neurec_kinfit_corr(Short_t, Int_t, Int_t, Short_t, Short_t, Short_t);
 Double_t trilateration_chi_square(const Double_t *);
 

@@ -34,4 +34,4 @@ $(OBJPATH)/main.o: neutrec_main.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	$(RM) $(RMFLAGS) $(OBJ)
+	$(RM) $(RMFLAGS) $(OBJ) $(BINPATH)/$(PROJECT)

@@ -4,6 +4,18 @@
 
 #include "../../Include/const.h"
 
+#include "../../Include/ErrorLogs.h"
+#include "../../Include/MainMenu.h"
+
+bool 
+    firstFileRangeErr, 
+    lastFileRangeErr, 
+    dataTypeErr,
+    menuRangeErr;
+
+ErrorHandling::ErrorLogs logger;
+Controls::Menu mainMenu(0);
+
 using namespace std;
 using namespace std::chrono;
 
@@ -12,6 +24,12 @@ int main(int argc, char *argv[])
   int first, last;
   Controls::MainMenu mainMenuOpt;
 
+  double array[2][4] = {{0., 0., 0., 0.},
+                        {0., 0., 0., 0.}};
+  double array1[4] = {0., 0., 0., 0.};
+  float numbers = 0;
+
+
   try
   {
     cout << "Choose the first file: ";
@@ -19,7 +37,7 @@ int main(int argc, char *argv[])
     cout << endl;
 
     dataTypeErr = !cin;
-    firstFileRangeErr = first < 1 || first > lastFile;
+    firstFileRangeErr = first < 1 || first > lastFileMax;
 
     if (dataTypeErr)
     {
@@ -46,7 +64,7 @@ int main(int argc, char *argv[])
     cout << endl;
 
     dataTypeErr = !cin;
-    firstFileRangeErr = last < first || last > lastFile;
+    firstFileRangeErr = last < first || last > lastFileMax;
 
     if (dataTypeErr)
     {
