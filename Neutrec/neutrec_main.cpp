@@ -2,8 +2,6 @@
 
 #include <TMath.h>
 
-#include "../../Include/ErrorLogs.h"
-#include "../../Include/MainMenu.h"
 #include "inc/trilateration.hpp"
 
 using namespace std;
@@ -14,11 +12,17 @@ using std::chrono::minutes;
 
 int main(int argc, char *argv[])
 {
-  Controls::Menu menu(1);
-  Controls::Menu dataType(2);
-  ErrorHandling::ErrorLogs logger;
-  ofstream LogFile;
-  LogFile.open("NeutRec.log");
+  ErrorHandling::ErrorLogs errLogger;
+  LogsHandling::Logs logger;
+  std::ofstream LogFileMain, LogFileTriangle, LogFileTri, LogFileTriKinFit;
+  std::ofstream ErrFileMain, ErrFileTriangle, ErrFileTri, ErrFileTriKinFit;
+
+  Controls::Menu *menu = new Controls::Menu(1);
+  Controls::Menu *dataType = new Controls::Menu(2);
+
+  logger.getErrLog(LogsHandling::GeneralLogs::TIME_STAMP);
+
+  ErrFileMain.open(neutrec_dir + logs_dir + "NeutRecMain.err");
 
   Int_t firstFile, lastFile, ind_data_mc;
 
@@ -38,8 +42,9 @@ int main(int argc, char *argv[])
   }
   catch (ErrorHandling::ErrorCodes err)
   {
-    logger.getErrLog(err);
-    logger.getErrLog(err, LogFile);
+    errLogger.getErrLog(err);
+    errLogger.getErrLog(err, ErrFileMain);
+    errLogger.setErrCount(err);
     return int(err);
   }
 
@@ -59,8 +64,9 @@ int main(int argc, char *argv[])
   }
   catch (ErrorHandling::ErrorCodes err)
   {
-    logger.getErrLog(err);
-    logger.getErrLog(err, LogFile);
+    errLogger.getErrLog(err);
+    errLogger.getErrLog(err, ErrFileMain);
+    errLogger.setErrCount(err);
     return int(err);
   }
 
@@ -68,9 +74,9 @@ int main(int argc, char *argv[])
 
   try
   {
-    dataType.InitMenu();
-    dataType.ShowOpt();
-    dataType.EndMenu();
+    dataType->InitMenu();
+    dataType->ShowOpt();
+    dataType->EndMenu();
 
     cin >> dataTypeOpt;
 
@@ -82,13 +88,12 @@ int main(int argc, char *argv[])
     {
       throw ErrorHandling::ErrorCodes::MENU_RANGE;
     }
-
-    ind_data_mc = int(dataTypeOpt);
   }
   catch (ErrorHandling::ErrorCodes err)
   {
-    logger.getErrLog(err);
-    logger.getErrLog(err, LogFile);
+    errLogger.getErrLog(err);
+    errLogger.getErrLog(err, ErrFileMain);
+    errLogger.setErrCount(err);
     return int(err);
   }
 
@@ -101,9 +106,9 @@ int main(int argc, char *argv[])
 
   do
   {
-    menu.InitMenu();
-    menu.ShowOpt();
-    menu.EndMenu();
+    menu->InitMenu();
+    menu->ShowOpt();
+    menu->EndMenu();
 
     try
     {
@@ -126,7 +131,9 @@ int main(int argc, char *argv[])
       cin.clear();
       cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-      logger.getErrLog(err);
+      errLogger.getErrLog(err);
+      errLogger.getErrLog(err, ErrFileMain);
+      errLogger.setErrCount(err);
     }
 
     switch (menuOpt)
@@ -138,12 +145,22 @@ int main(int argc, char *argv[])
     }
     case Controls::NeutRecMenu::TRILATERATION_KIN_FIT:
     {
+      auto start = std::chrono::system_clock::now();
       tri_neurec_kinfit_corr(ind_data_mc, firstFile, lastFile, loopcount, jmin, jmax);
+      auto end = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = end - start;
+
       break;
     }
     case Controls::NeutRecMenu::TRIANGLE:
     {
-      triangle_neurec(ind_data_mc, firstFile, lastFile, good_clus);
+      auto start = std::chrono::system_clock::now();
+      triangle_neurec(firstFile, lastFile, 10, 5, 1, dataTypeOpt, 0);
+      auto end = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = end - start;
+
+      std::cout << elapsedTimeHMS(elapsed_seconds.count()) << std::endl;
+
       break;
     }
     case Controls::NeutRecMenu::EXIT:
@@ -156,7 +173,11 @@ int main(int argc, char *argv[])
 
   } while (menuOpt != Controls::NeutRecMenu::EXIT);
 
-  LogFile.close();
+  errLogger.errLogStats();
+  errLogger.errLogStats(ErrFileMain);
+
+  ErrFileMain.close();
+  ErrFileMain.close();
 
   return 0;
 }
