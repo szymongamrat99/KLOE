@@ -9,6 +9,7 @@
 #include "../../../Include/Codes/reconstructor.h"
 #include "../../../Include/Codes/neu_triangle.h"
 #include "../../../Include/Codes/plane_intersection.h"
+#include "../../../Include/Codes/neutral_mom.h"
 #include "../inc/trilateration.hpp"
 
 int triangle_neurec(int first_file, int last_file, int loopcount, int M, int range, Controls::DataType data_type, int good_clus)
@@ -54,7 +55,7 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 		// Cluster vars
 		Int_t nclu;
 		UChar_t mctruth, mcflag;
-		Float_t cluster[5][500], Kchboost[9], Knereclor[9], Knemc[9], ip[3], Kchrec[9];
+		Float_t cluster[5][500], Kchboost[9], Knereclor[9], Knemc[9], ip[3];
 
 		chain->SetBranchAddress("nclu", &nclu);
 		chain->SetBranchAddress("Xacl", cluster[0]);
@@ -67,7 +68,7 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 		chain->SetBranchAddress("mcflag", &mcflag);
 
 		chain->SetBranchAddress("ip", ip);
-		chain->SetBranchAddress("Kchrec", Kchrec);
+		chain->SetBranchAddress("Kchboost", Kchboost);
 		chain->SetBranchAddress("Knemc", Knemc);
 
 		Int_t good_clus_ind[4];
@@ -81,9 +82,11 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 		tree_gen->SetBranchAddress("clusindgood", good_clus_ind);
 
 		Int_t done_kinfit = 0, g4taken_kinfit[4] = {0};
+		Float_t chi2min_tri;
 
 		tree_trilateration->SetBranchAddress("done4_kinfit", &done_kinfit);
 		tree_trilateration->SetBranchAddress("g4takentri_kinfit", g4taken_kinfit);
+		tree_trilateration->SetBranchAddress("chi2min", &chi2min_tri);
 
 		// Adding friends to the chain
 		chain->AddFriend(tree_gen);
@@ -104,27 +107,26 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 		Float_t neu_vtx[4] = {0.};
 
 		Int_t done, fourg4taken[4], chosen;
-		Float_t gammatriangle[4][8], Knetriangle[10], totalerr, ip_triangle[3], sol1[4], sol2[4], sol1err, sol2err;
+		Float_t gammatriangle[4][4], Knetriangle[10], totalerr, ip_triangle[3], chi2min, trcsum, trcfinal[4], minv4gam;
 
-		TBranch *b_gamma1triangle = tree->Branch("fourgamma1triangle", gammatriangle[0], "fourgamma1triangle[8]/F");
-		TBranch *b_gamma2triangle = tree->Branch("fourgamma2triangle", gammatriangle[1], "fourgamma2triangle[8]/F");
-		TBranch *b_gamma3triangle = tree->Branch("fourgamma3triangle", gammatriangle[2], "fourgamma3triangle[8]/F");
-		TBranch *b_gamma4triangle = tree->Branch("fourgamma4triangle", gammatriangle[3], "fourgamma4triangle[8]/F");
+		TBranch *b_gamma1triangle = tree->Branch("fourgamma1triangle", gammatriangle[0], "fourgamma1triangle[4]/F");
+		TBranch *b_gamma2triangle = tree->Branch("fourgamma2triangle", gammatriangle[1], "fourgamma2triangle[4]/F");
+		TBranch *b_gamma3triangle = tree->Branch("fourgamma3triangle", gammatriangle[2], "fourgamma3triangle[4]/F");
+		TBranch *b_gamma4triangle = tree->Branch("fourgamma4triangle", gammatriangle[3], "fourgamma4triangle[4]/F");
 
 		TBranch *b_Knetriangle = tree->Branch("fourKnetriangle", Knetriangle, "fourKnetriangle[10]/F");
 		TBranch *b_iptriangle = tree->Branch("iptriangle", ip_triangle, "iptriangle[3]/F");
 
-		TBranch *b_done = tree->Branch("done4", &done, "done4/I");
+		TBranch *b_done = tree->Branch("done_triangle", &done, "done_triangle/I");
 
-		TBranch *b_sol1 = tree->Branch("sol1", sol1, "sol1[4]/F");
-		TBranch *b_sol2 = tree->Branch("sol2", sol2, "sol2[4]/F");
+		TBranch *b_chi2min = tree->Branch("chi2min", &chi2min, "chi2min/F");
 
-		TBranch *b_sol1err = tree->Branch("sol1err", &sol1err, "sol1err/F");
-		TBranch *b_sol2err = tree->Branch("sol2err", &sol2err, "sol2err/F");
+		TBranch *b_trcsum = tree->Branch("trcsum", &trcsum, "trcsum/F");
+		TBranch *b_trc = tree->Branch("trc", trcfinal, "trc/F");
 
-		TBranch *b_chosen = tree->Branch("chosen", &chosen, "chosen/I");
+		TBranch *b_minv4gam = tree->Branch("minv4gam", &minv4gam, "minv4gam/F");
 
-		TBranch *b_fourg4taken = tree->Branch("fourg4taken", fourg4taken, "fourg4taken[4]/I");
+		TBranch *b_fourg4taken = tree->Branch("g4taken_triangle", fourg4taken, "g4taken_triangle[4]/I");
 
 		Float_t distance = 0., distance_mc = 0., distance_diff = 0.;
 		Float_t mc_dist[90], sigmas[90], Knerec[9], trc[4] = {0.};
@@ -153,6 +155,7 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 			totalerr = -999.;
 
 			done = 0;
+			chi2min = chi2min_tri;
 
 			vtxSigmaMin = 999999.;
 			TrcSumMin = 999999.;
@@ -191,10 +194,10 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 
 						//! Using the charged part of the decay
 
-						Knerec[0] = bhabha_mom[0] - Kchrec[0];
-						Knerec[1] = bhabha_mom[1] - Kchrec[1];
-						Knerec[2] = bhabha_mom[2] - Kchrec[2];
-						Knerec[3] = bhabha_mom[3] - Kchrec[3];
+						Knerec[0] = bhabha_mom[0] - Kchboost[0];
+						Knerec[1] = bhabha_mom[1] - Kchboost[1];
+						Knerec[2] = bhabha_mom[2] - Kchboost[2];
+						Knerec[3] = bhabha_mom[3] - Kchboost[3];
 
 						//!
 
@@ -207,16 +210,43 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 							vtxSigmaMin = vtxSigma;
 							TrcSumMin = TrcSum;
 
-							solution[0] = neu_vtx[0];
-							solution[1] = neu_vtx[1];
-							solution[2] = neu_vtx[2];
-							solution[3] = neu_vtx[3];
+							trcsum = TrcSumMin; 
+
+							done = 1;
+
+							for(Int_t l = 0; l < 4; l++)
+							{	
+								Knetriangle[l] = Knerec[l];
+								Knetriangle[6 + l] = neu_vtx[l];
+								fourg4taken[l] = ind_gam[l];
+
+								trcfinal[l] = trc[l];
+
+								neutral_mom(cluster[0][ind_gam[l]], cluster[1][ind_gam[l]], cluster[2][ind_gam[l]], cluster[4][ind_gam[l]], neu_vtx, gammatriangle[l]);
+							}
+
+							minv4gam = sqrt(pow(gammatriangle[0][3] + gammatriangle[1][3] + gammatriangle[2][3] + gammatriangle[3][3], 2) -
+							pow(gammatriangle[0][0] + gammatriangle[1][0] + gammatriangle[2][0] + gammatriangle[3][0], 2) -
+							pow(gammatriangle[0][1] + gammatriangle[1][1] + gammatriangle[2][1] + gammatriangle[3][1], 2) -
+							pow(gammatriangle[0][2] + gammatriangle[1][2] + gammatriangle[2][2] + gammatriangle[3][2], 2));
+
+							Knetriangle[4] = 0.;
+							for(Int_t l = 0; l < 3; l++)
+							{
+								Knetriangle[4] += pow(Knetriangle[l],2);
+								ip_triangle[l] = ip[l];
+							}
+
+							Knetriangle[5] = sqrt(pow(Knetriangle[3],2) - Knetriangle[4]);
+							Knetriangle[4] = sqrt(Knetriangle[4]);
+
+
 						}
 					}
 				}
-
-				tree->Fill();
 			}
+
+			tree->Fill();
 		}
 
 		tree->Print();

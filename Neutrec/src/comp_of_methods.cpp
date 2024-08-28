@@ -20,21 +20,19 @@
 #include <TChain.h>
 #include <TLegend.h>
 
-#include "../../Include/Codes/chain_init.cpp"
-#include "../../Include/const.h"
-#include "../../Include/Codes/kloe_class.h"
-#include "../../Include/Codes/interf_function.h"
-#include "../../Include/Codes/chi2_dist.h"
-#include "../../Include/Codes/uncertainties.h"
-#include "../../Include/Codes/lorentz_transf.h"
-#include "../../Include/Codes/triple_gaus.h"
-#include "../../Include/Codes/arrays_equality.h"
+#include "../../../Include/Codes/kloe_class.h"
+#include "../../../Include/Codes/interf_function.h"
+#include "../../../Include/Codes/chi2_dist.h"
+#include "../../../Include/Codes/uncertainties.h"
+#include "../../../Include/Codes/lorentz_transf.h"
+#include "../../../Include/Codes/triple_gaus.h"
+#include "../../../Include/Codes/arrays_equality.h"
 
-#include "inc/trilateration.hpp"
+#include "../inc/trilateration.hpp"
 
 int comp_of_methods(int first_file, int last_file, int loopcount, int M, const int range, Controls::DataType data_type)
 {
-  Controls::Menu menu(3);
+  ErrorHandling::ErrorLogs errLogger;
 
   Double_t cut_prob = 0.0, time_cut = 100.0;
   int bunch_int = 9;
@@ -43,87 +41,108 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
   chain_init(chain, first_file, last_file);
 
   TString
-			filename_gen = gen_vars_dir + root_files_dir + gen_vars_filename + first_file + "_" + last_file + ext_root,
-			filename_trilateration = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
+      filename_gen = gen_vars_dir + root_files_dir + gen_vars_filename + first_file + "_" + last_file + ext_root,
+      filename_trilateration = neutrec_dir + root_files_dir + gen_vars_filename + first_file + "_" + last_file + ext_root,
+      filename_trilateration_kin_fit = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root,
+      filename_triangle = neutrec_dir + root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
 
-  std::vector<TString> file_name;
-
-  file_name.push_back(neutrec_dir + root_files_dir + "neuvtx_tri_kin_fit_1_56_100_5_no_time.root");
+  std::vector<TString> file_name, tree_name;
 
   file_name.push_back(filename_trilateration);
+  file_name.push_back(filename_trilateration_kin_fit);
+  file_name.push_back(filename_triangle);
 
-  file_name.push_back(neutrec_dir + root_files_dir + neu_tri_filename + first_file + "_" + last_file + ext_root);
+  tree_name.push_back(neutrec_tri_tree);
+  tree_name.push_back(neutrec_kin_fit_tree);
+  tree_name.push_back(neutrec_triangle_tree);
 
-  file_name.push_back(neutrec_dir + root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root);
-
-  Int_t file_num;
+  Controls::Menu menu(3, file_name);
 
   menu.ShowOpt();
   menu.EndMenu();
 
-  std::cin >> file_num;
+  Int_t
+      file_num;
+  TFile
+      *file,
+      *file_gen;
+  TTree
+      *tree,
+      *tree_gen;
 
-  TFile *file = new TFile(file_name[file_num]);
-  TTree *tree;
+  try
+  {
+    std::cin >> file_num;
 
-  if (file_num == 0 || file_num == 1)
-    tree = (TTree *)file->Get(neutrec_kin_fit_tree);
-  else
-    tree = (TTree *)file->Get(neutrec_tri_tree);
+    if (!std::cin)
+      throw(ErrorHandling::ErrorCodes::DATA_TYPE);
+    else if (file_num < 1 || file_num > file_name.size())
+      throw(ErrorHandling::ErrorCodes::MENU_RANGE);
 
-  TFile *file_gen = new TFile(gen_vars_filename);
-  TTree *tree_gen = (TTree *)file_gen->Get(gen_vars_tree);
+    file = new TFile(file_name[file_num]);
+    file_gen = new TFile(filename_gen);
 
-  Float_t Kchboost[9], Knereclor[9], Knerec[9],
-      Kchmc[9], Knemc[9], ip[3], ipmc[3], phi_mom[4], Dtmc, Tcl[50],
-      cluster[5][200], bhabha_vtx[3], T0step1;
-  UChar_t mctruth, mcisr, g4taken[4], mcflag;
-  UChar_t pidmc[200], vtxmc[200], mother[200], Vtx[200];
-  Int_t ntmc, nvtxmc, nclu, nv, ntv;
+    if (file->IsZombie() || file_gen->IsZombie())
+      throw(ErrorHandling::ErrorCodes::FILE_NOT_EXIST);
 
-  chain->SetBranchAddress("Kchboost", Kchboost);
-  chain->SetBranchAddress("Knereclor", Knereclor);
-  chain->SetBranchAddress("Knerec", Knerec);
-  chain->SetBranchAddress("Kchmc", Kchmc);
-  chain->SetBranchAddress("Knemc", Knemc);
+    tree = (TTree *)file->Get(tree_name[file_num]);
+    tree_gen = (TTree *)file_gen->Get(gen_vars_tree);
 
-  chain->SetBranchAddress("nclu", &nclu);
-  chain->SetBranchAddress("Xcl", cluster[0]);
-  chain->SetBranchAddress("Ycl", cluster[1]);
-  chain->SetBranchAddress("Zcl", cluster[2]);
-  chain->SetBranchAddress("Tcl", cluster[3]);
-  chain->SetBranchAddress("Enecl", cluster[4]);
+    if (tree->IsZombie() || tree_gen->IsZombie())
+      throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
+  }
+  catch (ErrorHandling::ErrorCodes err)
+  {
+    errLogger.setErrCount(err);
+    errLogger.getErrLog(err);
+    return int(err);
+  }
 
-  chain->SetBranchAddress("Bx", &bhabha_vtx[0]);
-  chain->SetBranchAddress("By", &bhabha_vtx[1]);
-  chain->SetBranchAddress("Bz", &bhabha_vtx[2]);
+  BaseKinematics baseKin;
 
-  chain->SetBranchAddress("ip", ip);
-  chain->SetBranchAddress("ipmc", ipmc);
+  chain->SetBranchAddress("Kchboost", baseKin.Kchboost);
+  chain->SetBranchAddress("Knereclor", baseKin.Knereclor);
+  chain->SetBranchAddress("Knerec", baseKin.Knerec);
+  chain->SetBranchAddress("Kchmc", baseKin.Kchmc);
+  chain->SetBranchAddress("Knemc", baseKin.Knemc);
 
-  chain->SetBranchAddress("ntmc", &ntmc);
-  chain->SetBranchAddress("nvtxmc", &nvtxmc);
-  chain->SetBranchAddress("nv", &nv);
-  chain->SetBranchAddress("pidmc", pidmc);
-  chain->SetBranchAddress("vtxmc", vtxmc);
-  chain->SetBranchAddress("mother", mother);
+  chain->SetBranchAddress("nclu", &baseKin.nclu);
+  chain->SetBranchAddress("Xcl", baseKin.cluster[0]);
+  chain->SetBranchAddress("Ycl", baseKin.cluster[1]);
+  chain->SetBranchAddress("Zcl", baseKin.cluster[2]);
+  chain->SetBranchAddress("Tcl", baseKin.cluster[3]);
+  chain->SetBranchAddress("Enecl", baseKin.cluster[4]);
 
-  chain->SetBranchAddress("mcisr", &mcisr);
-  chain->SetBranchAddress("T0step1", &T0step1);
+  chain->SetBranchAddress("Bx", &baseKin.bhabha_vtx[0]);
+  chain->SetBranchAddress("By", &baseKin.bhabha_vtx[1]);
+  chain->SetBranchAddress("Bz", &baseKin.bhabha_vtx[2]);
 
-  chain->SetBranchAddress("Bpx", &phi_mom[0]);
-  chain->SetBranchAddress("Bpy", &phi_mom[1]);
-  chain->SetBranchAddress("Bpz", &phi_mom[2]);
-  chain->SetBranchAddress("Broots", &phi_mom[3]);
+  chain->SetBranchAddress("ip", baseKin.ip);
+  chain->SetBranchAddress("ipmc", baseKin.ipmc);
 
-  chain->SetBranchAddress("mctruth", &mctruth);
-  chain->SetBranchAddress("mcflag", &mcflag);
+  chain->SetBranchAddress("ntmc", &baseKin.ntmc);
+  chain->SetBranchAddress("nvtxmc", &baseKin.nvtxmc);
+  chain->SetBranchAddress("nv", &baseKin.nv);
+  chain->SetBranchAddress("pidmc", baseKin.pidmc);
+  chain->SetBranchAddress("vtxmc", baseKin.vtxmc);
+  chain->SetBranchAddress("mother", baseKin.mother);
 
-  chain->SetBranchAddress("Dtmc", &Dtmc);
+  chain->SetBranchAddress("mcisr", &baseKin.mcisr);
+  chain->SetBranchAddress("T0step1", &baseKin.T0step1);
 
-  chain->SetBranchAddress("g4taken", g4taken);
+  chain->SetBranchAddress("Bpx", &baseKin.phi_mom[0]);
+  chain->SetBranchAddress("Bpy", &baseKin.phi_mom[1]);
+  chain->SetBranchAddress("Bpz", &baseKin.phi_mom[2]);
+  chain->SetBranchAddress("Broots", &baseKin.phi_mom[3]);
 
-  Float_t gamma_kinfit[4][8], ip_kinfit[3], Knetri_kinfit[10], chi2min, bhabha_mom_err[4], sol1[4], sol2[4], sol1err, sol2err;
+  chain->SetBranchAddress("mctruth", &baseKin.mctruth);
+  chain->SetBranchAddress("mcflag", &baseKin.mcflag);
+
+  chain->SetBranchAddress("Dtmc", &baseKin.Dtmc);
+
+  chain->SetBranchAddress("g4taken", baseKin.g4taken);
+
+  Float_t gamma_kinfit[4][8], ip_kinfit[3], Knetri_kinfit[10], chi2min, bhabha_mom_err[4], sol1[4], sol2[4], sol1err, sol2err, trc[4], trcsum, minv4gam;
   Int_t done_kinfit = 10, g4taken_kinfit[4], bunchnum, chosen, region[4], clusindgood[4];
   TMatrixD *cov_matrix = new TMatrixD(27, 27);
   TVectorD *min_const = new TVectorD(M);
@@ -131,36 +150,8 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
   Float_t gamma_kinfit_no_bunch[4][8], ip_kinfit_no_bunch[3], Knetri_kinfit_no_bunch[10], chi2min_no_bunch, bhabha_mom_err_no_bunch[4], sol1_no_bunch[4], sol2_no_bunch[4], sol1err_no_bunch, sol2err_no_bunch;
   Int_t done_kinfit_no_bunch, g4taken_kinfit_no_bunch[4], bunchnum_no_bunch, chosen_no_bunch, region_no_bunch[4], clusindgood_no_bunch[4];
-  TMatrixD *cov_matrix_no_bunch = new TMatrixD(27, 27);
-  TVectorD *min_const_no_bunch = new TVectorD(M);
-  TVectorD *lag_mult_no_bunch = new TVectorD(M), *X_min_no_bunch = new TVectorD(27), *X_init_no_bunch = new TVectorD(27);
 
-  if (file_num == 0 || file_num == 1)
-  {
-    tree->SetBranchAddress("fourgamma1tri_kinfit", gamma_kinfit[0]);
-    tree->SetBranchAddress("fourgamma2tri_kinfit", gamma_kinfit[1]);
-    tree->SetBranchAddress("fourgamma3tri_kinfit", gamma_kinfit[2]);
-    tree->SetBranchAddress("fourgamma4tri_kinfit", gamma_kinfit[3]);
-
-    tree->SetBranchAddress("fourKnetri_kinfit", Knetri_kinfit);
-
-    tree->SetBranchAddress("iptri_kinfit", ip_kinfit);
-    tree->SetBranchAddress("done4_kinfit", &done_kinfit);
-
-    tree->SetBranchAddress("g4takentri_kinfit", g4taken_kinfit);
-
-    if (file_num == 1)
-      tree->SetBranchAddress("bunchnum", &bunchnum);
-
-    tree->SetBranchAddress("chi2min", &chi2min);
-    tree->SetBranchAddress("min_cov", &cov_matrix);
-    tree->SetBranchAddress("const_min", &min_const);
-    tree->SetBranchAddress("lag_mult", &lag_mult);
-
-    tree->SetBranchAddress("min_vars", &X_min);
-    tree->SetBranchAddress("init_vars", &X_init);
-  }
-  else
+  if (file_num == 0)
   {
     tree->SetBranchAddress("fourgamma1tri", gamma_kinfit[0]);
     tree->SetBranchAddress("fourgamma2tri", gamma_kinfit[1]);
@@ -181,14 +172,56 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
     tree->SetBranchAddress("iptri", ip_kinfit);
     tree->SetBranchAddress("done4", &done_kinfit);
   }
+  else if (file_num == 1)
+  {
+    tree->SetBranchAddress("fourgamma1tri_kinfit", gamma_kinfit[0]);
+    tree->SetBranchAddress("fourgamma2tri_kinfit", gamma_kinfit[1]);
+    tree->SetBranchAddress("fourgamma3tri_kinfit", gamma_kinfit[2]);
+    tree->SetBranchAddress("fourgamma4tri_kinfit", gamma_kinfit[3]);
+
+    tree->SetBranchAddress("fourKnetri_kinfit", Knetri_kinfit);
+
+    tree->SetBranchAddress("iptri_kinfit", ip_kinfit);
+    tree->SetBranchAddress("done4_kinfit", &done_kinfit);
+
+    tree->SetBranchAddress("g4takentri_kinfit", g4taken_kinfit);
+
+    tree->SetBranchAddress("bunchnum", &bunchnum);
+
+    tree->SetBranchAddress("chi2min", &chi2min);
+    tree->SetBranchAddress("min_cov", &cov_matrix);
+    tree->SetBranchAddress("const_min", &min_const);
+    tree->SetBranchAddress("lag_mult", &lag_mult);
+
+    tree->SetBranchAddress("min_vars", &X_min);
+    tree->SetBranchAddress("init_vars", &X_init);
+  }
+  else if (file_num == 2)
+  {
+    tree->SetBranchAddress("fourgamma1triangle", gamma_kinfit[0]);
+    tree->SetBranchAddress("fourgamma2triangle", gamma_kinfit[1]);
+    tree->SetBranchAddress("fourgamma3triangle", gamma_kinfit[2]);
+    tree->SetBranchAddress("fourgamma4triangle", gamma_kinfit[3]);
+
+    tree->SetBranchAddress("fourKnetriangle", Knetri_kinfit);
+
+    tree->SetBranchAddress("g4taken_triangle", g4taken_kinfit);
+
+    tree->SetBranchAddress("chi2min", &chi2min);
+
+    tree->SetBranchAddress("trc", trc);
+    tree->SetBranchAddress("trcsum", &trcsum);
+
+    tree->SetBranchAddress("minv4gam", &minv4gam);
+
+    tree->SetBranchAddress("iptriangle", ip_kinfit);
+    tree->SetBranchAddress("done_triangle", &done_kinfit);
+  }
 
   Float_t Knemc_bcg[9], Kchmc_bcg[9], ipmc_bcg[3];
 
   tree_gen->SetBranchAddress("region", region);
   tree_gen->SetBranchAddress("clusindgood", clusindgood);
-  //tree_gen->SetBranchAddress("Knemc", Knemc_bcg);
-  //tree_gen->SetBranchAddress("Kchmc", Kchmc_bcg);
-  //tree_gen->SetBranchAddress("ipmc", ipmc_bcg);
 
   chain->AddFriend(tree);
   chain->AddFriend(tree_gen);
@@ -302,7 +335,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
     id_hist = "Chi2" + std::to_string(j);
     chi2_hist[j] = new TH1F(id_hist, "", 200, -1.0, 100.0);
 
-    for(Int_t i = 0; i < 4; i++)
+    for (Int_t i = 0; i < 4; i++)
     {
       id_hist = "Chi2" + std::to_string(j) + std::to_string(i);
       chi2_bunch_hist[j][i] = new TH1F(id_hist, "", 200, -1.0, 100.0);
@@ -443,74 +476,68 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
   // General statistics
   Int_t counts_sig_all = 0, counts_sig_rec = 0, counts_sig_sel = 0;
 
-    std::cout << tree->GetEntries() << " " << chain->GetEntries() << std::endl;
+  std::cout << tree->GetEntries() << " " << chain->GetEntries() << std::endl;
 
   for (Int_t i = 0; i < nentries; i++)
   {
     chain->GetEntry(i);
 
-    if (mcflag == 1 && (mctruth == 1 || mctruth == 2 || mctruth == 0))
+    if (baseKin.mcflag == 1 && (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0))
     {
       counts_sig_all++;
 
-      if (nclu >= 4 && nv >= 1)
+      if (baseKin.nclu >= 4 && baseKin.nv >= 1)
       {
         counts_sig_rec++;
-
-        
       }
     }
 
     count_angle = 0;
 
-    if (mcflag == 1 && (mctruth == 1 || mctruth == 2))
+    if (baseKin.mcflag == 1 && (baseKin.mctruth == 1 || baseKin.mctruth == 2))
     {
       // Kaon path length
 
-      counts_sig_sel++;
-
-      if(mctruth == 1 || mctruth == 2)
+      if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
       {
 
-        lengthch_mc = sqrt(pow(Kchmc[6] - ipmc[0], 2) + pow(Kchmc[7] - ipmc[1], 2) + pow(Kchmc[8] - ipmc[2], 2));
-        lengthneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2) + pow(Knemc[8] - ipmc[2], 2));
-        Rtneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2));
+        lengthch_mc = sqrt(pow(baseKin.Kchmc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Kchmc[7] - baseKin.ipmc[1], 2) + pow(baseKin.Kchmc[8] - baseKin.ipmc[2], 2));
+        lengthneu_mc = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2) + pow(baseKin.Knemc[8] - baseKin.ipmc[2], 2));
+        Rtneu_mc = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2));
       }
-      else if(mctruth == 6)
+      else if (baseKin.mctruth == 6)
       {
         lengthch_mc = sqrt(pow(Kchmc_bcg[6] - ipmc_bcg[0], 2) + pow(Kchmc_bcg[7] - ipmc_bcg[1], 2) + pow(Kchmc_bcg[8] - ipmc_bcg[2], 2));
         lengthneu_mc = sqrt(pow(Knemc_bcg[6] - ipmc_bcg[0], 2) + pow(Knemc_bcg[7] - ipmc_bcg[1], 2) + pow(Knemc_bcg[8] - ipmc_bcg[2], 2));
         Rtneu_mc = sqrt(pow(Knemc_bcg[6] - ipmc_bcg[0], 2) + pow(Knemc_bcg[7] - ipmc_bcg[1], 2));
       }
 
-      
-      lengthch_rec = sqrt(pow(Kchboost[6] - ip[0], 2) + pow(Kchboost[7] - ip[1], 2) + pow(Kchboost[8] - ip[2], 2));
+      lengthch_rec = sqrt(pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + pow(baseKin.Kchboost[8] - baseKin.ip[2], 2));
 
       lengthneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2) + pow(Knetri_kinfit[8] - ip_kinfit[2], 2));
-      lengthneu_rec = sqrt(pow(Knereclor[6] - ip[0], 2) + pow(Knereclor[7] - ip[1], 2) + pow(Knereclor[8] - ip[2], 2));
+      lengthneu_rec = sqrt(pow(baseKin.Knereclor[6] - baseKin.ip[0], 2) + pow(baseKin.Knereclor[7] - baseKin.ip[1], 2) + pow(baseKin.Knereclor[8] - baseKin.ip[2], 2));
 
       //
       // Kaon transverse radius
-      //Rtneu_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2));
+      // Rtneu_mc = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2));
       Rtneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2));
-      Rtneu_rec = sqrt(pow(Knereclor[6] - ip[0], 2) + pow(Knereclor[7] - ip[1], 2));
+      Rtneu_rec = sqrt(pow(baseKin.Knereclor[6] - baseKin.ip[0], 2) + pow(baseKin.Knereclor[7] - baseKin.ip[1], 2));
       //
       // Kaon velocity
-      if(mctruth == 1 || mctruth == 2)
-        v_Kchmc = cVel * Kchmc[4] / Kchmc[3];
+      if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
+        v_Kchmc = cVel * baseKin.Kchmc[4] / baseKin.Kchmc[3];
       else
         v_Kchmc = cVel * Kchmc_bcg[4] / Kchmc_bcg[3];
 
-      v_Kchrec = cVel * Kchboost[4] / Kchboost[3];
+      v_Kchrec = cVel * baseKin.Kchboost[4] / baseKin.Kchboost[3];
 
-      if(mctruth == 1 || mctruth == 2)
-        v_Kneumc = cVel * Knemc[4] / Knemc[3];
+      if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
+        v_Kneumc = cVel * baseKin.Knemc[4] / baseKin.Knemc[3];
       else
         v_Kneumc = cVel * Knemc_bcg[4] / Knemc_bcg[3];
 
-
       v_Kneutri = cVel * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)) / Knetri_kinfit[3];
-      v_Kneurec = cVel * Knereclor[4] / Knereclor[3];
+      v_Kneurec = cVel * baseKin.Knereclor[4] / baseKin.Knereclor[3];
       //
       // Kaon flight times
       t_chrec = lengthch_rec / v_Kchrec;
@@ -520,7 +547,6 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
       t_neutri = lengthneu_tri / v_Kneutri;
 
       t_neumc = lengthneu_mc / v_Kneumc;
-
 
       //
       // Angle between vector between IP and neuvtx and Kaon's momentum vector
@@ -537,9 +563,9 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
       }
       else
       {
-        boost[0] = -phi_mom[0] / phi_mom[3];
-        boost[1] = -phi_mom[1] / phi_mom[3];
-        boost[2] = -phi_mom[2] / phi_mom[3];
+        boost[0] = -baseKin.phi_mom[0] / baseKin.phi_mom[3];
+        boost[1] = -baseKin.phi_mom[1] / baseKin.phi_mom[3];
+        boost[2] = -baseKin.phi_mom[2] / baseKin.phi_mom[3];
       }
 
       vec_before[0] = Knetri_kinfit[6] - ip_kinfit[0];
@@ -555,7 +581,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
       // Boost - kaon momentum angle
 
-      cos_boost_kaon_mom = (phi_mom[0] * Knetri_kinfit[0] + phi_mom[1] * Knetri_kinfit[1] + phi_mom[2] * Knetri_kinfit[2]) / (sqrt(pow(phi_mom[0], 2) + pow(phi_mom[1], 2) + pow(phi_mom[2], 2)) * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)));
+      cos_boost_kaon_mom = (baseKin.phi_mom[0] * Knetri_kinfit[0] + baseKin.phi_mom[1] * Knetri_kinfit[1] + baseKin.phi_mom[2] * Knetri_kinfit[2]) / (sqrt(pow(baseKin.phi_mom[0], 2) + pow(baseKin.phi_mom[1], 2) + pow(baseKin.phi_mom[2], 2)) * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)));
 
       angle_boost_kaon_mom = 180. * acos(cos_boost_kaon_mom) / M_PI;
 
@@ -610,10 +636,10 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
             if (Knetri_kinfit[9] > time_cut)
               counts_cut++;
 
-            //! Check how many cluster sets are found good and which bad
+            //! Check how many baseKin.cluster sets are found good and which bad
 
             for (Int_t k = 0; k < 4; k++)
-              g4taken_corr[k] = g4taken[k] - 1;
+              g4taken_corr[k] = baseKin.g4taken[k] - 1;
 
             isEqual = arr_eq(clusindgood, g4taken_kinfit);
 
@@ -677,38 +703,37 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
             chi2_hist[j]->Fill(chi2min);
             prob_hist[j]->Fill(TMath::Prob(chi2min, M));
 
-            if(bunch_0)
+            if (bunch_0)
               chi2_bunch_hist[j][0]->Fill(chi2min);
-            else if(bunch_minus1)
+            else if (bunch_minus1)
               chi2_bunch_hist[j][1]->Fill(chi2min);
-            else if(bunch_plus1) 
+            else if (bunch_plus1)
               chi2_bunch_hist[j][2]->Fill(chi2min);
             else
               chi2_bunch_hist[j][3]->Fill(chi2min);
-
 
             chi2_no_bunch_hist[j]->Fill(chi2min_no_bunch);
 
             if (angle_boost_kaon_mom < 90.)
             {
-              betadt_hist[j]->Fill(lengthneu_tri / (cVel * Knetri_kinfit[9]));
+              betadt_hist[j]->Fill(lengthneu_tri / (cVel * t_neurec));
               betapm_hist[j]->Fill(v_Kneutri / cVel);
             }
             else if (angle_boost_kaon_mom > 90.)
             {
-              betadtover90_hist[j]->Fill(lengthneu_tri / (cVel * Knetri_kinfit[9]));
+              betadtover90_hist[j]->Fill(lengthneu_tri / (cVel * t_neurec));
               betapmover90_hist[j]->Fill(v_Kneutri / cVel);
             }
 
             beta1_hist[j]->Fill(v_Kneumc / cVel, v_Kneutri / cVel);
 
-            beta2_hist[j]->Fill(v_Kneumc / cVel, lengthneu_tri / (cVel * Knetri_kinfit[9]));
+            beta2_hist[j]->Fill(v_Kneumc / cVel, lengthneu_tri / (cVel * t_neurec));
 
             bunch[j]->Fill(bunchnum);
           }
 
           for (Int_t k = 0; k < 3; k++)
-            ip_coor[j][k]->Fill(ipmc[k], ip[k]);
+            ip_coor[j][k]->Fill(baseKin.ipmc[k], baseKin.ip[k]);
 
           for (Int_t k = 0; k < 5; k++)
           {
@@ -716,21 +741,21 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
             {
               if (isEqual >= 0 && chosen_bunch)
               {
-                if(mctruth == 1 || mctruth == 2)
+                if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
                 {
-                  neu_vtx_corr[j][k]->Fill(Knemc[6 + k], Knereclor[6 + k]);
-                  sigmas_std[j][k]->Fill(lengthneu_mc, Knereclor[6 + k] - Knemc[6 + k]);
-                  pulls[j][4 + k]->Fill(Knereclor[6 + k] - Knemc[6 + k]);
-                  pulls[j][k]->Fill(Knereclor[k] - Knemc[k]);
-                  neu_mom[j][k]->Fill(Knemc[k], Knereclor[k]);
+                  neu_vtx_corr[j][k]->Fill(baseKin.Knemc[6 + k], Knetri_kinfit[6 + k]);
+                  sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - baseKin.Knemc[6 + k]);
+                  pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - baseKin.Knemc[6 + k]);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
+                  neu_mom[j][k]->Fill(baseKin.Knemc[k], Knetri_kinfit[k]);
                 }
                 else
                 {
-                  neu_vtx_corr[j][k]->Fill(Knemc_bcg[6 + k], Knereclor[6 + k]);
-                  sigmas_std[j][k]->Fill(lengthneu_mc, Knereclor[6 + k] - Knemc_bcg[6 + k]);
-                  pulls[j][4 + k]->Fill(Knereclor[6 + k] - Knemc_bcg[6 + k]);
-                  pulls[j][k]->Fill(Knereclor[k] - Knemc[k]);
-                  neu_mom[j][k]->Fill(Knemc_bcg[k], Knereclor[k]);
+                  neu_vtx_corr[j][k]->Fill(Knemc_bcg[6 + k], Knetri_kinfit[6 + k]);
+                  sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - Knemc_bcg[6 + k]);
+                  pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - Knemc_bcg[6 + k]);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
+                  neu_mom[j][k]->Fill(Knemc_bcg[k], Knetri_kinfit[k]);
                 }
               }
             }
@@ -738,21 +763,21 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
             {
               if (isEqual >= 0 && chosen_bunch)
               {
-                if(mctruth == 1 || mctruth == 2)
+                if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
                 {
-                  neu_vtx_corr[j][3]->Fill(t_neumc, t_neurec); // Knereclor[6 + k]);
-                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_neurec - t_neumc)/tau_S_nonCPT);
-                  pulls[j][4 + k]->Fill((t_neurec - t_neumc)/tau_S_nonCPT);
-                  pulls[j][k]->Fill(Knereclor[k] - Knemc[k]);
-                  neu_mom[j][k]->Fill(Knemc[k], Knereclor[k]);
+                  neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[9]); // Knetri_kinfit[6 + k]);
+                  sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
+                  pulls[j][4 + k]->Fill((Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
+                  neu_mom[j][k]->Fill(baseKin.Knemc[k], Knetri_kinfit[k]);
                 }
                 else
                 {
-                  neu_vtx_corr[j][3]->Fill(t_neumc, t_neurec); // Knereclor[6 + k]);
-                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_neurec - t_neumc)/tau_S_nonCPT);
-                  pulls[j][4 + k]->Fill((t_neurec - t_neumc)/tau_S_nonCPT);
-                  pulls[j][k]->Fill(Knereclor[k] - Knemc[k]);
-                  neu_mom[j][k]->Fill(Knemc_bcg[k], Knereclor[k]);
+                  neu_vtx_corr[j][3]->Fill(t_neumc, Knetri_kinfit[9]); // Knetri_kinfit[6 + k]);
+                  sigmas_std[j][3]->Fill(lengthneu_mc, (Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
+                  pulls[j][4 + k]->Fill((Knetri_kinfit[9] - t_neumc) / tau_S_nonCPT);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
+                  neu_mom[j][k]->Fill(Knemc_bcg[k], Knetri_kinfit[k]);
                 }
               }
             }
@@ -760,38 +785,24 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
             {
               if (isEqual >= 0 && chosen_bunch)
               {
-                sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_rec - lengthneu_mc));
+                sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_tri - lengthneu_mc));
               }
             }
-
-            /*if (isEqual >= 0 && chosen_bunch)
-            {
-              if(mctruth == 1 || mctruth == 2)
-              {
-                pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc[k]);
-                pulls[j][5 + k]->Fill(Knetri_kinfit[6 + k] - Knemc[6 + k]);
-              }
-              else if(mctruth == 6)
-              {
-                pulls[j][k]->Fill(Knetri_kinfit[k] - Knemc_bcg[k]);
-                pulls[j][5 + k]->Fill(Knetri_kinfit[6 + k] - Knemc_bcg[6 + k]);
-              }
-            }*/
           }
 
           if (isEqual >= 0 && chosen_bunch)
           {
-            pulls[j][8]->Fill(Rtneu_rec - Rtneu_mc);
-            pulls[j][9]->Fill(lengthneu_rec - lengthneu_mc);
+            pulls[j][8]->Fill(Rtneu_tri - Rtneu_mc);
+            pulls[j][9]->Fill(lengthneu_tri - lengthneu_mc);
           }
 
-          d_cl = sqrt(pow(cluster[0][0] - bhabha_vtx[0], 2) + pow(cluster[1][0] - bhabha_vtx[1], 2) + pow(cluster[2][0] - bhabha_vtx[2], 2));
+          d_cl = sqrt(pow(baseKin.cluster[0][0] - baseKin.bhabha_vtx[0], 2) + pow(baseKin.cluster[1][0] - baseKin.bhabha_vtx[1], 2) + pow(baseKin.cluster[2][0] - baseKin.bhabha_vtx[2], 2));
 
           if (isEqual >= 0 && chosen_bunch)
           {
 
-            for (Int_t k = 0; k < ntmc; k++)
-              pidmc_hist[j]->Fill(pidmc[k]);
+            for (Int_t k = 0; k < baseKin.ntmc; k++)
+              pidmc_hist[j]->Fill(baseKin.pidmc[k]);
 
             angle_vs_time[j][0]->Fill(angle_min_0, t_neutri);
 
@@ -813,9 +824,9 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
             clusenergy_hist[j]->Fill(Knetri_kinfit[5]);
 
-            first_clus_hist[j]->Fill(cluster[3][0] - (d_cl / cVel));
+            first_clus_hist[j]->Fill(baseKin.cluster[3][0] - (d_cl / cVel));
 
-            mcisr_hist[j]->Fill(mcisr);
+            mcisr_hist[j]->Fill(baseKin.mcisr);
           }
         }
         else
@@ -834,37 +845,37 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
   log_file.open("tri.log");
 
   log_file << "All events: " << counts_sig_all << std::endl;
-  log_file << "Events after nclu >= 4 and nv >= 1: " << counts_sig_rec / (Float_t)counts_sig_all << std::endl;
+  log_file << "Events after baseKin.nclu >= 4 and baseKin.nv >= 1: " << counts_sig_rec / (Float_t)counts_sig_all << std::endl;
   log_file << "Events at the starting point of analysis: " << counts_sig_sel / (Float_t)counts_sig_all << std::endl
            << std::endl;
 
   log_file << "Rejected events: " << counts_rej << std::endl
            << std::endl;
 
-  log_file << "Total signal events: " << counts_sig_sel << std::endl
+  log_file << "Total signal events: " << counts_all << std::endl
            << std::endl;
 
-  log_file << "Good cluster sets: " << counts_good << std::endl;
-  log_file << "Good cluster sets for 0 bunch: " << counts_goodzero << std::endl;
-  log_file << "Good cluster sets for +1 bunch: " << counts_goodpone << std::endl;
-  log_file << "Good cluster sets for -1 bunch: " << counts_goodmone << std::endl;
-  log_file << "Good cluster sets for blob: " << counts_blob << std::endl;
-  log_file << "Good cluster sets eff: " << counts_good / (Float_t)counts_sig_sel << std::endl;
+  log_file << "Good baseKin.cluster sets: " << counts_good << std::endl;
+  log_file << "Good baseKin.cluster sets for 0 bunch: " << counts_goodzero << std::endl;
+  log_file << "Good baseKin.cluster sets for +1 bunch: " << counts_goodpone << std::endl;
+  log_file << "Good baseKin.cluster sets for -1 bunch: " << counts_goodmone << std::endl;
+  log_file << "Good baseKin.cluster sets for blob: " << counts_blob << std::endl;
+  log_file << "Good baseKin.cluster sets eff: " << counts_good / (Float_t)counts_all << std::endl;
 
-  log_file << "Bad cluster sets: " << counts_bad << std::endl;
-  log_file << "Bad cluster sets for 0 bunch: " << counts_badzero << std::endl;
-  log_file << "Bad cluster sets for +1 bunch: " << counts_badpone << std::endl;
-  log_file << "Bad cluster sets for -1 bunch: " << counts_badmone << std::endl;
-  log_file << "Bad cluster sets for blob: " << counts_badblob << std::endl;
-  log_file << "Bad clusters 1: " << counts_bad1 / (Float_t)counts_sig_sel << std::endl;
-  log_file << "Bad clusters 2: " << counts_bad2 / (Float_t)counts_sig_sel << std::endl;
-  log_file << "Bad clusters 3: " << counts_bad3 / (Float_t)counts_sig_sel << std::endl;
-  log_file << "Bad clusters 4: " << counts_bad4 / (Float_t)counts_sig_sel << std::endl;
-  log_file << "Bad cluster smaller: " << counts_bad_smaller << std::endl;
-  log_file << "Bad cluster bigger: " << counts_bad_bigger << std::endl;
-  log_file << "Bad cluster sets eff: " << counts_bad / (Float_t)counts_sig_sel << std::endl;
-  log_file << "Bad cluster smaller eff: " << counts_bad_smaller / (Float_t)counts_sig_sel << std::endl;
-  log_file << "Bad cluster bigger eff: " << counts_bad_bigger / (Float_t)counts_sig_sel << std::endl;
+  log_file << "Bad baseKin.cluster sets: " << counts_bad << std::endl;
+  log_file << "Bad baseKin.cluster sets for 0 bunch: " << counts_badzero << std::endl;
+  log_file << "Bad baseKin.cluster sets for +1 bunch: " << counts_badpone << std::endl;
+  log_file << "Bad baseKin.cluster sets for -1 bunch: " << counts_badmone << std::endl;
+  log_file << "Bad baseKin.cluster sets for blob: " << counts_badblob << std::endl;
+  log_file << "Bad clusters 1: " << counts_bad1 / (Float_t)counts_all << std::endl;
+  log_file << "Bad clusters 2: " << counts_bad2 / (Float_t)counts_all << std::endl;
+  log_file << "Bad clusters 3: " << counts_bad3 / (Float_t)counts_all << std::endl;
+  log_file << "Bad clusters 4: " << counts_bad4 / (Float_t)counts_all << std::endl;
+  log_file << "Bad baseKin.cluster smaller: " << counts_bad_smaller << std::endl;
+  log_file << "Bad baseKin.cluster bigger: " << counts_bad_bigger << std::endl;
+  log_file << "Bad baseKin.cluster sets eff: " << counts_bad / (Float_t)counts_all << std::endl;
+  log_file << "Bad baseKin.cluster smaller eff: " << counts_bad_smaller / (Float_t)counts_all << std::endl;
+  log_file << "Bad baseKin.cluster bigger eff: " << counts_bad_bigger / (Float_t)counts_all << std::endl;
 
   log_file.close();
 
@@ -1000,7 +1011,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
   pidmc_hist[0]->GetYaxis()->SetMaxDigits(3);
 
-  id_canva = "pidmc";
+  id_canva = "baseKin.pidmc";
 
   pidmc_hist[0]->GetXaxis()->CenterTitle();
   pidmc_hist[0]->GetYaxis()->CenterTitle();
@@ -1023,7 +1034,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
   mcisr_hist[0]->GetYaxis()->SetMaxDigits(3);
 
-  id_canva = "mcisr";
+  id_canva = "baseKin.mcisr";
 
   mcisr_hist[0]->GetXaxis()->CenterTitle();
   mcisr_hist[0]->GetYaxis()->CenterTitle();
@@ -1050,7 +1061,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
   first_clus_hist[0]->GetXaxis()->CenterTitle();
   first_clus_hist[0]->GetYaxis()->CenterTitle();
-  // first_clus_hist[0]->GetXaxis()->SetTitle("T0step1 [ns]");
+  // first_clus_hist[0]->GetXaxis()->SetTitle("baseKin.T0step1 [ns]");
   first_clus_hist[0]->GetYaxis()->SetTitle("Counts");
   if (canvas[0][28]->GetLogy())
     first_clus_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * first_clus_hist[0]->GetMaximum());
@@ -1074,7 +1085,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
   tcl_hist[0]->GetXaxis()->CenterTitle();
   tcl_hist[0]->GetYaxis()->CenterTitle();
-  // tcl_hist[0]->GetXaxis()->SetTitle("T0step1 [ns]");
+  // tcl_hist[0]->GetXaxis()->SetTitle("baseKin.T0step1 [ns]");
   tcl_hist[0]->GetYaxis()->SetTitle("Counts");
   if (canvas[0][29]->GetLogy())
     tcl_hist[0]->GetYaxis()->SetRangeUser(1.0, 10. * tcl_hist[0]->GetMaximum());
@@ -1305,7 +1316,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
     {
       canvas[j][i + 13]->cd();
 
-      triple_fit->SetParameters(0.15*pulls[j][i]->Integral(), pulls[j][i]->GetMean(), pulls[j][i]->GetStdDev(), 0.15*pulls[j][i]->Integral(), pulls[j][i]->GetMean() - 2.0, pulls[j][i]->GetStdDev(), 0.15*pulls[j][i]->Integral(), pulls[j][i]->GetMean() + 2.0, pulls[j][i]->GetStdDev());
+      triple_fit->SetParameters(0.15 * pulls[j][i]->Integral(), pulls[j][i]->GetMean(), pulls[j][i]->GetStdDev(), 0.15 * pulls[j][i]->Integral(), pulls[j][i]->GetMean() - 2.0, pulls[j][i]->GetStdDev(), 0.15 * pulls[j][i]->Integral(), pulls[j][i]->GetMean() + 2.0, pulls[j][i]->GetStdDev());
 
       if (i < 3)
       {
@@ -1340,7 +1351,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
       result = pulls[j][i]->Fit(triple_fit, "SF");
 
-      fit_stats[2] = Form("Width = %.2f#pm%.2f", comb_std_dev(result->GetParams()), comb_std_dev_err(result->GetParams(),result->GetErrors()));
+      fit_stats[2] = Form("Width = %.2f#pm%.2f", comb_std_dev(result->GetParams()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
 
       fit_text->AddText(fit_stats[2]);
 
@@ -1473,9 +1484,9 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
         // triple_fit->FixParameter(3, 0.0);
         // triple_fit->FixParameter(6, parameter[0]);
 
-        triple_fit->SetParLimits(1, parameter[1] - 2.0, parameter[1] + 2.0);
-        triple_fit->SetParLimits(4, parameter[1] - 2.0, parameter[1] + 2.0);
-        triple_fit->SetParLimits(7, parameter[1] - 2.0, parameter[1] + 2.0);
+        triple_fit->SetParLimits(1, parameter[1] - 5.0, parameter[1] + 5.0);
+        triple_fit->SetParLimits(4, parameter[1] - 5.0, parameter[1] + 5.0);
+        triple_fit->SetParLimits(7, parameter[1] - 5.0, parameter[1] + 5.0);
         // triple_fit->FixParameter(4, 0.0);
         // triple_fit->FixParameter(7, 0.0);
 
@@ -1487,8 +1498,9 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
         TH1 *hist_temp = sigmas_std[j][k]->ProjectionY("_py", i, i);
         result = hist_temp->Fit(triple_fit, "LMES");
+
         res_std_hist[j][k]->SetBinContent(i, comb_std_dev(result->GetParams()));
-        res_std_hist[j][k]->SetBinError(i, comb_std_dev_err(result->GetParams(),result->GetErrors()));
+        res_std_hist[j][k]->SetBinError(i, comb_std_dev_err(result->GetParams(), result->GetErrors()));
 
         canvas_proj[j][k][i - 1]->SetRightMargin(0.15);
         canvas_proj[j][k][i - 1]->SetLeftMargin(0.17);
@@ -1542,7 +1554,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
     canvas_std[j][22]->SetLeftMargin(0.2);
     res_std_hist[j][0]->SetXTitle(x_title);
     res_std_hist[j][0]->SetYTitle(y_title);
-    res_std_hist[j][0]->GetYaxis()->SetRangeUser(0.0, 30.0);
+    res_std_hist[j][0]->GetYaxis()->SetRangeUser(0.0, 10.0);
     res_std_hist[j][0]->Draw("PE1");
     res_std_hist[j][1]->Draw("PE1SAME");
     res_std_hist[j][2]->Draw("PE1SAME");
@@ -1552,14 +1564,14 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
     id_canva = "sigmas_std_times" + std::to_string(j + 1);
     x_title = "K#rightarrow#pi^{0}#pi^{0} path generated [cm]";
     y_title = "#sigma(t_{K#rightarrow#pi^{0}#pi^{0}}^{tri} - t_{K#rightarrow#pi^{0}#pi^{0}}^{gen}) [#tau_{S}]";
-    canvas[j][23]->cd();
-    canvas_std[j][23]->SetLeftMargin(0.2);
+    canvas[j][99]->cd();
+    canvas_std[j][99]->SetLeftMargin(0.2);
     res_std_hist[j][3]->SetXTitle(x_title);
     res_std_hist[j][3]->SetYTitle(y_title);
     res_std_hist[j][3]->GetYaxis()->SetMaxDigits(3);
     res_std_hist[j][3]->GetYaxis()->SetRangeUser(0.0, 5.0);
     res_std_hist[j][3]->Draw("PE1");
-    canvas[j][23]->Print(img_dir + id_canva + ext_img);
+    canvas[j][99]->Print(img_dir + id_canva + ext_img);
     //!
     id_canva = "sigmas_std_length" + std::to_string(j + 1);
     x_title = "K#rightarrow#pi^{0}#pi^{0} path generated [cm]";

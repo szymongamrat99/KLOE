@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=`root-config --cflags --glibs` -Wall
+CXXFLAGS=`root-config --cflags --glibs`
 
 OBJPATH=obj
 SRCPATH=src
@@ -8,8 +8,8 @@ BINPATH=bin
 
 LIBS=-L$(INCPATH) -lrec -lm -llapack
 
-SRC=$(SRCPATH)/trilateration_neu_rec.cpp $(SRCPATH)/trilateration_neu_rec_kin_fit_aux.cpp $(SRCPATH)/triangle_neu_rec.cpp
-OBJ=$(OBJPATH)/trilateration_neu_rec.o $(OBJPATH)/trilateration_neu_rec_kin_fit_aux.o $(OBJPATH)/triangle_neu_rec.o
+SRC=$(SRCPATH)/trilateration_neu_rec.cpp $(SRCPATH)/trilateration_neu_rec_kin_fit_aux.cpp $(SRCPATH)/triangle_neu_rec.cpp $(SRCPATH)/comp_of_methods.cpp
+OBJ=$(OBJPATH)/trilateration_neu_rec.o $(OBJPATH)/trilateration_neu_rec_kin_fit_aux.o $(OBJPATH)/triangle_neu_rec.o $(OBJPATH)/comp_of_methods.o
 
 PROJECT=tri_rec.exe
 
@@ -28,6 +28,9 @@ $(OBJPATH)/triangle_neu_rec.o : $(SRCPATH)/triangle_neu_rec.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJPATH)/trilateration_neu_rec_kin_fit_aux.o: $(SRCPATH)/trilateration_neu_rec_kin_fit_aux.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+$(OBJPATH)/comp_of_methods.o : $(SRCPATH)/comp_of_methods.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJPATH)/main.o: neutrec_main.cpp 

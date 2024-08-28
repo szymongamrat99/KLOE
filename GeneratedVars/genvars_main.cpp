@@ -12,11 +12,10 @@ using std::chrono::minutes;
 
 int main(int argc, char *argv[])
 {
-  Controls::Menu *menu = new Controls::Menu(1);
-  Controls::Menu *dataType = new Controls::Menu(2);
+  Controls::Menu *menu = new Controls::Menu(5);
   ErrorHandling::ErrorLogs logger;
   ofstream LogFile;
-  LogFile.open(neutrec_dir + logs_dir + "NeutRec.log");
+  LogFile.open(gen_vars_dir + logs_dir + "GenVars.log");
 
   Int_t firstFile, lastFile, ind_data_mc;
 
@@ -62,35 +61,7 @@ int main(int argc, char *argv[])
     return int(err);
   }
 
-  Controls::DataType dataTypeOpt;
-
-  try
-  {
-    dataType->InitMenu();
-    dataType->ShowOpt();
-    dataType->EndMenu();
-
-    cin >> dataTypeOpt;
-
-    if (!cin)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (dataTypeOpt < Controls::DataType::SIGNAL_TOT || dataTypeOpt > Controls::DataType::MC_DATA)
-    {
-      throw ErrorHandling::ErrorCodes::MENU_RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    logger.getErrLog(err);
-    logger.getErrLog(err, LogFile);
-    return int(err);
-  }
-
-  Short_t good_clus = atoi(argv[3]), loopcount = atoi(argv[4]), jmin = atoi(argv[5]), jmax = atoi(argv[6]);
-
-  Controls::NeutRecMenu menuOpt;
+  Controls::GenVars menuOpt;
   bool
       dataTypeErr,
       menuRangeErr;
@@ -106,7 +77,7 @@ int main(int argc, char *argv[])
       cin >> menuOpt;
 
       dataTypeErr = !cin;
-      menuRangeErr = menuOpt < Controls::NeutRecMenu::BARE_TRILATERATION || menuOpt > Controls::NeutRecMenu::EXIT;
+      menuRangeErr = menuOpt < Controls::GenVars::GEN_VARS || menuOpt > Controls::GenVars::EXIT;
 
       if (dataTypeErr)
       {
@@ -127,22 +98,17 @@ int main(int argc, char *argv[])
 
     switch (menuOpt)
     {
-    case Controls::NeutRecMenu::BARE_TRILATERATION:
+    case Controls::GenVars::GEN_VARS:
     {
-      tri_neurec(ind_data_mc, firstFile, lastFile, good_clus);
+      genvars(firstFile, lastFile, 4);
       break;
     }
-    case Controls::NeutRecMenu::TRILATERATION_KIN_FIT:
+    case Controls::GenVars::SPLIT_CHANN:
     {
-      tri_neurec_kinfit_corr(ind_data_mc, firstFile, lastFile, loopcount, jmin, jmax);
+      split_channels(firstFile, lastFile);
       break;
     }
-    case Controls::NeutRecMenu::TRIANGLE:
-    {
-      triangle_neurec(firstFile, lastFile, 10, 5, 1, dataTypeOpt, 0);
-      break;
-    }
-    case Controls::NeutRecMenu::EXIT:
+    case Controls::GenVars::EXIT:
     {
       break;
     }
@@ -150,7 +116,7 @@ int main(int argc, char *argv[])
       break;
     }
 
-  } while (menuOpt != Controls::NeutRecMenu::EXIT);
+  } while (menuOpt != Controls::GenVars::EXIT);
 
   LogFile.close();
 

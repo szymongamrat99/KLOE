@@ -8,10 +8,11 @@ BINPATH=bin
 
 LIBS=-L$(INCPATH) -lrec -lm -llapack
 
-SRC=$(SRCPATH)/generated_variables.cpp $(SRCPATH)/split_channels.cpp
-OBJ=$(OBJPATH)/generated_variables.o $(OBJPATH)/split_channels.o
+SRC=$(SRCPATH)/cp_fit_mc_data.cpp
+OBJ=$(OBJPATH)/cp_fit_mc_data.o
 
-PROJECT=gen_vars.exe
+PROJECT=cpv_fit.exe
+
 RM=rm
 RMFLAGS=-f
 
@@ -20,13 +21,10 @@ all: $(OBJ) $(BINPATH)/$(PROJECT)
 $(BINPATH)/$(PROJECT): $(OBJPATH)/main.o $(OBJ)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 
-$(OBJPATH)/split_channels.o: $(SRCPATH)/split_channels.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@	
-
-$(OBJPATH)/generated_variables.o: $(SRCPATH)/generated_variables.cpp
+$(OBJPATH)/cp_fit_mc_data.o: $(SRCPATH)/cp_fit_mc_data.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(OBJPATH)/main.o: genvars_main.cpp 
+$(OBJPATH)/main.o: cpfit_main.cpp 
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:

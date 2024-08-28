@@ -9,10 +9,10 @@
 #include <TFile.h>
 
 #include "../../../Include/const.h"
-#include "../../../Include/Codes/chain_init.cpp"
 #include "../../../Include/Codes/ErrorLogs.h"
 #include "../../../Include/Codes/MainMenu.h"
 
-int genvars(int, int, int, Controls::DataType);
+int genvars(int, int, int);
+Int_t split_channels(Int_t, Int_t);
 
 #endif //! GENVARS_H

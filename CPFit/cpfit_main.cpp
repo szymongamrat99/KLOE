@@ -3,7 +3,9 @@
 #include <TMath.h>
 #include <TStyle.h>
 
-#include "inc/trilateration.hpp"
+#include "inc/cpfit.hpp"
+
+#define __FILENAME__ (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 
 using namespace std;
 using std::chrono::duration;
@@ -20,12 +22,12 @@ int main(int argc, char *argv[])
   std::ofstream LogFileMain, LogFileTriangle, LogFileTri, LogFileTriKinFit;
   std::ofstream ErrFileMain, ErrFileTriangle, ErrFileTri, ErrFileTriKinFit;
 
-  Controls::Menu *menu = new Controls::Menu(1);
+  Controls::Menu *menu = new Controls::Menu(4);
   Controls::Menu *dataType = new Controls::Menu(2);
 
   logger.getErrLog(LogsHandling::GeneralLogs::TIME_STAMP);
 
-  ErrFileMain.open(neutrec_dir + logs_dir + "NeutRecMain.err");
+  ErrFileMain.open(neutrec_dir + logs_dir + __FILENAME__ + ".err");
 
   Int_t firstFile, lastFile, ind_data_mc;
 
@@ -102,7 +104,7 @@ int main(int argc, char *argv[])
 
   Short_t good_clus = atoi(argv[3]), loopcount = atoi(argv[4]), jmin = atoi(argv[5]), jmax = atoi(argv[6]);
 
-  Controls::NeutRecMenu menuOpt;
+  Controls::CPFitMenu menuOpt;
   bool
       dataTypeErr,
       menuRangeErr;
@@ -118,7 +120,7 @@ int main(int argc, char *argv[])
       cin >> menuOpt;
 
       dataTypeErr = !cin;
-      menuRangeErr = menuOpt < Controls::NeutRecMenu::BARE_TRILATERATION || menuOpt > Controls::NeutRecMenu::EXIT;
+      menuRangeErr = menuOpt < Controls::CPFitMenu::HALF_SIGNAL_MC || menuOpt > Controls::CPFitMenu::EXIT;
 
       if (dataTypeErr)
       {
@@ -141,24 +143,19 @@ int main(int argc, char *argv[])
 
     switch (menuOpt)
     {
-    case Controls::NeutRecMenu::BARE_TRILATERATION:
+    case Controls::CPFitMenu::HALF_SIGNAL_MC:
     {
-      tri_neurec(ind_data_mc, firstFile, lastFile, good_clus);
       break;
     }
-    case Controls::NeutRecMenu::TRILATERATION_KIN_FIT:
+    case Controls::CPFitMenu::HALF_SIG_BCG_MC:
     {
-      auto start = std::chrono::system_clock::now();
-      tri_neurec_kinfit_corr(ind_data_mc, firstFile, lastFile, loopcount, jmin, jmax);
-      auto end = std::chrono::system_clock::now();
-      std::chrono::duration<double> elapsed_seconds = end - start;
 
       break;
     }
-    case Controls::NeutRecMenu::TRIANGLE:
+    case Controls::CPFitMenu::MC_DATA:
     {
       auto start = std::chrono::system_clock::now();
-      triangle_neurec(firstFile, lastFile, 10, 5, 1, dataTypeOpt, 0);
+      cp_fit_mc_data(firstFile, lastFile, "split", false, 10, 5, 1);
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
 
@@ -166,18 +163,7 @@ int main(int argc, char *argv[])
 
       break;
     }
-    case Controls::NeutRecMenu::COMP_OF_MET:
-    {
-      auto start = std::chrono::system_clock::now();
-      comp_of_methods(firstFile, lastFile, 10, 5, 1, dataTypeOpt);
-      auto end = std::chrono::system_clock::now();
-      std::chrono::duration<double> elapsed_seconds = end - start;
-
-      std::cout << elapsedTimeHMS(elapsed_seconds.count()) << std::endl;
-
-      break;
-    }
-    case Controls::NeutRecMenu::EXIT:
+    case Controls::CPFitMenu::EXIT:
     {
       break;
     }
@@ -185,7 +171,7 @@ int main(int argc, char *argv[])
       break;
     }
 
-  } while (menuOpt != Controls::NeutRecMenu::EXIT);
+  } while (menuOpt != Controls::CPFitMenu::EXIT);
 
   errLogger.errLogStats();
   errLogger.errLogStats(ErrFileMain);

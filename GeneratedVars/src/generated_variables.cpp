@@ -1,12 +1,8 @@
-#include "../../Include/Codes/cylinder_intersection.h"
+#include "../../../Include/Codes/cylinder_intersection.h"
 #include "../inc/genvars.hpp"
 
-int genvars(int first_file, int last_file, int nclus, Controls::DataType data_type)
+int genvars(int first_file, int last_file, int nclus)
 {
-	ErrorHandling::ErrorLogs logger;
-	std::ofstream LogFile;
-	LogFile.open(gen_vars_dir + logs_dir + "GenVars.log");
-
 	TChain *chain = new TChain("INTERF/h1");
 	chain_init(chain, first_file, last_file);
 

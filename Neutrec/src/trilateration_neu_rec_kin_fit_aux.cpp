@@ -31,14 +31,13 @@ using namespace std;
 
 const Int_t N_free = 24, N_const = 4, M = 5, jmin = 0, jmax = 0;
 Int_t j_ch, k_ch;
-const Float_t Trf = 2.715; // ns - time of a bunch (correction)
 
 const Int_t loopcount = 10;
 
 TF1 *constraints[M];
 
 Double_t det;
-Float_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, T0;
+Float_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, Tcorr;
 Int_t fail;
 
 Int_t selected[4] = {1, 2, 3, 4};
@@ -324,7 +323,7 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 										}
 									}
 
-									T0 = X(27) * Trf;
+									Tcorr = X(27) * T0;
 
 									Reconstructor R;
 									Solution S;
@@ -334,7 +333,7 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 										R.SetClu(k, X[k * 5],
 														 X[k * 5 + 1],
 														 X[k * 5 + 2],
-														 X[k * 5 + 3] + T0,
+														 X[k * 5 + 3] + Tcorr,
 														 X[k * 5 + 4]);
 
 										R.SetClu(4, 0., 0., 0., 0., 0.);
@@ -376,7 +375,7 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 											gamma_mom_tmp[l][4] = X[l * 5];
 											gamma_mom_tmp[l][5] = X[l * 5 + 1];
 											gamma_mom_tmp[l][6] = X[l * 5 + 2];
-											gamma_mom_tmp[l][7] = X[l * 5 + 3] + T0;
+											gamma_mom_tmp[l][7] = X[l * 5 + 3] + Tcorr;
 										}
 
 										fourKnetri_tmp[k][0] = gamma_mom_tmp[0][0] + gamma_mom_tmp[1][0] + gamma_mom_tmp[2][0] + gamma_mom_tmp[3][0];
@@ -410,9 +409,9 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 											value[k] = 999999.;
 									}
 
-									cond_time_clus[0] = S.sol[0][3] < X(3) + T0 && S.sol[0][3] < X(8) + T0 && S.sol[0][3] < X(13) + T0 && S.sol[0][3] < X(18) + T0;
+									cond_time_clus[0] = S.sol[0][3] < X(3) + Tcorr && S.sol[0][3] < X(8) + Tcorr && S.sol[0][3] < X(13) + Tcorr && S.sol[0][3] < X(18) + Tcorr;
 
-									cond_time_clus[1] = S.sol[1][3] < X(3) + T0 && S.sol[1][3] < X(8) + T0 && S.sol[1][3] < X(13) + T0 && S.sol[1][3] < X(18) + T0;
+									cond_time_clus[1] = S.sol[1][3] < X(3) + Tcorr && S.sol[1][3] < X(8) + Tcorr && S.sol[1][3] < X(13) + Tcorr && S.sol[1][3] < X(18) + Tcorr;
 
 									if (abs(CHISQRTMP) < abs(CHISQRMIN))
 									{
@@ -452,7 +451,7 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 												gamma_mom_final[l][4] = X[l * 5];
 												gamma_mom_final[l][5] = X[l * 5 + 1];
 												gamma_mom_final[l][6] = X[l * 5 + 2];
-												gamma_mom_final[l][7] = X[l * 5 + 3] + T0;
+												gamma_mom_final[l][7] = X[l * 5 + 3] + Tcorr;
 											}
 
 											fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
@@ -508,7 +507,7 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 												gamma_mom_final[l][4] = X[l * 5];
 												gamma_mom_final[l][5] = X[l * 5 + 1];
 												gamma_mom_final[l][6] = X[l * 5 + 2];
-												gamma_mom_final[l][7] = X[l * 5 + 3] + T0;
+												gamma_mom_final[l][7] = X[l * 5 + 3] + Tcorr;
 											}
 
 											fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
