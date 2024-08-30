@@ -5,10 +5,10 @@
 #include <fstream>
 #include <vector>
 
-#include "../../../Include/const.h"
-#include "../../../Include/Codes/ErrorLogs.h"
-#include "../../../Include/Codes/Logs.h"
-#include "../../../Include/Codes/MainMenu.h"
+#include "const.h"
+#include "ErrorLogs.h"
+#include "Logs.h"
+#include "MainMenu.h"
 
 const TString cpfit_res_dir = cpfit_dir + result_dir;
 

@@ -14,16 +14,16 @@
 #include "TVectorD.h"
 #include "TError.h"
 
-#include "../../../Include/Codes/reconstructor.h"
-#include "../../../Include/const.h"
-#include "../../../Include/Codes/uncertainties.h"
-#include "../../../Include/Codes/charged_mom.h"
-#include "../../../Include/Codes/neutral_mom.h"
-#include "../../../Include/Codes/lorentz_transf.h"
-#include "../../../Include/Codes/plane_intersection.h"
-#include "../../../Include/Codes/closest_approach.h"
-#include "../../../Include/Codes/constraints_tri.h"
-#include "../../../Include/Codes/chi2_dist.h"
+#include "reconstructor.h"
+#include "const.h"
+#include "uncertainties.h"
+#include "charged_mom.h"
+#include "neutral_mom.h"
+#include "lorentz_transf.h"
+#include "plane_intersection.h"
+#include "closest_approach.h"
+#include "constraints_tri.h"
+#include "chi2_dist.h"
 
 #include "../inc/trilateration.hpp"
 
@@ -269,8 +269,6 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 												constraints[l]->SetParameters(X.GetMatrixArray());
 												if (m < N_free)
 													D(l, m) = constraints[l]->GradientPar(m, 0, 0.01);
-												// else if (m == 24)
-												//	D(l, m) = constraints[l]->GradientPar(m, 0, 1.0);
 												else
 													D(l, m) = 0;
 											}
@@ -409,9 +407,9 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 											value[k] = 999999.;
 									}
 
-									cond_time_clus[0] = S.sol[0][3] < X(3) + Tcorr && S.sol[0][3] < X(8) + Tcorr && S.sol[0][3] < X(13) + Tcorr && S.sol[0][3] < X(18) + Tcorr;
+									cond_time_clus[0] = 1;//S.sol[0][3] < X(3) + Tcorr && S.sol[0][3] < X(8) + Tcorr && S.sol[0][3] < X(13) + Tcorr && S.sol[0][3] < X(18) + Tcorr;
 
-									cond_time_clus[1] = S.sol[1][3] < X(3) + Tcorr && S.sol[1][3] < X(8) + Tcorr && S.sol[1][3] < X(13) + Tcorr && S.sol[1][3] < X(18) + Tcorr;
+									cond_time_clus[1] = 1;//S.sol[1][3] < X(3) + Tcorr && S.sol[1][3] < X(8) + Tcorr && S.sol[1][3] < X(13) + Tcorr && S.sol[1][3] < X(18) + Tcorr;
 
 									if (abs(CHISQRTMP) < abs(CHISQRMIN))
 									{

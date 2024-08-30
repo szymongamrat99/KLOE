@@ -1,12 +1,11 @@
 CXX=g++
-CXXFLAGS=`root-config --cflags --glibs`
+CXXFLAGS=`root-config --cflags --glibs` -g3
 
 OBJPATH=obj
 SRCPATH=src
-INCPATH=/internal/big_one/4/users/gamrat/scripts/Include/
 BINPATH=bin
 
-LIBS=-L$(INCPATH) -lrec -lm -llapack
+LIBS= -lm -llapack -lrec 
 
 SRC=$(SRCPATH)/cp_fit_mc_data.cpp
 OBJ=$(OBJPATH)/cp_fit_mc_data.o
@@ -28,4 +27,4 @@ $(OBJPATH)/main.o: cpfit_main.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	$(RM) $(RMFLAGS) $(OBJ) $(BINPATH)/$(PROJECT)
+	$(RM) $(RMFLAGS) $(OBJ)
