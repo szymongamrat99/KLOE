@@ -15,9 +15,9 @@
 int triangle_neurec(int first_file, int last_file, int loopcount, int M, int range, Controls::DataType data_type, int good_clus)
 {
 	ErrorHandling::ErrorLogs errLogger;
-  LogsHandling::Logs logger;
-  std::ofstream LogFileMain, LogFileTriangle, LogFileTri, LogFileTriKinFit;
-  std::ofstream ErrFileMain, ErrFileTriangle, ErrFileTri, ErrFileTriKinFit;
+	LogsHandling::Logs logger;
+	std::ofstream LogFileMain, LogFileTriangle, LogFileTri, LogFileTriKinFit;
+	std::ofstream ErrFileMain, ErrFileTriangle, ErrFileTri, ErrFileTriKinFit;
 
 	TString
 			filename_gen = gen_vars_dir + root_files_dir + gen_vars_filename + first_file + "_" + last_file + ext_root,
@@ -82,11 +82,12 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 		tree_gen->SetBranchAddress("clusindgood", good_clus_ind);
 
 		Int_t done_kinfit = 0, g4taken_kinfit[4] = {0};
-		Float_t chi2min_tri;
+		Float_t chi2min_tri, Knetri_kinfit[10];
 
 		tree_trilateration->SetBranchAddress("done4_kinfit", &done_kinfit);
 		tree_trilateration->SetBranchAddress("g4takentri_kinfit", g4taken_kinfit);
 		tree_trilateration->SetBranchAddress("chi2min", &chi2min_tri);
+		tree_trilateration->SetBranchAddress("fourKnetri_kinfit", Knetri_kinfit);
 
 		// Adding friends to the chain
 		chain->AddFriend(tree_gen);
@@ -210,14 +211,26 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 							vtxSigmaMin = vtxSigma;
 							TrcSumMin = TrcSum;
 
-							trcsum = TrcSumMin; 
+							trcsum = TrcSumMin;
 
 							done = 1;
 
-							for(Int_t l = 0; l < 4; l++)
-							{	
+							for (Int_t l = 0; l < 4; l++)
+							{
 								Knetriangle[l] = Knerec[l];
-								Knetriangle[6 + l] = neu_vtx[l];
+
+								/*if (l == 3)
+								{
+									if (Knetri_kinfit[9] < 0.)
+										Knetriangle[6 + l] = -neu_vtx[l];
+									else if (Knetri_kinfit[9] >= 0.)
+										Knetriangle[6 + l] = neu_vtx[l];
+								}*/
+								// else
+								// {
+									Knetriangle[6 + l] = neu_vtx[l];
+								// }
+
 								fourg4taken[l] = ind_gam[l];
 
 								trcfinal[l] = trc[l];
@@ -226,21 +239,19 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 							}
 
 							minv4gam = sqrt(pow(gammatriangle[0][3] + gammatriangle[1][3] + gammatriangle[2][3] + gammatriangle[3][3], 2) -
-							pow(gammatriangle[0][0] + gammatriangle[1][0] + gammatriangle[2][0] + gammatriangle[3][0], 2) -
-							pow(gammatriangle[0][1] + gammatriangle[1][1] + gammatriangle[2][1] + gammatriangle[3][1], 2) -
-							pow(gammatriangle[0][2] + gammatriangle[1][2] + gammatriangle[2][2] + gammatriangle[3][2], 2));
+															pow(gammatriangle[0][0] + gammatriangle[1][0] + gammatriangle[2][0] + gammatriangle[3][0], 2) -
+															pow(gammatriangle[0][1] + gammatriangle[1][1] + gammatriangle[2][1] + gammatriangle[3][1], 2) -
+															pow(gammatriangle[0][2] + gammatriangle[1][2] + gammatriangle[2][2] + gammatriangle[3][2], 2));
 
 							Knetriangle[4] = 0.;
-							for(Int_t l = 0; l < 3; l++)
+							for (Int_t l = 0; l < 3; l++)
 							{
-								Knetriangle[4] += pow(Knetriangle[l],2);
+								Knetriangle[4] += pow(Knetriangle[l], 2);
 								ip_triangle[l] = ip[l];
 							}
 
-							Knetriangle[5] = sqrt(pow(Knetriangle[3],2) - Knetriangle[4]);
+							Knetriangle[5] = sqrt(pow(Knetriangle[3], 2) - Knetriangle[4]);
 							Knetriangle[4] = sqrt(Knetriangle[4]);
-
-
 						}
 					}
 				}

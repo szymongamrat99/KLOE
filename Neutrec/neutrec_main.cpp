@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
     case Controls::NeutRecMenu::TRILATERATION_KIN_FIT:
     {
       auto start = std::chrono::system_clock::now();
-      tri_neurec_kinfit_corr(ind_data_mc, firstFile, lastFile, loopcount, jmin, jmax);
+      tri_neurec_kinfit_corr(firstFile, lastFile, 10, 0, 0, dataTypeOpt);
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
 

@@ -20,13 +20,13 @@
 #include <TChain.h>
 #include <TLegend.h>
 
-#include "../../../Include/Codes/kloe_class.h"
-#include "../../../Include/Codes/interf_function.h"
-#include "../../../Include/Codes/chi2_dist.h"
-#include "../../../Include/Codes/uncertainties.h"
-#include "../../../Include/Codes/lorentz_transf.h"
-#include "../../../Include/Codes/triple_gaus.h"
-#include "../../../Include/Codes/arrays_equality.h"
+#include "kloe_class.h"
+#include "interf_function.h"
+#include "chi2_dist.h"
+#include "uncertainties.h"
+#include "lorentz_transf.h"
+#include "triple_gaus.h"
+#include "arrays_equality.h"
 
 #include "../inc/trilateration.hpp"
 
@@ -1351,7 +1351,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
       result = pulls[j][i]->Fit(triple_fit, "SF");
 
-      fit_stats[2] = Form("Width = %.2f#pm%.2f", comb_std_dev(result->GetParams()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
+      fit_stats[2] = Form("Width = %.2f#pm%.2f", comb_std_dev(result->GetParams(), result->GetErrors()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
 
       fit_text->AddText(fit_stats[2]);
 
@@ -1478,15 +1478,15 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
         triple_fit->SetParameters(0.15 * parameter[0], parameter[1], parameter[2], 0.15 * parameter[0], parameter[1] - 1.0, parameter[2], parameter[0], parameter[1] + 1.0, parameter[2]);
 
-        triple_fit->SetParLimits(0, 0.0, 100.0 * parameter[0]);
-        triple_fit->SetParLimits(3, 0.0, 100.0 * parameter[0]);
-        triple_fit->SetParLimits(6, 0.0, 100.0 * parameter[0]);
+        triple_fit->SetParLimits(0, 0.0, 100.0*parameter[0]);
+        triple_fit->SetParLimits(3, 0.0, 100.0*parameter[0]);
+        triple_fit->SetParLimits(6, 0.0, 100.0*parameter[0]);
         // triple_fit->FixParameter(3, 0.0);
         // triple_fit->FixParameter(6, parameter[0]);
 
-        triple_fit->SetParLimits(1, parameter[1] - 5.0, parameter[1] + 5.0);
-        triple_fit->SetParLimits(4, parameter[1] - 5.0, parameter[1] + 5.0);
-        triple_fit->SetParLimits(7, parameter[1] - 5.0, parameter[1] + 5.0);
+        triple_fit->SetParLimits(1, parameter[1] - 2.0, parameter[1] + 2.0);
+        triple_fit->SetParLimits(4, parameter[1] - 2.0, parameter[1] + 2.0);
+        triple_fit->SetParLimits(7, parameter[1] - 2.0, parameter[1] + 2.0);
         // triple_fit->FixParameter(4, 0.0);
         // triple_fit->FixParameter(7, 0.0);
 
@@ -1499,7 +1499,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
         TH1 *hist_temp = sigmas_std[j][k]->ProjectionY("_py", i, i);
         result = hist_temp->Fit(triple_fit, "LMES");
 
-        res_std_hist[j][k]->SetBinContent(i, comb_std_dev(result->GetParams()));
+        res_std_hist[j][k]->SetBinContent(i, comb_std_dev(result->GetParams(), result->GetErrors()));
         res_std_hist[j][k]->SetBinError(i, comb_std_dev_err(result->GetParams(), result->GetErrors()));
 
         canvas_proj[j][k][i - 1]->SetRightMargin(0.15);

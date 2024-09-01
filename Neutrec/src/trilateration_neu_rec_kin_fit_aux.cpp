@@ -42,7 +42,7 @@ Int_t fail;
 
 Int_t selected[4] = {1, 2, 3, 4};
 
-void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_file, Short_t loopcount, Short_t jmin, Short_t jmax)
+void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount, Short_t jmin, Short_t jmax, Controls::DataType data_type)
 {
 
 	gErrorIgnoreLevel = 6001;
@@ -54,13 +54,10 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 
 	const Int_t range = (jmax - jmin) + 1;
 
-	name = "neuvtx_tri_kin_fit_" + std::to_string(first_file) + "_" + std::to_string(last_file) + "_" + loopcount + "_" + M + "_" + range + "_" + ind_data_mc + "_" + "new" + ".root";
+	name = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
 
 	TFile *file = new TFile(name, "recreate");
-	TTree *tree = new TTree("h_tri_kin_fit", "Neu vtx rec with trilateration kin fit");
-
-	// TFile *file_corr = new TFile("bunch_corr.root");
-	// TTree *tree_corr = (TTree *)file_corr->Get("h_bunch_corr");
+	TTree *tree = new TTree(neutrec_kin_fit_tree, "Neu vtx rec with trilateration kin fit");
 
 	// Branches' addresses
 	// Bhabha vars
@@ -157,12 +154,7 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 
 		isConverged = 0;
 
-		if (ind_data_mc == 0)
-			data_flag = (mcflag == 1 && (mctruth == 1 || mctruth == 2));
-		else if (ind_data_mc == 1)
-			data_flag = (mcflag == 1 && mctruth != 0);
-		else if (ind_data_mc == 2)
-			data_flag = mcflag == 0 || (mcflag = 1 && mctruth != 0);
+		dataFlagSetter(data_type, data_flag, int(mcflag), int(mctruth));
 
 		if (nclu >= 4 && data_flag)
 		{
