@@ -79,7 +79,7 @@ int genvars(int first_file, int last_file, int nclus)
 		good_clus_ind[2] = 999;
 		good_clus_ind[3] = 999;
 
-		if (mctruth == 1 || mctruth == 2)
+		if (mctruth == 1 || mctruth == 2 || mctruth == 3)
 		{
 			for (Int_t j = 0; j < nvtxmc; j++)
 			{

@@ -2,14 +2,15 @@
 #include <fstream>
 #include <vector>
 
-#include "TFile.h"
-#include "TTree.h"
-#include "TH1.h"
+#include <TFile.h>
+#include <TTree.h>
+#include <TH2.h>
+#include <TCanvas.h>
 
-#include "../../../Include/Codes/reconstructor.h"
-#include "../../../Include/Codes/neu_triangle.h"
-#include "../../../Include/Codes/plane_intersection.h"
-#include "../../../Include/Codes/neutral_mom.h"
+#include <reconstructor.h>
+#include <neu_triangle.h>
+#include <plane_intersection.h>
+#include <neutral_mom.h>
 #include "../inc/trilateration.hpp"
 
 int triangle_neurec(int first_file, int last_file, int loopcount, int M, int range, Controls::DataType data_type, int good_clus)
@@ -54,8 +55,9 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 
 		// Cluster vars
 		Int_t nclu;
-		UChar_t mctruth, mcflag;
+		UChar_t mctruth, mcflag, g4taken[4], ncll[50];
 		Float_t cluster[5][500], Kchboost[9], Knereclor[9], Knemc[9], ip[3];
+		BaseKinematics baseKin;
 
 		chain->SetBranchAddress("nclu", &nclu);
 		chain->SetBranchAddress("Xacl", cluster[0]);
@@ -69,7 +71,9 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 
 		chain->SetBranchAddress("ip", ip);
 		chain->SetBranchAddress("Kchboost", Kchboost);
-		chain->SetBranchAddress("Knemc", Knemc);
+		chain->SetBranchAddress("Knereclor", Knereclor);
+		chain->SetBranchAddress("g4taken", g4taken);
+		chain->SetBranchAddress("ncll", baseKin.ncll);
 
 		Int_t good_clus_ind[4];
 		Float_t pgammc[4][8];
@@ -139,6 +143,26 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 		Bool_t
 				data_flag = false;
 
+		Int_t
+				nbin = 100;
+
+		Float_t
+					x_lim[4][2] = {
+												 {-50.0, 50.0},
+												 {-50.0, 50.0},
+												 {-50.0, 50.0},
+												 {-10.0, 20.0}
+					};
+
+		std::vector<TH2*> test2d;
+		TString test2d_name = "";
+		
+		for (Int_t i = 0; i < 4; i++)
+		{
+			test2d_name = "test2d_" + i;
+			test2d.push_back(new TH2D(test2d_name, "", nbin, x_lim[i][0], x_lim[i][1], nbin, x_lim[i][0], x_lim[i][1]));
+		};
+
 		for (Int_t i = 0; i < nentries; i++)
 		{
 			chain->GetEntry(i);
@@ -174,23 +198,23 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 					ind_gam[2] = g4taken_kinfit[2];
 					ind_gam[3] = g4taken_kinfit[3];
 
-					cond_ene = cluster[4][ind_gam[0]] > MIN_CLU_ENE && cluster[4][ind_gam[1]] > MIN_CLU_ENE &&
-										 cluster[4][ind_gam[2]] > MIN_CLU_ENE && cluster[4][ind_gam[3]] > MIN_CLU_ENE;
+					cond_ene = cluster[4][baseKin.ncll[ind_gam[0]] - 1] > MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[1]] - 1] > MIN_CLU_ENE &&
+										 cluster[4][baseKin.ncll[ind_gam[2]] - 1] > MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[3]] - 1] > MIN_CLU_ENE;
 
-					cond_clus[0] = cluster[3][ind_gam[0]] > 0 && cluster[0][ind_gam[0]] != 0 && cluster[1][ind_gam[0]] != 0 && cluster[2][ind_gam[0]] != 0;
-					cond_clus[1] = cluster[3][ind_gam[1]] > 0 && cluster[0][ind_gam[1]] != 0 && cluster[1][ind_gam[1]] != 0 && cluster[2][ind_gam[1]] != 0;
-					cond_clus[2] = cluster[3][ind_gam[2]] > 0 && cluster[0][ind_gam[2]] != 0 && cluster[1][ind_gam[2]] != 0 && cluster[2][ind_gam[2]] != 0;
-					cond_clus[3] = cluster[3][ind_gam[3]] > 0 && cluster[0][ind_gam[3]] != 0 && cluster[1][ind_gam[3]] != 0 && cluster[2][ind_gam[3]] != 0;
+					cond_clus[0] = cluster[3][baseKin.ncll[ind_gam[0]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[0]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[0]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[0]] - 1] != 0;
+					cond_clus[1] = cluster[3][baseKin.ncll[ind_gam[1]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[1]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[1]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[1]] - 1] != 0;
+					cond_clus[2] = cluster[3][baseKin.ncll[ind_gam[2]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[2]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[2]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[2]] - 1] != 0;
+					cond_clus[3] = cluster[3][baseKin.ncll[ind_gam[3]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[3]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[3]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[3]] - 1] != 0;
 
 					if (cond_ene == true && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3])
 					{
 						for (Int_t k = 0; k < 4; k++)
 						{
-							Clu5Vec[k][0] = cluster[0][ind_gam[k]];
-							Clu5Vec[k][1] = cluster[1][ind_gam[k]];
-							Clu5Vec[k][2] = cluster[2][ind_gam[k]];
-							Clu5Vec[k][3] = cluster[3][ind_gam[k]];
-							Clu5Vec[k][4] = cluster[4][ind_gam[k]];
+							Clu5Vec[k][0] = cluster[0][baseKin.ncll[ind_gam[k]] - 1];
+							Clu5Vec[k][1] = cluster[1][baseKin.ncll[ind_gam[k]] - 1];
+							Clu5Vec[k][2] = cluster[2][baseKin.ncll[ind_gam[k]] - 1];
+							Clu5Vec[k][3] = cluster[3][baseKin.ncll[ind_gam[k]] - 1];
+							Clu5Vec[k][4] = cluster[4][baseKin.ncll[ind_gam[k]] - 1];
 						}
 
 						//! Using the charged part of the decay
@@ -219,23 +243,23 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 							{
 								Knetriangle[l] = Knerec[l];
 
-								/*if (l == 3)
-								{
-									if (Knetri_kinfit[9] < 0.)
-										Knetriangle[6 + l] = -neu_vtx[l];
-									else if (Knetri_kinfit[9] >= 0.)
-										Knetriangle[6 + l] = neu_vtx[l];
-								}*/
+								// if (l == 3)
+								// {
+								// 	if (Knetri_kinfit[9] < 0.)
+								// 		Knetriangle[6 + l] = -neu_vtx[l];
+								// 	else if (Knetri_kinfit[9] >= 0.)
+								// 		Knetriangle[6 + l] = neu_vtx[l];
+								// }
 								// else
 								// {
 									Knetriangle[6 + l] = neu_vtx[l];
-								// }
+								//}
 
 								fourg4taken[l] = ind_gam[l];
 
 								trcfinal[l] = trc[l];
 
-								neutral_mom(cluster[0][ind_gam[l]], cluster[1][ind_gam[l]], cluster[2][ind_gam[l]], cluster[4][ind_gam[l]], neu_vtx, gammatriangle[l]);
+								neutral_mom(cluster[0][baseKin.ncll[ind_gam[l]] - 1], cluster[1][baseKin.ncll[ind_gam[l]] - 1], cluster[2][baseKin.ncll[ind_gam[l]] - 1], cluster[4][baseKin.ncll[ind_gam[l]] - 1], neu_vtx, gammatriangle[l]);
 							}
 
 							minv4gam = sqrt(pow(gammatriangle[0][3] + gammatriangle[1][3] + gammatriangle[2][3] + gammatriangle[3][3], 2) -
@@ -255,10 +279,36 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 						}
 					}
 				}
+
+				Double_t vKne = cVel * (Knereclor[4]/Knereclor[3]);
+				Double_t trec = sqrt(pow(Knereclor[6] - ip[0], 2) + 
+														 pow(Knereclor[7] - ip[1], 2) +
+														 pow(Knereclor[8] - ip[2], 2)) / vKne;
+
+				if(mctruth == 1 || mctruth == 2)
+				{
+					test2d[0]->Fill(Knereclor[6], Knetriangle[6]);
+					test2d[1]->Fill(Knereclor[7], Knetriangle[7]);
+					test2d[2]->Fill(Knereclor[8], Knetriangle[8]);
+					test2d[3]->Fill(trec, Knetriangle[9]);
+				};
 			}
 
 			tree->Fill();
 		}
+
+		std::vector<TCanvas*> canva;
+		TString canva_name = "";
+		
+		for (Int_t i = 0; i < 4; i++)
+		{
+			canva_name = "canva_" + std::to_string(i);
+			canva.push_back(new TCanvas(canva_name, canva_name, 750, 750));
+
+			test2d[i]->Draw("COLZ");
+
+			canva[i]->Print(canva_name + ext_img);
+		};
 
 		tree->Print();
 

@@ -1,20 +1,20 @@
 #include <string.h>
 
-#include "TFile.h"
-#include "TTree.h"
-#include "TH1.h"
-#include "TF1.h"
-#include "TH2.h"
-#include "TCanvas.h"
-#include "TStyle.h"
-#include "Math/Functor.h"
-#include "Math/Factory.h"
-#include "Math/Minimizer.h"
-#include "TMatrixD.h"
-#include "TVectorD.h"
-#include "TError.h"
+#include <TFile.h>
+#include <TTree.h>
+#include <TH1.h>
+#include <TF1.h>
+#include <TH2.h>
+#include <TCanvas.h>
+#include <TStyle.h>
+#include <Math/Functor.h>
+#include <Math/Factory.h>
+#include <Math/Minimizer.h>
+#include <TMatrixD.h>
+#include <TVectorD.h>
+#include <TError.h>
 
-#include "reconstructor.h"
+#include <reconstructor.h>
 #include "const.h"
 #include "uncertainties.h"
 #include "charged_mom.h"
@@ -22,14 +22,15 @@
 #include "lorentz_transf.h"
 #include "plane_intersection.h"
 #include "closest_approach.h"
-#include "constraints_tri.h"
+#include "constraints_omega.h"
 #include "chi2_dist.h"
+#include <pi0_photon_pair.h>
 
-#include "../inc/trilateration.hpp"
+#include "../inc/omegarec.hpp"
 
 using namespace std;
 
-const Int_t N_free = 24, N_const = 4, M = 5, jmin = 0, jmax = 0;
+const Int_t N_free = 27, N_const = 4, M = 5, jmin = 0, jmax = 0;
 Int_t j_ch, k_ch;
 
 const Int_t loopcount = 10;
@@ -42,7 +43,7 @@ Int_t fail;
 
 Int_t selected[4] = {1, 2, 3, 4};
 
-void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount, Short_t jmin, Short_t jmax, Controls::DataType data_type)
+int omegarec(Int_t first_file, Int_t last_file, Short_t loopcount, Short_t jmin, Short_t jmax, Controls::DataType data_type)
 {
 
 	gErrorIgnoreLevel = 6001;
@@ -54,10 +55,10 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 
 	const Int_t range = (jmax - jmin) + 1;
 
-	name = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
+	name = omegarec_dir + root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
 
 	TFile *file = new TFile(name, "recreate");
-	TTree *tree = new TTree(neutrec_kin_fit_tree, "Neu vtx rec with trilateration kin fit");
+	TTree *tree = new TTree(omegarec_tree, "Omega reconstruction with kin fit");
 
 	// Branches' addresses
 	// Bhabha vars
@@ -95,6 +96,12 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 	chain->SetBranchAddress("mcflag", &mcflag);
 	chain->SetBranchAddress("ncll", baseKin.ncll);
 
+	// Charged tracks momenta
+
+	chain->SetBranchAddress("trk1", baseKin.trk[0]);
+	chain->SetBranchAddress("trk2", baseKin.trk[1]);
+	chain->SetBranchAddress("Kchrec", baseKin.Kchrec);
+
 	// tree_corr->SetBranchAddress("bunchcorr", &bunch_corr);
 	// chain->AddFriend(tree_corr);
 
@@ -111,15 +118,30 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Float_t length_ch, time_ch, velocity_ch, gamma_mom_final[4][8], fourKnetri_kinfit[10], iptri_kinfit[3], y_axis[3], ip_tri[2][3], bhabha_mom_fit[4], gamma_mom_tmp[4][4], fourKnetri_tmp[2][4], value[range], kaon_vel_tmp[2], dist_tmp[2], ip_tmp[2][3], gamma_len[4];
+	Float_t length_ch, time_ch, velocity_ch, gamma_mom_final[4][8], Omegarec_kinfit[10], Omegapi0_kinfit[10], pi0_kinfit[10], iptri_kinfit[3], y_axis[3], ip_tri[2][3], bhabha_mom_fit[4], gamma_mom_tmp[4][8], Omegarec_tmp[2][10], Omegapi0_tmp[2][10], pi0_tmp[2][10], value[range], kaon_vel_tmp[2], dist_tmp[2], ip_tmp[2][3], gamma_len[4];
 	Int_t g4takentri_kinfit[4], bunchnum;
 
-	TBranch *b_gamma1tri = tree->Branch("fourgamma1tri_kinfit", gamma_mom_final[0], "fourgamma1tri_kinfit[8]/F");
-	TBranch *b_gamma2tri = tree->Branch("fourgamma2tri_kinfit", gamma_mom_final[1], "fourgamma2tri_kinfit[8]/F");
-	TBranch *b_gamma3tri = tree->Branch("fourgamma3tri_kinfit", gamma_mom_final[2], "fourgamma3tri_kinfit[8]/F");
-	TBranch *b_gamma4tri = tree->Branch("fourgamma4tri_kinfit", gamma_mom_final[3], "fourgamma4tri_kinfit[8]/F");
+	Int_t
+			clusterind[4],
+			clusterindpi0[2][2];
+
+	Float_t
+			gamma_mom[4][4],
+			gamma_mom_pi0[2][2][4],
+			pi0_mom[2][4],
+			omega_mom[4];
+
+	TBranch *b_gamma1tri = tree->Branch("gamma1tri_kinfit", gamma_mom_final[0], "gamma1tri_kinfit[8]/F");
+	TBranch *b_gamma2tri = tree->Branch("gamma2tri_kinfit", gamma_mom_final[1], "gamma2tri_kinfit[8]/F");
+	TBranch *b_gamma3tri = tree->Branch("gamma3tri_kinfit", gamma_mom_final[2], "gamma1tri_kinfit[8]/F");
+	TBranch *b_gamma4tri = tree->Branch("gamma4tri_kinfit", gamma_mom_final[3], "gamma2tri_kinfit[8]/F");
+
+	TBranch *b_pi0omega = tree->Branch("omegapi0tri_kinfit", Omegapi0_kinfit, "omegapi0tri_kinfit[10]/F");
+	TBranch *b_pi0 = tree->Branch("pi0_kinfit", pi0_kinfit, "pi0_kinfit[10]/F");
+
+	TBranch *b_omegatri = tree->Branch("omega_kinfit", Omegarec_kinfit, "omega_kinfit[10]/F");
+
 	TBranch *b_iptri = tree->Branch("iptri_kinfit", iptri_kinfit, "iptri_kinfit[3]/F");
-	TBranch *b_Knetri = tree->Branch("fourKnetri_kinfit", fourKnetri_kinfit, "fourKnetri_kinfit[10]/F");
 	TBranch *b_done = tree->Branch("done4_kinfit", &isConverged, "done4_kinfit/I");
 	TBranch *b_fourg4taken = tree->Branch("g4takentri_kinfit", g4takentri_kinfit, "g4takentri_kinfit[4]/I");
 	TBranch *b_bunchnum = tree->Branch("bunchnum", &bunchnum, "bunchnum/I");
@@ -132,17 +154,21 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 
 	TBranch *b_chisqr = tree->Branch("chi2min", &CHISQRMIN, "chi2min/F");
 
-	constraints[0] = new TF1("Ene consv", &ene_consv, 0, 1, N_free + N_const);
-	constraints[1] = new TF1("Minv consv", &minv_consv, 0, 1, N_free + N_const);
-	constraints[2] = new TF1("x consv", &x_consv, 0, 1, N_free + N_const);
-	constraints[3] = new TF1("y consv", &y_consv, 0, 1, N_free + N_const);
-	constraints[4] = new TF1("z consv", &z_consv, 0, 1, N_free + N_const);
-	constraints[5] = new TF1("gamma1 consv", &gamma1_consv, 0, 1, N_free + N_const);
-	constraints[6] = new TF1("gamma2 consv", &gamma2_consv, 0, 1, N_free + N_const);
-	constraints[7] = new TF1("gamma3 consv", &gamma3_consv, 0, 1, N_free + N_const);
-	constraints[8] = new TF1("gamma4 consv", &gamma4_consv, 0, 1, N_free + N_const);
+	//constraints[0] = new TF1("Ene consv", &OmegaConstraints::ene_consv, 0, 1, N_free + N_const);
+	//constraints[1] = new TF1("Px consv", &OmegaConstraints::px_consv, 0, 1, N_free + N_const);
+	//constraints[2] = new TF1("Py consv", &OmegaConstraints::py_consv, 0, 1, N_free + N_const);
+	//constraints[3] = new TF1("Pz consv", &OmegaConstraints::pz_consv, 0, 1, N_free + N_const);
+	//constraints[4] = new TF1("Minv consv", &OmegaConstraints::minv_omega_consv, 0, 1, N_free + N_const);
+	constraints[0] = new TF1("Minv pi01 consv", &OmegaConstraints::minv_pi01_consv, 0, 1, N_free + N_const);
+	constraints[1] = new TF1("Minv pi02 consv", &OmegaConstraints::minv_pi02_consv, 0, 1, N_free + N_const);
+	constraints[2] = new TF1("x consv", &OmegaConstraints::x_consv, 0, 1, N_free + N_const);
+	constraints[3] = new TF1("y consv", &OmegaConstraints::y_consv, 0, 1, N_free + N_const);
+	constraints[4] = new TF1("z consv", &OmegaConstraints::z_consv, 0, 1, N_free + N_const);
 
 	TH1 *chi2 = new TH1F("chi2", "", 100, -10.0, 30.0);
+
+	TH1 *pi01 = new TH1F("pi01", "", 100, 600.0, 1000.0);
+	TH1 *pi02 = new TH1F("pi02", "", 100, 0.0, 200.0);
 
 	Bool_t data_flag;
 	Bool_t cond_time_clus[2];
@@ -220,23 +246,31 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 									V(k * 5 + 4, k * 5 + 4) = pow(clu_ene_error(X_init(k * 5 + 4)), 2);																										 // MeV
 								}
 
-								X_init(20) = bhabha_mom[0];
-								X_init(21) = bhabha_mom[1];
-								X_init(22) = bhabha_mom[2];
-								X_init(23) = bhabha_mom[3];
+								X_init(20) = baseKin.Kchrec[6];
+								X_init(21) = baseKin.Kchrec[7];
+								X_init(22) = baseKin.Kchrec[8];
 
-								V(20, 20) = pow(bhabha_mom_err[0], 2);
-								V(21, 21) = pow(bhabha_mom_err[1], 2);
-								V(22, 22) = pow(bhabha_mom_err[2], 2);
-								V(23, 23) = pow(bhabha_mom_err[3], 2);
+								V(20, 20) = pow(2.0, 2);
+								V(21, 21) = pow(1.97, 2);
+								V(22, 22) = pow(4.72, 2);
 
-								X_init(24) = bhabha_vtx[0];
-								X_init(25) = bhabha_vtx[1];
-								X_init(26) = bhabha_vtx[2];
+								X_init(23) = bhabha_mom[0];
+								X_init(24) = bhabha_mom[1];
+								X_init(25) = bhabha_mom[2];
+								X_init(26) = bhabha_mom[3];
 
-								V(24, 24) = 0.;
-								V(25, 25) = 0.;
-								V(26, 26) = 0.;
+								V(23, 23) = pow(bhabha_mom_err[0], 2);
+								V(24, 24) = pow(bhabha_mom_err[1], 2);
+								V(25, 25) = pow(bhabha_mom_err[2], 2);
+								V(26, 26) = pow(bhabha_mom_err[3], 2);
+
+								X_init(27) = bhabha_vtx[0];
+								X_init(28) = bhabha_vtx[1];
+								X_init(29) = bhabha_vtx[2];
+
+								V(27, 27) = 0.;
+								V(28, 28) = 0.;
+								V(29, 29) = 0.;
 
 								for (Int_t k1 = jmin; k1 <= jmax; k1++)
 								{
@@ -245,7 +279,7 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 									CHISQRTMP = 999999.;
 									FUNVALTMP = 999999.;
 
-									X_init(27) = k1;
+									X_init(30) = k1;
 
 									X = X_init;
 
@@ -314,7 +348,7 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 										}
 									}
 
-									Tcorr = X(27) * T0;
+									Tcorr = X(30) * T0;
 
 									Reconstructor R;
 									Solution S;
@@ -358,43 +392,73 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 																				 pow(X[l * 5 + 1] - neu_vtx[k][1], 2) +
 																				 pow(X[l * 5 + 2] - neu_vtx[k][2], 2));
 
-											gamma_mom_tmp[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[k][0]) / distance[l]);
-											gamma_mom_tmp[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[k][1]) / distance[l]);
-											gamma_mom_tmp[l][2] = X[l * 5 + 4] * ((X[l * 5 + 2] - neu_vtx[k][2]) / distance[l]);
-											gamma_mom_tmp[l][3] = X[l * 5 + 4];
+											gamma_mom[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[k][0]) / distance[l]);
+											gamma_mom[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[k][1]) / distance[l]);
+											gamma_mom[l][2] = X[l * 5 + 4] * ((X[l * 5 + 2] - neu_vtx[k][2]) / distance[l]);
+											gamma_mom[l][3] = X[l * 5 + 4];
+										}
+
+										Pi0PhotonPair(ind_gam, gamma_mom, clusterindpi0, gamma_mom_pi0, pi0_mom, true, baseKin.trk, omega_mom);
+
+										for (Int_t l = 0; l < 4; l++)
+										{
+											gamma_mom_tmp[l][0] = gamma_mom[l][0];
+											gamma_mom_tmp[l][1] = gamma_mom[l][1];
+											gamma_mom_tmp[l][2] = gamma_mom[l][2];
+											gamma_mom_tmp[l][3] = gamma_mom[l][3];
 
 											gamma_mom_tmp[l][4] = X[l * 5];
 											gamma_mom_tmp[l][5] = X[l * 5 + 1];
 											gamma_mom_tmp[l][6] = X[l * 5 + 2];
-											gamma_mom_tmp[l][7] = X[l * 5 + 3] + Tcorr;
+											gamma_mom_tmp[l][7] = X[l * 5 + 3];
 										}
 
-										fourKnetri_tmp[k][0] = gamma_mom_tmp[0][0] + gamma_mom_tmp[1][0] + gamma_mom_tmp[2][0] + gamma_mom_tmp[3][0];
-										fourKnetri_tmp[k][1] = gamma_mom_tmp[0][1] + gamma_mom_tmp[1][1] + gamma_mom_tmp[2][1] + gamma_mom_tmp[3][1];
-										fourKnetri_tmp[k][2] = gamma_mom_tmp[0][2] + gamma_mom_tmp[1][2] + gamma_mom_tmp[2][2] + gamma_mom_tmp[3][2];
-										fourKnetri_tmp[k][3] = gamma_mom_tmp[0][3] + gamma_mom_tmp[1][3] + gamma_mom_tmp[2][3] + gamma_mom_tmp[3][3];
+										Omegapi0_tmp[k][0] = pi0_mom[0][0];
+										Omegapi0_tmp[k][1] = pi0_mom[0][1];
+										Omegapi0_tmp[k][2] = pi0_mom[0][2];
+										Omegapi0_tmp[k][3] = pi0_mom[0][3];
 
-										fourKnetri_tmp[k][4] = sqrt(pow(fourKnetri_tmp[k][0], 2) + pow(fourKnetri_tmp[k][1], 2) + pow(fourKnetri_tmp[k][2], 2));
-										fourKnetri_tmp[k][5] = sqrt(pow(fourKnetri_tmp[k][3], 2) - pow(fourKnetri_tmp[k][4], 2));
+										Omegapi0_tmp[k][4] = sqrt(pow(Omegapi0_tmp[k][0], 2) + pow(Omegapi0_tmp[k][1], 2) + pow(Omegapi0_tmp[k][2], 2));
+										Omegapi0_tmp[k][5] = sqrt(pow(Omegapi0_tmp[k][3], 2) - pow(Omegapi0_tmp[k][4], 2));
 
-										kaon_vel_tmp[k] = cVel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
+										Omegapi0_tmp[k][6] = neu_vtx[k][0];
+										Omegapi0_tmp[k][7] = neu_vtx[k][1];
+										Omegapi0_tmp[k][8] = neu_vtx[k][2];
+										Omegapi0_tmp[k][9] = neu_vtx[k][3];
 
-										y_axis[0] = 0.;
-										y_axis[1] = X[21];
-										y_axis[2] = 0.;
+										pi0_tmp[k][0] = pi0_mom[1][0];
+										pi0_tmp[k][1] = pi0_mom[1][1];
+										pi0_tmp[k][2] = pi0_mom[1][2];
+										pi0_tmp[k][3] = pi0_mom[1][3];
 
-										plane_intersection(bhabha_vtx, y_axis, neu_vtx[k], fourKnetri_tmp[k], ip_tmp[k]);
+										pi0_tmp[k][4] = sqrt(pow(pi0_tmp[k][0], 2) + pow(pi0_tmp[k][1], 2) + pow(pi0_tmp[k][2], 2));
+										pi0_tmp[k][5] = sqrt(pow(pi0_tmp[k][3], 2) - pow(pi0_tmp[k][4], 2));
 
-										ip_tmp[k][0] = bhabha_vtx[0];
-										ip_tmp[k][1] = bhabha_vtx[1];
-										if (abs(ip_tmp[k][2] - bhabha_vtx[2]) > 2)
-											ip_tmp[k][2] = bhabha_vtx[2];
+										pi0_tmp[k][6] = neu_vtx[k][0];
+										pi0_tmp[k][7] = neu_vtx[k][1];
+										pi0_tmp[k][8] = neu_vtx[k][2];
+										pi0_tmp[k][9] = neu_vtx[k][3];
 
-										dist_tmp[k] = sqrt(pow(neu_vtx[k][0] - ip_tmp[k][0], 2) +
-																			 pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
-																			 pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
+										Omegarec_tmp[k][0] = omega_mom[0];
+										Omegarec_tmp[k][1] = omega_mom[1];
+										Omegarec_tmp[k][2] = omega_mom[2];
+										Omegarec_tmp[k][3] = omega_mom[3];
 
-										value[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - mK0, 2));
+										Omegarec_tmp[k][4] = sqrt(pow(Omegarec_tmp[k][0], 2) + pow(Omegarec_tmp[k][1], 2) + pow(Omegarec_tmp[k][2], 2));
+										Omegarec_tmp[k][5] = sqrt(pow(Omegarec_tmp[k][3], 2) - pow(Omegarec_tmp[k][4], 2));
+
+										Omegarec_tmp[k][6] = neu_vtx[k][0];
+										Omegarec_tmp[k][7] = neu_vtx[k][1];
+										Omegarec_tmp[k][8] = neu_vtx[k][2];
+										Omegarec_tmp[k][9] = neu_vtx[k][3];
+
+										ip_tmp[k][0] = neu_vtx[k][0];
+										ip_tmp[k][1] = neu_vtx[k][1];
+										ip_tmp[k][2] = neu_vtx[k][2];
+
+										value[k] = sqrt(pow(Omegarec_tmp[k][5] - mOmega, 2) +
+																		pow(Omegapi0_tmp[k][5] - mPi0, 2) +
+																		pow(pi0_tmp[k][5] - mPi0, 2));
 
 										if (TMath::IsNaN(value[k]))
 											value[k] = 999999.;
@@ -445,22 +509,44 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 												gamma_mom_final[l][7] = X[l * 5 + 3] + Tcorr;
 											}
 
-											fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
-											fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
-											fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
-											fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
-											fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
-											fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
-											fourKnetri_kinfit[6] = neu_vtx_min[0];
-											fourKnetri_kinfit[7] = neu_vtx_min[1];
-											fourKnetri_kinfit[8] = neu_vtx_min[2];
-											fourKnetri_kinfit[9] = neu_vtx_min[3];
+											Omegapi0_kinfit[0] = Omegapi0_tmp[0][0];
+											Omegapi0_kinfit[1] = Omegapi0_tmp[0][1];
+											Omegapi0_kinfit[2] = Omegapi0_tmp[0][2];
+											Omegapi0_kinfit[3] = Omegapi0_tmp[0][3];
+											Omegapi0_kinfit[4] = Omegapi0_tmp[0][4];
+											Omegapi0_kinfit[5] = Omegapi0_tmp[0][5];
+											Omegapi0_kinfit[6] = neu_vtx_min[0];
+											Omegapi0_kinfit[7] = neu_vtx_min[1];
+											Omegapi0_kinfit[8] = neu_vtx_min[2];
+											Omegapi0_kinfit[9] = neu_vtx_min[3];
+
+											pi0_kinfit[0] = pi0_tmp[0][0];
+											pi0_kinfit[1] = pi0_tmp[0][1];
+											pi0_kinfit[2] = pi0_tmp[0][2];
+											pi0_kinfit[3] = pi0_tmp[0][3];
+											pi0_kinfit[4] = pi0_tmp[0][4];
+											pi0_kinfit[5] = pi0_tmp[0][5];
+											pi0_kinfit[6] = neu_vtx_min[0];
+											pi0_kinfit[7] = neu_vtx_min[1];
+											pi0_kinfit[8] = neu_vtx_min[2];
+											pi0_kinfit[9] = neu_vtx_min[3];
+
+											Omegarec_kinfit[0] = Omegarec_tmp[0][0];
+											Omegarec_kinfit[1] = Omegarec_tmp[0][1];
+											Omegarec_kinfit[2] = Omegarec_tmp[0][2];
+											Omegarec_kinfit[3] = Omegarec_tmp[0][3];
+											Omegarec_kinfit[4] = Omegarec_tmp[0][4];
+											Omegarec_kinfit[5] = Omegarec_tmp[0][5];
+											Omegarec_kinfit[6] = neu_vtx_min[0];
+											Omegarec_kinfit[7] = neu_vtx_min[1];
+											Omegarec_kinfit[8] = neu_vtx_min[2];
+											Omegarec_kinfit[9] = neu_vtx_min[3];
 
 											iptri_kinfit[0] = ip_tmp[0][0];
 											iptri_kinfit[1] = ip_tmp[0][1];
 											iptri_kinfit[2] = ip_tmp[0][2];
 
-											bunchnum = X_min(27);
+											bunchnum = X_min(33);
 										}
 										else if (cond_time_clus[1] && value[1] < value[0])
 										{
@@ -501,22 +587,44 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 												gamma_mom_final[l][7] = X[l * 5 + 3] + Tcorr;
 											}
 
-											fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
-											fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
-											fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
-											fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
-											fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
-											fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
-											fourKnetri_kinfit[6] = neu_vtx_min[0];
-											fourKnetri_kinfit[7] = neu_vtx_min[1];
-											fourKnetri_kinfit[8] = neu_vtx_min[2];
-											fourKnetri_kinfit[9] = neu_vtx_min[3];
+											Omegapi0_kinfit[0] = Omegapi0_tmp[1][0];
+											Omegapi0_kinfit[1] = Omegapi0_tmp[1][1];
+											Omegapi0_kinfit[2] = Omegapi0_tmp[1][2];
+											Omegapi0_kinfit[3] = Omegapi0_tmp[1][3];
+											Omegapi0_kinfit[4] = Omegapi0_tmp[1][4];
+											Omegapi0_kinfit[5] = Omegapi0_tmp[1][5];
+											Omegapi0_kinfit[6] = neu_vtx_min[0];
+											Omegapi0_kinfit[7] = neu_vtx_min[1];
+											Omegapi0_kinfit[8] = neu_vtx_min[2];
+											Omegapi0_kinfit[9] = neu_vtx_min[3];
+
+											pi0_kinfit[0] = pi0_tmp[1][0];
+											pi0_kinfit[1] = pi0_tmp[1][1];
+											pi0_kinfit[2] = pi0_tmp[1][2];
+											pi0_kinfit[3] = pi0_tmp[1][3];
+											pi0_kinfit[4] = pi0_tmp[1][4];
+											pi0_kinfit[5] = pi0_tmp[1][5];
+											pi0_kinfit[6] = neu_vtx_min[0];
+											pi0_kinfit[7] = neu_vtx_min[1];
+											pi0_kinfit[8] = neu_vtx_min[2];
+											pi0_kinfit[9] = neu_vtx_min[3];
+
+											Omegarec_kinfit[0] = Omegarec_tmp[1][0];
+											Omegarec_kinfit[1] = Omegarec_tmp[1][1];
+											Omegarec_kinfit[2] = Omegarec_tmp[1][2];
+											Omegarec_kinfit[3] = Omegarec_tmp[1][3];
+											Omegarec_kinfit[4] = Omegarec_tmp[1][4];
+											Omegarec_kinfit[5] = Omegarec_tmp[1][5];
+											Omegarec_kinfit[6] = neu_vtx_min[0];
+											Omegarec_kinfit[7] = neu_vtx_min[1];
+											Omegarec_kinfit[8] = neu_vtx_min[2];
+											Omegarec_kinfit[9] = neu_vtx_min[3];
 
 											iptri_kinfit[0] = ip_tmp[1][0];
 											iptri_kinfit[1] = ip_tmp[1][1];
 											iptri_kinfit[2] = ip_tmp[1][2];
 
-											bunchnum = X_min(27);
+											bunchnum = X_min(33);
 										}
 										else
 										{
@@ -537,16 +645,16 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 												gamma_mom_final[l][7] = 999.;
 											}
 
-											fourKnetri_kinfit[0] = 999.;
-											fourKnetri_kinfit[1] = 999.;
-											fourKnetri_kinfit[2] = 999.;
-											fourKnetri_kinfit[3] = 999.;
-											fourKnetri_kinfit[4] = 999.;
-											fourKnetri_kinfit[5] = 999.;
-											fourKnetri_kinfit[6] = 999.;
-											fourKnetri_kinfit[7] = 999.;
-											fourKnetri_kinfit[8] = 999.;
-											fourKnetri_kinfit[9] = 999.;
+											Omegarec_kinfit[0] = 999.;
+											Omegarec_kinfit[1] = 999.;
+											Omegarec_kinfit[2] = 999.;
+											Omegarec_kinfit[3] = 999.;
+											Omegarec_kinfit[4] = 999.;
+											Omegarec_kinfit[5] = 999.;
+											Omegarec_kinfit[6] = 999.;
+											Omegarec_kinfit[7] = 999.;
+											Omegarec_kinfit[8] = 999.;
+											Omegarec_kinfit[9] = 999.;
 
 											iptri_kinfit[0] = 999.;
 											iptri_kinfit[1] = 999.;
@@ -558,7 +666,10 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 								}
 							}
 						}
+
 			chi2->Fill(CHISQRMIN);
+			pi01->Fill(Omegarec_kinfit[5]);
+			pi02->Fill(pi0_kinfit[5]);
 		}
 		else
 		{
@@ -579,16 +690,38 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 				gamma_mom_final[l][7] = 999.;
 			}
 
-			fourKnetri_kinfit[0] = 999.;
-			fourKnetri_kinfit[1] = 999.;
-			fourKnetri_kinfit[2] = 999.;
-			fourKnetri_kinfit[3] = 999.;
-			fourKnetri_kinfit[4] = 999.;
-			fourKnetri_kinfit[5] = 999.;
-			fourKnetri_kinfit[6] = 999.;
-			fourKnetri_kinfit[7] = 999.;
-			fourKnetri_kinfit[8] = 999.;
-			fourKnetri_kinfit[9] = 999.;
+			Omegapi0_kinfit[0] = 999.;
+			Omegapi0_kinfit[1] = 999.;
+			Omegapi0_kinfit[2] = 999.;
+			Omegapi0_kinfit[3] = 999.;
+			Omegapi0_kinfit[4] = 999.;
+			Omegapi0_kinfit[5] = 999.;
+			Omegapi0_kinfit[6] = 999.;
+			Omegapi0_kinfit[7] = 999.;
+			Omegapi0_kinfit[8] = 999.;
+			Omegapi0_kinfit[9] = 999.;
+
+			pi0_kinfit[0] = 999.;
+			pi0_kinfit[1] = 999.;
+			pi0_kinfit[2] = 999.;
+			pi0_kinfit[3] = 999.;
+			pi0_kinfit[4] = 999.;
+			pi0_kinfit[5] = 999.;
+			pi0_kinfit[6] = 999.;
+			pi0_kinfit[7] = 999.;
+			pi0_kinfit[8] = 999.;
+			pi0_kinfit[9] = 999.;
+
+			Omegarec_kinfit[0] = 999.;
+			Omegarec_kinfit[1] = 999.;
+			Omegarec_kinfit[2] = 999.;
+			Omegarec_kinfit[3] = 999.;
+			Omegarec_kinfit[4] = 999.;
+			Omegarec_kinfit[5] = 999.;
+			Omegarec_kinfit[6] = 999.;
+			Omegarec_kinfit[7] = 999.;
+			Omegarec_kinfit[8] = 999.;
+			Omegarec_kinfit[9] = 999.;
 
 			iptri_kinfit[0] = 999.;
 			iptri_kinfit[1] = 999.;
@@ -610,16 +743,28 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 	func->SetParLimits(1, 1.0, 10.0);
 
 	TCanvas *c1 = new TCanvas("c1", "", 750, 750);
-	// chi2->Fit(func);
-	//c1->SetLogy(1);
 
 	chi2->GetYaxis()->SetRangeUser(0, 1.2 * chi2->GetMaximum());
 	chi2->Draw();
 	c1->Print("test_chi2.png");
+
+	TCanvas *c2 = new TCanvas("c2", "", 750, 750);
+
+	pi01->GetYaxis()->SetRangeUser(0, 1.2 * pi01->GetMaximum());
+	pi01->Draw();
+	c2->Print("pi01.png");
+
+	TCanvas *c3 = new TCanvas("c3", "", 750, 750);
+
+	pi02->GetYaxis()->SetRangeUser(0, 1.2 * pi02->GetMaximum());
+	pi02->Draw();
+	c3->Print("pi02.png");
 
 	tree->Print();
 
 	file->Write();
 	file->Close();
 	delete file;
+
+	return 0;
 }
