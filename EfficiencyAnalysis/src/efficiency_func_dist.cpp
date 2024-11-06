@@ -4,9 +4,8 @@
 #include <TH1F.h>
 #include <TCanvas.h>
 
-#include "../../Include/const.h"
-#include "../../Include/Codes/lorentz_transf.h"
-#include "chain_init.C"
+#include <const.h>
+#include <lorentz_transf.h>
 
 void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
 {

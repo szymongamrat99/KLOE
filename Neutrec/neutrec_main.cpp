@@ -191,7 +191,6 @@ int main(int argc, char *argv[])
   errLogger.errLogStats(ErrFileMain);
 
   ErrFileMain.close();
-  ErrFileMain.close();
 
   return 0;
 }

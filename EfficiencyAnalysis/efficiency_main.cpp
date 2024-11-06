@@ -2,7 +2,7 @@
 
 #include <TMath.h>
 
-#include "inc/omegarec.hpp"
+#include "inc/efficiency.hpp"
 
 using namespace std;
 using std::chrono::duration;
@@ -12,10 +12,10 @@ using std::chrono::minutes;
 
 int main(int argc, char *argv[])
 {
-  Controls::Menu *menu = new Controls::Menu(6);
+  Controls::Menu *menu = new Controls::Menu(7);
   ErrorHandling::ErrorLogs logger;
   ofstream LogFile;
-  LogFile.open(gen_vars_dir + logs_dir + "OmegaRec.log");
+  LogFile.open(efficiency_dir + logs_dir + "Efficiency.log");
   setGlobalStyle();
 
   Int_t firstFile, lastFile, ind_data_mc;
@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     return int(err);
   }
 
-  Controls::OmegaRec menuOpt;
+  Controls::Efficiency menuOpt;
   bool
       dataTypeErr,
       menuRangeErr;
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
       cin >> menuOpt;
 
       dataTypeErr = !cin;
-      menuRangeErr = menuOpt < Controls::OmegaRec::OMEGA_REC || menuOpt > Controls::OmegaRec::EXIT;
+      menuRangeErr = menuOpt < Controls::Efficiency::EFF_SCAN || menuOpt > Controls::Efficiency::EXIT;
 
       if (dataTypeErr)
       {
@@ -99,25 +99,19 @@ int main(int argc, char *argv[])
 
     switch (menuOpt)
     {
-    case Controls::OmegaRec::OMEGA_REC:
-    {
-      //omegarec(firstFile, lastFile, 10, 0, 0, Controls::DataType::MC_DATA);
-      break;
-    }
-    case Controls::OmegaRec::OMEGA_CUTS:
-    {
-      //omegacuts(firstFile, lastFile);
-      break;
-    }
-    case Controls::OmegaRec::PLOTS:
+    case Controls::Efficiency::EFF_SCAN:
     {
       auto start = std::chrono::system_clock::now();
-      plots(firstFile, lastFile, 10, 5, 1, Controls::DataType::MC_DATA);
+      efficiencyScan(firstFile, lastFile);
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
       break;
     }
-    case Controls::OmegaRec::EXIT:
+    case Controls::Efficiency::EFF_DIST:
+    {
+      break;
+    }
+    case Controls::Efficiency::EXIT:
     {
       break;
     }
@@ -125,7 +119,7 @@ int main(int argc, char *argv[])
       break;
     }
 
-  } while (menuOpt != Controls::OmegaRec::EXIT);
+  } while (menuOpt != Controls::Efficiency::EXIT);
 
   LogFile.close();
 

@@ -76,8 +76,14 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	chain->SetBranchAddress("Chi2", &baseKin.Chi2);
 	chain->SetBranchAddress("minv4gam", &baseKin.minv4gam);
 	chain->SetBranchAddress("Kchboost", baseKin.Kchboost);
-	//chain->SetBranchAddress("Knereclor", neutVars.Knerec);
+	// chain->SetBranchAddress("Knereclor", neutVars.Knerec);
 	chain->SetBranchAddress("Qmiss", &baseKin.Qmiss);
+
+	Float_t
+			PichFourMom[2][4];
+
+	chain->SetBranchAddress("trk1", PichFourMom[0]);
+	chain->SetBranchAddress("trk2", PichFourMom[1]);
 
 	chain->SetBranchAddress("Xcl", baseKin.cluster[0]);
 	chain->SetBranchAddress("Ycl", baseKin.cluster[1]);
@@ -91,6 +97,10 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	chain->SetBranchAddress("Bpy", &baseKin.phi_mom[1]);
 	chain->SetBranchAddress("Bpz", &baseKin.phi_mom[2]);
 	chain->SetBranchAddress("Broots", &baseKin.phi_mom[3]);
+
+	chain->SetBranchAddress("Bx", &baseKin.bhabha_vtx[0]);
+	chain->SetBranchAddress("By", &baseKin.bhabha_vtx[1]);
+	chain->SetBranchAddress("Bz", &baseKin.bhabha_vtx[2]);
 
 	// ===========================================================================
 
@@ -189,7 +199,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 			velocity_kne = cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
 
 			tch_LAB = sqrt(pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + pow(baseKin.Kchboost[8] - baseKin.ip[2], 2)) / velocity_kch;
-			tne_LAB = sqrt(pow(neutVars.Knerec[6] - baseKin.ip[0], 2) + pow(neutVars.Knerec[7] - baseKin.ip[1], 2) + pow(neutVars.Knerec[8] - baseKin.ip[2], 2)) / velocity_kne;//neutVars.Knerec[9];
+			tne_LAB = sqrt(pow(neutVars.Knerec[6] - baseKin.ip[0], 2) + pow(neutVars.Knerec[7] - baseKin.ip[1], 2) + pow(neutVars.Knerec[8] - baseKin.ip[2], 2)) / velocity_kne; // neutVars.Knerec[9];
 
 			Kch_LAB[0] = baseKin.Kchboost[6] - baseKin.ip[0];
 			Kch_LAB[1] = baseKin.Kchboost[7] - baseKin.ip[1];
@@ -240,7 +250,23 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 			trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
-			Double_t radius[2] = {0., 0.}, 
+			Float_t
+					boost_vec_Kchboost[3] = {-baseKin.Kchboost[0] / baseKin.Kchboost[3],
+																	 -baseKin.Kchboost[1] / baseKin.Kchboost[3],
+																	 -baseKin.Kchboost[2] / baseKin.Kchboost[3]},
+					PichFourMomKaonCM[2][4],
+					anglePichKaonCM;
+
+			lorentz_transf(boost_vec_Kchboost, PichFourMom[0], PichFourMomKaonCM[0]);
+			lorentz_transf(boost_vec_Kchboost, PichFourMom[1], PichFourMomKaonCM[1]);
+
+			TVector3
+					pich1(PichFourMomKaonCM[0][0], PichFourMomKaonCM[0][1], PichFourMomKaonCM[0][2]),
+					pich2(PichFourMomKaonCM[1][0], PichFourMomKaonCM[1][1], PichFourMomKaonCM[1][2]);
+
+			anglePichKaonCM = pich1.Angle(pich2) * 180. / M_PI;
+
+			Double_t radius[2] = {0., 0.},
 							 radius_ch[2] = {0., 0.},
 							 rho_pm_IP = 0.,
 							 rho_00_IP = 0.;
@@ -251,8 +277,8 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 			Bool_t cuts[4] = {false, false, false, false};
 
-			rho_pm_IP = sqrt(pow(baseKin.Kchboost[6] - baseKin.bhabha_vtx[0],2) + pow(baseKin.Kchboost[7] - baseKin.bhabha_vtx[1],2));
-			rho_00_IP = sqrt(pow(neutVars.Knerec[6] - baseKin.bhabha_vtx[0],2) + pow(neutVars.Knerec[7] - baseKin.bhabha_vtx[1],2));
+			rho_pm_IP = sqrt(pow(baseKin.Kchboost[6] - baseKin.bhabha_vtx[0], 2) + pow(baseKin.Kchboost[7] - baseKin.bhabha_vtx[1], 2));
+			rho_00_IP = sqrt(pow(neutVars.Knerec[6] - baseKin.bhabha_vtx[0], 2) + pow(neutVars.Knerec[7] - baseKin.bhabha_vtx[1], 2));
 
 			for (Int_t i = 0; i < 3; i++)
 			{
@@ -272,12 +298,38 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 			radius_ch[0] = sqrt(radius_ch[0]);
 			radius_ch[1] = sqrt(radius_ch[1]);
 
+			Int_t
+					sigmas_neu = 1.,
+					sigmas_ip = 3.;
+
+			Bool_t
+					cond[6],
+					cond_tot;
+
+			cond[0] = abs(baseKin.Kchboost[6] - neutVars.Knerec[6]) < sigmas_neu * 16.89;
+			cond[1] = abs(baseKin.Kchboost[7] - neutVars.Knerec[7]) < sigmas_neu * 16.77;
+			cond[2] = abs(baseKin.Kchboost[8] - neutVars.Knerec[8]) < sigmas_neu * 9.89;
+			cond[3] = abs(baseKin.Kchboost[6] - baseKin.bhabha_vtx[0]) < sigmas_ip * 2.63;
+			cond[4] = abs(baseKin.Kchboost[7] - baseKin.bhabha_vtx[1]) < sigmas_ip * 2.03;
+			cond[5] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < sigmas_ip * 3.39;
+
+			cond_tot = cond[0] && cond[1] && cond[2] && cond[3] && cond[4] && cond[5];
+
 			cuts[0] = abs(radius[0] - 10.9554) > 1.19279 * sigma;
 			cuts[1] = 1; // abs(radius[1] - 4.5) > 1.5 * sigma;
 			cuts[2] = abs(radius_ch[0] - 10.5840) > 0.681656 * sigma;
 			cuts[3] = 1; // abs(radius_ch[1] - 4.45238) > 1.29837 * sigma;
-			cuts[4] = rho_pm_IP > 1.0;
-			cuts[5] = rho_00_IP > 1.0;
+
+			if (cond_tot)
+			{
+				cuts[4] = 1;//sqrt(pow(rho_00_IP, 2) + pow(rho_pm_IP, 2)) > 0.5;
+				cuts[5] = 1;//anglePichKaonCM > 179.5;
+			}
+			else
+			{
+				cuts[4] = 1;
+				cuts[5] = 1;
+			}
 
 			if (baseKin.mcflag == 1)
 			{
@@ -287,7 +339,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 					no_cuts_sig[1].push_back(baseKin.Dtboostlor);
 				}
 
-				if (cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] || cuts[5]))
+				if (cuts[0] && cuts[1] && cuts[2] && cuts[3] && cuts[4] && cuts[5])
 				{
 					if (baseKin.mctruth_int == 1)
 					{
@@ -322,7 +374,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 				}
 			}
 
-			if (baseKin.mcflag == 0 && cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] || cuts[5]))
+			if (baseKin.mcflag == 0 && cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] && cuts[5]))
 			{
 				event.time_diff_data.push_back(baseKin.Dtboostlor);
 			}
