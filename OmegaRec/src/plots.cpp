@@ -34,7 +34,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 	TString
 			mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
-			omega_name = omegarec_dir + root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root,
+			omega_name = omegarec_dir + root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + int(data_type) + ext_root,
 			filename_triangle = neutrec_dir + root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
 
 	file_mctruth = new TFile(mctruth_name);
@@ -45,36 +45,59 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	file_omega = new TFile(omega_name);
 	tree_omega = (TTree *)file_omega->Get(omegarec_tree);
 
-	Float_t
-			gamma_kinfit[4][8],
-			Omegarec_kinfit[10],
-			pi0_kinfit[2][10],
-			ip_kinfit[3],
-			chi2min;
-
 	Int_t
-			done_kinfit,
-			g4taken_kinfit[4],
-			bunchnum;
+			doneOmega,
+			g4takenomega[4];
 
-	tree_omega->SetBranchAddress("gamma1tri_kinfit", gamma_kinfit[0]);
-	tree_omega->SetBranchAddress("gamma2tri_kinfit", gamma_kinfit[1]);
-	// tree_omega->SetBranchAddress("gamma3tri_kinfit", gamma_kinfit[2]);
-	// tree_omega->SetBranchAddress("gamma4tri_kinfit", gamma_kinfit[3]);
+	Float_t
+			gammaomega[4][8],
+			Omegapi0[6],
+			Pi0[6],
+			PichFourMom[2][4],
+			Omegarec[6],
+			lengthPhotonMin[4],
+			lengthKch,
+			rho_00,
+			rho_pm_IP,
+			rho_00_IP,
+			rho,
+			anglePi0KaonCM,
+			anglePichKaonCM,
+			anglePi0OmegaPhiCM,
+			anglePhiOmega,
+			neu_vtx_avg[3];
 
-	tree_omega->SetBranchAddress("omegapi0tri_kinfit", pi0_kinfit[0]);
-	tree_omega->SetBranchAddress("pi0_kinfit", pi0_kinfit[1]);
+	tree_omega->SetBranchAddress("gamma1omega", gammaomega[0]);
+	tree_omega->SetBranchAddress("gamma2omega", gammaomega[1]);
+	tree_omega->SetBranchAddress("gamma3omega", gammaomega[2]);
+	tree_omega->SetBranchAddress("gamma4omega", gammaomega[3]);
 
-	tree_omega->SetBranchAddress("omega_kinfit", Omegarec_kinfit);
+	tree_omega->SetBranchAddress("pich1", PichFourMom[0]);
+	tree_omega->SetBranchAddress("pich2", PichFourMom[1]);
 
-	tree_omega->SetBranchAddress("iptri_kinfit", ip_kinfit);
-	tree_omega->SetBranchAddress("done4_kinfit", &done_kinfit);
+	tree_omega->SetBranchAddress("omegapi0", Omegapi0);
+	tree_omega->SetBranchAddress("pi0", Pi0);
 
-	tree_omega->SetBranchAddress("g4takentri_kinfit", g4taken_kinfit);
+	tree_omega->SetBranchAddress("omega", Omegarec);
 
-	tree_omega->SetBranchAddress("bunchnum", &bunchnum);
+	tree_omega->SetBranchAddress("doneomega", &doneOmega);
 
-	tree_omega->SetBranchAddress("chi2min", &chi2min);
+	tree_omega->SetBranchAddress("g4takenomega", g4takenomega);
+
+	tree_omega->SetBranchAddress("lengthphoton", lengthPhotonMin);
+
+	tree_omega->SetBranchAddress("lengthKch", &lengthKch);
+
+	tree_omega->SetBranchAddress("NeuVtxAvg", neu_vtx_avg);
+
+	tree_omega->SetBranchAddress("rho_00", &rho_00);
+	tree_omega->SetBranchAddress("rho_00_IP", &rho_00_IP);
+	tree_omega->SetBranchAddress("rho_pm_IP", &rho_pm_IP);
+	tree_omega->SetBranchAddress("rho", &rho);
+	tree_omega->SetBranchAddress("anglePi0KaonCM", &anglePi0KaonCM),
+	tree_omega->SetBranchAddress("anglePichKaonCM", &anglePichKaonCM),
+	tree_omega->SetBranchAddress("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM),
+	tree_omega->SetBranchAddress("anglePhiOmega", &anglePhiOmega);
 
 	file_triangle = new TFile(filename_triangle);
 	tree_triangle = (TTree *)file_triangle->Get(neutrec_triangle_tree);
@@ -96,8 +119,6 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 	tree_triangle->SetBranchAddress("fourKnetriangle", Knetri_kinfit);
 
-	tree_triangle->SetBranchAddress("g4taken_triangle", g4taken_kinfit);
-
 	tree_triangle->SetBranchAddress("chi2min", &chi2min_triangle);
 
 	tree_triangle->SetBranchAddress("minv4gam", &minv4gam);
@@ -106,7 +127,6 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	tree_triangle->SetBranchAddress("done_triangle", &done_kinfit_triangle);
 
 	Float_t
-			PichFourMom[2][4],
 			Kchrec[9],
 			ip_avg[3],
 			Kchboost[9];
@@ -119,9 +139,6 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	chain->SetBranchAddress("Enecl", baseKin.cluster[4]);
 
 	chain->SetBranchAddress("ncll", baseKin.ncll);
-
-	chain->SetBranchAddress("trk1", PichFourMom[0]);
-	chain->SetBranchAddress("trk2", PichFourMom[1]);
 
 	chain->SetBranchAddress("Kchrec", Kchrec);
 	chain->SetBranchAddress("Kchboost", Kchboost);
@@ -148,7 +165,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 	const Int_t max_count = TMath::Factorial(4);
 	Int_t count = 0, ind_gam[4], mc_ind[4] = {0, 1, 2, 3}, min_ind[max_count];
-	Float_t clus_diff[max_count], clus_diff_min, neu_vtx[3], minv_pi0[2], minv_omega;
+	Float_t clus_diff[max_count], clus_diff_min, neu_vtx[3], minv_pi0[2];
 
 	Bool_t clus_time[max_count];
 
@@ -212,7 +229,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	for (Int_t i = 0; i < channNum; i++)
 	{
 		hist2d_name = channName[i];
-		hist2d.push_back(new TH2D(hist2d_name, "", 100.0, 178.0, 182.0, 100.0, 0.0, 10.0));
+		hist2d.push_back(new TH2D(hist2d_name, "", 30.0, 155.0, 182.0, 30.0, 0.0, 5.0));
 	};
 
 	for (Int_t i = 0; i < channNum; i++)
@@ -251,7 +268,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			g4takenPi0[2][2];
 
 	Float_t
-			PhotonMom[4][4],
+			PhotonMom[4][8],
 			PhotonMomPi0[2][2][4],
 			Pi0Mom[2][4],
 			OmegaMom[4];
@@ -262,32 +279,6 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	TString
 			name = efficiency_dir + root_files_dir + cut_vars_filename + first_file + "_" + last_file + ext_root;
 
-	Float_t
-			rho_00,
-			rho_pm_IP,
-			rho_00_IP,
-			rho,
-			lengthKaon[4],
-			lengthCh,
-			anglePi0KaonCM,
-			anglePichKaonCM,
-			anglePi0OmegaPhiCM,
-			anglePhiOmega;
-
-	// Initialization of the cut vars TTree
-	TFile *file = new TFile(name, "update");
-	TTree *tree = new TTree(cut_vars_tree, "Cut variables to use");
-
-	TBranch
-			*b1 = tree->Branch("rho_00", &rho_00, "rho_00/F"),
-			*b2 = tree->Branch("rho_00_IP", &rho_00_IP, "rho_00_IP/F"),
-			*b3 = tree->Branch("rho_pm_IP", &rho_pm_IP, "rho_pm_IP/F"),
-			*b4 = tree->Branch("rho", &rho, "rho/F"),
-			*b5 = tree->Branch("anglePi0KaonCM", &anglePi0KaonCM, "anglePi0KaonCM/F"),
-			*b6 = tree->Branch("anglePichKaonCM", &anglePichKaonCM, "anglePichKaonCM/F"),
-			*b7 = tree->Branch("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM, "anglePi0OmegaPhiCM/F"),
-			*b8 = tree->Branch("anglePhiOmega", &anglePhiOmega, "anglePhiOmega/F");
-
 	for (Int_t i = 0; i < nentries; i++)
 	{
 		chain->GetEntry(i);
@@ -296,143 +287,13 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			for (Int_t k = 0; k < 4; k++)
 				PhotonMom[j][k] = gamma_kinfit_triangle[j][k];
 
-		// Pairing of photons to 2Pi0 - without Omega assumption!
-		Pi0PhotonPair(g4taken_kinfit, PhotonMom, g4takenPi0, PhotonMomPi0, Pi0Mom, false, PichFourMom, OmegaMom);
-
-		// Calculation of the "kaon" path from IP.
-		rho_00 = sqrt(pow(Kchrec[6] - Knetri_kinfit[6], 2) + pow(Kchrec[7] - Knetri_kinfit[7], 2));
-		rho_pm_IP = sqrt(pow(Kchrec[6] - ip_avg[0], 2) + pow(Kchrec[7] - ip_avg[1], 2));
-		rho_00_IP = sqrt(pow(Knetri_kinfit[6] - ip_avg[0], 2) + pow(Knetri_kinfit[7] - ip_avg[1], 2));
-		rho = sqrt(pow(rho_pm_IP, 2) + pow(rho_00_IP, 2));
-
-		lengthCh = sqrt( pow(Kchrec[6] - ip_avg[0],2) +
-										 pow(Kchrec[7] - ip_avg[1],2) +
-										 pow(Kchrec[8] - ip_avg[2],2)	);
-
-		for (Int_t ii = 0; ii < 4; ii++)
-		{
-			lengthKaon[ii] = sqrt( pow(gamma_kinfit_triangle[ii][4] - ip_avg[0],2) +
-												  	pow(gamma_kinfit_triangle[ii][5] - ip_avg[1],2) +
-												  	pow(gamma_kinfit_triangle[ii][6] - ip_avg[2],2)	) - (gamma_kinfit_triangle[ii][7] / cVel);
-		}
-		
-
-		// Calculation of pi+pi-pi0 invariant mass - best option chosen by quadrature.
-		for (Int_t j = 0; j < 2; j++)
-		{
-			M_omega_tmp[j] = sqrt(pow(PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[j][3], 2) -
-														pow(PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[j][0], 2) -
-														pow(PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[j][1], 2) -
-														pow(PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[j][2], 2));
-			M_omega_diff[j] = M_omega_tmp[j] - mOmega;
-		}
-
-		Float_t
-				Pi0NonOmega[4];
-		//
-		if (std::isnan(M_omega_diff[0]) || std::isnan(M_omega_diff[1]))
-			minv_omega = 999999.;
-		else if (std::isinf(M_omega_diff[0]) || std::isinf(M_omega_diff[1]))
-			minv_omega = 999999.;
-		else
-		{
-			if (abs(M_omega_diff[0]) < abs(M_omega_diff[1]))
-			{
-				minv_omega = M_omega_tmp[0];
-				OmegaMom[0] = PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[0][0];
-				OmegaMom[1] = PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[0][1];
-				OmegaMom[2] = PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[0][2];
-				OmegaMom[3] = PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[0][3];
-
-				Pi0NonOmega[0] = Pi0Mom[1][0];
-				Pi0NonOmega[1] = Pi0Mom[1][1];
-				Pi0NonOmega[2] = Pi0Mom[1][2];
-				Pi0NonOmega[3] = Pi0Mom[1][3];
-			}
-			else
-			{
-				minv_omega = M_omega_tmp[1];
-				OmegaMom[0] = PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[1][0];
-				OmegaMom[1] = PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[1][1];
-				OmegaMom[2] = PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[1][2];
-				OmegaMom[3] = PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[1][3];
-
-				Pi0NonOmega[0] = Pi0Mom[0][0];
-				Pi0NonOmega[1] = Pi0Mom[0][1];
-				Pi0NonOmega[2] = Pi0Mom[0][2];
-				Pi0NonOmega[3] = Pi0Mom[0][3];
-			}
-		}
-		//
-		// Lorentz transformation of Pich to Kaon CM frame
-		Float_t
-				boost_vec_Kchboost[3] = {-Kchboost[0] / Kchboost[3],
-																 -Kchboost[1] / Kchboost[3],
-																 -Kchboost[2] / Kchboost[3]},
-				PichFourMomKaonCM[2][4];
-
-		lorentz_transf(boost_vec_Kchboost, PichFourMom[0], PichFourMomKaonCM[0]);
-		lorentz_transf(boost_vec_Kchboost, PichFourMom[1], PichFourMomKaonCM[1]);
-
-		TVector3
-				pich1(PichFourMomKaonCM[0][0], PichFourMomKaonCM[0][1], PichFourMomKaonCM[0][2]),
-				pich2(PichFourMomKaonCM[1][0], PichFourMomKaonCM[1][1], PichFourMomKaonCM[1][2]);
-
-		anglePichKaonCM = pich1.Angle(pich2) * 180. / M_PI;
-
-		// Lorentz transformation of Pi0 to Kaon CM frame
-		Float_t
-				boost_vec_Kne[3] = {-(baseKin.phi_mom[0] - Kchboost[0]) / (baseKin.phi_mom[3] - Kchboost[3]),
-														-(baseKin.phi_mom[1] - Kchboost[1]) / (baseKin.phi_mom[3] - Kchboost[3]),
-														-(baseKin.phi_mom[2] - Kchboost[2]) / (baseKin.phi_mom[3] - Kchboost[3])},
-				Pi0KaonCM[2][4];
-
-		lorentz_transf(boost_vec_Kne, Pi0Mom[0], Pi0KaonCM[0]);
-		lorentz_transf(boost_vec_Kne, Pi0Mom[1], Pi0KaonCM[1]);
-
-		TVector3
-				pi01(Pi0KaonCM[0][0], Pi0KaonCM[0][1], Pi0KaonCM[0][2]),
-				pi02(Pi0KaonCM[1][0], Pi0KaonCM[1][1], Pi0KaonCM[1][2]);
-
-		anglePi0KaonCM = pi01.Angle(pi02) * 180. / M_PI;
-
-		// Lorentz transformation of Pi0 to Kaon CM frame
-		Float_t
-				boost_vec_phi[3] = {-(baseKin.phi_mom[0]) / (baseKin.phi_mom[3]),
-														-(baseKin.phi_mom[1]) / (baseKin.phi_mom[3]),
-														-(baseKin.phi_mom[2]) / (baseKin.phi_mom[3])},
-				Pi0NonOmegaCM[4],
-				OmegaMomCM[4];
-
-		lorentz_transf(boost_vec_phi, Pi0NonOmega, Pi0NonOmegaCM);
-		lorentz_transf(boost_vec_phi, OmegaMom, OmegaMomCM);
-
-		TVector3
-				pi0CM(Pi0NonOmegaCM[0], Pi0NonOmegaCM[1], Pi0NonOmegaCM[2]),
-				omegaCM(OmegaMomCM[0], OmegaMomCM[1], OmegaMomCM[2]);
-
-		anglePi0OmegaPhiCM = pi0CM.Angle(omegaCM) * 180. / M_PI;
-
-		// Angle between phi and omega
-
-		TVector3
-				phi(baseKin.phi_mom[0], baseKin.phi_mom[1], baseKin.phi_mom[2]),
-				omega(OmegaMom[0], OmegaMom[1], OmegaMom[2]);
-
-		anglePhiOmega = phi.Angle(omega) * 180. / M_PI;
-
 		// Section for the histogram filling
 
-		if(baseKin.mctruth_int == 4)
+		if (baseKin.mctruth_int == 4 && doneOmega == 1)
 		{
-			hist_control[0]->Fill(lengthKaon[0]);
-			hist_control[0]->Fill(lengthKaon[1]);
-			hist_control[0]->Fill(lengthKaon[2]);
-			hist_control[0]->Fill(lengthKaon[3]);
-			hist_control[1]->Fill(lengthCh);
-			hist_control[2]->Fill(Kchrec[8] - Knetri_kinfit[8]);
-
-			std::cout << lengthKaon[1] << std::endl;
+			hist_control[0]->Fill(Kchrec[6] - neu_vtx_avg[0]);
+			hist_control[1]->Fill(Kchrec[7] - neu_vtx_avg[1]);
+			hist_control[2]->Fill(Kchrec[8] - neu_vtx_avg[2]);
 		}
 
 		Int_t
@@ -443,57 +304,57 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				cond[6],
 				cond_tot;
 
-		cond[0] = abs(Kchrec[6] - Knetri_kinfit[6]) < sigmas_neu * 16.89;
-		cond[1] = abs(Kchrec[7] - Knetri_kinfit[7]) < sigmas_neu * 16.77;
-		cond[2] = abs(Kchrec[8] - Knetri_kinfit[8]) < sigmas_neu * 9.89;
+		cond[0] = abs(Kchrec[6] - neu_vtx_avg[0]) < sigmas_neu * 3.04;
+		cond[1] = abs(Kchrec[7] - neu_vtx_avg[1]) < sigmas_neu * 3.04;
+		cond[2] = abs(Kchrec[8] - neu_vtx_avg[2]) < sigmas_neu * 6.3;
 		cond[3] = abs(Kchrec[6] - ip_avg[0]) < sigmas_ip * 2.63;
 		cond[4] = abs(Kchrec[7] - ip_avg[1]) < sigmas_ip * 2.03;
 		cond[5] = abs(Kchrec[8] - ip_avg[2]) < sigmas_ip * 3.39;
 
-		cond_tot = 1;
+		cond_tot = cond[0] && cond[1] && cond[2];
 
-		if (cond_tot)
+		if (cond_tot && doneOmega == 1)
 		{
 
 			if (baseKin.mctruth_int == 1)
 			{
 				hist[0][0]->Fill(anglePi0OmegaPhiCM);
 				hist[0][1]->Fill(Kchrec[5]);
-				hist[0][2]->Fill(minv_omega);
+				hist[0][2]->Fill(Omegarec[5]);
 				hist[0][3]->Fill(anglePi0OmegaPhiCM);
 
 				hist_control_chann[0][0]->Fill(rho_00);
-				hist_control_chann[0][1]->Fill(Kchrec[8] - Knetri_kinfit[8]);
+				hist_control_chann[0][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
 
 				hist_pm_IP[0][0]->Fill(rho_pm_IP, event.interf_function(baseKin.Dtmc, 0, par));
 				hist_pm_IP[0][1]->Fill(Kchrec[8] - ip_avg[8], event.interf_function(baseKin.Dtmc, 0, par));
 
 				hist_00_IP[0][0]->Fill(rho_00_IP, event.interf_function(baseKin.Dtmc, 0, par));
-				hist_00_IP[0][1]->Fill(Knetri_kinfit[8] - ip_avg[8], event.interf_function(baseKin.Dtmc, 0, par));
+				hist_00_IP[0][1]->Fill(neu_vtx_avg[2] - ip_avg[8], event.interf_function(baseKin.Dtmc, 0, par));
 
 				hist2d[0]->Fill(anglePichKaonCM, rho);
 
 				hist2d_00IP_pmIP[0][0]->Fill(rho_pm_IP, rho_00_IP, event.interf_function(baseKin.Dtmc, 0, par));
-				hist2d_00IP_pmIP[1][0]->Fill(Kchrec[8] - ip_avg[8], Knetri_kinfit[8] - ip_avg[8], event.interf_function(baseKin.Dtmc, 0, par));
+				hist2d_00IP_pmIP[1][0]->Fill(abs(Kchrec[8] - ip_avg[8]), abs(neu_vtx_avg[2] - ip_avg[8]), event.interf_function(baseKin.Dtmc, 0, par));
 			}
 			if (baseKin.mctruth_int == 3)
 			{
 				hist[1][0]->Fill(anglePi0OmegaPhiCM);
 				hist[1][1]->Fill(Kchrec[5]);
-				hist[1][2]->Fill(minv_omega);
+				hist[1][2]->Fill(Omegarec[5]);
 				hist[1][3]->Fill(anglePi0OmegaPhiCM);
 
 				hist_control_chann[1][0]->Fill(rho_00);
-				hist_control_chann[1][1]->Fill(Kchrec[8] - Knetri_kinfit[8]);
+				hist_control_chann[1][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
 
 				hist_pm_IP[1][0]->Fill(rho_pm_IP);
 				hist_pm_IP[1][1]->Fill(Kchrec[8] - ip_avg[8]);
 
 				hist_00_IP[1][0]->Fill(rho_00_IP);
-				hist_00_IP[1][1]->Fill(Knetri_kinfit[8] - ip_avg[8]);
+				hist_00_IP[1][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
 				hist2d_00IP_pmIP[0][1]->Fill(rho_pm_IP, rho_00_IP);
-				hist2d_00IP_pmIP[1][1]->Fill(Kchrec[8] - ip_avg[8], Knetri_kinfit[8] - ip_avg[8]);
+				hist2d_00IP_pmIP[1][1]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 
 				hist2d[1]->Fill(anglePichKaonCM, rho);
 			}
@@ -501,20 +362,20 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			{
 				hist[2][0]->Fill(anglePi0OmegaPhiCM);
 				hist[2][1]->Fill(Kchrec[5]);
-				hist[2][2]->Fill(minv_omega);
+				hist[2][2]->Fill(Omegarec[5]);
 				hist[2][3]->Fill(anglePi0OmegaPhiCM);
 
 				hist_control_chann[2][0]->Fill(rho_00);
-				hist_control_chann[2][1]->Fill(Kchrec[8] - Knetri_kinfit[8]);
+				hist_control_chann[2][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
 
 				hist_pm_IP[2][0]->Fill(rho_pm_IP);
 				hist_pm_IP[2][1]->Fill(Kchrec[8] - ip_avg[8]);
 
 				hist_00_IP[2][0]->Fill(rho_00_IP);
-				hist_00_IP[2][1]->Fill(Knetri_kinfit[8] - ip_avg[8]);
+				hist_00_IP[2][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
 				hist2d_00IP_pmIP[0][2]->Fill(rho_pm_IP, rho_00_IP);
-				hist2d_00IP_pmIP[1][2]->Fill(Kchrec[8] - ip_avg[8], Knetri_kinfit[8] - ip_avg[8]);
+				hist2d_00IP_pmIP[1][2]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 
 				hist2d[2]->Fill(anglePichKaonCM, rho);
 			}
@@ -522,69 +383,68 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			{
 				hist[3][0]->Fill(anglePi0OmegaPhiCM);
 				hist[3][1]->Fill(Kchrec[5]);
-				hist[3][2]->Fill(minv_omega);
+				hist[3][2]->Fill(Omegarec[5]);
 				hist[3][3]->Fill(anglePi0OmegaPhiCM);
 
 				hist_control_chann[3][0]->Fill(rho_00);
-				hist_control_chann[3][1]->Fill(Kchrec[8] - Knetri_kinfit[8]);
+				hist_control_chann[3][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
 
 				hist_pm_IP[3][0]->Fill(rho_pm_IP);
 				hist_pm_IP[3][1]->Fill(Kchrec[8] - ip_avg[8]);
 
 				hist_00_IP[3][0]->Fill(rho_00_IP);
-				hist_00_IP[3][1]->Fill(Knetri_kinfit[8] - ip_avg[8]);
+				hist_00_IP[3][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
 				hist2d[3]->Fill(anglePichKaonCM, rho);
 
 				// hist2d_00IP_pmIP[0][0]->Fill(rho_pm_IP, rho_00_IP);
 
 				hist2d_00IP_pmIP[0][3]->Fill(rho_pm_IP, rho_00_IP);
-				hist2d_00IP_pmIP[1][3]->Fill(Kchrec[8] - ip_avg[8], Knetri_kinfit[8] - ip_avg[8]);
+				hist2d_00IP_pmIP[1][3]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 			}
 			if (baseKin.mctruth_int == 6)
 			{
 				hist[4][0]->Fill(anglePi0OmegaPhiCM);
 				hist[4][1]->Fill(Kchrec[5]);
-				hist[4][2]->Fill(minv_omega);
+				hist[4][2]->Fill(Omegarec[5]);
 				hist[4][3]->Fill(anglePi0OmegaPhiCM);
 
 				hist_control_chann[4][0]->Fill(rho_00);
-				hist_control_chann[4][1]->Fill(Kchrec[8] - Knetri_kinfit[8]);
+				hist_control_chann[4][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
 
 				hist_pm_IP[4][0]->Fill(rho_pm_IP);
 				hist_pm_IP[4][1]->Fill(Kchrec[8] - ip_avg[8]);
 
 				hist_00_IP[4][0]->Fill(rho_00_IP);
-				hist_00_IP[4][1]->Fill(Knetri_kinfit[8] - ip_avg[8]);
+				hist_00_IP[4][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
 				hist2d[4]->Fill(anglePichKaonCM, rho);
 
 				hist2d_00IP_pmIP[0][4]->Fill(rho_pm_IP, rho_00_IP);
-				hist2d_00IP_pmIP[1][4]->Fill(Kchrec[8] - ip_avg[8], Knetri_kinfit[8] - ip_avg[8]);
+				hist2d_00IP_pmIP[1][4]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 			}
 			if (baseKin.mctruth_int == 7)
 			{
 				hist[5][0]->Fill(anglePi0OmegaPhiCM);
 				hist[5][1]->Fill(Kchrec[5]);
-				hist[5][2]->Fill(minv_omega);
+				hist[5][2]->Fill(Omegarec[5]);
 				hist[5][3]->Fill(anglePi0OmegaPhiCM);
 
 				hist_control_chann[5][0]->Fill(rho_00);
-				hist_control_chann[5][1]->Fill(Kchrec[8] - Knetri_kinfit[8]);
+				hist_control_chann[5][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
 
 				hist_pm_IP[5][0]->Fill(rho_pm_IP);
 				hist_pm_IP[5][1]->Fill(Kchrec[8] - ip_avg[8]);
 
 				hist_00_IP[5][0]->Fill(rho_00_IP);
-				hist_00_IP[5][1]->Fill(Knetri_kinfit[8] - ip_avg[8]);
+				hist_00_IP[5][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
 				hist2d[5]->Fill(anglePichKaonCM, rho);
 
 				hist2d_00IP_pmIP[0][5]->Fill(rho_pm_IP, rho_00_IP);
-				hist2d_00IP_pmIP[1][5]->Fill(Kchrec[8] - ip_avg[8], Knetri_kinfit[8] - ip_avg[8]);
+				hist2d_00IP_pmIP[1][5]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 			}
 		}
-		tree->Fill();
 	}
 
 	hist_00_IP[0][0]->Scale(hist_00_IP[0][0]->GetEntries() / hist_00_IP[0][0]->Integral());
@@ -671,24 +531,28 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		parameter[1] = hist_control[i]->GetBinCenter(hist_control[i]->GetMaximumBin());
 		parameter[2] = hist_control[i]->GetStdDev();
 
-		triple_fit->SetParameters(0.15 * parameter[0], parameter[1], parameter[2], 0.15 * parameter[0], parameter[1] - 10.0, parameter[2], parameter[0], parameter[1] + 10.0, parameter[2]);
+		triple_fit->SetParameters(0.15 * parameter[0], parameter[1], parameter[2], 0.15 * parameter[0], parameter[1] - 5.0, parameter[2], parameter[0], parameter[1] + 5.0, parameter[2]);
 
 		triple_fit->SetParLimits(0, 0.0, 100.0 * parameter[0]);
 		triple_fit->SetParLimits(3, 0.0, 100.0 * parameter[0]);
 		triple_fit->SetParLimits(6, 0.0, 100.0 * parameter[0]);
 
-		triple_fit->SetParLimits(1, parameter[1] - 2.0, parameter[1] + 2.0);
-		triple_fit->SetParLimits(4, parameter[1] - 2.0, parameter[1] + 2.0);
-		triple_fit->SetParLimits(7, parameter[1] - 2.0, parameter[1] + 2.0);
+		triple_fit->SetParLimits(1, parameter[1] - 10.0, parameter[1] + 10.0);
+		triple_fit->SetParLimits(4, parameter[1] - 10.0, parameter[1] + 10.0);
+		triple_fit->SetParLimits(7, parameter[1] - 10.0, parameter[1] + 10.0);
 
-		triple_fit->SetParLimits(2, 0.01 * parameter[2], 5.0 * parameter[2]);
-		triple_fit->SetParLimits(5, 0.01 * parameter[2], 5.0 * parameter[2]);
-		triple_fit->SetParLimits(8, 0.01 * parameter[2], 5.0 * parameter[2]);
+		triple_fit->SetParLimits(2, 0.5 * parameter[2], 10.0 * parameter[2]);
+		triple_fit->SetParLimits(5, 0.5 * parameter[2], 10.0 * parameter[2]);
+		triple_fit->SetParLimits(8, 0.5 * parameter[2], 10.0 * parameter[2]);
 
 		result = hist_control[i]->Fit(triple_fit, "SF");
 
-		fit_stats[1] = Form("Mean = %.2f#pm%.2f", comb_mean(result->GetParams(), result->GetErrors()), comb_mean_err(result->GetParams(), result->GetErrors()));
-		fit_stats[2] = Form("Std Dev = %.2f#pm%.2f", comb_std_dev(result->GetParams(), result->GetErrors()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
+		if(result == 0)
+		{
+
+			fit_stats[1] = Form("Mean = %.2f#pm%.2f", comb_mean(result->GetParams(), result->GetErrors()), comb_mean_err(result->GetParams(), result->GetErrors()));
+			fit_stats[2] = Form("Std Dev = %.2f#pm%.2f", comb_std_dev(result->GetParams(), result->GetErrors()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
+		}
 
 		fit_text->AddText(fit_stats[1]);
 		fit_text->AddText(fit_stats[2]);
@@ -847,12 +711,6 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 		canva2d[j + 2 * channNum]->Print(img_dir + "z_2d_" + channName[j] + ext_img);
 	}
-
-	tree->Print();
-
-	file->Write();
-	file->Close();
-	delete file;
 
 	return 0;
 }

@@ -40,10 +40,12 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	TFile
 			*file_corr,
 			*file_mctruth,
+			*file_omega,
 			*file;
 	TTree
 			*tree,
-			*tree_mctruth;
+			*tree_mctruth,
+			*tree_omega;
 	// =============================================================================
 
 	TString name = gen_vars_dir + root_files_dir + mctruth_filename + firstFile + "_" + lastFile + ext_root;
@@ -76,6 +78,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	chain->SetBranchAddress("Chi2", &baseKin.Chi2);
 	chain->SetBranchAddress("minv4gam", &baseKin.minv4gam);
 	chain->SetBranchAddress("Kchboost", baseKin.Kchboost);
+	chain->SetBranchAddress("Kchrec", baseKin.Kchrec);
 	// chain->SetBranchAddress("Knereclor", neutVars.Knerec);
 	chain->SetBranchAddress("Qmiss", &baseKin.Qmiss);
 
@@ -107,7 +110,8 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	TString
 			filename_trilateration = gen_vars_dir + root_files_dir + gen_vars_filename + firstFile + "_" + lastFile + ext_root,
 			filename_trilateration_kin_fit = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + firstFile + "_" + lastFile + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root,
-			filename_triangle = neutrec_dir + root_files_dir + neu_triangle_filename + firstFile + "_" + lastFile + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
+			filename_triangle = neutrec_dir + root_files_dir + neu_triangle_filename + firstFile + "_" + lastFile + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root,
+			omega_name = omegarec_dir + root_files_dir + omega_rec_filename + firstFile + "_" + lastFile + "_" + int(data_type) + ext_root;
 
 	std::vector<TString> file_name, tree_name;
 
@@ -168,7 +172,65 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 		tree->SetBranchAddress("chi2min", &neutVars.chi2min);
 	}
 
+	file_omega = new TFile(omega_name);
+	tree_omega = (TTree *)file_omega->Get(omegarec_tree);
+
+	Int_t
+			doneOmega,
+			g4takenomega[4];
+
+	Float_t
+			gammaomega[4][8],
+			Omegapi0[6],
+			Pi0[6],
+			PichFourMom1[2][4],
+			Omegarec[6],
+			lengthPhotonMin[4],
+			lengthKch,
+			rho_00,
+			rho_pm_IP,
+			rho_00_IP,
+			rho,
+			anglePi0KaonCM,
+			anglePichKaonCM,
+			anglePi0OmegaPhiCM,
+			anglePhiOmega,
+			neu_vtx_avg[3];
+
+	tree_omega->SetBranchAddress("gamma1omega", gammaomega[0]);
+	tree_omega->SetBranchAddress("gamma2omega", gammaomega[1]);
+	tree_omega->SetBranchAddress("gamma3omega", gammaomega[2]);
+	tree_omega->SetBranchAddress("gamma4omega", gammaomega[3]);
+
+	tree_omega->SetBranchAddress("pich1", PichFourMom1[0]);
+	tree_omega->SetBranchAddress("pich2", PichFourMom1[1]);
+
+	tree_omega->SetBranchAddress("omegapi0", Omegapi0);
+	tree_omega->SetBranchAddress("pi0", Pi0);
+
+	tree_omega->SetBranchAddress("omega", Omegarec);
+
+	tree_omega->SetBranchAddress("doneomega", &doneOmega);
+
+	tree_omega->SetBranchAddress("g4takenomega", g4takenomega);
+
+	tree_omega->SetBranchAddress("lengthphoton", lengthPhotonMin);
+
+	tree_omega->SetBranchAddress("lengthKch", &lengthKch);
+
+	tree_omega->SetBranchAddress("NeuVtxAvg", neu_vtx_avg);
+
+	tree_omega->SetBranchAddress("rho_00", &rho_00);
+	tree_omega->SetBranchAddress("rho_00_IP", &rho_00_IP);
+	tree_omega->SetBranchAddress("rho_pm_IP", &rho_pm_IP);
+	tree_omega->SetBranchAddress("rho", &rho);
+	tree_omega->SetBranchAddress("anglePi0KaonCM", &anglePi0KaonCM),
+			tree_omega->SetBranchAddress("anglePichKaonCM", &anglePichKaonCM),
+			tree_omega->SetBranchAddress("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM),
+			tree_omega->SetBranchAddress("anglePhiOmega", &anglePhiOmega);
+
 	chain->AddFriend(tree_mctruth);
+	chain->AddFriend(tree_omega);
 	chain->AddFriend(tree);
 
 	UInt_t nentries = chain->GetEntries();
@@ -250,26 +312,8 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 			trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
-			Float_t
-					boost_vec_Kchboost[3] = {-baseKin.Kchboost[0] / baseKin.Kchboost[3],
-																	 -baseKin.Kchboost[1] / baseKin.Kchboost[3],
-																	 -baseKin.Kchboost[2] / baseKin.Kchboost[3]},
-					PichFourMomKaonCM[2][4],
-					anglePichKaonCM;
-
-			lorentz_transf(boost_vec_Kchboost, PichFourMom[0], PichFourMomKaonCM[0]);
-			lorentz_transf(boost_vec_Kchboost, PichFourMom[1], PichFourMomKaonCM[1]);
-
-			TVector3
-					pich1(PichFourMomKaonCM[0][0], PichFourMomKaonCM[0][1], PichFourMomKaonCM[0][2]),
-					pich2(PichFourMomKaonCM[1][0], PichFourMomKaonCM[1][1], PichFourMomKaonCM[1][2]);
-
-			anglePichKaonCM = pich1.Angle(pich2) * 180. / M_PI;
-
 			Double_t radius[2] = {0., 0.},
-							 radius_ch[2] = {0., 0.},
-							 rho_pm_IP = 0.,
-							 rho_00_IP = 0.;
+							 radius_ch[2] = {0., 0.};
 
 			Double_t sphere_bound = 10, bp_bound = 4.4;
 
@@ -277,8 +321,6 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 			Bool_t cuts[4] = {false, false, false, false};
 
-			rho_pm_IP = sqrt(pow(baseKin.Kchboost[6] - baseKin.bhabha_vtx[0], 2) + pow(baseKin.Kchboost[7] - baseKin.bhabha_vtx[1], 2));
-			rho_00_IP = sqrt(pow(neutVars.Knerec[6] - baseKin.bhabha_vtx[0], 2) + pow(neutVars.Knerec[7] - baseKin.bhabha_vtx[1], 2));
 
 			for (Int_t i = 0; i < 3; i++)
 			{
@@ -306,14 +348,14 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 					cond[6],
 					cond_tot;
 
-			cond[0] = abs(baseKin.Kchboost[6] - neutVars.Knerec[6]) < sigmas_neu * 16.89;
-			cond[1] = abs(baseKin.Kchboost[7] - neutVars.Knerec[7]) < sigmas_neu * 16.77;
-			cond[2] = abs(baseKin.Kchboost[8] - neutVars.Knerec[8]) < sigmas_neu * 9.89;
+			cond[0] = abs(baseKin.Kchrec[6] - neu_vtx_avg[0]) < sigmas_neu * 3.04;
+			cond[1] = abs(baseKin.Kchrec[7] - neu_vtx_avg[1]) < sigmas_neu * 3.03;
+			cond[2] = abs(baseKin.Kchrec[8] - neu_vtx_avg[2]) < sigmas_neu * 6.3;
 			cond[3] = abs(baseKin.Kchboost[6] - baseKin.bhabha_vtx[0]) < sigmas_ip * 2.63;
 			cond[4] = abs(baseKin.Kchboost[7] - baseKin.bhabha_vtx[1]) < sigmas_ip * 2.03;
 			cond[5] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < sigmas_ip * 3.39;
 
-			cond_tot = cond[0] && cond[1] && cond[2] && cond[3] && cond[4] && cond[5];
+			cond_tot = cond[0] && cond[1] && cond[2];
 
 			cuts[0] = abs(radius[0] - 10.9554) > 1.19279 * sigma;
 			cuts[1] = 1; // abs(radius[1] - 4.5) > 1.5 * sigma;
@@ -322,8 +364,8 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 			if (cond_tot)
 			{
-				cuts[4] = 1;//sqrt(pow(rho_00_IP, 2) + pow(rho_pm_IP, 2)) > 0.5;
-				cuts[5] = 1;//anglePichKaonCM > 179.5;
+				cuts[4] = rho > 1.2;
+				cuts[5] = 1;//anglePichKaonCM > 167.5;
 			}
 			else
 			{
@@ -547,6 +589,31 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	TGraphAsymmErrors *sig_eff = new TGraphAsymmErrors();
 
 	sig_eff->Divide(sig_pass, sig_total, "cl=0.683 b(1,1) mode");
+
+	const Int_t 
+						n = sig_eff->GetN();
+
+	Int_t
+			n_mean = 0;
+
+	Double_t ax[n], ay[n], mean = 0.;
+
+	std::cout << "Tau_S" << " " << "Efficiency" << std::endl;
+
+	for(Int_t k = 0; k < n; k++)
+	{
+		sig_eff->GetPoint(k,ax[k],ay[k]);
+		if(abs(ax[k]) < 5.)
+		{
+			n_mean++;
+			mean += ay[k];
+			std::cout << ax[k] << " " << ay[k] << std::endl;
+		}
+	}
+
+	mean = mean / (Float_t)n_mean;
+
+	std::cout << mean << std::endl;
 
 	c1->cd();
 	paddown_c1->Draw();

@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
     {
     case Controls::OmegaRec::OMEGA_REC:
     {
-      //omegarec(firstFile, lastFile, 10, 0, 0, Controls::DataType::MC_DATA);
+      omegarec(firstFile, lastFile, Controls::DataType::MC_DATA);
       break;
     }
     case Controls::OmegaRec::OMEGA_CUTS:

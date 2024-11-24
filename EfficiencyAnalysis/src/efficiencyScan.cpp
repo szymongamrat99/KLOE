@@ -10,15 +10,18 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 
 	TFile
 			*file_mctruth,
+			*file_omega,
 			*file_cutvars,
 			*cutvars_csv;
 
 	TTree
 			*tree_mctruth,
+			*tree_omega,
 			*tree_cutvars;
 
 	TString
 			mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
+			omega_name = omegarec_dir + root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + std::to_string(3) + ext_root,
 			cutvars_csv_name = "CutVars";
 
 	// Wrapper to read the CSV file properly
@@ -78,7 +81,11 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 	file_mctruth = new TFile(mctruth_name);
 	tree_mctruth = (TTree *)file_mctruth->Get(gen_vars_tree);
 
+	file_omega = new TFile(omega_name);
+	tree_omega = (TTree *)file_omega->Get(omegarec_tree);
+
 	chain->AddFriend(tree_mctruth);
+	chain->AddFriend(tree_omega);
 
 	UInt_t
 			sel_ev[channNum],
@@ -102,7 +109,8 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 	std::vector<std::vector<Float_t>>
 			x_val[channNum],
 			eff[channNum],
-			purity(lineNum - 1);
+			purity(lineNum - 1),
+			measure(lineNum - 1);
 
 	for (Int_t i = 0; i < channNum; i++)
 	{
@@ -113,7 +121,8 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 	std::vector<TString>
 			varName,
 			benchmark,
-			sign;
+			sign,
+			title;
 
 	std::vector<Bool_t>
 			absVal;
@@ -140,15 +149,23 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 				max_lim.push_back(std::atof(cutDetails[i][header[j]]));
 			if (header[j] == "NumberOfPoints")
 				points_num.push_back(std::atoi(cutDetails[i][header[j]]));
+			if (header[j] == "Title")
+				title.push_back(cutDetails[i][header[j]]);
 		}
 
 		step.push_back((max_lim[i] - min_lim[i]) / (Float_t)points_num[i]);
 	}
 
+	TString condition[3];
+
+	condition[0] = "abs(Kchrec[6] - " + omegarec_tree + ".NeuVtxAvg[0]) < 3.04";
+	condition[1] = "abs(Kchrec[7] - " + omegarec_tree + ".NeuVtxAvg[1]) < 3.04";
+	condition[2] = "abs(Kchrec[8] - " + omegarec_tree + ".NeuVtxAvg[2]) < 6.3";
+
 	// Total num of events
 	for (Int_t i = 0; i < channNum; i++)
 	{
-		channelChoice[i] = gen_vars_tree + ".mctruth == " + channelInt[i];
+		channelChoice[i] = gen_vars_tree + ".mctruth == " + channelInt[i] + "&&" + omegarec_tree + ".doneomega == 1" + "&&" + condition[0] + "&&" + condition[1] + "&&" + condition[2];
 		total_ev[i] = chain->GetEntries(channelChoice[i]);
 	}
 
@@ -176,9 +193,19 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 
 			if (purity[k][j] > 1 || std::isnan(purity[k][j]) || std::isinf(purity[k][j]))
 				purity[k].push_back(0.);
+
+			measure[k].push_back(purity[k][j]);
 		}
 
-		auto legend = new TLegend(0.48, 0.1, 0.85, 0.3);
+		auto maxEl = *std::max_element(measure[k].begin(), measure[k].end());
+		auto it = std::find(measure[k].begin(), measure[k].end(), maxEl);
+
+		std::cout << it - measure[k].begin() << std::endl;
+
+		std::cout << "Maximum: " << maxEl << std::endl;
+		std::cout << "Cut value: " << x_val[0][k][it - measure[k].begin()] << std::endl;
+
+		auto legend = new TLegend(0.48, 0.7, 0.85, 0.9);
 
 		for (Int_t i = 0; i < channNum; i++)
 		{
@@ -209,12 +236,8 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 
 		mg->Add(purity_graph[k]);
 
-		TString x_title;
-
-		x_title = cutStr;
-
 		mg->GetXaxis()->SetMaxDigits(3);
-		mg->GetXaxis()->SetTitle(x_title);
+		mg->GetXaxis()->SetTitle(title[k]);
 		mg->GetYaxis()->SetTitle("Efficiency");
 		mg->GetXaxis()->CenterTitle(1);
 		mg->GetYaxis()->CenterTitle(1);
@@ -233,7 +256,7 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 
 		legend->Draw();
 
-		TString pngname = img_dir + "eff_" + cutStr + ".png";
+		TString pngname = img_dir + "eff_" + varName[k] + ".png";
 		canva->Print(pngname);
 	}
 

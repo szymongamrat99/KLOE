@@ -1433,11 +1433,16 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
       result = pulls[j][i]->Fit(triple_fit, "SF");
 
-      fit_stats[1] = Form("Mean = %.2f#pm%.2f", comb_mean(result->GetParams(), result->GetErrors()), comb_mean_err(result->GetParams(), result->GetErrors()));
-      fit_stats[2] = Form("Width = %.2f#pm%.2f", comb_std_dev(result->GetParams(), result->GetErrors()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
       
-      fit_text->AddText(fit_stats[1]);
+
+      if(result == 0)
+      {
+        fit_stats[1] = Form("Mean = %.2f#pm%.2f", comb_mean(result->GetParams(), result->GetErrors()), comb_mean_err(result->GetParams(), result->GetErrors()));
+        fit_stats[2] = Form("Width = %.2f#pm%.2f", comb_std_dev(result->GetParams(), result->GetErrors()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
+        fit_text->AddText(fit_stats[1]);
       fit_text->AddText(fit_stats[2]);
+      }
+      
 
       pulls[j][i]->SetLineWidth(5);
 

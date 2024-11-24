@@ -13,7 +13,7 @@
 #include <MainMenu.h>
 #include <clear_variables.h>
 
-int omegarec(Int_t, Int_t, Short_t, Short_t, Short_t, Controls::DataType);
+int omegarec(Int_t, Int_t, Controls::DataType);
 int plots(int, int, int, int, int, Controls::DataType);
 
 #endif //! OMEGAREC_HPP
