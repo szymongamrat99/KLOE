@@ -21,7 +21,8 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 
 	TString
 			mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
-			omega_name = omegarec_dir + root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + std::to_string(3) + ext_root,
+			omega_name = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
+			tree_name = std::string(properties["variables"]["tree"]["treename"]["omegarec"]),
 			cutvars_csv_name = "CutVars";
 
 	// Wrapper to read the CSV file properly
@@ -156,11 +157,28 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 		step.push_back((max_lim[i] - min_lim[i]) / (Float_t)points_num[i]);
 	}
 
-	TString condition[3];
+	TString 
+			condition[3],
+			resCombString[3];
 
-	condition[0] = "abs(Kchrec[6] - " + omegarec_tree + ".NeuVtxAvg[0]) < 3.04";
-	condition[1] = "abs(Kchrec[7] - " + omegarec_tree + ".NeuVtxAvg[1]) < 3.04";
-	condition[2] = "abs(Kchrec[8] - " + omegarec_tree + ".NeuVtxAvg[2]) < 6.3";
+	Float_t
+			resCh[3],
+			resNeu[3],
+			resComb[3];
+
+	for (Int_t k = 0; k < 3; k++)
+	{
+		resCh[k] = properties["variables"]["Resolutions"]["vtxCharged"][k];
+		resNeu[k] = properties["variables"]["Resolutions"]["vtxNeutral"]["triTriangle"][k];
+
+		resComb[k] = resCh[k] + resNeu[k];
+
+		resCombString[k] = Form("%f",resComb[k]);
+	}
+
+	condition[0] = "abs(Kchrec[6] - " + omegarec_tree + ".NeuVtxAvg[0]) < " + resCombString[0];
+	condition[1] = "abs(Kchrec[7] - " + omegarec_tree + ".NeuVtxAvg[1]) < " + resCombString[1];
+	condition[2] = "abs(Kchrec[8] - " + omegarec_tree + ".NeuVtxAvg[2]) < " + resCombString[2];
 
 	// Total num of events
 	for (Int_t i = 0; i < channNum; i++)
@@ -182,7 +200,7 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 				else
 					cutStr = "(" + varName[k] + " - " + benchmark[k] + ")" + sign[k];
 
-				cut = (cutStr + std::to_string(x_val[i][k][j]) )&& channelChoice[i];
+				cut = (cutStr + std::to_string(x_val[i][k][j])) && channelChoice[i];
 
 				sel_ev[i] = chain->GetEntries(cut);
 

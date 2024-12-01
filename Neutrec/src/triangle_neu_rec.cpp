@@ -13,12 +13,18 @@
 #include <neutral_mom.h>
 #include "../inc/trilateration.hpp"
 
-int triangle_neurec(int first_file, int last_file, int loopcount, int M, int range, Controls::DataType data_type, int good_clus)
+int triangle_neurec(int first_file, int last_file, Controls::DataType data_type)
 {
 	ErrorHandling::ErrorLogs errLogger;
 	LogsHandling::Logs logger;
 	std::ofstream LogFileMain, LogFileTriangle, LogFileTri, LogFileTriKinFit;
 	std::ofstream ErrFileMain, ErrFileTriangle, ErrFileTri, ErrFileTriKinFit;
+
+	int
+		loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopcount"],
+		M = properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+		range = properties["variables"]["KinFit"]["Trilateration"]["range"],
+		good_clus = properties["variables"]["Reconstruction"]["Triangle"]["goodClus"];
 
 	TString
 			filename_gen = gen_vars_dir + root_files_dir + gen_vars_filename + first_file + "_" + last_file + ext_root,
@@ -154,15 +160,6 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 												 {-10.0, 20.0}
 					};
 
-		std::vector<TH2*> test2d;
-		TString test2d_name = "";
-		
-		for (Int_t i = 0; i < 4; i++)
-		{
-			test2d_name = "test2d_" + i;
-			test2d.push_back(new TH2D(test2d_name, "", nbin, x_lim[i][0], x_lim[i][1], nbin, x_lim[i][0], x_lim[i][1]));
-		};
-
 		for (Int_t i = 0; i < nentries; i++)
 		{
 			chain->GetEntry(i);
@@ -284,31 +281,10 @@ int triangle_neurec(int first_file, int last_file, int loopcount, int M, int ran
 				Double_t trec = sqrt(pow(Knereclor[6] - ip[0], 2) + 
 														 pow(Knereclor[7] - ip[1], 2) +
 														 pow(Knereclor[8] - ip[2], 2)) / vKne;
-
-				if(mctruth == 1 || mctruth == 2)
-				{
-					test2d[0]->Fill(Knereclor[6], Knetriangle[6]);
-					test2d[1]->Fill(Knereclor[7], Knetriangle[7]);
-					test2d[2]->Fill(Knereclor[8], Knetriangle[8]);
-					test2d[3]->Fill(trec, Knetriangle[9]);
-				};
 			}
 
 			tree->Fill();
 		}
-
-		std::vector<TCanvas*> canva;
-		TString canva_name = "";
-		
-		for (Int_t i = 0; i < 4; i++)
-		{
-			canva_name = "canva_" + std::to_string(i);
-			canva.push_back(new TCanvas(canva_name, canva_name, 750, 750));
-
-			test2d[i]->Draw("COLZ");
-
-			canva[i]->Print(canva_name + ext_img);
-		};
 
 		tree->Print();
 

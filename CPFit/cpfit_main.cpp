@@ -16,7 +16,7 @@ using std::chrono::minutes;
 int main(int argc, char *argv[])
 {
   setGlobalStyle();
-
+  
   ErrorHandling::ErrorLogs errLogger;
   LogsHandling::Logs logger;
   std::ofstream LogFileMain, LogFileTriangle, LogFileTri, LogFileTriKinFit;

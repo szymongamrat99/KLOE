@@ -1,0 +1,12 @@
+{
+  "PDGURL": "https://pdgapi.lbl.gov",
+  "interfaces": {
+    "info": "/info",
+    "summary": "/summaries",
+    "doc": "/doc"
+  },
+  "pdgids": {
+    "length": 4,
+    "values": ["/S013EPS", "/S013EPI", "/S011M", "/S012T", "/S013T"]
+  }
+}

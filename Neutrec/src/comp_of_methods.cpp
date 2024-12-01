@@ -30,12 +30,17 @@
 
 #include "../inc/trilateration.hpp"
 
-int comp_of_methods(int first_file, int last_file, int loopcount, int M, const int range, Controls::DataType data_type)
+int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
 {
   ErrorHandling::ErrorLogs errLogger;
 
   Double_t cut_prob = 0.0, time_cut = 100.0;
-  int bunch_int = 9;
+
+  int
+      loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+      M = properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+      range = properties["variables"]["KinFit"]["Trilateration"]["range"],
+      bunch_int = 9;
 
   TChain *chain = new TChain("INTERF/h1");
   chain_init(chain, first_file, last_file);
@@ -85,11 +90,8 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
     if (file->IsZombie() || file_gen->IsZombie())
       throw(ErrorHandling::ErrorCodes::FILE_NOT_EXIST);
 
-
     tree = (TTree *)file->Get(tree_name[file_num]);
     tree_gen = (TTree *)file_gen->Get(gen_vars_tree);
-
-     std::cout << tree << std::endl;
 
     if (tree->IsZombie() || tree_gen->IsZombie())
       throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
@@ -101,6 +103,13 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
     return int(err);
   }
 
+  std::string interface;
+
+  if (file_num == 1)
+    interface = "trilateration";
+  if (file_num == 2)
+    interface = "pureTriangle";
+
   BaseKinematics baseKin;
 
   UChar_t errId, cutId;
@@ -108,6 +117,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
   chain->SetBranchAddress("Kchboost", baseKin.Kchboost);
   chain->SetBranchAddress("Knereclor", baseKin.Knereclor);
   chain->SetBranchAddress("Knerec", baseKin.Knerec);
+  chain->SetBranchAddress("Kchrec", baseKin.Kchrec);
   chain->SetBranchAddress("Kchmc", baseKin.Kchmc);
   chain->SetBranchAddress("Knemc", baseKin.Knemc);
 
@@ -239,7 +249,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
   Float_t lengthneu_mc, lengthneu_tri, lengthneu_tri_CM, lengthneu_rec, lengthch_mc, lengthch_rec,
       v_Kneutri, v_Kneutri_CM, v_Kchrec, v_Kneurec, v_Kneumc, v_Kchmc,
-      t_chmc, t_neumc, t_chrec, t_neutri, t_neurec, Rtneu_rec, Rtneu_mc, Rtneu_tri,
+      t_chmc, t_neumc, t_chrec, t_neutri, t_neurec, Rtneu_rec, Rtneu_mc, Rtneu_tri, Rtch_rec, Rtch_mc,
       angle_path_mom, cos_path_mom, sigmas_init[24];
 
   TString id_hist, id_canva;
@@ -483,12 +493,11 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
   Float_t bunch_corr = 0;
 
   // General statistics
-  Int_t 
-    counts_sig_all = 0, 
-    counts_sig_err[17] = {0},
-    counts_sig_cut[6] = {0}, 
-    counts_sig_sel = 0;
-
+  Int_t
+      counts_sig_all = 0,
+      counts_sig_err[17] = {0},
+      counts_sig_cut[6] = {0},
+      counts_sig_sel = 0;
 
   for (Int_t i = 0; i < nentries; i++)
   {
@@ -498,40 +507,40 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
     {
       counts_sig_all++;
 
-      if(errId != 2)
+      if (errId != 2)
       {
         counts_sig_err[1]++;
-        if(errId != 4)
+        if (errId != 4)
         {
           counts_sig_err[3]++;
-          if(errId != 5)
+          if (errId != 5)
           {
             counts_sig_err[4]++;
-            if(errId != 6)
+            if (errId != 6)
             {
               counts_sig_err[5]++;
-              if(errId != 7)
+              if (errId != 7)
               {
                 counts_sig_err[6]++;
-                if(errId != 11)
+                if (errId != 11)
                 {
                   counts_sig_err[10]++;
-                  if(cutId != 1)
+                  if (cutId != 1)
                   {
                     counts_sig_cut[0]++;
-                    if(cutId != 2)
+                    if (cutId != 2)
                     {
                       counts_sig_cut[1]++;
-                      if(cutId != 3)
+                      if (cutId != 3)
                       {
                         counts_sig_cut[2]++;
-                        if(cutId != 4)
+                        if (cutId != 4)
                         {
                           counts_sig_cut[3]++;
-                          if(cutId != 5)
+                          if (cutId != 5)
                           {
                             counts_sig_cut[4]++;
-                            if(cutId != 6)
+                            if (cutId != 6)
                             {
                               counts_sig_cut[5]++;
                             }
@@ -558,6 +567,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
       {
 
         lengthch_mc = sqrt(pow(baseKin.Kchmc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Kchmc[7] - baseKin.ipmc[1], 2) + pow(baseKin.Kchmc[8] - baseKin.ipmc[2], 2));
+        Rtch_mc = sqrt(pow(baseKin.Kchmc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Kchmc[7] - baseKin.ipmc[1], 2));
         lengthneu_mc = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2) + pow(baseKin.Knemc[8] - baseKin.ipmc[2], 2));
         Rtneu_mc = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2));
       }
@@ -568,7 +578,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
         Rtneu_mc = sqrt(pow(Knemc_bcg[6] - ipmc_bcg[0], 2) + pow(Knemc_bcg[7] - ipmc_bcg[1], 2));
       }
 
-      lengthch_rec = sqrt(pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + pow(baseKin.Kchboost[8] - baseKin.ip[2], 2));
+      lengthch_rec = sqrt(pow(baseKin.Kchrec[6] - baseKin.ip[0], 2) + pow(baseKin.Kchrec[7] - baseKin.ip[1], 2) + pow(baseKin.Kchrec[8] - baseKin.ip[2], 2));
 
       lengthneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2) + pow(Knetri_kinfit[8] - ip_kinfit[2], 2));
       lengthneu_rec = sqrt(pow(baseKin.Knereclor[6] - baseKin.ip[0], 2) + pow(baseKin.Knereclor[7] - baseKin.ip[1], 2) + pow(baseKin.Knereclor[8] - baseKin.ip[2], 2));
@@ -578,6 +588,8 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
       // Rtneu_mc = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2));
       Rtneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2));
       Rtneu_rec = sqrt(pow(baseKin.Knereclor[6] - baseKin.ip[0], 2) + pow(baseKin.Knereclor[7] - baseKin.ip[1], 2));
+
+      Rtch_rec = sqrt(pow(baseKin.Kchrec[6] - baseKin.ip[0], 2) + pow(baseKin.Kchrec[7] - baseKin.ip[1], 2));
       //
       // Kaon velocity
       if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
@@ -695,7 +707,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
             //! Check how many baseKin.cluster sets are found good and which bad
 
             for (Int_t k = 0; k < 4; k++)
-              g4taken_corr[k] = baseKin.ncll[baseKin.g4taken[k] - 1] - 1; //baseKin.ncll[g4taken_kinfit[k]] - 1;
+              g4taken_corr[k] = baseKin.ncll[baseKin.g4taken[k] - 1] - 1; // baseKin.ncll[g4taken_kinfit[k]] - 1;
 
             isEqual = arr_eq(clusindgood, g4taken_corr);
 
@@ -799,19 +811,19 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
               {
                 if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
                 {
-                  neu_vtx_corr[j][k]->Fill(baseKin.Kchmc[6 + k], baseKin.Kchrec[6 + k]);
-                  sigmas_std[j][k]->Fill(lengthneu_mc, baseKin.Kchrec[6 + k] - baseKin.Kchmc[6 + k]);
-                  pulls[j][4 + k]->Fill(baseKin.Kchrec[6 + k] - baseKin.Kchmc[6 + k]);
-                  pulls[j][k]->Fill(baseKin.Kchrec[k] - baseKin.Kchmc[k]);
-                  neu_mom[j][k]->Fill(baseKin.Kchmc[k], baseKin.Kchrec[k]);
+                  neu_vtx_corr[j][k]->Fill(baseKin.Knemc[6 + k], Knetri_kinfit[6 + k]);
+                  sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - baseKin.Knemc[6 + k]);
+                  pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - baseKin.Knemc[6 + k]);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
+                  neu_mom[j][k]->Fill(baseKin.Knemc[k], Knetri_kinfit[k]);
                 }
                 else
                 {
-                  neu_vtx_corr[j][k]->Fill(Knemc_bcg[6 + k], baseKin.Kchrec[6 + k]);
-                  sigmas_std[j][k]->Fill(lengthneu_mc, baseKin.Kchrec[6 + k] - Knemc_bcg[6 + k]);
-                  pulls[j][4 + k]->Fill(baseKin.Kchrec[6 + k] - Knemc_bcg[6 + k]);
-                  pulls[j][k]->Fill(baseKin.Kchrec[k] - baseKin.Kchmc[k]);
-                  neu_mom[j][k]->Fill(Knemc_bcg[k], baseKin.Kchrec[k]);
+                  neu_vtx_corr[j][k]->Fill(Knemc_bcg[6 + k], Knetri_kinfit[6 + k]);
+                  sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - Knemc_bcg[6 + k]);
+                  pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - Knemc_bcg[6 + k]);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
+                  neu_mom[j][k]->Fill(Knemc_bcg[k], Knetri_kinfit[k]);
                 }
               }
             }
@@ -821,19 +833,19 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
               {
                 if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
                 {
-                  neu_vtx_corr[j][3]->Fill(t_chmc, t_chrec); // Knetri_kinfit[6 + k]);
-                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_chrec - t_chmc) / tau_S_nonCPT);
-                  pulls[j][4 + k]->Fill((t_chrec - t_chmc) / tau_S_nonCPT);
-                  pulls[j][k]->Fill(baseKin.Kchrec[k] - baseKin.Kchmc[k]);
-                  neu_mom[j][k]->Fill(baseKin.Kchmc[k], baseKin.Kchrec[k]);
+                  neu_vtx_corr[j][3]->Fill(t_neumc, t_neutri); // Knetri_kinfit[6 + k]);
+                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_neutri - t_neumc) / tau_S_nonCPT);
+                  pulls[j][4 + k]->Fill((t_neutri - t_neumc) / tau_S_nonCPT);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
+                  neu_mom[j][k]->Fill(baseKin.Knemc[k], Knetri_kinfit[k]);
                 }
                 else
                 {
-                  neu_vtx_corr[j][3]->Fill(t_chmc, t_chrec); // baseKin.Kchrec[6 + k]);
-                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_chrec - t_chmc) / tau_S_nonCPT);
-                  pulls[j][4 + k]->Fill((t_chrec - t_chmc) / tau_S_nonCPT);
-                  pulls[j][k]->Fill(baseKin.Kchrec[k] - baseKin.Kchmc[k]);
-                  neu_mom[j][k]->Fill(Knemc_bcg[k], baseKin.Kchrec[k]);
+                  neu_vtx_corr[j][3]->Fill(t_neumc, t_neutri); // Knetri_kinfit[6 + k]);
+                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_neutri - t_neumc) / tau_S_nonCPT);
+                  pulls[j][4 + k]->Fill((t_neutri - t_neumc) / tau_S_nonCPT);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
+                  neu_mom[j][k]->Fill(Knemc_bcg[k], Knetri_kinfit[k]);
                 }
               }
             }
@@ -902,12 +914,12 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
   log_file << "All events: " << counts_sig_all << std::endl;
 
-  for(Int_t i = 0; i < 17; i++)
+  for (Int_t i = 0; i < 17; i++)
   {
     log_file << "Events without err " << i + 1 << ": " << counts_sig_err[i] / (Float_t)counts_sig_all << std::endl;
   }
 
-  for(Int_t i = 0; i < 6; i++)
+  for (Int_t i = 0; i < 6; i++)
   {
     log_file << "Events without cut " << i + 1 << ": " << counts_sig_cut[i] / (Float_t)counts_sig_all << std::endl;
   }
@@ -1348,7 +1360,7 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
     id_canva = "time_neutral" + std::to_string(j + 1);
     x_title = Form("t_{neu}^{gen} [ns]");
-    y_title = Form("#beta_{K#rightarrow#pi^{0}#pi^{0}} [-]");
+    y_title = Form("t_{neu}^{tri} [ns]");
 
     neu_vtx_corr[j][3]->GetXaxis()->SetTitle(x_title);
     neu_vtx_corr[j][3]->GetYaxis()->SetTitle(y_title);
@@ -1433,16 +1445,49 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
       result = pulls[j][i]->Fit(triple_fit, "SF");
 
-      
-
-      if(result == 0)
+      if (result == 0 && j == 0)
       {
         fit_stats[1] = Form("Mean = %.2f#pm%.2f", comb_mean(result->GetParams(), result->GetErrors()), comb_mean_err(result->GetParams(), result->GetErrors()));
         fit_stats[2] = Form("Width = %.2f#pm%.2f", comb_std_dev(result->GetParams(), result->GetErrors()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
         fit_text->AddText(fit_stats[1]);
-      fit_text->AddText(fit_stats[2]);
+        fit_text->AddText(fit_stats[2]);
+
+        // if(i >= 0 && i < 4)
+        //   properties["variables"]["Resolutions"]["momCharged"][i] = comb_std_dev(result->GetParams(), result->GetErrors());
+        // else if(i >= 4 && i < 8)
+        //   properties["variables"]["Resolutions"]["vtxCharged"][i - 4] = comb_std_dev(result->GetParams(), result->GetErrors());
+        // else if( i == 8 )
+        //   properties["variables"]["Resolutions"]["rhoCharged"] = comb_std_dev(result->GetParams(), result->GetErrors());
+        // else if( i == 9 )
+        //   properties["variables"]["Resolutions"]["pathCharged"] = comb_std_dev(result->GetParams(), result->GetErrors());
+        if (i >= 0 && i < 4)
+          properties["variables"]["Resolutions"]["momNeutral"][interface][i] = comb_std_dev(result->GetParams(), result->GetErrors());
+        else if (i >= 4 && i < 8)
+          properties["variables"]["Resolutions"]["vtxNeutral"][interface][i - 4] = comb_std_dev(result->GetParams(), result->GetErrors());
+        else if (i == 8)
+          properties["variables"]["Resolutions"]["rhoNeutral"][interface] = comb_std_dev(result->GetParams(), result->GetErrors());
+        else if (i == 9)
+          properties["variables"]["Resolutions"]["pathNeutral"][interface] = comb_std_dev(result->GetParams(), result->GetErrors());
       }
-      
+      else if (result == 1 && j == 0)
+      {
+        // if(i >= 0 && i < 4)
+        //   properties["variables"]["Resolutions"]["momCharged"][i] = nullptr;
+        // else if(i >= 4 && i < 8)
+        //   properties["variables"]["Resolutions"]["vtxCharged"][i - 4] = nullptr;
+        // else if( i == 8 )
+        //   properties["variables"]["Resolutions"]["rhoCharged"] = nullptr;
+        // else if( i == 9 )
+        //   properties["variables"]["Resolutions"]["pathCharged"] = nullptr;
+        if (i >= 0 && i < 4)
+          properties["variables"]["Resolutions"]["momNeutral"][interface][i] = nullptr;
+        else if (i >= 4 && i < 8)
+          properties["variables"]["Resolutions"]["vtxNeutral"][interface][i - 4] = nullptr;
+        else if (i == 8)
+          properties["variables"]["Resolutions"]["rhoNeutral"][interface] = nullptr;
+        else if (i == 9)
+          properties["variables"]["Resolutions"]["pathNeutral"][interface] = nullptr;
+      }
 
       pulls[j][i]->SetLineWidth(5);
 
@@ -1570,20 +1615,14 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
         triple_fit->SetParLimits(0, 0.0, 100.0 * parameter[0]);
         triple_fit->SetParLimits(3, 0.0, 100.0 * parameter[0]);
         triple_fit->SetParLimits(6, 0.0, 100.0 * parameter[0]);
-        // triple_fit->FixParameter(3, 0.0);
-        // triple_fit->FixParameter(6, parameter[0]);
 
         triple_fit->SetParLimits(1, parameter[1] - 2.0, parameter[1] + 2.0);
         triple_fit->SetParLimits(4, parameter[1] - 2.0, parameter[1] + 2.0);
         triple_fit->SetParLimits(7, parameter[1] - 2.0, parameter[1] + 2.0);
-        // triple_fit->FixParameter(4, 0.0);
-        // triple_fit->FixParameter(7, 0.0);
 
         triple_fit->SetParLimits(2, 0.1 * parameter[2], 6.0 * parameter[2]);
         triple_fit->SetParLimits(5, 0.1 * parameter[2], 6.0 * parameter[2]);
         triple_fit->SetParLimits(8, 0.1 * parameter[2], 6.0 * parameter[2]);
-        // triple_fit->FixParameter(5, 1.0);
-        // triple_fit->FixParameter(8, 1.0);
 
         TH1 *hist_temp = sigmas_std[j][k]->ProjectionY("_py", i, i);
         result = hist_temp->Fit(triple_fit, "LMES");
@@ -1676,6 +1715,10 @@ int comp_of_methods(int first_file, int last_file, int loopcount, int M, const i
 
     legend->Clear();
   }
+
+  std::ofstream outfile(propName);
+  outfile << properties.dump(4);
+  outfile.close();
 
   return 0;
 }

@@ -1,34 +1,43 @@
 #include <iostream>
-
+#include <json.hpp>
 
 using namespace std;
+using json = nlohmann::json;
+
+namespace ns
+{
+  struct person
+  {
+    std::string name;
+    std::string address;
+    int age;
+  };
+
+  void to_json(json &j, const person &p)
+  {
+    j = json{{"name", p.name}, {"address", p.address}, {"age", p.age}};
+  }
+
+  void from_json(const json &j, person &p)
+  {
+    j.at("name").get_to(p.name);
+    j.at("address").get_to(p.address);
+    j.at("age").get_to(p.age);
+  }
+};
 
 int main()
 {
+  ns::person p = {"Andrzej Wajda", "Zwyciestwa 22/4", 82};
 
-  try
-  {
-    int age = 0;
+  json j;
 
-    cout << "Input Your age: ";
-    cin >> age;
-    cout << endl;
-    if(age >= 18)
-    {
-      cout << "Access granted!" << endl;
-    }
-    
-  }
-  catch(float myNum)
-  {
-    cerr << "You are not old enough!" << endl;
-    cerr << "Age is: " << myNum;
-  }
-  catch(...)
-  {
-    cerr << "unknown exception" << endl;
-  }
-  
+  j["Name"] = "Andrzej Wajda";
+  j["Addresses"]["Zwycięstwa 22/4"] = "Zwycięstwa 22/4";
+  j["Addresses"]["Dupy 22/4"] = "Dupy 22/4";
+  j["Cars"] = "Old";
+
+  std::cout << j;
 
   return 0;
 }

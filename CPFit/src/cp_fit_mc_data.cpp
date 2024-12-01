@@ -111,7 +111,8 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 			filename_trilateration = gen_vars_dir + root_files_dir + gen_vars_filename + firstFile + "_" + lastFile + ext_root,
 			filename_trilateration_kin_fit = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + firstFile + "_" + lastFile + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root,
 			filename_triangle = neutrec_dir + root_files_dir + neu_triangle_filename + firstFile + "_" + lastFile + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root,
-			omega_name = omegarec_dir + root_files_dir + omega_rec_filename + firstFile + "_" + lastFile + "_" + int(data_type) + ext_root;
+			omega_name = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
+			omega_tree_name = std::string(properties["variables"]["tree"]["treename"]["omegarec"]);
 
 	std::vector<TString> file_name, tree_name;
 
@@ -173,7 +174,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	}
 
 	file_omega = new TFile(omega_name);
-	tree_omega = (TTree *)file_omega->Get(omegarec_tree);
+	tree_omega = (TTree *)file_omega->Get(omega_tree_name);
 
 	Int_t
 			doneOmega,
@@ -195,7 +196,8 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 			anglePichKaonCM,
 			anglePi0OmegaPhiCM,
 			anglePhiOmega,
-			neu_vtx_avg[3];
+			neu_vtx_avg[3],
+			chi2min;
 
 	tree_omega->SetBranchAddress("gamma1omega", gammaomega[0]);
 	tree_omega->SetBranchAddress("gamma2omega", gammaomega[1]);
@@ -224,10 +226,11 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	tree_omega->SetBranchAddress("rho_00_IP", &rho_00_IP);
 	tree_omega->SetBranchAddress("rho_pm_IP", &rho_pm_IP);
 	tree_omega->SetBranchAddress("rho", &rho);
-	tree_omega->SetBranchAddress("anglePi0KaonCM", &anglePi0KaonCM),
-			tree_omega->SetBranchAddress("anglePichKaonCM", &anglePichKaonCM),
-			tree_omega->SetBranchAddress("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM),
-			tree_omega->SetBranchAddress("anglePhiOmega", &anglePhiOmega);
+	tree_omega->SetBranchAddress("anglePi0KaonCM", &anglePi0KaonCM);
+	tree_omega->SetBranchAddress("anglePichKaonCM", &anglePichKaonCM);
+	tree_omega->SetBranchAddress("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM);
+	tree_omega->SetBranchAddress("anglePhiOmega", &anglePhiOmega);
+	tree_omega->SetBranchAddress("chi2min", &chi2min);
 
 	chain->AddFriend(tree_mctruth);
 	chain->AddFriend(tree_omega);
@@ -235,8 +238,12 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 	UInt_t nentries = chain->GetEntries();
 
-	Double_t x_min = -90.0, x_max = 90.0;
-	UInt_t nbins = 1 + ((x_max - x_min) / 2.);
+	const Double_t
+			x_min = properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
+			x_max = properties["variables"]["CPFit"]["histoResults"]["rangeX"][1],
+			res_deltaT = properties["variables"]["Resolutions"]["deltaT"];
+	const UInt_t
+			nbins = 1 + ((x_max - x_min) / res_deltaT);
 
 	Double_t split[3] = {-30.0, 0.0, 30.0};
 
@@ -321,7 +328,6 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 			Bool_t cuts[4] = {false, false, false, false};
 
-
 			for (Int_t i = 0; i < 3; i++)
 			{
 				radius[0] += pow(neutVars.Knerec[6 + i], 2);
@@ -348,9 +354,21 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 					cond[6],
 					cond_tot;
 
-			cond[0] = abs(baseKin.Kchrec[6] - neu_vtx_avg[0]) < sigmas_neu * 3.04;
-			cond[1] = abs(baseKin.Kchrec[7] - neu_vtx_avg[1]) < sigmas_neu * 3.03;
-			cond[2] = abs(baseKin.Kchrec[8] - neu_vtx_avg[2]) < sigmas_neu * 6.3;
+			Float_t
+					resCh[3],
+					resNeu[3],
+					resComb[3];
+
+			for (Int_t k = 0; k < 3; k++)
+			{
+				resCh[k] = properties["variables"]["Resolutions"]["vtxCharged"][k];
+				resNeu[k] = properties["variables"]["Resolutions"]["vtxNeutral"]["triTriangle"][k];
+				resComb[k] = resCh[k] + resNeu[k];
+			}
+
+			cond[0] = abs(baseKin.Kchrec[6] - neu_vtx_avg[0]) < sigmas_neu * resComb[0];
+			cond[1] = abs(baseKin.Kchrec[7] - neu_vtx_avg[1]) < sigmas_neu * resComb[1];
+			cond[2] = abs(baseKin.Kchrec[8] - neu_vtx_avg[2]) < sigmas_neu * resComb[2];
 			cond[3] = abs(baseKin.Kchboost[6] - baseKin.bhabha_vtx[0]) < sigmas_ip * 2.63;
 			cond[4] = abs(baseKin.Kchboost[7] - baseKin.bhabha_vtx[1]) < sigmas_ip * 2.03;
 			cond[5] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < sigmas_ip * 3.39;
@@ -364,8 +382,8 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 			if (cond_tot)
 			{
-				cuts[4] = rho > 1.2;
-				cuts[5] = 1;//anglePichKaonCM > 167.5;
+				cuts[4] = rho > 0.6;
+				cuts[5] = 1; //chi2min > 4.0;
 			}
 			else
 			{
@@ -438,14 +456,27 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 	minimum->SetFunction(minimized_function);
 
-	const Double_t init_vars[num_of_vars] = {Re, M_PI * Im_nonCPT / 180., 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+	const Double_t init_vars[num_of_vars] = {
+			properties["variables"]["CPFit"]["initParams"]["Re"],
+			properties["variables"]["CPFit"]["initParams"]["Im"],
+			properties["variables"]["CPFit"]["initParams"]["Norm"]["Signal"],
+			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarLeft"],
+			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseLeft"],
+			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseRight"],
+			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarRight"],
+			properties["variables"]["CPFit"]["initParams"]["Norm"]["Omegapi0"],
+			properties["variables"]["CPFit"]["initParams"]["Norm"]["Threepi0"],
+			properties["variables"]["CPFit"]["initParams"]["Norm"]["Semileptonic"],
+			properties["variables"]["CPFit"]["initParams"]["Norm"]["Other"]},
 								 step[num_of_vars] = {1E-5, 1E-5, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
 
-	Double_t limit_span_signal = 0.3, limit_span = 0.3, limit_pars = 1.0;
+	Double_t
+			limit_upper = properties["variables"]["CPFit"]["limitPer"]["upper"],
+			limit_lower = properties["variables"]["CPFit"]["limitPer"]["lower"];
 
-	minimum->SetVariable(0, "Real part", init_vars[0], step[0]);			//, init_vars[0] - limit_pars*init_vars[0], init_vars[0] + limit_pars*init_vars[0]);
-	minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]); //, init_vars[1] - limit_pars*init_vars[1], init_vars[1] + limit_pars*init_vars[1]);
-	minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - limit_span_signal * init_vars[2], init_vars[2] + limit_span_signal * init_vars[2]);
+	minimum->SetVariable(0, "Real part", init_vars[0], step[0]);
+	minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]);
+	minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - limit_lower * init_vars[2], init_vars[2] + limit_upper * init_vars[2]);
 
 	if (x_min > -30.0 && x_max < 30.0)
 	{
@@ -462,10 +493,10 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 		minimum->SetLowerLimitedVariable(6, "Norm right DC wall", init_vars[6], step[6], 0.0);
 	}
 
-	minimum->SetLimitedVariable(7, "Norm omega", init_vars[7], step[7], init_vars[7] - limit_span * init_vars[7], init_vars[7] + limit_span * init_vars[7]);
-	minimum->SetLimitedVariable(8, "Norm three", init_vars[8], step[8], init_vars[8] - limit_span * init_vars[8], init_vars[8] + limit_span * init_vars[8]);
-	minimum->SetLimitedVariable(9, "Norm semi", init_vars[9], step[9], init_vars[9] - limit_span * init_vars[9], init_vars[9] + limit_span * init_vars[9]);
-	minimum->SetLimitedVariable(10, "Norm other bcg", init_vars[10], step[10], init_vars[10] - limit_span * init_vars[10], init_vars[10] + limit_span * init_vars[10]);
+	minimum->SetLimitedVariable(7, "Norm omega", init_vars[7], step[7], init_vars[7] - limit_lower * init_vars[7], init_vars[7] + limit_upper * init_vars[7]);
+	minimum->SetLimitedVariable(8, "Norm three", init_vars[8], step[8], init_vars[8] - limit_lower * init_vars[8], init_vars[8] + limit_upper * init_vars[8]);
+	minimum->SetLimitedVariable(9, "Norm semi", init_vars[9], step[9], init_vars[9] - limit_lower * init_vars[9], init_vars[9] + limit_upper * init_vars[9]);
+	minimum->SetLimitedVariable(10, "Norm other bcg", init_vars[10], step[10], init_vars[10] - limit_lower * init_vars[10], init_vars[10] + limit_upper * init_vars[10]);
 
 	minimum->Minimize();
 
@@ -551,23 +582,38 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 		event.frac[i]->SetLineColor(channColor[i]);
 	}
 
-	std::ofstream myfile;
-	myfile.open(cpfit_res_dir + "results_split_fit.csv");
-	myfile << "Parameter,Value,Error\n";
-	myfile << "Real part," << minimum->X()[0] << "," << minimum->Errors()[0] << ",\n";
-	myfile << "Imaginary part," << minimum->X()[1] << "," << minimum->Errors()[1] << ",\n";
-	myfile << "Norm signal," << minimum->X()[2] << "," << minimum->Errors()[2] << ",\n";
-	myfile << "Norm left DC wall," << minimum->X()[3] << "," << minimum->Errors()[3] << ",\n";
-	myfile << "Norm left beam pipe," << minimum->X()[4] << "," << minimum->Errors()[4] << ",\n";
-	myfile << "Norm right beam pipe," << minimum->X()[5] << "," << minimum->Errors()[5] << ",\n";
-	myfile << "Norm right DC wall," << minimum->X()[6] << "," << minimum->Errors()[6] << ",\n";
-	myfile << "Norm omega," << minimum->X()[7] << "," << minimum->Errors()[7] << ",\n";
-	myfile << "Norm three," << minimum->X()[8] << "," << minimum->Errors()[8] << ",\n";
-	myfile << "Norm semi," << minimum->X()[9] << "," << minimum->Errors()[9] << ",\n";
-	myfile << "Norm other bcg," << minimum->X()[10] << "," << minimum->Errors()[10] << ",\n";
-	myfile << "\u03C7\u00B2," << event.data->Chi2Test(event.mc_sum, "UW CHI2") << ",-,\n";
-	myfile << "\u03C7\u00B2/" << (UInt_t)nbins << "," << event.data->Chi2Test(event.mc_sum, "UW CHI2/NDF") << ",-,\n";
-	myfile.close();
+	properties["variables"]["CPFit"]["result"]["value"]["Re"] = minimum->X()[0];
+	properties["variables"]["CPFit"]["result"]["value"]["Im"] = minimum->X()[1];
+	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Signal"] = minimum->X()[2];
+	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarLeft"] = minimum->X()[3];
+	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseLeft"] = minimum->X()[4];
+	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseRight"] = minimum->X()[5];
+	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarRight"] = minimum->X()[6];
+	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Omegapi0"] = minimum->X()[7];
+	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Threepi0"] = minimum->X()[8];
+	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Semileptonic"] = minimum->X()[9];
+	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Other"] = minimum->X()[10];
+
+	properties["variables"]["CPFit"]["result"]["error"]["Re"] = minimum->Errors()[0];
+	properties["variables"]["CPFit"]["result"]["error"]["Im"] = minimum->Errors()[1];
+	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Signal"] = minimum->Errors()[2];
+	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarLeft"] = minimum->Errors()[3];
+	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseLeft"] = minimum->Errors()[4];
+	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseRight"] = minimum->Errors()[5];
+	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarRight"] = minimum->Errors()[6];
+	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Omegapi0"] = minimum->Errors()[7];
+	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Threepi0"] = minimum->Errors()[8];
+	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Semileptonic"] = minimum->Errors()[9];
+	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Other"] = minimum->Errors()[10];
+
+	properties["variables"]["CPFit"]["result"]["chi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2");
+	properties["variables"]["CPFit"]["result"]["normChi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2/NDF");
+
+	properties["lastUpdate"] = currentDateTime();
+
+	std::ofstream outfile(propName);
+	outfile << properties.dump(4);
+	outfile.close();
 
 	event.mc_sum->SetLineWidth(3);
 	event.mc_sum->SetLineColor(mcSumColor);
@@ -590,8 +636,8 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 	sig_eff->Divide(sig_pass, sig_total, "cl=0.683 b(1,1) mode");
 
-	const Int_t 
-						n = sig_eff->GetN();
+	const Int_t
+			n = sig_eff->GetN();
 
 	Int_t
 			n_mean = 0;
@@ -600,10 +646,10 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 	std::cout << "Tau_S" << " " << "Efficiency" << std::endl;
 
-	for(Int_t k = 0; k < n; k++)
+	for (Int_t k = 0; k < n; k++)
 	{
-		sig_eff->GetPoint(k,ax[k],ay[k]);
-		if(abs(ax[k]) < 5.)
+		sig_eff->GetPoint(k, ax[k], ay[k]);
+		if (abs(ax[k]) < 5.)
 		{
 			n_mean++;
 			mean += ay[k];

@@ -6,7 +6,7 @@ SRCPATH=src
 INCPATH=/internal/big_one/4/users/gamrat/scripts/Include/
 BINPATH=bin
 
-LIBS=-L$(INCPATH) -lrec -lm -llapack
+LIBS=-L$(INCPATH) -lrec -lm -llapack -lcurl
 
 SRC=$(SRCPATH)/trilateration_neu_rec.cpp $(SRCPATH)/trilateration_neu_rec_kin_fit_aux.cpp $(SRCPATH)/triangle_neu_rec.cpp $(SRCPATH)/comp_of_methods.cpp
 OBJ=$(OBJPATH)/trilateration_neu_rec.o $(OBJPATH)/trilateration_neu_rec_kin_fit_aux.o $(OBJPATH)/triangle_neu_rec.o $(OBJPATH)/comp_of_methods.o

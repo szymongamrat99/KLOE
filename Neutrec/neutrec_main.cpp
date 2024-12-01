@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
     case Controls::NeutRecMenu::TRIANGLE:
     {
       auto start = std::chrono::system_clock::now();
-      triangle_neurec(firstFile, lastFile, 10, 5, 1, dataTypeOpt, 0);
+      triangle_neurec(firstFile, lastFile, dataTypeOpt);
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
 
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
     case Controls::NeutRecMenu::COMP_OF_MET:
     {
       auto start = std::chrono::system_clock::now();
-      comp_of_methods(firstFile, lastFile, 10, 5, 1, dataTypeOpt);
+      comp_of_methods(firstFile, lastFile, dataTypeOpt);
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
 

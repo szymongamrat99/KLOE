@@ -34,7 +34,8 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 	TString
 			mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
-			omega_name = omegarec_dir + root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + int(data_type) + ext_root,
+			omega_name = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
+			tree_name = std::string(properties["variables"]["tree"]["treename"]["omegarec"]),
 			filename_triangle = neutrec_dir + root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
 
 	file_mctruth = new TFile(mctruth_name);
@@ -43,7 +44,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	tree_mctruth->SetBranchAddress("mctruth", &baseKin.mctruth_int);
 
 	file_omega = new TFile(omega_name);
-	tree_omega = (TTree *)file_omega->Get(omegarec_tree);
+	tree_omega = (TTree *)file_omega->Get(tree_name);
 
 	Int_t
 			doneOmega,
@@ -99,8 +100,12 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	tree_omega->SetBranchAddress("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM),
 	tree_omega->SetBranchAddress("anglePhiOmega", &anglePhiOmega);
 
-	file_triangle = new TFile(filename_triangle);
-	tree_triangle = (TTree *)file_triangle->Get(neutrec_triangle_tree);
+	Float_t chi2min;
+
+	tree_omega->SetBranchAddress("chi2min", &chi2min);
+
+	// file_triangle = new TFile(filename_triangle);
+	// tree_triangle = (TTree *)file_triangle->Get(neutrec_triangle_tree);
 
 	Float_t
 			Knetri_kinfit[10],
@@ -112,19 +117,19 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	Int_t
 			done_kinfit_triangle;
 
-	tree_triangle->SetBranchAddress("fourgamma1triangle", gamma_kinfit_triangle[0]);
-	tree_triangle->SetBranchAddress("fourgamma2triangle", gamma_kinfit_triangle[1]);
-	tree_triangle->SetBranchAddress("fourgamma3triangle", gamma_kinfit_triangle[2]);
-	tree_triangle->SetBranchAddress("fourgamma4triangle", gamma_kinfit_triangle[3]);
+	// tree_triangle->SetBranchAddress("fourgamma1triangle", gamma_kinfit_triangle[0]);
+	// tree_triangle->SetBranchAddress("fourgamma2triangle", gamma_kinfit_triangle[1]);
+	// tree_triangle->SetBranchAddress("fourgamma3triangle", gamma_kinfit_triangle[2]);
+	// tree_triangle->SetBranchAddress("fourgamma4triangle", gamma_kinfit_triangle[3]);
 
-	tree_triangle->SetBranchAddress("fourKnetriangle", Knetri_kinfit);
+	// tree_triangle->SetBranchAddress("fourKnetriangle", Knetri_kinfit);
 
-	tree_triangle->SetBranchAddress("chi2min", &chi2min_triangle);
+	// tree_triangle->SetBranchAddress("chi2min", &chi2min_triangle);
 
-	tree_triangle->SetBranchAddress("minv4gam", &minv4gam);
+	// tree_triangle->SetBranchAddress("minv4gam", &minv4gam);
 
-	tree_triangle->SetBranchAddress("iptriangle", ip_kinfit_triangle);
-	tree_triangle->SetBranchAddress("done_triangle", &done_kinfit_triangle);
+	// tree_triangle->SetBranchAddress("iptriangle", ip_kinfit_triangle);
+	// tree_triangle->SetBranchAddress("done_triangle", &done_kinfit_triangle);
 
 	Float_t
 			Kchrec[9],
@@ -159,7 +164,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 	chain->AddFriend(tree_mctruth);
 	chain->AddFriend(tree_omega);
-	chain->AddFriend(tree_triangle);
+	//chain->AddFriend(tree_triangle);
 
 	/////////////////////////////////////////////////////////////////////
 
@@ -195,7 +200,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			if (j < 2)
 			{
 				if (j == 0)
-					hist[i].push_back(new TH1D(hist_name, "", 100.0, 0.0, 200.0));
+					hist[i].push_back(new TH1D(hist_name, "", 100.0, 0.0, 100.0));
 				else if (j == 1)
 					hist[i].push_back(new TH1D(hist_name, "", 100.0, 495.0, 500.0));
 
@@ -209,7 +214,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			else if (j == 2)
 				hist[i].push_back(new TH1D(hist_name, "", 200.0, 500.0, 1000.0));
 			else
-				hist[i].push_back(new TH1D(hist_name, "", 100.0, 0.0, 200.0));
+				hist[i].push_back(new TH1D(hist_name, "", 100.0, 0.0, 100.0));
 		};
 
 	std::vector<TCanvas *> canva2d;
@@ -229,7 +234,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	for (Int_t i = 0; i < channNum; i++)
 	{
 		hist2d_name = channName[i];
-		hist2d.push_back(new TH2D(hist2d_name, "", 30.0, 155.0, 182.0, 30.0, 0.0, 5.0));
+		hist2d.push_back(new TH2D(hist2d_name, "", 50.0, 0.0, 100.0, 30.0, 0.0, 5.0));
 	};
 
 	for (Int_t i = 0; i < channNum; i++)
@@ -304,9 +309,22 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				cond[6],
 				cond_tot;
 
-		cond[0] = abs(Kchrec[6] - neu_vtx_avg[0]) < sigmas_neu * 3.04;
-		cond[1] = abs(Kchrec[7] - neu_vtx_avg[1]) < sigmas_neu * 3.04;
-		cond[2] = abs(Kchrec[8] - neu_vtx_avg[2]) < sigmas_neu * 6.3;
+		Float_t
+				resCh[3],
+				resNeu[3],
+				resComb[3];
+
+		for(Int_t k = 0; k < 3; k++)
+		{
+			resCh[k] = properties["variables"]["Resolutions"]["vtxCharged"][k];
+			resNeu[k] = properties["variables"]["Resolutions"]["vtxNeutral"]["triTriangle"][k];
+
+			resComb[k] = resCh[k] + resNeu[k];
+		}
+
+		cond[0] = abs(Kchrec[6] - neu_vtx_avg[0]) < sigmas_neu * resComb[0];
+		cond[1] = abs(Kchrec[7] - neu_vtx_avg[1]) < sigmas_neu * resComb[1];
+		cond[2] = abs(Kchrec[8] - neu_vtx_avg[2]) < sigmas_neu * resComb[2];
 		cond[3] = abs(Kchrec[6] - ip_avg[0]) < sigmas_ip * 2.63;
 		cond[4] = abs(Kchrec[7] - ip_avg[1]) < sigmas_ip * 2.03;
 		cond[5] = abs(Kchrec[8] - ip_avg[2]) < sigmas_ip * 3.39;
@@ -318,10 +336,10 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 			if (baseKin.mctruth_int == 1)
 			{
-				hist[0][0]->Fill(anglePi0OmegaPhiCM);
+				hist[0][0]->Fill(chi2min);
 				hist[0][1]->Fill(Kchrec[5]);
 				hist[0][2]->Fill(Omegarec[5]);
-				hist[0][3]->Fill(anglePi0OmegaPhiCM);
+				hist[0][3]->Fill(chi2min);
 
 				hist_control_chann[0][0]->Fill(rho_00);
 				hist_control_chann[0][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -332,17 +350,17 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist_00_IP[0][0]->Fill(rho_00_IP, event.interf_function(baseKin.Dtmc, 0, par));
 				hist_00_IP[0][1]->Fill(neu_vtx_avg[2] - ip_avg[8], event.interf_function(baseKin.Dtmc, 0, par));
 
-				hist2d[0]->Fill(anglePichKaonCM, rho);
+				hist2d[0]->Fill(chi2min, rho);
 
 				hist2d_00IP_pmIP[0][0]->Fill(rho_pm_IP, rho_00_IP, event.interf_function(baseKin.Dtmc, 0, par));
 				hist2d_00IP_pmIP[1][0]->Fill(abs(Kchrec[8] - ip_avg[8]), abs(neu_vtx_avg[2] - ip_avg[8]), event.interf_function(baseKin.Dtmc, 0, par));
 			}
 			if (baseKin.mctruth_int == 3)
 			{
-				hist[1][0]->Fill(anglePi0OmegaPhiCM);
+				hist[1][0]->Fill(chi2min);
 				hist[1][1]->Fill(Kchrec[5]);
 				hist[1][2]->Fill(Omegarec[5]);
-				hist[1][3]->Fill(anglePi0OmegaPhiCM);
+				hist[1][3]->Fill(chi2min);
 
 				hist_control_chann[1][0]->Fill(rho_00);
 				hist_control_chann[1][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -356,14 +374,14 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist2d_00IP_pmIP[0][1]->Fill(rho_pm_IP, rho_00_IP);
 				hist2d_00IP_pmIP[1][1]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 
-				hist2d[1]->Fill(anglePichKaonCM, rho);
+				hist2d[1]->Fill(chi2min, rho);
 			}
 			if (baseKin.mctruth_int == 4)
 			{
-				hist[2][0]->Fill(anglePi0OmegaPhiCM);
+				hist[2][0]->Fill(chi2min);
 				hist[2][1]->Fill(Kchrec[5]);
 				hist[2][2]->Fill(Omegarec[5]);
-				hist[2][3]->Fill(anglePi0OmegaPhiCM);
+				hist[2][3]->Fill(chi2min);
 
 				hist_control_chann[2][0]->Fill(rho_00);
 				hist_control_chann[2][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -377,14 +395,14 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist2d_00IP_pmIP[0][2]->Fill(rho_pm_IP, rho_00_IP);
 				hist2d_00IP_pmIP[1][2]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 
-				hist2d[2]->Fill(anglePichKaonCM, rho);
+				hist2d[2]->Fill(chi2min, rho);
 			}
 			if (baseKin.mctruth_int == 5)
 			{
-				hist[3][0]->Fill(anglePi0OmegaPhiCM);
+				hist[3][0]->Fill(chi2min);
 				hist[3][1]->Fill(Kchrec[5]);
 				hist[3][2]->Fill(Omegarec[5]);
-				hist[3][3]->Fill(anglePi0OmegaPhiCM);
+				hist[3][3]->Fill(chi2min);
 
 				hist_control_chann[3][0]->Fill(rho_00);
 				hist_control_chann[3][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -395,7 +413,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist_00_IP[3][0]->Fill(rho_00_IP);
 				hist_00_IP[3][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
-				hist2d[3]->Fill(anglePichKaonCM, rho);
+				hist2d[3]->Fill(chi2min, rho);
 
 				// hist2d_00IP_pmIP[0][0]->Fill(rho_pm_IP, rho_00_IP);
 
@@ -404,10 +422,10 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			}
 			if (baseKin.mctruth_int == 6)
 			{
-				hist[4][0]->Fill(anglePi0OmegaPhiCM);
+				hist[4][0]->Fill(chi2min);
 				hist[4][1]->Fill(Kchrec[5]);
 				hist[4][2]->Fill(Omegarec[5]);
-				hist[4][3]->Fill(anglePi0OmegaPhiCM);
+				hist[4][3]->Fill(chi2min);
 
 				hist_control_chann[4][0]->Fill(rho_00);
 				hist_control_chann[4][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -418,17 +436,17 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist_00_IP[4][0]->Fill(rho_00_IP);
 				hist_00_IP[4][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
-				hist2d[4]->Fill(anglePichKaonCM, rho);
+				hist2d[4]->Fill(chi2min, rho);
 
 				hist2d_00IP_pmIP[0][4]->Fill(rho_pm_IP, rho_00_IP);
 				hist2d_00IP_pmIP[1][4]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 			}
 			if (baseKin.mctruth_int == 7)
 			{
-				hist[5][0]->Fill(anglePi0OmegaPhiCM);
+				hist[5][0]->Fill(chi2min);
 				hist[5][1]->Fill(Kchrec[5]);
 				hist[5][2]->Fill(Omegarec[5]);
-				hist[5][3]->Fill(anglePi0OmegaPhiCM);
+				hist[5][3]->Fill(chi2min);
 
 				hist_control_chann[5][0]->Fill(rho_00);
 				hist_control_chann[5][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -439,7 +457,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist_00_IP[5][0]->Fill(rho_00_IP);
 				hist_00_IP[5][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
-				hist2d[5]->Fill(anglePichKaonCM, rho);
+				hist2d[5]->Fill(chi2min, rho);
 
 				hist2d_00IP_pmIP[0][5]->Fill(rho_pm_IP, rho_00_IP);
 				hist2d_00IP_pmIP[1][5]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
@@ -458,7 +476,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	TLegend *legend_chi2 = new TLegend(0.6, 0.5, 0.9, 0.9);
 	legend_chi2->SetFillColor(kWhite);
 
-	TString xTitle[4] = {"#angle(#pi^{0},#omega) [#circ]", "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]", "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]", "#angle(#pi^{0},#omega) [#circ]"};
+	TString xTitle[4] = {"#chi^{2}_{#omega#pi^{0}} [-]", "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]", "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]", "#angle(#pi^{0},#omega) [#circ]"};
 
 	TString yTitle = "Counts";
 
@@ -502,7 +520,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		hist2d[j]->SetMarkerColor(channColor[j]);
 		hist2d[j]->SetMarkerSize(2);
 
-		hist2d[j]->GetXaxis()->SetTitle("#angle(#pi^{+},#pi^{-}) [#circ]");
+		hist2d[j]->GetXaxis()->SetTitle("#chi^{2}_{#omega#pi^{0}} [-]");
 		hist2d[j]->GetYaxis()->SetTitle("#sqrt{#rho_{+-}^{2} + #rho_{00}^{2}} [cm]");
 		hist2d[j]->Draw("COLZ");
 
