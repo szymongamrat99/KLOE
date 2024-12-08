@@ -7,6 +7,8 @@
 #include <MainMenu.h>
 #include <ErrorLogs.h>
 
+#include "inc/klspm00.hpp"
+
 bool 
     firstFileRangeErr, 
     lastFileRangeErr, 
@@ -28,6 +30,8 @@ int main(int argc, char *argv[])
                         {0., 0., 0., 0.}};
   double array1[4] = {0., 0., 0., 0.};
   float numbers = 0;
+
+  setGlobalStyle();
 
 
   try
@@ -147,7 +151,7 @@ int main(int argc, char *argv[])
     case Controls::MainMenu::TRANSF_TO_CM:
       break;
     case Controls::MainMenu::CPV_NORM:
-      break;
+      CPFit_main();
     }
 
   } while (mainMenuOpt != Controls::MainMenu::EXIT);

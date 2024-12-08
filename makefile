@@ -12,27 +12,35 @@ NEUTREC_DIR    := $(SUBANALYSIS_DIR)/Neutrec
 
 # WORK DIRECTORIES
 OBJDIR := obj
+BINDIR := bin
 
 OBJ :=
 OBJ += $(OBJDIR)/CPVAnalysis.o
 
-COLOR_ON = color
+MAKE_CPFIT := $(CPFIT_DIR)/$(OBJDIR)/cpfit_main.o
+MAKE_CPFIT += $(CPFIT_DIR)/$(OBJDIR)/cp_fit_mc_data.o
+
+LIBS= -lm -llapack -lrec -lfort -lcurl
+
+PROJECT := $(BINDIR)/KLSPM00.exe
 
 CXX = g++
 CXXFLAGS := `root-config --cflags --glibs` -g3
 
-#export MAKE_DIR CXX CXXFLAGS
+all: $(OBJ) $(MAKE_CPFIT) $(PROJECT)
 
-$(OBJPATH)/CPVAnalysis.o: CPVAnalysis.cpp
+$(PROJECT): $(OBJ) $(MAKE_CPFIT)
+	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
+	
+$(OBJDIR)/CPVAnalysis.o: CPVAnalysis.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-#	@$(MAKE) -C $(CPFIT_DIR)
-
-.PHONY: 
-	clean
+$(MAKE_CPFIT):
+	@$(MAKE) -C $(CPFIT_DIR)
 
 clean: 
 	@$(MAKE) -C $(CPFIT_DIR) clean
+	rm -f $(OBJDIR)/*.o
 
 
 

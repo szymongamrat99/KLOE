@@ -13,9 +13,12 @@ using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::chrono::minutes;
 
-int CPFit_main(Short_t good_clus, Short_t loopcount, Short_t jmin, Short_t jmax)
+int CPFit_main()
 {
-  setGlobalStyle();
+  Short_t good_clus = properties["variables"]["KinFit"]["Trilateration"]["goodClus"],
+          loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopCount"], 
+          jmin = properties["variables"]["KinFit"]["Trilateration"]["bunchMin"], 
+          jmax = properties["variables"]["KinFit"]["Trilateration"]["bunchMax"];
 
   ErrorHandling::ErrorLogs errLogger;
   LogsHandling::Logs logger;
