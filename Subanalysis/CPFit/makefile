@@ -9,8 +9,8 @@ CONSTPATH=/internal/big_one/4/users/gamrat/scripts/Include
 
 LIBS= -lm -llapack -lrec -lcurl
 
-SRC=$(SRCPATH)/cp_fit_mc_data.cpp
-OBJ=$(OBJPATH)/cp_fit_mc_data.o
+SRC=$(SRCPATH)/cp_fit_mc_data.cpp cpfit_main.cpp
+OBJ=$(OBJPATH)/cp_fit_mc_data.o $(OBJPATH)/cpfit_main.o
 INC=$(INCPATH)/cpfit.hpp $(CONSTPATH)/const.h
 
 PROJECT=cpv_fit.exe
@@ -20,13 +20,13 @@ RMFLAGS=-f
 
 all: $(OBJ) $(BINPATH)/$(PROJECT)
 
-$(BINPATH)/$(PROJECT): $(OBJPATH)/main.o $(OBJ)
-	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
+#$(BINPATH)/$(PROJECT): $(OBJPATH)/main.o $(OBJ)
+#	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 
 $(OBJPATH)/cp_fit_mc_data.o: $(SRCPATH)/cp_fit_mc_data.cpp $(INC)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(OBJPATH)/main.o: cpfit_main.cpp $(INC)
+$(OBJPATH)/cpfit_main.o: cpfit_main.cpp $(INC)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:

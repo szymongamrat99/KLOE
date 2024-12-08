@@ -13,10 +13,10 @@ using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::chrono::minutes;
 
-int main(int argc, char *argv[])
+int CPFit_main(Short_t good_clus, Short_t loopcount, Short_t jmin, Short_t jmax)
 {
   setGlobalStyle();
-  
+
   ErrorHandling::ErrorLogs errLogger;
   LogsHandling::Logs logger;
   std::ofstream LogFileMain, LogFileTriangle, LogFileTri, LogFileTriKinFit;
@@ -101,8 +101,6 @@ int main(int argc, char *argv[])
     errLogger.setErrCount(err);
     return int(err);
   }
-
-  Short_t good_clus = atoi(argv[3]), loopcount = atoi(argv[4]), jmin = atoi(argv[5]), jmax = atoi(argv[6]);
 
   Controls::CPFitMenu menuOpt;
   bool

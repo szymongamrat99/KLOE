@@ -10,7 +10,7 @@
 #include <TFitResult.h>
 #include <TGraphAsymmErrors.h>
 
-#include "chain_init.C"
+#include <const.h>
 
 using namespace std;
 

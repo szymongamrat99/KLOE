@@ -1,41 +1,38 @@
-CXX=g++
-CXXFLAGS=`root-config --cflags --glibs`
+# STANDARD DIRECTORIES FOR MAIN COMPILATION
+MAKE_DIR = $(PWD)
+SUBANALYSIS_DIR = $(MAKE_DIR)/Subanalysis
 
-OBJPATH=obj
-SRCPATH=src
-INCPATH=/internal/big_one/4/users/gamrat/scripts/Include/
-BINPATH=bin
+# DIRECTORIES FOR SUBCOMPILATIONS
+CPFIT_DIR 		 := $(SUBANALYSIS_DIR)/CPFit
+EFFICIENCY_DIR := $(SUBANALYSIS_DIR)/EfficiencyAnalysis
+FORTRAN_DIR    := $(SUBANALYSIS_DIR)/FortranAnalysis
+GENERATED_DIR  := $(SUBANALYSIS_DIR)/GeneratedVars
+OMEGAREC_DIR   := $(SUBANALYSIS_DIR)/OmegaRec 
+NEUTREC_DIR    := $(SUBANALYSIS_DIR)/Neutrec
 
-LIBS=-L$(INCPATH) -lrec -lm -llapack
+# WORK DIRECTORIES
+OBJDIR := obj
 
-SRC=$(SRCPATH)/trilateration_neu_rec.cpp $(SRCPATH)/trilateration_neu_rec_kin_fit_aux.cpp $(SRCPATH)/triangle_neu_rec.cpp
-OBJ=$(OBJPATH)/trilateration_neu_rec.o $(OBJPATH)/trilateration_neu_rec_kin_fit_aux.o $(OBJPATH)/triangle_neu_rec.o
+OBJ :=
+OBJ += $(OBJDIR)/CPVAnalysis.o
 
-PROJECT=CPV_Analysis.exe
+COLOR_ON = color
 
-RM=rm
-RMFLAGS=-f
+CXX = g++
+CXXFLAGS := `root-config --cflags --glibs` -g3
 
-all: $(OBJ) $(BINPATH)/$(PROJECT)
+#export MAKE_DIR CXX CXXFLAGS
 
-$(BINPATH)/$(PROJECT): $(OBJPATH)/main.o $(OBJ)
-	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
-
-$(OBJPATH)/trilateration_neu_rec.o : $(SRCPATH)/trilateration_neu_rec.cpp
+$(OBJPATH)/CPVAnalysis.o: CPVAnalysis.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(OBJPATH)/triangle_neu_rec.o : $(SRCPATH)/triangle_neu_rec.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+#	@$(MAKE) -C $(CPFIT_DIR)
 
-$(OBJPATH)/trilateration_neu_rec_kin_fit_aux.o: $(SRCPATH)/trilateration_neu_rec_kin_fit_aux.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+.PHONY: 
+	clean
 
-$(OBJPATH)/main.o: neutrec_main.cpp 
-	$(CXX) $(CXXFLAGS) -c $< -o $@
-
-clean:
-	$(RM) $(RMFLAGS) $(OBJ)
-
+clean: 
+	@$(MAKE) -C $(CPFIT_DIR) clean
 
 
 

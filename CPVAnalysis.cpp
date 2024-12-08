@@ -2,10 +2,10 @@
 #include <iostream>
 #include <string>
 
-#include "../../Include/const.h"
+#include <const.h>
 
-#include "../../Include/ErrorLogs.h"
-#include "../../Include/MainMenu.h"
+#include <MainMenu.h>
+#include <ErrorLogs.h>
 
 bool 
     firstFileRangeErr, 
