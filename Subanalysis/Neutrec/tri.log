@@ -1,0 +1,50 @@
+All events: 1088980
+Events without err 1: 0
+Events without err 2: 0.774607
+Events without err 3: 0
+Events without err 4: 0.548286
+Events without err 5: 0.487289
+Events without err 6: 0.388553
+Events without err 7: 0.172498
+Events without err 8: 0
+Events without err 9: 0
+Events without err 10: 0
+Events without err 11: 0.171963
+Events without err 12: 0
+Events without err 13: 0
+Events without err 14: 0
+Events without err 15: 0
+Events without err 16: 0
+Events without err 17: 0
+Events without cut 1: 0.0878327
+Events without cut 2: 0.0866848
+Events without cut 3: 0.0776176
+Events without cut 4: 0.0757204
+Events without cut 5: 0.0669976
+Events without cut 6: 0.0657349
+Events at the starting point of analysis: 0
+
+Rejected events: 198405
+
+Total signal events: 106565
+
+Good baseKin.cluster sets: 101235
+Good baseKin.cluster sets for 0 bunch: 93010
+Good baseKin.cluster sets for +1 bunch: 1632
+Good baseKin.cluster sets for -1 bunch: 5371
+Good baseKin.cluster sets for blob: 362
+Good baseKin.cluster sets eff: 0.949984
+Bad baseKin.cluster sets: 5330
+Bad baseKin.cluster sets for 0 bunch: 3575
+Bad baseKin.cluster sets for +1 bunch: 162
+Bad baseKin.cluster sets for -1 bunch: 971
+Bad baseKin.cluster sets for blob: 109
+Bad clusters 1: 0.0485807
+Bad clusters 2: 0.0013419
+Bad clusters 3: 4.69197e-05
+Bad clusters 4: 4.69197e-05
+Bad baseKin.cluster smaller: 0
+Bad baseKin.cluster bigger: 0
+Bad baseKin.cluster sets eff: 0.0500164
+Bad baseKin.cluster smaller eff: 0
+Bad baseKin.cluster bigger eff: 0
