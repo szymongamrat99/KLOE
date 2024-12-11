@@ -1,6 +1,6 @@
 {
     "lastScript": null,
-    "lastUpdate": "2024-11-29.00:16:16",
+    "lastUpdate": "2024-12-09.23:40:11",
     "variables": {
         "CPFit": {
             "histoResults": {
@@ -33,44 +33,44 @@
             },
             "limitPer": {
                 "lower": 0.3,
-                "upper": 0.1
+                "upper": 0.3
             },
             "result": {
-                "chi2": 100.74804728675045,
+                "chi2": 123.65627812772084,
                 "error": {
-                    "Im": 0.046941990172087174,
+                    "Im": 0.04866802726251112,
                     "Norm": {
-                        "Omegapi0": 0.0841802239598533,
-                        "Other": 0.32167550325816335,
+                        "Omegapi0": 0.08564047997914775,
+                        "Other": 0.41356138580495316,
                         "Regeneration": {
-                            "CloseLeft": 0.1715270220081555,
-                            "CloseRight": 0.1328435665205605,
-                            "FarLeft": 0.013352180228241806,
-                            "FarRight": 0.018958116785798507
+                            "CloseLeft": 0.1744576177249697,
+                            "CloseRight": 0.13430355092917967,
+                            "FarLeft": 0.013398747835833058,
+                            "FarRight": 0.019169356513710656
                         },
-                        "Semileptonic": 0.3046701969921486,
-                        "Signal": 0.011322778465418293,
-                        "Threepi0": 0.34538466503972765
+                        "Semileptonic": 0.4568168728827047,
+                        "Signal": 0.011491533323201408,
+                        "Threepi0": 0.4837851027298362
                     },
-                    "Re": 0.004239640960713478
+                    "Re": 0.004413063068952759
                 },
-                "normChi2": 1.1194227476305605,
+                "normChi2": 1.3739586458635649,
                 "value": {
-                    "Im": -0.07167715839438352,
+                    "Im": -0.09969681387637638,
                     "Norm": {
-                        "Omegapi0": 0.764231571225915,
-                        "Other": 1.0999999876536843,
+                        "Omegapi0": 0.7376291755305996,
+                        "Other": 1.29999983189011,
                         "Regeneration": {
-                            "CloseLeft": 1.8077631847525546,
-                            "CloseRight": 1.81086339163131,
-                            "FarLeft": 0.4558258281884855,
-                            "FarRight": 0.48027194857846656
+                            "CloseLeft": 1.7996421647091063,
+                            "CloseRight": 1.8715338984351297,
+                            "FarLeft": 0.45616473986743244,
+                            "FarRight": 0.490385317990234
                         },
-                        "Semileptonic": 0.7000006937326528,
-                        "Signal": 0.9051476379278127,
-                        "Threepi0": 1.0999998983314623
+                        "Semileptonic": 0.7000014578515327,
+                        "Signal": 0.8706093600441369,
+                        "Threepi0": 1.2999950216681126
                     },
-                    "Re": 0.0009809798018221517
+                    "Re": 0.006729933576439189
                 }
             }
         },
@@ -83,14 +83,14 @@
                 "range": null
             },
             "Trilateration": {
+                "bunchMax": 0,
+                "bunchMin": 0,
                 "fixedVars": 4,
                 "freeVars": 27,
+                "goodClus": 0,
                 "loopCount": 10,
                 "numOfConstraints": 5,
-                "range": 1,
-                "goodClus": 0,
-                "bunchMin": 0,
-                "bunchMax": 0 
+                "range": 1
             }
         },
         "Reconstruction": {
@@ -164,11 +164,15 @@
         },
         "tree": {
             "filename": {
-                "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/OmegaRec/root_files/omega_rec_1_56_10_8_3.root"
+                "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_1_56_10_8_3.root"
             },
             "treename": {
                 "omegarec": "h_omega_rec"
             }
+        },
+        "rootFiles":
+        {
+            "path": "/internal/big_one/4/users/gamrat/old_root_files"
         }
     }
 }

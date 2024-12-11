@@ -2,5 +2,7 @@
 #define KLSPM00_H
 
 int CPFit_main();
+int GenVars_main();
+int OmegaRec_main();
 
 #endif //! CPFIT_H

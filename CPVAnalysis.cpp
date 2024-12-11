@@ -95,13 +95,14 @@ int main(int argc, char *argv[])
     cout << "2. K->pi+pi- reconstruction - no boost." << endl;
     cout << "3. K->pi+pi- reconstruction - boost." << endl;
     cout << "4. IP event by event - using K->pi+pi-." << endl;
-    cout << "5. K->pi0pi0 - using trilateration." << endl;
-    cout << "6. K->pi0pi0 - using triangle, photons with trilateration." << endl;
-    cout << "7. Efficiency and signal-to-background plots." << endl;
-    cout << "8. Kinematic fits." << endl;
-    cout << "9. Recalculation of variables to CM frame." << endl;
-    cout << "10. CPV normalization." << endl;
-    cout << "11. Exit." << endl;
+    cout << "5. Omega-pi0 reconstruction." << endl;
+    cout << "6. K->pi0pi0 - using trilateration." << endl;
+    cout << "7. K->pi0pi0 - using triangle, photons with trilateration." << endl;
+    cout << "8. Efficiency and signal-to-background plots." << endl;
+    cout << "9. Kinematic fits." << endl;
+    cout << "10. Recalculation of variables to CM frame." << endl;
+    cout << "11. CPV normalization." << endl;
+    cout << "12. Exit." << endl;
     mainMenu.EndMenu();
 
     try
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
     {
     case Controls::MainMenu::GEN_VARS:
     {
-      break;
+      GenVars_main();
     }
     case Controls::MainMenu::KCHREC_NO_BOOST:
       break;
@@ -140,6 +141,10 @@ int main(int argc, char *argv[])
       break;
     case Controls::MainMenu::IP_EV_BY_EV:
       break;
+    case Controls::MainMenu::OMEGA_REC:
+    {
+      OmegaRec_main();
+    }
     case Controls::MainMenu::KNEREC_TRILAT:
       break;
     case Controls::MainMenu::KNEREC_TRIANGLE:

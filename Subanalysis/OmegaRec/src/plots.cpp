@@ -137,9 +137,9 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			Kchboost[9];
 
 	chain->SetBranchAddress("nclu", &baseKin.nclu);
-	chain->SetBranchAddress("Xacl", baseKin.cluster[0]);
-	chain->SetBranchAddress("Yacl", baseKin.cluster[1]);
-	chain->SetBranchAddress("Zacl", baseKin.cluster[2]);
+	chain->SetBranchAddress("Xcl", baseKin.cluster[0]);
+	chain->SetBranchAddress("Ycl", baseKin.cluster[1]);
+	chain->SetBranchAddress("Zcl", baseKin.cluster[2]);
 	chain->SetBranchAddress("Tcl", baseKin.cluster[3]);
 	chain->SetBranchAddress("Enecl", baseKin.cluster[4]);
 

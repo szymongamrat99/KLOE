@@ -10,7 +10,7 @@ using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::chrono::minutes;
 
-int main(int argc, char *argv[])
+int GenVars_main()
 {
   Controls::Menu *menu = new Controls::Menu(5);
   ErrorHandling::ErrorLogs logger;

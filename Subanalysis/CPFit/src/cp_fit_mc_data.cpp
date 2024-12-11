@@ -17,9 +17,9 @@
 #include <TLegend.h>
 
 #include "../inc/cpfit.hpp"
-#include "../../../Include/Codes/interference.h"
-#include "../../../Include/Codes/kloe_class.h"
-#include "../../../Include/Codes/lorentz_transf.h"
+#include <interference.h>
+#include <kloe_class.h>
+#include <lorentz_transf.h>
 
 #define __FILENAME__ (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -79,7 +79,6 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	chain->SetBranchAddress("minv4gam", &baseKin.minv4gam);
 	chain->SetBranchAddress("Kchboost", baseKin.Kchboost);
 	chain->SetBranchAddress("Kchrec", baseKin.Kchrec);
-	// chain->SetBranchAddress("Knereclor", neutVars.Knerec);
 	chain->SetBranchAddress("Qmiss", &baseKin.Qmiss);
 
 	Float_t
@@ -268,7 +267,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 			velocity_kne = cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
 
 			tch_LAB = sqrt(pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + pow(baseKin.Kchboost[8] - baseKin.ip[2], 2)) / velocity_kch;
-			tne_LAB = sqrt(pow(neutVars.Knerec[6] - baseKin.ip[0], 2) + pow(neutVars.Knerec[7] - baseKin.ip[1], 2) + pow(neutVars.Knerec[8] - baseKin.ip[2], 2)) / velocity_kne; // neutVars.Knerec[9];
+			tne_LAB = sqrt(pow(neutVars.Knerec[6] - baseKin.ip[0], 2) + pow(neutVars.Knerec[7] - baseKin.ip[1], 2) + pow(neutVars.Knerec[8] - baseKin.ip[2], 2)) / velocity_kne;
 
 			Kch_LAB[0] = baseKin.Kchboost[6] - baseKin.ip[0];
 			Kch_LAB[1] = baseKin.Kchboost[7] - baseKin.ip[1];
@@ -280,15 +279,15 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 			Kchmom_LAB[2] = baseKin.Kchboost[2];
 			Kchmom_LAB[3] = baseKin.Kchboost[3];
 
-			Kne_LAB[0] = neutVars.Knerec[6] + 0.07 - baseKin.ip[0];
-			Kne_LAB[1] = neutVars.Knerec[7] - 0.01 - baseKin.ip[1];
-			Kne_LAB[2] = neutVars.Knerec[8] + 0.03 - baseKin.ip[2];
-			Kne_LAB[3] = (tne_LAB - 1.3 * tau_S_nonCPT) * cVel;
+			Kne_LAB[0] = neutVars.Knerec[6] - baseKin.ip[0];
+			Kne_LAB[1] = neutVars.Knerec[7] - baseKin.ip[1];
+			Kne_LAB[2] = neutVars.Knerec[8] - baseKin.ip[2];
+			Kne_LAB[3] = tne_LAB * cVel;
 
-			Knemom_LAB[0] = neutVars.Knerec[0] + 0.31;
-			Knemom_LAB[1] = neutVars.Knerec[1] - 0.09;
-			Knemom_LAB[2] = neutVars.Knerec[2] + 0.07;
-			Knemom_LAB[3] = neutVars.Knerec[3] - 0.06;
+			Knemom_LAB[0] = neutVars.Knerec[0];
+			Knemom_LAB[1] = neutVars.Knerec[1];
+			Knemom_LAB[2] = neutVars.Knerec[2];
+			Knemom_LAB[3] = neutVars.Knerec[3];
 
 			Phi_boost[0] = -baseKin.phi_mom[0] / baseKin.phi_mom[3];
 			Phi_boost[1] = -baseKin.phi_mom[1] / baseKin.phi_mom[3];
@@ -457,8 +456,8 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	minimum->SetFunction(minimized_function);
 
 	const Double_t init_vars[num_of_vars] = {
-			properties["variables"]["CPFit"]["initParams"]["Re"],
-			properties["variables"]["CPFit"]["initParams"]["Im"],
+			Re,
+			Im_nonCPT,
 			properties["variables"]["CPFit"]["initParams"]["Norm"]["Signal"],
 			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarLeft"],
 			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseLeft"],
@@ -719,7 +718,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	legend_chann->AddEntry(event.data, dataName, "le");
 	legend_chann->Draw();
 
-	c1->Print(img_dir + "split_fit_with_corr" + ext_img);
+	c1->Print(cpfit_dir + img_dir + "split_fit_with_corr" + ext_img);
 
 	// Residuals graph
 	TCanvas *c2 = new TCanvas("c2", "", 790, 790);
@@ -747,7 +746,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 	residuals_hist->Draw();
 
-	c2->Print(img_dir + "residuals_hist" + ext_img);
+	c2->Print(cpfit_dir + img_dir + "residuals_hist" + ext_img);
 
 	delete residuals_hist;
 	delete c1;

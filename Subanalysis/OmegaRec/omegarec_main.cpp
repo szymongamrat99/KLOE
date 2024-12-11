@@ -10,7 +10,7 @@ using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::chrono::minutes;
 
-int main(int argc, char *argv[])
+int OmegaRec_main()
 {
   Controls::Menu *menu = new Controls::Menu(6);
   ErrorHandling::ErrorLogs logger;
