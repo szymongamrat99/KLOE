@@ -96,13 +96,14 @@ int main(int argc, char *argv[])
     cout << "3. K->pi+pi- reconstruction - boost." << endl;
     cout << "4. IP event by event - using K->pi+pi-." << endl;
     cout << "5. Omega-pi0 reconstruction." << endl;
-    cout << "6. K->pi0pi0 - using trilateration." << endl;
-    cout << "7. K->pi0pi0 - using triangle, photons with trilateration." << endl;
-    cout << "8. Efficiency and signal-to-background plots." << endl;
-    cout << "9. Kinematic fits." << endl;
-    cout << "10. Recalculation of variables to CM frame." << endl;
-    cout << "11. CPV normalization." << endl;
-    cout << "12. Exit." << endl;
+    cout << "6. Regeneration rejection." << endl;
+    cout << "7. K->pi0pi0 - using trilateration." << endl;
+    cout << "8. K->pi0pi0 - using triangle, photons with trilateration." << endl;
+    cout << "9. Efficiency and signal-to-background plots." << endl;
+    cout << "10. Kinematic fits." << endl;
+    cout << "11. Recalculation of variables to CM frame." << endl;
+    cout << "12. CPV normalization." << endl;
+    cout << "13. Exit." << endl;
     mainMenu.EndMenu();
 
     try
@@ -144,6 +145,10 @@ int main(int argc, char *argv[])
     case Controls::MainMenu::OMEGA_REC:
     {
       OmegaRec_main();
+    }
+    case Controls::MainMenu::REGEN_REJ:
+    {
+      Regen_main();
     }
     case Controls::MainMenu::KNEREC_TRILAT:
       break;

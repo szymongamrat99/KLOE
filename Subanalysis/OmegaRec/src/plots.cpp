@@ -193,14 +193,14 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	TString hist_name = "";
 
 	for (Int_t i = 0; i < channNum; i++)
-		for (Int_t j = 0; j < 4; j++)
+		for (Int_t j = 0; j < 7; j++)
 		{
 			hist_name = "hist_" + std::to_string(i) + std::to_string(j);
 
 			if (j < 2)
 			{
 				if (j == 0)
-					hist[i].push_back(new TH1D(hist_name, "", 100.0, 0.0, 100.0));
+					hist[i].push_back(new TH1D(hist_name, "", 100.0, 0.0, 180.0));
 				else if (j == 1)
 					hist[i].push_back(new TH1D(hist_name, "", 100.0, 495.0, 500.0));
 
@@ -213,8 +213,10 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			}
 			else if (j == 2)
 				hist[i].push_back(new TH1D(hist_name, "", 200.0, 500.0, 1000.0));
-			else
+			else if (j == 3)
 				hist[i].push_back(new TH1D(hist_name, "", 100.0, 0.0, 100.0));
+			else
+				hist[i].push_back(new TH1D(hist_name, "", 100.0, 0.0, 180.0));
 		};
 
 	std::vector<TCanvas *> canva2d;
@@ -336,10 +338,13 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 			if (baseKin.mctruth_int == 1)
 			{
-				hist[0][0]->Fill(chi2min);
+				hist[0][0]->Fill(anglePi0OmegaPhiCM);
 				hist[0][1]->Fill(Kchrec[5]);
 				hist[0][2]->Fill(Omegarec[5]);
 				hist[0][3]->Fill(chi2min);
+				hist[0][4]->Fill(anglePhiOmega);
+				hist[0][5]->Fill(anglePi0KaonCM);
+				hist[0][6]->Fill(anglePichKaonCM);
 
 				hist_control_chann[0][0]->Fill(rho_00);
 				hist_control_chann[0][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -357,10 +362,13 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			}
 			if (baseKin.mctruth_int == 3)
 			{
-				hist[1][0]->Fill(chi2min);
+				hist[1][0]->Fill(anglePi0OmegaPhiCM);
 				hist[1][1]->Fill(Kchrec[5]);
 				hist[1][2]->Fill(Omegarec[5]);
 				hist[1][3]->Fill(chi2min);
+				hist[1][4]->Fill(anglePhiOmega);
+				hist[1][5]->Fill(anglePi0KaonCM);
+				hist[1][6]->Fill(anglePichKaonCM);
 
 				hist_control_chann[1][0]->Fill(rho_00);
 				hist_control_chann[1][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -378,10 +386,13 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			}
 			if (baseKin.mctruth_int == 4)
 			{
-				hist[2][0]->Fill(chi2min);
+				hist[2][0]->Fill(anglePi0OmegaPhiCM);
 				hist[2][1]->Fill(Kchrec[5]);
 				hist[2][2]->Fill(Omegarec[5]);
 				hist[2][3]->Fill(chi2min);
+				hist[2][4]->Fill(anglePhiOmega);
+				hist[2][5]->Fill(anglePi0KaonCM);
+				hist[2][6]->Fill(anglePichKaonCM);
 
 				hist_control_chann[2][0]->Fill(rho_00);
 				hist_control_chann[2][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -399,10 +410,13 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			}
 			if (baseKin.mctruth_int == 5)
 			{
-				hist[3][0]->Fill(chi2min);
+				hist[3][0]->Fill(anglePi0OmegaPhiCM);
 				hist[3][1]->Fill(Kchrec[5]);
 				hist[3][2]->Fill(Omegarec[5]);
 				hist[3][3]->Fill(chi2min);
+				hist[3][4]->Fill(anglePhiOmega);
+				hist[3][5]->Fill(anglePi0KaonCM);
+				hist[3][6]->Fill(anglePichKaonCM);
 
 				hist_control_chann[3][0]->Fill(rho_00);
 				hist_control_chann[3][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -422,10 +436,13 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			}
 			if (baseKin.mctruth_int == 6)
 			{
-				hist[4][0]->Fill(chi2min);
+				hist[4][0]->Fill(anglePi0OmegaPhiCM);
 				hist[4][1]->Fill(Kchrec[5]);
 				hist[4][2]->Fill(Omegarec[5]);
 				hist[4][3]->Fill(chi2min);
+				hist[4][4]->Fill(anglePhiOmega);
+				hist[4][5]->Fill(anglePi0KaonCM);
+				hist[4][6]->Fill(anglePichKaonCM);
 
 				hist_control_chann[4][0]->Fill(rho_00);
 				hist_control_chann[4][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -443,10 +460,13 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			}
 			if (baseKin.mctruth_int == 7)
 			{
-				hist[5][0]->Fill(chi2min);
+				hist[5][0]->Fill(anglePi0OmegaPhiCM);
 				hist[5][1]->Fill(Kchrec[5]);
 				hist[5][2]->Fill(Omegarec[5]);
 				hist[5][3]->Fill(chi2min);
+				hist[5][4]->Fill(anglePhiOmega);
+				hist[5][5]->Fill(anglePi0KaonCM);
+				hist[5][6]->Fill(anglePichKaonCM);
 
 				hist_control_chann[5][0]->Fill(rho_00);
 				hist_control_chann[5][1]->Fill(Kchrec[8] - neu_vtx_avg[2]);
@@ -476,11 +496,11 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	TLegend *legend_chi2 = new TLegend(0.6, 0.5, 0.9, 0.9);
 	legend_chi2->SetFillColor(kWhite);
 
-	TString xTitle[4] = {"#chi^{2}_{#omega#pi^{0}} [-]", "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]", "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]", "#angle(#pi^{0},#omega) [#circ]"};
+	TString xTitle[7] = {"#angle(#pi^{0},#omega) [#circ]", "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]", "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]", "#chi^{2}_{#omega#pi^{0}} [-]", "#angle(#phi,#omega) [#circ]", "#angle(#pi^{0},#pi^{0}) [#circ]", "#angle(#pi^{+},#pi^{-}) [#circ]"};
 
 	TString yTitle = "Counts";
 
-	for (Int_t i = 0; i < 4; i++)
+	for (Int_t i = 0; i < 7; i++)
 	{
 		canva[i]->cd();
 		canva[i]->SetLogy(1);
@@ -489,8 +509,8 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			hist[j][i]->SetLineColor(channColor[j]);
 			hist[j][i]->SetLineWidth(3);
 
-			legend_chann->AddEntry(hist[j][i], channName[j], "l");
-			legend_chi2->AddEntry(hist[j][i], channName[j], "l");
+			// legend_chann->AddEntry(hist[j][i], channName[j], "l");
+			// legend_chi2->AddEntry(hist[j][i], channName[j], "l");
 
 			if (j == 0)
 			{
@@ -502,14 +522,14 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			else
 				hist[j][i]->Draw("SAME");
 		}
-		if (i < 3)
-			legend_chann->Draw();
-		else if (i == 3)
-			legend_chi2->Draw();
+		// if (i < 3)
+		// 	legend_chann->Draw();
+		// else if (i == 3)
+		// 	legend_chi2->Draw();
 
-		canva[i]->Print(img_dir + "hist" + std::to_string(i) + ext_img);
-		legend_chann->Clear();
-		legend_chi2->Clear();
+		canva[i]->Print(img_dir + "OmegaRec/hist" + std::to_string(i) + ext_img);
+		// legend_chann->Clear();
+		// legend_chi2->Clear();
 	}
 
 	for (Int_t j = 0; j < channNum; j++)
@@ -524,7 +544,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		hist2d[j]->GetYaxis()->SetTitle("#sqrt{#rho_{+-}^{2} + #rho_{00}^{2}} [cm]");
 		hist2d[j]->Draw("COLZ");
 
-		canva2d[j]->Print(img_dir + "angle_2d_kaon_cm_" + channName[j] + ext_img);
+		canva2d[j]->Print(img_dir + "OmegaRec/angle_2d_kaon_cm_" + channName[j] + ext_img);
 	}
 
 	TString xTitleCont[3] = {"x_{#pi^{+}#pi^{-}} - x_{#pi^{0}#pi^{0}}", "y_{#pi^{+}#pi^{-}} - y_{#pi^{0}#pi^{0}}", "z_{#pi^{+}#pi^{-}} - z_{#pi^{0}#pi^{0}}"};
@@ -587,7 +607,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		hist_control[i]->Draw();
 		fit_text->Draw();
 
-		canvas_cont[i]->Print(img_dir + "cont_plot_" + std::to_string(i) + ext_img);
+		canvas_cont[i]->Print(img_dir + "OmegaRec/cont_plot_" + std::to_string(i) + ext_img);
 
 		fit_text->Clear();
 	}
@@ -625,7 +645,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		else if (i == 3)
 			legend_chi2->Draw();
 
-		canva[i + 6]->Print(img_dir + "hist_control_chann" + std::to_string(i) + ext_img);
+		canva[i + 6]->Print(img_dir + "OmegaRec/hist_control_chann" + std::to_string(i) + ext_img);
 		legend_chann_cont->Clear();
 		legend_chi2->Clear();
 	}
@@ -660,7 +680,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		else if (i == 3)
 			legend_chi2->Draw();
 
-		canva[i + 6]->Print(img_dir + "hist_pm_IP_" + std::to_string(i) + ext_img);
+		canva[i + 6]->Print(img_dir + "OmegaRec/hist_pm_IP_" + std::to_string(i) + ext_img);
 		legend_chann_cont->Clear();
 		legend_chi2->Clear();
 	}
@@ -695,7 +715,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		else if (i == 3)
 			legend_chi2->Draw();
 
-		canva[i + 8]->Print(img_dir + "hist_00_IP_" + std::to_string(i) + ext_img);
+		canva[i + 8]->Print(img_dir + "OmegaRec/hist_00_IP_" + std::to_string(i) + ext_img);
 		legend_chann_cont->Clear();
 		legend_chi2->Clear();
 	}
@@ -712,7 +732,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		hist2d_00IP_pmIP[0][j]->GetYaxis()->SetTitle("#rho_{00,IP} [cm]");
 		hist2d_00IP_pmIP[0][j]->Draw("COLZ");
 
-		canva2d[j + channNum]->Print(img_dir + "rho_2d_" + channName[j] + ext_img);
+		canva2d[j + channNum]->Print(img_dir + "OmegaRec/rho_2d_" + channName[j] + ext_img);
 	}
 
 	for (Int_t j = 0; j < channNum; j++)
@@ -727,7 +747,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		hist2d_00IP_pmIP[1][j]->GetYaxis()->SetTitle("z_{00,IP} [cm]");
 		hist2d_00IP_pmIP[1][j]->Draw("COLZ");
 
-		canva2d[j + 2 * channNum]->Print(img_dir + "z_2d_" + channName[j] + ext_img);
+		canva2d[j + 2 * channNum]->Print(img_dir + "OmegaRec/z_2d_" + channName[j] + ext_img);
 	}
 
 	return 0;

@@ -9,6 +9,7 @@ FORTRAN_DIR    := $(SUBANALYSIS_DIR)/FortranAnalysis
 GENERATED_DIR  := $(SUBANALYSIS_DIR)/GeneratedVars
 OMEGAREC_DIR   := $(SUBANALYSIS_DIR)/OmegaRec
 NEUTREC_DIR    := $(SUBANALYSIS_DIR)/Neutrec
+REGEN_DIR    	 := $(SUBANALYSIS_DIR)/RegenerationAnalysis
 
 # WORK DIRECTORIES
 OBJDIR := obj
@@ -35,12 +36,20 @@ SRC_GENVARS += $(GENERATED_DIR)/$(SRCDIR)/generated_variables.cpp
 SRC_GENVARS += $(GENERATED_DIR)/genvars_main.cpp
 
 MAKE_OMEGAREC := $(OMEGAREC_DIR)/$(OBJDIR)/omegarec_main.o
-MAKE_OMEGAREC += $(OMEGAREC_DIR)/$(OBJDIR)/omega_rec_kin_fit.o
+MAKE_OMEGAREC += $(OMEGAREC_DIR)/$(OBJDIR)/omega_rec.o
 MAKE_OMEGAREC += $(OMEGAREC_DIR)/$(OBJDIR)/plots.o
 
-SRC_OMEGAREC := $(OMEGAREC_DIR)/$(SRCDIR)/omega_rec_kin_fit.cpp
+SRC_OMEGAREC := $(OMEGAREC_DIR)/$(SRCDIR)/omega_rec.cpp
 SRC_OMEGAREC += $(OMEGAREC_DIR)/$(SRCDIR)/plots.cpp
 SRC_OMEGAREC += $(OMEGAREC_DIR)/omegarec_main.cpp
+
+MAKE_REGEN := $(REGEN_DIR)/$(OBJDIR)/regen_main.o
+MAKE_REGEN += $(REGEN_DIR)/$(OBJDIR)/regen_cut_analysis.o
+MAKE_REGEN += $(REGEN_DIR)/$(OBJDIR)/plots.o
+
+SRC_REGEN := $(REGEN_DIR)/$(SRCDIR)/regen_cut_analysis.cpp
+SRC_REGEN := $(REGEN_DIR)/$(SRCDIR)/plots.cpp
+SRC_REGEN += $(REGEN_DIR)/regen_main.cpp
 
 LIBS= -lm -llapack -lrec -lfort -lcurl
 
@@ -49,27 +58,31 @@ PROJECT := $(BINDIR)/KLSPM00.exe
 CXX = g++
 CXXFLAGS := `root-config --cflags --glibs` -g3
 
-all: $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(PROJECT) $(SRC_CPFIT) $(SRC_OMEGAREC) $(SRC_GENVARS)
+all: $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(PROJECT)
 
-$(PROJECT): $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC)
+$(PROJECT): $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 	
 $(OBJDIR)/CPVAnalysis.o: CPVAnalysis.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(MAKE_CPFIT):
+$(MAKE_CPFIT): $(SRC_CPFIT)
 	@$(MAKE) -C $(CPFIT_DIR)
 
-$(MAKE_OMEGAREC):
+$(MAKE_OMEGAREC): $(SRC_OMEGAREC)
 	@$(MAKE) -C $(OMEGAREC_DIR)
 
-$(MAKE_GENVARS):
+$(MAKE_GENVARS): $(SRC_GENVARS)
 	@$(MAKE) -C $(GENERATED_DIR)
+
+$(MAKE_REGEN): $(SRC_REGEN)
+	@$(MAKE) -C $(REGEN_DIR)
 
 clean: 
 	@$(MAKE) -C $(CPFIT_DIR) clean
 	@$(MAKE) -C $(GENERATED_DIR) clean
 	@$(MAKE) -C $(OMEGAREC_DIR) clean
+	@$(MAKE) -C $(REGEN_DIR) clean
 	rm -f $(OBJDIR)/*.o
 
 

@@ -18,6 +18,7 @@
 
 #include "../inc/cpfit.hpp"
 #include <interference.h>
+#include <fort_common.h>
 #include <kloe_class.h>
 #include <lorentz_transf.h>
 
@@ -80,6 +81,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	chain->SetBranchAddress("Kchboost", baseKin.Kchboost);
 	chain->SetBranchAddress("Kchrec", baseKin.Kchrec);
 	chain->SetBranchAddress("Qmiss", &baseKin.Qmiss);
+	chain->SetBranchAddress("ip", interfcommon_.ip);
 
 	Float_t
 			PichFourMom[2][4];
@@ -323,19 +325,19 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 			Double_t sphere_bound = 10, bp_bound = 4.4;
 
-			Double_t sigma = 1.5;
+			Double_t sigma = properties["variables"]["RegenRejection"]["sigma"];
 
 			Bool_t cuts[4] = {false, false, false, false};
 
 			for (Int_t i = 0; i < 3; i++)
 			{
-				radius[0] += pow(neutVars.Knerec[6 + i], 2);
-				radius_ch[0] += pow(baseKin.Kchboost[6 + i], 2);
+				radius[0] += pow(neutVars.Knerec[6 + i] - interfcommon_.ip[i], 2);
+				radius_ch[0] += pow(baseKin.Kchboost[6 + i] - interfcommon_.ip[i], 2);
 
 				if (i < 2)
 				{
-					radius[1] += pow(neutVars.Knerec[6 + i], 2);
-					radius_ch[1] += pow(baseKin.Kchboost[6 + i], 2);
+					radius[1] += pow(neutVars.Knerec[6 + i] - interfcommon_.ip[i], 2);
+					radius_ch[1] += pow(baseKin.Kchboost[6 + i] - interfcommon_.ip[i], 2);
 				}
 			}
 
@@ -374,10 +376,21 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 			cond_tot = cond[0] && cond[1] && cond[2];
 
-			cuts[0] = abs(radius[0] - 10.9554) > 1.19279 * sigma;
-			cuts[1] = 1; // abs(radius[1] - 4.5) > 1.5 * sigma;
-			cuts[2] = abs(radius_ch[0] - 10.5840) > 0.681656 * sigma;
-			cuts[3] = 1; // abs(radius_ch[1] - 4.45238) > 1.29837 * sigma;
+			Double_t
+        meanRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
+        errorRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1],
+        meanRadiusChLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0],
+        errorRadiusChLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0],
+        
+        meanRadiusTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1],
+        errorRadiusTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1],
+        meanRadiusTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0],
+        errorRadiusTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0];
+
+			cuts[0] = abs(radius[0] - meanRadiusTriangleHigher) > errorRadiusTriangleHigher * sigma;      // && radius[1] > 8;
+      cuts[1] = 1;//abs(radius[1] - meanRadiusTriangleLower) > errorRadiusTriangleLower * sigma;     // && radius[1] <= 8;
+      cuts[2] = abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma; // && radius_ch[1] > 8;
+      cuts[3] = 1;//abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
 
 			if (cond_tot)
 			{
