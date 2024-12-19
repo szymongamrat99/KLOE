@@ -115,6 +115,8 @@ int OmegaRec_main()
       plots(firstFile, lastFile, 10, 5, 1, Controls::DataType::MC_DATA);
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
+
+      std::cout << elapsed_seconds.count() << std::endl;
       break;
     }
     case Controls::OmegaRec::EXIT:

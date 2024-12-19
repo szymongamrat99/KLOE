@@ -16,7 +16,7 @@ int GenVars_main()
   ErrorHandling::ErrorLogs logger;
   ofstream LogFile;
   LogFile.open(gen_vars_dir + logs_dir + "GenVars.log");
-
+  
   Int_t firstFile, lastFile, ind_data_mc;
 
   try

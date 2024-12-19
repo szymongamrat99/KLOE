@@ -8,9 +8,10 @@
 #include <TTree.h>
 #include <TFile.h>
 
-#include "../../../Include/const.h"
-#include "../../../Include/Codes/ErrorLogs.h"
-#include "../../../Include/Codes/MainMenu.h"
+#include <const.h>
+#include <ErrorLogs.h>
+#include <MainMenu.h>
+#include <fort_common.h>
 
 int genvars(int, int, int);
 Int_t split_channels(Int_t, Int_t);

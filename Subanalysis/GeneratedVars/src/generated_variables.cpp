@@ -3,7 +3,7 @@
 
 int genvars(int first_file, int last_file, int nclus)
 {
-	TChain *chain = new TChain("INTERF/h1");
+	TChain *chain = new TChain("h1");
 	chain_init(chain, first_file, last_file);
 
 	TString name = "gen_vars_" + std::to_string(first_file) + "_" + std::to_string(last_file) + ".root";
