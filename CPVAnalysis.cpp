@@ -26,11 +26,6 @@ int main(int argc, char *argv[])
   int first, last;
   Controls::MainMenu mainMenuOpt;
 
-  double array[2][4] = {{0., 0., 0., 0.},
-                        {0., 0., 0., 0.}};
-  double array1[4] = {0., 0., 0., 0.};
-  float numbers = 0;
-
   setGlobalStyle();
 
 

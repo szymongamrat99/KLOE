@@ -451,9 +451,9 @@
             }
         },
         "rootFiles": {
-            "path": "/internal/big_one/4/users/gamrat/scripts/ROOT_files/DBV-26",
-            "firstFileMax": 40000,
-            "lastFileMax": 40100
+            "path": "/internal/big_one/4/users/gamrat/old_root_files",
+            "firstFileMax": 1,
+            "lastFileMax": 56
         },
         "tree": {
             "filename": {
