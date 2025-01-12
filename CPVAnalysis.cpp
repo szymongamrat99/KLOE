@@ -23,7 +23,7 @@ using namespace std::chrono;
 
 int main(int argc, char *argv[])
 {
-  int first, last;
+  int firstFile, lastFile;
   Controls::MainMenu mainMenuOpt;
 
   setGlobalStyle();
@@ -32,11 +32,11 @@ int main(int argc, char *argv[])
   try
   {
     cout << "Choose the first file: ";
-    cin >> first;
+    cin >> firstFile;
     cout << endl;
 
     dataTypeErr = !cin;
-    firstFileRangeErr = first < 1 || first > lastFileMax;
+    firstFileRangeErr = firstFile < 1 || firstFile > lastFileMax;
 
     if (dataTypeErr)
     {
@@ -59,11 +59,11 @@ int main(int argc, char *argv[])
   try
   {
     cout << "Choose the last file: ";
-    cin >> last;
+    cin >> lastFile;
     cout << endl;
 
     dataTypeErr = !cin;
-    firstFileRangeErr = last < first || last > lastFileMax;
+    firstFileRangeErr = lastFile < firstFile || lastFile > lastFileMax;
 
     if (dataTypeErr)
     {
@@ -98,7 +98,8 @@ int main(int argc, char *argv[])
     cout << "10. Kinematic fits." << endl;
     cout << "11. Recalculation of variables to CM frame." << endl;
     cout << "12. CPV normalization." << endl;
-    cout << "13. Exit." << endl;
+    cout << "13. Plots." << endl;
+    cout << "14. Exit." << endl;
     mainMenu.EndMenu();
 
     try
@@ -157,6 +158,8 @@ int main(int argc, char *argv[])
       break;
     case Controls::MainMenu::CPV_NORM:
       CPFit_main();
+    case Controls::MainMenu::PLOTS:
+      Plots_main(firstFile, lastFile);
     }
 
   } while (mainMenuOpt != Controls::MainMenu::EXIT);

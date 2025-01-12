@@ -488,7 +488,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 	minimum->SetVariable(0, "Real part", init_vars[0], step[0]);
 	minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]);
-	minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - limit_lower * init_vars[2], init_vars[2] + limit_upper * init_vars[2]);
+	minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - 1.0 * init_vars[2], init_vars[2] + 5.0 * init_vars[2]);
 
 	if (x_min > -30.0 && x_max < 30.0)
 	{

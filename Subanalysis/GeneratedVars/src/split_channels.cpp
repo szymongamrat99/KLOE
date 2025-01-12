@@ -51,7 +51,7 @@ Int_t split_channels(Int_t firstFile, Int_t lastFile)
            positronks = 0, positronkl = 0, pi0ks = 0, pi0kl = 0, pi0phi = 0, piplusphi = 0, piminusphi = 0, otherphi = 0,
            otherkl = 0, otherks = 0, gammaphi = 0;
 
-        if (mcflag == 1 && mctruth != 0 && mctruth != 2)
+        if (mcflag == 1 && mctruth != 0)
         {
             for (Int_t j = 0; j < interfcommon_.ntmc; j++)
             {
@@ -152,8 +152,10 @@ Int_t split_channels(Int_t firstFile, Int_t lastFile)
 
             std::cout << signal_cond << " " << regen_cond << " " << omega_cond << " " << three_cond << " " << semi_cond << " " << pipi_cond << std::endl;
 
-            if (signal_cond)
+            if (signal_cond && mctruth == 1)
                 baseKin.mctruth_int = 1;
+            else if (signal_cond && mctruth == 2)
+                baseKin.mctruth_int = 2;
             else if (regen_cond)
                 baseKin.mctruth_int = 3;
             else if (omega_cond)

@@ -10,6 +10,7 @@ GENERATED_DIR  := $(SUBANALYSIS_DIR)/GeneratedVars
 OMEGAREC_DIR   := $(SUBANALYSIS_DIR)/OmegaRec
 NEUTREC_DIR    := $(SUBANALYSIS_DIR)/Neutrec
 REGEN_DIR    	 := $(SUBANALYSIS_DIR)/RegenerationAnalysis
+PLOTS_DIR    	 := $(SUBANALYSIS_DIR)/Plots
 
 # WORK DIRECTORIES
 OBJDIR := obj
@@ -51,16 +52,22 @@ SRC_REGEN := $(REGEN_DIR)/$(SRCDIR)/regen_cut_analysis.cpp
 SRC_REGEN := $(REGEN_DIR)/$(SRCDIR)/plots.cpp
 SRC_REGEN += $(REGEN_DIR)/regen_main.cpp
 
+MAKE_PLOTS := $(PLOTS_DIR)/$(OBJDIR)/plots_main.o
+MAKE_PLOTS += $(PLOTS_DIR)/$(OBJDIR)/plots_norm.o
+
+SRC_PLOTS := $(PLOTS_DIR)/$(SRCDIR)/plots_norm.cpp
+SRC_PLOTS += $(PLOTS_DIR)/plots_main.cpp
+
 LIBS= -lm -llapack -lrec -lfort -lcurl
 
 PROJECT := $(BINDIR)/KLSPM00.exe
 
 CXX = g++
-CXXFLAGS := `root-config --cflags --glibs` -g3
+CXXFLAGS := `root-config --cflags --glibs` -g3 -fopenmp
 
-all: $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(PROJECT)
+all: $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(MAKE_PLOTS) $(PROJECT)
 
-$(PROJECT): $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(HEADER)
+$(PROJECT): $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(MAKE_PLOTS) $(HEADER)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 	
 $(OBJDIR)/CPVAnalysis.o: CPVAnalysis.cpp $(HEADER)
@@ -77,6 +84,9 @@ $(MAKE_GENVARS): $(SRC_GENVARS) $(HEADER)
 
 $(MAKE_REGEN): $(SRC_REGEN) $(HEADER)
 	@$(MAKE) -C $(REGEN_DIR)
+
+$(MAKE_PLOTS): $(SRC_PLOTS) $(HEADER)
+	@$(MAKE) -C $(PLOTS_DIR)
 
 clean: 
 	@$(MAKE) -C $(CPFIT_DIR) clean
