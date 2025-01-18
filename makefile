@@ -21,6 +21,7 @@ OBJ :=
 OBJ += $(OBJDIR)/CPVAnalysis.o
 
 HEADER := ${WORKDIR}/scripts/Include/const.h
+HEADER += ${WORKDIR}/scripts/Include/Codes/MainMenu.h
 
 MAKE_CPFIT := $(CPFIT_DIR)/$(OBJDIR)/cpfit_main.o
 MAKE_CPFIT += $(CPFIT_DIR)/$(OBJDIR)/cp_fit_mc_data.o
@@ -35,6 +36,18 @@ MAKE_GENVARS += $(GENERATED_DIR)/$(OBJDIR)/split_channels.o
 SRC_GENVARS := $(GENERATED_DIR)/$(SRCDIR)/split_channels.cpp
 SRC_GENVARS += $(GENERATED_DIR)/$(SRCDIR)/generated_variables.cpp
 SRC_GENVARS += $(GENERATED_DIR)/genvars_main.cpp
+
+MAKE_NEUTREC := $(NEUTREC_DIR)/$(OBJDIR)/trilateration_neu_rec.o
+MAKE_NEUTREC += $(NEUTREC_DIR)/$(OBJDIR)/trilateration_neu_rec_kin_fit_aux.o
+MAKE_NEUTREC += $(NEUTREC_DIR)/$(OBJDIR)/triangle_neu_rec.o
+MAKE_NEUTREC += $(NEUTREC_DIR)/$(OBJDIR)/comp_of_methods.o
+MAKE_NEUTREC += $(NEUTREC_DIR)/$(OBJDIR)/neutrec_main.o
+
+SRC_NEUTREC := $(NEUTREC_DIR)/$(SRCDIR)/trilateration_neu_rec.cpp
+SRC_NEUTREC += $(NEUTREC_DIR)/$(SRCDIR)/trilateration_neu_rec_kin_fit_aux.cpp
+SRC_NEUTREC += $(NEUTREC_DIR)/$(SRCDIR)/triangle_neu_rec.cpp
+SRC_NEUTREC += $(NEUTREC_DIR)/$(SRCDIR)/comp_of_methods.cpp
+SRC_NEUTREC += $(NEUTREC_DIR)/neutrec_main.cpp
 
 MAKE_OMEGAREC := $(OMEGAREC_DIR)/$(OBJDIR)/omegarec_main.o
 MAKE_OMEGAREC += $(OMEGAREC_DIR)/$(OBJDIR)/omega_rec.o
@@ -65,9 +78,9 @@ PROJECT := $(BINDIR)/KLSPM00.exe
 CXX = g++
 CXXFLAGS := `root-config --cflags --glibs` -g3 -fopenmp
 
-all: $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(MAKE_PLOTS) $(PROJECT)
+all: $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(MAKE_PLOTS) $(MAKE_NEUTREC) $(PROJECT)
 
-$(PROJECT): $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(MAKE_PLOTS) $(HEADER)
+$(PROJECT): $(OBJ) $(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(MAKE_PLOTS) $(MAKE_NEUTREC) $(HEADER)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 	
 $(OBJDIR)/CPVAnalysis.o: CPVAnalysis.cpp $(HEADER)
@@ -75,6 +88,9 @@ $(OBJDIR)/CPVAnalysis.o: CPVAnalysis.cpp $(HEADER)
 
 $(MAKE_CPFIT): $(SRC_CPFIT) $(HEADER)
 	@$(MAKE) -C $(CPFIT_DIR)
+
+$(MAKE_NEUTREC): $(SRC_NEUTREC) $(HEADER)
+	@$(MAKE) -C $(NEUTREC_DIR)
 
 $(MAKE_OMEGAREC): $(SRC_OMEGAREC) $(HEADER)
 	@$(MAKE) -C $(OMEGAREC_DIR)
@@ -90,6 +106,7 @@ $(MAKE_PLOTS): $(SRC_PLOTS) $(HEADER)
 
 clean: 
 	@$(MAKE) -C $(CPFIT_DIR) clean
+	@$(MAKE) -C $(NEUTREC_DIR) clean
 	@$(MAKE) -C $(GENERATED_DIR) clean
 	@$(MAKE) -C $(OMEGAREC_DIR) clean
 	@$(MAKE) -C $(REGEN_DIR) clean

@@ -13,21 +13,16 @@
 #include <neutral_mom.h>
 #include "../inc/trilateration.hpp"
 
-int triangle_neurec(int first_file, int last_file, Controls::DataType data_type)
+int triangle_neurec(int first_file, int last_file, Short_t loopcount, Short_t jmin, Short_t jmax, Short_t M, Bool_t good_clus, Controls::DataType data_type)
 {
 	ErrorHandling::ErrorLogs errLogger;
 	LogsHandling::Logs logger;
 	std::ofstream LogFileMain, LogFileTriangle, LogFileTri, LogFileTriKinFit;
 	std::ofstream ErrFileMain, ErrFileTriangle, ErrFileTri, ErrFileTriKinFit;
 
-	int
-		loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopcount"],
-		M = properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
-		range = properties["variables"]["KinFit"]["Trilateration"]["range"],
-		good_clus = properties["variables"]["Reconstruction"]["Triangle"]["goodClus"];
+	int range = Int_t(jmax - jmin) + 1;
 
 	TString
-			filename_gen = gen_vars_dir + root_files_dir + gen_vars_filename + first_file + "_" + last_file + ext_root,
 			filename_trilateration = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
 
 	TChain *chain = new TChain("INTERF/h1");
@@ -35,7 +30,7 @@ int triangle_neurec(int first_file, int last_file, Controls::DataType data_type)
 
 	try
 	{
-		TFile *file_gen = new TFile(filename_gen);
+		TFile *file_gen = new TFile(genvarsPath);
 		TFile *file_trilateration = new TFile(filename_trilateration);
 
 		if (file_gen->IsZombie() || file_trilateration->IsZombie())
@@ -159,6 +154,8 @@ int triangle_neurec(int first_file, int last_file, Controls::DataType data_type)
 												 {-50.0, 50.0},
 												 {-10.0, 20.0}
 					};
+
+		boost::progress_display show_progress(nentries);
 
 		for (Int_t i = 0; i < nentries; i++)
 		{
@@ -284,6 +281,8 @@ int triangle_neurec(int first_file, int last_file, Controls::DataType data_type)
 			}
 
 			tree->Fill();
+
+			++show_progress;
 		}
 
 		tree->Print();

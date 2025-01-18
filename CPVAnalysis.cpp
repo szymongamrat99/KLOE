@@ -147,7 +147,9 @@ int main(int argc, char *argv[])
       Regen_main();
     }
     case Controls::MainMenu::KNEREC_TRILAT:
-      break;
+    {
+      Neutrec_main(firstFile, lastFile);
+    }
     case Controls::MainMenu::KNEREC_TRIANGLE:
       break;
     case Controls::MainMenu::EFF_SIG_TO_BCG:

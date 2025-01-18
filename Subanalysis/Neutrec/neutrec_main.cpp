@@ -11,9 +11,11 @@ using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::chrono::minutes;
 
-int main(int argc, char *argv[])
+int Neutrec_main(Int_t firstFile, Int_t lastFile)
 {
   setGlobalStyle();
+
+  std::cout << "Dupa" << std::endl;
 
   ErrorHandling::ErrorLogs errLogger;
   LogsHandling::Logs logger;
@@ -27,51 +29,51 @@ int main(int argc, char *argv[])
 
   ErrFileMain.open(neutrec_dir + logs_dir + "NeutRecMain.err");
 
-  Int_t firstFile, lastFile, ind_data_mc;
+  Int_t ind_data_mc;
 
-  try
-  {
-    cout << "Input the first file number to be analyzed: ";
-    cin >> firstFile;
+  // try
+  // {
+  //   cout << "Input the first file number to be analyzed: ";
+  //   cin >> firstFile;
 
-    if (!cin)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (firstFile < firstFileMax || firstFile > lastFileMax)
-    {
-      throw ErrorHandling::ErrorCodes::RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    errLogger.getErrLog(err);
-    errLogger.getErrLog(err, ErrFileMain);
-    errLogger.setErrCount(err);
-    return int(err);
-  }
+  //   if (!cin)
+  //   {
+  //     throw ErrorHandling::ErrorCodes::DATA_TYPE;
+  //   }
+  //   else if (firstFile < firstFileMax || firstFile > lastFileMax)
+  //   {
+  //     throw ErrorHandling::ErrorCodes::RANGE;
+  //   }
+  // }
+  // catch (ErrorHandling::ErrorCodes err)
+  // {
+  //   errLogger.getErrLog(err);
+  //   errLogger.getErrLog(err, ErrFileMain);
+  //   errLogger.setErrCount(err);
+  //   return int(err);
+  // }
 
-  try
-  {
-    cout << "Input the last file number to be analyzed: ";
-    cin >> lastFile;
+  // try
+  // {
+  //   cout << "Input the last file number to be analyzed: ";
+  //   cin >> lastFile;
 
-    if (!cin)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (lastFile < firstFile || lastFile > lastFileMax)
-    {
-      throw ErrorHandling::ErrorCodes::RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    errLogger.getErrLog(err);
-    errLogger.getErrLog(err, ErrFileMain);
-    errLogger.setErrCount(err);
-    return int(err);
-  }
+  //   if (!cin)
+  //   {
+  //     throw ErrorHandling::ErrorCodes::DATA_TYPE;
+  //   }
+  //   else if (lastFile < firstFile || lastFile > lastFileMax)
+  //   {
+  //     throw ErrorHandling::ErrorCodes::RANGE;
+  //   }
+  // }
+  // catch (ErrorHandling::ErrorCodes err)
+  // {
+  //   errLogger.getErrLog(err);
+  //   errLogger.getErrLog(err, ErrFileMain);
+  //   errLogger.setErrCount(err);
+  //   return int(err);
+  // }
 
   Controls::DataType dataTypeOpt;
 
@@ -87,7 +89,7 @@ int main(int argc, char *argv[])
     {
       throw ErrorHandling::ErrorCodes::DATA_TYPE;
     }
-    else if (dataTypeOpt < Controls::DataType::SIGNAL_TOT || dataTypeOpt > Controls::DataType::MC_DATA)
+    else if (dataTypeOpt < Controls::DataType::SIGNAL_TOT || dataTypeOpt > Controls::DataType::SIGNAL_MAX)
     {
       throw ErrorHandling::ErrorCodes::MENU_RANGE;
     }
@@ -100,7 +102,14 @@ int main(int argc, char *argv[])
     return int(err);
   }
 
-  Short_t good_clus = atoi(argv[3]), loopcount = atoi(argv[4]), jmin = atoi(argv[5]), jmax = atoi(argv[6]);
+  Bool_t
+      good_clus = (Bool_t)properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
+
+  Short_t
+      loopcount = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+      jmin = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+      jmax = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
+      M = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"];
 
   Controls::NeutRecMenu menuOpt;
   bool
@@ -143,22 +152,30 @@ int main(int argc, char *argv[])
     {
     case Controls::NeutRecMenu::BARE_TRILATERATION:
     {
+      auto start = std::chrono::system_clock::now();
       tri_neurec(ind_data_mc, firstFile, lastFile, good_clus);
+      auto end = std::chrono::system_clock::now();
+      std::chrono::duration<double> elapsed_seconds = end - start;
+
+      std::cout << elapsedTimeHMS(elapsed_seconds.count()) << std::endl;
+
       break;
     }
     case Controls::NeutRecMenu::TRILATERATION_KIN_FIT:
     {
       auto start = std::chrono::system_clock::now();
-      tri_neurec_kinfit_corr(firstFile, lastFile, 10, 0, 0, dataTypeOpt);
+      tri_neurec_kinfit_corr(firstFile, lastFile, loopcount, jmin, jmax, M, good_clus, dataTypeOpt);
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
+
+      std::cout << elapsedTimeHMS(elapsed_seconds.count()) << std::endl;
 
       break;
     }
     case Controls::NeutRecMenu::TRIANGLE:
     {
       auto start = std::chrono::system_clock::now();
-      triangle_neurec(firstFile, lastFile, dataTypeOpt);
+      triangle_neurec(firstFile, lastFile, loopcount, jmin, jmax, M, good_clus, dataTypeOpt);
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
 

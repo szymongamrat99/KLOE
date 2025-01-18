@@ -26,7 +26,6 @@
 #include "uncertainties.h"
 #include "lorentz_transf.h"
 #include "triple_gaus.h"
-#include "arrays_equality.h"
 
 #include "../inc/trilateration.hpp"
 
@@ -37,9 +36,11 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
   Double_t cut_prob = 0.0, time_cut = 100.0;
 
   int
-      loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
-      M = properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
-      range = properties["variables"]["KinFit"]["Trilateration"]["range"],
+      loopcount = (Int_t)properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+      M = (Int_t)properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+      jmin = (Int_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+      jmax = (Int_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
+      range = Int_t(jmax - jmin) + 1,
       bunch_int = 9;
 
   TChain *chain = new TChain("INTERF/h1");
@@ -305,7 +306,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
     for (Int_t i = 0; i < 3; i++)
     {
       id_hist = "Coor" + std::to_string(j) + std::to_string(i);
-      neu_vtx_corr[j][i] = new TH2F(id_hist, "", 100, -50, 50, 100, -50, 50);
+      neu_vtx_corr[j][i] = new TH2F(id_hist, "", 100, -200, 200, 100, -200, 200);
 
       id_hist = "Mom" + std::to_string(j) + std::to_string(i);
       neu_mom[j][i] = new TH2F(id_hist, "", 200, -300, 300, 200, -300, 300);
@@ -321,7 +322,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
     beta2_hist[j] = new TH2F(id_hist, "", 200, 0.15, 0.3, 200, 0.15, 0.3);
 
     id_hist = "Coor" + std::to_string(j) + std::to_string(3);
-    neu_vtx_corr[j][3] = new TH2F(id_hist, "", 200, 0.0, 20.0, 200, -5.0, 20.0);
+    neu_vtx_corr[j][3] = new TH2F(id_hist, "", 200, 0.0, 50.0, 200, -5.0, 50.0);
 
     id_hist = "Mom" + std::to_string(j) + std::to_string(3);
     neu_mom[j][3] = new TH2F(id_hist, "", 100, 490, 550, 100, 490, 550);
@@ -434,51 +435,51 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
       id_hist = Form(name[i] + "%d%d", j + 1, i + 1);
       if (i < 2)
       {
-        neu_std_hist[j][i] = new TH1F(id_hist + " std coor", "", 100, -50, 50);
-        neu_tri_hist[j][i] = new TH1F(id_hist + " tri coor", "", 100, -50, 50);
-        neu_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit coor", "", 100, -50, 50);
-        res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 50);
-        res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 50);
-        res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 50);
-        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -8, 8);
-        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -8, 8);
-        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -8, 8);
+        neu_std_hist[j][i] = new TH1F(id_hist + " std coor", "", 100, -200, 200);
+        neu_tri_hist[j][i] = new TH1F(id_hist + " tri coor", "", 100, -200, 200);
+        neu_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit coor", "", 100, -200, 200);
+        res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 200);
+        res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 200);
+        res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 200);
+        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 200, 200, -8, 8);
+        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 200, 200, -8, 8);
+        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 200, 200, -8, 8);
       }
       else if (i == 2)
       {
         neu_std_hist[j][i] = new TH1F(id_hist + " std", "", 100, 0, 5);
         neu_tri_hist[j][i] = new TH1F(id_hist + " tri", "", 100, 0, 5);
         neu_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit", "", 100, 0, 5);
-        res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 50);
-        res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 50);
-        res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 50);
-        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -8, 8);
-        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -8, 8);
-        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -8, 8);
+        res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 200);
+        res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 200);
+        res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 200);
+        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 200, 200, -8, 8);
+        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 200, 200, -8, 8);
+        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 200, 50, -8, 8);
       }
       else if (i == 3)
       {
         neu_std_hist[j][i] = new TH1F(id_hist + " std", "", 100, 0, 5);
         neu_tri_hist[j][i] = new TH1F(id_hist + " tri", "", 100, 0, 5);
         neu_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit", "", 100, 0, 5);
-        res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 50);
-        res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 50);
-        res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 50);
-        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -5, 10);
-        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -5, 10);
-        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -5, 10);
+        res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 200);
+        res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 200);
+        res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 200);
+        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 200, 200, -5, 10);
+        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 200, 200, -5, 10);
+        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 200, 50, -5, 10);
       }
       else if (i == 4)
       {
         neu_std_hist[j][i] = new TH1F(id_hist + " std", "", 100, 0, 5);
         neu_tri_hist[j][i] = new TH1F(id_hist + " tri", "", 100, 0, 5);
         neu_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit", "", 100, 0, 5);
-        res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 50);
-        res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 50);
-        res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 50);
-        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 50, 50, -5, 5);
-        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 50, 50, -5, 5);
-        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 50, 50, -5, 5);
+        res_std_hist[j][i] = new TH1F(id_hist + " std res", "", number_of_points, 0, 200);
+        res_tri_hist[j][i] = new TH1F(id_hist + " tri res", "", number_of_points, 0, 200);
+        res_tri_kin_fit_hist[j][i] = new TH1F(id_hist + " kinfit res", "", number_of_points, 0, 200);
+        sigmas_std[j][i] = new TH2F(id_hist + " sigmas std", "", number_of_points, 0, 200, 200, -5, 5);
+        sigmas_tri[j][i] = new TH2F(id_hist + " sigmas tri", "", number_of_points, 0, 200, 200, -5, 5);
+        sigmas_tri_kin_fit[j][i] = new TH2F(id_hist + " sigmas kinfit", "", number_of_points, 0, 200, 50, -5, 5);
       }
     }
   }
@@ -498,6 +499,8 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
       counts_sig_err[17] = {0},
       counts_sig_cut[6] = {0},
       counts_sig_sel = 0;
+
+  KLOE::pm00 event;
 
   for (Int_t i = 0; i < nentries; i++)
   {
@@ -559,11 +562,12 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
 
     count_angle = 0;
 
-    if (baseKin.mcflag == 1 && (baseKin.mctruth == 1 || baseKin.mctruth == 2))
+    if (baseKin.mcflag == 1 && (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0) && done_kinfit == 1)
     {
       // Kaon path length
 
-      if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
+
+      if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
       {
 
         lengthch_mc = sqrt(pow(baseKin.Kchmc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Kchmc[7] - baseKin.ipmc[1], 2) + pow(baseKin.Kchmc[8] - baseKin.ipmc[2], 2));
@@ -583,6 +587,8 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
       lengthneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2) + pow(Knetri_kinfit[8] - ip_kinfit[2], 2));
       lengthneu_rec = sqrt(pow(baseKin.Knereclor[6] - baseKin.ip[0], 2) + pow(baseKin.Knereclor[7] - baseKin.ip[1], 2) + pow(baseKin.Knereclor[8] - baseKin.ip[2], 2));
 
+      // if(baseKin.mctruth == 0 && done_kinfit == 1) std::cout << lengthneu_tri << std::endl;
+
       //
       // Kaon transverse radius
       // Rtneu_mc = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2));
@@ -592,14 +598,14 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
       Rtch_rec = sqrt(pow(baseKin.Kchrec[6] - baseKin.ip[0], 2) + pow(baseKin.Kchrec[7] - baseKin.ip[1], 2));
       //
       // Kaon velocity
-      if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
+      if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
         v_Kchmc = cVel * baseKin.Kchmc[4] / baseKin.Kchmc[3];
       else
         v_Kchmc = cVel * Kchmc_bcg[4] / Kchmc_bcg[3];
 
       v_Kchrec = cVel * baseKin.Kchboost[4] / baseKin.Kchboost[3];
 
-      if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
+      if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
         v_Kneumc = cVel * baseKin.Knemc[4] / baseKin.Knemc[3];
       else
         v_Kneumc = cVel * Knemc_bcg[4] / Knemc_bcg[3];
@@ -660,7 +666,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
         else
           cut = chi2min < 40.0; // && abs(Knetri_kinfit[9] - t_neumc) < 2.375/2.;
 
-        if (done_kinfit == 1 && cut)
+        if (done_kinfit == 1 && cut && lengthneu_tri > 50)
         {
           for (Int_t k1 = 0; k1 < 3; k1++)
             for (Int_t k2 = k1 + 1; k2 < 4; k2++)
@@ -697,7 +703,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
           angle_min_180 = angle_180[min_ind_180[0]];
           dist_min = dist[min_ind_dist[0]];
 
-          if (j == 0)
+          if (j == 0 && lengthneu_tri > 50)
           {
             counts_all++;
 
@@ -709,7 +715,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
             for (Int_t k = 0; k < 4; k++)
               g4taken_corr[k] = baseKin.ncll[baseKin.g4taken[k] - 1] - 1; // baseKin.ncll[g4taken_kinfit[k]] - 1;
 
-            isEqual = arr_eq(clusindgood, g4taken_corr);
+            isEqual = event.ArrayEquality(clusindgood, g4taken_corr, 4);
 
             bad_clus = isEqual;
 
@@ -766,7 +772,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
           else
             chosen_bunch = true;
 
-          if (isEqual >= 0 && chosen_bunch)
+          if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
           {
             chi2_hist[j]->Fill(chi2min);
             prob_hist[j]->Fill(TMath::Prob(chi2min, M));
@@ -807,9 +813,9 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
           {
             if (k < 3)
             {
-              if (isEqual >= 0 && chosen_bunch)
+              if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
               {
-                if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
+                if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
                 {
                   neu_vtx_corr[j][k]->Fill(baseKin.Knemc[6 + k], Knetri_kinfit[6 + k]);
                   sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - baseKin.Knemc[6 + k]);
@@ -829,9 +835,9 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
             }
             else if (k == 3)
             {
-              if (isEqual >= 0 && chosen_bunch)
+              if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
               {
-                if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
+                if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
                 {
                   neu_vtx_corr[j][3]->Fill(t_neumc, t_neutri); // Knetri_kinfit[6 + k]);
                   sigmas_std[j][3]->Fill(lengthneu_mc, (t_neutri - t_neumc) / tau_S_nonCPT);
@@ -851,14 +857,14 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
             }
             else
             {
-              if (isEqual >= 0 && chosen_bunch)
+              if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
               {
                 sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_tri - lengthneu_mc));
               }
             }
           }
 
-          if (isEqual >= 0 && chosen_bunch)
+          if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
           {
             pulls[j][8]->Fill(Rtneu_tri - Rtneu_mc);
             pulls[j][9]->Fill(lengthneu_tri - lengthneu_mc);
@@ -866,7 +872,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
 
           d_cl = sqrt(pow(baseKin.cluster[0][0] - baseKin.bhabha_vtx[0], 2) + pow(baseKin.cluster[1][0] - baseKin.bhabha_vtx[1], 2) + pow(baseKin.cluster[2][0] - baseKin.bhabha_vtx[2], 2));
 
-          if (isEqual >= 0 && chosen_bunch)
+          if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
           {
 
             for (Int_t k = 0; k < baseKin.ntmc; k++)

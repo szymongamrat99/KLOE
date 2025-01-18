@@ -8,18 +8,18 @@ BINPATH=bin
 
 LIBS=-L$(INCPATH) -lrec -lm -llapack -lcurl
 
-SRC=$(SRCPATH)/trilateration_neu_rec.cpp $(SRCPATH)/trilateration_neu_rec_kin_fit_aux.cpp $(SRCPATH)/triangle_neu_rec.cpp $(SRCPATH)/comp_of_methods.cpp
-OBJ=$(OBJPATH)/trilateration_neu_rec.o $(OBJPATH)/trilateration_neu_rec_kin_fit_aux.o $(OBJPATH)/triangle_neu_rec.o $(OBJPATH)/comp_of_methods.o
+SRC=$(SRCPATH)/trilateration_neu_rec.cpp $(SRCPATH)/trilateration_neu_rec_kin_fit_aux.cpp $(SRCPATH)/triangle_neu_rec.cpp $(SRCPATH)/comp_of_methods.cpp neutrec_main.cpp
+OBJ=$(OBJPATH)/trilateration_neu_rec.o $(OBJPATH)/trilateration_neu_rec_kin_fit_aux.o $(OBJPATH)/triangle_neu_rec.o $(OBJPATH)/comp_of_methods.o $(OBJPATH)/neutrec_main.o
 
 PROJECT=tri_rec.exe
 
 RM=rm
 RMFLAGS=-f
 
-all: $(OBJ) $(BINPATH)/$(PROJECT)
+all: $(OBJ)
 
-$(BINPATH)/$(PROJECT): $(OBJPATH)/main.o $(OBJ)
-	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
+# $(BINPATH)/$(PROJECT): $(OBJPATH)/neutrec_main.o $(OBJ)
+# 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 
 $(OBJPATH)/trilateration_neu_rec.o : $(SRCPATH)/trilateration_neu_rec.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -33,7 +33,7 @@ $(OBJPATH)/trilateration_neu_rec_kin_fit_aux.o: $(SRCPATH)/trilateration_neu_rec
 $(OBJPATH)/comp_of_methods.o : $(SRCPATH)/comp_of_methods.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(OBJPATH)/main.o: neutrec_main.cpp 
+$(OBJPATH)/neutrec_main.o: neutrec_main.cpp 
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:

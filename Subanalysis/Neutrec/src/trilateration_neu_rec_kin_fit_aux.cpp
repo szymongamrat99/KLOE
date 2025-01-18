@@ -29,12 +29,8 @@
 
 using namespace std;
 
-const Int_t N_free = 24, N_const = 4, M = 5, jmin = 0, jmax = 0;
+const Int_t N_free = 24, N_const = 4;
 Int_t j_ch, k_ch;
-
-const Int_t loopcount = 10;
-
-TF1 *constraints[M];
 
 Double_t det;
 Float_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, Tcorr;
@@ -42,8 +38,10 @@ Int_t fail;
 
 Int_t selected[4] = {1, 2, 3, 4};
 
-void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount, Short_t jmin, Short_t jmax, Controls::DataType data_type)
+void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount, Short_t jmin, Short_t jmax, const Short_t M, Bool_t good_clus, Controls::DataType data_type)
 {
+
+	TF1 *constraints[M];
 
 	gErrorIgnoreLevel = 6001;
 
@@ -147,6 +145,8 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 	Bool_t data_flag;
 	Bool_t cond_time_clus[2];
 
+	boost::progress_display show_progress(nentries);
+
 	for (Int_t i = 0; i < nentries; i++)
 	{
 		chain->GetEntry(i);
@@ -161,8 +161,6 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 
 		if (nclu >= 4 && data_flag)
 		{
-			std::cout << 100 * i / (Float_t)nentries << "% done" << std::endl;
-
 			for (Int_t j1 = 0; j1 < nclu - 3; j1++)
 				for (Int_t j2 = j1 + 1; j2 < nclu - 2; j2++)
 					for (Int_t j3 = j2 + 1; j3 < nclu - 1; j3++)
@@ -598,6 +596,8 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 		}
 
 		tree->Fill();
+
+		++show_progress;
 	}
 
 	gStyle->SetOptStat("iMr");

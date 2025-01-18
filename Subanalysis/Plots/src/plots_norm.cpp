@@ -42,7 +42,7 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 	fileTriangle = new TFile(trianglePath);
 	treeTriangle = (TTree *)fileTriangle->Get(neutrec_triangle_tree);
 
-	treeTriangle->Print();
+	KLOE::pm00 event;
 
 	chain->AddFriend(treeMctruth, "mc");
 	chain->AddFriend(treeOmega, "omega");
@@ -61,8 +61,11 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 					"MOmega",
 					"AngleOmegaPhiLAB",
 					"AngleOmegaZAxisLAB",
+					"AngleKnePhiLAB",
 					"AngleKneZAxisLAB",
-					"DistIPAvgIPBoost"};
+					"DistIPAvgIPBoost",
+					"TimeDifference"
+					};
 
 	std::map<const std::string, Int_t>
 			bin_num = {
@@ -75,7 +78,9 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 					{alias[6], 100},
 					{alias[7], 100},
 					{alias[8], 100},
-					{alias[9], 100}};
+					{alias[9], 100},
+					{alias[10], 100},
+					{alias[11], 100}};
 
 	std::map<const std::string, Double_t>
 			range_min = {
@@ -88,7 +93,9 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 					{alias[6], -10.0},
 					{alias[7], -10.0},
 					{alias[8], -10.0},
-					{alias[9], -0.5}},
+					{alias[9], -10.0},
+					{alias[10], -0.5},
+					{alias[11], -90.0}},
 			range_max = {
 				{alias[0], 500.0}, 
 				{alias[1], 500.0}, 
@@ -99,7 +106,9 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 				{alias[6], 190.0},
 				{alias[7], 190.0},
 				{alias[8], 190.0},
-				{alias[9], 2.5}}, 
+				{alias[9], 190.0},
+				{alias[10], 2.5},
+				{alias[11], 90.0}}, 
 			bin_width;
 
 	std::map<const std::string, std::string>
@@ -112,8 +121,10 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 					{alias[5], "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]"},
 					{alias[6], "#angle(#omega,#phi) [#circ]"},
 					{alias[7], "#angle(#vec{p}_{#omega},#hat{z}) [#circ]"},
-					{alias[8], "#angle(#vec{p}^{triangle}_{K#rightarrow#pi^{0}#pi^{0}},#hat{z}) [#circ]"},
-					{alias[9], "|#vec{IP}_{boost} - #vec{IP}_{bhabha}| [cm]"}},
+					{alias[8], "#angle(#vec{p}^{triangle}_{K#rightarrow#pi^{0}#pi^{0}},#phi) [#circ]"},
+					{alias[9], "#angle(#vec{p}^{triangle}_{K#rightarrow#pi^{0}#pi^{0}},#hat{z}) [#circ]"},
+					{alias[10], "|#vec{IP}_{boost} - #vec{IP}_{bhabha}| [cm]"},
+					{alias[11], "#Deltat [#tau_{S}]"}},
 			yTitle,
 			flags = {
 				{"data", "mcflag == 0"},
@@ -124,6 +135,11 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 
 	std::map<const std::string, ROOT::RDF::TH1DModel>
 			model;
+
+	std::map<const std::string, ROOT::RDF::TH2DModel>
+			model2D;
+
+	model2D["CombinedAnglesZ"] = {"CombinedAnglesZ", "", bin_num[alias[7]], range_min[alias[7]], range_max[alias[7]], bin_num[alias[9]], range_min[alias[9]], range_max[alias[9]]};
 
 	for (Int_t i = 0; i < alias.size(); i++)
 	{
@@ -176,6 +192,41 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 		return sqrt(pow(v[0] - w1, 2) + pow(v[1] - w2, 2) + pow(v[2] - w3, 2));
 	};
 
+	auto setLorentzVectorMom = [](ROOT::RVec<Float_t> &v)
+	{
+		TLorentzVector vLorentz(v[0], v[1], v[2], v[3]);
+
+		return vLorentz;
+	};
+
+	auto setLorentzVectorPos = [](ROOT::RVec<Float_t> &v, ROOT::RVec<Float_t> &w)
+	{
+		TLorentzVector vLorentz(v[6] - w[0], v[7] - w[1], v[8] - w[2], cVel * v[9]);
+
+		return vLorentz;
+	};
+
+	auto setLorentzVectorPosAlt = [](ROOT::RVec<Float_t> &v, ROOT::RVec<Float_t> &w, Float_t TimeCh)
+	{
+		TLorentzVector vLorentz(v[6] - w[0], v[7] - w[1], v[8] - w[2], cVel * TimeCh);
+
+		return vLorentz;
+	};
+
+	auto getTimeCh = [](ROOT::RVec<Float_t> &v, ROOT::RVec<Float_t> &w)
+	{
+		Float_t 
+			boost = cVel * sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2], 2)) / v[3],
+			time = sqrt(pow(v[6] - w[0], 2) + pow(v[7] - w[1], 2) + pow(v[8] - w[2], 2)) / boost;
+
+		return time;
+	};
+
+	auto getDeltaT = [&event](TLorentzVector momKch, TLorentzVector posKch, TLorentzVector momKne, TLorentzVector posKne)
+	{
+		return event.DeltaT(&momKch,&posKch,&momKne,&posKne);
+	};
+
 	for (index = 0; index < alias.size(); index++)
 	{
 		canvas_name = "canvas_" + std::to_string(index);
@@ -212,7 +263,7 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 			}
 			else if(index == 8)
 			{
-				dfData.Define(alias[index].c_str(), getAngleZAxis, {"triangle.fourKnetriangle"})
+				dfData.Define(alias[index].c_str(), getAngleComponents, {"triangle.fourKnetriangle", "Bpx", "Bpy", "Bpz"})
 					.Filter(filterMctruth[j].c_str())
 					.Histo1D(model[alias[index]], alias[index])
 					.GetPtr()
@@ -220,7 +271,28 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 			}
 			else if(index == 9)
 			{
+				dfData.Define(alias[index].c_str(), getAngleZAxis, {"triangle.fourKnetriangle"})
+					.Filter(filterMctruth[j].c_str())
+					.Histo1D(model[alias[index]], alias[index])
+					.GetPtr()
+					->Copy(*hist[j]);
+			}
+			else if(index == 10)
+			{
 				dfData.Define(alias[index].c_str(), getDistanceComponents, {"ip", "Bx", "By", "Bz"})
+					.Filter(filterMctruth[j].c_str())
+					.Histo1D(model[alias[index]], alias[index])
+					.GetPtr()
+					->Copy(*hist[j]);
+			}
+			else if(index == 11)
+			{
+				dfData.Define("Kne4mom", setLorentzVectorMom, {"fourKnetriangle"})
+					.Define("Kne4pos", setLorentzVectorPos, {"fourKnetriangle", "ip"})
+					.Define("Kch4mom", setLorentzVectorMom, {"Kchboost"})
+					.Define("TimeCh", getTimeCh, {"Kchboost", "ip"})
+					.Define("Kch4pos", setLorentzVectorPosAlt, {"Kchboost", "ip", "TimeCh"})
+					.Define(alias[index], getDeltaT, {"Kch4mom", "Kch4pos", "Kne4mom", "Kne4pos"})
 					.Filter(filterMctruth[j].c_str())
 					.Histo1D(model[alias[index]], alias[index])
 					.GetPtr()
@@ -279,6 +351,51 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 
 		canvas[index]->Print(imgNames[alias[index]].c_str());
 	}
+
+	//
+
+	UInt_t hist2DNum = 1;
+
+	std::vector<TCanvas*> canva2D;
+	TString canva2D_name = "";
+	
+	for (Int_t i = 0; i < channNum * hist2DNum; i++)
+	{
+		canva2D_name = "canva2D_" + std::to_string(i);
+		canva2D.push_back(new TCanvas(canva2D_name, canva2D_name));
+	};
+
+	std::vector<TH2*> hist2D;
+	TString hist2D_name = "";
+	
+	for (Int_t i = 0; i < channNum; i++)
+	{
+		hist2D_name = "hist2D_" + std::to_string(i);
+		hist2D.push_back(new TH2D());
+
+		dfData.Define(alias[7].c_str(), getAngleZAxis, {"omega.omega"})
+					.Define(alias[9].c_str(), getAngleZAxis, {"triangle.fourKnetriangle"})
+					.Filter(filterMctruth[i].c_str())
+					.Histo2D(model2D["CombinedAnglesZ"], alias[7], alias[9])
+					.GetPtr()
+					->Copy(*hist2D[i]);
+		
+		canva2D[i]->cd();
+
+		hist2D[i]->SetStats(0);
+
+		hist2D[i]->GetXaxis()->SetTitle(xTitle[alias[7]].c_str());
+		hist2D[i]->GetYaxis()->SetTitle(xTitle[alias[9]].c_str());
+
+		hist2D[i]->Draw("COLZ");
+
+		std::string hist2DName = (std::string)plots_dir + (std::string)img_dir + "CombinedAnglesZ" + (std::string)hist2D_name + (std::string)ext_img;
+
+		canva2D[i]->Print(hist2DName.c_str());
+
+	};
+
+
 
 	return 0;
 }

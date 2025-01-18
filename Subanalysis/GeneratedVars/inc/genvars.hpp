@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <omp.h>
 
 #include <TTree.h>
 #include <TFile.h>

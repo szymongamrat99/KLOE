@@ -87,14 +87,10 @@
                 "bunchMin": 0,
                 "fixedVars": 4,
                 "freeVars": 27,
-                "goodClus": 0,
-                "loopCount": 10,
-                "numOfConstraints": 5,
-                "range": 1
+                "goodClus": false,
+                "loopCount": 20,
+                "numOfConstraints": 5
             }
-        },
-        "Reconstruction": {
-            "goodClus": 0
         },
         "RegenRejection": {
             "boundaries": {
@@ -394,10 +390,10 @@
             ],
             "momNeutral": {
                 "pureTriangle": [
-                    3.266721099294612,
-                    3.326794977908071,
-                    4.014546575667175,
-                    0.1907438515836392
+                    0.1884285507993903,
+                    2.4528698949178693,
+                    3.1364430524265448,
+                    0.16705916862307066
                 ],
                 "triTriangle": [
                     3.266721099294612,
@@ -413,13 +409,13 @@
             },
             "pathCharged": 1.380214379459432,
             "pathNeutral": {
-                "pureTriangle": 0.7158323180008569,
+                "pureTriangle": 1.1116735483875233,
                 "triTriangle": 0.7158323180008569,
                 "trilateration": 1.708955794589611
             },
             "rhoCharged": 0.1397413323844326,
             "rhoNeutral": {
-                "pureTriangle": 0.7330918396099843,
+                "pureTriangle": 1.2509319316404441,
                 "triTriangle": 0.7330918396099843,
                 "trilateration": 2.1715572150643294
             },
@@ -431,10 +427,10 @@
             ],
             "vtxNeutral": {
                 "pureTriangle": [
-                    0.741247667184261,
-                    0.7391049203989483,
-                    1.3623782106887345,
-                    1.1809737428459406
+                    0.7995301293332278,
+                    2.0592650295851307,
+                    2.3587843392754952,
+                    1.1738408861347345
                 ],
                 "triTriangle": [
                     0.741247667184261,
@@ -450,6 +446,9 @@
                 ]
             }
         },
+        "parallelization": {
+            "numOfThreads": 4
+        },
         "rootFiles": {
             "firstFileMax": 1,
             "lastFileMax": 56,
@@ -457,7 +456,8 @@
         },
         "tree": {
             "filename": {
-                "mctruth": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/mctruth_1_56.root",
+                "generatedvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/gen_vars_1_1.root",
+                "mctruth": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/mctruth_1_1.root",
                 "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_1_56_10_8_3.root",
                 "selectionvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/SelectionVars/root_files/selection_vars.root",
                 "trianglefinal": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_triangle_rec_1_56_10_5_1_1.root"
