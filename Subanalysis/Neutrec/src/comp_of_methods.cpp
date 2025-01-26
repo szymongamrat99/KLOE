@@ -122,6 +122,9 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
   chain->SetBranchAddress("Kchmc", baseKin.Kchmc);
   chain->SetBranchAddress("Knemc", baseKin.Knemc);
 
+  chain->SetBranchAddress("trk1", baseKin.trk[0]);
+  chain->SetBranchAddress("trk2", baseKin.trk[1]);
+
   chain->SetBranchAddress("nclu", &baseKin.nclu);
   chain->SetBranchAddress("Xcl", baseKin.cluster[0]);
   chain->SetBranchAddress("Ycl", baseKin.cluster[1]);
@@ -273,7 +276,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
 
   TString name[5] = {"x", "y", "z", "time", "length"};
 
-  const UInt_t number_of_points = 5;
+  const UInt_t number_of_points = 10;
 
   TCanvas *canvas_proj[2][6][5];
 
@@ -562,7 +565,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
 
     count_angle = 0;
 
-    if (baseKin.mcflag == 1 && (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0) && done_kinfit == 1)
+    if (baseKin.mcflag == 1 && (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0))
     {
       // Kaon path length
 
@@ -586,8 +589,6 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
 
       lengthneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2) + pow(Knetri_kinfit[8] - ip_kinfit[2], 2));
       lengthneu_rec = sqrt(pow(baseKin.Knereclor[6] - baseKin.ip[0], 2) + pow(baseKin.Knereclor[7] - baseKin.ip[1], 2) + pow(baseKin.Knereclor[8] - baseKin.ip[2], 2));
-
-      // if(baseKin.mctruth == 0 && done_kinfit == 1) std::cout << lengthneu_tri << std::endl;
 
       //
       // Kaon transverse radius
@@ -666,8 +667,9 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
         else
           cut = chi2min < 40.0; // && abs(Knetri_kinfit[9] - t_neumc) < 2.375/2.;
 
-        if (done_kinfit == 1 && cut && lengthneu_tri > 50)
+        if (cut && (errId > 3 || errId == 0) && done_kinfit == 1)
         {
+
           for (Int_t k1 = 0; k1 < 3; k1++)
             for (Int_t k2 = k1 + 1; k2 < 4; k2++)
             {
@@ -703,19 +705,67 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
           angle_min_180 = angle_180[min_ind_180[0]];
           dist_min = dist[min_ind_dist[0]];
 
-          if (j == 0 && lengthneu_tri > 50)
+          Float_t
+              trk_before[2][4],
+              trk_after[2][4];
+
+          for (Int_t ll = 0; ll < 2; ll++)
           {
+            trk_before[ll][0] = baseKin.trk[ll][0];
+            trk_before[ll][1] = baseKin.trk[ll][1];
+            trk_before[ll][2] = baseKin.trk[ll][2];
+            trk_before[ll][3] = baseKin.trk[ll][3];
+          }
+
+          boost[0] = -baseKin.Kchboost[0] / baseKin.Kchboost[3];
+          boost[1] = -baseKin.Kchboost[1] / baseKin.Kchboost[3];
+          boost[2] = -baseKin.Kchboost[2] / baseKin.Kchboost[3];
+
+          lorentz_transf(boost, trk_before[0], trk_after[0]);
+          lorentz_transf(boost, trk_before[1], trk_after[1]);
+
+          Float_t 
+                costrk_num = trk_after[0][0]*trk_after[1][0] + trk_after[0][1]*trk_after[1][1] + trk_after[0][2]*trk_after[1][2],
+                costrk_den = sqrt(pow(trk_after[0][0], 2) + pow(trk_after[0][1], 2) + pow(trk_after[0][2], 2)) * sqrt(pow(trk_after[1][0], 2) + pow(trk_after[1][1], 2) + pow(trk_after[1][2], 2)),
+                costrk = costrk_num / costrk_den;
+
+          Bool_t
+              cut_trcsum   = 1,//= trcsum > -1., 
+              cut_Kneuminv = 1,//= (minv4gam - mK0) < 76,
+              cut_Kchminv = 1,//= (baseKin.Kchrec[5] - mK0) < 1.2,
+              cut_Qmiss = 1,//= sqrt(pow(baseKin.Kchboost[3] - baseKin.Kchrec[3], 2) +
+                              //  pow(baseKin.Kchboost[0] - baseKin.Kchrec[0], 2) +
+                              //  pow(baseKin.Kchboost[1] - baseKin.Kchrec[1], 2) +
+                              //  pow(baseKin.Kchboost[2] - baseKin.Kchrec[2], 2)) < 3.75,
+              cut_costrk = 1;//= costrk < -0.8;
+
+          if (j == 0 /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
+          { 
             counts_all++;
+
+            // std::cout << counts_all << std::endl;
 
             if (Knetri_kinfit[9] > time_cut)
               counts_cut++;
 
             //! Check how many baseKin.cluster sets are found good and which bad
 
+            // std::cout << int(baseKin.mctruth) << std::endl;
+
             for (Int_t k = 0; k < 4; k++)
-              g4taken_corr[k] = baseKin.ncll[baseKin.g4taken[k] - 1] - 1; // baseKin.ncll[g4taken_kinfit[k]] - 1;
+            {
+              g4taken_corr[k] = baseKin.ncll[g4taken_kinfit[k]] - 1;
+              // std::cout << g4taken_corr[k] << " ";
+            }
+
+            // std::cout << std::endl;
 
             isEqual = event.ArrayEquality(clusindgood, g4taken_corr, 4);
+
+            // for(Int_t k = 0; k < 4; k++)
+            // {
+            //   std::cout << clusindgood[k] << " " << g4taken_corr[k] << std::endl;
+            // }
 
             bad_clus = isEqual;
 
@@ -772,7 +822,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
           else
             chosen_bunch = true;
 
-          if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
+          if (isEqual >= 0 && chosen_bunch /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
           {
             chi2_hist[j]->Fill(chi2min);
             prob_hist[j]->Fill(TMath::Prob(chi2min, M));
@@ -813,7 +863,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
           {
             if (k < 3)
             {
-              if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
+              if (isEqual >= 0 && chosen_bunch /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
               {
                 if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
                 {
@@ -835,7 +885,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
             }
             else if (k == 3)
             {
-              if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
+              if (isEqual >= 0 && chosen_bunch /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
               {
                 if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
                 {
@@ -857,14 +907,14 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
             }
             else
             {
-              if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
+              if (isEqual >= 0 && chosen_bunch /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
               {
                 sigmas_std[j][4]->Fill(lengthneu_mc, (lengthneu_tri - lengthneu_mc));
               }
             }
           }
 
-          if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
+          if (isEqual >= 0 && chosen_bunch /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
           {
             pulls[j][8]->Fill(Rtneu_tri - Rtneu_mc);
             pulls[j][9]->Fill(lengthneu_tri - lengthneu_mc);
@@ -872,7 +922,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
 
           d_cl = sqrt(pow(baseKin.cluster[0][0] - baseKin.bhabha_vtx[0], 2) + pow(baseKin.cluster[1][0] - baseKin.bhabha_vtx[1], 2) + pow(baseKin.cluster[2][0] - baseKin.bhabha_vtx[2], 2));
 
-          if (isEqual >= 0 && chosen_bunch && lengthneu_tri > 50)
+          if (isEqual >= 0 && chosen_bunch /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
           {
 
             for (Int_t k = 0; k < baseKin.ntmc; k++)

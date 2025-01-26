@@ -72,9 +72,7 @@ int genvars(int first_file, int last_file, int nclus)
 
 	omp_set_num_threads(numOfThreads);
 
-#pragma omp parallel
-	{
-#pragma omp for
+
 		for (Int_t i = 0; i < nentries; i++)
 		{
 			chain->GetEntry(i);
@@ -251,7 +249,6 @@ int genvars(int first_file, int last_file, int nclus)
 
 			++show_progress;
 		}
-	}
 
 	tree->Print();
 
