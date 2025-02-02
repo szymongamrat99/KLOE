@@ -1,11 +1,21 @@
 #ifndef KLSPM00_H
 #define KLSPM00_H
 
-int CPFit_main();
-int GenVars_main();
-int OmegaRec_main();
-int Regen_main();
-int Neutrec_main(Int_t firstFile, Int_t lastFile);
-int Plots_main(Int_t firstFile, Int_t lastFile);
+#include <chrono>
+#include <iostream>
+#include <string>
 
-#endif //! CPFIT_H
+#include <const.h>
+
+#include <MainMenu.h>
+#include <ErrorLogs.h>
+#include <kloe_class.h>
+
+// int CPFit_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
+// int GenVars_main(TChain &chain);
+int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
+// int Regen_main(TChain &chain);
+// int Neutrec_main(TChain &chain);
+// int Plots_main(TChain &chain);
+
+#endif //! KLSPM00_H

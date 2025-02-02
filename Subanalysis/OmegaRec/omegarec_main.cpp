@@ -5,64 +5,24 @@
 #include "inc/omegarec.hpp"
 
 using namespace std;
-using std::chrono::duration;
-using std::chrono::duration_cast;
-using std::chrono::high_resolution_clock;
-using std::chrono::minutes;
 
-int OmegaRec_main()
+int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
+  // Set logger for error logging
+  std::string logFilename = (std::string)omegarec_dir + (std::string)logs_dir + "omegaRec_" + Obj.getCurrentDate() + ".log";
+  ErrorHandling::ErrorLogs logger(logFilename);
+  // -------------------------------------------------------------------
+  // Set Menu instance
   Controls::Menu *menu = new Controls::Menu(6);
-  ErrorHandling::ErrorLogs logger;
-  ofstream LogFile;
-  LogFile.open(gen_vars_dir + logs_dir + "OmegaRec.log");
-  setGlobalStyle();
-
-  Int_t firstFile, lastFile, ind_data_mc;
-
-  try
-  {
-    cout << "Input the first file number to be analyzed: ";
-    cin >> firstFile;
-
-    if (!cin)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (firstFile < firstFileMax || firstFile > lastFileMax)
-    {
-      throw ErrorHandling::ErrorCodes::RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    logger.getErrLog(err);
-    logger.getErrLog(err, LogFile);
-    return int(err);
-  }
-
-  try
-  {
-    cout << "Input the last file number to be analyzed: ";
-    cin >> lastFile;
-
-    if (!cin)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (lastFile < firstFile || lastFile > lastFileMax)
-    {
-      throw ErrorHandling::ErrorCodes::RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    logger.getErrLog(err);
-    logger.getErrLog(err, LogFile);
-    return int(err);
-  }
-
   Controls::OmegaRec menuOpt;
+  // -------------------------------------------------------------------
+
+  Short_t good_clus = properties["variables"]["KinFit"]["Trilateration"]["goodClus"],
+          loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+          numOfConstraints = properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+          jmin = properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+          jmax = properties["variables"]["KinFit"]["Trilateration"]["bunchMax"];
+
   bool
       dataTypeErr,
       menuRangeErr;
@@ -101,22 +61,23 @@ int OmegaRec_main()
     {
     case Controls::OmegaRec::OMEGA_REC:
     {
-      omegarec(firstFile, lastFile, Controls::DataType::MC_DATA);
+      Obj.startTimer();
+      omegarec(chain, dataTypeOpt, logger, Obj);
+      std::cout << Obj.endTimer() << std::endl;
+
       break;
     }
     case Controls::OmegaRec::OMEGA_CUTS:
     {
-      //omegacuts(firstFile, lastFile);
+      // omegacuts(firstFile, lastFile);
       break;
     }
     case Controls::OmegaRec::PLOTS:
     {
-      auto start = std::chrono::system_clock::now();
-      plots(firstFile, lastFile, 10, 5, 1, Controls::DataType::MC_DATA);
-      auto end = std::chrono::system_clock::now();
-      std::chrono::duration<double> elapsed_seconds = end - start;
+      Obj.startTimer();
+      plots(chain, loopcount, numOfConstraints, jmin, jmax, dataTypeOpt, logger);
+      std::cout << Obj.endTimer() << std::endl;
 
-      std::cout << elapsed_seconds.count() << std::endl;
       break;
     }
     case Controls::OmegaRec::EXIT:
@@ -129,7 +90,7 @@ int OmegaRec_main()
 
   } while (menuOpt != Controls::OmegaRec::EXIT);
 
-  LogFile.close();
+  logger.printErrStats();
 
   return 0;
 }

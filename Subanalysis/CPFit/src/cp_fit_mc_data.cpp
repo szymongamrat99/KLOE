@@ -22,15 +22,10 @@
 #include <kloe_class.h>
 #include <lorentz_transf.h>
 
-#define __FILENAME__ (__builtin_strrchr(__FILE__, '/') ? __builtin_strrchr(__FILE__, '/') + 1 : __FILE__)
-
 using namespace KLOE;
 
-int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool_t check_corr = false, Int_t loopcount = 0, Int_t M = 0, Int_t range = 0)
+int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = false, Int_t loopcount = 0, Int_t M = 0, Int_t jmin = 0, Int_t jmax = 0, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger)
 {
-	ErrorHandling::ErrorLogs errLogger;
-	Controls::DataType data_type = Controls::DataType::MC_DATA;
-
 	// =============================================================================
 	BaseKinematics
 			baseKin;
@@ -49,13 +44,6 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 			*tree_omega;
 	// =============================================================================
 
-	TString name = gen_vars_dir + root_files_dir + mctruth_filename + firstFile + "_" + lastFile + ext_root;
-
-	file_mctruth = new TFile(name);
-	tree_mctruth = (TTree *)file_mctruth->Get(gen_vars_tree);
-
-	tree_mctruth->SetBranchAddress("mctruth", &baseKin.mctruth_int);
-
 	Double_t *eff_vals;
 
 	if (check_corr == true)
@@ -69,61 +57,68 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 	// ===========================================================================
 
-	TChain *chain = new TChain("INTERF/h1");
-	chain_init(chain, firstFile, lastFile);
+	chain.SetBranchAddress("mcflag", &baseKin.mcflag);
 
-	chain->SetBranchAddress("mcflag", &baseKin.mcflag);
+	chain.SetBranchAddress("Dtmc", &baseKin.Dtmc);
 
-	chain->SetBranchAddress("Dtmc", &baseKin.Dtmc);
-
-	chain->SetBranchAddress("Chi2", &baseKin.Chi2);
-	chain->SetBranchAddress("minv4gam", &baseKin.minv4gam);
-	chain->SetBranchAddress("Kchboost", baseKin.Kchboost);
-	chain->SetBranchAddress("Kchrec", baseKin.Kchrec);
-	chain->SetBranchAddress("Qmiss", &baseKin.Qmiss);
-	chain->SetBranchAddress("ip", interfcommon_.ip);
+	chain.SetBranchAddress("Chi2", &baseKin.Chi2);
+	chain.SetBranchAddress("minv4gam", &baseKin.minv4gam);
+	chain.SetBranchAddress("Kchboost", baseKin.Kchboost);
+	chain.SetBranchAddress("Kchrec", baseKin.Kchrec);
+	chain.SetBranchAddress("Qmiss", &baseKin.Qmiss);
+	chain.SetBranchAddress("ip", interfcommon_.ip);
 
 	Float_t
 			PichFourMom[2][4];
 
-	chain->SetBranchAddress("trk1", PichFourMom[0]);
-	chain->SetBranchAddress("trk2", PichFourMom[1]);
+	chain.SetBranchAddress("trk1", PichFourMom[0]);
+	chain.SetBranchAddress("trk2", PichFourMom[1]);
 
-	chain->SetBranchAddress("Xcl", baseKin.cluster[0]);
-	chain->SetBranchAddress("Ycl", baseKin.cluster[1]);
-	chain->SetBranchAddress("Zcl", baseKin.cluster[2]);
-	chain->SetBranchAddress("Tcl", baseKin.cluster[3]);
-	chain->SetBranchAddress("Enecl", baseKin.cluster[4]);
+	chain.SetBranchAddress("Xcl", baseKin.cluster[0]);
+	chain.SetBranchAddress("Ycl", baseKin.cluster[1]);
+	chain.SetBranchAddress("Zcl", baseKin.cluster[2]);
+	chain.SetBranchAddress("Tcl", baseKin.cluster[3]);
+	chain.SetBranchAddress("Enecl", baseKin.cluster[4]);
 
-	chain->SetBranchAddress("ip", baseKin.ip);
+	chain.SetBranchAddress("ip", baseKin.ip);
 
-	chain->SetBranchAddress("Bpx", &baseKin.phi_mom[0]);
-	chain->SetBranchAddress("Bpy", &baseKin.phi_mom[1]);
-	chain->SetBranchAddress("Bpz", &baseKin.phi_mom[2]);
-	chain->SetBranchAddress("Broots", &baseKin.phi_mom[3]);
+	chain.SetBranchAddress("Bpx", &baseKin.phi_mom[0]);
+	chain.SetBranchAddress("Bpy", &baseKin.phi_mom[1]);
+	chain.SetBranchAddress("Bpz", &baseKin.phi_mom[2]);
+	chain.SetBranchAddress("Broots", &baseKin.phi_mom[3]);
 
-	chain->SetBranchAddress("Bx", &baseKin.bhabha_vtx[0]);
-	chain->SetBranchAddress("By", &baseKin.bhabha_vtx[1]);
-	chain->SetBranchAddress("Bz", &baseKin.bhabha_vtx[2]);
+	chain.SetBranchAddress("Bx", &baseKin.bhabha_vtx[0]);
+	chain.SetBranchAddress("By", &baseKin.bhabha_vtx[1]);
+	chain.SetBranchAddress("Bz", &baseKin.bhabha_vtx[2]);
 
 	// ===========================================================================
 
-	TString
-			filename_trilateration = gen_vars_dir + root_files_dir + gen_vars_filename + firstFile + "_" + lastFile + ext_root,
-			filename_trilateration_kin_fit = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + firstFile + "_" + lastFile + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root,
-			filename_triangle = neutrec_dir + root_files_dir + neu_triangle_filename + firstFile + "_" + lastFile + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root,
-			omega_name = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
-			omega_tree_name = std::string(properties["variables"]["tree"]["treename"]["omegarec"]);
+	Int_t range = Int_t(jmax - jmin) + 1;
 
-	std::vector<TString> file_name, tree_name;
+	TString
+			filename_trilateration = std::string(properties["variables"]["tree"]["filename"]["trilateration"]),
+			treename_trilateration = std::string(properties["variables"]["tree"]["treename"]["trilateration"]),
+
+			filename_trilateration_kin_fit = std::string(properties["variables"]["tree"]["filename"]["trilaterationKinFit"]),
+			treename_trilateration_kin_fit = std::string(properties["variables"]["tree"]["treename"]["trilaterationKinFit"]),
+
+			filename_triangle = std::string(properties["variables"]["tree"]["filename"]["trianglefinal"]),
+			treename_triangle = std::string(properties["variables"]["tree"]["treename"]["trianglefinal"]),
+
+			filename_omega = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
+			treename_omega = std::string(properties["variables"]["tree"]["treename"]["omegarec"]);
+
+	std::vector<TString>
+			file_name,
+			tree_name;
 
 	file_name.push_back(filename_trilateration);
 	file_name.push_back(filename_trilateration_kin_fit);
 	file_name.push_back(filename_triangle);
 
-	tree_name.push_back(neutrec_tri_tree);
-	tree_name.push_back(neutrec_kin_fit_tree);
-	tree_name.push_back(neutrec_triangle_tree);
+	tree_name.push_back(treename_trilateration);
+	tree_name.push_back(treename_trilateration_kin_fit);
+	tree_name.push_back(treename_triangle);
 
 	Controls::Menu menu(3, file_name);
 
@@ -148,11 +143,20 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 		if (tree->IsZombie())
 			throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
+
+		file_omega = new TFile(filename_omega);
+
+		if (file_omega->IsZombie())
+			throw(ErrorHandling::ErrorCodes::FILE_NOT_EXIST);
+
+		tree_omega = (TTree *)file_omega->Get(treename_omega);
+
+		if (tree_omega->IsZombie())
+			throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
 	}
 	catch (ErrorHandling::ErrorCodes err)
 	{
-		errLogger.setErrCount(err);
-		errLogger.getErrLog(err);
+		logger.getErrLog(err);
 		return int(err);
 	}
 
@@ -173,9 +177,6 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 		tree->SetBranchAddress("g4taken_triangle", neutVars.gtaken);
 		tree->SetBranchAddress("chi2min", &neutVars.chi2min);
 	}
-
-	file_omega = new TFile(omega_name);
-	tree_omega = (TTree *)file_omega->Get(omega_tree_name);
 
 	Int_t
 			doneOmega,
@@ -233,11 +234,11 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 	tree_omega->SetBranchAddress("anglePhiOmega", &anglePhiOmega);
 	tree_omega->SetBranchAddress("chi2min", &chi2min);
 
-	chain->AddFriend(tree_mctruth);
-	chain->AddFriend(tree_omega);
-	chain->AddFriend(tree);
+	chain.AddFriend(tree_mctruth);
+	chain.AddFriend(tree_omega);
+	chain.AddFriend(tree);
 
-	UInt_t nentries = chain->GetEntries();
+	UInt_t nentries = chain.GetEntries();
 
 	const Double_t
 			x_min = properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
@@ -260,7 +261,7 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 
 	for (UInt_t i = 0; i < nentries; i++)
 	{
-		chain->GetEntry(i);
+		chain.GetEntry(i);
 
 		if (neutVars.done == 1)
 		{
@@ -377,25 +378,25 @@ int cp_fit_mc_data(Int_t firstFile, Int_t lastFile, TString mode = "split", Bool
 			cond_tot = cond[0] && cond[1] && cond[2];
 
 			Double_t
-        meanRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
-        errorRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1],
-        meanRadiusChLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0],
-        errorRadiusChLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0],
-        
-        meanRadiusTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1],
-        errorRadiusTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1],
-        meanRadiusTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0],
-        errorRadiusTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0];
+					meanRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
+					errorRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1],
+					meanRadiusChLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0],
+					errorRadiusChLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0],
 
-			cuts[0] = abs(radius[0] - meanRadiusTriangleHigher) > errorRadiusTriangleHigher * sigma;      // && radius[1] > 8;
-      cuts[1] = 1;//abs(radius[1] - meanRadiusTriangleLower) > errorRadiusTriangleLower * sigma;     // && radius[1] <= 8;
-      cuts[2] = abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma; // && radius_ch[1] > 8;
-      cuts[3] = 1;//abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
+					meanRadiusTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1],
+					errorRadiusTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1],
+					meanRadiusTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0],
+					errorRadiusTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0];
+
+			cuts[0] = abs(radius[0] - meanRadiusTriangleHigher) > errorRadiusTriangleHigher * sigma; // && radius[1] > 8;
+			cuts[1] = 1;																																						 // abs(radius[1] - meanRadiusTriangleLower) > errorRadiusTriangleLower * sigma;     // && radius[1] <= 8;
+			cuts[2] = abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma;					 // && radius_ch[1] > 8;
+			cuts[3] = 1;																																						 // abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
 
 			if (cond_tot)
 			{
 				cuts[4] = rho > 0.6;
-				cuts[5] = 1; //chi2min > 4.0;
+				cuts[5] = 1; // chi2min > 4.0;
 			}
 			else
 			{

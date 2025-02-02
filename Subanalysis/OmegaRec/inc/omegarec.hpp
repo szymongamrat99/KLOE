@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <boost/optional.hpp>
 
 #include <TTree.h>
 #include <TFile.h>
@@ -12,8 +13,10 @@
 #include <ErrorLogs.h>
 #include <MainMenu.h>
 #include <clear_variables.h>
+#include <kloe_class.h>
+#include <charged_mom.h>
 
-int omegarec(Int_t, Int_t, Controls::DataType);
-int plots(int, int, int, int, int, Controls::DataType);
+int omegarec(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
+int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t &jmin, Short_t &jmax, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger);
 
 #endif //! OMEGAREC_HPP

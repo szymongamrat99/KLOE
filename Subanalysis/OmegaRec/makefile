@@ -8,8 +8,8 @@ BINPATH=bin
 
 LIBS=-L$(INCPATH) -lrec -lm -llapack -lcurl
 
-SRC=$(SRCPATH)/omega_rec.cpp $(SRCPATH)/plots_df.cpp omegarec_main.cpp
-OBJ=$(OBJPATH)/omega_rec.o $(OBJPATH)/plots_df.o $(OBJPATH)/omegarec_main.o
+SRC=$(SRCPATH)/omega_rec.cpp omegarec_main.cpp $(SRCPATH)/plots.cpp
+OBJ=$(OBJPATH)/omega_rec.o $(OBJPATH)/omegarec_main.o $(OBJPATH)/plots.o 
 
 PROJECT=omega_rec.exe
 RM=rm
@@ -26,7 +26,7 @@ $(OBJPATH)/omega_rec.o: $(SRCPATH)/omega_rec.cpp
 #$(OBJPATH)/omega_rec_kin_fit.o: $(SRCPATH)/omega_rec_kin_fit.cpp
 #	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(OBJPATH)/plots_df.o: $(SRCPATH)/plots_df.cpp
+$(OBJPATH)/plots.o: $(SRCPATH)/plots.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJPATH)/omegarec_main.o: omegarec_main.cpp 

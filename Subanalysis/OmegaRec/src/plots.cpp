@@ -15,11 +15,8 @@
 
 #include "../inc/omegarec.hpp"
 
-int plots(int first_file, int last_file, int loopcount, int M, int range, Controls::DataType data_type)
+int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t &jmin, Short_t &jmax, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger)
 {
-	TChain *chain = new TChain("INTERF/h1");
-	chain_init(chain, first_file, last_file);
-
 	BaseKinematics baseKin;
 
 	TFile
@@ -33,15 +30,8 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			*tree_triangle;
 
 	TString
-			mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
 			omega_name = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
-			tree_name = std::string(properties["variables"]["tree"]["treename"]["omegarec"]),
-			filename_triangle = neutrec_dir + root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
-
-	file_mctruth = new TFile(mctruth_name);
-	tree_mctruth = (TTree *)file_mctruth->Get(gen_vars_tree);
-
-	tree_mctruth->SetBranchAddress("mctruth", &baseKin.mctruth_int);
+			tree_name = std::string(properties["variables"]["tree"]["treename"]["omegarec"]);
 
 	file_omega = new TFile(omega_name);
 	tree_omega = (TTree *)file_omega->Get(tree_name);
@@ -102,10 +92,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 	Float_t chi2min;
 
-	tree_omega->SetBranchAddress("chi2min", &chi2min);
-
-	// file_triangle = new TFile(filename_triangle);
-	// tree_triangle = (TTree *)file_triangle->Get(neutrec_triangle_tree);
+	// tree_omega->SetBranchAddress("chi2min", &chi2min);
 
 	Float_t
 			Knetri_kinfit[10],
@@ -117,54 +104,38 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	Int_t
 			done_kinfit_triangle;
 
-	// tree_triangle->SetBranchAddress("fourgamma1triangle", gamma_kinfit_triangle[0]);
-	// tree_triangle->SetBranchAddress("fourgamma2triangle", gamma_kinfit_triangle[1]);
-	// tree_triangle->SetBranchAddress("fourgamma3triangle", gamma_kinfit_triangle[2]);
-	// tree_triangle->SetBranchAddress("fourgamma4triangle", gamma_kinfit_triangle[3]);
-
-	// tree_triangle->SetBranchAddress("fourKnetriangle", Knetri_kinfit);
-
-	// tree_triangle->SetBranchAddress("chi2min", &chi2min_triangle);
-
-	// tree_triangle->SetBranchAddress("minv4gam", &minv4gam);
-
-	// tree_triangle->SetBranchAddress("iptriangle", ip_kinfit_triangle);
-	// tree_triangle->SetBranchAddress("done_triangle", &done_kinfit_triangle);
-
 	Float_t
 			Kchrec[9],
 			ip_avg[3],
 			Kchboost[9];
 
-	chain->SetBranchAddress("nclu", &baseKin.nclu);
-	chain->SetBranchAddress("Xcl", baseKin.cluster[0]);
-	chain->SetBranchAddress("Ycl", baseKin.cluster[1]);
-	chain->SetBranchAddress("Zcl", baseKin.cluster[2]);
-	chain->SetBranchAddress("Tcl", baseKin.cluster[3]);
-	chain->SetBranchAddress("Enecl", baseKin.cluster[4]);
+	chain.SetBranchAddress("nclu", &baseKin.nclu);
+	chain.SetBranchAddress("Xcl", baseKin.cluster[0]);
+	chain.SetBranchAddress("Ycl", baseKin.cluster[1]);
+	chain.SetBranchAddress("Zcl", baseKin.cluster[2]);
+	chain.SetBranchAddress("Tcl", baseKin.cluster[3]);
+	chain.SetBranchAddress("Enecl", baseKin.cluster[4]);
 
-	chain->SetBranchAddress("ncll", baseKin.ncll);
+	chain.SetBranchAddress("ncll", baseKin.ncll);
 
-	chain->SetBranchAddress("Kchrec", Kchrec);
-	chain->SetBranchAddress("Kchboost", Kchboost);
-	chain->SetBranchAddress("Bx", &ip_avg[0]);
-	chain->SetBranchAddress("By", &ip_avg[1]);
-	chain->SetBranchAddress("Bz", &ip_avg[2]);
-	chain->SetBranchAddress("Bpx", &baseKin.phi_mom[0]);
-	chain->SetBranchAddress("Bpy", &baseKin.phi_mom[1]);
-	chain->SetBranchAddress("Bpz", &baseKin.phi_mom[2]);
-	chain->SetBranchAddress("Broots", &baseKin.phi_mom[3]);
+	chain.SetBranchAddress("Kchrec", Kchrec);
+	chain.SetBranchAddress("Kchboost", Kchboost);
+	chain.SetBranchAddress("Bx", &ip_avg[0]);
+	chain.SetBranchAddress("By", &ip_avg[1]);
+	chain.SetBranchAddress("Bz", &ip_avg[2]);
+	chain.SetBranchAddress("Bpx", &baseKin.phi_mom[0]);
+	chain.SetBranchAddress("Bpy", &baseKin.phi_mom[1]);
+	chain.SetBranchAddress("Bpz", &baseKin.phi_mom[2]);
+	chain.SetBranchAddress("Broots", &baseKin.phi_mom[3]);
 
-	chain->SetBranchAddress("Dtmc", &baseKin.Dtmc);
+	chain.SetBranchAddress("Dtmc", &baseKin.Dtmc);
 
-	chain->SetBranchAddress("mctruth", &baseKin.mctruth);
-	chain->SetBranchAddress("mcflag", &baseKin.mcflag);
+	chain.SetBranchAddress("mctruth", &baseKin.mctruth);
+	chain.SetBranchAddress("mcflag", &baseKin.mcflag);
 
 	////////////////////////////////////////////////////////
 
-	chain->AddFriend(tree_mctruth);
-	chain->AddFriend(tree_omega);
-	//chain->AddFriend(tree_triangle);
+	chain.AddFriend(tree_omega);
 
 	/////////////////////////////////////////////////////////////////////
 
@@ -174,7 +145,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 	Bool_t clus_time[max_count];
 
-	Int_t nentries = (Int_t)chain->GetEntries();
+	Int_t nentries = (Int_t)chain.GetEntries();
 
 	std::vector<TCanvas *> canva;
 	TString canva_name = "";
@@ -283,12 +254,9 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	// Initialization of interference function
 	KLOE::interference event("split", 0, 91, -90, 90, split);
 
-	TString
-			name = efficiency_dir + root_files_dir + cut_vars_filename + first_file + "_" + last_file + ext_root;
-
 	for (Int_t i = 0; i < nentries; i++)
 	{
-		chain->GetEntry(i);
+		chain.GetEntry(i);
 
 		for (Int_t j = 0; j < 4; j++)
 			for (Int_t k = 0; k < 4; k++)
@@ -296,7 +264,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 		// Section for the histogram filling
 
-		if (baseKin.mctruth_int == 4 && doneOmega == 1)
+		if (baseKin.mctruth == 4 && doneOmega == 1)
 		{
 			hist_control[0]->Fill(Kchrec[6] - neu_vtx_avg[0]);
 			hist_control[1]->Fill(Kchrec[7] - neu_vtx_avg[1]);
@@ -331,12 +299,11 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		cond[4] = abs(Kchrec[7] - ip_avg[1]) < sigmas_ip * 2.03;
 		cond[5] = abs(Kchrec[8] - ip_avg[2]) < sigmas_ip * 3.39;
 
-		cond_tot = cond[0] && cond[1] && cond[2];
+		cond_tot = 1;//cond[0] && cond[1] && cond[2];
 
 		if (cond_tot && doneOmega == 1)
 		{
-
-			if (baseKin.mctruth_int == 1)
+			if (baseKin.mctruth == 1)
 			{
 				hist[0][0]->Fill(anglePi0OmegaPhiCM);
 				hist[0][1]->Fill(Kchrec[5]);
@@ -360,7 +327,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist2d_00IP_pmIP[0][0]->Fill(rho_pm_IP, rho_00_IP, event.interf_function(baseKin.Dtmc, 0, par));
 				hist2d_00IP_pmIP[1][0]->Fill(abs(Kchrec[8] - ip_avg[8]), abs(neu_vtx_avg[2] - ip_avg[8]), event.interf_function(baseKin.Dtmc, 0, par));
 			}
-			if (baseKin.mctruth_int == 3)
+			if (baseKin.mctruth == 3)
 			{
 				hist[1][0]->Fill(anglePi0OmegaPhiCM);
 				hist[1][1]->Fill(Kchrec[5]);
@@ -384,7 +351,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 				hist2d[1]->Fill(chi2min, rho);
 			}
-			if (baseKin.mctruth_int == 4)
+			if (baseKin.mctruth == 4)
 			{
 				hist[2][0]->Fill(anglePi0OmegaPhiCM);
 				hist[2][1]->Fill(Kchrec[5]);
@@ -408,7 +375,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 
 				hist2d[2]->Fill(chi2min, rho);
 			}
-			if (baseKin.mctruth_int == 5)
+			if (baseKin.mctruth == 5)
 			{
 				hist[3][0]->Fill(anglePi0OmegaPhiCM);
 				hist[3][1]->Fill(Kchrec[5]);
@@ -434,7 +401,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist2d_00IP_pmIP[0][3]->Fill(rho_pm_IP, rho_00_IP);
 				hist2d_00IP_pmIP[1][3]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 			}
-			if (baseKin.mctruth_int == 6)
+			if (baseKin.mctruth == 6)
 			{
 				hist[4][0]->Fill(anglePi0OmegaPhiCM);
 				hist[4][1]->Fill(Kchrec[5]);
@@ -458,7 +425,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist2d_00IP_pmIP[0][4]->Fill(rho_pm_IP, rho_00_IP);
 				hist2d_00IP_pmIP[1][4]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 			}
-			if (baseKin.mctruth_int == 7)
+			if (baseKin.mctruth == 7)
 			{
 				hist[5][0]->Fill(anglePi0OmegaPhiCM);
 				hist[5][1]->Fill(Kchrec[5]);
@@ -517,6 +484,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist[j][i]->SetStats(0);
 				hist[j][i]->GetXaxis()->SetTitle(xTitle[i]);
 				hist[j][i]->GetYaxis()->SetTitle(yTitle);
+				hist[j][i]->GetYaxis()->SetRangeUser(0.1, 10.0*hist[3][i]->GetMaximum());
 				hist[j][i]->Draw("HIST");
 			}
 			else
@@ -629,7 +597,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			legend_chann_cont->AddEntry(hist_control_chann[j][i], channName[j], "l");
 			legend_chi2->AddEntry(hist_control_chann[j][i], channName[j], "l");
 
-			if (j == 1)
+			if (j == 3)
 			{
 				hist_control_chann[j][i]->SetStats(0);
 				hist_control_chann[j][i]->GetXaxis()->SetTitle(xTitleControl[i]);
@@ -637,7 +605,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist_control_chann[j][i]->Draw("HIST");
 				hist_control_chann[0][i]->Draw("SAME");
 			}
-			else if (j != 1 && j != 0)
+			else if (j != 3 && j != 0)
 				hist_control_chann[j][i]->Draw("SAME");
 		}
 		if (i < 3)
@@ -664,7 +632,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			legend_chann_cont->AddEntry(hist_pm_IP[j][i], channName[j], "l");
 			legend_chi2->AddEntry(hist_pm_IP[j][i], channName[j], "l");
 
-			if (j == 1)
+			if (j == 3)
 			{
 				hist_pm_IP[j][i]->SetStats(0);
 				hist_pm_IP[j][i]->GetXaxis()->SetTitle(xTitlepmIP[i]);
@@ -672,7 +640,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist_pm_IP[j][i]->Draw("HIST");
 				hist_pm_IP[0][i]->Draw("SAME");
 			}
-			else if (j != 1 && j != 0)
+			else if (j != 3 && j != 0)
 				hist_pm_IP[j][i]->Draw("SAME");
 		}
 		if (i < 3)
@@ -699,7 +667,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			legend_chann_cont->AddEntry(hist_00_IP[j][i], channName[j], "l");
 			legend_chi2->AddEntry(hist_00_IP[j][i], channName[j], "l");
 
-			if (j == 1)
+			if (j == 3)
 			{
 				hist_00_IP[j][i]->SetStats(0);
 				hist_00_IP[j][i]->GetXaxis()->SetTitle(xTitle00IP[i]);
@@ -707,7 +675,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist_00_IP[j][i]->Draw("HIST");
 				hist_00_IP[0][i]->Draw("SAME");
 			}
-			else if (j != 1 && j != 0)
+			else if (j != 3 && j != 0)
 				hist_00_IP[j][i]->Draw("SAME");
 		}
 		if (i < 3)

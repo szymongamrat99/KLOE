@@ -1,33 +1,34 @@
-#include <chrono>
-#include <iostream>
-#include <string>
-
-#include <const.h>
-
-#include <MainMenu.h>
-#include <ErrorLogs.h>
-
 #include "inc/klspm00.hpp"
-
-bool 
-    firstFileRangeErr, 
-    lastFileRangeErr, 
-    dataTypeErr,
-    menuRangeErr;
-
-ErrorHandling::ErrorLogs logger;
-Controls::Menu mainMenu(0);
 
 using namespace std;
 using namespace std::chrono;
 
 int main(int argc, char *argv[])
 {
-  int firstFile, lastFile;
+  bool
+      firstFileRangeErr,
+      lastFileRangeErr,
+      dataTypeErr,
+      menuRangeErr;
+
+  UInt_t firstFile, lastFile;
+
+  // Set KLOE class instance
+  KLOE::pm00 eventAnalysis;
+  // -------------------------------------------------------------------
+  // Set logger for error logging
+  std::string logFilename = (std::string)logs_dir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
+  ErrorHandling::ErrorLogs logger(logFilename);
+  // -------------------------------------------------------------------
+  // Set Menu instance
+  Controls::Menu mainMenu(0); // For analysis options
   Controls::MainMenu mainMenuOpt;
 
+  Controls::Menu *dataType = new Controls::Menu(2); // For data type
+  // -------------------------------------------------------------------
+  // Set global style for histograms
   setGlobalStyle();
-
+  // -------------------------------------------------------------------
 
   try
   {
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
     cout << endl;
 
     dataTypeErr = !cin;
-    firstFileRangeErr = lastFile < firstFile || lastFile > lastFileMax;
+    lastFileRangeErr = lastFile < firstFile || lastFile > lastFileMax;
 
     if (dataTypeErr)
     {
@@ -79,6 +80,47 @@ int main(int argc, char *argv[])
     cin.clear();
     cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
+    logger.getErrLog(err);
+    return int(err);
+  }
+
+  properties["variables"]["rootFiles"]["Data"]["firstFile"] = firstFile;
+  properties["variables"]["rootFiles"]["Data"]["lastFile"] = lastFile;
+  properties["variables"]["rootFiles"]["MC"]["firstFile"] = firstFile;
+  properties["variables"]["rootFiles"]["MC"]["lastFile"] = lastFile;
+
+  std::ofstream outfile(propName);
+  outfile << properties.dump(4);
+  outfile.close();
+
+  // Initialize and fill the TChain object
+  TChain chain("INTERF/h1");
+  eventAnalysis.chainInit(chain, firstFile, lastFile, firstFile, lastFile);
+  // -------------------------------------------------------------------
+
+  std::cout << chain.GetEntries() << std::endl;
+
+  Controls::DataType dataTypeOpt;
+
+  try
+  {
+    dataType->InitMenu();
+    dataType->ShowOpt();
+    dataType->EndMenu();
+
+    cin >> dataTypeOpt;
+
+    if (!cin)
+    {
+      throw ErrorHandling::ErrorCodes::DATA_TYPE;
+    }
+    else if (dataTypeOpt < Controls::DataType::SIGNAL_TOT || dataTypeOpt > Controls::DataType::SIGNAL_MAX)
+    {
+      throw ErrorHandling::ErrorCodes::MENU_RANGE;
+    }
+  }
+  catch (ErrorHandling::ErrorCodes err)
+  {
     logger.getErrLog(err);
     return int(err);
   }
@@ -130,7 +172,8 @@ int main(int argc, char *argv[])
     {
     case Controls::MainMenu::GEN_VARS:
     {
-      GenVars_main();
+      break;
+      // GenVars_main(chain);
     }
     case Controls::MainMenu::KCHREC_NO_BOOST:
       break;
@@ -140,15 +183,17 @@ int main(int argc, char *argv[])
       break;
     case Controls::MainMenu::OMEGA_REC:
     {
-      OmegaRec_main();
+      OmegaRec_main(chain, eventAnalysis, dataTypeOpt);
     }
     case Controls::MainMenu::REGEN_REJ:
     {
-      Regen_main();
+      break;
+      // Regen_main(chain);
     }
     case Controls::MainMenu::KNEREC_TRILAT:
     {
-      Neutrec_main(firstFile, lastFile);
+      break;
+      // Neutrec_main(chain);
     }
     case Controls::MainMenu::KNEREC_TRIANGLE:
       break;
@@ -159,12 +204,16 @@ int main(int argc, char *argv[])
     case Controls::MainMenu::TRANSF_TO_CM:
       break;
     case Controls::MainMenu::CPV_NORM:
-      CPFit_main();
+      break;
+      // CPFit_main(chain, eventAnalysis, dataTypeOpt);
     case Controls::MainMenu::PLOTS:
-      Plots_main(firstFile, lastFile);
+      break;
+      // Plots_main(chain);
     }
 
   } while (mainMenuOpt != Controls::MainMenu::EXIT);
+
+  logger.printErrStats();
 
   return 0;
 }

@@ -450,23 +450,36 @@
             "numOfThreads": 4
         },
         "rootFiles": {
+            "Data": {
+                "firstFile": 1,
+                "lastFile": 1
+            },
+            "MC": {
+                "firstFile": 1,
+                "lastFile": 1
+            },
             "firstFileMax": 1,
-            "lastFileMax": 56,
-            "path": "/internal/big_one/4/users/gamrat/old_root_files"
+            "lastFileMax": 10,
+            "path": "/internal/big_one/4/users/gamrat/scripts/ROOT_files/PROD2NTU"
         },
         "tree": {
             "filename": {
                 "generatedvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/gen_vars_1_1.root",
                 "mctruth": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/mctruth_1_1.root",
-                "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_1_56_10_8_3.root",
+                "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_2025-02-02_3.root",
                 "selectionvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/SelectionVars/root_files/selection_vars.root",
-                "trianglefinal": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_triangle_rec_1_56_10_5_1_1.root"
+                "trianglefinal": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_triangle_rec_1_56_10_5_1_1.root",
+                "trilateration": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_triangle_rec_1_56_10_5_1_1.root",
+                "trilaterationKinFit": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_triangle_rec_1_56_10_5_1_1.root"
             },
             "treename": {
+                "generatedvars": "h_gen_vars",
                 "mctruth": "h_gen_vars",
                 "omegarec": "h_omega_rec",
                 "selectionvars": "h_sel_vars",
-                "trianglefinal": "h_triangle"
+                "trianglefinal": "h_triangle",
+                "trilateration": "h_tri",
+                "trilaterationKinFit": "h_tri_kin_fit"
             }
         }
     }
