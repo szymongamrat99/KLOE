@@ -11,6 +11,7 @@ int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOp
   // Set logger for error logging
   std::string logFilename = (std::string)omegarec_dir + (std::string)logs_dir + "omegaRec_" + Obj.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
+  ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Set Menu instance
   Controls::Menu *menu = new Controls::Menu(6);
@@ -61,22 +62,40 @@ int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOp
     {
     case Controls::OmegaRec::OMEGA_REC:
     {
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+      logger.getLog(infoCode, "Omega-pi0 Reconstruction: Reconstruction with kinematic fit");
+
       Obj.startTimer();
       omegarec(chain, dataTypeOpt, logger, Obj);
-      std::cout << Obj.endTimer() << std::endl;
+
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
+      logger.getLog(infoCode, Obj.endTimer());
 
       break;
     }
     case Controls::OmegaRec::OMEGA_CUTS:
     {
-      // omegacuts(firstFile, lastFile);
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+      logger.getLog(infoCode, "Omega-pi0 Reconstruction: Reconstruction with kinematic fit");
+
+      Obj.startTimer();
+      omegarec_kin_fit(chain, dataTypeOpt, logger, Obj);
+
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
+      logger.getLog(infoCode, Obj.endTimer());
+
       break;
     }
     case Controls::OmegaRec::PLOTS:
     {
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+      logger.getLog(infoCode, "Omega-pi0 Reconstruction: Plots");
+
       Obj.startTimer();
       plots(chain, loopcount, numOfConstraints, jmin, jmax, dataTypeOpt, logger);
-      std::cout << Obj.endTimer() << std::endl;
+      
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
+      logger.getLog(infoCode, Obj.endTimer());
 
       break;
     }

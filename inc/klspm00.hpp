@@ -13,6 +13,7 @@
 
 // int CPFit_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
 // int GenVars_main(TChain &chain);
+// int KchRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
 int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
 // int Regen_main(TChain &chain);
 // int Neutrec_main(TChain &chain);

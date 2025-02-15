@@ -3,6 +3,7 @@ MAKE_DIR = $(PWD)
 SUBANALYSIS_DIR = $(MAKE_DIR)/Subanalysis
 
 # DIRECTORIES FOR SUBCOMPILATIONS
+KCHREC_DIR 		 := $(SUBANALYSIS_DIR)/KchRec
 CPFIT_DIR 		 := $(SUBANALYSIS_DIR)/CPFit
 EFFICIENCY_DIR := $(SUBANALYSIS_DIR)/EfficiencyAnalysis
 FORTRAN_DIR    := $(SUBANALYSIS_DIR)/FortranAnalysis
@@ -21,7 +22,15 @@ OBJ :=
 OBJ += $(OBJDIR)/CPVAnalysis.o
 
 HEADER := ${WORKDIR}/scripts/Include/const.h
-HEADER += ${WORKDIR}/scripts/Include/Codes/MainMenu.h
+HEADER += ${WORKDIR}/scripts/Include/Codes/inc/MainMenu.h
+HEADER += ${WORKDIR}/scripts/Include/Codes/inc/KinFitter.h
+HEADER += ${WORKDIR}/scripts/Include/Codes/src/KinFitter.cpp
+
+MAKE_KCHREC := $(KCHREC_DIR)/$(OBJDIR)/cpfit_main.o
+MAKE_KCHREC += $(KCHREC_DIR)/$(OBJDIR)/cp_fit_mc_data.o
+
+SRC_KCHREC := $(KCHREC_DIR)/$(SRCDIR)/cp_fit_mc_data.cpp
+SRC_KCHREC += $(KCHREC_DIR)/cpfit_main.cpp
 
 MAKE_CPFIT := $(CPFIT_DIR)/$(OBJDIR)/cpfit_main.o
 MAKE_CPFIT += $(CPFIT_DIR)/$(OBJDIR)/cp_fit_mc_data.o
@@ -51,9 +60,11 @@ SRC_NEUTREC += $(NEUTREC_DIR)/neutrec_main.cpp
 
 MAKE_OMEGAREC := $(OMEGAREC_DIR)/$(OBJDIR)/omegarec_main.o
 MAKE_OMEGAREC += $(OMEGAREC_DIR)/$(OBJDIR)/omega_rec.o
+MAKE_OMEGAREC += $(OMEGAREC_DIR)/$(OBJDIR)/omega_rec_kin_fit.o
 MAKE_OMEGAREC += $(OMEGAREC_DIR)/$(OBJDIR)/plots.o
 
 SRC_OMEGAREC := $(OMEGAREC_DIR)/$(SRCDIR)/omega_rec.cpp
+SRC_OMEGAREC := $(OMEGAREC_DIR)/$(SRCDIR)/omega_rec_kin_fit.cpp
 SRC_OMEGAREC += $(OMEGAREC_DIR)/$(SRCDIR)/plots.cpp
 SRC_OMEGAREC += $(OMEGAREC_DIR)/omegarec_main.cpp
 
@@ -71,7 +82,7 @@ MAKE_PLOTS += $(PLOTS_DIR)/$(OBJDIR)/plots_norm.o
 SRC_PLOTS := $(PLOTS_DIR)/$(SRCDIR)/plots_norm.cpp
 SRC_PLOTS += $(PLOTS_DIR)/plots_main.cpp
 
-LIBS= -lm -llapack -lrec -lfort -lcurl
+LIBS= -lm -llapack -lrec -lfort -lcurl -lboost_filesystem -lboost_system
 
 PROJECT := $(BINDIR)/KLSPM00.exe
 
@@ -104,7 +115,8 @@ $(MAKE_OMEGAREC): $(SRC_OMEGAREC) $(HEADER)
 # $(MAKE_PLOTS): $(SRC_PLOTS) $(HEADER)
 # 	@$(MAKE) -C $(PLOTS_DIR)
 
-clean: 
+clean:
+	@$(MAKE) -C $(KCHREC_DIR) clean 
 	@$(MAKE) -C $(CPFIT_DIR) clean
 	@$(MAKE) -C $(NEUTREC_DIR) clean
 	@$(MAKE) -C $(GENERATED_DIR) clean

@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=`root-config --cflags --glibs`
+CXXFLAGS=`root-config --cflags --glibs` -fopenmp
 
 OBJPATH=obj
 SRCPATH=src
@@ -8,8 +8,8 @@ BINPATH=bin
 
 LIBS=-L$(INCPATH) -lrec -lm -llapack -lcurl
 
-SRC=$(SRCPATH)/omega_rec.cpp omegarec_main.cpp $(SRCPATH)/plots.cpp
-OBJ=$(OBJPATH)/omega_rec.o $(OBJPATH)/omegarec_main.o $(OBJPATH)/plots.o 
+SRC=$(SRCPATH)/omega_rec.cpp omegarec_main.cpp $(SRCPATH)/plots.cpp $(SRCPATH)/omega_rec_kin_fit.cpp
+OBJ=$(OBJPATH)/omega_rec.o $(OBJPATH)/omegarec_main.o $(OBJPATH)/plots.o $(OBJPATH)/omega_rec_kin_fit.o
 
 PROJECT=omega_rec.exe
 RM=rm
@@ -23,8 +23,8 @@ all: $(OBJ)
 $(OBJPATH)/omega_rec.o: $(SRCPATH)/omega_rec.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-#$(OBJPATH)/omega_rec_kin_fit.o: $(SRCPATH)/omega_rec_kin_fit.cpp
-#	$(CXX) $(CXXFLAGS) -c $< -o $@
+$(OBJPATH)/omega_rec_kin_fit.o: $(SRCPATH)/omega_rec_kin_fit.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJPATH)/plots.o: $(SRCPATH)/plots.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@

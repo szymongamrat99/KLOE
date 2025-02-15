@@ -17,6 +17,7 @@
 #include <charged_mom.h>
 
 int omegarec(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
+int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
 int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t &jmin, Short_t &jmax, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger);
 
 #endif //! OMEGAREC_HPP

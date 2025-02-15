@@ -9,13 +9,11 @@
 #include <TStyle.h>
 #include <Math/Functor.h>
 #include <Math/Factory.h>
-#include <Math/Minimizer.h>
 #include <TMatrixD.h>
 #include <TVectorD.h>
 #include <TError.h>
 
 #include <reconstructor.h>
-#include "const.h"
 #include "uncertainties.h"
 #include "charged_mom.h"
 #include "neutral_mom.h"
@@ -25,6 +23,7 @@
 #include "constraints_omega.h"
 #include "chi2_dist.h"
 #include <pi0_photon_pair.h>
+#include <KinFitter.h>
 
 #include "../inc/omegarec.hpp"
 
@@ -38,49 +37,49 @@ Int_t fail;
 
 Int_t selected[4] = {1, 2, 3, 4};
 
-int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
+int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
 	const int
 			loopcount = properties["variables"]["KinFit"]["Omega"]["loopCount"],
 			M = properties["variables"]["KinFit"]["Omega"]["numOfConstraints"],
 			N_free = properties["variables"]["KinFit"]["Omega"]["freeVars"],
-			N_const = properties["variables"]["KinFit"]["Omega"]["fixedVars"];
+			N_const = properties["variables"]["KinFit"]["Omega"]["fixedVars"],
+			chiSqrStep = properties["variables"]["KinFit"]["Omega"]["chiSqrStep"];
 
 	TF1
 			*constraints[M];
 
 	gErrorIgnoreLevel = 6001;
 
-	TChain *chain = new TChain("INTERF/h1");
-	chain_init(chain, first_file, last_file);
+	// Creation of filename for the analysis step
+	std::string
+			datestamp = Obj.getCurrentDate(),
+			name = "";
 
-	TString name = "";
+	name = omegarec_dir + root_files_dir + omega_rec_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
 
-	name = omegarec_dir + root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + int(data_type) + ext_root;
+	properties["variables"]["tree"]["filename"]["omegarecKinFit"] = name;
 
-	properties["variables"]["tree"]["filename"]["omegarec"] = name;
-	properties["variables"]["tree"]["treename"]["omegarec"] = omegarec_tree;
-
-	TFile *file = new TFile(name, "recreate");
-	TTree *tree = new TTree(omegarec_tree, "Omega reconstruction with kin fit");
+	TFile *file = new TFile(name.c_str(), "recreate");
+	TTree *tree = new TTree(omegarec_kin_fit_tree, "Omega reconstruction with kin fit");
 
 	// Branches' addresses
 	// Bhabha vars
 	Float_t bhabha_mom[4], bhabha_mom_err[4], bhabha_vtx[3];
 
-	chain->SetBranchAddress("Bpx", &bhabha_mom[0]);
-	chain->SetBranchAddress("Bpy", &bhabha_mom[1]);
-	chain->SetBranchAddress("Bpz", &bhabha_mom[2]);
-	chain->SetBranchAddress("Broots", &bhabha_mom[3]);
+	chain.SetBranchAddress("Bpx", &bhabha_mom[0]);
+	chain.SetBranchAddress("Bpy", &bhabha_mom[1]);
+	chain.SetBranchAddress("Bpz", &bhabha_mom[2]);
+	chain.SetBranchAddress("Broots", &bhabha_mom[3]);
 
-	chain->SetBranchAddress("Bwidpx", &bhabha_mom_err[0]);
-	chain->SetBranchAddress("Bwidpy", &bhabha_mom_err[1]);
-	chain->SetBranchAddress("Bwidpz", &bhabha_mom_err[2]);
-	chain->SetBranchAddress("Brootserr", &bhabha_mom_err[3]);
+	chain.SetBranchAddress("Bwidpx", &bhabha_mom_err[0]);
+	chain.SetBranchAddress("Bwidpy", &bhabha_mom_err[1]);
+	chain.SetBranchAddress("Bwidpz", &bhabha_mom_err[2]);
+	chain.SetBranchAddress("Brootserr", &bhabha_mom_err[3]);
 
-	chain->SetBranchAddress("Bx", &bhabha_vtx[0]);
-	chain->SetBranchAddress("By", &bhabha_vtx[1]);
-	chain->SetBranchAddress("Bz", &bhabha_vtx[2]);
+	chain.SetBranchAddress("Bx", &bhabha_vtx[0]);
+	chain.SetBranchAddress("By", &bhabha_vtx[1]);
+	chain.SetBranchAddress("Bz", &bhabha_vtx[2]);
 
 	// Cluster vars
 	Int_t nclu;
@@ -89,27 +88,29 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 
 	BaseKinematics baseKin;
 
-	chain->SetBranchAddress("nclu", &nclu);
-	chain->SetBranchAddress("Xcl", cluster[0]);
-	chain->SetBranchAddress("Ycl", cluster[1]);
-	chain->SetBranchAddress("Zcl", cluster[2]);
-	chain->SetBranchAddress("Tcl", cluster[3]);
-	chain->SetBranchAddress("Enecl", cluster[4]);
+	chain.SetBranchAddress("nclu", &nclu);
+	chain.SetBranchAddress("Xcl", cluster[0]);
+	chain.SetBranchAddress("Ycl", cluster[1]);
+	chain.SetBranchAddress("Zcl", cluster[2]);
+	chain.SetBranchAddress("Tcl", cluster[3]);
+	chain.SetBranchAddress("Enecl", cluster[4]);
 
-	chain->SetBranchAddress("mctruth", &mctruth);
-	chain->SetBranchAddress("mcflag", &mcflag);
-	chain->SetBranchAddress("ncll", baseKin.ncll);
+	chain.SetBranchAddress("mctruth", &mctruth);
+	chain.SetBranchAddress("mcflag", &mcflag);
+	chain.SetBranchAddress("ncll", baseKin.ncll);
 
-	// Charged tracks momenta
+	// Charged vars
+	chain.SetBranchAddress("nv", &baseKin.nv);
+	chain.SetBranchAddress("ntv", &baseKin.ntv);
+	chain.SetBranchAddress("iv", baseKin.iv);
+	chain.SetBranchAddress("Curv", baseKin.Curv);
+	chain.SetBranchAddress("Phiv", baseKin.Phiv);
+	chain.SetBranchAddress("Cotv", baseKin.Cotv);
+	chain.SetBranchAddress("xv", baseKin.xv);
+	chain.SetBranchAddress("yv", baseKin.yv);
+	chain.SetBranchAddress("zv", baseKin.zv);
 
-	chain->SetBranchAddress("trk1", baseKin.trk[0]);
-	chain->SetBranchAddress("trk2", baseKin.trk[1]);
-	chain->SetBranchAddress("Kchrec", baseKin.Kchrec);
-
-	// tree_corr->SetBranchAddress("bunchcorr", &bunch_corr);
-	// chain->AddFriend(tree_corr);
-
-	Int_t nentries = (Int_t)chain->GetEntries();
+	Int_t nentries = (Int_t)chain.GetEntries();
 
 	Bool_t clusterEnergy, solError, cond_clus[4];
 	Int_t ind_gam[4], sort_ind_gam[2][4], chosen_ind_gam[4], found_best, isConverged, n_bunch;
@@ -215,9 +216,37 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 	Bool_t data_flag;
 	Bool_t cond_time_clus[2];
 
+	// Progress bar
+	boost::progress_display show_progress(nentries);
+	// --------------------------------------------------------------------
+
+	Int_t mode = 1;
+
+	// Initialization of Charged part of decay reconstruction class
+	// Constructor is below, in the loop
+	boost::optional<KLOE::ChargedVtxRec<>> eventAnalysis;
+	// -------------------------------------------------------------
+
+	std::vector<std::string> ConstSet = {
+			"EnergyConsvLAB",
+			"PxConsvLAB",
+			"PyConsvLAB",
+			"PzConsvLAB",
+			"Photon1PathLAB",
+			"Photon2PathLAB",
+			"Photon3PathLAB",
+			"Photon4PathLAB"};
+
+	KLOE::KinFitter kinematicFitObj("Omega", N_free, N_const, 8, 0, 10, 0.001, logger);
+	kinematicFitObj.ConstraintSet(ConstSet);
+
+	Double_t
+			Param[N_free + N_const],
+			Errors[N_free + N_const];
+
 	for (Int_t i = 0; i < nentries; i++)
 	{
-		chain->GetEntry(i);
+		chain.GetEntry(i);
 
 		min_value_def = 999999.;
 		FUNVALMIN = 999999.;
@@ -225,139 +254,98 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 
 		isConverged = 0;
 
-		dataFlagSetter(data_type, data_flag, int(mcflag), int(mctruth));
+		int
+				mctruth_int = int(mctruth),
+				mcflag_int = int(mcflag);
 
-		if (nclu >= 4 && data_flag)
+		Obj.dataFlagSetter(dataType, data_flag, mcflag_int, mctruth_int);
+
+		if (data_flag)
 		{
-			std::cout << 100 * i / (Float_t)nentries << "% done" << std::endl;
+			// Reconstruction of the charged part of the decay - vtx closest to the IP - to be included
 
+			// Construction of the charged rec class object
+			eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.iv, bhabha_vtx, baseKin.Curv, baseKin.Phiv, baseKin.Cotv, baseKin.xv, baseKin.yv, baseKin.zv, mode);
+
+			// Finding the vtx closest to the interaction point
+			eventAnalysis->findKClosestRec(baseKin.Kchrec, baseKin.trk[0], baseKin.trk[1], baseKin.vtaken, baseKin.errFlag);
+			// ----------------------------------------------------------------------------------------
+
+			// Looping over all clusters in the event
 			for (Int_t j1 = 0; j1 < nclu - 3; j1++)
 				for (Int_t j2 = j1 + 1; j2 < nclu - 2; j2++)
 					for (Int_t j3 = j2 + 1; j3 < nclu - 1; j3++)
 						for (Int_t j4 = j3 + 1; j4 < nclu; j4++)
 						{
-							V.SetMatrixArray(reinitialize.data());
-
 							ind_gam[0] = j1;
 							ind_gam[1] = j2;
 							ind_gam[2] = j3;
 							ind_gam[3] = j4;
 
-							clusterEnergy = (cluster[4][baseKin.ncll[ind_gam[0]] - 1] > MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[1]] - 1] > MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[2]] - 1] > MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[3]] - 1] > MIN_CLU_ENE);
+							clusterEnergy = cluster[4][baseKin.ncll[ind_gam[0]] - 1] > MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[1]] - 1] > MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[2]] - 1] > MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[3]] - 1] > MIN_CLU_ENE;
 
-							cond_clus[0] = cluster[3][baseKin.ncll[ind_gam[0]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[0]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[0]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[0]] - 1] != 0;
-							cond_clus[1] = cluster[3][baseKin.ncll[ind_gam[1]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[1]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[1]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[1]] - 1] != 0;
-							cond_clus[2] = cluster[3][baseKin.ncll[ind_gam[2]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[2]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[2]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[2]] - 1] != 0;
-							cond_clus[3] = cluster[3][baseKin.ncll[ind_gam[3]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[3]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[3]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[3]] - 1] != 0;
+							for (Int_t k = 0; k < 4; k++)
+							{
+								cond_clus[k] =
+										cluster[3][baseKin.ncll[ind_gam[k]] - 1] > 0 &&
+										cluster[0][baseKin.ncll[ind_gam[k]] - 1] != 0 &&
+										cluster[1][baseKin.ncll[ind_gam[k]] - 1] != 0 &&
+										cluster[2][baseKin.ncll[ind_gam[k]] - 1] != 0;
+							}
 
-							if (clusterEnergy && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3])
+							Bool_t cond_tot = cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
+
+							if (cond_tot)
 							{
 								for (Int_t k = 0; k < 4; k++)
 								{
-									X_init(k * 5) = cluster[0][baseKin.ncll[ind_gam[k]] - 1];
-									X_init(k * 5 + 1) = cluster[1][baseKin.ncll[ind_gam[k]] - 1];
-									X_init(k * 5 + 2) = cluster[2][baseKin.ncll[ind_gam[k]] - 1];
-									X_init(k * 5 + 3) = cluster[3][baseKin.ncll[ind_gam[k]] - 1];
-									X_init(k * 5 + 4) = cluster[4][baseKin.ncll[ind_gam[k]] - 1];
+									Param[k * 5] = cluster[0][baseKin.ncll[ind_gam[k]] - 1];
+									Param[k * 5 + 1] = cluster[1][baseKin.ncll[ind_gam[k]] - 1];
+									Param[k * 5 + 2] = cluster[2][baseKin.ncll[ind_gam[k]] - 1];
+									Param[k * 5 + 3] = cluster[3][baseKin.ncll[ind_gam[k]] - 1];
+									Param[k * 5 + 4] = cluster[4][baseKin.ncll[ind_gam[k]] - 1];
 
-									V(k * 5, k * 5) = pow(clu_x_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
-									V(k * 5 + 1, k * 5 + 1) = pow(clu_y_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
-									V(k * 5 + 2, k * 5 + 2) = pow(clu_z_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2); // cm
-									V(k * 5 + 3, k * 5 + 3) = pow(clu_time_error(X_init(k * 5 + 4)), 2);																									 // ns
-									V(k * 5 + 4, k * 5 + 4) = pow(clu_ene_error(X_init(k * 5 + 4)), 2);																										 // MeV
+									Errors[k * 5, k * 5] = pow(clu_x_error(Param[k * 5], Param[k * 5 + 1], Param[k * 5 + 2], Param[k * 5 + 4]), 2);
+									Errors[k * 5 + 1, k * 5 + 1] = pow(clu_y_error(Param[k * 5], Param[k * 5 + 1], Param[k * 5 + 2], Param[k * 5 + 4]), 2);
+									Errors[k * 5 + 2, k * 5 + 2] = pow(clu_z_error(Param[k * 5], Param[k * 5 + 1], Param[k * 5 + 2], Param[k * 5 + 4]), 2); // cm
+									Errors[k * 5 + 3, k * 5 + 3] = pow(clu_time_error(Param[k * 5 + 4]), 2);																								// ns
+									Errors[k * 5 + 4, k * 5 + 4] = pow(clu_ene_error(Param[k * 5 + 4]), 2);																									// MeV
 								}
 
-								X_init(20) = baseKin.Kchrec[6];
-								X_init(21) = baseKin.Kchrec[7];
-								X_init(22) = baseKin.Kchrec[8];
+								Param[20] = baseKin.Kchrec[6];
+								Param[21] = baseKin.Kchrec[7];
+								Param[22] = baseKin.Kchrec[8];
 
-								V(20, 20) = pow(Double_t(properties["variables"]["Resolutions"]["vtxCharged"][0]), 2);
-								V(21, 21) = pow(Double_t(properties["variables"]["Resolutions"]["vtxCharged"][1]), 2);
-								V(22, 22) = pow(Double_t(properties["variables"]["Resolutions"]["vtxCharged"][2]), 2);
+								Errors[20, 20] = pow(Double_t(properties["variables"]["Resolutions"]["vtxCharged"][0]), 2);
+								Errors[21, 21] = pow(Double_t(properties["variables"]["Resolutions"]["vtxCharged"][1]), 2);
+								Errors[22, 22] = pow(Double_t(properties["variables"]["Resolutions"]["vtxCharged"][2]), 2);
 
-								X_init(23) = baseKin.Kchrec[0];
-								X_init(24) = baseKin.Kchrec[1];
-								X_init(25) = baseKin.Kchrec[2];
-								X_init(26) = baseKin.Kchrec[3];
+								Param[23] = baseKin.Kchrec[0];
+								Param[24] = baseKin.Kchrec[1];
+								Param[25] = baseKin.Kchrec[2];
+								Param[26] = baseKin.Kchrec[3];
 
-								V(23, 23) = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][0]), 2);
-								V(24, 24) = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][1]), 2);
-								V(25, 25) = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][2]), 2);
-								V(26, 26) = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][3]), 2);
+								Errors[23, 23] = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][0]), 2);
+								Errors[24, 24] = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][1]), 2);
+								Errors[25, 25] = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][2]), 2);
+								Errors[26, 26] = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][3]), 2);
 
-								X_init(27) = bhabha_mom[0];
-								X_init(28) = bhabha_mom[1];
-								X_init(29) = bhabha_mom[2];
-								X_init(30) = bhabha_mom[3];
+								Param[27] = bhabha_mom[0];
+								Param[28] = bhabha_mom[1];
+								Param[29] = bhabha_mom[2];
+								Param[30] = bhabha_mom[3];
 
-								V(27, 27) = pow(bhabha_mom_err[0], 2);
-								V(28, 28) = pow(bhabha_mom_err[1], 2);
-								V(29, 29) = pow(bhabha_mom_err[2], 2);
-								V(30, 30) = pow(bhabha_mom_err[3], 2);
+								Errors[27, 27] = pow(bhabha_mom_err[0], 2);
+								Errors[28, 28] = pow(bhabha_mom_err[1], 2);
+								Errors[29, 29] = pow(bhabha_mom_err[2], 2);
+								Errors[30, 30] = pow(bhabha_mom_err[3], 2);
 
-								fail = 0;
-								CHISQR = 999999.;
-								CHISQRTMP = 999999.;
-								FUNVALTMP = 999999.;
+								kinematicFitObj.ParameterInitialization(Param, Errors);
 
-								X = X_init;
-
-								V_invert = V.GetSub(0, N_free - 1, 0, N_free - 1).Invert();
-
-								for (Int_t j = 0; j < loopcount; j++)
-								{
-									for (Int_t l = 0; l < M; l++)
-									{
-										C(l) = constraints[l]->EvalPar(0, X.GetMatrixArray());
-
-										for (Int_t m = 0; m < N_free + N_const; m++)
-										{
-											constraints[l]->SetParameters(X.GetMatrixArray());
-											if (m < N_free)
-												D(l, m) = constraints[l]->GradientPar(m, 0, 0.01);
-											else
-												D(l, m) = 0;
-										}
-									}
-									D_T.Transpose(D);
-
-									Aux = (D * V * D_T);
-
-									Aux.Invert(&det);
-
-									if (!TMath::IsNaN(det) && det != 0)
-									{
-
-										L = (Aux * C);
-
-										CORR = V * D_T * L;
-
-										X_final = X - CORR;
-										V_final = V - V * D_T * Aux * D * V;
-
-										for (Int_t l = 0; l < M; l++)
-											C(l) = constraints[l]->EvalPar(0, X_final.GetMatrixArray());
-
-										FUNVAL = Dot((X_final - X_init).GetSub(0, N_free - 1), V_invert * (X_final - X_init).GetSub(0, N_free - 1)) + Dot(L, C);
-
-										CHISQR = Dot((X_final - X_init).GetSub(0, N_free - 1), V_invert * (X_final - X_init).GetSub(0, N_free - 1));
-									}
-									else
-									{
-										fail = 1;
-									}
-
-									if (fail == 0)
-									{
-										X = X_final;
-										X_init_aux = X_init;
-										V_aux = V_final;
-										L_aux = L;
-										C_aux = C;
-										FUNVALTMP = FUNVAL;
-										CHISQRTMP = CHISQR;
-									}
-								}
+								CHISQRTMP = kinematicFitObj.FitFunction();
 
 								if (abs(CHISQRTMP) < abs(CHISQRMIN))
 								{
@@ -365,12 +353,7 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 									FUNVALMIN = FUNVALTMP;
 									CHISQRMIN = CHISQRTMP;
 
-									X_min = X;
-									X_init_min = X_init_aux;
-									V_min = V_aux;
-									V_init = V;
-									C_min = C_aux;
-									L_min = L_aux;
+									kinematicFitObj.GetResults(X_final, V_final, X_init, V_init, C_min, L_min);
 
 									g4takenomega[0] = ind_gam[0];
 									g4takenomega[1] = ind_gam[1];
@@ -455,9 +438,8 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 											kaonMomTot = sqrt(pow(kaonMom[0], 2) + pow(kaonMom[1], 2) + pow(kaonMom[2], 2)),
 											kaonVelTot = cVel * (kaonMomTot / kaonMom[3]);
 
-									neu_vtx_avg[0] = lengthPhotonAvg * kaonVelTot * (kaonMom[0] / kaonMomTot) + IP_vtx[0];
-									neu_vtx_avg[1] = lengthPhotonAvg * kaonVelTot * (kaonMom[1] / kaonMomTot) + IP_vtx[1];
-									neu_vtx_avg[2] = lengthPhotonAvg * kaonVelTot * (kaonMom[2] / kaonMomTot) + IP_vtx[2];
+									for (Int_t k = 0; k < 3; k++)
+										neu_vtx_avg[k] = lengthPhotonAvg * kaonVelTot * (kaonMom[k] / kaonMomTot) + IP_vtx[k];
 
 									// Calculation of pi+pi-pi0 invariant mass - best option chosen by quadrature.
 									for (Int_t j = 0; j < 2; j++)
@@ -651,7 +633,9 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 			bunchnum = 999;
 		}
 
-		tree->Fill();
+		// tree->Fill();
+
+		++show_progress; // Progress of the loading bar
 	}
 
 	gStyle->SetOptStat("iMr");
@@ -683,9 +667,9 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 
 	tree->Print();
 
-	file->Write();
-	file->Close();
-	delete file;
+	// file->Write();
+	// file->Close();
+	// delete file;
 
 	std::ofstream outfile(propName);
 	outfile << properties.dump(4);

@@ -19,9 +19,10 @@ int main(int argc, char *argv[])
   // Set logger for error logging
   std::string logFilename = (std::string)logs_dir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
+  ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Set Menu instance
-  Controls::Menu mainMenu(0); // For analysis options
+  Controls::Menu mainMenu(12); // For analysis options
   Controls::MainMenu mainMenuOpt;
 
   Controls::Menu *dataType = new Controls::Menu(2); // For data type
@@ -93,13 +94,6 @@ int main(int argc, char *argv[])
   outfile << properties.dump(4);
   outfile.close();
 
-  // Initialize and fill the TChain object
-  TChain chain("INTERF/h1");
-  eventAnalysis.chainInit(chain, firstFile, lastFile, firstFile, lastFile);
-  // -------------------------------------------------------------------
-
-  std::cout << chain.GetEntries() << std::endl;
-
   Controls::DataType dataTypeOpt;
 
   try
@@ -124,6 +118,21 @@ int main(int argc, char *argv[])
     logger.getErrLog(err);
     return int(err);
   }
+
+  // Initialize and fill the TChain object
+  TChain chain("INTERF/h1");
+  eventAnalysis.chainInit(chain, dataTypeOpt, firstFile, lastFile, firstFile, lastFile, logger);
+  // -------------------------------------------------------------------
+
+  std::cout << "Number of entries in the batch: " << chain.GetEntries() << std::endl;
+  std::cout << "Number of entries - signal with improperly reconstructed Kch: " << chain.GetEntries("mctruth == 0") << std::endl;
+  std::cout << "Number of entries - signal: " << chain.GetEntries("mctruth == 1") << std::endl;
+  std::cout << "Number of entries - regeneration: " << chain.GetEntries("mctruth == 3") << std::endl;
+  std::cout << "Number of entries - omega: " << chain.GetEntries("mctruth == 4") << std::endl;
+  std::cout << "Number of entries - threepi0: " << chain.GetEntries("mctruth == 5") << std::endl;
+  std::cout << "Number of entries - semileptonic: " << chain.GetEntries("mctruth == 6") << std::endl;
+  std::cout << "Number of entries - pi+pi-pi+pi-: " << chain.GetEntries("mctruth == 8") << std::endl;
+  std::cout << "Number of entries - other bcg: " << chain.GetEntries("mctruth == 7") << std::endl;
 
   do
   {
@@ -176,19 +185,26 @@ int main(int argc, char *argv[])
       // GenVars_main(chain);
     }
     case Controls::MainMenu::KCHREC_NO_BOOST:
+    {
+      // KchRec_main(chain, eventAnalysis, dataTypeOpt);
       break;
+    }
     case Controls::MainMenu::KCHREC_BOOST:
       break;
     case Controls::MainMenu::IP_EV_BY_EV:
       break;
     case Controls::MainMenu::OMEGA_REC:
     {
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+      logger.getLog(infoCode, "Omega-pi0 Reconstruction");
+
       OmegaRec_main(chain, eventAnalysis, dataTypeOpt);
+      break;
     }
     case Controls::MainMenu::REGEN_REJ:
-    {
-      break;
+    { 
       // Regen_main(chain);
+      break;
     }
     case Controls::MainMenu::KNEREC_TRILAT:
     {

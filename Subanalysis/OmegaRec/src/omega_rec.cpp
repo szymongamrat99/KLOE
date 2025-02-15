@@ -86,6 +86,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	chain.SetBranchAddress("yv", baseKin.yv);
 	chain.SetBranchAddress("zv", baseKin.zv);
 
+
 	// Cluster vars
 	Int_t nclu;
 	UChar_t mctruth, mcflag;
@@ -101,6 +102,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	chain.SetBranchAddress("mctruth", &mctruth);
 	chain.SetBranchAddress("mcflag", &mcflag);
 	chain.SetBranchAddress("ncll", baseKin.ncll);
+	
 
 	Int_t nentries = (Int_t)chain.GetEntries();
 
@@ -117,7 +119,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			Omegapi0[6],
 			Pi0[6],
 			PichFourMom[2][4],
-			Omegarec[6],
+			Omegarec[7],
 			lengthPhotonMin[4],
 			lengthKch,
 			rho_00,
@@ -127,7 +129,8 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			anglePi0KaonCM,
 			anglePichKaonCM,
 			anglePi0OmegaPhiCM,
-			anglePhiOmega,
+			angleOmegaPolar,
+			angleKchPolar,
 			neu_vtx_avg[3];
 
 	TBranch *b_gamma1omega = tree->Branch("gamma1omega", gammaomega[0], "gamma1omega[8]/F");
@@ -141,7 +144,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	TBranch *b_pi0omega = tree->Branch("omegapi0", Omegapi0, "omegapi0[6]/F");
 	TBranch *b_pi0 = tree->Branch("pi0", Pi0, "pi0[6]/F");
 
-	TBranch *b_omega = tree->Branch("omega", Omegarec, "omega[6]/F");
+	TBranch *b_omega = tree->Branch("omega", Omegarec, "omega[7]/F");
 
 	TBranch *b_neuvtxavg = tree->Branch("NeuVtxAvg", neu_vtx_avg, "NeuVtxAvg[3]/F");
 
@@ -160,7 +163,9 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			*b5 = tree->Branch("anglePi0KaonCM", &anglePi0KaonCM, "anglePi0KaonCM/F"),
 			*b6 = tree->Branch("anglePichKaonCM", &anglePichKaonCM, "anglePichKaonCM/F"),
 			*b7 = tree->Branch("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM, "anglePi0OmegaPhiCM/F"),
-			*b8 = tree->Branch("anglePhiOmega", &anglePhiOmega, "anglePhiOmega/F");
+			*b8 = tree->Branch("angleOmegaPolar", &angleOmegaPolar, "angleOmegaPolar/F"),
+			*b9 = tree->Branch("angleKchPolar", &angleKchPolar, "angleKchPolar/F"),
+			*b10 = tree->Branch("Kchrecomega", baseKin.Kchrec, "Kchrecomega[9]/F");
 
 	Bool_t
 			cond_time_clus[2],
@@ -206,7 +211,8 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 		rho_00_IP = 999.;
 		rho_pm_IP = 999.;
 		rho = 999.;
-		anglePhiOmega = 999.;
+		angleOmegaPolar = 999.;
+		angleKchPolar = 999.;
 		anglePi0KaonCM = 999.;
 		anglePi0OmegaPhiCM = 999.;
 		anglePichKaonCM = 999.;
@@ -300,7 +306,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 
 			// Initialization of the variables
 			Float_t
-					kaonMom[3] = {0.},
+					kaonMom[4] = {0.},
 					IP_vtx[3] = {bhabha_vtx[0],
 											 bhabha_vtx[1],
 											 baseKin.Kchrec[8]}; // Last coordinate from charged vtx - in this case IP = Ch Vtx
@@ -320,18 +326,16 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 				{
 					gammaomega[j][k + 4] = cluster[k][baseKin.ncll[g4takenomega[j]] - 1]; // Position and time of cluster
 
-					if (k < 3)
-					{
-						kaonMom[k] += gammaomega[j][k]; // 'Kaon' momentum = sum of 4 photons' momenta
-					}
+
+					kaonMom[k] += gammaomega[j][k]; // 'Kaon' momentum = sum of 4 photons' momenta
 				};
 			}
 
 			// 'Kaon' momentum = using charged part of the decay
-			kaonMom[0] = bhabha_mom[0] - baseKin.Kchrec[0];
-			kaonMom[1] = bhabha_mom[1] - baseKin.Kchrec[1];
-			kaonMom[2] = bhabha_mom[2] - baseKin.Kchrec[2];
-			kaonMom[3] = bhabha_mom[3] - baseKin.Kchrec[3];
+			// kaonMom[0] = bhabha_mom[0] - baseKin.Kchrec[0];
+			// kaonMom[1] = bhabha_mom[1] - baseKin.Kchrec[1];
+			// kaonMom[2] = bhabha_mom[2] - baseKin.Kchrec[2];
+			// kaonMom[3] = bhabha_mom[3] - baseKin.Kchrec[3];
 
 			Float_t
 					kaonMomTot = sqrt(pow(kaonMom[0], 2) + pow(kaonMom[1], 2) + pow(kaonMom[2], 2)), // total 'Kaon' momentum
@@ -339,7 +343,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 
 			for (Int_t k = 0; k < 3; k++)
 			{
-				neu_vtx_avg[k] = lengthPhotonMinAvg * kaonVelTot * (kaonMom[k] / kaonMomTot) + IP_vtx[0]; // Position of the neutral vtx
+				neu_vtx_avg[k] = lengthPhotonMinAvg * kaonVelTot * (kaonMom[k] / kaonMomTot) + IP_vtx[k]; // Position of the neutral vtx
 			}
 
 			Int_t
@@ -413,6 +417,8 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 					Pi0[4] = sqrt(pow(Pi0Mom[1][0], 2) + pow(Pi0Mom[1][1], 2) + pow(Pi0Mom[1][2], 2));
 					Pi0[5] = sqrt(pow(Pi0[3], 2) - pow(Pi0[4], 2));
 					// ------------------------------------------------------------------------------------
+
+					Omegarec[6] = bhabha_mom[3] - Omegarec[5] - Pi0[5];
 				}
 				else
 				{
@@ -440,6 +446,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 					Pi0[4] = sqrt(pow(Pi0Mom[0][0], 2) + pow(Pi0Mom[0][1], 2) + pow(Pi0Mom[0][2], 2));
 					Pi0[5] = sqrt(pow(Pi0[3], 2) - pow(Pi0[4], 2));
 					// ------------------------------------------------------------------------------------
+					Omegarec[6] = bhabha_mom[3] - Omegarec[5] - Pi0[5]; // Kinetic energy after the decay
 				}
 
 				Float_t
@@ -503,10 +510,18 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 
 				// Angle between phi and omega in LAB
 				TVector3
-						phi(bhabha_mom[0], bhabha_mom[1], bhabha_mom[2]),
 						omega(OmegaMom[0], OmegaMom[1], OmegaMom[2]);
 
-				anglePhiOmega = phi.Angle(omega) * 180. / M_PI;
+				angleOmegaPolar = omega.Theta() * 180. / M_PI;
+				// -----------------------------------------------------------------------------
+
+				// Angle between phi and pi+pi- (quasi-Kaon) in LAB
+				TVector3
+						quasiKaon(PichFourMom[0][0] + PichFourMom[1][0], 
+											PichFourMom[0][1] + PichFourMom[1][1],
+											PichFourMom[0][2] + PichFourMom[1][2]);
+
+				angleKchPolar = quasiKaon.Theta() * 180. / M_PI;
 				// -----------------------------------------------------------------------------
 
 				// Distances from IP and the combined distance - should be close to 0 for omega-pi0 event
