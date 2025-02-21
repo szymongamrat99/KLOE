@@ -6,14 +6,10 @@
 #include "inc/cpfit.hpp"
 
 using namespace std;
-using std::chrono::duration;
-using std::chrono::duration_cast;
-using std::chrono::high_resolution_clock;
-using std::chrono::minutes;
 
 int CPFit_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
-  Short_t good_clus = properties["variables"]["KinFit"]["Trilateration"]["goodClus"],
+  Short_t 
           loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
           numOfConstraints = properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
           jmin = properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
@@ -22,6 +18,7 @@ int CPFit_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
   // Set logger for error logging
   std::string logFilename = (std::string)cpfit_dir + (std::string)logs_dir + "cpfit.log";
   ErrorHandling::ErrorLogs logger(logFilename);
+  ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Set Menu instance
   Controls::Menu *menu = new Controls::Menu(4);
@@ -75,9 +72,14 @@ int CPFit_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
     }
     case Controls::CPFitMenu::MC_DATA:
     {
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+      logger.getLog(infoCode, "CP Final Fit");
+
       Obj.startTimer();
-      cp_fit_mc_data(chain, "split", good_clus, loopcount, numOfConstraints, jmin, jmax, logger, dataTypeOpt);
-      Obj.endTimer();
+      cp_fit_mc_data(chain, "split", false, dataTypeOpt, logger, Obj);
+      
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
+      logger.getLog(infoCode, Obj.endTimer());
 
       break;
     }

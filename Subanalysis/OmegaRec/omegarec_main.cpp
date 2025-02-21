@@ -67,7 +67,7 @@ int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOp
 
       Obj.startTimer();
       omegarec(chain, dataTypeOpt, logger, Obj);
-
+      
       infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
       logger.getLog(infoCode, Obj.endTimer());
 
@@ -92,7 +92,7 @@ int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOp
       logger.getLog(infoCode, "Omega-pi0 Reconstruction: Plots");
 
       Obj.startTimer();
-      plots(chain, loopcount, numOfConstraints, jmin, jmax, dataTypeOpt, logger);
+      plots(chain, loopcount, numOfConstraints, jmin, jmax, dataTypeOpt, Obj, logger);
       
       infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
       logger.getLog(infoCode, Obj.endTimer());

@@ -7,7 +7,7 @@ BINPATH=bin
 INCPATH=inc
 CONSTPATH=/internal/big_one/4/users/gamrat/scripts/Include
 
-LIBS= -lm -llapack -lrec -lcurl
+LIBS= -lm -llapack -lrec -lcurl -lboost_filesystem -lboost_system
 
 SRC=$(SRCPATH)/cp_fit_mc_data.cpp cpfit_main.cpp
 OBJ=$(OBJPATH)/cp_fit_mc_data.o $(OBJPATH)/cpfit_main.o
@@ -18,7 +18,7 @@ PROJECT=cpv_fit.exe
 RM=rm
 RMFLAGS=-f
 
-all: $(OBJ) $(BINPATH)/$(PROJECT)
+all: $(OBJ)
 
 #$(BINPATH)/$(PROJECT): $(OBJPATH)/main.o $(OBJ)
 #	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@

@@ -44,13 +44,6 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			name = "";
 
 	name = omegarec_dir + root_files_dir + omega_rec_filename + datestamp + "_" + int(data_type) + ext_root;
-
-	properties["variables"]["tree"]["filename"]["omegarec"] = (std::string)name;
-	properties["variables"]["tree"]["treename"]["omegarec"] = (std::string)omegarec_tree;
-
-	std::ofstream outfile(propName);
-	outfile << properties.dump(4);
-	outfile.close();
 	// -----------------------------------------------------------------------------------------
 
 	TFile *file = new TFile(name.c_str(), "recreate");
@@ -76,16 +69,9 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	chain.SetBranchAddress("Bz", &bhabha_vtx[2]);
 
 	// Charged vars
-	chain.SetBranchAddress("nv", &baseKin.nv);
-	chain.SetBranchAddress("ntv", &baseKin.ntv);
-	chain.SetBranchAddress("iv", baseKin.iv);
-	chain.SetBranchAddress("Curv", baseKin.Curv);
-	chain.SetBranchAddress("Phiv", baseKin.Phiv);
-	chain.SetBranchAddress("Cotv", baseKin.Cotv);
-	chain.SetBranchAddress("xv", baseKin.xv);
-	chain.SetBranchAddress("yv", baseKin.yv);
-	chain.SetBranchAddress("zv", baseKin.zv);
-
+	chain.SetBranchAddress("Kchrec", baseKin.Kchrec);
+	chain.SetBranchAddress("trk1", baseKin.trk[0]);
+	chain.SetBranchAddress("trk2", baseKin.trk[1]);
 
 	// Cluster vars
 	Int_t nclu;
@@ -102,7 +88,6 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	chain.SetBranchAddress("mctruth", &mctruth);
 	chain.SetBranchAddress("mcflag", &mcflag);
 	chain.SetBranchAddress("ncll", baseKin.ncll);
-	
 
 	Int_t nentries = (Int_t)chain.GetEntries();
 
@@ -164,21 +149,12 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			*b6 = tree->Branch("anglePichKaonCM", &anglePichKaonCM, "anglePichKaonCM/F"),
 			*b7 = tree->Branch("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM, "anglePi0OmegaPhiCM/F"),
 			*b8 = tree->Branch("angleOmegaPolar", &angleOmegaPolar, "angleOmegaPolar/F"),
-			*b9 = tree->Branch("angleKchPolar", &angleKchPolar, "angleKchPolar/F"),
-			*b10 = tree->Branch("Kchrecomega", baseKin.Kchrec, "Kchrecomega[9]/F");
-
+			*b9 = tree->Branch("angleKchPolar", &angleKchPolar, "angleKchPolar/F");
 	Bool_t
 			cond_time_clus[2],
 			data_flag;
 
 	Float_t lengthPhoton[4];
-
-	Int_t mode = 1;
-
-	// Initialization of Charged part of decay reconstruction class
-	// Constructor is below, in the loop
-	boost::optional<KLOE::ChargedVtxRec<>> eventAnalysis;
-	// -------------------------------------------------------------
 
 	for (Int_t i = 0; i < nentries; i++)
 	{
@@ -225,12 +201,6 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 		if (data_flag)
 		{
 			// Reconstruction of the charged part of the decay - vtx closest to the IP - to be included
-			
-			// Construction of the charged rec class object
-			eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.iv, bhabha_vtx, baseKin.Curv, baseKin.Phiv, baseKin.Cotv, baseKin.xv, baseKin.yv, baseKin.zv, mode);
-
-			// Finding the vtx closest to the interaction point
-			eventAnalysis->findKClosestRec(baseKin.Kchrec, baseKin.trk[0], baseKin.trk[1], baseKin.vtaken, baseKin.errFlag);
 
 			lengthKch = sqrt(pow(baseKin.Kchrec[6] - bhabha_vtx[0], 2) +
 											 pow(baseKin.Kchrec[7] - bhabha_vtx[1], 2) +
@@ -326,16 +296,15 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 				{
 					gammaomega[j][k + 4] = cluster[k][baseKin.ncll[g4takenomega[j]] - 1]; // Position and time of cluster
 
-
 					kaonMom[k] += gammaomega[j][k]; // 'Kaon' momentum = sum of 4 photons' momenta
 				};
 			}
 
 			// 'Kaon' momentum = using charged part of the decay
-			// kaonMom[0] = bhabha_mom[0] - baseKin.Kchrec[0];
-			// kaonMom[1] = bhabha_mom[1] - baseKin.Kchrec[1];
-			// kaonMom[2] = bhabha_mom[2] - baseKin.Kchrec[2];
-			// kaonMom[3] = bhabha_mom[3] - baseKin.Kchrec[3];
+			kaonMom[0] = bhabha_mom[0] - baseKin.Kchrec[0];
+			kaonMom[1] = bhabha_mom[1] - baseKin.Kchrec[1];
+			kaonMom[2] = bhabha_mom[2] - baseKin.Kchrec[2];
+			kaonMom[3] = bhabha_mom[3] - baseKin.Kchrec[3];
 
 			Float_t
 					kaonMomTot = sqrt(pow(kaonMom[0], 2) + pow(kaonMom[1], 2) + pow(kaonMom[2], 2)), // total 'Kaon' momentum
@@ -517,7 +486,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 
 				// Angle between phi and pi+pi- (quasi-Kaon) in LAB
 				TVector3
-						quasiKaon(PichFourMom[0][0] + PichFourMom[1][0], 
+						quasiKaon(PichFourMom[0][0] + PichFourMom[1][0],
 											PichFourMom[0][1] + PichFourMom[1][1],
 											PichFourMom[0][2] + PichFourMom[1][2]);
 
@@ -543,6 +512,16 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	file->Write(); // Writing the file
 	file->Close(); // Closing the file
 	delete file;	 // Deletion of the file pointer
+
+	properties["variables"]["tree"]["filename"]["omegarec"] = (std::string)name;
+	properties["variables"]["tree"]["treename"]["omegarec"] = (std::string)omegarec_tree;
+
+	properties["lastScript"] = "Plots of Omega Reconstruction";
+	properties["lastUpdate"] = Obj.getCurrentTimestamp();
+
+	std::ofstream outfile(propName);
+	outfile << properties.dump(4);
+	outfile.close();
 
 	return 0;
 }

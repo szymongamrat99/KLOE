@@ -17,14 +17,8 @@
 #include <TLegend.h>
 
 #include "../inc/cpfit.hpp"
-#include <interference.h>
-#include <fort_common.h>
-#include <kloe_class.h>
-#include <lorentz_transf.h>
 
-using namespace KLOE;
-
-int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = false, Int_t loopcount = 0, Int_t M = 0, Int_t jmin = 0, Int_t jmax = 0, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger)
+int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
 	// =============================================================================
 	BaseKinematics
@@ -43,6 +37,8 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 			*tree_mctruth,
 			*tree_omega;
 	// =============================================================================
+
+	const TString cpfit_res_dir = cpfit_dir + result_dir;
 
 	Double_t *eff_vals;
 
@@ -93,8 +89,6 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 
 	// ===========================================================================
 
-	Int_t range = Int_t(jmax - jmin) + 1;
-
 	TString
 			filename_trilateration = std::string(properties["variables"]["tree"]["filename"]["trilateration"]),
 			treename_trilateration = std::string(properties["variables"]["tree"]["treename"]["trilateration"]),
@@ -106,7 +100,10 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 			treename_triangle = std::string(properties["variables"]["tree"]["treename"]["trianglefinal"]),
 
 			filename_omega = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
-			treename_omega = std::string(properties["variables"]["tree"]["treename"]["omegarec"]);
+			treename_omega = std::string(properties["variables"]["tree"]["treename"]["omegarec"]),
+
+			filename_mctruth = std::string(properties["variables"]["tree"]["filename"]["mctruth"]),
+			treename_mctruth = std::string(properties["variables"]["tree"]["treename"]["mctruth"]);
 
 	std::vector<TString>
 			file_name,
@@ -153,6 +150,16 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 
 		if (tree_omega->IsZombie())
 			throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
+
+		file_mctruth = new TFile(filename_mctruth);
+
+		if (file_mctruth->IsZombie())
+			throw(ErrorHandling::ErrorCodes::FILE_NOT_EXIST);
+
+		tree_mctruth = (TTree *)file_mctruth->Get(treename_mctruth);
+
+		if (tree_mctruth->IsZombie())
+			throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);		
 	}
 	catch (ErrorHandling::ErrorCodes err)
 	{
@@ -187,7 +194,7 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 			Omegapi0[6],
 			Pi0[6],
 			PichFourMom1[2][4],
-			Omegarec[6],
+			Omegarec[7],
 			lengthPhotonMin[4],
 			lengthKch,
 			rho_00,
@@ -234,6 +241,8 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 	tree_omega->SetBranchAddress("anglePhiOmega", &anglePhiOmega);
 	tree_omega->SetBranchAddress("chi2min", &chi2min);
 
+	tree_mctruth->SetBranchAddress("mctruth", &baseKin.mctruth_int);
+
 	chain.AddFriend(tree_mctruth);
 	chain.AddFriend(tree_omega);
 	chain.AddFriend(tree);
@@ -249,7 +258,7 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 
 	Double_t split[3] = {-30.0, 0.0, 30.0};
 
-	interference event(mode, check_corr, nbins, x_min, x_max, split);
+	KLOE::interference event(mode, check_corr, nbins, x_min, x_max, split);
 
 	Double_t velocity_kch, velocity_kne, tch_LAB, tch_CM, tne_LAB, tne_CM, trcv_sum, TRCV[4];
 	Float_t Kch_LAB[4], Kne_LAB[4], Kch_CM[4], Kne_CM[4], Kch_CMCM[4], Kne_CMCM[4], Kne_boost[3], Kch_boost[3], Phi_boost[3], Kchmom_LAB[4], Knemom_LAB[4], Kchmom_CM[4], Knemom_CM[4];
@@ -349,33 +358,34 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 			radius_ch[1] = sqrt(radius_ch[1]);
 
 			Int_t
-					sigmas_neu = 1.,
-					sigmas_ip = 3.;
+					sigmas = 1.;
 
 			Bool_t
-					cond[6],
+					cond[4],
 					cond_tot;
 
-			Float_t
-					resCh[3],
-					resNeu[3],
-					resComb[3];
+			std::vector<Double_t>
+					stdDevOmegaVtx(6);
 
-			for (Int_t k = 0; k < 3; k++)
-			{
-				resCh[k] = properties["variables"]["Resolutions"]["vtxCharged"][k];
-				resNeu[k] = properties["variables"]["Resolutions"]["vtxNeutral"]["triTriangle"][k];
-				resComb[k] = resCh[k] + resNeu[k];
-			}
+			// Limitation for the Omega fiducial volume - based on Rayleigh distribution
+			std::string decayType[2] = {"neutral", "charged"};
+			for (Int_t i = 0; i < 2; i++)
+				for (Int_t j = 0; j < 3; j++)
+				{
+					stdDevOmegaVtx[i * 3 + j] = properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["stdDev"][j];
+				}
 
-			cond[0] = abs(baseKin.Kchrec[6] - neu_vtx_avg[0]) < sigmas_neu * resComb[0];
-			cond[1] = abs(baseKin.Kchrec[7] - neu_vtx_avg[1]) < sigmas_neu * resComb[1];
-			cond[2] = abs(baseKin.Kchrec[8] - neu_vtx_avg[2]) < sigmas_neu * resComb[2];
-			cond[3] = abs(baseKin.Kchboost[6] - baseKin.bhabha_vtx[0]) < sigmas_ip * 2.63;
-			cond[4] = abs(baseKin.Kchboost[7] - baseKin.bhabha_vtx[1]) < sigmas_ip * 2.03;
-			cond[5] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < sigmas_ip * 3.39;
+			Double_t
+					stdDevRho00IP = sqrt((4-M_PI)/2)*(stdDevOmegaVtx[0] + stdDevOmegaVtx[1])/2.,
+					stdDevRhopmIP = sqrt((4-M_PI)/2)*(stdDevOmegaVtx[3] + stdDevOmegaVtx[4])/2.;
 
-			cond_tot = cond[0] && cond[1] && cond[2];
+			cond[0] = rho_00_IP < sigmas * stdDevRho00IP;
+			cond[1] = rho_pm_IP < sigmas * stdDevRhopmIP;
+			cond[2] = abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < sigmas * stdDevOmegaVtx[2];
+			cond[3] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < sigmas * stdDevOmegaVtx[5];
+
+			cond_tot = cond[0] && cond[1] && cond[2] && cond[3];
+			// ----------------------------------------------------------------------------------------------------------------
 
 			Double_t
 					meanRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
@@ -395,7 +405,7 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 
 			if (cond_tot)
 			{
-				cuts[4] = rho > 0.6;
+				cuts[4] = 1; //rho > 0.6;
 				cuts[5] = 1; // chi2min > 4.0;
 			}
 			else
@@ -465,7 +475,7 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 
 	const UInt_t num_of_vars = 11;
 
-	ROOT::Math::Functor minimized_function(&event, &interference::interf_chi2, num_of_vars);
+	ROOT::Math::Functor minimized_function(&event, &KLOE::interference::interf_chi2, num_of_vars);
 
 	minimum->SetFunction(minimized_function);
 
@@ -622,7 +632,7 @@ int cp_fit_mc_data(TChain &chain, TString mode = "split", Bool_t check_corr = fa
 	properties["variables"]["CPFit"]["result"]["chi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2");
 	properties["variables"]["CPFit"]["result"]["normChi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2/NDF");
 
-	properties["lastUpdate"] = currentDateTime();
+	properties["lastUpdate"] = Obj.getCurrentDate();
 
 	std::ofstream outfile(propName);
 	outfile << properties.dump(4);

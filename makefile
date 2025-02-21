@@ -39,11 +39,11 @@ SRC_CPFIT := $(CPFIT_DIR)/$(SRCDIR)/cp_fit_mc_data.cpp
 SRC_CPFIT += $(CPFIT_DIR)/cpfit_main.cpp
 
 MAKE_GENVARS := $(GENERATED_DIR)/$(OBJDIR)/genvars_main.o
-MAKE_GENVARS += $(GENERATED_DIR)/$(OBJDIR)/generated_variables.o
+# MAKE_GENVARS += $(GENERATED_DIR)/$(OBJDIR)/generated_variables.o
 MAKE_GENVARS += $(GENERATED_DIR)/$(OBJDIR)/split_channels.o
 
 SRC_GENVARS := $(GENERATED_DIR)/$(SRCDIR)/split_channels.cpp
-SRC_GENVARS += $(GENERATED_DIR)/$(SRCDIR)/generated_variables.cpp
+# SRC_GENVARS += $(GENERATED_DIR)/$(SRCDIR)/generated_variables.cpp
 SRC_GENVARS += $(GENERATED_DIR)/genvars_main.cpp
 
 MAKE_NEUTREC := $(NEUTREC_DIR)/$(OBJDIR)/trilateration_neu_rec.o
@@ -89,16 +89,16 @@ PROJECT := $(BINDIR)/KLSPM00.exe
 CXX = g++
 CXXFLAGS := `root-config --cflags --glibs` -g3 -fopenmp
 
-all: $(OBJ) $(MAKE_OMEGAREC) $(PROJECT) #$(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(MAKE_PLOTS) $(MAKE_NEUTREC) $(PROJECT)
+all: $(OBJ) $(MAKE_OMEGAREC) $(MAKE_GENVARS) $(MAKE_CPFIT) $(PROJECT) #$(MAKE_REGEN) $(MAKE_PLOTS) $(MAKE_NEUTREC)
 
-$(PROJECT): $(OBJ) $(MAKE_OMEGAREC) $(HEADER) #$(MAKE_CPFIT) $(MAKE_GENVARS) $(MAKE_OMEGAREC) $(MAKE_REGEN) $(MAKE_PLOTS) $(MAKE_NEUTREC) $(HEADER)
+$(PROJECT): $(OBJ) $(MAKE_OMEGAREC) $(MAKE_GENVARS) $(MAKE_CPFIT) $(HEADER) #$(MAKE_REGEN) $(MAKE_PLOTS) $(MAKE_NEUTREC)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 	
 $(OBJDIR)/CPVAnalysis.o: CPVAnalysis.cpp $(HEADER)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# $(MAKE_CPFIT): $(SRC_CPFIT) $(HEADER)
-# 	@$(MAKE) -C $(CPFIT_DIR)
+$(MAKE_CPFIT): $(SRC_CPFIT) $(HEADER)
+	@$(MAKE) -C $(CPFIT_DIR)
 
 # $(MAKE_NEUTREC): $(SRC_NEUTREC) $(HEADER)
 # 	@$(MAKE) -C $(NEUTREC_DIR)
@@ -106,8 +106,8 @@ $(OBJDIR)/CPVAnalysis.o: CPVAnalysis.cpp $(HEADER)
 $(MAKE_OMEGAREC): $(SRC_OMEGAREC) $(HEADER)
 	@$(MAKE) -C $(OMEGAREC_DIR)
 
-# $(MAKE_GENVARS): $(SRC_GENVARS) $(HEADER)
-# 	@$(MAKE) -C $(GENERATED_DIR)
+$(MAKE_GENVARS): $(SRC_GENVARS) $(HEADER)
+	@$(MAKE) -C $(GENERATED_DIR)
 
 # $(MAKE_REGEN): $(SRC_REGEN) $(HEADER)
 # 	@$(MAKE) -C $(REGEN_DIR)

@@ -11,8 +11,8 @@
 #include <ErrorLogs.h>
 #include <kloe_class.h>
 
-// int CPFit_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
-// int GenVars_main(TChain &chain);
+int CPFit_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
+int GenVars_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
 // int KchRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
 int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
 // int Regen_main(TChain &chain);

@@ -1,6 +1,6 @@
 {
-    "lastScript": null,
-    "lastUpdate": "2024-12-30.01:25:25",
+    "lastScript": "Plots of Omega Reconstruction",
+    "lastUpdate": "2025-02-21",
     "variables": {
         "CPFit": {
             "histoResults": {
@@ -36,41 +36,41 @@
                 "upper": 0.3
             },
             "result": {
-                "chi2": 115.7128466712388,
+                "chi2": 555.680678665872,
                 "error": {
-                    "Im": 0.04830684283131494,
+                    "Im": 0.15243433443171978,
                     "Norm": {
-                        "Omegapi0": 0.08553081758815573,
-                        "Other": 0.3994013925366835,
+                        "Omegapi0": 0.05381791461015728,
+                        "Other": 0.05086777978461965,
                         "Regeneration": {
-                            "CloseLeft": 0.17686254496755915,
-                            "CloseRight": 0.15177065997496642,
-                            "FarLeft": 0.013435266905737042,
-                            "FarRight": 0.019299058055579632
+                            "CloseLeft": 0.1129994563572827,
+                            "CloseRight": 0.13306497364707726,
+                            "FarLeft": 0.06530892858114523,
+                            "FarRight": 0.10988526116420783
                         },
-                        "Semileptonic": 0.5233058930004091,
-                        "Signal": 0.011675025551401874,
-                        "Threepi0": 0.42599466318041146
+                        "Semileptonic": 0.015399405050550596,
+                        "Signal": 0.031079060492667177,
+                        "Threepi0": 0.012797825122108475
                     },
-                    "Re": 0.0044561657301659076
+                    "Re": 0.01522277926224944
                 },
-                "normChi2": 1.2856982963470978,
+                "normChi2": 6.174229762954134,
                 "value": {
-                    "Im": -0.10147308191978552,
+                    "Im": -1.1808129333764563,
                     "Norm": {
-                        "Omegapi0": 0.736680261258828,
-                        "Other": 1.2999942200532275,
+                        "Omegapi0": 1.2999999854241429,
+                        "Other": 1.2999999968740796,
                         "Regeneration": {
-                            "CloseLeft": 1.7042485363125195,
-                            "CloseRight": 1.7367473019951039,
-                            "FarLeft": 0.45383209866862795,
-                            "FarRight": 0.4866741258567513
+                            "CloseLeft": 1.7871027108675364,
+                            "CloseRight": 1.2373660648531093,
+                            "FarLeft": 1.4655102895696244,
+                            "FarRight": 0.9383895240399174
                         },
-                        "Semileptonic": 0.7000099857840255,
-                        "Signal": 0.874569204509481,
-                        "Threepi0": 1.29999957205129
+                        "Semileptonic": 1.2999999814926335,
+                        "Signal": 0.6557172462318703,
+                        "Threepi0": 1.2999999986780708
                     },
-                    "Re": 0.006688948725562943
+                    "Re": 0.009659936455186806
                 }
             }
         },
@@ -92,6 +92,34 @@
                 "goodClus": false,
                 "loopCount": 20,
                 "numOfConstraints": 5
+            }
+        },
+        "OmegaRec": {
+            "fiducialVolume": {
+                "charged": {
+                    "error": [
+                        0.018839888784015334,
+                        0.008919891983249356,
+                        0.06366415156775161
+                    ],
+                    "stdDev": [
+                        0.41998750656480677,
+                        0.3919011660164338,
+                        1.1641442131626296
+                    ]
+                },
+                "neutral": {
+                    "error": [
+                        null,
+                        null,
+                        null
+                    ],
+                    "stdDev": [
+                        0.41530234575891023,
+                        0.413449873533145,
+                        0.3907361160187552
+                    ]
+                }
             }
         },
         "RegenRejection": {
@@ -454,21 +482,21 @@
         "rootFiles": {
             "Data": {
                 "firstFile": 1,
-                "lastFile": 1
+                "lastFile": 56
             },
             "MC": {
                 "firstFile": 1,
-                "lastFile": 1
+                "lastFile": 56
             },
             "firstFileMax": 1,
             "lastFileMax": 56,
-            "path": "/internal/big_one/4/users/gamrat/scripts/ROOT_files/PROD2NTU"
+            "path": "/internal/big_one/4/users/gamrat/old_root_files"
         },
         "tree": {
             "filename": {
                 "generatedvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/gen_vars_1_1.root",
-                "mctruth": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/mctruth_1_56.root",
-                "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_2025-02-15_2.root",
+                "mctruth": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/mctruth_2025-02-17_2.root",
+                "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_2025-02-18_2.root",
                 "omegarecKinFit": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_kin_fit_2025-02-07_31_0_8_10_2.root",
                 "selectionvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/SelectionVars/root_files/selection_vars.root",
                 "trianglefinal": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_triangle_rec_1_56_10_5_1_1.root",

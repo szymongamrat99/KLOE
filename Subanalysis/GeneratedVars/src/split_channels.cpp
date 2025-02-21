@@ -1,39 +1,38 @@
-#include <TROOT.h>
-
 #include "../inc/genvars.hpp"
 
-Int_t split_channels(Int_t firstFile, Int_t lastFile)
+Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
     TFile
         *file;
     TTree
         *tree;
-    TChain
-        *chain;
 
     BaseKinematics baseKin;
 
-    chain = new TChain("INTERF/h1");
-    chain_init(chain, firstFile, lastFile);
-
     UChar_t pidmc[50], vtxmc[50], mother[50], mctruth, mcflag;
 
-    chain->SetBranchAddress("ntmc", &interfcommon_.ntmc);
-    chain->SetBranchAddress("nvtxmc", &interfcommon_.nvtxmc);
+    chain.SetBranchAddress("ntmc", &interfcommon_.ntmc);
+    chain.SetBranchAddress("nvtxmc", &interfcommon_.nvtxmc);
 
-    chain->SetBranchAddress("pidmc", pidmc);
-    chain->SetBranchAddress("vtxmc", vtxmc);
-    chain->SetBranchAddress("mother", mother);
-    chain->SetBranchAddress("mctruth", &mctruth);
-    chain->SetBranchAddress("mcflag", &mcflag);
+    chain.SetBranchAddress("pidmc", pidmc);
+    chain.SetBranchAddress("vtxmc", vtxmc);
+    chain.SetBranchAddress("mother", mother);
+    chain.SetBranchAddress("mctruth", &mctruth);
+    chain.SetBranchAddress("mcflag", &mcflag);
 
-    Int_t nentries = (Int_t)chain->GetEntries();
+    Int_t nentries = (Int_t)chain.GetEntries();
 
     // =================================================================================
 
-    TString name = mctruth_filename + std::to_string(firstFile) + "_" + std::to_string(lastFile) + ext_root;
+    // Creation of filename for the analysis step
+    std::string
+        datestamp = Obj.getCurrentDate(),
+        name = "";
 
-    file = new TFile(gen_vars_dir + root_files_dir + name, "recreate");
+    name = gen_vars_dir + root_files_dir + mctruth_filename + datestamp + "_" + int(data_type) + ext_root;
+    // -----------------------------------------------------------------------------------------
+
+    file = new TFile(name.c_str(), "recreate");
     tree = new TTree(gen_vars_tree, "Mctruth for all channels");
 
     tree->Branch("mctruth", &baseKin.mctruth_int, "mctruth/I");
@@ -44,12 +43,12 @@ Int_t split_channels(Int_t firstFile, Int_t lastFile)
 
     for (Int_t i = 0; i < nentries; i++)
     {
-        chain->GetEntry(i);
+        chain.GetEntry(i);
 
         UInt_t Ks = 0, Kl = 0, Ksregen = 0, piplusks = 0, pipluskl = 0, piminusks = 0, piminuskl = 0,
-           muonplusks = 0, muonpluskl = 0, muonminusks = 0, muonminuskl = 0, electronks = 0, electronkl = 0,
-           positronks = 0, positronkl = 0, pi0ks = 0, pi0kl = 0, pi0phi = 0, piplusphi = 0, piminusphi = 0, otherphi = 0,
-           otherkl = 0, otherks = 0, gammaphi = 0;
+               muonplusks = 0, muonpluskl = 0, muonminusks = 0, muonminuskl = 0, electronks = 0, electronkl = 0,
+               positronks = 0, positronkl = 0, pi0ks = 0, pi0kl = 0, pi0phi = 0, piplusphi = 0, piminusphi = 0, otherphi = 0,
+               otherkl = 0, otherks = 0, gammaphi = 0;
 
         if (mcflag == 1 && mctruth != 0)
         {
@@ -150,8 +149,6 @@ Int_t split_channels(Int_t firstFile, Int_t lastFile)
                           (pi0kl == 2 && piplusks == 1 && muonminusks == 1 && pi0ks == 0) ||
                           (pi0kl == 2 && piminusks == 1 && muonplusks == 1 && pi0ks == 0)));
 
-            std::cout << signal_cond << " " << regen_cond << " " << omega_cond << " " << three_cond << " " << semi_cond << " " << pipi_cond << std::endl;
-
             if (signal_cond && mctruth == 1)
                 baseKin.mctruth_int = 1;
             else if (signal_cond && mctruth == 2)
@@ -201,6 +198,16 @@ Int_t split_channels(Int_t firstFile, Int_t lastFile)
 
     file->Write();
     file->Close();
+
+    properties["variables"]["tree"]["filename"]["mctruth"] = (std::string)name;
+    properties["variables"]["tree"]["treename"]["mctruth"] = (std::string)gen_vars_tree;
+
+    properties["lastScript"] = "Mctruth division of files.";
+    properties["lastUpdate"] = Obj.getCurrentTimestamp();
+
+    std::ofstream outfile(propName);
+    outfile << properties.dump(4);
+    outfile.close();
 
     return 0;
 }

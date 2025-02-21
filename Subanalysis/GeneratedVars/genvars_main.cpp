@@ -10,58 +10,18 @@ using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;
 using std::chrono::minutes;
 
-int GenVars_main()
+int GenVars_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
+  // Set logger for error logging
+  std::string logFilename = (std::string)gen_vars_dir + (std::string)logs_dir + "genVars_" + Obj.getCurrentDate() + ".log";
+  ErrorHandling::ErrorLogs logger(logFilename);
+  ErrorHandling::InfoCodes infoCode;
+  // -------------------------------------------------------------------
+  // Set Menu instance
   Controls::Menu *menu = new Controls::Menu(5);
-  ErrorHandling::ErrorLogs logger;
-  ofstream LogFile;
-  LogFile.open(gen_vars_dir + logs_dir + "GenVars.log");
-  
-  Int_t firstFile, lastFile, ind_data_mc;
-
-  try
-  {
-    cout << "Input the first file number to be analyzed: ";
-    cin >> firstFile;
-
-    if (!cin)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (firstFile < firstFileMax || firstFile > lastFileMax)
-    {
-      throw ErrorHandling::ErrorCodes::RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    logger.getErrLog(err);
-    logger.getErrLog(err, LogFile);
-    return int(err);
-  }
-
-  try
-  {
-    cout << "Input the last file number to be analyzed: ";
-    cin >> lastFile;
-
-    if (!cin)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (lastFile < firstFile || lastFile > lastFileMax)
-    {
-      throw ErrorHandling::ErrorCodes::RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    logger.getErrLog(err);
-    logger.getErrLog(err, LogFile);
-    return int(err);
-  }
-
   Controls::GenVars menuOpt;
+  // -------------------------------------------------------------------
+
   bool
       dataTypeErr,
       menuRangeErr;
@@ -100,12 +60,20 @@ int GenVars_main()
     {
     case Controls::GenVars::GEN_VARS:
     {
-      genvars(firstFile, lastFile, 4);
+      // genvars(firstFile, lastFile, 4);
       break;
     }
     case Controls::GenVars::SPLIT_CHANN:
     {
-      split_channels(firstFile, lastFile);
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+      logger.getLog(infoCode, "Split of files into MCTruth variable.");
+
+      Obj.startTimer();
+      split_channels(chain, dataTypeOpt, logger, Obj);
+
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
+      logger.getLog(infoCode, Obj.endTimer());
+
       break;
     }
     case Controls::GenVars::EXIT:
@@ -117,8 +85,6 @@ int GenVars_main()
     }
 
   } while (menuOpt != Controls::GenVars::EXIT);
-
-  LogFile.close();
 
   return 0;
 }

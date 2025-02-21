@@ -181,8 +181,11 @@ int main(int argc, char *argv[])
     {
     case Controls::MainMenu::GEN_VARS:
     {
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+      logger.getLog(infoCode, "MC generated variables for analysis");
+
+      GenVars_main(chain, eventAnalysis, dataTypeOpt);
       break;
-      // GenVars_main(chain);
     }
     case Controls::MainMenu::KCHREC_NO_BOOST:
     {
@@ -220,8 +223,13 @@ int main(int argc, char *argv[])
     case Controls::MainMenu::TRANSF_TO_CM:
       break;
     case Controls::MainMenu::CPV_NORM:
+    {
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+      logger.getLog(infoCode, "CP Final Fit");
+
+      CPFit_main(chain, eventAnalysis, dataTypeOpt);
       break;
-      // CPFit_main(chain, eventAnalysis, dataTypeOpt);
+    }
     case Controls::MainMenu::PLOTS:
       break;
       // Plots_main(chain);
