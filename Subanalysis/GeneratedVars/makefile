@@ -8,8 +8,8 @@ BINPATH=bin
 
 LIBS=-L$(INCPATH) -lrec -lm -llapack -lcurl
 
-SRC=$(SRCPATH)/split_channels.cpp genvars_main.cpp #$(SRCPATH)/generated_variables.cpp
-OBJ=$(OBJPATH)/split_channels.o $(OBJPATH)/genvars_main.o #$(OBJPATH)/generated_variables.o 
+SRC=$(SRCPATH)/split_channels.cpp genvars_main.cpp $(SRCPATH)/generated_variables.cpp
+OBJ=$(OBJPATH)/split_channels.o $(OBJPATH)/genvars_main.o $(OBJPATH)/generated_variables.o 
 
 PROJECT=gen_vars.exe
 RM=rm
@@ -23,8 +23,8 @@ all: $(OBJ)
 $(OBJPATH)/split_channels.o: $(SRCPATH)/split_channels.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@	
 
-# $(OBJPATH)/generated_variables.o: $(SRCPATH)/generated_variables.cpp
-# 	$(CXX) $(CXXFLAGS) -c $< -o $@
+$(OBJPATH)/generated_variables.o: $(SRCPATH)/generated_variables.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(OBJPATH)/genvars_main.o: genvars_main.cpp 
 	$(CXX) $(CXXFLAGS) -c $< -o $@

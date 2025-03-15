@@ -63,7 +63,7 @@ int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOp
     case Controls::OmegaRec::OMEGA_REC:
     {
       infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
-      logger.getLog(infoCode, "Omega-pi0 Reconstruction: Reconstruction with kinematic fit");
+      logger.getLog(infoCode, "Omega-pi0 Reconstruction: Simple reconstruction");
 
       Obj.startTimer();
       omegarec(chain, dataTypeOpt, logger, Obj);

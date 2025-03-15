@@ -11,7 +11,6 @@
 #include <triple_gaus.h>
 #include <interference.h>
 #include <kloe_class.h>
-#include <lorentz_transf.h>
 
 #include "../inc/omegarec.hpp"
 

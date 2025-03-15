@@ -24,15 +24,12 @@
 #include "interf_function.h"
 #include "chi2_dist.h"
 #include "uncertainties.h"
-#include "lorentz_transf.h"
 #include "triple_gaus.h"
 
 #include "../inc/trilateration.hpp"
 
-int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
+Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
-  ErrorHandling::ErrorLogs errLogger;
-
   Double_t cut_prob = 0.0, time_cut = 100.0;
 
   int
@@ -43,14 +40,21 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
       range = Int_t(jmax - jmin) + 1,
       bunch_int = 9;
 
-  TChain *chain = new TChain("INTERF/h1");
-  chain_init(chain, first_file, last_file);
-
   TString
-      filename_gen = gen_vars_dir + root_files_dir + gen_vars_filename + first_file + "_" + last_file + ext_root,
-      filename_trilateration = neutrec_dir + root_files_dir + gen_vars_filename + first_file + "_" + last_file + ext_root,
-      filename_trilateration_kin_fit = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root,
-      filename_triangle = neutrec_dir + root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
+      filename_trilateration = std::string(properties["variables"]["tree"]["filename"]["trilateration"]),
+      treename_trilateration = std::string(properties["variables"]["tree"]["treename"]["trilateration"]),
+
+      filename_trilateration_kin_fit = std::string(properties["variables"]["tree"]["filename"]["trilaterationKinFit"]),
+      treename_trilateration_kin_fit = std::string(properties["variables"]["tree"]["treename"]["trilaterationKinFit"]),
+
+      filename_triangle = std::string(properties["variables"]["tree"]["filename"]["trianglefinal"]),
+      treename_triangle = std::string(properties["variables"]["tree"]["treename"]["trianglefinal"]),
+
+      filename_mctruth = std::string(properties["variables"]["tree"]["filename"]["mctruth"]),
+      treename_mctruth = std::string(properties["variables"]["tree"]["treename"]["mctruth"]),
+
+      filename_gen = std::string(properties["variables"]["tree"]["filename"]["generatedvars"]),
+      treename_gen = std::string(properties["variables"]["tree"]["treename"]["generatedvars"]);
 
   std::vector<TString> file_name, tree_name;
 
@@ -59,8 +63,8 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
   file_name.push_back(filename_triangle);
 
   tree_name.push_back(neutrec_tri_tree);
-  tree_name.push_back(neutrec_kin_fit_tree);
-  tree_name.push_back(neutrec_triangle_tree);
+  tree_name.push_back(treename_trilateration_kin_fit);
+  tree_name.push_back(treename_triangle);
 
   Controls::Menu menu(3, file_name);
 
@@ -92,15 +96,14 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
       throw(ErrorHandling::ErrorCodes::FILE_NOT_EXIST);
 
     tree = (TTree *)file->Get(tree_name[file_num]);
-    tree_gen = (TTree *)file_gen->Get(gen_vars_tree);
+    tree_gen = (TTree *)file_gen->Get(treename_gen);
 
     if (tree->IsZombie() || tree_gen->IsZombie())
       throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
   }
   catch (ErrorHandling::ErrorCodes err)
   {
-    errLogger.setErrCount(err);
-    errLogger.getErrLog(err);
+    logger.getErrLog(err);
     return int(err);
   }
 
@@ -115,57 +118,69 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
 
   UChar_t errId, cutId;
 
-  chain->SetBranchAddress("Kchboost", baseKin.Kchboost);
-  chain->SetBranchAddress("Knereclor", baseKin.Knereclor);
-  chain->SetBranchAddress("Knerec", baseKin.Knerec);
-  chain->SetBranchAddress("Kchrec", baseKin.Kchrec);
-  chain->SetBranchAddress("Kchmc", baseKin.Kchmc);
-  chain->SetBranchAddress("Knemc", baseKin.Knemc);
+  chain.SetBranchAddress("Kchboost", baseKin.Kchboost);
+  chain.SetBranchAddress("Knereclor", baseKin.Knereclor);
+  chain.SetBranchAddress("Knerec", baseKin.Knerec);
+  chain.SetBranchAddress("Kchrec", baseKin.Kchrec);
+  chain.SetBranchAddress("Kchmc", baseKin.Kchmc);
+  chain.SetBranchAddress("Knemc", baseKin.Knemc);
 
-  chain->SetBranchAddress("trk1", baseKin.trk[0]);
-  chain->SetBranchAddress("trk2", baseKin.trk[1]);
+  chain.SetBranchAddress("trk1", baseKin.trk[0]);
+  chain.SetBranchAddress("trk2", baseKin.trk[1]);
 
-  chain->SetBranchAddress("nclu", &baseKin.nclu);
-  chain->SetBranchAddress("Xcl", baseKin.cluster[0]);
-  chain->SetBranchAddress("Ycl", baseKin.cluster[1]);
-  chain->SetBranchAddress("Zcl", baseKin.cluster[2]);
-  chain->SetBranchAddress("Tcl", baseKin.cluster[3]);
-  chain->SetBranchAddress("Enecl", baseKin.cluster[4]);
+  chain.SetBranchAddress("nclu", &baseKin.nclu);
+  chain.SetBranchAddress("Xcl", baseKin.cluster[0]);
+  chain.SetBranchAddress("Ycl", baseKin.cluster[1]);
+  chain.SetBranchAddress("Zcl", baseKin.cluster[2]);
+  chain.SetBranchAddress("Tcl", baseKin.cluster[3]);
+  chain.SetBranchAddress("Enecl", baseKin.cluster[4]);
 
-  chain->SetBranchAddress("Bx", &baseKin.bhabha_vtx[0]);
-  chain->SetBranchAddress("By", &baseKin.bhabha_vtx[1]);
-  chain->SetBranchAddress("Bz", &baseKin.bhabha_vtx[2]);
+  chain.SetBranchAddress("Bx", &baseKin.bhabha_vtx[0]);
+  chain.SetBranchAddress("By", &baseKin.bhabha_vtx[1]);
+  chain.SetBranchAddress("Bz", &baseKin.bhabha_vtx[2]);
 
-  chain->SetBranchAddress("ip", baseKin.ip);
-  chain->SetBranchAddress("ipmc", baseKin.ipmc);
+  chain.SetBranchAddress("ip", baseKin.ip);
+  chain.SetBranchAddress("ipmc", baseKin.ipmc);
 
-  chain->SetBranchAddress("ntmc", &baseKin.ntmc);
-  chain->SetBranchAddress("nvtxmc", &baseKin.nvtxmc);
-  chain->SetBranchAddress("nv", &baseKin.nv);
-  chain->SetBranchAddress("pidmc", baseKin.pidmc);
-  chain->SetBranchAddress("vtxmc", baseKin.vtxmc);
-  chain->SetBranchAddress("mother", baseKin.mother);
+  chain.SetBranchAddress("ntmc", &baseKin.ntmc);
+  chain.SetBranchAddress("nvtxmc", &baseKin.nvtxmc);
+  chain.SetBranchAddress("nv", &baseKin.nv);
+  chain.SetBranchAddress("pidmc", baseKin.pidmc);
+  chain.SetBranchAddress("vtxmc", baseKin.vtxmc);
+  chain.SetBranchAddress("mother", baseKin.mother);
 
-  chain->SetBranchAddress("mcisr", &baseKin.mcisr);
-  chain->SetBranchAddress("T0step1", &baseKin.T0step1);
+  chain.SetBranchAddress("mcisr", &baseKin.mcisr);
+  chain.SetBranchAddress("T0step1", &baseKin.T0step1);
 
-  chain->SetBranchAddress("Bpx", &baseKin.phi_mom[0]);
-  chain->SetBranchAddress("Bpy", &baseKin.phi_mom[1]);
-  chain->SetBranchAddress("Bpz", &baseKin.phi_mom[2]);
-  chain->SetBranchAddress("Broots", &baseKin.phi_mom[3]);
+  chain.SetBranchAddress("Bpx", &baseKin.phi_mom[0]);
+  chain.SetBranchAddress("Bpy", &baseKin.phi_mom[1]);
+  chain.SetBranchAddress("Bpz", &baseKin.phi_mom[2]);
+  chain.SetBranchAddress("Broots", &baseKin.phi_mom[3]);
 
-  chain->SetBranchAddress("mctruth", &baseKin.mctruth);
-  chain->SetBranchAddress("mcflag", &baseKin.mcflag);
+  chain.SetBranchAddress("mctruth", &baseKin.mctruth);
+  chain.SetBranchAddress("mcflag", &baseKin.mcflag);
 
-  chain->SetBranchAddress("Dtmc", &baseKin.Dtmc);
+  chain.SetBranchAddress("Dtmc", &baseKin.Dtmc);
 
-  chain->SetBranchAddress("g4taken", baseKin.g4taken);
-  chain->SetBranchAddress("ncll", baseKin.ncll);
+  chain.SetBranchAddress("g4taken", baseKin.g4taken);
+  chain.SetBranchAddress("ncll", baseKin.ncll);
 
-  chain->SetBranchAddress("Errid", &errId);
-  chain->SetBranchAddress("Cutid", &cutId);
+  chain.SetBranchAddress("Errid", &errId);
+  chain.SetBranchAddress("Cutid", &cutId);
 
-  Float_t gamma_kinfit[4][8], ip_kinfit[3], Knetri_kinfit[10], chi2min, bhabha_mom_err[4], sol1[4], sol2[4], sol1err, sol2err, trc[4], trcsum, minv4gam;
+  Float_t 
+        gamma_kinfit[4][8], 
+        ip_kinfit[3], 
+        Knetri_kinfit[10], 
+        chi2min, 
+        bhabha_mom_err[4], 
+        sol1[4], 
+        sol2[4], 
+        sol1err, 
+        sol2err, 
+        trc[4], 
+        trcsum, 
+        minv4gam;
   Int_t done_kinfit = 10, g4taken_kinfit[4], bunchnum, chosen, region[4], clusindgood[4];
   TMatrixD *cov_matrix = new TMatrixD(27, 27);
   TVectorD *min_const = new TVectorD(M);
@@ -246,10 +261,10 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
   tree_gen->SetBranchAddress("region", region);
   tree_gen->SetBranchAddress("clusindgood", clusindgood);
 
-  chain->AddFriend(tree);
-  chain->AddFriend(tree_gen);
+  chain.AddFriend(tree);
+  chain.AddFriend(tree_gen);
 
-  UInt_t nentries = (UInt_t)chain->GetEntries();
+  UInt_t nentries = (UInt_t)chain.GetEntries();
 
   Float_t lengthneu_mc, lengthneu_tri, lengthneu_tri_CM, lengthneu_rec, lengthch_mc, lengthch_rec,
       v_Kneutri, v_Kneutri_CM, v_Kchrec, v_Kneurec, v_Kneumc, v_Kchmc,
@@ -507,9 +522,9 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
 
   for (Int_t i = 0; i < nentries; i++)
   {
-    chain->GetEntry(i);
+    chain.GetEntry(i);
 
-    if (baseKin.mcflag == 1 && (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0))
+    if (baseKin.mcflag == 1 && (baseKin.mctruth == 1 || baseKin.mctruth == 2))
     {
       counts_sig_all++;
 
@@ -565,12 +580,11 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
 
     count_angle = 0;
 
-    if (baseKin.mcflag == 1 && (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0))
+    if (baseKin.mcflag == 1 && (baseKin.mctruth == 1 || baseKin.mctruth == 2))
     {
       // Kaon path length
 
-
-      if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
+      if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
       {
 
         lengthch_mc = sqrt(pow(baseKin.Kchmc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Kchmc[7] - baseKin.ipmc[1], 2) + pow(baseKin.Kchmc[8] - baseKin.ipmc[2], 2));
@@ -599,14 +613,14 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
       Rtch_rec = sqrt(pow(baseKin.Kchrec[6] - baseKin.ip[0], 2) + pow(baseKin.Kchrec[7] - baseKin.ip[1], 2));
       //
       // Kaon velocity
-      if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
+      if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
         v_Kchmc = cVel * baseKin.Kchmc[4] / baseKin.Kchmc[3];
       else
         v_Kchmc = cVel * Kchmc_bcg[4] / Kchmc_bcg[3];
 
       v_Kchrec = cVel * baseKin.Kchboost[4] / baseKin.Kchboost[3];
 
-      if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
+      if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
         v_Kneumc = cVel * baseKin.Knemc[4] / baseKin.Knemc[3];
       else
         v_Kneumc = cVel * Knemc_bcg[4] / Knemc_bcg[3];
@@ -648,7 +662,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
       vec_before[2] = Knetri_kinfit[8] - ip_kinfit[2];
       vec_before[3] = Knetri_kinfit[9];
 
-      lorentz_transf(boost, vec_before, vec_after);
+      Obj.lorentz_transf(boost, vec_before, vec_after);
 
       lengthneu_tri_CM = sqrt(pow(vec_after[0], 2) + pow(vec_after[1], 2) + pow(vec_after[2], 2));
       v_Kneutri_CM = lengthneu_tri_CM / vec_after[3];
@@ -721,51 +735,39 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
           boost[1] = -baseKin.Kchboost[1] / baseKin.Kchboost[3];
           boost[2] = -baseKin.Kchboost[2] / baseKin.Kchboost[3];
 
-          lorentz_transf(boost, trk_before[0], trk_after[0]);
-          lorentz_transf(boost, trk_before[1], trk_after[1]);
+          Obj.lorentz_transf(boost, trk_before[0], trk_after[0]);
+          Obj.lorentz_transf(boost, trk_before[1], trk_after[1]);
 
-          Float_t 
-                costrk_num = trk_after[0][0]*trk_after[1][0] + trk_after[0][1]*trk_after[1][1] + trk_after[0][2]*trk_after[1][2],
-                costrk_den = sqrt(pow(trk_after[0][0], 2) + pow(trk_after[0][1], 2) + pow(trk_after[0][2], 2)) * sqrt(pow(trk_after[1][0], 2) + pow(trk_after[1][1], 2) + pow(trk_after[1][2], 2)),
-                costrk = costrk_num / costrk_den;
+          Float_t
+              costrk_num = trk_after[0][0] * trk_after[1][0] + trk_after[0][1] * trk_after[1][1] + trk_after[0][2] * trk_after[1][2],
+              costrk_den = sqrt(pow(trk_after[0][0], 2) + pow(trk_after[0][1], 2) + pow(trk_after[0][2], 2)) * sqrt(pow(trk_after[1][0], 2) + pow(trk_after[1][1], 2) + pow(trk_after[1][2], 2)),
+              costrk = costrk_num / costrk_den;
 
           Bool_t
-              cut_trcsum   = 1,//= trcsum > -1., 
-              cut_Kneuminv = 1,//= (minv4gam - mK0) < 76,
-              cut_Kchminv = 1,//= (baseKin.Kchrec[5] - mK0) < 1.2,
-              cut_Qmiss = 1,//= sqrt(pow(baseKin.Kchboost[3] - baseKin.Kchrec[3], 2) +
-                              //  pow(baseKin.Kchboost[0] - baseKin.Kchrec[0], 2) +
-                              //  pow(baseKin.Kchboost[1] - baseKin.Kchrec[1], 2) +
-                              //  pow(baseKin.Kchboost[2] - baseKin.Kchrec[2], 2)) < 3.75,
-              cut_costrk = 1;//= costrk < -0.8;
+              cut_trcsum = 1,   //= trcsum > -1.,
+              cut_Kneuminv = 1, //= (minv4gam - mK0) < 76,
+              cut_Kchminv = 1,  //= (baseKin.Kchrec[5] - mK0) < 1.2,
+              cut_Qmiss = 1,    //= sqrt(pow(baseKin.Kchboost[3] - baseKin.Kchrec[3], 2) +
+                                //  pow(baseKin.Kchboost[0] - baseKin.Kchrec[0], 2) +
+                                //  pow(baseKin.Kchboost[1] - baseKin.Kchrec[1], 2) +
+                                //  pow(baseKin.Kchboost[2] - baseKin.Kchrec[2], 2)) < 3.75,
+              cut_costrk = 1;   //= costrk < -0.8;
 
           if (j == 0 /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
-          { 
+          {
             counts_all++;
-
-            // std::cout << counts_all << std::endl;
 
             if (Knetri_kinfit[9] > time_cut)
               counts_cut++;
 
             //! Check how many baseKin.cluster sets are found good and which bad
 
-            // std::cout << int(baseKin.mctruth) << std::endl;
-
             for (Int_t k = 0; k < 4; k++)
             {
               g4taken_corr[k] = baseKin.ncll[g4taken_kinfit[k]] - 1;
-              // std::cout << g4taken_corr[k] << " ";
             }
 
-            // std::cout << std::endl;
-
             isEqual = event.ArrayEquality(clusindgood, g4taken_corr, 4);
-
-            // for(Int_t k = 0; k < 4; k++)
-            // {
-            //   std::cout << clusindgood[k] << " " << g4taken_corr[k] << std::endl;
-            // }
 
             bad_clus = isEqual;
 
@@ -865,7 +867,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
             {
               if (isEqual >= 0 && chosen_bunch /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
               {
-                if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
+                if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
                 {
                   neu_vtx_corr[j][k]->Fill(baseKin.Knemc[6 + k], Knetri_kinfit[6 + k]);
                   sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - baseKin.Knemc[6 + k]);
@@ -887,7 +889,7 @@ int comp_of_methods(int first_file, int last_file, Controls::DataType data_type)
             {
               if (isEqual >= 0 && chosen_bunch /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
               {
-                if (baseKin.mctruth == 1 || baseKin.mctruth == 2 || baseKin.mctruth == 0)
+                if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
                 {
                   neu_vtx_corr[j][3]->Fill(t_neumc, t_neutri); // Knetri_kinfit[6 + k]);
                   sigmas_std[j][3]->Fill(lengthneu_mc, (t_neutri - t_neumc) / tau_S_nonCPT);

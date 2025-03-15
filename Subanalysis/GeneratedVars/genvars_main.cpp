@@ -5,10 +5,6 @@
 #include "inc/genvars.hpp"
 
 using namespace std;
-using std::chrono::duration;
-using std::chrono::duration_cast;
-using std::chrono::high_resolution_clock;
-using std::chrono::minutes;
 
 int GenVars_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
@@ -60,7 +56,15 @@ int GenVars_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt
     {
     case Controls::GenVars::GEN_VARS:
     {
-      // genvars(firstFile, lastFile, 4);
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+      logger.getLog(infoCode, "Finding generated variables for Monte Carlo");
+
+      Obj.startTimer();
+      GenVars(chain, dataTypeOpt, logger, Obj);
+
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
+      logger.getLog(infoCode, Obj.endTimer());
+
       break;
     }
     case Controls::GenVars::SPLIT_CHANN:

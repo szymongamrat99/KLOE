@@ -159,7 +159,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		tree_mctruth = (TTree *)file_mctruth->Get(treename_mctruth);
 
 		if (tree_mctruth->IsZombie())
-			throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);		
+			throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
 	}
 	catch (ErrorHandling::ErrorCodes err)
 	{
@@ -305,10 +305,10 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 			Phi_boost[1] = -baseKin.phi_mom[1] / baseKin.phi_mom[3];
 			Phi_boost[2] = -baseKin.phi_mom[2] / baseKin.phi_mom[3];
 
-			lorentz_transf(Phi_boost, Kch_LAB, Kch_CM);
-			lorentz_transf(Phi_boost, Kne_LAB, Kne_CM);
-			lorentz_transf(Phi_boost, Kchmom_LAB, Kchmom_CM);
-			lorentz_transf(Phi_boost, Knemom_LAB, Knemom_CM);
+			Obj.lorentz_transf(Phi_boost, Kch_LAB, Kch_CM);
+			Obj.lorentz_transf(Phi_boost, Kne_LAB, Kne_CM);
+			Obj.lorentz_transf(Phi_boost, Kchmom_LAB, Kchmom_CM);
+			Obj.lorentz_transf(Phi_boost, Knemom_LAB, Knemom_CM);
 
 			Kch_boost[0] = -Kchmom_CM[0] / Kchmom_CM[3];
 			Kch_boost[1] = -Kchmom_CM[1] / Kchmom_CM[3];
@@ -318,8 +318,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 			Kne_boost[1] = Kchmom_CM[1] / Kchmom_CM[3];
 			Kne_boost[2] = Kchmom_CM[2] / Kchmom_CM[3];
 
-			lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
-			lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
+			Obj.lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
+			Obj.lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
 
 			baseKin.Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (cVel * tau_S_nonCPT);
 
@@ -358,7 +358,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 			radius_ch[1] = sqrt(radius_ch[1]);
 
 			Int_t
-					sigmas = 1.;
+					sigmas = 3;
 
 			Bool_t
 					cond[4],
@@ -376,13 +376,13 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				}
 
 			Double_t
-					stdDevRho00IP = sqrt((4-M_PI)/2)*(stdDevOmegaVtx[0] + stdDevOmegaVtx[1])/2.,
-					stdDevRhopmIP = sqrt((4-M_PI)/2)*(stdDevOmegaVtx[3] + stdDevOmegaVtx[4])/2.;
+					stdDevRho00IP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[0] + stdDevOmegaVtx[1]) / 2.,
+					stdDevRhopmIP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[3] + stdDevOmegaVtx[4]) / 2.;
 
 			cond[0] = rho_00_IP < sigmas * stdDevRho00IP;
 			cond[1] = rho_pm_IP < sigmas * stdDevRhopmIP;
-			cond[2] = abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < sigmas * stdDevOmegaVtx[2];
-			cond[3] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < sigmas * stdDevOmegaVtx[5];
+			cond[2] = abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < 2 * stdDevOmegaVtx[2];
+			cond[3] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < stdDevOmegaVtx[5];
 
 			cond_tot = cond[0] && cond[1] && cond[2] && cond[3];
 			// ----------------------------------------------------------------------------------------------------------------
@@ -403,10 +403,28 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 			cuts[2] = abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma;					 // && radius_ch[1] > 8;
 			cuts[3] = 1;																																						 // abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
 
+			// Check of Simona's cuts
+			Double_t
+					meanInvMass = properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"],
+					meanInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"],
+					stdInvMass = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"],
+					stdInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"],
+					meanKinEne = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"],
+					meanKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"],
+					stdKinEne = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"],
+					stdKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"];
+
+			Double_t 
+						KinEnergyPi0 = Omegarec[3] - PichFourMom[0][3] - PichFourMom[1][3] - Omegapi0[5];
+			// ---------------------------------------------------------------
+
 			if (cond_tot)
 			{
-				cuts[4] = 1; //rho > 0.6;
+				cuts[4] = 1; // rho > 0.8;
 				cuts[5] = 1; // chi2min > 4.0;
+
+				cuts[4] = abs(Omegarec[5] - meanInvMass) > stdInvMass;
+				cuts[5] = abs(KinEnergyPi0 - meanKinEne) > stdKinEne;
 			}
 			else
 			{
@@ -499,7 +517,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 	minimum->SetVariable(0, "Real part", init_vars[0], step[0]);
 	minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]);
-	minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - 1.0 * init_vars[2], init_vars[2] + 5.0 * init_vars[2]);
+	minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - limit_lower * init_vars[2], init_vars[2] + limit_upper * init_vars[2]);
 
 	if (x_min > -30.0 && x_max < 30.0)
 	{
@@ -632,7 +650,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	properties["variables"]["CPFit"]["result"]["chi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2");
 	properties["variables"]["CPFit"]["result"]["normChi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2/NDF");
 
-	properties["lastUpdate"] = Obj.getCurrentDate();
+	properties["lastScript"] = "Final CP Parameters normalization";
+	properties["lastUpdate"] = Obj.getCurrentTimestamp();
 
 	std::ofstream outfile(propName);
 	outfile << properties.dump(4);
@@ -658,31 +677,6 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	TGraphAsymmErrors *sig_eff = new TGraphAsymmErrors();
 
 	sig_eff->Divide(sig_pass, sig_total, "cl=0.683 b(1,1) mode");
-
-	const Int_t
-			n = sig_eff->GetN();
-
-	Int_t
-			n_mean = 0;
-
-	Double_t ax[n], ay[n], mean = 0.;
-
-	std::cout << "Tau_S" << " " << "Efficiency" << std::endl;
-
-	for (Int_t k = 0; k < n; k++)
-	{
-		sig_eff->GetPoint(k, ax[k], ay[k]);
-		if (abs(ax[k]) < 5.)
-		{
-			n_mean++;
-			mean += ay[k];
-			std::cout << ax[k] << " " << ay[k] << std::endl;
-		}
-	}
-
-	mean = mean / (Float_t)n_mean;
-
-	std::cout << mean << std::endl;
 
 	c1->cd();
 	paddown_c1->Draw();

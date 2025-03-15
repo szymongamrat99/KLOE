@@ -13,7 +13,6 @@
 #include <triple_gaus.h>
 #include <interference.h>
 #include <kloe_class.h>
-#include <lorentz_transf.h>
 
 #include "../inc/omegarec.hpp"
 
@@ -222,7 +221,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	for (Int_t i = 0; i < channNum; i++)
 	{
 		hist2d_name = channName[i] + "100Ip";
-		hist2d_00IP_pmIP[0].push_back(new TH2D(hist2d_name, "", 50.0, 0.0, 5.0, 50.0, 0.0, 5.0));
+		hist2d_00IP_pmIP[0].push_back(new TH2D(hist2d_name, "", 50.0, 0.0, 20.0, 50.0, 0.0, 20.0));
 		hist2d_name = channName[i] + "200IP";
 		hist2d_00IP_pmIP[1].push_back(new TH2D(hist2d_name, "", 100.0, -70.0, 70.0, 100.0, -70.0, 70.0));
 	};
@@ -230,7 +229,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	std::vector<TCanvas *> canvas_cont;
 	TString canvas_cont_name = "";
 
-	for (Int_t i = 0; i < 6; i++)
+	for (Int_t i = 0; i < 8; i++)
 	{
 		canvas_cont_name = "canvas_cont_" + std::to_string(i);
 		canvas_cont.push_back(new TCanvas(canvas_cont_name, canvas_cont_name, 790, 790));
@@ -239,10 +238,16 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	std::vector<TH1 *> hist_control;
 	TString hist_control_name = "";
 
-	for (Int_t i = 0; i < 6; i++)
+	for (Int_t i = 0; i < 8; i++)
 	{
 		hist_control_name = "hist_control_" + std::to_string(i);
-		hist_control.push_back(new TH1D(hist_control_name, "", 40.0, -5.0, 5.0));
+
+		if (i < 6)
+			hist_control.push_back(new TH1D(hist_control_name, "", 40.0, -20.0, 20.0));
+		else if (i == 6)
+			hist_control.push_back(new TH1D(hist_control_name, "", 100.0, 500.0, 1000.0));
+		else if (i == 7)
+			hist_control.push_back(new TH1D(hist_control_name, "", 50.0, 50.0, 250.0));
 	};
 
 	Double_t
@@ -267,6 +272,8 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	chain.Draw("(Kchrec[6] - Bx)>>hist_control_3", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
 	chain.Draw("(Kchrec[7] - By)>>hist_control_4", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
 	chain.Draw("(Kchrec[8] - Bz)>>hist_control_5", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
+	chain.Draw("omegatree.omega[5]>>hist_control_6", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
+	chain.Draw("(omegatree.omega[3] - trk1[3] - trk2[3] - omegatree.omegapi0[5])>>hist_control_7", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
 
 	std::vector<TString> xTitleCont = {
 			"x_{#pi^{0}#pi^{0}} - x_{IP} [cm]",
@@ -274,7 +281,9 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 			"z_{#pi^{0}#pi^{0}} - z_{#pi^{+}#pi^{-}} [cm]",
 			"x_{#pi^{+}#pi^{-}} - x_{IP} [cm]",
 			"y_{#pi^{+}#pi^{-}} - y_{IP} [cm]",
-			"z_{#pi^{+}#pi^{-}} - z_{IP} [cm]"};
+			"z_{#pi^{+}#pi^{-}} - z_{IP} [cm]",
+			"m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]",
+			"T_{#pi^{0}_{#omega}} [MeV]"};
 
 	Float_t
 			parameter[3];
@@ -284,13 +293,32 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 
 	TPaveText *fit_text = new TPaveText(0.7, 0.7, 0.9, 0.9, "NDC");
 
+	Double_t
+			meanInvMass = 0,
+			meanInvMassErr = 0,
+			stdInvMass = 0,
+			stdInvMassErr = 0,
+			meanKinEne = 0,
+			meanKinEneErr = 0,
+			stdKinEne = 0,
+			stdKinEneErr = 0;
+
 	std::vector<Double_t>
 			stdDevOmegaVtx(6),
 			stdDevOmegaVtxErr(6);
 
-	for (Int_t i = 0; i < 6; i++)
+	for (Int_t i = 0; i < 8; i++)
 	{
-		TF1 *triple_fit = new TF1("triple_gaus", triple_gaus, -20.0, 20.0, 9, 1);
+
+		TF1 *triple_fit;
+
+		if (i < 6)
+			triple_fit = new TF1("triple_gaus", triple_gaus, -20.0, 20.0, 9, 1);
+		else if (i == 6)
+			triple_fit = new TF1("triple_gaus", triple_gaus, 500.0, 1000.0, 9, 1);
+		else if (i == 7)
+			triple_fit = new TF1("triple_gaus", triple_gaus, 50.0, 250.0, 9, 1);
+
 		triple_fit->SetParNames("Norm1", "Avg1", "Std1", "Norm2", "Avg2", "Std2", "Norm3", "Avg3", "Std3");
 		triple_fit->SetLineWidth(4);
 
@@ -333,12 +361,29 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 
 		TVirtualFitter::SetMaxIterations(10000);
 
-		result = hist_control[i]->Fit(triple_fit, "SL", "", -5.0, 5.0);
+		result = hist_control[i]->Fit(triple_fit, "SL", "");
 
 		if (result == 0)
 		{
-			stdDevOmegaVtx[i] = comb_std_dev(result->GetParams(), result->GetErrors());
-			stdDevOmegaVtxErr[i] = comb_std_dev_err(result->GetParams(), result->GetErrors());
+			if (i < 6)
+			{
+				stdDevOmegaVtx[i] = comb_std_dev(result->GetParams(), result->GetErrors());
+				stdDevOmegaVtxErr[i] = comb_std_dev_err(result->GetParams(), result->GetErrors());
+			}
+			else if (i == 6)
+			{
+				meanInvMass = comb_mean(result->GetParams(), result->GetErrors());
+				meanInvMassErr = comb_mean_err(result->GetParams(), result->GetErrors());
+				stdInvMass = comb_std_dev(result->GetParams(), result->GetErrors());
+				stdInvMassErr = comb_std_dev_err(result->GetParams(), result->GetErrors());
+			}
+			else if (i == 7)
+			{
+				meanKinEne = comb_mean(result->GetParams(), result->GetErrors());
+				meanKinEneErr = comb_mean_err(result->GetParams(), result->GetErrors());
+				stdKinEne = comb_std_dev(result->GetParams(), result->GetErrors());
+				stdKinEneErr = comb_std_dev_err(result->GetParams(), result->GetErrors());
+			}
 
 			fit_stats[1] = Form("Mean = %.2f#pm%.2f", comb_mean(result->GetParams(), result->GetErrors()), comb_mean_err(result->GetParams(), result->GetErrors()));
 			fit_stats[2] = Form("Std Dev = %.2f#pm%.2f", comb_std_dev(result->GetParams(), result->GetErrors()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
@@ -368,6 +413,8 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		canvas_cont[i]->Print(img_dir + "OmegaRec/cont_plot_" + std::to_string(i) + ext_img);
 
 		fit_text->Clear();
+
+		delete triple_fit;
 	}
 
 	// -------------------------------------------------------------------------------------------------
@@ -385,7 +432,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 
 		Int_t
 				sigmas_neu = 1.,
-				sigmas_ip = 1.;
+				sigmas_ip = 3;
 
 		Bool_t
 				cond[6],
@@ -396,7 +443,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		cond[2] = abs(Kchrec[8] - ip_avg[2]) < sigmas_ip * 1.06;
 		cond[3] = abs(neu_vtx_avg[2] - Kchrec[8]) < sigmas_ip * 0.39;
 
-		cond_tot = cond[0] && cond[1] && cond[2] && cond[3];
+		cond_tot = 1; // cond[0] && cond[1] && cond[2] && cond[3];
 
 		if (cond_tot && doneOmega == 1)
 		{
@@ -405,7 +452,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist[0][0]->Fill(angleKchPolar);
 				hist[0][1]->Fill(Kchrec[5]);
 				hist[0][2]->Fill(Omegarec[5]);
-				hist[0][3]->Fill(Omegarec[6]);
+				hist[0][3]->Fill(Omegapi0[3] - Omegapi0[5]);
 				hist[0][4]->Fill(angleOmegaPolar);
 				hist[0][5]->Fill(anglePi0KaonCM);
 				hist[0][6]->Fill(anglePichKaonCM);
@@ -419,7 +466,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist_00_IP[0][0]->Fill(rho_00_IP, event.interf_function(baseKin.Dtmc, 0, par));
 				hist_00_IP[0][1]->Fill(neu_vtx_avg[2] - ip_avg[8], event.interf_function(baseKin.Dtmc, 0, par));
 
-				hist2d[0]->Fill(Omegarec[6], Omegarec[5]);
+				hist2d[0]->Fill(Omegapi0[3] - Omegapi0[5], Omegarec[5]);
 
 				hist2d_00IP_pmIP[0][0]->Fill(rho_pm_IP, rho_00_IP, event.interf_function(baseKin.Dtmc, 0, par));
 				hist2d_00IP_pmIP[1][0]->Fill(abs(Kchrec[8] - ip_avg[8]), abs(neu_vtx_avg[2] - ip_avg[8]), event.interf_function(baseKin.Dtmc, 0, par));
@@ -429,7 +476,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist[1][0]->Fill(angleKchPolar);
 				hist[1][1]->Fill(Kchrec[5]);
 				hist[1][2]->Fill(Omegarec[5]);
-				hist[1][3]->Fill(Omegarec[6]);
+				hist[1][3]->Fill(Omegapi0[3] - Omegapi0[5]);
 				hist[1][4]->Fill(angleOmegaPolar);
 				hist[1][5]->Fill(anglePi0KaonCM);
 				hist[1][6]->Fill(anglePichKaonCM);
@@ -446,14 +493,14 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist2d_00IP_pmIP[0][1]->Fill(rho_pm_IP, rho_00_IP);
 				hist2d_00IP_pmIP[1][1]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 
-				hist2d[1]->Fill(Omegarec[6], Omegarec[5]);
+				hist2d[1]->Fill(Omegapi0[3] - Omegapi0[5], Omegarec[5]);
 			}
 			if (baseKin.mctruth_int == 4)
 			{
 				hist[2][0]->Fill(angleKchPolar);
 				hist[2][1]->Fill(Kchrec[5]);
 				hist[2][2]->Fill(Omegarec[5]);
-				hist[2][3]->Fill(Omegarec[6]);
+				hist[2][3]->Fill(Omegapi0[3] - Omegapi0[5]);
 				hist[2][4]->Fill(angleOmegaPolar);
 				hist[2][5]->Fill(anglePi0KaonCM);
 				hist[2][6]->Fill(anglePichKaonCM);
@@ -470,14 +517,14 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist2d_00IP_pmIP[0][2]->Fill(rho_pm_IP, rho_00_IP);
 				hist2d_00IP_pmIP[1][2]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 
-				hist2d[2]->Fill(Omegarec[6], Omegarec[5]);
+				hist2d[2]->Fill(Omegapi0[3] - Omegapi0[5], Omegarec[5]);
 			}
 			if (baseKin.mctruth_int == 5)
 			{
 				hist[3][0]->Fill(angleKchPolar);
 				hist[3][1]->Fill(Kchrec[5]);
 				hist[3][2]->Fill(Omegarec[5]);
-				hist[3][3]->Fill(Omegarec[6]);
+				hist[3][3]->Fill(Omegapi0[3] - Omegapi0[5]);
 				hist[3][4]->Fill(angleOmegaPolar);
 				hist[3][5]->Fill(anglePi0KaonCM);
 				hist[3][6]->Fill(anglePichKaonCM);
@@ -491,7 +538,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist_00_IP[3][0]->Fill(rho_00_IP);
 				hist_00_IP[3][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
-				hist2d[3]->Fill(Omegarec[6], Omegarec[5]);
+				hist2d[3]->Fill(Omegapi0[3] - Omegapi0[5], Omegarec[5]);
 
 				hist2d_00IP_pmIP[0][0]->Fill(rho_pm_IP, rho_00_IP);
 
@@ -503,7 +550,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist[4][0]->Fill(angleKchPolar);
 				hist[4][1]->Fill(Kchrec[5]);
 				hist[4][2]->Fill(Omegarec[5]);
-				hist[4][3]->Fill(Omegarec[6]);
+				hist[4][3]->Fill(Omegapi0[3] - Omegapi0[5]);
 				hist[4][4]->Fill(angleOmegaPolar);
 				hist[4][5]->Fill(anglePi0KaonCM);
 				hist[4][6]->Fill(anglePichKaonCM);
@@ -517,7 +564,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist_00_IP[4][0]->Fill(rho_00_IP);
 				hist_00_IP[4][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
-				hist2d[4]->Fill(Omegarec[6], Omegarec[5]);
+				hist2d[4]->Fill(Omegapi0[3] - Omegapi0[5], Omegarec[5]);
 
 				hist2d_00IP_pmIP[0][4]->Fill(rho_pm_IP, rho_00_IP);
 				hist2d_00IP_pmIP[1][4]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
@@ -527,7 +574,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist[5][0]->Fill(angleKchPolar);
 				hist[5][1]->Fill(Kchrec[5]);
 				hist[5][2]->Fill(Omegarec[5]);
-				hist[5][3]->Fill(Omegarec[6]);
+				hist[5][3]->Fill(Omegapi0[3] - Omegapi0[5]);
 				hist[5][4]->Fill(angleOmegaPolar);
 				hist[5][5]->Fill(anglePi0KaonCM);
 				hist[5][6]->Fill(anglePichKaonCM);
@@ -541,7 +588,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist_00_IP[5][0]->Fill(rho_00_IP);
 				hist_00_IP[5][1]->Fill(neu_vtx_avg[2] - ip_avg[8]);
 
-				hist2d[5]->Fill(Omegarec[6], Omegarec[5]);
+				hist2d[5]->Fill(Omegapi0[3] - Omegapi0[5], Omegarec[5]);
 
 				hist2d_00IP_pmIP[0][5]->Fill(rho_pm_IP, rho_00_IP);
 				hist2d_00IP_pmIP[1][5]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
@@ -752,13 +799,22 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 
 	// Addition of stdDevs to the properties file
 	std::string decayType[2] = {"neutral", "charged"};
-	for(Int_t i = 0; i < 2; i++)
-		for(Int_t j = 0; j < 3; j++)
+	for (Int_t i = 0; i < 2; i++)
+		for (Int_t j = 0; j < 3; j++)
 		{
 			properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["stdDev"][j] = stdDevOmegaVtx[i * 3 + j];
 			properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["error"][j] = stdDevOmegaVtxErr[i * 3 + j];
 		}
 
+	properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"] = meanInvMass;
+	properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"] = meanInvMassErr;
+	properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"] = stdInvMass;
+	properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"] = stdInvMassErr;
+
+	properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"] = meanKinEne;
+	properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"] = meanKinEneErr;
+	properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"] = stdKinEne;
+	properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"] = stdKinEneErr;
 
 	properties["lastScript"] = "Plots of Omega Reconstruction";
 	properties["lastUpdate"] = Obj.getCurrentTimestamp();

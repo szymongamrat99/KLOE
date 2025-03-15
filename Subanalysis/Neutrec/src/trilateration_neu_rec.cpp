@@ -4,9 +4,8 @@
 #include "TTree.h"
 #include "TH1.h"
 
-#include "../../../Include/Codes/reconstructor.h"
-#include "../../../Include/const.h"
-#include "../../../Include/Codes/plane_intersection.h"
+#include <reconstructor.h>
+#include <plane_intersection.h>
 #include "../inc/trilateration.hpp"
 
 void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	arguments are: 1. Number of points

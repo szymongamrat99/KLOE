@@ -1,0 +1,14 @@
+{
+  "$schema": "./analysis-schema.json",
+
+  "lastUpdate": "2025-01-01",
+  "lastScript": "Dupa",
+
+  "variables": {
+    "tree": {
+      "filename": {
+        "dupa": "sda"
+      }
+    }
+  }
+}

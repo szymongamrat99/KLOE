@@ -15,7 +15,7 @@
 #include <fort_common.h>
 #include <kloe_class.h>
 
-// int genvars(int, int, int);
+Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
 Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
 
 #endif //! GENVARS_H

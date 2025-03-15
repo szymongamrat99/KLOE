@@ -19,61 +19,71 @@
 #include "uncertainties.h"
 #include "charged_mom.h"
 #include "neutral_mom.h"
-#include "lorentz_transf.h"
 #include "plane_intersection.h"
 #include "closest_approach.h"
-#include "constraints_tri.h"
 #include "chi2_dist.h"
+#include <KinFitter.h>
 
 #include "../inc/trilateration.hpp"
 
 using namespace std;
 
-const Int_t N_free = 24, N_const = 4;
-Int_t j_ch, k_ch;
-
-Double_t det;
-Float_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, Tcorr;
-Int_t fail;
-
-Int_t selected[4] = {1, 2, 3, 4};
-
-void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount, Short_t jmin, Short_t jmax, const Short_t M, Bool_t good_clus, Controls::DataType data_type)
+Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+	Bool_t
+			good_clus = (Bool_t)properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
+
+	const Short_t
+			loopcount = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+			jmin = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+			jmax = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
+			M = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+			N_const = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["fixedVars"],
+			N_free = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["freeVars"],
+			range = Int_t(jmax - jmin) + 1;
+
+	const Double_t
+			chiSqrStep = (Double_t)properties["variables"]["KinFit"]["Trilateration"]["chiSqrStep"];
+
+	Double_t det;
+	Float_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, Tcorr;
+	Int_t fail;
+
+	Int_t selected[4] = {1, 2, 3, 4};
 
 	TF1 *constraints[M];
 
 	gErrorIgnoreLevel = 6001;
 
-	TChain *chain = new TChain("INTERF/h1");
-	chain_init(chain, first_file, last_file);
+	// Creation of filename for the analysis step
+	std::string
+			datestamp = Obj.getCurrentDate(),
+			name = "";
 
-	TString name = "";
+	name = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
 
-	const Int_t range = (jmax - jmin) + 1;
+	properties["variables"]["tree"]["filename"]["trilaterationKinFit"] = name;
 
-	name = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
-
-	TFile *file = new TFile(name, "recreate");
-	TTree *tree = new TTree(neutrec_kin_fit_tree, "Neu vtx rec with trilateration kin fit");
+	TFile *file = new TFile(name.c_str(), "recreate");
+	TTree *tree = new TTree(neutrec_tri_tree, "Trilateration reconstruction with kin fit");
 
 	// Branches' addresses
 	// Bhabha vars
 	Float_t bhabha_mom[4], bhabha_mom_err[4], bhabha_vtx[3];
 
-	chain->SetBranchAddress("Bpx", &bhabha_mom[0]);
-	chain->SetBranchAddress("Bpy", &bhabha_mom[1]);
-	chain->SetBranchAddress("Bpz", &bhabha_mom[2]);
-	chain->SetBranchAddress("Broots", &bhabha_mom[3]);
+	chain.SetBranchAddress("Bpx", &bhabha_mom[0]);
+	chain.SetBranchAddress("Bpy", &bhabha_mom[1]);
+	chain.SetBranchAddress("Bpz", &bhabha_mom[2]);
+	chain.SetBranchAddress("Broots", &bhabha_mom[3]);
 
-	chain->SetBranchAddress("Bwidpx", &bhabha_mom_err[0]);
-	chain->SetBranchAddress("Bwidpy", &bhabha_mom_err[1]);
-	chain->SetBranchAddress("Bwidpz", &bhabha_mom_err[2]);
-	chain->SetBranchAddress("Brootserr", &bhabha_mom_err[3]);
+	chain.SetBranchAddress("Bwidpx", &bhabha_mom_err[0]);
+	chain.SetBranchAddress("Bwidpy", &bhabha_mom_err[1]);
+	chain.SetBranchAddress("Bwidpz", &bhabha_mom_err[2]);
+	chain.SetBranchAddress("Brootserr", &bhabha_mom_err[3]);
 
-	chain->SetBranchAddress("Bx", &bhabha_vtx[0]);
-	chain->SetBranchAddress("By", &bhabha_vtx[1]);
-	chain->SetBranchAddress("Bz", &bhabha_vtx[2]);
+	chain.SetBranchAddress("Bx", &bhabha_vtx[0]);
+	chain.SetBranchAddress("By", &bhabha_vtx[1]);
+	chain.SetBranchAddress("Bz", &bhabha_vtx[2]);
 
 	// Cluster vars
 	Int_t nclu;
@@ -82,26 +92,22 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 
 	BaseKinematics baseKin;
 
-	chain->SetBranchAddress("nclu", &nclu);
-	chain->SetBranchAddress("Xcl", cluster[0]);
-	chain->SetBranchAddress("Ycl", cluster[1]);
-	chain->SetBranchAddress("Zcl", cluster[2]);
-	chain->SetBranchAddress("Tcl", cluster[3]);
-	chain->SetBranchAddress("Enecl", cluster[4]);
+	chain.SetBranchAddress("nclu", &nclu);
+	chain.SetBranchAddress("Xcl", cluster[0]);
+	chain.SetBranchAddress("Ycl", cluster[1]);
+	chain.SetBranchAddress("Zcl", cluster[2]);
+	chain.SetBranchAddress("Tcl", cluster[3]);
+	chain.SetBranchAddress("Enecl", cluster[4]);
 
-	chain->SetBranchAddress("mctruth", &mctruth);
-	chain->SetBranchAddress("mcflag", &mcflag);
-	chain->SetBranchAddress("ncll", baseKin.ncll);
+	chain.SetBranchAddress("mctruth", &mctruth);
+	chain.SetBranchAddress("mcflag", &mcflag);
+	chain.SetBranchAddress("ncll", baseKin.ncll);
 
-	// tree_corr->SetBranchAddress("bunchcorr", &bunch_corr);
-	// chain->AddFriend(tree_corr);
-
-	Int_t nentries = (Int_t)chain->GetEntries();
+	Int_t nentries = (Int_t)chain.GetEntries();
 
 	Bool_t clusterEnergy, solError, cond_clus[4];
-	Int_t ind_gam[4], sort_index[range], sort_ind_gam[2][4], chosen_ind_gam[4], found_best, isConverged, n_bunch;
-	Float_t CHISQRMIN, min_value_def, value_first[range];
-	Double_t reinitialize[(N_free + N_const) * (N_free + N_const)] = {0.};
+	Int_t ind_gam[4], sort_ind_gam[2][4], chosen_ind_gam[4], found_best, isConverged, n_bunch;
+	Float_t CHISQRMIN, min_value_def;
 	Float_t gamma_mom_min[4][4], neu_vtx_min[4], kaon_mom_min[4], kaon_vel[3], kaon_vel_tot, kaon_path_tot, bhabha_vtx_min[3], ip_min[3], time_diff[2][4], time_diff_fin, gamma_path[2][4], neu_vtx[2][4];
 
 	TMatrixD V(N_free + N_const, N_free + N_const), D(M, N_free + N_const), D_T(N_free + N_const, M), V_final(N_free + N_const, N_free + N_const), V_aux(N_free + N_const, N_free + N_const), V_min(N_free + N_const, N_free + N_const), Aux(M, M), V_invert(N_free, N_free), V_init(N_free + N_const, N_free + N_const);
@@ -130,26 +136,34 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 
 	TBranch *b_chisqr = tree->Branch("chi2min", &CHISQRMIN, "chi2min/F");
 
-	constraints[0] = new TF1("Ene consv", &ene_consv, 0, 1, N_free + N_const);
-	constraints[1] = new TF1("Minv consv", &minv_consv, 0, 1, N_free + N_const);
-	constraints[2] = new TF1("x consv", &x_consv, 0, 1, N_free + N_const);
-	constraints[3] = new TF1("y consv", &y_consv, 0, 1, N_free + N_const);
-	constraints[4] = new TF1("z consv", &z_consv, 0, 1, N_free + N_const);
-	constraints[5] = new TF1("gamma1 consv", &gamma1_consv, 0, 1, N_free + N_const);
-	constraints[6] = new TF1("gamma2 consv", &gamma2_consv, 0, 1, N_free + N_const);
-	constraints[7] = new TF1("gamma3 consv", &gamma3_consv, 0, 1, N_free + N_const);
-	constraints[8] = new TF1("gamma4 consv", &gamma4_consv, 0, 1, N_free + N_const);
-
-	TH1 *chi2 = new TH1F("chi2", "", 100, -10.0, 30.0);
+	TH1 *chi2 = new TH1F("chi2", "", 100, -10.0, 10.0);
 
 	Bool_t data_flag;
 	Bool_t cond_time_clus[2];
 
+	// Progress bar
 	boost::progress_display show_progress(nentries);
+	// --------------------------------------------------------------------
+
+	Int_t mode = 1;
+
+	std::vector<std::string> ConstSet = {
+			"EnergyConsvCM",
+			"MinvConsv",
+			"NeutralXPathConsvLAB",
+			"NeutralYPathConsvLAB",
+			"NeutralZPathConsvLAB"};
+
+	KLOE::KinFitter *kinematicFitObj = new KLOE::KinFitter("Trilateration", N_free, N_const, M, 0, loopcount, chiSqrStep, logger);
+	kinematicFitObj->ConstraintSet(ConstSet);
+
+	Double_t
+			Param[N_free + N_const],
+			Errors[N_free + N_const];
 
 	for (Int_t i = 0; i < nentries; i++)
 	{
-		chain->GetEntry(i);
+		chain.GetEntry(i);
 
 		min_value_def = 999999.;
 		FUNVALMIN = 999999.;
@@ -157,7 +171,11 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 
 		isConverged = 0;
 
-		dataFlagSetter(data_type, data_flag, int(mcflag), int(mctruth));
+		int
+				mctruth_int = int(mctruth),
+				mcflag_int = int(mcflag);
+
+		Obj.dataFlagSetter(dataType, data_flag, mcflag_int, mctruth_int);
 
 		if (nclu >= 4 && data_flag)
 		{
@@ -166,8 +184,6 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 					for (Int_t j3 = j2 + 1; j3 < nclu - 1; j3++)
 						for (Int_t j4 = j3 + 1; j4 < nclu; j4++)
 						{
-							V.SetMatrixArray(reinitialize);
-
 							ind_gam[0] = j1;
 							ind_gam[1] = j2;
 							ind_gam[2] = j3;
@@ -190,129 +206,64 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 
 							S = R.MySolve(selected);
 
-							cond_time_clus[0] = S.sol[0][3] < cluster[3][baseKin.ncll[ind_gam[0]] - 1] && S.sol[0][3] < cluster[3][baseKin.ncll[ind_gam[1]] - 1] && S.sol[0][3] < cluster[3][baseKin.ncll[ind_gam[2]] - 1] && S.sol[0][3] < cluster[3][baseKin.ncll[ind_gam[3]] - 1];
+							clusterEnergy = cluster[4][baseKin.ncll[ind_gam[0]] - 1] > MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[1]] - 1] > MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[2]] - 1] > MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[3]] - 1] > MIN_CLU_ENE;
 
-							cond_time_clus[1] = S.sol[1][3] < cluster[3][baseKin.ncll[ind_gam[0]] - 1] && S.sol[1][3] < cluster[3][baseKin.ncll[ind_gam[1]] - 1] && S.sol[1][3] < cluster[3][baseKin.ncll[ind_gam[2]] - 1] && S.sol[1][3] < cluster[3][baseKin.ncll[ind_gam[3]] - 1];
+							for (Int_t k = 0; k < 4; k++)
+							{
+								cond_clus[k] =
+										cluster[3][baseKin.ncll[ind_gam[k]] - 1] > 0 &&
+										cluster[0][baseKin.ncll[ind_gam[k]] - 1] != 0 &&
+										cluster[1][baseKin.ncll[ind_gam[k]] - 1] != 0 &&
+										cluster[2][baseKin.ncll[ind_gam[k]] - 1] != 0;
 
-							clusterEnergy = (cluster[4][baseKin.ncll[ind_gam[0]] - 1] > MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[1]] - 1] > MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[2]] - 1] > MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[3]] - 1] > MIN_CLU_ENE);
+								if (k < 2)
+									cond_time_clus[k] = S.sol[k][3] < cluster[3][baseKin.ncll[ind_gam[0]] - 1] &&
+																			S.sol[k][3] < cluster[3][baseKin.ncll[ind_gam[1]] - 1] &&
+																			S.sol[k][3] < cluster[3][baseKin.ncll[ind_gam[2]] - 1] &&
+																			S.sol[k][3] < cluster[3][baseKin.ncll[ind_gam[3]] - 1];
+							}
 
-							cond_clus[0] = cluster[3][baseKin.ncll[ind_gam[0]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[0]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[0]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[0]] - 1] != 0;
-							cond_clus[1] = cluster[3][baseKin.ncll[ind_gam[1]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[1]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[1]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[1]] - 1] != 0;
-							cond_clus[2] = cluster[3][baseKin.ncll[ind_gam[2]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[2]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[2]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[2]] - 1] != 0;
-							cond_clus[3] = cluster[3][baseKin.ncll[ind_gam[3]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[3]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[3]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[3]] - 1] != 0;
+							Bool_t cond_tot = cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
 
-							if (clusterEnergy && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && (cond_time_clus[0] || cond_time_clus[1]))
+							if (cond_tot && (cond_time_clus[0] || cond_time_clus[1]))
 							{
 								for (Int_t k = 0; k < 4; k++)
 								{
-									X_init(k * 5) = cluster[0][baseKin.ncll[ind_gam[k]] - 1];
-									X_init(k * 5 + 1) = cluster[1][baseKin.ncll[ind_gam[k]] - 1];
-									X_init(k * 5 + 2) = cluster[2][baseKin.ncll[ind_gam[k]] - 1];
-									X_init(k * 5 + 3) = cluster[3][baseKin.ncll[ind_gam[k]] - 1];
-									X_init(k * 5 + 4) = cluster[4][baseKin.ncll[ind_gam[k]] - 1];
+									Param[k * 5] = cluster[0][baseKin.ncll[ind_gam[k]] - 1];
+									Param[k * 5 + 1] = cluster[1][baseKin.ncll[ind_gam[k]] - 1];
+									Param[k * 5 + 2] = cluster[2][baseKin.ncll[ind_gam[k]] - 1];
+									Param[k * 5 + 3] = cluster[3][baseKin.ncll[ind_gam[k]] - 1];
+									Param[k * 5 + 4] = cluster[4][baseKin.ncll[ind_gam[k]] - 1];
 
-									V(k * 5, k * 5) = pow(clu_x_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
-									V(k * 5 + 1, k * 5 + 1) = pow(clu_y_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
-									V(k * 5 + 2, k * 5 + 2) = pow(clu_z_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2); // cm
-									V(k * 5 + 3, k * 5 + 3) = pow(clu_time_error(X_init(k * 5 + 4)), 2);																									 // ns
-									V(k * 5 + 4, k * 5 + 4) = pow(clu_ene_error(X_init(k * 5 + 4)), 2);																										 // MeV
+									Errors[k * 5] = clu_x_error(Param[k * 5], Param[k * 5 + 1], Param[k * 5 + 2], Param[k * 5 + 4]);
+									Errors[k * 5 + 1] = clu_y_error(Param[k * 5], Param[k * 5 + 1], Param[k * 5 + 2], Param[k * 5 + 4]);
+									Errors[k * 5 + 2] = clu_z_error(Param[k * 5], Param[k * 5 + 1], Param[k * 5 + 2], Param[k * 5 + 4]);
+									// cm
+									Errors[k * 5 + 3] = clu_time_error(Param[k * 5 + 4]); // ns
+									Errors[k * 5 + 4] = clu_ene_error(Param[k * 5 + 4]);	 // MeV
+
+									Param[20 + k] = bhabha_mom[k];
+									Errors[20 + k] = bhabha_mom_err[k];
+
+									if (k < 3)
+									{
+										Param[24 + k] = bhabha_vtx[k];
+										Errors[24 + k] = 0.;
+									}
 								}
-
-								X_init(20) = bhabha_mom[0];
-								X_init(21) = bhabha_mom[1];
-								X_init(22) = bhabha_mom[2];
-								X_init(23) = bhabha_mom[3];
-
-								V(20, 20) = pow(bhabha_mom_err[0], 2);
-								V(21, 21) = pow(bhabha_mom_err[1], 2);
-								V(22, 22) = pow(bhabha_mom_err[2], 2);
-								V(23, 23) = pow(bhabha_mom_err[3], 2);
-
-								X_init(24) = bhabha_vtx[0];
-								X_init(25) = bhabha_vtx[1];
-								X_init(26) = bhabha_vtx[2];
-
-								V(24, 24) = 0.;
-								V(25, 25) = 0.;
-								V(26, 26) = 0.;
 
 								for (Int_t k1 = jmin; k1 <= jmax; k1++)
 								{
-									fail = 0;
-									CHISQR = 999999.;
-									CHISQRTMP = 999999.;
-									FUNVALTMP = 999999.;
+									kinematicFitObj->ParameterInitialization(Param, Errors);
 
-									X_init(27) = k1;
+									Tcorr = k1 * T0;
 
-									X = X_init;
+									CHISQRTMP = kinematicFitObj->FitFunction(Tcorr);
 
-									V_invert = V.GetSub(0, N_free - 1, 0, N_free - 1).Invert();
-
-									for (Int_t j = 0; j < loopcount; j++)
-									{
-
-										for (Int_t l = 0; l < M; l++)
-										{
-											C(l) = constraints[l]->EvalPar(0, X.GetMatrixArray());
-											for (Int_t m = 0; m < N_free + N_const; m++)
-											{
-												constraints[l]->SetParameters(X.GetMatrixArray());
-												if (m < N_free)
-													D(l, m) = constraints[l]->GradientPar(m, 0, 0.01);
-												else
-													D(l, m) = 0;
-											}
-										}
-
-										D_T.Transpose(D);
-
-										Aux = (D * V * D_T);
-
-										Aux.Invert(&det);
-
-										if (!TMath::IsNaN(det) && det != 0)
-										{
-
-											L = (Aux * C);
-
-											CORR = V * D_T * L;
-
-											if (1)
-											{
-												X_final = X - CORR;
-												V_final = V - V * D_T * Aux * D * V;
-
-												for (Int_t l = 0; l < M; l++)
-													C(l) = constraints[l]->EvalPar(0, X_final.GetMatrixArray());
-
-												FUNVAL = Dot((X_final - X_init).GetSub(0, N_free - 1), V_invert * (X_final - X_init).GetSub(0, N_free - 1)) + Dot(L, C);
-
-												CHISQR = Dot((X_final - X_init).GetSub(0, N_free - 1), V_invert * (X_final - X_init).GetSub(0, N_free - 1));
-											}
-											else
-											{
-												break;
-											}
-										}
-										else
-										{
-											fail = 1;
-										}
-
-										if (fail == 0)
-										{
-											X = X_final;
-											X_init_aux = X_init;
-											V_aux = V_final;
-											L_aux = L;
-											C_aux = C;
-											FUNVALTMP = FUNVAL;
-											CHISQRTMP = CHISQR;
-										}
-									}
-
-									Tcorr = X(27) * T0;
+									kinematicFitObj->GetResults(X, V, X_init, V_init, C, L);
 
 									Reconstructor R;
 									Solution S;
@@ -322,7 +273,7 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 										R.SetClu(k, X[k * 5],
 														 X[k * 5 + 1],
 														 X[k * 5 + 2],
-														 X[k * 5 + 3] + Tcorr,
+														 X[k * 5 + 3],
 														 X[k * 5 + 4]);
 
 										R.SetClu(4, 0., 0., 0., 0., 0.);
@@ -337,34 +288,23 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 									{
 										if (!S.error[k])
 										{
-											neu_vtx[k][0] = S.sol[k][0];
-											neu_vtx[k][1] = S.sol[k][1];
-											neu_vtx[k][2] = S.sol[k][2];
-											neu_vtx[k][3] = S.sol[k][3];
+											for (Int_t l = 0; l < 4; l++)
+												neu_vtx[k][l] = S.sol[k][l];
 										}
 										else
 										{
-											neu_vtx[k][0] = 999.;
-											neu_vtx[k][1] = 999.;
-											neu_vtx[k][2] = 999.;
-											neu_vtx[k][3] = 999.;
+											for (Int_t l = 0; l < 4; l++)
+												neu_vtx[k][l] = 999.;
 										}
 
 										for (Int_t l = 0; l < 4; l++)
 										{
-											distance[l] = sqrt(pow(X[l * 5] - neu_vtx[k][0], 2) +
-																				 pow(X[l * 5 + 1] - neu_vtx[k][1], 2) +
-																				 pow(X[l * 5 + 2] - neu_vtx[k][2], 2));
-
-											gamma_mom_tmp[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[k][0]) / distance[l]);
-											gamma_mom_tmp[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[k][1]) / distance[l]);
-											gamma_mom_tmp[l][2] = X[l * 5 + 4] * ((X[l * 5 + 2] - neu_vtx[k][2]) / distance[l]);
-											gamma_mom_tmp[l][3] = X[l * 5 + 4];
+											neutral_mom(X[l * 5], X[l * 5 + 1], X[l * 5 + 2], X[l * 5 + 4], neu_vtx[k], gamma_mom_tmp[l]);
 
 											gamma_mom_tmp[l][4] = X[l * 5];
 											gamma_mom_tmp[l][5] = X[l * 5 + 1];
 											gamma_mom_tmp[l][6] = X[l * 5 + 2];
-											gamma_mom_tmp[l][7] = X[l * 5 + 3] + Tcorr;
+											gamma_mom_tmp[l][7] = X[l * 5 + 3];
 										}
 
 										fourKnetri_tmp[k][0] = gamma_mom_tmp[0][0] + gamma_mom_tmp[1][0] + gamma_mom_tmp[2][0] + gamma_mom_tmp[3][0];
@@ -398,24 +338,25 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 											value[k] = 999999.;
 									}
 
-									cond_time_clus[0] = S.sol[0][3] < X(3) + Tcorr && S.sol[0][3] < X(8) + Tcorr && S.sol[0][3] < X(13) + Tcorr && S.sol[0][3] < X(18) + Tcorr;
+									cond_time_clus[0] = S.sol[0][3] < X(3) &&
+																			S.sol[0][3] < X(8) &&
+																			S.sol[0][3] < X(13) &&
+																			S.sol[0][3] < X(18);
 
-									cond_time_clus[1] = S.sol[1][3] < X(3) + Tcorr && S.sol[1][3] < X(8) + Tcorr && S.sol[1][3] < X(13) + Tcorr && S.sol[1][3] < X(18) + Tcorr;
+									cond_time_clus[1] = S.sol[1][3] < X(3) &&
+																			S.sol[1][3] < X(8) &&
+																			S.sol[1][3] < X(13) &&
+																			S.sol[1][3] < X(18);
 
 									if (abs(CHISQRTMP) < abs(CHISQRMIN))
-									{
+									{										
 										if (cond_time_clus[0] && value[0] < value[1])
 										{
 											isConverged = 1;
 											FUNVALMIN = FUNVALTMP;
 											CHISQRMIN = CHISQRTMP;
 
-											X_min = X;
-											X_init_min = X_init_aux;
-											V_min = V_aux;
-											V_init = V;
-											C_min = C_aux;
-											L_min = L_aux;
+											kinematicFitObj->GetResults(X_min, V_min, X_init_min, V_init, C_min, L_min);
 
 											g4takentri_kinfit[0] = ind_gam[0];
 											g4takentri_kinfit[1] = ind_gam[1];
@@ -440,7 +381,7 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 												gamma_mom_final[l][4] = X[l * 5];
 												gamma_mom_final[l][5] = X[l * 5 + 1];
 												gamma_mom_final[l][6] = X[l * 5 + 2];
-												gamma_mom_final[l][7] = X[l * 5 + 3] + Tcorr;
+												gamma_mom_final[l][7] = X[l * 5 + 3];
 											}
 
 											fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
@@ -458,7 +399,7 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 											iptri_kinfit[1] = ip_tmp[0][1];
 											iptri_kinfit[2] = ip_tmp[0][2];
 
-											bunchnum = X_min(27);
+											bunchnum = k1;
 										}
 										else if (cond_time_clus[1] && value[1] < value[0])
 										{
@@ -466,12 +407,7 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 											FUNVALMIN = FUNVALTMP;
 											CHISQRMIN = CHISQRTMP;
 
-											X_min = X;
-											X_init_min = X_init_aux;
-											V_min = V_aux;
-											V_init = V;
-											C_min = C_aux;
-											L_min = L_aux;
+											kinematicFitObj->GetResults(X_min, V_min, X_init_min, V_init, C_min, L_min);
 
 											g4takentri_kinfit[0] = ind_gam[0];
 											g4takentri_kinfit[1] = ind_gam[1];
@@ -496,7 +432,7 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 												gamma_mom_final[l][4] = X[l * 5];
 												gamma_mom_final[l][5] = X[l * 5 + 1];
 												gamma_mom_final[l][6] = X[l * 5 + 2];
-												gamma_mom_final[l][7] = X[l * 5 + 3] + Tcorr;
+												gamma_mom_final[l][7] = X[l * 5 + 3];
 											}
 
 											fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
@@ -514,7 +450,7 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 											iptri_kinfit[1] = ip_tmp[1][1];
 											iptri_kinfit[2] = ip_tmp[1][2];
 
-											bunchnum = X_min(27);
+											bunchnum = k1;
 										}
 										else
 										{
@@ -556,7 +492,11 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 								}
 							}
 						}
-			chi2->Fill(CHISQRMIN);
+
+			if(isConverged == 1)
+			{
+				chi2->Fill(CHISQRMIN);
+			}
 		}
 		else
 		{
@@ -611,7 +551,7 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 
 	TCanvas *c1 = new TCanvas("c1", "", 750, 750);
 	// chi2->Fit(func);
-	//c1->SetLogy(1);
+	// c1->SetLogy(1);
 
 	chi2->GetYaxis()->SetRangeUser(0, 1.2 * chi2->GetMaximum());
 	chi2->Draw();
@@ -622,4 +562,6 @@ void tri_neurec_kinfit_corr(Int_t first_file, Int_t last_file, Short_t loopcount
 	file->Write();
 	file->Close();
 	delete file;
+
+	return 0;
 }

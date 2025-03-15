@@ -25,7 +25,6 @@
 #include "uncertainties.h"
 #include "charged_mom.h"
 #include "neutral_mom.h"
-#include "lorentz_transf.h"
 #include "plane_intersection.h"
 #include "closest_approach.h"
 #include "chi2_dist.h"
@@ -429,8 +428,8 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 						PichFourMomKaonCM[2][4];
 
 				// Lorentz transformation of Pi+ and Pi- to CM frame of charged 'Kaon'
-				lorentz_transf(boost_vec_Kchboost, PichFourMom[0], PichFourMomKaonCM[0]);
-				lorentz_transf(boost_vec_Kchboost, PichFourMom[1], PichFourMomKaonCM[1]);
+				Obj.lorentz_transf(boost_vec_Kchboost, PichFourMom[0], PichFourMomKaonCM[0]);
+				Obj.lorentz_transf(boost_vec_Kchboost, PichFourMom[1], PichFourMomKaonCM[1]);
 
 				// Transformed pions to CM frame of 'Kaon' and the angle between them - should be 180 deg for signal
 				TVector3
@@ -447,8 +446,8 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 						Pi0KaonCM[2][4];
 
 				// Lorentz transformation of Pi0 to Kaon CM frame
-				lorentz_transf(boost_vec_Kne, Pi0Mom[0], Pi0KaonCM[0]);
-				lorentz_transf(boost_vec_Kne, Pi0Mom[1], Pi0KaonCM[1]);
+				Obj.lorentz_transf(boost_vec_Kne, Pi0Mom[0], Pi0KaonCM[0]);
+				Obj.lorentz_transf(boost_vec_Kne, Pi0Mom[1], Pi0KaonCM[1]);
 
 				// Transformed pions to CM frame of 'Kaon' and the angle between them - should be 180 deg for signal
 				TVector3
@@ -466,8 +465,8 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 						OmegaMomCM[4];
 
 				// Lorentz transformation of Pi0 and Omega to Phi's CM frame
-				lorentz_transf(boost_vec_phi, Pi0NonOmega, Pi0NonOmegaCM);
-				lorentz_transf(boost_vec_phi, OmegaMom, OmegaMomCM);
+				Obj.lorentz_transf(boost_vec_phi, Pi0NonOmega, Pi0NonOmegaCM);
+				Obj.lorentz_transf(boost_vec_phi, OmegaMom, OmegaMomCM);
 
 				// Transformed mesons to Phi's CM frame and angle between them
 				TVector3

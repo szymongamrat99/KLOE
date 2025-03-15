@@ -211,8 +211,8 @@ int main(int argc, char *argv[])
     }
     case Controls::MainMenu::KNEREC_TRILAT:
     {
+      Neutrec_main(chain, eventAnalysis, dataTypeOpt);
       break;
-      // Neutrec_main(chain);
     }
     case Controls::MainMenu::KNEREC_TRIANGLE:
       break;

@@ -13,46 +13,48 @@
 #include <neutral_mom.h>
 #include "../inc/trilateration.hpp"
 
-int triangle_neurec(int first_file, int last_file, Short_t loopcount, Short_t jmin, Short_t jmax, Short_t M, Bool_t good_clus, Controls::DataType data_type)
+Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
-	ErrorHandling::ErrorLogs errLogger;
-	LogsHandling::Logs logger;
-	std::ofstream LogFileMain, LogFileTriangle, LogFileTri, LogFileTriKinFit;
-	std::ofstream ErrFileMain, ErrFileTriangle, ErrFileTri, ErrFileTriKinFit;
 
-	int range = Int_t(jmax - jmin) + 1;
+	Bool_t
+			good_clus = (Bool_t)properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
+
+	const Short_t
+			loopcount = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+			jmin = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+			jmax = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
+			M = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+			N_const = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["fixedVars"],
+			N_free = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["freeVars"],
+			range = Int_t(jmax - jmin) + 1;
 
 	TString
-			filename_trilateration = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
-
-	TChain *chain = new TChain("INTERF/h1");
-	chain_init(chain, first_file, last_file);
+			filename_trilateration = (std::string)properties["variables"]["tree"]["filename"]["trilaterationKinFit"],
+			treename_trilateration = (std::string)properties["variables"]["tree"]["treename"]["trilaterationKinFit"];
 
 	try
 	{
-		TFile *file_gen = new TFile(genvarsPath);
 		TFile *file_trilateration = new TFile(filename_trilateration);
 
-		if (file_gen->IsZombie() || file_trilateration->IsZombie())
+		if (file_trilateration->IsZombie())
 		{
 			throw ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
 		}
 
-		TTree *tree_gen = (TTree *)file_gen->Get(gen_vars_tree);
-		TTree *tree_trilateration = (TTree *)file_trilateration->Get(neutrec_kin_fit_tree);
+		TTree *tree_trilateration = (TTree *)file_trilateration->Get(treename_trilateration);
 
 		// Branches' addresses
 		// Bhabha vars
 		Float_t bhabha_mom[4], bhabha_vtx[3];
 
-		chain->SetBranchAddress("Bpx", &bhabha_mom[0]);
-		chain->SetBranchAddress("Bpy", &bhabha_mom[1]);
-		chain->SetBranchAddress("Bpz", &bhabha_mom[2]);
-		chain->SetBranchAddress("Broots", &bhabha_mom[3]);
+		chain.SetBranchAddress("Bpx", &bhabha_mom[0]);
+		chain.SetBranchAddress("Bpy", &bhabha_mom[1]);
+		chain.SetBranchAddress("Bpz", &bhabha_mom[2]);
+		chain.SetBranchAddress("Broots", &bhabha_mom[3]);
 
-		chain->SetBranchAddress("Bx", &bhabha_vtx[0]);
-		chain->SetBranchAddress("By", &bhabha_vtx[1]);
-		chain->SetBranchAddress("Bz", &bhabha_vtx[2]);
+		chain.SetBranchAddress("Bx", &bhabha_vtx[0]);
+		chain.SetBranchAddress("By", &bhabha_vtx[1]);
+		chain.SetBranchAddress("Bz", &bhabha_vtx[2]);
 
 		// Cluster vars
 		Int_t nclu;
@@ -60,31 +62,21 @@ int triangle_neurec(int first_file, int last_file, Short_t loopcount, Short_t jm
 		Float_t cluster[5][500], Kchboost[9], Knereclor[9], Knemc[9], ip[3];
 		BaseKinematics baseKin;
 
-		chain->SetBranchAddress("nclu", &nclu);
-		chain->SetBranchAddress("Xacl", cluster[0]);
-		chain->SetBranchAddress("Yacl", cluster[1]);
-		chain->SetBranchAddress("Zacl", cluster[2]);
-		chain->SetBranchAddress("Tcl", cluster[3]);
-		chain->SetBranchAddress("Enecl", cluster[4]);
+		chain.SetBranchAddress("nclu", &nclu);
+		chain.SetBranchAddress("Xacl", cluster[0]);
+		chain.SetBranchAddress("Yacl", cluster[1]);
+		chain.SetBranchAddress("Zacl", cluster[2]);
+		chain.SetBranchAddress("Tcl", cluster[3]);
+		chain.SetBranchAddress("Enecl", cluster[4]);
 
-		chain->SetBranchAddress("mctruth", &mctruth);
-		chain->SetBranchAddress("mcflag", &mcflag);
+		chain.SetBranchAddress("mctruth", &mctruth);
+		chain.SetBranchAddress("mcflag", &mcflag);
 
-		chain->SetBranchAddress("ip", ip);
-		chain->SetBranchAddress("Kchboost", Kchboost);
-		chain->SetBranchAddress("Knereclor", Knereclor);
-		chain->SetBranchAddress("g4taken", g4taken);
-		chain->SetBranchAddress("ncll", baseKin.ncll);
-
-		Int_t good_clus_ind[4];
-		Float_t pgammc[4][8];
-
-		tree_gen->SetBranchAddress("pgammc1", pgammc[0]);
-		tree_gen->SetBranchAddress("pgammc2", pgammc[1]);
-		tree_gen->SetBranchAddress("pgammc3", pgammc[2]);
-		tree_gen->SetBranchAddress("pgammc4", pgammc[3]);
-
-		tree_gen->SetBranchAddress("clusindgood", good_clus_ind);
+		chain.SetBranchAddress("ip", ip);
+		chain.SetBranchAddress("Kchboost", Kchboost);
+		chain.SetBranchAddress("Knereclor", Knereclor);
+		chain.SetBranchAddress("g4taken", g4taken);
+		chain.SetBranchAddress("ncll", baseKin.ncll);
 
 		Int_t done_kinfit = 0, g4taken_kinfit[4] = {0};
 		Float_t chi2min_tri, Knetri_kinfit[10];
@@ -95,15 +87,20 @@ int triangle_neurec(int first_file, int last_file, Short_t loopcount, Short_t jm
 		tree_trilateration->SetBranchAddress("fourKnetri_kinfit", Knetri_kinfit);
 
 		// Adding friends to the chain
-		chain->AddFriend(tree_gen);
-		chain->AddFriend(tree_trilateration);
+		chain.AddFriend(tree_trilateration);
 
-		Int_t nentries = (Int_t)chain->GetEntries();
+		Int_t nentries = (Int_t)chain.GetEntries();
 
-		// Creation of the triangle method tree
-		TString name = neutrec_dir + root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
+		// Creation of filename for the analysis step
+		std::string
+				datestamp = Obj.getCurrentDate(),
+				name = "";
 
-		TFile *file = new TFile(name, "recreate");
+		name = neutrec_dir + root_files_dir + neu_triangle_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
+
+		properties["variables"]["tree"]["filename"]["trianglefinal"] = name;
+
+		TFile *file = new TFile(name.c_str(), "recreate");
 		TTree *tree = new TTree(neutrec_triangle_tree, "Neu vtx rec with triangle method");
 
 		// Variables
@@ -148,18 +145,17 @@ int triangle_neurec(int first_file, int last_file, Short_t loopcount, Short_t jm
 				nbin = 100;
 
 		Float_t
-					x_lim[4][2] = {
-												 {-50.0, 50.0},
-												 {-50.0, 50.0},
-												 {-50.0, 50.0},
-												 {-10.0, 20.0}
-					};
+				x_lim[4][2] = {
+						{-50.0, 50.0},
+						{-50.0, 50.0},
+						{-50.0, 50.0},
+						{-10.0, 20.0}};
 
 		boost::progress_display show_progress(nentries);
 
 		for (Int_t i = 0; i < nentries; i++)
 		{
-			chain->GetEntry(i);
+			chain.GetEntry(i);
 
 			for (Int_t j1 = 0; j1 < 4; j1++)
 				for (Int_t j2 = 0; j2 < 8; j2++)
@@ -179,9 +175,12 @@ int triangle_neurec(int first_file, int last_file, Short_t loopcount, Short_t jm
 			vtxSigmaMin = 999999.;
 			TrcSumMin = 999999.;
 
-			// Setting the data type flags
+			int
+					mctruth_int = int(mctruth),
+					mcflag_int = int(mcflag);
 
-			dataFlagSetter(data_type, data_flag, int(mcflag), int(mctruth));
+			// Setting the data type flags
+			Obj.dataFlagSetter(dataType, data_flag, mcflag_int, mctruth_int);
 
 			if (done_kinfit == 1 && data_flag)
 			{
@@ -222,7 +221,7 @@ int triangle_neurec(int first_file, int last_file, Short_t loopcount, Short_t jm
 
 						Float_t TrcSum = 0., vtxSigma = 0.;
 
-						neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip, bhabha_mom, Knerec, neu_vtx, trc);
+						neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip, bhabha_mom, Knerec, neu_vtx, trc, logger);
 
 						if (sqrt(pow(vtxSigma, 2) + pow(TrcSum, 2)) < sqrt(pow(vtxSigmaMin, 2) + pow(TrcSumMin, 2)))
 						{
@@ -246,7 +245,7 @@ int triangle_neurec(int first_file, int last_file, Short_t loopcount, Short_t jm
 								// }
 								// else
 								// {
-									Knetriangle[6 + l] = neu_vtx[l];
+								Knetriangle[6 + l] = neu_vtx[l];
 								//}
 
 								fourg4taken[l] = ind_gam[l];
@@ -274,10 +273,11 @@ int triangle_neurec(int first_file, int last_file, Short_t loopcount, Short_t jm
 					}
 				}
 
-				Double_t vKne = cVel * (Knereclor[4]/Knereclor[3]);
-				Double_t trec = sqrt(pow(Knereclor[6] - ip[0], 2) + 
+				Double_t vKne = cVel * (Knereclor[4] / Knereclor[3]);
+				Double_t trec = sqrt(pow(Knereclor[6] - ip[0], 2) +
 														 pow(Knereclor[7] - ip[1], 2) +
-														 pow(Knereclor[8] - ip[2], 2)) / vKne;
+														 pow(Knereclor[8] - ip[2], 2)) /
+												vKne;
 			}
 
 			tree->Fill();
@@ -293,12 +293,16 @@ int triangle_neurec(int first_file, int last_file, Short_t loopcount, Short_t jm
 	}
 	catch (ErrorHandling::ErrorCodes err)
 	{
-		errLogger.getErrLog(err, ErrFileTriangle);
-		ErrFileTriangle.close();
-
-		errLogger.getErrLog(err);
+		logger.getErrLog(err);
 		return int(err);
 	}
+
+	properties["lastScript"] = "Triangle Reconstruction";
+	properties["lastUpdate"] = Obj.getCurrentTimestamp();
+
+	std::ofstream outfile(propName);
+	outfile << properties.dump(4);
+	outfile.close();
 
 	return 0;
 }

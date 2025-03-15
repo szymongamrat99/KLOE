@@ -17,10 +17,8 @@
 #include "uncertainties.h"
 #include "charged_mom.h"
 #include "neutral_mom.h"
-#include "lorentz_transf.h"
 #include "plane_intersection.h"
 #include "closest_approach.h"
-#include "constraints_omega.h"
 #include "chi2_dist.h"
 #include <pi0_photon_pair.h>
 #include <KinFitter.h>
@@ -199,15 +197,6 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
 	TBranch *b_chisqr = tree->Branch("chi2min", &CHISQRMIN, "chi2min/F");
 
-	constraints[0] = new TF1("Ene consv", &OmegaConstraints::ene_consv, 0, 1, N_free + N_const);
-	constraints[1] = new TF1("Px consv", &OmegaConstraints::px_consv, 0, 1, N_free + N_const);
-	constraints[2] = new TF1("Py consv", &OmegaConstraints::py_consv, 0, 1, N_free + N_const);
-	constraints[3] = new TF1("Pz consv", &OmegaConstraints::pz_consv, 0, 1, N_free + N_const);
-	constraints[4] = new TF1("Photon1 consv", &OmegaConstraints::photon1_consv, 0, 1, N_free + N_const);
-	constraints[5] = new TF1("Photon2 consv", &OmegaConstraints::photon2_consv, 0, 1, N_free + N_const);
-	constraints[6] = new TF1("Photon3 consv", &OmegaConstraints::photon3_consv, 0, 1, N_free + N_const);
-	constraints[7] = new TF1("Photon4 consv", &OmegaConstraints::photon4_consv, 0, 1, N_free + N_const);
-
 	TH1 *chi2 = new TH1F("chi2", "", 100, -10.0, 30.0);
 
 	TH1 *pi01 = new TH1F("pi01", "", 100, 600.0, 1000.0);
@@ -353,7 +342,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									FUNVALMIN = FUNVALTMP;
 									CHISQRMIN = CHISQRTMP;
 
-									kinematicFitObj.GetResults(X_final, V_final, X_init, V_init, C_min, L_min);
+									kinematicFitObj.GetResults(X_min, V_min, X_init_min, V_min, C_min, L_min);
 
 									g4takenomega[0] = ind_gam[0];
 									g4takenomega[1] = ind_gam[1];
@@ -512,8 +501,8 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 																								 -(bhabha_mom[2] - Kne[2]) / (bhabha_mom[3] - Kne[3])},
 												PichFourMomKaonCM[2][4];
 
-										lorentz_transf(boost_vec_Kchboost, PichFourMom[0], PichFourMomKaonCM[0]);
-										lorentz_transf(boost_vec_Kchboost, PichFourMom[1], PichFourMomKaonCM[1]);
+										Obj.lorentz_transf(boost_vec_Kchboost, PichFourMom[0], PichFourMomKaonCM[0]);
+										Obj.lorentz_transf(boost_vec_Kchboost, PichFourMom[1], PichFourMomKaonCM[1]);
 
 										TVector3
 												pich1(PichFourMomKaonCM[0][0], PichFourMomKaonCM[0][1], PichFourMomKaonCM[0][2]),
@@ -528,8 +517,8 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 																						-(Kne[2]) / (Kne[3])},
 												Pi0KaonCM[2][4];
 
-										lorentz_transf(boost_vec_Kne, Pi0Mom[0], Pi0KaonCM[0]);
-										lorentz_transf(boost_vec_Kne, Pi0Mom[1], Pi0KaonCM[1]);
+										Obj.lorentz_transf(boost_vec_Kne, Pi0Mom[0], Pi0KaonCM[0]);
+										Obj.lorentz_transf(boost_vec_Kne, Pi0Mom[1], Pi0KaonCM[1]);
 
 										TVector3
 												pi01(Pi0KaonCM[0][0], Pi0KaonCM[0][1], Pi0KaonCM[0][2]),
@@ -545,8 +534,8 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 												Pi0NonOmegaCM[4],
 												OmegaMomCM[4];
 
-										lorentz_transf(boost_vec_phi, Pi0NonOmega, Pi0NonOmegaCM);
-										lorentz_transf(boost_vec_phi, OmegaMom, OmegaMomCM);
+										Obj.lorentz_transf(boost_vec_phi, Pi0NonOmega, Pi0NonOmegaCM);
+										Obj.lorentz_transf(boost_vec_phi, OmegaMom, OmegaMomCM);
 
 										TVector3
 												pi0CM(Pi0NonOmegaCM[0], Pi0NonOmegaCM[1], Pi0NonOmegaCM[2]),

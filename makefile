@@ -39,20 +39,20 @@ SRC_CPFIT := $(CPFIT_DIR)/$(SRCDIR)/cp_fit_mc_data.cpp
 SRC_CPFIT += $(CPFIT_DIR)/cpfit_main.cpp
 
 MAKE_GENVARS := $(GENERATED_DIR)/$(OBJDIR)/genvars_main.o
-# MAKE_GENVARS += $(GENERATED_DIR)/$(OBJDIR)/generated_variables.o
+MAKE_GENVARS += $(GENERATED_DIR)/$(OBJDIR)/generated_variables.o
 MAKE_GENVARS += $(GENERATED_DIR)/$(OBJDIR)/split_channels.o
 
 SRC_GENVARS := $(GENERATED_DIR)/$(SRCDIR)/split_channels.cpp
-# SRC_GENVARS += $(GENERATED_DIR)/$(SRCDIR)/generated_variables.cpp
+SRC_GENVARS += $(GENERATED_DIR)/$(SRCDIR)/generated_variables.cpp
 SRC_GENVARS += $(GENERATED_DIR)/genvars_main.cpp
 
-MAKE_NEUTREC := $(NEUTREC_DIR)/$(OBJDIR)/trilateration_neu_rec.o
+# MAKE_NEUTREC := $(NEUTREC_DIR)/$(OBJDIR)/trilateration_neu_rec.o
 MAKE_NEUTREC += $(NEUTREC_DIR)/$(OBJDIR)/trilateration_neu_rec_kin_fit_aux.o
 MAKE_NEUTREC += $(NEUTREC_DIR)/$(OBJDIR)/triangle_neu_rec.o
 MAKE_NEUTREC += $(NEUTREC_DIR)/$(OBJDIR)/comp_of_methods.o
 MAKE_NEUTREC += $(NEUTREC_DIR)/$(OBJDIR)/neutrec_main.o
 
-SRC_NEUTREC := $(NEUTREC_DIR)/$(SRCDIR)/trilateration_neu_rec.cpp
+# SRC_NEUTREC := $(NEUTREC_DIR)/$(SRCDIR)/trilateration_neu_rec.cpp
 SRC_NEUTREC += $(NEUTREC_DIR)/$(SRCDIR)/trilateration_neu_rec_kin_fit_aux.cpp
 SRC_NEUTREC += $(NEUTREC_DIR)/$(SRCDIR)/triangle_neu_rec.cpp
 SRC_NEUTREC += $(NEUTREC_DIR)/$(SRCDIR)/comp_of_methods.cpp
@@ -89,9 +89,9 @@ PROJECT := $(BINDIR)/KLSPM00.exe
 CXX = g++
 CXXFLAGS := `root-config --cflags --glibs` -g3 -fopenmp
 
-all: $(OBJ) $(MAKE_OMEGAREC) $(MAKE_GENVARS) $(MAKE_CPFIT) $(PROJECT) #$(MAKE_REGEN) $(MAKE_PLOTS) $(MAKE_NEUTREC)
+all: $(OBJ) $(MAKE_OMEGAREC) $(MAKE_GENVARS) $(MAKE_CPFIT) $(MAKE_NEUTREC) $(PROJECT) #$(MAKE_REGEN) $(MAKE_PLOTS)
 
-$(PROJECT): $(OBJ) $(MAKE_OMEGAREC) $(MAKE_GENVARS) $(MAKE_CPFIT) $(HEADER) #$(MAKE_REGEN) $(MAKE_PLOTS) $(MAKE_NEUTREC)
+$(PROJECT): $(OBJ) $(MAKE_OMEGAREC) $(MAKE_GENVARS) $(MAKE_CPFIT) $(MAKE_NEUTREC) $(HEADER) #$(MAKE_REGEN) $(MAKE_PLOTS)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 	
 $(OBJDIR)/CPVAnalysis.o: CPVAnalysis.cpp $(HEADER)
@@ -100,8 +100,8 @@ $(OBJDIR)/CPVAnalysis.o: CPVAnalysis.cpp $(HEADER)
 $(MAKE_CPFIT): $(SRC_CPFIT) $(HEADER)
 	@$(MAKE) -C $(CPFIT_DIR)
 
-# $(MAKE_NEUTREC): $(SRC_NEUTREC) $(HEADER)
-# 	@$(MAKE) -C $(NEUTREC_DIR)
+$(MAKE_NEUTREC): $(SRC_NEUTREC) $(HEADER)
+	@$(MAKE) -C $(NEUTREC_DIR)
 
 $(MAKE_OMEGAREC): $(SRC_OMEGAREC) $(HEADER)
 	@$(MAKE) -C $(OMEGAREC_DIR)

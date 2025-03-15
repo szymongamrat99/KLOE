@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/internal/big_one/4/users/gamrat/scripts/Scripts/CPVAnalysis.cpp
+inc/klspm00.hpp
+/internal/big_one/4/users/gamrat/scripts/Scripts/inc/klspm00.hpp
+
+/internal/big_one/4/users/gamrat/scripts/Scripts/inc/klspm00.hpp
+chrono
+-
+iostream
+-
+string
+-
+const.h
+-
+MainMenu.h
+-
+ErrorLogs.h
+-
+kloe_class.h
+-
+
