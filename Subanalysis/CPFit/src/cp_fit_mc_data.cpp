@@ -238,8 +238,6 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	tree_omega->SetBranchAddress("anglePi0KaonCM", &anglePi0KaonCM);
 	tree_omega->SetBranchAddress("anglePichKaonCM", &anglePichKaonCM);
 	tree_omega->SetBranchAddress("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM);
-	tree_omega->SetBranchAddress("anglePhiOmega", &anglePhiOmega);
-	tree_omega->SetBranchAddress("chi2min", &chi2min);
 
 	tree_mctruth->SetBranchAddress("mctruth", &baseKin.mctruth_int);
 
@@ -268,387 +266,695 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 	std::vector<Float_t> no_cuts_sig[2];
 
-	for (UInt_t i = 0; i < nentries; i++)
+	// Initialization of cut formulas
+	Int_t cuts_number = 6;
+
+	std::vector<TFormula> formula_vector(cuts_number);
+	std::vector<Double_t *> mean_sigma_vector(cuts_number);
+	std::vector<Bool_t> values_vector(cuts_number);
+	std::vector<Double_t> x_vector(cuts_number);
+	std::vector<TString> formula_names =
+			{
+					"DriftChamberRegenerationLeft",
+					"BeamPipeRegenerationLeft",
+					"DriftChamberRegenerationRight",
+					"BeamPipeRegenerationRight",
+					"RhoCutOmega",
+					"ChiSqrCut"};
+
+	Bool_t scanFlag = (Bool_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["flag"];
+	Int_t numberOfPoints;
+	Double_t
+			cutLimits[2] = {0.0},
+			cutStep = 0.0;
+
+	if (scanFlag)
 	{
-		chain.GetEntry(i);
+		numberOfPoints = (Int_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["numberOfPoints"];
+		cutLimits[0] = (Double_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][0];
+		cutLimits[1] = (Double_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][1];
+	}
+	else
+	{
+		numberOfPoints = 1;
+		cutLimits[0] = 0.0;
+		cutLimits[1] = 0.0;
+	}
 
-		if (neutVars.done == 1)
+	cutStep = abs(cutLimits[1] - cutLimits[0]) / (Double_t)numberOfPoints;
+
+	// Vectors needed for the initialization of graphs
+	TString graphMode = "FitResultErr";
+	std::vector<Double_t> cutLimit(numberOfPoints);
+	std::vector<std::vector<Double_t>> errValue(2);
+	TString xTitle = (std::string)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutTitle"],
+					yTitle = "|#sigma(Re(#varepsilon'/#varepsilon))/Re(#varepsilon'/#varepsilon)|",
+					yRightTitle = "|#sigma(Im(#varepsilon'/#varepsilon))/Im(#varepsilon'/#varepsilon)|",
+					cutName = (std::string)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutName"];
+
+	// Values of cuts to be used in the analysis
+	Double_t
+			rho_cut = 0.0;
+
+	std::vector<Double_t> par, parErr;
+
+	for (Int_t scanIter = 1; scanIter <= numberOfPoints; scanIter++)
+	{
+
+		Bool_t
+				simona_cuts = properties["variables"]["CPFit"]["cuts"]["simonaCuts"]["flag"];
+
+		Double_t
+				sigmas = 5,
+				sigma = (Double_t)properties["variables"]["RegenRejection"]["sigma"],
+				ChHigher[2] = {
+						properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
+						sigma * (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1]},
+				ChLower[2] = {properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0], sigma * (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0]}, TrHigher[2] = {properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1], sigma * (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1]}, TrLower[2] = {properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0], sigma * (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0]}, OmegaCut1[2], OmegaCut2[2];
+
+		if (properties["variables"]["CPFit"]["cuts"]["omegaRho"].is_null())
+			rho_cut = 0.;
+		else if (scanFlag && ToLower(cutName) == "rho")
 		{
-			velocity_kch = cVel * sqrt(pow(baseKin.Kchboost[0], 2) + pow(baseKin.Kchboost[1], 2) + pow(baseKin.Kchboost[2], 2)) / baseKin.Kchboost[3];
+			rho_cut = scanIter * cutStep;
+			cutLimit[scanIter - 1] = rho_cut;
+		}
+		else
+			rho_cut = properties["variables"]["CPFit"]["cuts"]["omegaRho"];
+		// ---------------------------------------------------------------
+		if (scanFlag && ToLower(cutName) == "regen")
+		{
+			TrHigher[1] = scanIter * cutStep;
+			ChHigher[1] = scanIter * cutStep;
 
-			velocity_kne = cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
+			cutLimit[scanIter - 1] = scanIter * cutStep;
+		}
+		else
+		{
+			TrHigher[1] = 1.5;
+			ChHigher[1] = 1.5;
+		}
+		// ---------------------------------------------------------------
 
-			tch_LAB = sqrt(pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + pow(baseKin.Kchboost[8] - baseKin.ip[2], 2)) / velocity_kch;
-			tne_LAB = sqrt(pow(neutVars.Knerec[6] - baseKin.ip[0], 2) + pow(neutVars.Knerec[7] - baseKin.ip[1], 2) + pow(neutVars.Knerec[8] - baseKin.ip[2], 2)) / velocity_kne;
+		if (!simona_cuts)
+		{
+			OmegaCut1[0] = 0.0;
+			OmegaCut1[1] = rho_cut;
 
-			Kch_LAB[0] = baseKin.Kchboost[6] - baseKin.ip[0];
-			Kch_LAB[1] = baseKin.Kchboost[7] - baseKin.ip[1];
-			Kch_LAB[2] = baseKin.Kchboost[8] - baseKin.ip[2];
-			Kch_LAB[3] = tch_LAB * cVel;
-
-			Kchmom_LAB[0] = baseKin.Kchboost[0];
-			Kchmom_LAB[1] = baseKin.Kchboost[1];
-			Kchmom_LAB[2] = baseKin.Kchboost[2];
-			Kchmom_LAB[3] = baseKin.Kchboost[3];
-
-			Kne_LAB[0] = neutVars.Knerec[6] - baseKin.ip[0];
-			Kne_LAB[1] = neutVars.Knerec[7] - baseKin.ip[1];
-			Kne_LAB[2] = neutVars.Knerec[8] - baseKin.ip[2];
-			Kne_LAB[3] = tne_LAB * cVel;
-
-			Knemom_LAB[0] = neutVars.Knerec[0];
-			Knemom_LAB[1] = neutVars.Knerec[1];
-			Knemom_LAB[2] = neutVars.Knerec[2];
-			Knemom_LAB[3] = neutVars.Knerec[3];
-
-			Phi_boost[0] = -baseKin.phi_mom[0] / baseKin.phi_mom[3];
-			Phi_boost[1] = -baseKin.phi_mom[1] / baseKin.phi_mom[3];
-			Phi_boost[2] = -baseKin.phi_mom[2] / baseKin.phi_mom[3];
-
-			Obj.lorentz_transf(Phi_boost, Kch_LAB, Kch_CM);
-			Obj.lorentz_transf(Phi_boost, Kne_LAB, Kne_CM);
-			Obj.lorentz_transf(Phi_boost, Kchmom_LAB, Kchmom_CM);
-			Obj.lorentz_transf(Phi_boost, Knemom_LAB, Knemom_CM);
-
-			Kch_boost[0] = -Kchmom_CM[0] / Kchmom_CM[3];
-			Kch_boost[1] = -Kchmom_CM[1] / Kchmom_CM[3];
-			Kch_boost[2] = -Kchmom_CM[2] / Kchmom_CM[3];
-
-			Kne_boost[0] = Kchmom_CM[0] / Kchmom_CM[3];
-			Kne_boost[1] = Kchmom_CM[1] / Kchmom_CM[3];
-			Kne_boost[2] = Kchmom_CM[2] / Kchmom_CM[3];
-
-			Obj.lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
-			Obj.lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
-
-			baseKin.Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (cVel * tau_S_nonCPT);
-
-			for (Int_t i = 0; i < 4; i++)
-			{
-				TRCV[i] = baseKin.cluster[3][neutVars.gtaken[i]] - (sqrt(pow(baseKin.cluster[0][neutVars.gtaken[i]] - neutVars.Knerec[6], 2) + pow(baseKin.cluster[1][neutVars.gtaken[i]] - neutVars.Knerec[7], 2) + pow(baseKin.cluster[2][neutVars.gtaken[i]] - neutVars.Knerec[8], 2)) / cVel) - tne_LAB;
-			}
-
-			trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
-
-			Double_t radius[2] = {0., 0.},
-							 radius_ch[2] = {0., 0.};
-
-			Double_t sphere_bound = 10, bp_bound = 4.4;
-
-			Double_t sigma = properties["variables"]["RegenRejection"]["sigma"];
-
-			Bool_t cuts[4] = {false, false, false, false};
-
-			for (Int_t i = 0; i < 3; i++)
-			{
-				radius[0] += pow(neutVars.Knerec[6 + i] - interfcommon_.ip[i], 2);
-				radius_ch[0] += pow(baseKin.Kchboost[6 + i] - interfcommon_.ip[i], 2);
-
-				if (i < 2)
-				{
-					radius[1] += pow(neutVars.Knerec[6 + i] - interfcommon_.ip[i], 2);
-					radius_ch[1] += pow(baseKin.Kchboost[6 + i] - interfcommon_.ip[i], 2);
-				}
-			}
-
-			radius[0] = sqrt(radius[0]);
-			radius[1] = sqrt(radius[1]);
-
-			radius_ch[0] = sqrt(radius_ch[0]);
-			radius_ch[1] = sqrt(radius_ch[1]);
-
-			Int_t
-					sigmas = 3;
-
-			Bool_t
-					cond[4],
-					cond_tot;
-
-			std::vector<Double_t>
-					stdDevOmegaVtx(6);
-
-			// Limitation for the Omega fiducial volume - based on Rayleigh distribution
-			std::string decayType[2] = {"neutral", "charged"};
-			for (Int_t i = 0; i < 2; i++)
-				for (Int_t j = 0; j < 3; j++)
-				{
-					stdDevOmegaVtx[i * 3 + j] = properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["stdDev"][j];
-				}
-
-			Double_t
-					stdDevRho00IP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[0] + stdDevOmegaVtx[1]) / 2.,
-					stdDevRhopmIP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[3] + stdDevOmegaVtx[4]) / 2.;
-
-			cond[0] = rho_00_IP < sigmas * stdDevRho00IP;
-			cond[1] = rho_pm_IP < sigmas * stdDevRhopmIP;
-			cond[2] = abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < 2 * stdDevOmegaVtx[2];
-			cond[3] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < stdDevOmegaVtx[5];
-
-			cond_tot = cond[0] && cond[1] && cond[2] && cond[3];
-			// ----------------------------------------------------------------------------------------------------------------
-
-			Double_t
-					meanRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
-					errorRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1],
-					meanRadiusChLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0],
-					errorRadiusChLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0],
-
-					meanRadiusTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1],
-					errorRadiusTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1],
-					meanRadiusTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0],
-					errorRadiusTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0];
-
-			cuts[0] = abs(radius[0] - meanRadiusTriangleHigher) > errorRadiusTriangleHigher * sigma; // && radius[1] > 8;
-			cuts[1] = 1;																																						 // abs(radius[1] - meanRadiusTriangleLower) > errorRadiusTriangleLower * sigma;     // && radius[1] <= 8;
-			cuts[2] = abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma;					 // && radius_ch[1] > 8;
-			cuts[3] = 1;																																						 // abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
-
-			// Check of Simona's cuts
+			OmegaCut2[0] = 0.0;
+			OmegaCut2[1] = 40.0;
+		}
+		else
+		{
 			Double_t
 					meanInvMass = properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"],
 					meanInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"],
 					stdInvMass = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"],
 					stdInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"],
+					InvMass[2] = {meanInvMass, sigmas * stdInvMass},
 					meanKinEne = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"],
 					meanKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"],
 					stdKinEne = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"],
-					stdKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"];
+					stdKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"],
+					KinEne[2] = {meanKinEne, sigmas * stdKinEne};
 
-			Double_t 
-						KinEnergyPi0 = Omegarec[3] - PichFourMom[0][3] - PichFourMom[1][3] - Omegapi0[5];
-			// ---------------------------------------------------------------
+			OmegaCut1[0] = meanInvMass;
+			OmegaCut1[1] = sigmas * stdInvMass;
 
-			if (cond_tot)
+			OmegaCut2[0] = meanKinEne;
+			OmegaCut2[1] = sigmas * stdKinEne;
+		}
+
+		mean_sigma_vector[0] = ChHigher;
+		mean_sigma_vector[1] = ChLower;
+		mean_sigma_vector[2] = TrHigher;
+		mean_sigma_vector[3] = TrLower;
+		mean_sigma_vector[4] = OmegaCut1;
+		mean_sigma_vector[5] = OmegaCut2;
+
+		Obj.ConditionInitializer(formula_vector, formula_names);
+
+		Obj.SetAllConditionParameters(formula_vector, mean_sigma_vector);
+		// ---------------------------------------------------------
+
+		for (UInt_t i = 0; i < nentries; i++)
+		{
+			chain.GetEntry(i);
+
+			if (neutVars.done == 1)
 			{
-				cuts[4] = 1; // rho > 0.8;
-				cuts[5] = 1; // chi2min > 4.0;
+				velocity_kch = cVel * sqrt(pow(baseKin.Kchboost[0], 2) + pow(baseKin.Kchboost[1], 2) + pow(baseKin.Kchboost[2], 2)) / baseKin.Kchboost[3];
 
-				cuts[4] = abs(Omegarec[5] - meanInvMass) > stdInvMass;
-				cuts[5] = abs(KinEnergyPi0 - meanKinEne) > stdKinEne;
-			}
-			else
-			{
-				cuts[4] = 1;
-				cuts[5] = 1;
-			}
+				velocity_kne = cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
 
-			if (baseKin.mcflag == 1)
-			{
-				if (baseKin.mctruth_int == 1 || baseKin.mctruth_int == 2)
+				tch_LAB = sqrt(pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + pow(baseKin.Kchboost[8] - baseKin.ip[2], 2)) / velocity_kch;
+				tne_LAB = sqrt(pow(neutVars.Knerec[6] - baseKin.ip[0], 2) + pow(neutVars.Knerec[7] - baseKin.ip[1], 2) + pow(neutVars.Knerec[8] - baseKin.ip[2], 2)) / velocity_kne;
+
+				Kch_LAB[0] = baseKin.Kchboost[6] - baseKin.ip[0];
+				Kch_LAB[1] = baseKin.Kchboost[7] - baseKin.ip[1];
+				Kch_LAB[2] = baseKin.Kchboost[8] - baseKin.ip[2];
+				Kch_LAB[3] = tch_LAB * cVel;
+
+				Kchmom_LAB[0] = baseKin.Kchboost[0];
+				Kchmom_LAB[1] = baseKin.Kchboost[1];
+				Kchmom_LAB[2] = baseKin.Kchboost[2];
+				Kchmom_LAB[3] = baseKin.Kchboost[3];
+
+				Kne_LAB[0] = neutVars.Knerec[6] - baseKin.ip[0];
+				Kne_LAB[1] = neutVars.Knerec[7] - baseKin.ip[1];
+				Kne_LAB[2] = neutVars.Knerec[8] - baseKin.ip[2];
+				Kne_LAB[3] = tne_LAB * cVel;
+
+				Knemom_LAB[0] = neutVars.Knerec[0];
+				Knemom_LAB[1] = neutVars.Knerec[1];
+				Knemom_LAB[2] = neutVars.Knerec[2];
+				Knemom_LAB[3] = neutVars.Knerec[3];
+
+				Phi_boost[0] = -baseKin.phi_mom[0] / baseKin.phi_mom[3];
+				Phi_boost[1] = -baseKin.phi_mom[1] / baseKin.phi_mom[3];
+				Phi_boost[2] = -baseKin.phi_mom[2] / baseKin.phi_mom[3];
+
+				Obj.lorentz_transf(Phi_boost, Kch_LAB, Kch_CM);
+				Obj.lorentz_transf(Phi_boost, Kne_LAB, Kne_CM);
+				Obj.lorentz_transf(Phi_boost, Kchmom_LAB, Kchmom_CM);
+				Obj.lorentz_transf(Phi_boost, Knemom_LAB, Knemom_CM);
+
+				Kch_boost[0] = -Kchmom_CM[0] / Kchmom_CM[3];
+				Kch_boost[1] = -Kchmom_CM[1] / Kchmom_CM[3];
+				Kch_boost[2] = -Kchmom_CM[2] / Kchmom_CM[3];
+
+				Kne_boost[0] = Kchmom_CM[0] / Kchmom_CM[3];
+				Kne_boost[1] = Kchmom_CM[1] / Kchmom_CM[3];
+				Kne_boost[2] = Kchmom_CM[2] / Kchmom_CM[3];
+
+				Obj.lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
+				Obj.lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
+
+				baseKin.Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (cVel * tau_S_nonCPT);
+
+				for (Int_t i = 0; i < 4; i++)
 				{
-					no_cuts_sig[0].push_back(baseKin.Dtmc);
-					no_cuts_sig[1].push_back(baseKin.Dtboostlor);
+					TRCV[i] = baseKin.cluster[3][neutVars.gtaken[i]] - (sqrt(pow(baseKin.cluster[0][neutVars.gtaken[i]] - neutVars.Knerec[6], 2) + pow(baseKin.cluster[1][neutVars.gtaken[i]] - neutVars.Knerec[7], 2) + pow(baseKin.cluster[2][neutVars.gtaken[i]] - neutVars.Knerec[8], 2)) / cVel) - tne_LAB;
 				}
 
-				if (cuts[0] && cuts[1] && cuts[2] && cuts[3] && cuts[4] && cuts[5])
+				trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
+
+				Double_t radius[2] = {0., 0.},
+								 radius_ch[2] = {0., 0.};
+
+				Double_t sphere_bound = 10, bp_bound = 4.4;
+
+				Bool_t cuts[4] = {false, false, false, false};
+
+				for (Int_t i = 0; i < 3; i++)
 				{
-					if (baseKin.mctruth_int == 1)
-					{
-						event.time_diff_gen.push_back(baseKin.Dtmc);
-						event.time_diff[0].push_back(baseKin.Dtboostlor);
-					}
+					radius[0] += pow(neutVars.Knerec[6 + i] - interfcommon_.ip[i], 2);
+					radius_ch[0] += pow(baseKin.Kchboost[6 + i] - interfcommon_.ip[i], 2);
 
-					if (baseKin.mctruth_int == 3)
+					if (i < 2)
 					{
-						event.time_diff[1].push_back(baseKin.Dtboostlor);
-					}
-
-					if (baseKin.mctruth_int == 4)
-					{
-						event.time_diff[2].push_back(baseKin.Dtboostlor);
-					}
-
-					if (baseKin.mctruth_int == 5)
-					{
-						event.time_diff[3].push_back(baseKin.Dtboostlor);
-					}
-
-					if (baseKin.mctruth_int == 6)
-					{
-						event.time_diff[4].push_back(baseKin.Dtboostlor);
-					}
-
-					if (baseKin.mctruth_int == 7)
-					{
-						event.time_diff[5].push_back(baseKin.Dtboostlor);
+						radius[1] += pow(neutVars.Knerec[6 + i] - interfcommon_.ip[i], 2);
+						radius_ch[1] += pow(baseKin.Kchboost[6 + i] - interfcommon_.ip[i], 2);
 					}
 				}
-			}
 
-			if (baseKin.mcflag == 0 && cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] && cuts[5]))
-			{
-				event.time_diff_data.push_back(baseKin.Dtboostlor);
+				radius[0] = sqrt(radius[0]);
+				radius[1] = sqrt(radius[1]);
+
+				radius_ch[0] = sqrt(radius_ch[0]);
+				radius_ch[1] = sqrt(radius_ch[1]);
+
+				Bool_t
+						cond[4],
+						cond_tot;
+
+				std::vector<Double_t>
+						stdDevOmegaVtx(6);
+
+				// Limitation for the Omega fiducial volume - based on Rayleigh distribution
+				std::string decayType[2] = {"neutral", "charged"};
+				for (Int_t i = 0; i < 2; i++)
+					for (Int_t j = 0; j < 3; j++)
+					{
+						stdDevOmegaVtx[i * 3 + j] = properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["stdDev"][j];
+					}
+
+				Double_t
+						stdDevRho00IP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[0] + stdDevOmegaVtx[1]) / 2.,
+						stdDevRhopmIP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[3] + stdDevOmegaVtx[4]) / 2.;
+
+				cond[0] = rho_00_IP < sigmas * stdDevRho00IP;
+				cond[1] = rho_pm_IP < sigmas * stdDevRhopmIP;
+				cond[2] = abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < sigmas * stdDevOmegaVtx[2];
+				cond[3] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < sigmas * stdDevOmegaVtx[5];
+
+				cond_tot = cond[0] && cond[1] && cond[2] && cond[3];
+				// ----------------------------------------------------------------------------------------------------------------
+
+				x_vector[0] = radius_ch[0];
+				x_vector[1] = radius_ch[1];
+				x_vector[2] = radius[0];
+				x_vector[3] = radius[1];
+
+				// Check of Simona's cuts
+				if (simona_cuts)
+				{
+					Double_t
+							KinEnergyPi0 = Omegarec[3] - PichFourMom[0][3] - PichFourMom[1][3] - Omegapi0[5];
+
+					x_vector[4] = Omegarec[5];
+					x_vector[5] = KinEnergyPi0;
+					// ---------------------------------------------------------------
+				}
+				else
+				{
+					x_vector[4] = rho;
+					x_vector[5] = 0.0;
+				}
+
+				// cuts[0] = abs(radius[0] - meanRadiusTriangleHigher) > errorRadiusTriangleHigher * sigma; // && radius[1] > 8;
+				// cuts[1] = 1;																																						 // abs(radius[1] - meanRadiusTriangleLower) > errorRadiusTriangleLower * sigma;     // && radius[1] <= 8;
+				// cuts[2] = abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma;					 // && radius_ch[1] > 8;
+				// cuts[3] = 1;																																						 // abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
+
+				cuts[0] = Obj.GetSingleConditionValue(formula_vector[0], x_vector[0]);
+				cuts[2] = Obj.GetSingleConditionValue(formula_vector[2], x_vector[2]);
+
+				cuts[1] = 1;
+				cuts[3] = 1;
+
+				if (cond_tot)
+				{
+					cuts[4] = Obj.GetSingleConditionValue(formula_vector[4], x_vector[4]);
+
+					cuts[5] = 1;//Obj.GetSingleConditionValue(formula_vector[5], x_vector[5]);
+				}
+				else
+				{
+					cuts[4] = 1;
+					cuts[5] = 1;
+				}
+
+				if (baseKin.mcflag == 1)
+				{
+					if (baseKin.mctruth_int == 1 || baseKin.mctruth_int == 2)
+					{
+						no_cuts_sig[0].push_back(baseKin.Dtmc);
+						no_cuts_sig[1].push_back(baseKin.Dtboostlor);
+					}
+
+					if (cuts[0] && cuts[1] && cuts[2] && cuts[3] && cuts[4] && cuts[5])
+					{
+						if (baseKin.mctruth_int == 1)
+						{
+							event.time_diff_gen.push_back(baseKin.Dtmc);
+							event.time_diff[0].push_back(baseKin.Dtboostlor);
+						}
+
+						if (baseKin.mctruth_int == 3)
+						{
+							event.time_diff[1].push_back(baseKin.Dtboostlor);
+						}
+
+						if (baseKin.mctruth_int == 4)
+						{
+							event.time_diff[2].push_back(baseKin.Dtboostlor);
+						}
+
+						if (baseKin.mctruth_int == 5)
+						{
+							event.time_diff[3].push_back(baseKin.Dtboostlor);
+						}
+
+						if (baseKin.mctruth_int == 6)
+						{
+							event.time_diff[4].push_back(baseKin.Dtboostlor);
+						}
+
+						if (baseKin.mctruth_int == 7)
+						{
+							event.time_diff[5].push_back(baseKin.Dtboostlor);
+						}
+					}
+				}
+
+				if (baseKin.mcflag == 0 && cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] && cuts[5]))
+				{
+					event.time_diff_data.push_back(baseKin.Dtboostlor);
+				}
 			}
+		}
+
+		ROOT::Math::Minimizer *minimum =
+				ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
+
+		// set tolerance , etc...
+		minimum->SetMaxFunctionCalls(1000000); // for Minuit/Minuit2
+		minimum->SetTolerance(0.1);
+		minimum->SetPrintLevel(1);
+		minimum->SetStrategy(2);
+
+		const UInt_t num_of_vars = 11;
+
+		ROOT::Math::Functor minimized_function(&event, &KLOE::interference::interf_chi2, num_of_vars);
+
+		minimum->SetFunction(minimized_function);
+
+		const Double_t init_vars[num_of_vars] = {
+				Re,
+				Im_nonCPT,
+				properties["variables"]["CPFit"]["initParams"]["Norm"]["Signal"],
+				properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarLeft"],
+				properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseLeft"],
+				properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseRight"],
+				properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarRight"],
+				properties["variables"]["CPFit"]["initParams"]["Norm"]["Omegapi0"],
+				properties["variables"]["CPFit"]["initParams"]["Norm"]["Threepi0"],
+				properties["variables"]["CPFit"]["initParams"]["Norm"]["Semileptonic"],
+				properties["variables"]["CPFit"]["initParams"]["Norm"]["Other"]},
+									 step[num_of_vars] = {1E-5, 1E-5, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
+
+		Double_t
+				limit_upper = properties["variables"]["CPFit"]["limitPer"]["upper"],
+				limit_lower = properties["variables"]["CPFit"]["limitPer"]["lower"];
+
+		minimum->SetVariable(0, "Real part", init_vars[0], step[0]);
+		minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]);
+		minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - limit_lower * init_vars[2], init_vars[2] + limit_upper * init_vars[2]);
+
+		if (x_min > -30.0 && x_max < 30.0)
+		{
+			minimum->SetFixedVariable(3, "Norm left DC wall", init_vars[3]);
+			minimum->SetLowerLimitedVariable(4, "Norm left beam pipe", init_vars[4], step[4], 0.0);
+			minimum->SetLowerLimitedVariable(5, "Norm right beam pipe", init_vars[5], step[5], 0.0);
+			minimum->SetFixedVariable(6, "Norm right DC wall", init_vars[6]);
+		}
+		else
+		{
+			minimum->SetLowerLimitedVariable(3, "Norm left DC wall", init_vars[3], step[3], 0.0);
+			minimum->SetLowerLimitedVariable(4, "Norm left beam pipe", init_vars[4], step[4], 0.0);
+			minimum->SetLowerLimitedVariable(5, "Norm right beam pipe", init_vars[5], step[5], 0.0);
+			minimum->SetLowerLimitedVariable(6, "Norm right DC wall", init_vars[6], step[6], 0.0);
+		}
+
+		minimum->SetLimitedVariable(7, "Norm omega", init_vars[7], step[7], init_vars[7] - limit_lower * init_vars[7], init_vars[7] + limit_upper * init_vars[7]);
+		minimum->SetLimitedVariable(8, "Norm three", init_vars[8], step[8], init_vars[8] - limit_lower * init_vars[8], init_vars[8] + limit_upper * init_vars[8]);
+		minimum->SetLimitedVariable(9, "Norm semi", init_vars[9], step[9], init_vars[9] - limit_lower * init_vars[9], init_vars[9] + limit_upper * init_vars[9]);
+		minimum->SetLimitedVariable(10, "Norm other bcg", init_vars[10], step[10], init_vars[10] - limit_lower * init_vars[10], init_vars[10] + limit_upper * init_vars[10]);
+
+		minimum->Minimize();
+
+		if (scanFlag)
+		{
+			errValue[0].push_back(abs(minimum->Errors()[0] / minimum->X()[0]));
+			errValue[1].push_back(abs(minimum->Errors()[1] / minimum->X()[1]));
+
+			event.time_diff[0].clear();
+			event.time_diff[1].clear();
+			event.time_diff[2].clear();
+			event.time_diff[3].clear();
+			event.time_diff[4].clear();
+			event.time_diff[5].clear();
+			event.time_diff_data.clear();
+			event.time_diff_gen.clear();
+			no_cuts_sig[0].clear();
+			no_cuts_sig[1].clear();
+
+			event.time_diff[0].shrink_to_fit();
+			event.time_diff[1].shrink_to_fit();
+			event.time_diff[2].shrink_to_fit();
+			event.time_diff[3].shrink_to_fit();
+			event.time_diff[4].shrink_to_fit();
+			event.time_diff[5].shrink_to_fit();
+			event.time_diff_data.shrink_to_fit();
+			event.time_diff_gen.shrink_to_fit();
+			no_cuts_sig[0].shrink_to_fit();
+			no_cuts_sig[1].shrink_to_fit();
+		}
+		else
+		{
+			par.push_back(minimum->X()[0]);
+			par.push_back(minimum->X()[1]);
+			par.push_back(minimum->X()[2]);
+			par.push_back(minimum->X()[3]);
+			par.push_back(minimum->X()[4]);
+			par.push_back(minimum->X()[5]);
+			par.push_back(minimum->X()[6]);
+			par.push_back(minimum->X()[7]);
+			par.push_back(minimum->X()[8]);
+			par.push_back(minimum->X()[9]);
+			par.push_back(minimum->X()[10]);
+
+			parErr.push_back(minimum->Errors()[0]);
+			parErr.push_back(minimum->Errors()[1]);
+			parErr.push_back(minimum->Errors()[2]);
+			parErr.push_back(minimum->Errors()[3]);
+			parErr.push_back(minimum->Errors()[4]);
+			parErr.push_back(minimum->Errors()[5]);
+			parErr.push_back(minimum->Errors()[6]);
+			parErr.push_back(minimum->Errors()[7]);
+			parErr.push_back(minimum->Errors()[8]);
+			parErr.push_back(minimum->Errors()[9]);
+			parErr.push_back(minimum->Errors()[10]);
 		}
 	}
 
-	ROOT::Math::Minimizer *minimum =
-			ROOT::Math::Factory::CreateMinimizer("Minuit2", "Migrad");
-
-	// set tolerance , etc...
-	minimum->SetMaxFunctionCalls(1000000); // for Minuit/Minuit2
-	minimum->SetTolerance(0.1);
-	minimum->SetPrintLevel(1);
-	minimum->SetStrategy(2);
-
-	const UInt_t num_of_vars = 11;
-
-	ROOT::Math::Functor minimized_function(&event, &KLOE::interference::interf_chi2, num_of_vars);
-
-	minimum->SetFunction(minimized_function);
-
-	const Double_t init_vars[num_of_vars] = {
-			Re,
-			Im_nonCPT,
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Signal"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarLeft"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseLeft"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseRight"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarRight"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Omegapi0"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Threepi0"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Semileptonic"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Other"]},
-								 step[num_of_vars] = {1E-5, 1E-5, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
-
-	Double_t
-			limit_upper = properties["variables"]["CPFit"]["limitPer"]["upper"],
-			limit_lower = properties["variables"]["CPFit"]["limitPer"]["lower"];
-
-	minimum->SetVariable(0, "Real part", init_vars[0], step[0]);
-	minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]);
-	minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - limit_lower * init_vars[2], init_vars[2] + limit_upper * init_vars[2]);
-
-	if (x_min > -30.0 && x_max < 30.0)
+	if (!scanFlag)
 	{
-		minimum->SetFixedVariable(3, "Norm left DC wall", init_vars[3]);
-		minimum->SetLowerLimitedVariable(4, "Norm left beam pipe", init_vars[4], step[4], 0.0);
-		minimum->SetLowerLimitedVariable(5, "Norm right beam pipe", init_vars[5], step[5], 0.0);
-		minimum->SetFixedVariable(6, "Norm right DC wall", init_vars[6]);
+		Double_t sum_of_events = 0., fractions[6] = {0.};
+
+		for (Int_t i = 0; i < channNum; i++)
+			sum_of_events += event.time_diff[i].size();
+
+		for (Int_t i = 0; i < channNum; i++)
+			fractions[i] = 100 * event.time_diff[i].size() / sum_of_events;
+
+		std::ofstream myfile_num;
+		myfile_num.open(cpfit_res_dir + "num_of_events.csv");
+		myfile_num << "Channel,Number of events,Fraction\n";
+		myfile_num << "Signal," << event.time_diff[0].size() << "," << fractions[0] << "%,\n";
+		myfile_num << "Regeneration," << event.time_diff[1].size() << "," << fractions[1] << "%,\n";
+		myfile_num << "Omega," << event.time_diff[2].size() << "," << fractions[2] << "%,\n";
+		myfile_num << "Three," << event.time_diff[3].size() << "," << fractions[3] << "%,\n";
+		myfile_num << "Semi," << event.time_diff[4].size() << "," << fractions[4] << "%,\n";
+		myfile_num << "Other bcg," << event.time_diff[5].size() << "," << fractions[5] << "%,\n";
+		myfile_num.close();
+
+		for (UInt_t i = 0; i < no_cuts_sig[1].size(); i++)
+		{
+			sig_total->Fill(no_cuts_sig[1][i]);
+		}
+
+		for (UInt_t i = 0; i < channNum; i++)
+		{
+			for (UInt_t j = 0; j < event.time_diff[i].size(); j++)
+			{
+				if (i == 0)
+				{
+					sig_pass->Fill(event.time_diff[i][j]);
+
+					event.frac[i]->Fill(event.time_diff[i][j], event.interf_function(event.time_diff_gen[j], 0, par.data()));
+				}
+				else if (i == 1)
+				{
+					if (event.time_diff[i][j] < event.left_x_split)
+						event.frac[i]->Fill(event.time_diff[i][j], par[3]);
+					else if (event.time_diff[i][j] > event.left_x_split && event.time_diff[i][j] < event.center_x_split)
+						event.frac[i]->Fill(event.time_diff[i][j], par[4]);
+					else if (event.time_diff[i][j] > event.center_x_split && event.time_diff[i][j] < event.right_x_split)
+						event.frac[i]->Fill(event.time_diff[i][j], par[5]);
+					else if (event.time_diff[i][j] > event.right_x_split)
+						event.frac[i]->Fill(event.time_diff[i][j], par[6]);
+				}
+				else
+				{
+					event.frac[i]->Fill(event.time_diff[i][j]);
+				}
+			}
+		}
+
+		for (UInt_t j = 0; j < event.time_diff_data.size(); j++)
+		{
+			event.data->Fill(event.time_diff_data[j]);
+		}
+
+		event.frac[0]->Scale(par[2] * event.frac[0]->GetEntries() / event.frac[0]->Integral(0, nbins + 1));
+
+		if (check_corr == true)
+		{
+			for (Int_t i = 0; i < nbins; i++)
+			{
+				event.frac[0]->SetBinContent(i + 1, event.frac[0]->GetBinContent(i + 1) * event.corr_vals[i]);
+			}
+		}
+
+		event.frac[2]->Scale(par[7] * event.frac[2]->GetEntries() / event.frac[2]->Integral(0, nbins + 1));
+		event.frac[3]->Scale(par[8] * event.frac[3]->GetEntries() / event.frac[3]->Integral(0, nbins + 1));
+		event.frac[4]->Scale(par[9] * event.frac[4]->GetEntries() / event.frac[4]->Integral(0, nbins + 1));
+		event.frac[5]->Scale(par[10] * event.frac[5]->GetEntries() / event.frac[5]->Integral(0, nbins + 1));
+
+		for (UInt_t i = 0; i < channNum; i++)
+		{
+			event.mc_sum->Add(event.frac[i]);
+
+			event.frac[i]->SetLineWidth(3);
+			event.frac[i]->SetLineColor(channColor[i]);
+		}
+
+		event.mc_sum->SetLineWidth(3);
+		event.mc_sum->SetLineColor(mcSumColor);
+
+		event.data->SetLineWidth(3);
+		event.data->SetLineColor(dataColor);
+
+		TCanvas *c1 = new TCanvas("c1", "", 790, 1200);
+
+		c1->SetBottomMargin(0.5);
+		c1->Draw();
+
+		TPad *padup_c1 = new TPad("pad_up_c1", "", 0.0, 0.3, 1.0, 1.0);
+		TPad *paddown_c1 = new TPad("pad_down_c1", "", 0.0, 0.0, 1.0, 0.3);
+		paddown_c1->SetBottomMargin(0.3);
+
+		gStyle->SetOptStat(0);
+
+		TGraphAsymmErrors *sig_eff = new TGraphAsymmErrors();
+
+		sig_eff->Divide(sig_pass, sig_total, "cl=0.683 b(1,1) mode");
+
+		c1->cd();
+		paddown_c1->Draw();
+		paddown_c1->cd();
+		sig_eff->GetXaxis()->SetRangeUser(x_min, x_max);
+		sig_eff->GetYaxis()->SetRangeUser(0.0, 1.0);
+		sig_eff->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
+		sig_eff->GetYaxis()->SetTitle("#varepsilon(#Deltat)");
+
+		sig_eff->GetYaxis()->SetTitleSize(0.1);
+		sig_eff->GetYaxis()->SetTitleOffset(0.5);
+		sig_eff->GetXaxis()->SetTitleSize(0.1);
+		sig_eff->GetYaxis()->SetLabelSize(0.05);
+		sig_eff->GetXaxis()->SetLabelSize(0.08);
+
+		sig_eff->Draw("APE");
+
+		TRatioPlot *rp = new TRatioPlot(event.mc_sum, event.data, "diffsig");
+
+		c1->cd();
+		padup_c1->Draw();
+		padup_c1->cd();
+
+		rp->Draw();
+
+		rp->SetSplitFraction(0.2);
+
+		rp->GetLowerRefGraph()->SetMinimum(-5);
+		rp->GetLowerRefGraph()->SetMaximum(5);
+		rp->GetLowerRefGraph()->SetLineWidth(3);
+
+		rp->SetLowBottomMargin(0.0);
+		rp->SetLeftMargin(0.15);
+
+		rp->GetLowerRefYaxis()->SetLabelSize(0.02);
+		rp->GetLowerRefXaxis()->SetLabelSize(0.0);
+
+		Double_t max_height = event.mc_sum->GetMaximum();
+
+		rp->GetUpperRefYaxis()->SetRangeUser(0.0, 2 * max_height);
+		rp->GetUpperRefYaxis()->SetTitle("Counts/2#tau_{S}");
+
+		rp->GetLowerRefYaxis()->SetTitleSize(0.03);
+		rp->GetLowerRefYaxis()->SetTitle("Residuals");
+
+		rp->GetUpperPad()->cd();
+
+		TLegend *legend_chann = new TLegend(0.6, 0.5, 0.9, 0.9);
+		legend_chann->SetFillColor(kWhite);
+		for (UInt_t i = 0; i < channNum; i++)
+		{
+			legend_chann->AddEntry(event.frac[i], channName[i], "l");
+			event.frac[i]->Draw("HISTSAME");
+		}
+
+		legend_chann->AddEntry(event.mc_sum, mcSumName, "l");
+		legend_chann->AddEntry(event.data, dataName, "le");
+		legend_chann->Draw();
+
+		c1->Print(cpfit_dir + img_dir + "split_fit_with_corr" + ext_img);
+
+		// Residuals graph
+		TCanvas *c2 = new TCanvas("c2", "", 790, 790);
+		TH1 *residuals_hist = new TH1D("Residuals hist", "", 11, -5., 5.);
+
+		event.resi_vals = rp->GetLowerRefGraph()->GetY();
+
+		for (Int_t i = 0; i < event.bin_number; i++)
+		{
+			residuals_hist->Fill(event.resi_vals[i]);
+		}
+
+		residuals_hist->GetYaxis()->SetRangeUser(0, 1.2 * residuals_hist->GetMaximum());
+		residuals_hist->Fit("gaus");
+
+		c2->cd();
+
+		residuals_hist->SetXTitle("Residuals");
+		residuals_hist->SetYTitle("Counts");
+		residuals_hist->SetLineWidth(5);
+		residuals_hist->Draw();
+		residuals_hist->SetStats(1);
+		gStyle->SetOptStat(1);
+		gStyle->SetOptFit(1);
+
+		residuals_hist->Draw();
+
+		c2->Print(cpfit_dir + img_dir + "residuals_hist" + ext_img);
+
+		properties["variables"]["CPFit"]["result"]["value"]["Re"] = par[0];
+		properties["variables"]["CPFit"]["result"]["value"]["Im"] = par[1];
+		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Signal"] = par[2];
+		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarLeft"] = par[3];
+		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseLeft"] = par[4];
+		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseRight"] = par[5];
+		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarRight"] = par[6];
+		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Omegapi0"] = par[7];
+		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Threepi0"] = par[8];
+		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Semileptonic"] = par[9];
+		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Other"] = par[10];
+
+		properties["variables"]["CPFit"]["result"]["error"]["Re"] = parErr[0];
+		properties["variables"]["CPFit"]["result"]["error"]["Im"] = parErr[1];
+		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Signal"] = parErr[2];
+		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarLeft"] = parErr[3];
+		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseLeft"] = parErr[4];
+		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseRight"] = parErr[5];
+		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarRight"] = parErr[6];
+		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Omegapi0"] = parErr[7];
+		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Threepi0"] = parErr[8];
+		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Semileptonic"] = parErr[9];
+		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Other"] = parErr[10];
+
+		properties["variables"]["CPFit"]["result"]["chi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2");
+		properties["variables"]["CPFit"]["result"]["normChi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2/NDF");
+
+		delete residuals_hist;
+		delete c1;
+		delete c2;
+
+		delete rp;
 	}
 	else
 	{
-		minimum->SetLowerLimitedVariable(3, "Norm left DC wall", init_vars[3], step[3], 0.0);
-		minimum->SetLowerLimitedVariable(4, "Norm left beam pipe", init_vars[4], step[4], 0.0);
-		minimum->SetLowerLimitedVariable(5, "Norm right beam pipe", init_vars[5], step[5], 0.0);
-		minimum->SetLowerLimitedVariable(6, "Norm right DC wall", init_vars[6], step[6], 0.0);
+		TString
+				mode = "FitResultErr",
+				imageTitle = cpfit_dir + img_dir + "scan_of_errors_fit_regen" + ext_img;
+
+		Double_t legendPos[4] = {0.2, 0.5, 0.7, 0.9};
+
+		KLOE::MeasQualityGraph errorGraph(mode, numberOfPoints, cutLimit, errValue, xTitle, yTitle, yRightTitle, legendPos);
+
+		errorGraph.DrawGraphs(imageTitle);
 	}
-
-	minimum->SetLimitedVariable(7, "Norm omega", init_vars[7], step[7], init_vars[7] - limit_lower * init_vars[7], init_vars[7] + limit_upper * init_vars[7]);
-	minimum->SetLimitedVariable(8, "Norm three", init_vars[8], step[8], init_vars[8] - limit_lower * init_vars[8], init_vars[8] + limit_upper * init_vars[8]);
-	minimum->SetLimitedVariable(9, "Norm semi", init_vars[9], step[9], init_vars[9] - limit_lower * init_vars[9], init_vars[9] + limit_upper * init_vars[9]);
-	minimum->SetLimitedVariable(10, "Norm other bcg", init_vars[10], step[10], init_vars[10] - limit_lower * init_vars[10], init_vars[10] + limit_upper * init_vars[10]);
-
-	minimum->Minimize();
-
-	Double_t sum_of_events = 0., fractions[6] = {0.};
-
-	for (Int_t i = 0; i < channNum; i++)
-		sum_of_events += event.time_diff[i].size();
-
-	for (Int_t i = 0; i < channNum; i++)
-		fractions[i] = 100 * event.time_diff[i].size() / sum_of_events;
-
-	std::ofstream myfile_num;
-	myfile_num.open(cpfit_res_dir + "num_of_events.csv");
-	myfile_num << "Channel,Number of events,Fraction\n";
-	myfile_num << "Signal," << event.time_diff[0].size() << "," << fractions[0] << "%,\n";
-	myfile_num << "Regeneration," << event.time_diff[1].size() << "," << fractions[1] << "%,\n";
-	myfile_num << "Omega," << event.time_diff[2].size() << "," << fractions[2] << "%,\n";
-	myfile_num << "Three," << event.time_diff[3].size() << "," << fractions[3] << "%,\n";
-	myfile_num << "Semi," << event.time_diff[4].size() << "," << fractions[4] << "%,\n";
-	myfile_num << "Other bcg," << event.time_diff[5].size() << "," << fractions[5] << "%,\n";
-	myfile_num.close();
-
-	Double_t par[2] = {minimum->X()[0], minimum->X()[1]};
-
-	for (UInt_t i = 0; i < no_cuts_sig[1].size(); i++)
-	{
-		sig_total->Fill(no_cuts_sig[1][i]);
-	}
-
-	for (UInt_t i = 0; i < channNum; i++)
-	{
-		for (UInt_t j = 0; j < event.time_diff[i].size(); j++)
-		{
-			if (i == 0)
-			{
-				sig_pass->Fill(event.time_diff[i][j]);
-
-				event.frac[i]->Fill(event.time_diff[i][j], event.interf_function(event.time_diff_gen[j], 0, par));
-			}
-			else if (i == 1)
-			{
-				if (event.time_diff[i][j] < event.left_x_split)
-					event.frac[i]->Fill(event.time_diff[i][j], minimum->X()[3]);
-				else if (event.time_diff[i][j] > event.left_x_split && event.time_diff[i][j] < event.center_x_split)
-					event.frac[i]->Fill(event.time_diff[i][j], minimum->X()[4]);
-				else if (event.time_diff[i][j] > event.center_x_split && event.time_diff[i][j] < event.right_x_split)
-					event.frac[i]->Fill(event.time_diff[i][j], minimum->X()[5]);
-				else if (event.time_diff[i][j] > event.right_x_split)
-					event.frac[i]->Fill(event.time_diff[i][j], minimum->X()[6]);
-			}
-			else
-			{
-				event.frac[i]->Fill(event.time_diff[i][j]);
-			}
-		}
-	}
-
-	for (UInt_t j = 0; j < event.time_diff_data.size(); j++)
-	{
-		event.data->Fill(event.time_diff_data[j]);
-	}
-
-	event.frac[0]->Scale(minimum->X()[2] * event.frac[0]->GetEntries() / event.frac[0]->Integral(0, nbins + 1));
-
-	if (check_corr == true)
-	{
-		for (Int_t i = 0; i < nbins; i++)
-		{
-			event.frac[0]->SetBinContent(i + 1, event.frac[0]->GetBinContent(i + 1) * event.corr_vals[i]);
-		}
-	}
-
-	event.frac[2]->Scale(minimum->X()[7] * event.frac[2]->GetEntries() / event.frac[2]->Integral(0, nbins + 1));
-	event.frac[3]->Scale(minimum->X()[8] * event.frac[3]->GetEntries() / event.frac[3]->Integral(0, nbins + 1));
-	event.frac[4]->Scale(minimum->X()[9] * event.frac[4]->GetEntries() / event.frac[4]->Integral(0, nbins + 1));
-	event.frac[5]->Scale(minimum->X()[10] * event.frac[5]->GetEntries() / event.frac[5]->Integral(0, nbins + 1));
-
-	for (UInt_t i = 0; i < channNum; i++)
-	{
-		event.mc_sum->Add(event.frac[i]);
-
-		event.frac[i]->SetLineWidth(3);
-		event.frac[i]->SetLineColor(channColor[i]);
-	}
-
-	properties["variables"]["CPFit"]["result"]["value"]["Re"] = minimum->X()[0];
-	properties["variables"]["CPFit"]["result"]["value"]["Im"] = minimum->X()[1];
-	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Signal"] = minimum->X()[2];
-	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarLeft"] = minimum->X()[3];
-	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseLeft"] = minimum->X()[4];
-	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseRight"] = minimum->X()[5];
-	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarRight"] = minimum->X()[6];
-	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Omegapi0"] = minimum->X()[7];
-	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Threepi0"] = minimum->X()[8];
-	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Semileptonic"] = minimum->X()[9];
-	properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Other"] = minimum->X()[10];
-
-	properties["variables"]["CPFit"]["result"]["error"]["Re"] = minimum->Errors()[0];
-	properties["variables"]["CPFit"]["result"]["error"]["Im"] = minimum->Errors()[1];
-	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Signal"] = minimum->Errors()[2];
-	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarLeft"] = minimum->Errors()[3];
-	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseLeft"] = minimum->Errors()[4];
-	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseRight"] = minimum->Errors()[5];
-	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarRight"] = minimum->Errors()[6];
-	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Omegapi0"] = minimum->Errors()[7];
-	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Threepi0"] = minimum->Errors()[8];
-	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Semileptonic"] = minimum->Errors()[9];
-	properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Other"] = minimum->Errors()[10];
-
-	properties["variables"]["CPFit"]["result"]["chi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2");
-	properties["variables"]["CPFit"]["result"]["normChi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2/NDF");
 
 	properties["lastScript"] = "Final CP Parameters normalization";
 	properties["lastUpdate"] = Obj.getCurrentTimestamp();
@@ -656,121 +962,6 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	std::ofstream outfile(propName);
 	outfile << properties.dump(4);
 	outfile.close();
-
-	event.mc_sum->SetLineWidth(3);
-	event.mc_sum->SetLineColor(mcSumColor);
-
-	event.data->SetLineWidth(3);
-	event.data->SetLineColor(dataColor);
-
-	TCanvas *c1 = new TCanvas("c1", "", 790, 1200);
-
-	c1->SetBottomMargin(0.5);
-	c1->Draw();
-
-	TPad *padup_c1 = new TPad("pad_up_c1", "", 0.0, 0.3, 1.0, 1.0);
-	TPad *paddown_c1 = new TPad("pad_down_c1", "", 0.0, 0.0, 1.0, 0.3);
-	paddown_c1->SetBottomMargin(0.3);
-
-	gStyle->SetOptStat(0);
-
-	TGraphAsymmErrors *sig_eff = new TGraphAsymmErrors();
-
-	sig_eff->Divide(sig_pass, sig_total, "cl=0.683 b(1,1) mode");
-
-	c1->cd();
-	paddown_c1->Draw();
-	paddown_c1->cd();
-	sig_eff->GetXaxis()->SetRangeUser(x_min, x_max);
-	sig_eff->GetYaxis()->SetRangeUser(0.0, 1.0);
-	sig_eff->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
-	sig_eff->GetYaxis()->SetTitle("#varepsilon(#Deltat)");
-
-	sig_eff->GetYaxis()->SetTitleSize(0.1);
-	sig_eff->GetYaxis()->SetTitleOffset(0.5);
-	sig_eff->GetXaxis()->SetTitleSize(0.1);
-	sig_eff->GetYaxis()->SetLabelSize(0.05);
-	sig_eff->GetXaxis()->SetLabelSize(0.08);
-
-	sig_eff->Draw("APE");
-
-	TRatioPlot *rp = new TRatioPlot(event.mc_sum, event.data, "diffsig");
-
-	c1->cd();
-	padup_c1->Draw();
-	padup_c1->cd();
-
-	rp->Draw();
-
-	rp->SetSplitFraction(0.2);
-
-	rp->GetLowerRefGraph()->SetMinimum(-5);
-	rp->GetLowerRefGraph()->SetMaximum(5);
-	rp->GetLowerRefGraph()->SetLineWidth(3);
-
-	rp->SetLowBottomMargin(0.0);
-	rp->SetLeftMargin(0.15);
-
-	rp->GetLowerRefYaxis()->SetLabelSize(0.02);
-	rp->GetLowerRefXaxis()->SetLabelSize(0.0);
-
-	Double_t max_height = event.mc_sum->GetMaximum();
-
-	rp->GetUpperRefYaxis()->SetRangeUser(0.0, 2 * max_height);
-	rp->GetUpperRefYaxis()->SetTitle("Counts/2#tau_{S}");
-
-	rp->GetLowerRefYaxis()->SetTitleSize(0.03);
-	rp->GetLowerRefYaxis()->SetTitle("Residuals");
-
-	rp->GetUpperPad()->cd();
-
-	TLegend *legend_chann = new TLegend(0.6, 0.5, 0.9, 0.9);
-	legend_chann->SetFillColor(kWhite);
-	for (UInt_t i = 0; i < channNum; i++)
-	{
-		legend_chann->AddEntry(event.frac[i], channName[i], "l");
-		event.frac[i]->Draw("HISTSAME");
-	}
-
-	legend_chann->AddEntry(event.mc_sum, mcSumName, "l");
-	legend_chann->AddEntry(event.data, dataName, "le");
-	legend_chann->Draw();
-
-	c1->Print(cpfit_dir + img_dir + "split_fit_with_corr" + ext_img);
-
-	// Residuals graph
-	TCanvas *c2 = new TCanvas("c2", "", 790, 790);
-	TH1 *residuals_hist = new TH1D("Residuals hist", "", 11, -5., 5.);
-
-	event.resi_vals = rp->GetLowerRefGraph()->GetY();
-
-	for (Int_t i = 0; i < event.bin_number; i++)
-	{
-		residuals_hist->Fill(event.resi_vals[i]);
-	}
-
-	residuals_hist->GetYaxis()->SetRangeUser(0, 1.2 * residuals_hist->GetMaximum());
-	residuals_hist->Fit("gaus");
-
-	c2->cd();
-
-	residuals_hist->SetXTitle("Residuals");
-	residuals_hist->SetYTitle("Counts");
-	residuals_hist->SetLineWidth(5);
-	residuals_hist->Draw();
-	residuals_hist->SetStats(1);
-	gStyle->SetOptStat(1);
-	gStyle->SetOptFit(1);
-
-	residuals_hist->Draw();
-
-	c2->Print(cpfit_dir + img_dir + "residuals_hist" + ext_img);
-
-	delete residuals_hist;
-	delete c1;
-	delete c2;
-
-	delete rp;
 
 	return 0;
 }

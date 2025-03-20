@@ -10,6 +10,7 @@
 #include "Logs.h"
 #include "MainMenu.h"
 #include <kloe_class.h>
+#include <MeasQualityGraph.h>
 #include <interference.h>
 #include <fort_common.h>
 

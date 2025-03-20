@@ -1,9 +1,28 @@
 {
     "$schema": "./analysis-schema.json",
-    "lastScript": "Plots of Omega Reconstruction",
-    "lastUpdate": "2025-03-15_2018",
+    "lastScript": "Final CP Parameters normalization",
+    "lastUpdate": "2025-03-20_2259",
     "variables": {
         "CPFit": {
+            "cuts": {
+                "chi2KinFit": null,
+                "cutScanMode": {
+                    "cutLimits": [
+                        0.0,
+                        3.0
+                    ],
+                    "cutName": "regen",
+                    "cutTitle": "r_{0} [cm]",
+                    "flag": false,
+                    "numberOfPoints": 30
+                },
+                "omegaRho": 0.6,
+                "simonaCuts": {
+                    "flag": false,
+                    "invMass": 100.0,
+                    "kinEne": 100.0
+                }
+            },
             "histoResults": {
                 "logScale": false,
                 "rangeX": [
@@ -37,41 +56,41 @@
                 "upper": 0.3
             },
             "result": {
-                "chi2": 122.76758245757256,
+                "chi2": 120.81057826902257,
                 "error": {
-                    "Im": 0.05449032803571559,
+                    "Im": 0.046846374713918386,
                     "Norm": {
-                        "Omegapi0": 0.09286151268758025,
-                        "Other": 0.4130274464315332,
+                        "Omegapi0": 0.09081993345390948,
+                        "Other": 0.3997635428246804,
                         "Regeneration": {
-                            "CloseLeft": 0.18076197592050058,
-                            "CloseRight": 0.16035922033823846,
-                            "FarLeft": 0.014040377956292982,
-                            "FarRight": 0.020014021631457823
+                            "CloseLeft": 0.16428251060968768,
+                            "CloseRight": 0.1697746500676769,
+                            "FarLeft": 0.01393583035672119,
+                            "FarRight": 0.020078965686626704
                         },
-                        "Semileptonic": 0.12395047854012747,
-                        "Signal": 0.01251817196599414,
-                        "Threepi0": 0.5800931401871796
+                        "Semileptonic": 0.38074466685757935,
+                        "Signal": 0.012152194587507437,
+                        "Threepi0": 0.45037925149122676
                     },
-                    "Re": 0.004775794992338791
+                    "Re": 0.004501555237578911
                 },
-                "normChi2": 1.364084249528584,
+                "normChi2": 1.3423397585446952,
                 "value": {
-                    "Im": -0.13672877005234,
+                    "Im": -0.12612605149385653,
                     "Norm": {
-                        "Omegapi0": 0.7854206027068114,
-                        "Other": 1.2999991377740658,
+                        "Omegapi0": 0.8535184264319751,
+                        "Other": 1.2999997204094278,
                         "Regeneration": {
-                            "CloseLeft": 1.6800923257915183,
-                            "CloseRight": 1.8162626846553422,
-                            "FarLeft": 0.450483002497962,
-                            "FarRight": 0.5011246656587958
+                            "CloseLeft": 1.9819132971586386,
+                            "CloseRight": 1.7529729725516248,
+                            "FarLeft": 0.45219089267075674,
+                            "FarRight": 0.49888655914816127
                         },
-                        "Semileptonic": 0.7000000203882317,
-                        "Signal": 0.8820662310453251,
-                        "Threepi0": 1.2999197714617923
+                        "Semileptonic": 0.7000021169839523,
+                        "Signal": 0.9466474476352984,
+                        "Threepi0": 0.7000010904665644
                     },
-                    "Re": 0.0057239607267736345
+                    "Re": -0.018552804519827108
                 }
             }
         },
