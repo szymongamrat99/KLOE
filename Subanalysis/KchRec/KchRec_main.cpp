@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int Neutrec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
+int KchRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
   // Set logger for error logging
   std::string logFilename = (std::string)logs_dir + "KchRec_" + Obj.getCurrentDate() + ".log";
@@ -60,7 +60,7 @@ int Neutrec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt
     case Controls::KchRecMenu::KSKL:
     {
       Obj.startTimer();
-      kchrec_KSKL(chain, dataTypeOpt, logger, Obj);
+      // kchrec_KSKL(chain, dataTypeOpt, logger, Obj);
       Obj.endTimer();
 
       break;
@@ -68,7 +68,7 @@ int Neutrec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt
     case Controls::KchRecMenu::CLOSEST:
     {
       Obj.startTimer();
-      kchrec_Closest(chain, dataTypeOpt, logger, Obj);
+      // kchrec_Closest(chain, dataTypeOpt, logger, Obj);
       Obj.endTimer();
 
       break;

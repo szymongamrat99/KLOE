@@ -243,7 +243,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		hist_control_name = "hist_control_" + std::to_string(i);
 
 		if (i < 6)
-			hist_control.push_back(new TH1D(hist_control_name, "", 40.0, -20.0, 20.0));
+			hist_control.push_back(new TH1D(hist_control_name, "", 20.0, -5.0, 5.0));
 		else if (i == 6)
 			hist_control.push_back(new TH1D(hist_control_name, "", 100.0, 500.0, 1000.0));
 		else if (i == 7)
@@ -313,7 +313,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		TF1 *triple_fit;
 
 		if (i < 6)
-			triple_fit = new TF1("triple_gaus", triple_gaus, -20.0, 20.0, 9, 1);
+			triple_fit = new TF1("triple_gaus", triple_gaus, -5.0, 5.0, 9, 1);
 		else if (i == 6)
 			triple_fit = new TF1("triple_gaus", triple_gaus, 500.0, 1000.0, 9, 1);
 		else if (i == 7)
@@ -330,7 +330,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 
 		triple_fit->SetParameters(0.15 * parameter[0], parameter[1], parameter[2], 0.15 * parameter[0], parameter[1] - 1.5, parameter[2], parameter[0], parameter[1] + 1.0, parameter[2]);
 
-		if (i < 3)
+		if (i > 10)
 		{
 			triple_fit->SetParLimits(0, 0.0, 100.0 * parameter[0]);
 			triple_fit->FixParameter(3, 0.0);

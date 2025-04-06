@@ -12,6 +12,7 @@ OMEGAREC_DIR   := $(SUBANALYSIS_DIR)/OmegaRec
 NEUTREC_DIR    := $(SUBANALYSIS_DIR)/Neutrec
 REGEN_DIR    	 := $(SUBANALYSIS_DIR)/RegenerationAnalysis
 PLOTS_DIR    	 := $(SUBANALYSIS_DIR)/Plots
+COVMATRIX_DIR  := $(SUBANALYSIS_DIR)/CovarianceMatrix
 
 # WORK DIRECTORIES
 OBJDIR := obj
@@ -25,18 +26,28 @@ HEADER := ${WORKDIR}/scripts/Include/const.h
 HEADER += ${WORKDIR}/scripts/Include/Codes/inc/MainMenu.h
 HEADER += ${WORKDIR}/scripts/Include/Codes/inc/KinFitter.h
 HEADER += ${WORKDIR}/scripts/Include/Codes/src/KinFitter.cpp
+HEADER += ${WORKDIR}/scripts/Include/Codes/inc/MomentumSmearing.h
+HEADER += ${WORKDIR}/scripts/Include/Codes/src/MomentumSmearing.cpp
 
-MAKE_KCHREC := $(KCHREC_DIR)/$(OBJDIR)/cpfit_main.o
-MAKE_KCHREC += $(KCHREC_DIR)/$(OBJDIR)/cp_fit_mc_data.o
+MAKE_KCHREC := $(KCHREC_DIR)/$(OBJDIR)/KchRec_main.o
+MAKE_KCHREC += $(KCHREC_DIR)/$(OBJDIR)/kchrec_Kmass.o
 
-SRC_KCHREC := $(KCHREC_DIR)/$(SRCDIR)/cp_fit_mc_data.cpp
-SRC_KCHREC += $(KCHREC_DIR)/cpfit_main.cpp
+SRC_KCHREC := $(KCHREC_DIR)/$(SRCDIR)/kchrec_Kmass.cpp
+SRC_KCHREC += $(KCHREC_DIR)/KchRec_main.cpp
 
 MAKE_CPFIT := $(CPFIT_DIR)/$(OBJDIR)/cpfit_main.o
 MAKE_CPFIT += $(CPFIT_DIR)/$(OBJDIR)/cp_fit_mc_data.o
 
 SRC_CPFIT := $(CPFIT_DIR)/$(SRCDIR)/cp_fit_mc_data.cpp
 SRC_CPFIT += $(CPFIT_DIR)/cpfit_main.cpp
+
+MAKE_COVMATRIX := $(COVMATRIX_DIR)/$(OBJDIR)/covmatrix_main.o
+MAKE_COVMATRIX += $(COVMATRIX_DIR)/$(OBJDIR)/cov_matrix_determination.o
+MAKE_COVMATRIX += $(COVMATRIX_DIR)/$(OBJDIR)/cov_matrix_determination_control_sample.o
+
+SRC_COVMATRIX := $(COVMATRIX_DIR)/$(SRCDIR)/cov_matrix_determination.cpp
+SRC_COVMATRIX += $(COVMATRIX_DIR)/$(SRCDIR)/cov_matrix_determination_control_sample.cpp
+SRC_COVMATRIX += $(COVMATRIX_DIR)/covmatrix_main.cpp
 
 MAKE_GENVARS := $(GENERATED_DIR)/$(OBJDIR)/genvars_main.o
 MAKE_GENVARS += $(GENERATED_DIR)/$(OBJDIR)/generated_variables.o
@@ -89,9 +100,9 @@ PROJECT := $(BINDIR)/KLSPM00.exe
 CXX = g++
 CXXFLAGS := `root-config --cflags --glibs` -g3 -fopenmp
 
-all: $(OBJ) $(MAKE_OMEGAREC) $(MAKE_GENVARS) $(MAKE_CPFIT) $(MAKE_NEUTREC) $(PROJECT) #$(MAKE_REGEN) $(MAKE_PLOTS)
+all: $(OBJ) $(MAKE_OMEGAREC) $(MAKE_GENVARS) $(MAKE_CPFIT) $(MAKE_NEUTREC) $(MAKE_COVMATRIX) $(PROJECT) $(MAKE_KCHREC) #$(MAKE_PLOTS)
 
-$(PROJECT): $(OBJ) $(MAKE_OMEGAREC) $(MAKE_GENVARS) $(MAKE_CPFIT) $(MAKE_NEUTREC) $(HEADER) #$(MAKE_REGEN) $(MAKE_PLOTS)
+$(PROJECT): $(OBJ) $(MAKE_OMEGAREC) $(MAKE_GENVARS) $(MAKE_CPFIT) $(MAKE_NEUTREC) $(MAKE_COVMATRIX) $(HEADER) $(MAKE_KCHREC) #$(MAKE_PLOTS)
 	$(CXX) $(CXXFLAGS) $(LIBS) $^ -o $@
 	
 $(OBJDIR)/CPVAnalysis.o: CPVAnalysis.cpp $(HEADER)
@@ -109,8 +120,11 @@ $(MAKE_OMEGAREC): $(SRC_OMEGAREC) $(HEADER)
 $(MAKE_GENVARS): $(SRC_GENVARS) $(HEADER)
 	@$(MAKE) -C $(GENERATED_DIR)
 
-# $(MAKE_REGEN): $(SRC_REGEN) $(HEADER)
-# 	@$(MAKE) -C $(REGEN_DIR)
+$(MAKE_COVMATRIX): $(SRC_COVMATRIX) $(HEADER)
+	@$(MAKE) -C $(COVMATRIX_DIR)
+
+$(MAKE_KCHREC): $(SRC_KCHREC) $(HEADER)
+	@$(MAKE) -C $(KCHREC_DIR)
 
 # $(MAKE_PLOTS): $(SRC_PLOTS) $(HEADER)
 # 	@$(MAKE) -C $(PLOTS_DIR)
@@ -122,6 +136,8 @@ clean:
 	@$(MAKE) -C $(GENERATED_DIR) clean
 	@$(MAKE) -C $(OMEGAREC_DIR) clean
 	@$(MAKE) -C $(REGEN_DIR) clean
+	@$(MAKE) -C $(KCHREC_DIR) clean
+	@$(MAKE) -C $(COVMATRIX_DIR) clean
 	rm -f $(OBJDIR)/*.o
 
 

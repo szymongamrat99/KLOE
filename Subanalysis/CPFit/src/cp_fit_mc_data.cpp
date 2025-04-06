@@ -305,11 +305,20 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 	// Vectors needed for the initialization of graphs
 	TString graphMode = "FitResultErr";
-	std::vector<Double_t> cutLimit(numberOfPoints);
-	std::vector<std::vector<Double_t>> errValue(2);
+	std::vector<Double_t> 
+									cutLimit(numberOfPoints);
+	std::vector<std::vector<Double_t>> 
+															errValue(2),
+															realValue(2),
+															imaginaryValue(2);
+
 	TString xTitle = (std::string)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutTitle"],
 					yTitle = "|#sigma(Re(#varepsilon'/#varepsilon))/Re(#varepsilon'/#varepsilon)|",
 					yRightTitle = "|#sigma(Im(#varepsilon'/#varepsilon))/Im(#varepsilon'/#varepsilon)|",
+					yTitleReal = "Re(#varepsilon'/#varepsilon)",
+					yRightTitleReal = "#sigma(Re(#varepsilon'/#varepsilon))",
+					yTitleImaginary = "Im(#varepsilon'/#varepsilon)",
+					yRightTitleImaginary = "#sigma(Im(#varepsilon'/#varepsilon))",
 					cutName = (std::string)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutName"];
 
 	// Values of cuts to be used in the analysis
@@ -320,7 +329,6 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 	for (Int_t scanIter = 1; scanIter <= numberOfPoints; scanIter++)
 	{
-
 		Bool_t
 				simona_cuts = properties["variables"]["CPFit"]["cuts"]["simonaCuts"]["flag"];
 
@@ -371,12 +379,12 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 					meanInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"],
 					stdInvMass = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"],
 					stdInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"],
-					InvMass[2] = {meanInvMass, sigmas * stdInvMass},
+					InvMass[2] = {meanInvMass, 3 * stdInvMass},
 					meanKinEne = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"],
 					meanKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"],
 					stdKinEne = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"],
 					stdKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"],
-					KinEne[2] = {meanKinEne, sigmas * stdKinEne};
+					KinEne[2] = {meanKinEne, 3 * stdKinEne};
 
 			OmegaCut1[0] = meanInvMass;
 			OmegaCut1[1] = sigmas * stdInvMass;
@@ -401,7 +409,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		{
 			chain.GetEntry(i);
 
-			if (neutVars.done == 1)
+			if (neutVars.done == 1 && doneOmega == 1)
 			{
 				velocity_kch = cVel * sqrt(pow(baseKin.Kchboost[0], 2) + pow(baseKin.Kchboost[1], 2) + pow(baseKin.Kchboost[2], 2)) / baseKin.Kchboost[3];
 
@@ -537,8 +545,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				// cuts[2] = abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma;					 // && radius_ch[1] > 8;
 				// cuts[3] = 1;																																						 // abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
 
-				cuts[0] = Obj.GetSingleConditionValue(formula_vector[0], x_vector[0]);
-				cuts[2] = Obj.GetSingleConditionValue(formula_vector[2], x_vector[2]);
+				cuts[0] = 1;//Obj.GetSingleConditionValue(formula_vector[0], x_vector[0]);
+				cuts[2] = 1;//Obj.GetSingleConditionValue(formula_vector[2], x_vector[2]);
 
 				cuts[1] = 1;
 				cuts[3] = 1;
@@ -640,7 +648,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 		minimum->SetVariable(0, "Real part", init_vars[0], step[0]);
 		minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]);
-		minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - limit_lower * init_vars[2], init_vars[2] + limit_upper * init_vars[2]);
+		minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - 1.0 * init_vars[2], init_vars[2] + 5.0 * init_vars[2]);
 
 		if (x_min > -30.0 && x_max < 30.0)
 		{
@@ -668,6 +676,12 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		{
 			errValue[0].push_back(abs(minimum->Errors()[0] / minimum->X()[0]));
 			errValue[1].push_back(abs(minimum->Errors()[1] / minimum->X()[1]));
+
+			realValue[0].push_back(abs(minimum->X()[0]));
+			realValue[1].push_back(abs(minimum->Errors()[0]));
+
+			imaginaryValue[0].push_back(abs(minimum->X()[1]));
+			imaginaryValue[1].push_back(abs(minimum->Errors()[1]));
 
 			event.time_diff[0].clear();
 			event.time_diff[1].clear();
@@ -947,13 +961,23 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	{
 		TString
 				mode = "FitResultErr",
-				imageTitle = cpfit_dir + img_dir + "scan_of_errors_fit_regen" + ext_img;
+				imageTitle = cpfit_dir + img_dir + "scan_of_errors_fit" + ext_img,
+				realTitle = cpfit_dir + img_dir + "real_errors_vs_value_fit" + ext_img,
+				imaginaryTitle = cpfit_dir + img_dir + "imaginary_errors_vs_value_fit" + ext_img;
 
 		Double_t legendPos[4] = {0.2, 0.5, 0.7, 0.9};
 
 		KLOE::MeasQualityGraph errorGraph(mode, numberOfPoints, cutLimit, errValue, xTitle, yTitle, yRightTitle, legendPos);
 
 		errorGraph.DrawGraphs(imageTitle);
+
+		mode = "errvsvalue";
+
+		KLOE::MeasQualityGraph realGraph(mode, numberOfPoints, cutLimit, realValue, xTitle, yTitleReal, yRightTitleReal, legendPos);
+		KLOE::MeasQualityGraph imaginaryGraph(mode, numberOfPoints, cutLimit, imaginaryValue, xTitle, yTitleImaginary, yRightTitleImaginary, legendPos);
+
+		realGraph.DrawGraphs(realTitle);
+		imaginaryGraph.DrawGraphs(imaginaryTitle);
 	}
 
 	properties["lastScript"] = "Final CP Parameters normalization";

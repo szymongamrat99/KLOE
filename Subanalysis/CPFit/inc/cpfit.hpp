@@ -11,6 +11,7 @@
 #include "MainMenu.h"
 #include <kloe_class.h>
 #include <MeasQualityGraph.h>
+#include <CustomGraph.h>
 #include <interference.h>
 #include <fort_common.h>
 

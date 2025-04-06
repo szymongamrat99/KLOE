@@ -49,13 +49,16 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 	Int_t nentries = (Int_t)chain.GetEntries();
 
 	Float_t pgammc[4][8], neu_vtx[3], cluster[3],
-			Knemcnew[9], Kchmcnew[9], ipmcnew[3], Ks[9], Kl[9];
+			Knemcnew[9], Kchmcnew[9], ipmcnew[3], Ks[9], Kl[9], trkMC[2][4];
 	Int_t good_clus_ind[4], region[4];
 
 	TBranch *b_pgammc1 = tree->Branch("pgammc1", pgammc[0], "pgammc1[8]/F");
 	TBranch *b_pgammc2 = tree->Branch("pgammc2", pgammc[1], "pgammc2[8]/F");
 	TBranch *b_pgammc3 = tree->Branch("pgammc3", pgammc[2], "pgammc3[8]/F");
 	TBranch *b_pgammc4 = tree->Branch("pgammc4", pgammc[3], "pgammc4[8]/F");
+
+	TBranch *b_trkMC1 = tree->Branch("trkMC1", trkMC[0], "trkMC1[4]/F");
+	TBranch *b_trkMC2 = tree->Branch("trkMC2", trkMC[1], "trkMC2[4]/F");
 
 	TBranch *b_Knemc = tree->Branch("Knemcnew", Knemcnew, "Knemcnew[9]/F");
 	TBranch *b_Kchmc = tree->Branch("Kchmcnew", Kchmcnew, "Kchmcnew[9]/F");
@@ -85,6 +88,12 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 		good_clus_ind[1] = 999;
 		good_clus_ind[2] = 999;
 		good_clus_ind[3] = 999;
+
+		for (size_t j = 0; j < 2; j++)
+			for (size_t k = 0; k < 4; k++)
+			{
+				trkMC[j][k] = 0;
+			}
 
 		if (mctruth == 1 || mctruth == 2 || mctruth == 3 || mctruth == 0)
 		{
@@ -165,6 +174,30 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 							Kchmcnew[k] = Kl[k];
 							Knemcnew[k] = Ks[k];
 						}
+					}
+				}
+
+				if ((mother[vtxmc[j] - 1] == 10 || mother[vtxmc[j] - 1] == 16) && (pidmc[j] == 8 || pidmc[j] == 9))
+				{
+					if (trkMC[0][3] == 0)
+					{
+						trkMC[0][0] = mom_mc[0][j];
+						trkMC[0][1] = mom_mc[1][j];
+						trkMC[0][2] = mom_mc[2][j];
+						trkMC[0][3] = sqrt(pow(trkMC[0][0], 2) +
+															 pow(trkMC[0][1], 2) +
+															 pow(trkMC[0][2], 2) +
+															 pow(mPiCh, 2));
+					}
+					else
+					{
+						trkMC[1][0] = mom_mc[0][j];
+						trkMC[1][1] = mom_mc[1][j];
+						trkMC[1][2] = mom_mc[2][j];
+						trkMC[1][3] = sqrt(pow(trkMC[1][0], 2) +
+															 pow(trkMC[1][1], 2) +
+															 pow(trkMC[1][2], 2) +
+															 pow(mPiCh, 2));
 					}
 				}
 			}
