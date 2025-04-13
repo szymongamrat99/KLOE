@@ -1,6 +1,10 @@
 // Author: Szymon Gamrat
 // Date of last update: 03.02.2025
 
+#include <TGraph.h>
+#include <TCanvas.h>
+#include <TF1.h>
+
 #include <boost/optional.hpp>
 #include <SplitFileWriter.h>
 
@@ -58,6 +62,10 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
       invMass = 0.;
 
   Int_t nentries = chain.GetEntries();
+
+  TGraph *angleGraph;
+
+  Int_t dupa = 0;
 
   Int_t mode = 1; // Model for pi+pi-
 
@@ -176,50 +184,221 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
                                         pow(baseKin.KchrecKLTwoBody[1], 2) +
                                         pow(baseKin.KchrecKLTwoBody[2], 2));
       baseKin.KchrecKLTwoBody[5] = sqrt(pow(baseKin.KchrecKLTwoBody[3], 2) -
-                                        pow(baseKin.KchrecKLTwoBody[4], 2) );
+                                        pow(baseKin.KchrecKLTwoBody[4], 2));
       baseKin.KchrecKLTwoBody[6] = baseKin.KchrecKL[6];
       baseKin.KchrecKLTwoBody[7] = baseKin.KchrecKL[7];
       baseKin.KchrecKLTwoBody[8] = baseKin.KchrecKL[8];
 
-      
+      // 1. Calculate the axis of kaon
+      TVector3
+          boost_Kaon = {-baseKin.KchrecKL[4] / baseKin.KchrecKL[3],
+                        0.0,
+                        0.0},
+          boost_KaonTwoBody = {-baseKin.KchrecKLTwoBody[4] / baseKin.KchrecKLTwoBody[3],
+                               0.0,
+                               0.0},
+          trkKLMomVecLAB[2],
+          trkKLMomVecKaonCM[2];
+
+      TLorentzVector
+          kaon4VecLAB,
+          kaon4VecKaonCM,
+          trkKL4VecLAB[2],
+          trkKL4VecKaonCM[2],
+          PiKaon4VecKaonCM[2],
+          PiKaon4VecLAB[2];
+
+      kaon4VecLAB.SetPxPyPzE(baseKin.KchrecKL[0],
+                             baseKin.KchrecKL[1],
+                             baseKin.KchrecKL[2],
+                             baseKin.KchrecKL[3]);
+
+      Double_t angleKaonTrk,
+          magTrkLAB;
+
+      for (Int_t j = 0; j < 2; j++)
+      {
+        trkKLMomVecLAB[j].SetXYZ(baseKin.trkKL[j][0],
+                                 baseKin.trkKL[j][1],
+                                 baseKin.trkKL[j][2]);
+
+        angleKaonTrk = kaon4VecLAB.Angle(trkKLMomVecLAB[j]);
+        magTrkLAB = trkKLMomVecLAB[j].Mag();
+
+        if (j == 0)
+          trkKL4VecLAB[j].SetPxPyPzE(magTrkLAB * cos(angleKaonTrk),
+                                     magTrkLAB * sin(angleKaonTrk),
+                                     0.0,
+                                     baseKin.trkKL[j][3]);
+        else
+          trkKL4VecLAB[j].SetPxPyPzE(magTrkLAB * cos(2 * M_PI - angleKaonTrk),
+                                     magTrkLAB * sin(2 * M_PI - angleKaonTrk),
+                                     0.0,
+                                     baseKin.trkKL[j][3]);
+
+        Obj.lorentz_transf(boost_Kaon, trkKL4VecLAB[j], trkKL4VecKaonCM[j]);
+
+        trkKLMomVecKaonCM[j].SetXYZ(trkKL4VecKaonCM[j][0],
+                                    trkKL4VecKaonCM[j][1],
+                                    trkKL4VecKaonCM[j][2]);
+      }
+
+      // 2. Calculation of momentum magnitude using two body decay (based on theory)
+
+      Double_t
+          PiMomMagKaonCM = 0.5 * sqrt(pow(baseKin.KchrecKLTwoBody[5], 2) - 4. * pow(mPiCh, 2));
+
+      // 3. Check for what angle accordance is the best
+
+      TVector3
+          PiMomKaonCM[2],
+          PiMomKaonLAB[2];
+
+      TF1 *func = new TF1("minFunc", KLOE::pm00::MomMinAngleFunction, 0., M_PI, 5, 1);
+
+      func->SetParameter(0, trkKLMomVecKaonCM[0][0]);
+      func->SetParameter(1, trkKLMomVecKaonCM[0][1]);
+      func->SetParameter(2, trkKLMomVecKaonCM[1][0]);
+      func->SetParameter(3, trkKLMomVecKaonCM[1][1]);
+      func->SetParameter(4, PiMomMagKaonCM);
+
+      TVector3
+          x_axis = {1.0, 0.0, 0.0},
+          kaonMomLAB = {baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[4],
+                        baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[4],
+                        baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[4]},
+          cross = kaonMomLAB.Cross(x_axis);
+
+      Double_t
+          bestAngle = func->GetMinimumX(0.0, M_PI),
+          rotAngle = kaonMomLAB.Angle(x_axis);
+
+      // TMatrixD K(3, 3);
+
+      // K(0, 0) = 0;
+      // K(0, 1) = -cross[2];
+      // K(0, 2) = cross[1];
+      // K(1, 0) = cross[2];
+      // K(1, 1) = 0;
+      // K(1, 2) = -cross[0];
+      // K(2, 0) = -cross[1];
+      // K(2, 1) = cross[0];
+      // K(2, 2) = 0;
+
+      // TMatrixD
+      //     K2 = K * K,
+      //     I(TMatrixD::kUnit, K),
+      //     R = I;
+
+      // R += sin(rotAngle) * K;
+      // R += (1 - cos(rotAngle)) * K2;
+
+      // R = R.Invert();
+
+      PiMomKaonCM[0].SetXYZ(PiMomMagKaonCM * cos(bestAngle),
+                            PiMomMagKaonCM * sin(bestAngle),
+                            0.0);
+      PiMomKaonCM[1].SetXYZ(PiMomMagKaonCM * cos(M_PI + bestAngle),
+                            PiMomMagKaonCM * sin(M_PI + bestAngle),
+                            0.0);
+
+      PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomMagKaonCM, 2) + pow(mPiCh, 2)));
+      PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomMagKaonCM, 2) + pow(mPiCh, 2)));
+
+      boost_KaonTwoBody = -boost_KaonTwoBody;
+
+      Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
+      Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[1], PiKaon4VecLAB[1]);
+
+      PiMomKaonLAB[0].SetXYZ(PiKaon4VecLAB[0][0],
+                             PiKaon4VecLAB[0][1],
+                             PiKaon4VecLAB[0][2]);
+      PiMomKaonLAB[1].SetXYZ(PiKaon4VecLAB[1][0],
+                             PiKaon4VecLAB[1][1],
+                             PiKaon4VecLAB[1][2]);
+
+      PiMomKaonLAB[0].Rotate(-rotAngle, cross);
+      PiMomKaonLAB[1].Rotate(-rotAngle, cross);
+
+      PiKaon4VecLAB[0].SetPxPyPzE(PiMomKaonLAB[0][0],
+                                  PiMomKaonLAB[0][1],
+                                  PiMomKaonLAB[0][2],
+                                  PiKaon4VecLAB[0][3]);
+      PiKaon4VecLAB[1].SetPxPyPzE(PiMomKaonLAB[1][0],
+                                  PiMomKaonLAB[1][1],
+                                  PiMomKaonLAB[1][2],
+                                  PiKaon4VecLAB[1][3]);
+
+      trkKL4VecLAB[0].SetPxPyPzE(baseKin.trkKL[0][0],
+                                 baseKin.trkKL[0][1],
+                                 baseKin.trkKL[0][2],
+                                 baseKin.trkKL[0][3]);
+
+      trkKL4VecLAB[1].SetPxPyPzE(baseKin.trkKL[1][0],
+                                 baseKin.trkKL[1][1],
+                                 baseKin.trkKL[1][2],
+                                 baseKin.trkKL[1][3]);
+
+      std::vector<Float_t>
+          trkKLTwoBody1(4),
+          trkKLTwoBody2(4);
+
+      Double_t
+          metric1 = sqrt((PiKaon4VecLAB[0] - trkKL4VecLAB[0]).Mag2() + (PiKaon4VecLAB[1] - trkKL4VecLAB[1]).Mag2()),
+          metric2 = sqrt((PiKaon4VecLAB[0] - trkKL4VecLAB[1]).Mag2() + (PiKaon4VecLAB[1] - trkKL4VecLAB[0]).Mag2());
+
+      for (Int_t k = 0; k < 4; k++)
+      {
+        if (metric1 < metric2)
+        {
+          trkKLTwoBody1[k] = PiKaon4VecLAB[0][k];
+          trkKLTwoBody2[k] = PiKaon4VecLAB[1][k];
+        }
+        else
+        {
+          trkKLTwoBody1[k] = PiKaon4VecLAB[1][k];
+          trkKLTwoBody2[k] = PiKaon4VecLAB[0][k];
+        }
+      }
+
+      // Int_t zmienne
+      std::map<std::string, Int_t> intVars = {
+          {"nrun", 0},
+          {"nev", baseKin.nevent},
+          {"mcflag", mcflag_int},
+          {"mctruth", mctruth_int},
+          {"errflag", baseKin.errFlag},
+          {"errflagks", baseKin.errFlagKS},
+          {"errflagkl", baseKin.errFlagKL},
+          {"errflagclosest", baseKin.errFlagClosest}};
+
+      std::map<std::string, Float_t> floatVars;
+
+      // Tablice
+      std::map<std::string, std::vector<Int_t>> intArrays = {
+          {"vtaken", baseKin.vtaken},
+          {"vtakenKS", baseKin.vtakenKS},
+          {"vtakenKL", baseKin.vtakenKL},
+          {"vtakenClosest", baseKin.vtakenClosest}};
+
+      std::map<std::string, std::vector<Float_t>> floatArrays = {
+          {"Kchrec", baseKin.Kchrecnew},
+          {"KchrecKS", baseKin.KchrecKS},
+          {"KchrecKL", baseKin.KchrecKL},
+          {"KchrecClosest", baseKin.KchrecClosest},
+          {"KchrecKLTwoBody", baseKin.KchrecKLTwoBody},
+          {"trk1", baseKin.trknew[0]},
+          {"trk2", baseKin.trknew[1]},
+          {"trk1KS", baseKin.trkKS[0]},
+          {"trk2KS", baseKin.trkKS[1]},
+          {"trk1KL", baseKin.trkKL[0]},
+          {"trk2KL", baseKin.trkKL[1]},
+          {"trk1Closest", baseKin.trkClosest[0]},
+          {"trk2Closest", baseKin.trkClosest[1]},
+          {"trk1TwoBody", trkKLTwoBody1},
+          {"trk2TwoBody", trkKLTwoBody2}};
+          writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }
-
-    // Int_t zmienne
-    std::map<std::string, Int_t> intVars = {
-        {"nrun", 0},
-        {"nev", baseKin.nevent},
-        {"mcflag", mcflag_int},
-        {"mctruth", mctruth_int},
-        {"errflag", baseKin.errFlag},
-        {"errflagks", baseKin.errFlagKS},
-        {"errflagkl", baseKin.errFlagKL},
-        {"errflagclosest", baseKin.errFlagClosest}};
-
-    std::map<std::string, Float_t> floatVars;
-
-    // Tablice
-    std::map<std::string, std::vector<Int_t>> intArrays = {
-        {"vtaken", baseKin.vtaken},
-        {"vtakenKS", baseKin.vtakenKS},
-        {"vtakenKL", baseKin.vtakenKL},
-        {"vtakenClosest", baseKin.vtakenClosest}};
-
-    std::map<std::string, std::vector<Float_t>> floatArrays = {
-        {"Kchrec", baseKin.Kchrecnew},
-        {"KchrecKS", baseKin.KchrecKS},
-        {"KchrecKL", baseKin.KchrecKL},
-        {"KchrecClosest", baseKin.KchrecClosest},
-        {"KchrecKLTwoBody", baseKin.KchrecKLTwoBody},
-        {"trk1", baseKin.trknew[0]},
-        {"trk2", baseKin.trknew[1]},
-        {"trk1KS", baseKin.trkKS[0]},
-        {"trk2KS", baseKin.trkKS[1]},
-        {"trk1KL", baseKin.trkKL[0]},
-        {"trk2KL", baseKin.trkKL[1]},
-        {"trk1Closest", baseKin.trkClosest[0]},
-        {"trk2Closest", baseKin.trkClosest[1]}};
-
-    writer.Fill(intVars, floatVars, intArrays, floatArrays);
   }
 
   writer.Close();
