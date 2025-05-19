@@ -386,7 +386,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 					Pi0[5] = sqrt(pow(Pi0[3], 2) - pow(Pi0[4], 2));
 					// ------------------------------------------------------------------------------------
 
-					Omegarec[6] = bhabha_mom[3] - Omegarec[5] - Pi0[5];
+					Omegarec[6] = Omegarec[5] - ( PichFourMom[0][3] + PichFourMom[1][3] ) - Pi0[5];
 				}
 				else
 				{
@@ -414,7 +414,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 					Pi0[4] = sqrt(pow(Pi0Mom[0][0], 2) + pow(Pi0Mom[0][1], 2) + pow(Pi0Mom[0][2], 2));
 					Pi0[5] = sqrt(pow(Pi0[3], 2) - pow(Pi0[4], 2));
 					// ------------------------------------------------------------------------------------
-					Omegarec[6] = bhabha_mom[3] - Omegarec[5] - Pi0[5]; // Kinetic energy after the decay
+					Omegarec[6] = Omegarec[5] - ( PichFourMom[0][3] + PichFourMom[1][3] ) - Pi0[5]; // Kinetic energy after the decay
 				}
 
 				Float_t

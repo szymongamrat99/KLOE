@@ -67,7 +67,14 @@ int CPFit_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
     }
     case Controls::CPFitMenu::HALF_SIG_BCG_MC:
     {
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+      logger.getLog(infoCode, "Cut Search");
 
+      Obj.startTimer();
+      cut_search(chain, "split", false, dataTypeOpt, logger, Obj);
+      
+      infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
+      logger.getLog(infoCode, Obj.endTimer());
       break;
     }
     case Controls::CPFitMenu::MC_DATA:

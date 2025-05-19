@@ -1,9 +1,58 @@
 {
     "$schema": "./analysis-schema.json",
-    "lastScript": "Generated variables for Monte Carlo.",
-    "lastUpdate": "2025-03-31_1836",
+    "lastScript": "Final CP Parameters normalization",
+    "lastUpdate": "2025-05-11_1655",
     "momSmearing": {
-        "covarianceMatrix": "{\n  \"_typename\" : \"TMatrixT<double>\",\n  \"fUniqueID\" : 0,\n  \"fBits\" : 0,\n  \"fNrows\" : 6,\n  \"fNcols\" : 6,\n  \"fRowLwb\" : 0,\n  \"fColLwb\" : 0,\n  \"fNelems\" : 36,\n  \"fNrowIndex\" : 0,\n  \"fTol\" : 2.22044604925031e-16,\n  \"fElements\" : [17249.5222500578, 1759.25265126151, -1187.05353951124, -9436.6671534897, 377.540292090097, 385.405705851835, 1759.25265126151, 22874.7521932619, -2122.28504534599, -1438.8862089854, -9052.03126272308, 2614.86550038346, -1187.05353951124, -2122.28504534599, 31677.5006389524, 8544.0138770048, -7140.78584421316, -10474.0570027234, -9436.6671534897, -1438.8862089854, 8544.0138770048, 22522.242110462, -3047.7336475124, -5164.68477989618, 377.540292090097, -9052.03126272308, -7140.78584421316, -3047.7336475124, 24103.8069552666, 1175.2544488107, 385.405705851835, 2614.86550038346, -10474.0570027234, -5164.68477989618, 1175.2544488107, 27730.155773803]\n}"
+        "covarianceMatrix": {
+            "_typename": "TMatrixT<double>",
+            "fBits": 0,
+            "fColLwb": 0,
+            "fElements": [
+                3128.2520595103,
+                -122.358559519439,
+                -9.0815760841145,
+                -675.444000356416,
+                74.1825161338467,
+                2.79935411693997,
+                -122.358559519439,
+                6380.01374424062,
+                11.9659098271779,
+                100.511064210499,
+                2172.05681689359,
+                -15.5604386886677,
+                -9.0815760841145,
+                11.9659098271779,
+                6704.96720350241,
+                -0.0686764039756612,
+                3.61018293563988,
+                -1707.63753940056,
+                -675.444000356416,
+                100.511064210499,
+                -0.0686764039756612,
+                3265.23744678766,
+                -113.780172520869,
+                6.73573643735943,
+                74.1825161338467,
+                2172.05681689359,
+                3.61018293563988,
+                -113.780172520869,
+                6527.43309185201,
+                -2.69927539011548,
+                2.79935411693997,
+                -15.5604386886677,
+                -1707.63753940056,
+                6.73573643735943,
+                -2.69927539011548,
+                7005.76041854628
+            ],
+            "fNcols": 6,
+            "fNelems": 36,
+            "fNrowIndex": 0,
+            "fNrows": 6,
+            "fRowLwb": 0,
+            "fTol": 2.22044604925031e-16,
+            "fUniqueID": 0
+        }
     },
     "variables": {
         "CPFit": {
@@ -12,14 +61,14 @@
                 "cutScanMode": {
                     "cutLimits": [
                         0.0,
-                        3.0
+                        5.0
                     ],
                     "cutName": "rho",
                     "cutTitle": "#rho_{0} [cm]",
                     "flag": false,
-                    "numberOfPoints": 30
+                    "numberOfPoints": 8
                 },
-                "omegaRho": null,
+                "omegaRho": 0.5,
                 "simonaCuts": {
                     "flag": false,
                     "invMass": 100.0,
@@ -55,45 +104,45 @@
                 "Re": 0.00166434974830615
             },
             "limitPer": {
-                "lower": 0.3,
-                "upper": 0.3
+                "lower": 1.0,
+                "upper": 1.0
             },
             "result": {
-                "chi2": 133.21471329223226,
+                "chi2": 113.37091517911324,
                 "error": {
-                    "Im": 0.046631393246081065,
+                    "Im": 0.047721565020067906,
                     "Norm": {
-                        "Omegapi0": 0.06083446524577629,
-                        "Other": 0.4085516752514896,
+                        "Omegapi0": 0.06105237330585639,
+                        "Other": 0.0,
                         "Regeneration": {
-                            "CloseLeft": 0.06427764038655126,
-                            "CloseRight": 0.07254705002533623,
-                            "FarLeft": 0.01388981033407799,
-                            "FarRight": 0.019226627541551355
+                            "CloseLeft": 0.164420997592305,
+                            "CloseRight": 0.16796527976081999,
+                            "FarLeft": 0.014347632323518655,
+                            "FarRight": 0.019961651352907617
                         },
-                        "Semileptonic": 0.10342535114520363,
-                        "Signal": 0.011033916639806296,
-                        "Threepi0": 0.37073677654115594
+                        "Semileptonic": 0.0,
+                        "Signal": 0.012156990255894617,
+                        "Threepi0": 0.0
                     },
-                    "Re": 0.004193509363870886
+                    "Re": 0.004796122534525714
                 },
-                "normChi2": 1.480163481024803,
+                "normChi2": 1.2596768353234804,
                 "value": {
-                    "Im": -0.09790789514916494,
+                    "Im": -0.11795301142659467,
                     "Norm": {
-                        "Omegapi0": 0.8947301155349823,
-                        "Other": 1.299998340735681,
+                        "Omegapi0": 0.8215242957766489,
+                        "Other": 1.0,
                         "Regeneration": {
-                            "CloseLeft": 2.2471406599690575,
-                            "CloseRight": 2.1820981029584616,
-                            "FarLeft": 0.47885266219821254,
-                            "FarRight": 0.5085741258201497
+                            "CloseLeft": 1.8104465832993006,
+                            "CloseRight": 1.7056213583330337,
+                            "FarLeft": 0.465134195538055,
+                            "FarRight": 0.49520264137131065
                         },
-                        "Semileptonic": 0.700001281116899,
-                        "Signal": 0.931791464346433,
-                        "Threepi0": 0.7000011505098218
+                        "Semileptonic": 1.0,
+                        "Signal": 0.8911556709482091,
+                        "Threepi0": 1.0
                     },
-                    "Re": -0.016941432345368688
+                    "Re": -0.016959261429294745
                 }
             }
         },
@@ -118,50 +167,60 @@
             }
         },
         "OmegaRec": {
+            "combined": {
+                "line": {
+                    "inter": 683.4345897665708,
+                    "slope": 0.6917158583086116
+                },
+                "stdDev": {
+                    "error": 0.2153077262076355,
+                    "value": 12.819692407627148
+                }
+            },
             "fiducialVolume": {
                 "charged": {
                     "error": [
-                        0.009409927199394635,
-                        0.010208344961053795,
-                        0.0562797480634434
+                        0.006680983323387541,
+                        0.006976708714463684,
+                        0.09189582239788467
                     ],
                     "stdDev": [
-                        0.405884815498185,
-                        0.38403902995923056,
-                        1.138613062094209
+                        0.24573160312110354,
+                        0.22615478423597876,
+                        1.123000988705261
                     ]
                 },
                 "neutral": {
                     "error": [
-                        0.019811991123845137,
-                        0.00792933486177566,
-                        0.04751972959567072
+                        null,
+                        null,
+                        null
                     ],
                     "stdDev": [
-                        0.28568097871527526,
-                        0.4195023538054849,
-                        0.35879119887378874
+                        0.411477182455037,
+                        0.41202235724694497,
+                        0.39059471562297304
                     ]
                 }
             },
             "invMass": {
                 "mean": {
-                    "error": 0.4293610345712388,
-                    "value": 776.3329303151743
+                    "error": 0.5821395317055362,
+                    "value": 776.2008247929103
                 },
                 "stdDev": {
-                    "error": 3.803021848571996,
-                    "value": 21.924962319815297
+                    "error": null,
+                    "value": 28.730641298741403
                 }
             },
             "kinEne": {
                 "mean": {
-                    "error": 0.019364514964833254,
-                    "value": 145.9999999936686
+                    "error": 0.7220791153873165,
+                    "value": 133.44226625293015
                 },
                 "stdDev": {
-                    "error": 0.8866391272427507,
-                    "value": 17.343921442101173
+                    "error": null,
+                    "value": 34.27204322115873
                 }
             }
         },
@@ -451,7 +510,7 @@
                     }
                 }
             },
-            "sigma": 0
+            "sigma": 0.0
         },
         "Resolutions": {
             "deltaT": 2.0,
@@ -526,22 +585,22 @@
         "rootFiles": {
             "Data": {
                 "firstFile": 1,
-                "lastFile": 250
+                "lastFile": 56
             },
             "MC": {
                 "firstFile": 1,
-                "lastFile": 250
+                "lastFile": 56
             },
             "firstFileMax": 1,
-            "lastFileMax": 250,
+            "lastFileMax": 569,
             "path": "/internal/big_one/4/users/gamrat/old_root_files",
-            "pathControlSample": "/internal/big_one/4/users/gamrat/scripts/ROOT_files/PROD2NTU"
+            "pathControlSample": "/internal/big_one/4/users/gamrat/scripts/ROOT_files/PROD2NTU/DoublePiPi"
         },
         "tree": {
             "filename": {
                 "generatedvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/gen_vars_2025-03-31_3.root",
                 "mctruth": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/mctruth_2025-03-13_3.root",
-                "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_2025-03-15_3.root",
+                "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_2025-04-14_3.root",
                 "omegarecKinFit": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_kin_fit_2025-02-07_31_0_8_10_2.root",
                 "selectionvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/SelectionVars/root_files/selection_vars.root",
                 "trianglefinal": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_triangle_rec_2025-03-23_24_3_5_20_3.root",

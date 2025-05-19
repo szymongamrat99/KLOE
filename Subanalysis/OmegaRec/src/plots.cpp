@@ -7,6 +7,7 @@
 #include <TPaveText.h>
 #include <TTreeReader.h>
 #include <TVirtualFitter.h>
+#include <TLine.h>
 
 #include <neutral_mom.h>
 #include <pi0_photon_pair.h>
@@ -229,7 +230,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	std::vector<TCanvas *> canvas_cont;
 	TString canvas_cont_name = "";
 
-	for (Int_t i = 0; i < 8; i++)
+	for (Int_t i = 0; i < 10; i++)
 	{
 		canvas_cont_name = "canvas_cont_" + std::to_string(i);
 		canvas_cont.push_back(new TCanvas(canvas_cont_name, canvas_cont_name, 790, 790));
@@ -238,16 +239,20 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	std::vector<TH1 *> hist_control;
 	TString hist_control_name = "";
 
-	for (Int_t i = 0; i < 8; i++)
+	for (Int_t i = 0; i < 10; i++)
 	{
 		hist_control_name = "hist_control_" + std::to_string(i);
 
-		if (i < 6)
+		if (i < 5)
+			hist_control.push_back(new TH1D(hist_control_name, "", 20.0, -2.0, 2.0));
+		else if (i == 5)
 			hist_control.push_back(new TH1D(hist_control_name, "", 20.0, -5.0, 5.0));
 		else if (i == 6)
 			hist_control.push_back(new TH1D(hist_control_name, "", 100.0, 500.0, 1000.0));
 		else if (i == 7)
-			hist_control.push_back(new TH1D(hist_control_name, "", 50.0, 50.0, 250.0));
+			hist_control.push_back(new TH1D(hist_control_name, "", 30.0, 50.0, 250.0));
+		else if (i >= 8)
+			hist_control.push_back(new TH1D(hist_control_name, "", 30.0, 0.0, 3.0));
 	};
 
 	Double_t
@@ -273,7 +278,9 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	chain.Draw("(Kchrec[7] - By)>>hist_control_4", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
 	chain.Draw("(Kchrec[8] - Bz)>>hist_control_5", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
 	chain.Draw("omegatree.omega[5]>>hist_control_6", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
-	chain.Draw("(omegatree.omega[3] - trk1[3] - trk2[3] - omegatree.omegapi0[5])>>hist_control_7", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
+	chain.Draw("omegatree.omega[6]>>hist_control_7", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
+	chain.Draw("sqrt(pow(omegatree.NeuVtxAvg[0] - Bx, 2) + pow(omegatree.NeuVtxAvg[1] - By, 2))>>hist_control_8", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
+	chain.Draw("sqrt(pow(Kchrec[6] - Bx, 2) + pow(Kchrec[7] - By, 2))>>hist_control_9", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
 
 	std::vector<TString> xTitleCont = {
 			"x_{#pi^{0}#pi^{0}} - x_{IP} [cm]",
@@ -283,7 +290,9 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 			"y_{#pi^{+}#pi^{-}} - y_{IP} [cm]",
 			"z_{#pi^{+}#pi^{-}} - z_{IP} [cm]",
 			"m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]",
-			"T_{#pi^{0}_{#omega}} [MeV]"};
+			"T_{#pi^{0}_{#omega}} [MeV]",
+			"#sqrt{(x_{#pi^{0}#pi^{0}} - x_{IP})^{2} +(y_{#pi^{0}#pi^{0}} - y_{IP})^{2}} [cm]",
+			"#sqrt{(x_{#pi^{+}#pi^{-}} - x_{IP})^{2} +(y_{#pi^{+}#pi^{-}} - y_{IP})^{2}} [cm]"};
 
 	Float_t
 			parameter[3];
@@ -307,95 +316,102 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 			stdDevOmegaVtx(6),
 			stdDevOmegaVtxErr(6);
 
-	for (Int_t i = 0; i < 8; i++)
+	for (Int_t i = 0; i < 10; i++)
 	{
-
 		TF1 *triple_fit;
 
-		if (i < 6)
-			triple_fit = new TF1("triple_gaus", triple_gaus, -5.0, 5.0, 9, 1);
-		else if (i == 6)
-			triple_fit = new TF1("triple_gaus", triple_gaus, 500.0, 1000.0, 9, 1);
-		else if (i == 7)
-			triple_fit = new TF1("triple_gaus", triple_gaus, 50.0, 250.0, 9, 1);
-
-		triple_fit->SetParNames("Norm1", "Avg1", "Std1", "Norm2", "Avg2", "Std2", "Norm3", "Avg3", "Std3");
-		triple_fit->SetLineWidth(4);
-
-		TFitResultPtr result;
-
-		parameter[0] = hist_control[i]->GetEntries();
-		parameter[1] = hist_control[i]->GetBinCenter(hist_control[i]->GetMaximumBin());
-		parameter[2] = hist_control[i]->GetStdDev();
-
-		triple_fit->SetParameters(0.15 * parameter[0], parameter[1], parameter[2], 0.15 * parameter[0], parameter[1] - 1.5, parameter[2], parameter[0], parameter[1] + 1.0, parameter[2]);
-
-		if (i > 10)
+		if (i < 8)
 		{
-			triple_fit->SetParLimits(0, 0.0, 100.0 * parameter[0]);
-			triple_fit->FixParameter(3, 0.0);
-			triple_fit->FixParameter(6, 0.0);
 
-			triple_fit->SetParLimits(1, parameter[1] - 2.0, parameter[1] + 2.0);
-			triple_fit->FixParameter(4, 0.0);
-			triple_fit->FixParameter(7, 0.0);
-
-			triple_fit->SetParLimits(2, 0.005 * parameter[2], 10.0 * parameter[2]);
-			triple_fit->FixParameter(5, 1.0);
-			triple_fit->FixParameter(8, 1.0);
-		}
-		else
-		{
-			triple_fit->SetParLimits(0, 0.0, 100.0 * parameter[0]);
-			triple_fit->SetParLimits(3, 0.0, 100.0 * parameter[0]);
-			triple_fit->SetParLimits(6, 0.0, 100.0 * parameter[0]);
-
-			triple_fit->SetParLimits(1, parameter[1] - 2.0, parameter[1] + 2.0);
-			triple_fit->SetParLimits(4, parameter[1] - 1.0, parameter[1] + 1.0);
-			triple_fit->SetParLimits(7, parameter[1] + 1.0, parameter[1] + 2.0);
-
-			triple_fit->SetParLimits(2, 0.005 * parameter[2], 10.0 * parameter[2]);
-			triple_fit->SetParLimits(5, 0.005 * parameter[2], 10.0 * parameter[2]);
-			triple_fit->SetParLimits(8, 0.005 * parameter[2], 10.0 * parameter[2]);
-		}
-
-		TVirtualFitter::SetMaxIterations(10000);
-
-		result = hist_control[i]->Fit(triple_fit, "SL", "");
-
-		if (result == 0)
-		{
-			if (i < 6)
-			{
-				stdDevOmegaVtx[i] = comb_std_dev(result->GetParams(), result->GetErrors());
-				stdDevOmegaVtxErr[i] = comb_std_dev_err(result->GetParams(), result->GetErrors());
-			}
+			if (i < 5)
+				triple_fit = new TF1("triple_gaus", triple_gaus, -2.0, 2.0, 9, 1);
+			else if (i == 5)
+				triple_fit = new TF1("triple_gaus", triple_gaus, -5.0, 5.0, 9, 1);
 			else if (i == 6)
-			{
-				meanInvMass = comb_mean(result->GetParams(), result->GetErrors());
-				meanInvMassErr = comb_mean_err(result->GetParams(), result->GetErrors());
-				stdInvMass = comb_std_dev(result->GetParams(), result->GetErrors());
-				stdInvMassErr = comb_std_dev_err(result->GetParams(), result->GetErrors());
-			}
+				triple_fit = new TF1("triple_gaus", triple_gaus, 500.0, 1000.0, 9, 1);
 			else if (i == 7)
+				triple_fit = new TF1("triple_gaus", triple_gaus, 80.0, 240.0, 9, 1);
+			else
+				triple_fit = new TF1("triple_gaus", triple_gaus, 80.0, 240.0, 9, 1);
+
+			triple_fit->SetParNames("Norm1", "Avg1", "Std1", "Norm2", "Avg2", "Std2", "Norm3", "Avg3", "Std3");
+			triple_fit->SetLineWidth(4);
+
+			TFitResultPtr result;
+
+			parameter[0] = hist_control[i]->GetEntries();
+			parameter[1] = hist_control[i]->GetBinCenter(hist_control[i]->GetMaximumBin());
+			parameter[2] = hist_control[i]->GetStdDev();
+
+			triple_fit->SetParameters(parameter[0], parameter[1], parameter[2], 0.15 * parameter[0], parameter[1] - 1.5, parameter[2], parameter[0], parameter[1] + 1.0, parameter[2]);
+
+			if (i >= 6 || i < 3)
 			{
-				meanKinEne = comb_mean(result->GetParams(), result->GetErrors());
-				meanKinEneErr = comb_mean_err(result->GetParams(), result->GetErrors());
-				stdKinEne = comb_std_dev(result->GetParams(), result->GetErrors());
-				stdKinEneErr = comb_std_dev_err(result->GetParams(), result->GetErrors());
+				triple_fit->SetParLimits(0, 0.0, 100.0 * parameter[0]);
+				triple_fit->FixParameter(3, 0.0);
+				triple_fit->FixParameter(6, 0.0);
+
+				triple_fit->SetParLimits(1, parameter[1] - 2.0, parameter[1] + 2.0);
+				triple_fit->FixParameter(4, 0.0);
+				triple_fit->FixParameter(7, 0.0);
+
+				triple_fit->SetParLimits(2, 0.005 * parameter[2], 10.0 * parameter[2]);
+				triple_fit->FixParameter(5, 1.0);
+				triple_fit->FixParameter(8, 1.0);
+			}
+			else if (i >= 3 && i < 6)
+			{
+				triple_fit->SetParLimits(0, 0.0, 100.0 * parameter[0]);
+				triple_fit->SetParLimits(3, 0.0, 100.0 * parameter[0]);
+				triple_fit->SetParLimits(6, 0.0, 100.0 * parameter[0]);
+
+				triple_fit->SetParLimits(1, parameter[1] - 1.0, parameter[1] - 0.5);
+				triple_fit->SetParLimits(4, parameter[1] - 0.5, parameter[1] + 0.5);
+				triple_fit->SetParLimits(7, parameter[1] + 0.5, parameter[1] + 1.0);
+
+				triple_fit->SetParLimits(2, 0.005 * parameter[2], 10.0 * parameter[2]);
+				triple_fit->SetParLimits(5, 0.005 * parameter[2], 10.0 * parameter[2]);
+				triple_fit->SetParLimits(8, 0.005 * parameter[2], 10.0 * parameter[2]);
 			}
 
-			fit_stats[1] = Form("Mean = %.2f#pm%.2f", comb_mean(result->GetParams(), result->GetErrors()), comb_mean_err(result->GetParams(), result->GetErrors()));
-			fit_stats[2] = Form("Std Dev = %.2f#pm%.2f", comb_std_dev(result->GetParams(), result->GetErrors()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
-		}
-		else
-		{
-			stdDevOmegaVtx[i] = 0;
-			stdDevOmegaVtxErr[i] = 0;
-		}
+			TVirtualFitter::SetMaxIterations(1000000);
 
-		fit_text->AddText(fit_stats[1]);
-		fit_text->AddText(fit_stats[2]);
+			result = hist_control[i]->Fit(triple_fit, "SL", "");
+
+			if (result == 0)
+			{
+				if (i < 6)
+				{
+					stdDevOmegaVtx[i] = comb_std_dev(result->GetParams(), result->GetErrors());
+					stdDevOmegaVtxErr[i] = comb_std_dev_err(result->GetParams(), result->GetErrors());
+				}
+				else if (i == 6)
+				{
+					meanInvMass = comb_mean(result->GetParams(), result->GetErrors());
+					meanInvMassErr = comb_mean_err(result->GetParams(), result->GetErrors());
+					stdInvMass = comb_std_dev(result->GetParams(), result->GetErrors());
+					stdInvMassErr = comb_std_dev_err(result->GetParams(), result->GetErrors());
+				}
+				else if (i == 7)
+				{
+					meanKinEne = comb_mean(result->GetParams(), result->GetErrors());
+					meanKinEneErr = comb_mean_err(result->GetParams(), result->GetErrors());
+					stdKinEne = comb_std_dev(result->GetParams(), result->GetErrors());
+					stdKinEneErr = comb_std_dev_err(result->GetParams(), result->GetErrors());
+				}
+
+				fit_stats[1] = Form("Mean = %.2f#pm%.2f", comb_mean(result->GetParams(), result->GetErrors()), comb_mean_err(result->GetParams(), result->GetErrors()));
+				fit_stats[2] = Form("Std Dev = %.2f#pm%.2f", comb_std_dev(result->GetParams(), result->GetErrors()), comb_std_dev_err(result->GetParams(), result->GetErrors()));
+
+				fit_text->AddText(fit_stats[1]);
+				fit_text->AddText(fit_stats[2]);
+			}
+			else
+			{
+				stdDevOmegaVtx[i] = 0;
+				stdDevOmegaVtxErr[i] = 0;
+			}
+		}
 
 		canvas_cont[i]->cd();
 		canvas_cont[i]->SetLogy(0);
@@ -408,16 +424,22 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		hist_control[i]->GetYaxis()->SetTitle("Counts");
 		hist_control[i]->GetYaxis()->SetRangeUser(0.0, 1.2 * hist_control[i]->GetMaximum());
 		hist_control[i]->Draw();
-		fit_text->Draw();
+
+		if(i < 8)
+			fit_text->Draw();
 
 		canvas_cont[i]->Print(img_dir + "OmegaRec/cont_plot_" + std::to_string(i) + ext_img);
 
-		fit_text->Clear();
+		if(i < 8)
+			fit_text->Clear();
 
-		delete triple_fit;
+		if(i < 8)
+			delete triple_fit;
 	}
 
 	// -------------------------------------------------------------------------------------------------
+
+	TH2 *energyVsMass = new TH2D("EnergyVsMass", ";T_{#pi^{0}_{#omega}} [MeV];m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]", 100, 0, 300, 100, 600, 1000);
 
 	// Initialization of interference function
 	KLOE::interference event("split", 0, 91, -90, 90, split);
@@ -518,6 +540,9 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist2d_00IP_pmIP[1][2]->Fill(Kchrec[8] - ip_avg[8], neu_vtx_avg[2] - ip_avg[8]);
 
 				hist2d[2]->Fill(Omegapi0[3] - Omegapi0[5], Omegarec[5]);
+
+				// Fill histogram to get kin ene vs. mass width
+				energyVsMass->Fill(Omegarec[6], Omegarec[5]);
 			}
 			if (baseKin.mctruth_int == 5)
 			{
@@ -797,6 +822,96 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		canva2d[j + 2 * channNum]->Print(img_dir + "OmegaRec/z_2d_" + channName[j] + ext_img);
 	}
 
+	TF1 *fit2D = new TF1("fit2D", "[0]*x + [1]", 0, 300); // pol1: y = a*x + b
+
+	energyVsMass->Fit(fit2D);
+
+	Double_t a = fit2D->GetParameter(0);
+	Double_t b = fit2D->GetParameter(1);
+
+	Double_t theta = atan(a); // Get angle for rotation of points
+
+	// Histogram of projection
+	TH1 *hProj = new TH1D("hProj", ";Projection along fitted line [-];Counts", 50, 400, 800);
+	TH2 *energyVsMassRot = new TH2D("Projection", "", 50, 400, 750, 50, 450, 650);
+
+	for (int ix = 1; ix <= energyVsMass->GetNbinsX(); ix++)
+	{
+		for (int iy = 1; iy <= energyVsMass->GetNbinsY(); iy++)
+		{
+			int count = energyVsMass->GetBinContent(ix, iy);
+
+			double x = energyVsMass->GetXaxis()->GetBinCenter(ix);
+			double y = energyVsMass->GetYaxis()->GetBinCenter(iy);
+
+			// Rotacja
+			double x_rot = x * cos(-theta) - y * sin(-theta);
+			double y_rot = x * sin(-theta) + y * cos(-theta);
+
+			for (Int_t i = 0; i < count; i++)
+				energyVsMassRot->Fill(x_rot, y_rot);
+		}
+	}
+
+	hProj = energyVsMassRot->ProjectionY();
+
+	// Dopasowanie Gaussa do szerokości
+	TF1 *gaus = new TF1("gaus", "gaus", -100, 100);
+	hProj->Fit(gaus);
+	Double_t sigma = gaus->GetParameter(2);
+	Double_t sigmaErr = gaus->GetParError(2);
+
+	Double_t normFactor = 3 * sigma / sqrt(a * a + 1); // Norm of normal vector
+	Double_t normalX = -a * normFactor;
+	Double_t normalY = normFactor;
+
+	TF1 *lineplus3sigma = new TF1("line_plus_3sigma", "[0]*x + [1]", 0, 300);		// pol1: y = a*x + b
+	TF1 *lineminus3sigma = new TF1("line_minus_3sigma", "[0]*x + [1]", 0, 300); // pol1: y = a*x + b
+
+	TLine *T0plus3sigma = new TLine(meanKinEne + stdKinEne, meanInvMass - stdInvMass, meanKinEne + stdKinEne, meanInvMass + stdInvMass);
+	TLine *T0minus3sigma = new TLine(meanKinEne - stdKinEne, meanInvMass - stdInvMass, meanKinEne - stdKinEne, meanInvMass + stdInvMass);
+
+	TLine *minvplus3sigma = new TLine(meanKinEne - stdKinEne, meanInvMass + stdInvMass, meanKinEne + stdKinEne, meanInvMass + stdInvMass);
+	TLine *minvminus3sigma = new TLine(meanKinEne - stdKinEne, meanInvMass - stdInvMass, meanKinEne + stdKinEne, meanInvMass - stdInvMass);
+
+	lineplus3sigma->SetParameter(0, a);
+	lineminus3sigma->SetParameter(0, a);
+	lineplus3sigma->SetParameter(1, b + (1 - pow(a, 2)) * normFactor);
+	lineminus3sigma->SetParameter(1, b - (1 - pow(a, 2)) * normFactor);
+
+	// Rysowanie
+	TCanvas *c1 = new TCanvas("c1", "Rotacja TH2D", 1200, 600);
+	c1->Divide(2, 1);
+	c1->cd(1);
+
+	gStyle->SetStatX(0.4); // prawa krawędź statboxa
+	gStyle->SetStatY(0.9); // górna krawędź statboxa
+
+	energyVsMass->Draw("COLZ");
+	fit2D->SetLineColor(kBlack);
+	lineplus3sigma->SetLineColor(kBlack);
+	lineminus3sigma->SetLineColor(kBlack);
+	fit2D->Draw("same");
+	lineplus3sigma->Draw("same");
+	lineminus3sigma->Draw("same");
+	T0plus3sigma->Draw("same");
+	T0minus3sigma->Draw("same");
+	minvplus3sigma->Draw("same");
+	minvminus3sigma->Draw("same");
+
+	c1->cd(2);
+
+	gStyle->SetStatX(0.4); // prawa krawędź statboxa
+	gStyle->SetStatY(0.9); // górna krawędź statboxa
+
+	hProj->GetXaxis()->SetTitle("Deviation from fitted line [-]");
+	hProj->GetYaxis()->SetTitle("Counts");
+	hProj->Draw();
+	gaus->SetLineColor(kBlue);
+	gaus->Draw("same");
+
+	c1->Print(omegarec_dir + img_dir + "widthOfDistribution" + ext_img);
+
 	// Addition of stdDevs to the properties file
 	std::string decayType[2] = {"neutral", "charged"};
 	for (Int_t i = 0; i < 2; i++)
@@ -815,6 +930,12 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"] = meanKinEneErr;
 	properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"] = stdKinEne;
 	properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"] = stdKinEneErr;
+
+	properties["variables"]["OmegaRec"]["combined"]["stdDev"]["value"] = sigma;
+	properties["variables"]["OmegaRec"]["combined"]["stdDev"]["error"] = sigmaErr;
+
+	properties["variables"]["OmegaRec"]["combined"]["line"]["slope"] = a;
+	properties["variables"]["OmegaRec"]["combined"]["line"]["inter"] = b;
 
 	properties["lastScript"] = "Plots of Omega Reconstruction";
 	properties["lastUpdate"] = Obj.getCurrentTimestamp();

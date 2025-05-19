@@ -15,6 +15,7 @@
 #include <TGraphAsymmErrors.h>
 #include <TEfficiency.h>
 #include <TLegend.h>
+#include <TBufferJSON.h>
 
 #include "../inc/cpfit.hpp"
 
@@ -59,7 +60,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 	chain.SetBranchAddress("Chi2", &baseKin.Chi2);
 	chain.SetBranchAddress("minv4gam", &baseKin.minv4gam);
-	chain.SetBranchAddress("Kchboost", baseKin.Kchboost);
+	// chain.SetBranchAddress("Kchboost", baseKin.Kchboost);
 	chain.SetBranchAddress("Kchrec", baseKin.Kchrec);
 	chain.SetBranchAddress("Qmiss", &baseKin.Qmiss);
 	chain.SetBranchAddress("ip", interfcommon_.ip);
@@ -305,12 +306,12 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 	// Vectors needed for the initialization of graphs
 	TString graphMode = "FitResultErr";
-	std::vector<Double_t> 
-									cutLimit(numberOfPoints);
-	std::vector<std::vector<Double_t>> 
-															errValue(2),
-															realValue(2),
-															imaginaryValue(2);
+	std::vector<Double_t>
+			cutLimit(numberOfPoints);
+	std::vector<std::vector<Double_t>>
+			errValue(2),
+			realValue(2),
+			imaginaryValue(2);
 
 	TString xTitle = (std::string)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutTitle"],
 					yTitle = "|#sigma(Re(#varepsilon'/#varepsilon))/Re(#varepsilon'/#varepsilon)|",
@@ -333,7 +334,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				simona_cuts = properties["variables"]["CPFit"]["cuts"]["simonaCuts"]["flag"];
 
 		Double_t
-				sigmas = 5,
+				sigmas = 1.5,
 				sigma = (Double_t)properties["variables"]["RegenRejection"]["sigma"],
 				ChHigher[2] = {
 						properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
@@ -346,6 +347,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		{
 			rho_cut = scanIter * cutStep;
 			cutLimit[scanIter - 1] = rho_cut;
+
+			std::cout << rho_cut << std::endl;
 		}
 		else
 			rho_cut = properties["variables"]["CPFit"]["cuts"]["omegaRho"];
@@ -364,6 +367,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		}
 		// ---------------------------------------------------------------
 
+		Double_t a, b, lineWidth;
+
 		if (!simona_cuts)
 		{
 			OmegaCut1[0] = 0.0;
@@ -376,15 +381,19 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		{
 			Double_t
 					meanInvMass = properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"],
-					meanInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"],
+					// meanInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"],
 					stdInvMass = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"],
-					stdInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"],
+					// stdInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"],
 					InvMass[2] = {meanInvMass, 3 * stdInvMass},
 					meanKinEne = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"],
-					meanKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"],
+					// meanKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"],
 					stdKinEne = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"],
-					stdKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"],
+					// stdKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"],
 					KinEne[2] = {meanKinEne, 3 * stdKinEne};
+
+			a = properties["variables"]["OmegaRec"]["combined"]["line"]["slope"],
+			b = properties["variables"]["OmegaRec"]["combined"]["line"]["inter"],
+			lineWidth = properties["variables"]["OmegaRec"]["combined"]["stdDev"]["value"];
 
 			OmegaCut1[0] = meanInvMass;
 			OmegaCut1[1] = sigmas * stdInvMass;
@@ -405,12 +414,62 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		Obj.SetAllConditionParameters(formula_vector, mean_sigma_vector);
 		// ---------------------------------------------------------
 
+		Bool_t
+				cut_regen_neg,
+				cut_regen_pos,
+				cut_line_down,
+				cut_line_up,
+				cut_KinEnePi0,
+				cut_MinvOmega,
+				cut_total;
+
+		const Int_t numberOfMomenta = 2;
+
+		TVectorT<Double_t>
+				momVecMC(numberOfMomenta * 3),
+				momVecSmeared(numberOfMomenta * 3);
+
+		std::vector<double> elems = properties["momSmearing"]["covarianceMatrix"]["fElements"].get<std::vector<Double_t>>();
+
+		Int_t nRows = properties["momSmearing"]["covarianceMatrix"]["fNrows"],
+					nCols = properties["momSmearing"]["covarianceMatrix"]["fNcols"];
+
+		TMatrixT<Double_t>
+				covMatrix(nRows, nCols, elems.data());
+
+		KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
+		KLOE::ChargedVtxRec<Float_t> BoostMethodObj;
+
 		for (UInt_t i = 0; i < nentries; i++)
 		{
 			chain.GetEntry(i);
 
 			if (neutVars.done == 1 && doneOmega == 1)
 			{
+				momVecMC[0] = PichFourMom[0][0];
+				momVecMC[1] = PichFourMom[0][1];
+				momVecMC[2] = PichFourMom[0][2];
+				momVecMC[3] = PichFourMom[1][0];
+				momVecMC[4] = PichFourMom[1][1];
+				momVecMC[5] = PichFourMom[1][2];
+
+				CovMatrixCalcObj.SetMCVector(momVecMC);
+				CovMatrixCalcObj.SmearMomentum();
+				CovMatrixCalcObj.GetSmearedMomentum(momVecSmeared);
+
+				Float_t KchrecSmeared[4], energyPion[2];
+
+				KchrecSmeared[0] = momVecSmeared[0] + momVecSmeared[3];
+				KchrecSmeared[1] = momVecSmeared[1] + momVecSmeared[4];
+				KchrecSmeared[2] = momVecSmeared[2] + momVecSmeared[5];
+
+				energyPion[0] = sqrt(pow(momVecSmeared[0],2) + pow(momVecSmeared[1],2) + pow(momVecSmeared[2],2) + pow(mPiCh,2));
+				energyPion[1] = sqrt(pow(momVecSmeared[3],2) + pow(momVecSmeared[4],2) + pow(momVecSmeared[5],2) + pow(mPiCh,2));
+
+				KchrecSmeared[3] = energyPion[0] + energyPion[1];
+
+				BoostMethodObj.KaonMomFromBoost(KchrecSmeared, baseKin.phi_mom, baseKin.Kchboost);
+
 				velocity_kch = cVel * sqrt(pow(baseKin.Kchboost[0], 2) + pow(baseKin.Kchboost[1], 2) + pow(baseKin.Kchboost[2], 2)) / baseKin.Kchboost[3];
 
 				velocity_kne = cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
@@ -474,6 +533,10 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 				Bool_t cuts[4] = {false, false, false, false};
 
+				Double_t normFactor = sigmas * lineWidth / sqrt(a * a + 1); // Norm of normal vector
+				cut_line_up = (a * Omegarec[6] + b + (1 - pow(a, 2)) * normFactor) > Omegarec[5];
+				cut_line_down = (a * Omegarec[6] + b - (1 - pow(a, 2)) * normFactor) < Omegarec[5];
+
 				for (Int_t i = 0; i < 3; i++)
 				{
 					radius[0] += pow(neutVars.Knerec[6 + i] - interfcommon_.ip[i], 2);
@@ -509,12 +572,14 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 				Double_t
 						stdDevRho00IP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[0] + stdDevOmegaVtx[1]) / 2.,
-						stdDevRhopmIP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[3] + stdDevOmegaVtx[4]) / 2.;
+						stdDevRhopmIP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[3] + stdDevOmegaVtx[4]) / 2.,
+						meanRho00IP = sqrt(M_PI / 2.) * (stdDevOmegaVtx[0] + stdDevOmegaVtx[1]) / 2.,
+						meanRhopmIP = sqrt(M_PI / 2.) * (stdDevOmegaVtx[3] + stdDevOmegaVtx[4]) / 2.;
 
-				cond[0] = rho_00_IP < sigmas * stdDevRho00IP;
-				cond[1] = rho_pm_IP < sigmas * stdDevRhopmIP;
-				cond[2] = abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < sigmas * stdDevOmegaVtx[2];
-				cond[3] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < sigmas * stdDevOmegaVtx[5];
+				cond[0] = rho_00_IP - meanRho00IP < stdDevRho00IP;
+				cond[1] = rho_pm_IP - meanRhopmIP < stdDevRhopmIP;
+				cond[2] = abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < stdDevOmegaVtx[2];
+				cond[3] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < stdDevOmegaVtx[5];
 
 				cond_tot = cond[0] && cond[1] && cond[2] && cond[3];
 				// ----------------------------------------------------------------------------------------------------------------
@@ -527,11 +592,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				// Check of Simona's cuts
 				if (simona_cuts)
 				{
-					Double_t
-							KinEnergyPi0 = Omegarec[3] - PichFourMom[0][3] - PichFourMom[1][3] - Omegapi0[5];
-
 					x_vector[4] = Omegarec[5];
-					x_vector[5] = KinEnergyPi0;
+					x_vector[5] = Omegarec[6];
 					// ---------------------------------------------------------------
 				}
 				else
@@ -545,8 +607,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				// cuts[2] = abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma;					 // && radius_ch[1] > 8;
 				// cuts[3] = 1;																																						 // abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
 
-				cuts[0] = 1;//Obj.GetSingleConditionValue(formula_vector[0], x_vector[0]);
-				cuts[2] = 1;//Obj.GetSingleConditionValue(formula_vector[2], x_vector[2]);
+				cuts[0] = Obj.GetSingleConditionValue(formula_vector[0], x_vector[0]);
+				cuts[2] = Obj.GetSingleConditionValue(formula_vector[2], x_vector[2]);
 
 				cuts[1] = 1;
 				cuts[3] = 1;
@@ -555,7 +617,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				{
 					cuts[4] = Obj.GetSingleConditionValue(formula_vector[4], x_vector[4]);
 
-					cuts[5] = 1;//Obj.GetSingleConditionValue(formula_vector[5], x_vector[5]);
+					cuts[5] = Obj.GetSingleConditionValue(formula_vector[5], x_vector[5]);
 				}
 				else
 				{
@@ -571,7 +633,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 						no_cuts_sig[1].push_back(baseKin.Dtboostlor);
 					}
 
-					if (cuts[0] && cuts[1] && cuts[2] && cuts[3] && cuts[4] && cuts[5])
+					if (cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] || cuts[5] || cut_line_up || cut_line_down))
 					{
 						if (baseKin.mctruth_int == 1)
 						{
@@ -606,7 +668,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 					}
 				}
 
-				if (baseKin.mcflag == 0 && cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] && cuts[5]))
+				if (baseKin.mcflag == 0 && cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] || cuts[5] || cut_line_up || cut_line_down))
 				{
 					event.time_diff_data.push_back(baseKin.Dtboostlor);
 				}
@@ -640,7 +702,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				properties["variables"]["CPFit"]["initParams"]["Norm"]["Threepi0"],
 				properties["variables"]["CPFit"]["initParams"]["Norm"]["Semileptonic"],
 				properties["variables"]["CPFit"]["initParams"]["Norm"]["Other"]},
-									 step[num_of_vars] = {1E-5, 1E-5, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
+									 step[num_of_vars] = {1E-5, 1E-5, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 0.00, 0.00, 0.00};
 
 		Double_t
 				limit_upper = properties["variables"]["CPFit"]["limitPer"]["upper"],
@@ -829,17 +891,52 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		TPad *padup_c1 = new TPad("pad_up_c1", "", 0.0, 0.3, 1.0, 1.0);
 		TPad *paddown_c1 = new TPad("pad_down_c1", "", 0.0, 0.0, 1.0, 0.3);
 		paddown_c1->SetBottomMargin(0.3);
+		paddown_c1->SetRightMargin(0.10);
 
 		gStyle->SetOptStat(0);
 
 		TGraphAsymmErrors *sig_eff = new TGraphAsymmErrors();
 
+		Double_t xMinRangeDisplay = x_min, xMaxRangeDisplay = x_max;
+
 		sig_eff->Divide(sig_pass, sig_total, "cl=0.683 b(1,1) mode");
+
+		Double_t
+				*yArr = sig_eff->GetY(),
+				*yErrLArr = sig_eff->GetEYlow(),
+				*yErrHArr = sig_eff->GetEYhigh();
+
+		Int_t n_bins = sig_eff->GetN();
+		std::vector<Double_t>
+				y(yArr, yArr + n_bins),
+				eyl(yErrLArr, yErrLArr + n_bins),
+				eyh(yErrHArr, yErrHArr + n_bins);
+
+		Double_t
+				weightedMean = Obj.WeightedAverageAsymmetric(y, eyl, eyh),
+				weightedMeanErr = Obj.WAvgAsymmError(eyl, eyh);
+
+		std::cout << "Weighted mean: " << weightedMean << " +/- " << weightedMeanErr << std::endl;
+
+		TLine
+				*lineAvg = new TLine(xMinRangeDisplay, weightedMean, xMaxRangeDisplay, weightedMean),
+				*lineDown = new TLine(xMinRangeDisplay, weightedMean - weightedMeanErr, xMaxRangeDisplay, weightedMean - weightedMeanErr),
+				*lineUp = new TLine(xMinRangeDisplay, weightedMean + weightedMeanErr, xMaxRangeDisplay, weightedMean + weightedMeanErr);
+
+		lineAvg->SetLineColor(kRed);
+		lineDown->SetLineColor(kRed);
+		lineUp->SetLineColor(kRed);
+		lineAvg->SetLineStyle(2); // np. przerywana
+		lineDown->SetLineStyle(2);
+		lineUp->SetLineStyle(2);
+		lineAvg->SetLineWidth(2);
+		lineDown->SetLineWidth(2);
+		lineUp->SetLineWidth(2);
 
 		c1->cd();
 		paddown_c1->Draw();
 		paddown_c1->cd();
-		sig_eff->GetXaxis()->SetRangeUser(x_min, x_max);
+		sig_eff->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
 		sig_eff->GetYaxis()->SetRangeUser(0.0, 1.0);
 		sig_eff->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
 		sig_eff->GetYaxis()->SetTitle("#varepsilon(#Deltat)");
@@ -851,6 +948,14 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		sig_eff->GetXaxis()->SetLabelSize(0.08);
 
 		sig_eff->Draw("APE");
+		lineAvg->Draw("SAME");
+		lineDown->Draw("SAME");
+		lineUp->Draw("SAME");
+
+		event.data->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
+		event.mc_sum->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
+
+		event.frac[0]->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
 
 		TRatioPlot *rp = new TRatioPlot(event.mc_sum, event.data, "diffsig");
 
@@ -872,7 +977,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		rp->GetLowerRefYaxis()->SetLabelSize(0.02);
 		rp->GetLowerRefXaxis()->SetLabelSize(0.0);
 
-		Double_t max_height = event.mc_sum->GetMaximum();
+		Double_t max_height = event.data->GetMaximum();
 
 		rp->GetUpperRefYaxis()->SetRangeUser(0.0, 2 * max_height);
 		rp->GetUpperRefYaxis()->SetTitle("Counts/2#tau_{S}");
@@ -882,7 +987,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 		rp->GetUpperPad()->cd();
 
-		TLegend *legend_chann = new TLegend(0.6, 0.5, 0.9, 0.9);
+		TLegend *legend_chann = new TLegend(0.6, 0.7, 0.9, 0.9);
 		legend_chann->SetFillColor(kWhite);
 		for (UInt_t i = 0; i < channNum; i++)
 		{
@@ -890,7 +995,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 			event.frac[i]->Draw("HISTSAME");
 		}
 
-		legend_chann->AddEntry(event.mc_sum, mcSumName, "l");
+		legend_chann->AddEntry(event.frac[0], mcSumName, "l");
 		legend_chann->AddEntry(event.data, dataName, "le");
 		legend_chann->Draw();
 

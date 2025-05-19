@@ -256,9 +256,9 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 			// Construction of the charged rec class object
 			eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.iv, bhabha_vtx, baseKin.Curv, baseKin.Phiv, baseKin.Cotv, baseKin.xv, baseKin.yv, baseKin.zv, mode);
 
-			// Finding the vtx closest to the interaction point
-			eventAnalysis->findKClosestRec(baseKin.Kchrec, baseKin.trk[0], baseKin.trk[1], baseKin.vtaken, baseKin.errFlag);
-			// ----------------------------------------------------------------------------------------
+			// // Finding the vtx closest to the interaction point
+			// eventAnalysis->findKClosestRec(baseKin.Kchrec, baseKin.trk[0], baseKin.trk[1], baseKin.vtaken, baseKin.errFlag);
+			// // ----------------------------------------------------------------------------------------
 
 			// Looping over all clusters in the event
 			for (Int_t j1 = 0; j1 < nclu - 3; j1++)
