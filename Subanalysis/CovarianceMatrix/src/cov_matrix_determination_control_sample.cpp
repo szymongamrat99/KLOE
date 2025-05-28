@@ -74,24 +74,107 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	TMatrixT<Double_t>
 			covMatrix(numberOfMomenta * 3, numberOfMomenta * 3);
 
+	std::vector<TCanvas *> canvases_pi[2];
+	TString canvases_pi_name = "";
+
+	for (Int_t i = 0; i < 2; i++)
+		for (Int_t j = 0; j < 4; j++)
+		{
+			canvases_pi_name = "canvases_pi_" + std::to_string(i) + std::to_string(j);
+			canvases_pi[i].push_back(new TCanvas(canvases_pi_name, canvases_pi_name, 790, 790));
+		};
+
+	std::vector<TH1 *> pi[2][2];
+	TString pi_name = "";
+
+	for (Int_t i = 0; i < 2; i++)
+		for (Int_t j = 0; j < 2; j++)
+			for (Int_t k = 0; k < 4; k++)
+			{
+				pi_name = "pi_" + std::to_string(i) + std::to_string(j) + std::to_string(k);
+
+				if (k != 3)
+					pi[i][j].push_back(new TH1D(pi_name, "", 100, -400, 400));
+				else
+					pi[i][j].push_back(new TH1D(pi_name, "", 100, 100, 350));
+			};
+
+	TCanvas *canvaDiff = new TCanvas("canvaDiff", "canvaDiff", 790, 790);
+	TH1 *histDiff = new TH1D("histDiff", "", 100, 0, 2.0);
+
+	std::vector<TCanvas *> kaonCanva;
+	TString kaonCanva_name = "";
+
+	for (Int_t i = 0; i < 5; i++)
+	{
+		kaonCanva_name = "kaonCanva_" + std::to_string(i);
+		kaonCanva.push_back(new TCanvas(kaonCanva_name, kaonCanva_name, 790, 790));
+	};
+
+	std::vector<TH1 *> KaonHist[2];
+	TString KaonHist_name = "";
+
+	for (Int_t i = 0; i < 2; i++)
+		for (Int_t j = 0; j < 5; j++)
+		{
+			KaonHist_name = "KaonHist_" + std::to_string(i) + std::to_string(j);
+			if (j != 3 && j != 4)
+				KaonHist[i].push_back(new TH1D(KaonHist_name, "", 100, -400.0, 400.0));
+			else if (j == 3)
+				KaonHist[i].push_back(new TH1D(KaonHist_name, "", 100, 490.0, 600.0));
+			else
+				KaonHist[i].push_back(new TH1D(KaonHist_name, "", 100, 490.0, 510.0));
+		};
+
 	KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, momVecData, covMatrix);
 
 	const Int_t nentries = chainDoublePiPi->GetEntries();
+
+	Int_t events[2] = {0, 0};
+	Float_t efficiency[2];
 
 	for (Int_t i = 0; i < nentries; i++)
 	{
 		chainDoublePiPi->GetEntry(i);
 
+		histDiff->Fill(minDiff);
+
+		if (minDiff < 0.5)
+		{ 
+			KaonHist[0][0]->Fill(KchrecKL->at(0));
+			KaonHist[0][1]->Fill(KchrecKL->at(1));
+			KaonHist[0][2]->Fill(KchrecKL->at(2));
+			KaonHist[0][3]->Fill(KchrecKL->at(3));
+			KaonHist[0][4]->Fill(KchrecKL->at(5));
+
+			KaonHist[1][0]->Fill(KchrecKLTwoBody->at(0));
+			KaonHist[1][1]->Fill(KchrecKLTwoBody->at(1));
+			KaonHist[1][2]->Fill(KchrecKLTwoBody->at(2));
+			KaonHist[1][3]->Fill(KchrecKLTwoBody->at(3));
+			KaonHist[1][4]->Fill(KchrecKLTwoBody->at(5));
+
+			events[0]++;
+		}
+
 		if (minDiff < 0.5 && abs(KchrecKL->at(5) - mK0) < 2.0)
 		{
-
-			for (Int_t j = 0; j < 3; j++)
+			events[1]++;
+			for (Int_t j = 0; j < 4; j++)
 			{
-				momVecMC[j] = trk1KLTwoBody->at(j);
-				momVecData[j] = trk1KL->at(j);
+				pi[0][0][j]->Fill(trk1KL->at(j));
+				pi[0][1][j]->Fill(trk2KL->at(j));
 
-				momVecMC[3 + j] = trk2KLTwoBody->at(j);
-				momVecData[3 + j] = trk2KL->at(j);
+				pi[1][0][j]->Fill(trk1KLTwoBody->at(j));
+				pi[1][1][j]->Fill(trk2KLTwoBody->at(j));
+
+				if (j < 3)
+				{
+					momVecMC[j] = trk1KLTwoBody->at(j);
+					momVecData[j] = trk1KL->at(j);
+
+					momVecMC[3 + j] = trk2KLTwoBody->at(j);
+					momVecData[3 + j] = trk2KL->at(j);
+				}
 			}
 
 			CovMatrixCalcObj.SetMCVector(momVecMC);
@@ -101,7 +184,87 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 		}
 	}
 
+	efficiency[0] = events[0] / (Float_t)nentries;
+	efficiency[1] = events[1] / (Float_t)nentries;
+
+	std::cout << "After cut on Difference: " << efficiency[0] << std::endl;
+	std::cout << "After cut on all: " << efficiency[1] << std::endl;
+
 	CovMatrixCalcObj.GetCovMatrix();
+
+	TString x_names_pi[4] = {"p^{#pi}_{x} [MeV/c]", "p^{#pi}_{y} [MeV/c]", "p^{#pi}_{z} [MeV/c]", "E^{#pi} [MeV]"};
+
+	gStyle->SetOptStat(0);
+
+	for (Int_t i = 0; i < 2; i++)
+		for (Int_t j = 0; j < 4; j++)
+		{
+			TString name_canva = Form("%s_%d_%d.png", "Momentum", i, j);
+			canvases_pi[i][j]->cd();
+
+			TLegend *legendPi = new TLegend(0.2, 0.7, 0.5, 0.9);
+			legendPi->AddEntry(pi[0][i][j], Form("Reconstructed charged pion %d", i), "l");
+			legendPi->AddEntry(pi[1][i][j], Form("Charged pion %d from 2-body decay", i), "l");
+
+			pi[0][i][j]->SetLineColor(kBlue);
+			pi[1][i][j]->SetLineColor(kRed);
+
+			pi[0][i][j]->GetXaxis()->SetTitle(x_names_pi[j]);
+			pi[0][i][j]->GetYaxis()->SetTitle("Counts");
+
+			Float_t maxY;
+
+			if (pi[0][i][j]->GetMaximum() >= pi[1][i][j]->GetMaximum())
+				maxY = pi[0][i][j]->GetMaximum();
+			else
+				maxY = pi[1][i][j]->GetMaximum();
+
+			pi[0][i][j]->GetYaxis()->SetRangeUser(0.0, 1.2 * maxY);
+
+			pi[0][i][j]->Draw("HIST");
+			pi[1][i][j]->Draw("SAME");
+
+			legendPi->Draw();
+
+			canvases_pi[i][j]->Print(name_canva);
+		}
+
+		TString x_names_kaon[5] = {"p^{K2}_{x} [MeV/c]", "p^{K2}_{y} [MeV/c]", "p^{K2}_{z} [MeV/c]", "E^{K2} [MeV]", "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]"};
+
+	for (Int_t i = 0; i < 5; i++)
+		{
+			TString name_canva = Form("%s_%d.png", "Kaon", i);
+			kaonCanva[i]->cd();
+
+			KaonHist[0][i]->SetLineColor(kBlue);
+
+			KaonHist[0][i]->GetXaxis()->SetTitle(x_names_kaon[i]);
+			KaonHist[0][i]->GetYaxis()->SetTitle("Counts");
+
+			Float_t maxY;
+
+			maxY = KaonHist[0][i]->GetMaximum();
+
+			KaonHist[0][i]->GetYaxis()->SetRangeUser(0.0, 1.2 * maxY);
+
+			KaonHist[0][i]->Draw("HIST");
+
+			kaonCanva[i]->Print(name_canva);
+		}
+
+	canvaDiff->cd();
+
+	histDiff->SetLineColor(kBlue);
+	histDiff->GetXaxis()->SetTitle("Difference");
+	histDiff->GetYaxis()->SetTitle("Counts");
+
+	Float_t maxY = histDiff->GetMaximum();
+
+	histDiff->GetYaxis()->SetRangeUser(0.0, 1.2 * maxY);
+
+	histDiff->Draw("HIST");
+
+	canvaDiff->Print("difference.png");
 
 	return 0;
 }

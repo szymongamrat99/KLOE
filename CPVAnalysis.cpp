@@ -33,6 +33,10 @@ int main(int argc, char *argv[])
   // Set global style for histograms
   setGlobalStyle();
   // -------------------------------------------------------------------
+  // Set config file watcher
+  ConfigWatcher cfgWatcher(propName);
+  cfgWatcher.start();
+  // -------------------------------------------------------------------
 
   try
   {
@@ -294,7 +298,7 @@ int main(int argc, char *argv[])
         infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
         logger.getLog(infoCode, "CP Final Fit");
 
-        CPFit_main(chain, eventAnalysis, dataTypeOpt);
+        CPFit_main(chain, eventAnalysis, cfgWatcher, dataTypeOpt);
         break;
       }
       case Controls::MainMenu::PLOTS:
@@ -339,5 +343,6 @@ int main(int argc, char *argv[])
 
   logger.printErrStats();
 
+  cfgWatcher.stop();
   return 0;
 }

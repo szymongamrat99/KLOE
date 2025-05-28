@@ -19,7 +19,7 @@
 
 #include "../inc/cpfit.hpp"
 
-int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
+int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
 {
 	// =============================================================================
 	BaseKinematics
@@ -38,6 +38,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 			*tree_mctruth,
 			*tree_omega;
 	// =============================================================================
+
+	properties = cfgWatcher.getConfig();
 
 	const TString cpfit_res_dir = cpfit_dir + result_dir;
 
@@ -60,7 +62,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 	chain.SetBranchAddress("Chi2", &baseKin.Chi2);
 	chain.SetBranchAddress("minv4gam", &baseKin.minv4gam);
-	// chain.SetBranchAddress("Kchboost", baseKin.Kchboost);
+	chain.SetBranchAddress("Kchboost", baseKin.Kchboost);
 	chain.SetBranchAddress("Kchrec", baseKin.Kchrec);
 	chain.SetBranchAddress("Qmiss", &baseKin.Qmiss);
 	chain.SetBranchAddress("ip", interfcommon_.ip);
@@ -439,38 +441,61 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 		KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
 		KLOE::ChargedVtxRec<Float_t> BoostMethodObj;
+		
 
 		for (UInt_t i = 0; i < nentries; i++)
 		{
 			chain.GetEntry(i);
 
+			Float_t KchrecSmeared[4], KchboostSmeared[4], energyPion[2];
+
 			if (neutVars.done == 1 && doneOmega == 1)
 			{
-				momVecMC[0] = PichFourMom[0][0];
-				momVecMC[1] = PichFourMom[0][1];
-				momVecMC[2] = PichFourMom[0][2];
-				momVecMC[3] = PichFourMom[1][0];
-				momVecMC[4] = PichFourMom[1][1];
-				momVecMC[5] = PichFourMom[1][2];
+				if (baseKin.mcflag == 1)
+				{
+					momVecMC[0] = PichFourMom[0][0];
+					momVecMC[1] = PichFourMom[0][1];
+					momVecMC[2] = PichFourMom[0][2];
+					momVecMC[3] = PichFourMom[1][0];
+					momVecMC[4] = PichFourMom[1][1];
+					momVecMC[5] = PichFourMom[1][2];
 
-				CovMatrixCalcObj.SetMCVector(momVecMC);
-				CovMatrixCalcObj.SmearMomentum();
-				CovMatrixCalcObj.GetSmearedMomentum(momVecSmeared);
+					CovMatrixCalcObj.SetMCVector(momVecMC);
+					CovMatrixCalcObj.SmearMomentum();
+					CovMatrixCalcObj.GetSmearedMomentum(momVecSmeared);
 
-				Float_t KchrecSmeared[4], energyPion[2];
+					KchrecSmeared[0] = momVecSmeared[0] + momVecSmeared[3];
+					KchrecSmeared[1] = momVecSmeared[1] + momVecSmeared[4];
+					KchrecSmeared[2] = momVecSmeared[2] + momVecSmeared[5];
 
-				KchrecSmeared[0] = momVecSmeared[0] + momVecSmeared[3];
-				KchrecSmeared[1] = momVecSmeared[1] + momVecSmeared[4];
-				KchrecSmeared[2] = momVecSmeared[2] + momVecSmeared[5];
+					energyPion[0] = sqrt(pow(momVecSmeared[0], 2) + pow(momVecSmeared[1], 2) + pow(momVecSmeared[2], 2) + pow(mPiCh, 2));
+					energyPion[1] = sqrt(pow(momVecSmeared[3], 2) + pow(momVecSmeared[4], 2) + pow(momVecSmeared[5], 2) + pow(mPiCh, 2));
 
-				energyPion[0] = sqrt(pow(momVecSmeared[0],2) + pow(momVecSmeared[1],2) + pow(momVecSmeared[2],2) + pow(mPiCh,2));
-				energyPion[1] = sqrt(pow(momVecSmeared[3],2) + pow(momVecSmeared[4],2) + pow(momVecSmeared[5],2) + pow(mPiCh,2));
+					KchrecSmeared[3] = energyPion[0] + energyPion[1];
 
-				KchrecSmeared[3] = energyPion[0] + energyPion[1];
+					BoostMethodObj.KaonMomFromBoost(KchrecSmeared, baseKin.phi_mom, KchboostSmeared);
 
-				BoostMethodObj.KaonMomFromBoost(KchrecSmeared, baseKin.phi_mom, baseKin.Kchboost);
+					Float_t X_line[3] = {baseKin.Kchboost[6], baseKin.Kchboost[7], baseKin.Kchboost[8]},
+									p[3] = {KchboostSmeared[0], KchboostSmeared[1], KchboostSmeared[2]},
+									xB[3] = {baseKin.bhabha_vtx[0], baseKin.bhabha_vtx[1], baseKin.bhabha_vtx[2]},
+									plane_perp[3] = {0., baseKin.phi_mom[1], 0.};
 
-				velocity_kch = cVel * sqrt(pow(baseKin.Kchboost[0], 2) + pow(baseKin.Kchboost[1], 2) + pow(baseKin.Kchboost[2], 2)) / baseKin.Kchboost[3];
+					BoostMethodObj.IPBoostCorr(X_line, p, xB, plane_perp, baseKin.ip);
+
+					baseKin.ip[0] = baseKin.bhabha_vtx[0];
+					baseKin.ip[1] = baseKin.bhabha_vtx[1];
+					if (abs(baseKin.ip[2] - baseKin.bhabha_vtx[2]) > 2.0)
+						baseKin.ip[2] = baseKin.bhabha_vtx[2];
+				}
+				else
+				{
+					KchboostSmeared[0] = baseKin.Kchboost[0];
+					KchboostSmeared[1] = baseKin.Kchboost[1];
+					KchboostSmeared[2] = baseKin.Kchboost[2];
+					KchboostSmeared[3] = baseKin.Kchboost[3];
+				}
+
+				velocity_kch = cVel * sqrt(pow(KchboostSmeared[0], 2) + pow(KchboostSmeared[1], 2) + pow(KchboostSmeared[2], 2)) / KchboostSmeared[3];
 
 				velocity_kne = cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
 
@@ -482,10 +507,10 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				Kch_LAB[2] = baseKin.Kchboost[8] - baseKin.ip[2];
 				Kch_LAB[3] = tch_LAB * cVel;
 
-				Kchmom_LAB[0] = baseKin.Kchboost[0];
-				Kchmom_LAB[1] = baseKin.Kchboost[1];
-				Kchmom_LAB[2] = baseKin.Kchboost[2];
-				Kchmom_LAB[3] = baseKin.Kchboost[3];
+				Kchmom_LAB[0] = KchboostSmeared[0];
+				Kchmom_LAB[1] = KchboostSmeared[1];
+				Kchmom_LAB[2] = KchboostSmeared[2];
+				Kchmom_LAB[3] = KchboostSmeared[3];
 
 				Kne_LAB[0] = neutVars.Knerec[6] - baseKin.ip[0];
 				Kne_LAB[1] = neutVars.Knerec[7] - baseKin.ip[1];
@@ -702,7 +727,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				properties["variables"]["CPFit"]["initParams"]["Norm"]["Threepi0"],
 				properties["variables"]["CPFit"]["initParams"]["Norm"]["Semileptonic"],
 				properties["variables"]["CPFit"]["initParams"]["Norm"]["Other"]},
-									 step[num_of_vars] = {1E-5, 1E-5, 1.00, 1.00, 1.00, 1.00, 1.00, 1.00, 0.00, 0.00, 0.00};
+									 step[num_of_vars] = {properties["variables"]["CPFit"]["step"]["Re"], properties["variables"]["CPFit"]["step"]["Im"], properties["variables"]["CPFit"]["step"]["Norm"]["Signal"], properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["FarLeft"], properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["CloseLeft"], properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["CloseRight"], properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["FarRight"], properties["variables"]["CPFit"]["step"]["Norm"]["Omegapi0"], properties["variables"]["CPFit"]["step"]["Norm"]["Threepi0"], properties["variables"]["CPFit"]["step"]["Norm"]["Semileptonic"], properties["variables"]["CPFit"]["step"]["Norm"]["Other"]};
 
 		Double_t
 				limit_upper = properties["variables"]["CPFit"]["limitPer"]["upper"],
@@ -710,7 +735,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 		minimum->SetVariable(0, "Real part", init_vars[0], step[0]);
 		minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]);
-		minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - 1.0 * init_vars[2], init_vars[2] + 5.0 * init_vars[2]);
+		minimum->SetLimitedVariable(2, "Norm signal", init_vars[2], step[2], init_vars[2] - limit_lower * init_vars[2], init_vars[2] + limit_upper * init_vars[2]);
 
 		if (x_min > -30.0 && x_max < 30.0)
 		{

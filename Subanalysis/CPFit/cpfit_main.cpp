@@ -7,7 +7,7 @@
 
 using namespace std;
 
-int CPFit_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
+int CPFit_main(TChain &chain, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher, Controls::DataType &dataTypeOpt)
 {
   Short_t 
           loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
@@ -83,7 +83,7 @@ int CPFit_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
       logger.getLog(infoCode, "CP Final Fit");
 
       Obj.startTimer();
-      cp_fit_mc_data(chain, "split", false, dataTypeOpt, logger, Obj);
+      cp_fit_mc_data(chain, "split", false, dataTypeOpt, logger, Obj, cfgWatcher);
       
       infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
       logger.getLog(infoCode, Obj.endTimer());

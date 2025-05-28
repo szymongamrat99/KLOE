@@ -41,8 +41,8 @@ MAKE_CPFIT += $(CPFIT_DIR)/$(OBJDIR)/cp_fit_func.o
 MAKE_CPFIT += $(CPFIT_DIR)/$(OBJDIR)/cut_search.o
 
 SRC_CPFIT := $(CPFIT_DIR)/$(SRCDIR)/cp_fit_mc_data.cpp
-SRC_CPFIT := $(CPFIT_DIR)/$(SRCDIR)/cp_fit_func.cpp
-SRC_CPFIT := $(CPFIT_DIR)/$(SRCDIR)/cut_search.cpp
+SRC_CPFIT += $(CPFIT_DIR)/$(SRCDIR)/cp_fit_func.cpp
+SRC_CPFIT += $(CPFIT_DIR)/$(SRCDIR)/cut_search.cpp
 SRC_CPFIT += $(CPFIT_DIR)/cpfit_main.cpp
 
 MAKE_COVMATRIX := $(COVMATRIX_DIR)/$(OBJDIR)/covmatrix_main.o
