@@ -99,6 +99,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   // baseKin.KchrecKS.resize(9);
   // baseKin.KchrecKL.resize(9);
   baseKin.KchrecClosest.resize(9);
+  baseKin.KchrecKLTwoBody.resize(9);
 
   for (Int_t i = 0; i < 2; i++)
   {
@@ -143,6 +144,10 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   boost::progress_display show_progress(nentries);
   // --------------------------------------------------------------------
 
+  std::vector<Float_t>
+      trkKLTwoBody1(4),
+      trkKLTwoBody2(4);
+
   for (Int_t i = 0; i < nentries; i++)
   {
     chain.GetEntry(i);
@@ -171,43 +176,17 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
     baseKin.errFlagClosest = 1;
 
     baseKin.vtaken.clear();
-    baseKin.vtakenKS.clear();
-    baseKin.vtakenKL.clear();
     baseKin.vtakenClosest.clear();
 
     baseKin.Kchrecnew.clear();
-    // baseKin.KchrecKS.clear();
-    // baseKin.KchrecKL.clear();
     baseKin.KchrecClosest.clear();
     baseKin.KchrecKLTwoBody.clear();
 
     for (Int_t i = 0; i < 2; i++)
     {
       baseKin.trknew[i].clear();
-      // baseKin.trkKS[i].clear();
-      // baseKin.trkKL[i].clear();
       baseKin.trkClosest[i].clear();
       baseKin.trkKLTwoBody[i].clear();
-    }
-
-    baseKin.vtaken.resize(3);
-    // baseKin.vtakenKS.resize(3);
-    // baseKin.vtakenKL.resize(3);
-    baseKin.vtakenClosest.resize(3);
-
-    baseKin.Kchrecnew.resize(9);
-    // baseKin.KchrecKS.resize(9);
-    // baseKin.KchrecKL.resize(9);
-    baseKin.KchrecClosest.resize(9);
-    baseKin.KchrecKLTwoBody.resize(9);
-
-    for (Int_t i = 0; i < 2; i++)
-    {
-      baseKin.trknew[i].resize(4);
-      // baseKin.trkKS[i].resize(4);
-      // baseKin.trkKL[i].resize(4);
-      baseKin.trkClosest[i].resize(4);
-      baseKin.trkKLTwoBody[i].resize(4);
     }
 
     if (data_flag)
@@ -219,94 +198,46 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
       eventAnalysis->findKchRec(baseKin.Kchrecnew.data(), baseKin.trknew[0].data(), baseKin.trknew[1].data(), baseKin.vtaken.data(), baseKin.errFlag);
       // ------------------------------------------------------------------
 
-      // // KSL HYPOTHESIS
-      // eventAnalysis->findKSLRec(16, -1, baseKin.KchrecKS.data(), baseKin.trkKS[0].data(), baseKin.trkKS[1].data(), baseKin.vtakenKS.data(), baseKin.errFlagKS);
-
-      // eventAnalysis->findKSLRec(10, baseKin.vtakenKS[0], baseKin.KchrecKL.data(), baseKin.trkKL[0].data(), baseKin.trkKL[1].data(), baseKin.vtakenKL.data(), baseKin.errFlagKL);
+      // // CLOSEST TO IP
+      // eventAnalysis->findKClosestRec(baseKin.KchrecClosest.data(), baseKin.trkClosest[0].data(), baseKin.trkClosest[1].data(), baseKin.vtakenClosest.data(), baseKin.errFlagClosest);
       // // ------------------------------------------------------------------
-
-      // CLOSEST TO IP
-      eventAnalysis->findKClosestRec(baseKin.KchrecClosest.data(), baseKin.trkClosest[0].data(), baseKin.trkClosest[1].data(), baseKin.vtakenClosest.data(), baseKin.errFlagClosest);
-      // ------------------------------------------------------------------
-
-      std::vector<Float_t>
-          trkKLTwoBody1(4),
-          trkKLTwoBody2(4);
 
       if (1)
       {
-        /*
-         * +------------------+
-         * | Calc K2 magnitude|
-         * | using K1 boost   |
-         * | method           |
-         * +--------+---------+
-         *          |
-         *          v
-         * +------------------+
-         * | Calc pi magnitude|
-         * | in K2 CM         |
-         * +--------+---------+
-         *          |
-         *          v
-         * +------------------+
-         * | Set angle between|
-         * | K2 momentum and  |<-------+
-         * | pi momentum      |        |
-         * +--------+---------+        |
-         *          |                  |
-         *          v                  |
-         * +------------------+        |
-         * | Transform to LAB |        |
-         * | using K2 4-mom   |        |
-         * +--------+---------+        |
-         *          |                  |
-         *          v                  |
-         * +------------------+     No |
-         * | Rotate back to   |        |
-         * | X-Y-Z coordinates|        |
-         * +--------+---------+        |
-         *          |                  |
-         *          v                  |
-         * +------------------+        |
-         * | Calc chi2 between|        |
-         * | K2 original pions|        |
-         * | and calculated   |        |
-         * | ones             |        |
-         * +--------+---------+        |
-         *          |                  |
-         *          v                  |
-         * +------------------+        |
-         * | Angle up to      |        |
-         * | 180 deg checked? +--------+
-         * +--------+---------+
-         *          |
-         *          | Yes
-         *          v
-         * +------------------+
-         * | Get angle with   |
-         * | minimal chi2     |
-         * +------------------+
-         */
-
         // 1. Calculation of pions' momenta from two-body decay using the boost method
 
-        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS.data(), baseKin.phi_mom, baseKin.Kchboost);
+        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS.data(), baseKin.phi_mom, baseKin.KchboostKS);
+
+        Float_t X_line[3] = {baseKin.KchboostKS[6], baseKin.KchboostKS[7], baseKin.KchboostKS[8]},
+                p[3] = {baseKin.KchboostKS[0], baseKin.KchboostKS[1], baseKin.KchboostKS[2]},
+                xB[3] = {baseKin.bhabha_vtx[0], baseKin.bhabha_vtx[1], baseKin.bhabha_vtx[2]},
+                plane_perp[3] = {0., baseKin.phi_mom[1], 0.};
+
+        eventAnalysis->IPBoostCorr(X_line, p, xB, plane_perp, baseKin.ip);
+
+        baseKin.ip[0] = baseKin.bhabha_vtx[0];
+        baseKin.ip[1] = baseKin.bhabha_vtx[1];
+        if (abs(baseKin.ip[2] - baseKin.bhabha_vtx[2]) > 2.0)
+          baseKin.ip[2] = baseKin.bhabha_vtx[2];
 
         // 1.1 Calculation of KL flight direction
-        Double_t KLmomMag = sqrt(pow(baseKin.phi_mom[0] - baseKin.Kchboost[0], 2) +
-                                 pow(baseKin.phi_mom[1] - baseKin.Kchboost[1], 2) +
-                                 pow(baseKin.phi_mom[2] - baseKin.Kchboost[2], 2));
-        TVector3 KLflightDirection = {(baseKin.phi_mom[0] - baseKin.Kchboost[0]) / KLmomMag,
-                                      (baseKin.phi_mom[1] - baseKin.Kchboost[1]) / KLmomMag,
-                                      (baseKin.phi_mom[2] - baseKin.Kchboost[2]) / KLmomMag};
+        Double_t KLpath = sqrt(pow(baseKin.KchrecKL[6] - baseKin.ip[0], 2) + pow(baseKin.KchrecKL[7] - baseKin.ip[1], 2) + pow(baseKin.KchrecKL[8] - baseKin.ip[2], 2));
+        TVector3 KLflightDirection = {(baseKin.KchrecKL[6] - baseKin.ip[0]) / KLpath,
+                                      (baseKin.KchrecKL[7] - baseKin.ip[1]) / KLpath,
+                                      (baseKin.KchrecKL[8] - baseKin.ip[2]) / KLpath};
+
+        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL.data(), baseKin.phi_mom, baseKin.KchboostKL);
+
+        Double_t KLmomMag = sqrt(pow(baseKin.KchboostKL[0], 2) +
+                                 pow(baseKin.KchboostKL[1], 2) +
+                                 pow(baseKin.KchboostKL[2], 2));
 
         // 1.2 Calculation of KL momentum from 2 body decay
         for (Int_t j = 0; j < 3; j++)
         {
           baseKin.KchrecKLTwoBody[j] = KLflightDirection[j] * KLmomMag;
         }
-        baseKin.KchrecKLTwoBody[3] = baseKin.phi_mom[3] - baseKin.Kchboost[3];
+        baseKin.KchrecKLTwoBody[3] = baseKin.KchboostKL[3];
 
         baseKin.KchrecKLTwoBody[4] = sqrt(pow(baseKin.KchrecKLTwoBody[0], 2) +
                                           pow(baseKin.KchrecKLTwoBody[1], 2) +
@@ -316,13 +247,19 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
         baseKin.KchrecKLTwoBody[6] = baseKin.KchrecKL[6];
         baseKin.KchrecKLTwoBody[7] = baseKin.KchrecKL[7];
         baseKin.KchrecKLTwoBody[8] = baseKin.KchrecKL[8];
+
         // ------------------------------------------------------------------
 
-        // 2. Calculate the boost of a Kaon
+        // 2. Rotate the momenta to get the frame along momentum of Kaon
+
         TVector3
-            boost_KaonTwoBody = {baseKin.KchrecKLTwoBody[4] / baseKin.KchrecKLTwoBody[3],
-                                 0.0,
-                                 0.0},
+            PiMomKaonCM[2],
+            PiMomKaonLAB[2],
+            x_axis = {1.0, 0.0, 0.0},
+            kaonMomLAB = {baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[4],
+                          baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[4],
+                          baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[4]},
+            cross = kaonMomLAB.Cross(x_axis),
             trkKLMomVecLAB[2],
             trkKLMomVecKaonCM[2];
 
@@ -333,6 +270,15 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
             trkKL4VecKaonCM[2],
             PiKaon4VecKaonCM[2],
             PiKaon4VecLAB[2];
+
+        Double_t rotAngle = kaonMomLAB.Angle(x_axis);
+
+        std::cout << "Rotation angle: " << rotAngle * 180./M_PI << std::endl;
+
+        TVector3
+            boost_KaonTwoBody = {baseKin.KchrecKLTwoBody[4] / baseKin.KchrecKLTwoBody[3],
+                                 0.0,
+                                 0.0};
 
         for (Int_t j = 0; j < 2; j++)
         {
@@ -346,26 +292,24 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
                                      baseKin.trkKL[j][3]);
         }
 
-        // 3. Calculation of Pis momentum magnitude in Kaon's CM frame using two body decay (based on theory)
-        Float_t numOfPoints = 30.;
+        std::cout << "Momenta before rotation: " << std::endl;
+        trkKLMomVecLAB[0].Print();
+        trkKLMomVecLAB[1].Print();
+
+        trkKLMomVecLAB[0].Rotate(rotAngle, cross);
+        trkKLMomVecLAB[1].Rotate(rotAngle, cross);
+
+        std::cout << "Momenta after rotation: " << std::endl;
+        trkKLMomVecLAB[0].Print();
+        trkKLMomVecLAB[1].Print();
+
+        // Going to Kaon's CM frame
+        Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
+        Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[1], PiKaon4VecLAB[1]);
+
 
         Double_t
-            PiMomMagKaonCM = 0.5 * sqrt(pow(baseKin.KchrecKLTwoBody[5], 2) - 4. * pow(mPiCh, 2)),
-            angleStep = M_PI / numOfPoints;
-
-        TVector3
-            PiMomKaonCM[2],
-            PiMomKaonLAB[2],
-            x_axis = {1.0, 0.0, 0.0},
-            kaonMomLAB = {baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[4],
-                          baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[4],
-                          baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[4]},
-            cross = kaonMomLAB.Cross(x_axis);
-
-        Double_t
-            differenceTmp[2] = {999., 999.},
-            rotAngle = kaonMomLAB.Angle(x_axis); // Rotation angle back to the original coordinates
-
+            differenceTmp[2] = {999., 999.};
         std::vector<Double_t>
             angle,
             difference;

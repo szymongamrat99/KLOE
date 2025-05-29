@@ -602,11 +602,11 @@
         "rootFiles": {
             "Data": {
                 "firstFile": 1,
-                "lastFile": 56
+                "lastFile": 1
             },
             "MC": {
                 "firstFile": 1,
-                "lastFile": 56
+                "lastFile": 1
             },
             "firstFileMax": 1,
             "lastFileMax": 569,
