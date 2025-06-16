@@ -39,8 +39,15 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/inc/cmake_install.cmake")
-  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/tests/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/FortBuild/cmake_install.cmake")
 
 endif()
 

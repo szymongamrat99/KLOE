@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/KLSPM00.dir/CPVAnalysis.o"
+  "CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o"
   "KLSPM00.pdb"
   "KLSPM00"
 )

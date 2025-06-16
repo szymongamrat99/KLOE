@@ -1,7 +1,7 @@
 {
     "$schema": "./analysis-schema.json",
-    "lastScript": "Final CP Parameters normalization",
-    "lastUpdate": "2025-05-22_0226",
+    "lastScript": "Generated variables for Monte Carlo.",
+    "lastUpdate": "2025-06-17_0002",
     "momSmearing": {
         "covarianceMatrix": {
             "_typename": "TMatrixT<double>",
@@ -602,11 +602,11 @@
         "rootFiles": {
             "Data": {
                 "firstFile": 1,
-                "lastFile": 1
+                "lastFile": 56
             },
             "MC": {
                 "firstFile": 1,
-                "lastFile": 1
+                "lastFile": 56
             },
             "firstFileMax": 1,
             "lastFileMax": 569,
@@ -615,7 +615,7 @@
         },
         "tree": {
             "filename": {
-                "generatedvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/gen_vars_2025-03-31_3.root",
+                "generatedvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/gen_vars_2025-06-16_3.root",
                 "mctruth": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/mctruth_2025-03-13_3.root",
                 "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_2025-04-14_3.root",
                 "omegarecKinFit": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_kin_fit_2025-02-07_31_0_8_10_2.root",

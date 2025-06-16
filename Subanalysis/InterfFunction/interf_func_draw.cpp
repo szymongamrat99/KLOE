@@ -3,8 +3,9 @@
 #include <TStyle.h>
 #include <TAxis.h>
 #include <TMath.h>
+#include <TLegend.h>
 
-#include "../../Include/const.h"
+#include "/internal/big_one/4/users/gamrat/scripts/Include/const.h"
 
 Double_t interf_function(Double_t *x, Double_t *par)
 {
@@ -51,14 +52,13 @@ Double_t interf_function(Double_t *x, Double_t *par)
     return (pow(Epsilon, 2) / (2. * Gamma)) * Value * 100000;
 }
 
-void interf_function_draw(Int_t mult = 1.)
+int main()
 {
-    Double_t propIm = mult*M_PI * Im_nonCPT / 180.;
-
-    TCanvas *canva = new TCanvas();
+    TCanvas *canva = new TCanvas("", "", 750, 750);
+    canva->SetMargin(0.15, 0.15, 0.15, 0.1);
     TF1 *func_with_im = new TF1("Interference function2", &interf_function, -20.0, 20.0, 2);
-    func_with_im->SetParameter(0, 4*Re);
-    func_with_im->SetParameter(1, propIm);
+    func_with_im->SetParameter(0, 0.005);
+    func_with_im->SetParameter(1, 0.05);
 
     TF1 *func_wo_im = new TF1("Interference function1", &interf_function, -20.0, 20.0, 2);
     func_wo_im->SetParameter(0, 0);
@@ -93,8 +93,8 @@ void interf_function_draw(Int_t mult = 1.)
 
     TString name_0, name_1;
 
-    const Int_t expRe = floor(log10(abs(4*Re))), expIm = floor(log10(abs(propIm)));
-    const Double_t frontRe = 4*Re / pow(10, expRe), frontIm = propIm / pow(10, expIm);  
+    const Int_t expRe = floor(log10(abs(0.005))), expIm = floor(log10(abs(0.05)));
+    const Double_t frontRe = 0.005 / pow(10, expRe), frontIm = 0.05 / pow(10, expIm);  
 
     name_0 = "#varepsilon'/#varepsilon = 0";
     name_1 = Form("#splitline{Re(#varepsilon'/#varepsilon) = %.2f#times10^{%d}}{Im(#varepsilon'/#varepsilon) = %.2f#times10^{%d}}",frontRe,expRe,frontIm,expIm);

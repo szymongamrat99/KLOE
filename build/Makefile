@@ -78,6 +78,17 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+
+.PHONY : test/fast
+
 # The main all target
 all: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles /internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles/progress.marks
@@ -123,20 +134,149 @@ KLSPM00/fast:
 	$(MAKE) -f CMakeFiles/KLSPM00.dir/build.make CMakeFiles/KLSPM00.dir/build
 .PHONY : KLSPM00/fast
 
+#=============================================================================
+# Target rules for targets named LibRecTest
+
+# Build rule for target.
+LibRecTest: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 LibRecTest
+.PHONY : LibRecTest
+
+# fast build rule for target.
+LibRecTest/fast:
+	$(MAKE) -f tests/CMakeFiles/LibRecTest.dir/build.make tests/CMakeFiles/LibRecTest.dir/build
+.PHONY : LibRecTest/fast
+
+#=============================================================================
+# Target rules for targets named CovMatrix
+
+# Build rule for target.
+CovMatrix: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 CovMatrix
+.PHONY : CovMatrix
+
+# fast build rule for target.
+CovMatrix/fast:
+	$(MAKE) -f Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/build.make Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/build
+.PHONY : CovMatrix/fast
+
+#=============================================================================
+# Target rules for targets named CPFit
+
+# Build rule for target.
+CPFit: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 CPFit
+.PHONY : CPFit
+
+# fast build rule for target.
+CPFit/fast:
+	$(MAKE) -f Subanalysis/CPFit/CMakeFiles/CPFit.dir/build.make Subanalysis/CPFit/CMakeFiles/CPFit.dir/build
+.PHONY : CPFit/fast
+
+#=============================================================================
+# Target rules for targets named GenVars
+
+# Build rule for target.
+GenVars: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 GenVars
+.PHONY : GenVars
+
+# fast build rule for target.
+GenVars/fast:
+	$(MAKE) -f Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/build.make Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/build
+.PHONY : GenVars/fast
+
+#=============================================================================
+# Target rules for targets named KchRec
+
+# Build rule for target.
+KchRec: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 KchRec
+.PHONY : KchRec
+
+# fast build rule for target.
+KchRec/fast:
+	$(MAKE) -f Subanalysis/KchRec/CMakeFiles/KchRec.dir/build.make Subanalysis/KchRec/CMakeFiles/KchRec.dir/build
+.PHONY : KchRec/fast
+
+#=============================================================================
+# Target rules for targets named OmegaRec
+
+# Build rule for target.
+OmegaRec: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 OmegaRec
+.PHONY : OmegaRec
+
+# fast build rule for target.
+OmegaRec/fast:
+	$(MAKE) -f Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/build.make Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/build
+.PHONY : OmegaRec/fast
+
+#=============================================================================
+# Target rules for targets named NeutRec
+
+# Build rule for target.
+NeutRec: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 NeutRec
+.PHONY : NeutRec
+
+# fast build rule for target.
+NeutRec/fast:
+	$(MAKE) -f Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/build.make Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/build
+.PHONY : NeutRec/fast
+
+#=============================================================================
+# Target rules for targets named LibRec
+
+# Build rule for target.
+LibRec: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 LibRec
+.PHONY : LibRec
+
+# fast build rule for target.
+LibRec/fast:
+	$(MAKE) -f LibRecBuild/CMakeFiles/LibRec.dir/build.make LibRecBuild/CMakeFiles/LibRec.dir/build
+.PHONY : LibRec/fast
+
+#=============================================================================
+# Target rules for targets named LibFort
+
+# Build rule for target.
+LibFort: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 LibFort
+.PHONY : LibFort
+
+# fast build rule for target.
+LibFort/fast:
+	$(MAKE) -f FortBuild/CMakeFiles/LibFort.dir/build.make FortBuild/CMakeFiles/LibFort.dir/build
+.PHONY : LibFort/fast
+
+app/CPVAnalysis.o: app/CPVAnalysis.cpp.o
+
+.PHONY : app/CPVAnalysis.o
+
 # target to build an object file
-CPVAnalysis.o:
-	$(MAKE) -f CMakeFiles/KLSPM00.dir/build.make CMakeFiles/KLSPM00.dir/CPVAnalysis.o
-.PHONY : CPVAnalysis.o
+app/CPVAnalysis.cpp.o:
+	$(MAKE) -f CMakeFiles/KLSPM00.dir/build.make CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o
+.PHONY : app/CPVAnalysis.cpp.o
+
+app/CPVAnalysis.i: app/CPVAnalysis.cpp.i
+
+.PHONY : app/CPVAnalysis.i
 
 # target to preprocess a source file
-CPVAnalysis.i:
-	$(MAKE) -f CMakeFiles/KLSPM00.dir/build.make CMakeFiles/KLSPM00.dir/CPVAnalysis.i
-.PHONY : CPVAnalysis.i
+app/CPVAnalysis.cpp.i:
+	$(MAKE) -f CMakeFiles/KLSPM00.dir/build.make CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.i
+.PHONY : app/CPVAnalysis.cpp.i
+
+app/CPVAnalysis.s: app/CPVAnalysis.cpp.s
+
+.PHONY : app/CPVAnalysis.s
 
 # target to generate assembly for a file
-CPVAnalysis.s:
-	$(MAKE) -f CMakeFiles/KLSPM00.dir/build.make CMakeFiles/KLSPM00.dir/CPVAnalysis.s
-.PHONY : CPVAnalysis.s
+app/CPVAnalysis.cpp.s:
+	$(MAKE) -f CMakeFiles/KLSPM00.dir/build.make CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.s
+.PHONY : app/CPVAnalysis.cpp.s
 
 # Help Target
 help:
@@ -145,11 +285,21 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... KLSPM00"
 	@echo "... edit_cache"
-	@echo "... CPVAnalysis.o"
-	@echo "... CPVAnalysis.i"
-	@echo "... CPVAnalysis.s"
+	@echo "... KLSPM00"
+	@echo "... test"
+	@echo "... LibRecTest"
+	@echo "... CovMatrix"
+	@echo "... CPFit"
+	@echo "... GenVars"
+	@echo "... KchRec"
+	@echo "... OmegaRec"
+	@echo "... NeutRec"
+	@echo "... LibRec"
+	@echo "... LibFort"
+	@echo "... app/CPVAnalysis.o"
+	@echo "... app/CPVAnalysis.i"
+	@echo "... app/CPVAnalysis.s"
 .PHONY : help
 
 

@@ -57,28 +57,60 @@ include CMakeFiles/KLSPM00.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/KLSPM00.dir/flags.make
 
-CMakeFiles/KLSPM00.dir/CPVAnalysis.o: CMakeFiles/KLSPM00.dir/flags.make
-CMakeFiles/KLSPM00.dir/CPVAnalysis.o: ../CPVAnalysis.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/KLSPM00.dir/CPVAnalysis.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KLSPM00.dir/CPVAnalysis.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/CPVAnalysis.cpp
+CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o: CMakeFiles/KLSPM00.dir/flags.make
+CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o: ../app/CPVAnalysis.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/app/CPVAnalysis.cpp
 
-CMakeFiles/KLSPM00.dir/CPVAnalysis.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/KLSPM00.dir/CPVAnalysis.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/CPVAnalysis.cpp > CMakeFiles/KLSPM00.dir/CPVAnalysis.i
+CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/app/CPVAnalysis.cpp > CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.i
 
-CMakeFiles/KLSPM00.dir/CPVAnalysis.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/KLSPM00.dir/CPVAnalysis.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/CPVAnalysis.cpp -o CMakeFiles/KLSPM00.dir/CPVAnalysis.s
+CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/app/CPVAnalysis.cpp -o CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.s
 
 # Object files for target KLSPM00
 KLSPM00_OBJECTS = \
-"CMakeFiles/KLSPM00.dir/CPVAnalysis.o"
+"CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o"
 
 # External object files for target KLSPM00
 KLSPM00_EXTERNAL_OBJECTS =
 
-KLSPM00: CMakeFiles/KLSPM00.dir/CPVAnalysis.o
+KLSPM00: CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o
 KLSPM00: CMakeFiles/KLSPM00.dir/build.make
+KLSPM00: Subanalysis/CovarianceMatrix/libCovMatrix.so
+KLSPM00: Subanalysis/Neutrec/libNeutRec.so
+KLSPM00: Subanalysis/KchRec/libKchRec.so
+KLSPM00: Subanalysis/GeneratedVars/libGenVars.so
+KLSPM00: Subanalysis/CPFit/libCPFit.so
+KLSPM00: Subanalysis/OmegaRec/libOmegaRec.so
+KLSPM00: /usr/lib/x86_64-linux-gnu/libboost_system.so
+KLSPM00: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so
+KLSPM00: /usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so
+KLSPM00: /usr/lib/x86_64-linux-gnu/libcurl.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libCore.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libImt.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libRIO.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libNet.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libHist.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libGraf.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libGraf3d.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libGpad.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTDataFrame.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTree.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTreePlayer.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libRint.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libPostscript.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMatrix.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libPhysics.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMathCore.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libThread.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMultiProc.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTVecOps.so
+KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTMVA.so
+KLSPM00: LibRecBuild/libLibRec.so
+KLSPM00: FortBuild/libLibFort.so
 KLSPM00: CMakeFiles/KLSPM00.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable KLSPM00"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/KLSPM00.dir/link.txt --verbose=$(VERBOSE)
