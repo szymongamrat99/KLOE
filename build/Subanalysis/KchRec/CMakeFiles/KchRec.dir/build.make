@@ -114,6 +114,7 @@ Subanalysis/KchRec/libKchRec.so: /internal/big_one/4/users/gamrat/root_dirs/inst
 Subanalysis/KchRec/libKchRec.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMultiProc.so
 Subanalysis/KchRec/libKchRec.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTVecOps.so
 Subanalysis/KchRec/libKchRec.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTMVA.so
+Subanalysis/KchRec/libKchRec.so: LibRecBuild/libLibRec.so
 Subanalysis/KchRec/libKchRec.so: Subanalysis/KchRec/CMakeFiles/KchRec.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX shared library libKchRec.so"
 	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/KchRec.dir/link.txt --verbose=$(VERBOSE)

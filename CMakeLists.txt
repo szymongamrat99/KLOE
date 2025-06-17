@@ -9,6 +9,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(ROOT REQUIRED COMPONENTS Tree Physics MathCore Matrix TMVA Hist Graf)
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework)
 find_package(CURL REQUIRED)
+find_package(LAPACK REQUIRED)
+find_package(BLAS REQUIRED)
 
 # Enable tests for the files
 enable_testing()
@@ -45,6 +47,8 @@ target_include_directories(KLSPM00 PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/../Include/Codes/inc
   ${CMAKE_CURRENT_SOURCE_DIR}/../Include/FortranAnalysis/inc
   )
+
+link_directories(${CERNLIB_DIR})
 target_link_libraries(KLSPM00 PRIVATE
   CovMatrix
   NeutRec

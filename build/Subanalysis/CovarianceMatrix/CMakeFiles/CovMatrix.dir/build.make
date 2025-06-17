@@ -129,6 +129,7 @@ Subanalysis/CovarianceMatrix/libCovMatrix.so: /internal/big_one/4/users/gamrat/r
 Subanalysis/CovarianceMatrix/libCovMatrix.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMultiProc.so
 Subanalysis/CovarianceMatrix/libCovMatrix.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTVecOps.so
 Subanalysis/CovarianceMatrix/libCovMatrix.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTMVA.so
+Subanalysis/CovarianceMatrix/libCovMatrix.so: LibRecBuild/libLibRec.so
 Subanalysis/CovarianceMatrix/libCovMatrix.so: Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX shared library libCovMatrix.so"
 	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CovMatrix.dir/link.txt --verbose=$(VERBOSE)

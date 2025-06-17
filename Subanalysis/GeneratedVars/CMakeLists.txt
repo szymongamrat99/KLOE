@@ -21,8 +21,8 @@ target_include_directories(GenVars PUBLIC
 # Zmienna ${ROOT_LIBRARIES} jest dziedziczona z głównego CMakeLists.txt.
 target_link_libraries(GenVars PRIVATE
     ${ROOT_LIBRARIES}
-    librec.so # Jeśli AnalysisALib zależy od SubanalysisLib
-    libfort.so
+    LibRec # Jeśli AnalysisALib zależy od SubanalysisLib
+    LibFort
 )
 
 # Możesz tu także zdefiniować lokalny program wykonawczy, np. do testów.

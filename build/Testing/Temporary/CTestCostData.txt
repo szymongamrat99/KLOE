@@ -1,3 +1,3 @@
-LibRecTest 0 0
+LibRecTest 1 0
 ---
 LibRecTest

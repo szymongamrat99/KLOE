@@ -20,7 +20,7 @@ target_include_directories(KchRec PUBLIC
 # Zmienna ${ROOT_LIBRARIES} jest dziedziczona z głównego CMakeLists.txt.
 target_link_libraries(KchRec PRIVATE
     ${ROOT_LIBRARIES}
-    librec.so # Jeśli AnalysisALib zależy od SubanalysisLib
+    LibRec # Jeśli AnalysisALib zależy od SubanalysisLib
 )
 
 # Możesz tu także zdefiniować lokalny program wykonawczy, np. do testów.

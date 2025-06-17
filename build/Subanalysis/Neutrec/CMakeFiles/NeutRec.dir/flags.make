@@ -6,5 +6,5 @@ CXX_FLAGS = -fPIC   -std=c++14
 
 CXX_DEFINES = -DNeutRec_EXPORTS
 
-CXX_INCLUDES = -I/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/inc 
+CXX_INCLUDES = -I/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/inc -I/internal/big_one/4/users/gamrat/scripts/Include/Codes/inc 
 

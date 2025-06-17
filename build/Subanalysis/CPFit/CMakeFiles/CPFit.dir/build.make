@@ -144,6 +144,7 @@ Subanalysis/CPFit/libCPFit.so: /internal/big_one/4/users/gamrat/root_dirs/instal
 Subanalysis/CPFit/libCPFit.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMultiProc.so
 Subanalysis/CPFit/libCPFit.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTVecOps.so
 Subanalysis/CPFit/libCPFit.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTMVA.so
+Subanalysis/CPFit/libCPFit.so: LibRecBuild/libLibRec.so
 Subanalysis/CPFit/libCPFit.so: Subanalysis/CPFit/CMakeFiles/CPFit.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX shared library libCPFit.so"
 	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/CPFit.dir/link.txt --verbose=$(VERBOSE)
