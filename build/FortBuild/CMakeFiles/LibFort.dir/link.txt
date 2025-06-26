@@ -1,1 +1,1 @@
-/usr/bin/gfortran -fPIC   -shared -Wl,-soname,libLibFort.so -o libLibFort.so CMakeFiles/LibFort.dir/src/analysismodule.f.o CMakeFiles/LibFort.dir/src/analysis_library.f.o -lmathlib -lkernlib -lpacklib -lpawlib -lgraflib -lkernlib -lpacklib -lpawlib -lgraflib 
+/usr/bin/gfortran -fPIC -g  -shared -Wl,-soname,libLibFort.so -o libLibFort.so CMakeFiles/LibFort.dir/src/analysismodule.f.o CMakeFiles/LibFort.dir/src/analysis_library.f.o -lmathlib -lkernlib -lpacklib -lpawlib -lgraflib -lkernlib -lpacklib -lpawlib -lgraflib 

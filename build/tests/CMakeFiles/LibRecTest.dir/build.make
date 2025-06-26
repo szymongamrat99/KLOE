@@ -60,15 +60,15 @@ include tests/CMakeFiles/LibRecTest.dir/flags.make
 tests/CMakeFiles/LibRecTest.dir/LibRec_test.cpp.o: tests/CMakeFiles/LibRecTest.dir/flags.make
 tests/CMakeFiles/LibRecTest.dir/LibRec_test.cpp.o: ../tests/LibRec_test.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object tests/CMakeFiles/LibRecTest.dir/LibRec_test.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/tests && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRecTest.dir/LibRec_test.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/tests/LibRec_test.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/tests && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRecTest.dir/LibRec_test.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/tests/LibRec_test.cpp
 
 tests/CMakeFiles/LibRecTest.dir/LibRec_test.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRecTest.dir/LibRec_test.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/tests && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/tests/LibRec_test.cpp > CMakeFiles/LibRecTest.dir/LibRec_test.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/tests && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/tests/LibRec_test.cpp > CMakeFiles/LibRecTest.dir/LibRec_test.cpp.i
 
 tests/CMakeFiles/LibRecTest.dir/LibRec_test.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRecTest.dir/LibRec_test.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/tests && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/tests/LibRec_test.cpp -o CMakeFiles/LibRecTest.dir/LibRec_test.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/tests && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/tests/LibRec_test.cpp -o CMakeFiles/LibRecTest.dir/LibRec_test.cpp.s
 
 # Object files for target LibRecTest
 LibRecTest_OBJECTS = \

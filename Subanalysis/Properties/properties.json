@@ -610,8 +610,7 @@
             },
             "firstFileMax": 1,
             "lastFileMax": 569,
-            "path": "/internal/big_one/4/users/gamrat/scripts/ROOT_files/PROD2ROOT/DBV-26/MK0/all_phys",
-            "filename": "prod2root_mk0_all_phys_",
+            "path": "/internal/big_one/4/users/gamrat/old_root_files",
             "pathControlSample": "/internal/big_one/4/users/gamrat/scripts/ROOT_files/PROD2NTU/DoublePiPi"
         },
         "tree": {

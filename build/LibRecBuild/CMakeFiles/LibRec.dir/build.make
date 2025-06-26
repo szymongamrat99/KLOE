@@ -60,353 +60,366 @@ include LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/charged_mom.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/charged_mom.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/charged_mom.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/charged_mom.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/charged_mom.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/charged_mom.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/charged_mom.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/charged_mom.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/charged_mom.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/charged_mom.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/charged_mom.cpp > CMakeFiles/LibRec.dir/src/charged_mom.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/charged_mom.cpp > CMakeFiles/LibRec.dir/src/charged_mom.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/charged_mom.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/charged_mom.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/charged_mom.cpp -o CMakeFiles/LibRec.dir/src/charged_mom.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/charged_mom.cpp -o CMakeFiles/LibRec.dir/src/charged_mom.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/chi2_dist.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/chi2_dist.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/chi2_dist.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/chi2_dist.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/chi2_dist.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/chi2_dist.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/chi2_dist.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/chi2_dist.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/chi2_dist.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/chi2_dist.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/chi2_dist.cpp > CMakeFiles/LibRec.dir/src/chi2_dist.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/chi2_dist.cpp > CMakeFiles/LibRec.dir/src/chi2_dist.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/chi2_dist.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/chi2_dist.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/chi2_dist.cpp -o CMakeFiles/LibRec.dir/src/chi2_dist.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/chi2_dist.cpp -o CMakeFiles/LibRec.dir/src/chi2_dist.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/clear_variables.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/clear_variables.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/clear_variables.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/clear_variables.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/clear_variables.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/clear_variables.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/clear_variables.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/clear_variables.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/clear_variables.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/clear_variables.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/clear_variables.cpp > CMakeFiles/LibRec.dir/src/clear_variables.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/clear_variables.cpp > CMakeFiles/LibRec.dir/src/clear_variables.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/clear_variables.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/clear_variables.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/clear_variables.cpp -o CMakeFiles/LibRec.dir/src/clear_variables.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/clear_variables.cpp -o CMakeFiles/LibRec.dir/src/clear_variables.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/closest_approach.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/closest_approach.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/closest_approach.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/closest_approach.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/closest_approach.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/closest_approach.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/closest_approach.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/closest_approach.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/closest_approach.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/closest_approach.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/closest_approach.cpp > CMakeFiles/LibRec.dir/src/closest_approach.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/closest_approach.cpp > CMakeFiles/LibRec.dir/src/closest_approach.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/closest_approach.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/closest_approach.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/closest_approach.cpp -o CMakeFiles/LibRec.dir/src/closest_approach.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/closest_approach.cpp -o CMakeFiles/LibRec.dir/src/closest_approach.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigWatcher.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigWatcher.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigWatcher.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigWatcher.cpp > CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigWatcher.cpp > CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigWatcher.cpp -o CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigWatcher.cpp -o CMakeFiles/LibRec.dir/src/ConfigWatcher.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsOmega.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsOmega.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsOmega.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsOmega.cpp > CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsOmega.cpp > CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsOmega.cpp -o CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsOmega.cpp -o CMakeFiles/LibRec.dir/src/ConstraintsOmega.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsTrilateration.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsTrilateration.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsTrilateration.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsTrilateration.cpp > CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsTrilateration.cpp > CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsTrilateration.cpp -o CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConstraintsTrilateration.cpp -o CMakeFiles/LibRec.dir/src/ConstraintsTrilateration.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/CustomGraph.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/CustomGraph.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/CustomGraph.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/CustomGraph.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/CustomGraph.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/CustomGraph.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/CustomGraph.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/CustomGraph.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/CustomGraph.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/CustomGraph.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/CustomGraph.cpp > CMakeFiles/LibRec.dir/src/CustomGraph.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/CustomGraph.cpp > CMakeFiles/LibRec.dir/src/CustomGraph.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/CustomGraph.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/CustomGraph.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/CustomGraph.cpp -o CMakeFiles/LibRec.dir/src/CustomGraph.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/CustomGraph.cpp -o CMakeFiles/LibRec.dir/src/CustomGraph.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/cylinder_intersection.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/cylinder_intersection.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/cylinder_intersection.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/cylinder_intersection.cpp > CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/cylinder_intersection.cpp > CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/cylinder_intersection.cpp -o CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/cylinder_intersection.cpp -o CMakeFiles/LibRec.dir/src/cylinder_intersection.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/DoubleRatio.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/DoubleRatio.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/DoubleRatio.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/DoubleRatio.cpp > CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/DoubleRatio.cpp > CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/DoubleRatio.cpp -o CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/DoubleRatio.cpp -o CMakeFiles/LibRec.dir/src/DoubleRatio.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/EfficiencyAnalysis.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/EfficiencyAnalysis.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/EfficiencyAnalysis.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/EfficiencyAnalysis.cpp > CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/EfficiencyAnalysis.cpp > CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/EfficiencyAnalysis.cpp -o CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/EfficiencyAnalysis.cpp -o CMakeFiles/LibRec.dir/src/EfficiencyAnalysis.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/fraction_fitter.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/fraction_fitter.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/fraction_fitter.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/fraction_fitter.cpp > CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/fraction_fitter.cpp > CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/fraction_fitter.cpp -o CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/fraction_fitter.cpp -o CMakeFiles/LibRec.dir/src/fraction_fitter.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/interf_function.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/interf_function.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interf_function.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/interf_function.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/interf_function.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interf_function.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/interf_function.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interf_function.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/interf_function.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/interf_function.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interf_function.cpp > CMakeFiles/LibRec.dir/src/interf_function.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interf_function.cpp > CMakeFiles/LibRec.dir/src/interf_function.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/interf_function.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/interf_function.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interf_function.cpp -o CMakeFiles/LibRec.dir/src/interf_function.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interf_function.cpp -o CMakeFiles/LibRec.dir/src/interf_function.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/interference.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/interference.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interference.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/interference.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/interference.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interference.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/interference.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interference.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/interference.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/interference.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interference.cpp > CMakeFiles/LibRec.dir/src/interference.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interference.cpp > CMakeFiles/LibRec.dir/src/interference.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/interference.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/interference.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interference.cpp -o CMakeFiles/LibRec.dir/src/interference.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/interference.cpp -o CMakeFiles/LibRec.dir/src/interference.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/KinFitter.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/KinFitter.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/KinFitter.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/KinFitter.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/KinFitter.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/KinFitter.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/KinFitter.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/KinFitter.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/KinFitter.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/KinFitter.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/KinFitter.cpp > CMakeFiles/LibRec.dir/src/KinFitter.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/KinFitter.cpp > CMakeFiles/LibRec.dir/src/KinFitter.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/KinFitter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/KinFitter.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/KinFitter.cpp -o CMakeFiles/LibRec.dir/src/KinFitter.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/KinFitter.cpp -o CMakeFiles/LibRec.dir/src/KinFitter.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/kloe_class.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/kloe_class.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/kloe_class.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/kloe_class.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/kloe_class.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/kloe_class.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/kloe_class.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/kloe_class.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/kloe_class.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/kloe_class.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/kloe_class.cpp > CMakeFiles/LibRec.dir/src/kloe_class.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/kloe_class.cpp > CMakeFiles/LibRec.dir/src/kloe_class.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/kloe_class.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/kloe_class.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/kloe_class.cpp -o CMakeFiles/LibRec.dir/src/kloe_class.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/kloe_class.cpp -o CMakeFiles/LibRec.dir/src/kloe_class.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MeasQualityGraph.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MeasQualityGraph.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MeasQualityGraph.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MeasQualityGraph.cpp > CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MeasQualityGraph.cpp > CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MeasQualityGraph.cpp -o CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MeasQualityGraph.cpp -o CMakeFiles/LibRec.dir/src/MeasQualityGraph.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MomentumSmearing.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MomentumSmearing.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MomentumSmearing.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MomentumSmearing.cpp > CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MomentumSmearing.cpp > CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MomentumSmearing.cpp -o CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/MomentumSmearing.cpp -o CMakeFiles/LibRec.dir/src/MomentumSmearing.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/neu_triangle.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/neu_triangle.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neu_triangle.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/neu_triangle.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/neu_triangle.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neu_triangle.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/neu_triangle.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neu_triangle.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/neu_triangle.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/neu_triangle.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neu_triangle.cpp > CMakeFiles/LibRec.dir/src/neu_triangle.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neu_triangle.cpp > CMakeFiles/LibRec.dir/src/neu_triangle.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/neu_triangle.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/neu_triangle.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neu_triangle.cpp -o CMakeFiles/LibRec.dir/src/neu_triangle.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neu_triangle.cpp -o CMakeFiles/LibRec.dir/src/neu_triangle.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/neutral_mom.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/neutral_mom.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neutral_mom.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/neutral_mom.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/neutral_mom.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neutral_mom.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/neutral_mom.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neutral_mom.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/neutral_mom.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/neutral_mom.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neutral_mom.cpp > CMakeFiles/LibRec.dir/src/neutral_mom.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neutral_mom.cpp > CMakeFiles/LibRec.dir/src/neutral_mom.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/neutral_mom.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/neutral_mom.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neutral_mom.cpp -o CMakeFiles/LibRec.dir/src/neutral_mom.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/neutral_mom.cpp -o CMakeFiles/LibRec.dir/src/neutral_mom.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/pi0_photon_pair.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/pi0_photon_pair.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/pi0_photon_pair.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/pi0_photon_pair.cpp > CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/pi0_photon_pair.cpp > CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/pi0_photon_pair.cpp -o CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/pi0_photon_pair.cpp -o CMakeFiles/LibRec.dir/src/pi0_photon_pair.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/plane_intersection.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/plane_intersection.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/plane_intersection.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/plane_intersection.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/plane_intersection.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/plane_intersection.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/plane_intersection.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/plane_intersection.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/plane_intersection.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/plane_intersection.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/plane_intersection.cpp > CMakeFiles/LibRec.dir/src/plane_intersection.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/plane_intersection.cpp > CMakeFiles/LibRec.dir/src/plane_intersection.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/plane_intersection.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/plane_intersection.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/plane_intersection.cpp -o CMakeFiles/LibRec.dir/src/plane_intersection.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/plane_intersection.cpp -o CMakeFiles/LibRec.dir/src/plane_intersection.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/RealTimeIntegration.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/RealTimeIntegration.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/RealTimeIntegration.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/RealTimeIntegration.cpp > CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/RealTimeIntegration.cpp > CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/RealTimeIntegration.cpp -o CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/RealTimeIntegration.cpp -o CMakeFiles/LibRec.dir/src/RealTimeIntegration.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/reconstructor.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/reconstructor.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/reconstructor.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/reconstructor.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/reconstructor.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/reconstructor.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/reconstructor.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/reconstructor.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/reconstructor.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/reconstructor.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/reconstructor.cpp > CMakeFiles/LibRec.dir/src/reconstructor.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/reconstructor.cpp > CMakeFiles/LibRec.dir/src/reconstructor.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/reconstructor.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/reconstructor.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/reconstructor.cpp -o CMakeFiles/LibRec.dir/src/reconstructor.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/reconstructor.cpp -o CMakeFiles/LibRec.dir/src/reconstructor.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/SplitFileWriter.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/SplitFileWriter.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/SplitFileWriter.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/SplitFileWriter.cpp > CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/SplitFileWriter.cpp > CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/SplitFileWriter.cpp -o CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/SplitFileWriter.cpp -o CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/triple_gaus.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/triple_gaus.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/triple_gaus.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/triple_gaus.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/triple_gaus.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/triple_gaus.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/triple_gaus.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/triple_gaus.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/triple_gaus.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/triple_gaus.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/triple_gaus.cpp > CMakeFiles/LibRec.dir/src/triple_gaus.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/triple_gaus.cpp > CMakeFiles/LibRec.dir/src/triple_gaus.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/triple_gaus.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/triple_gaus.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/triple_gaus.cpp -o CMakeFiles/LibRec.dir/src/triple_gaus.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/triple_gaus.cpp -o CMakeFiles/LibRec.dir/src/triple_gaus.cpp.s
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/uncertainties.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
 LibRecBuild/CMakeFiles/LibRec.dir/src/uncertainties.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/uncertainties.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/uncertainties.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/uncertainties.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/uncertainties.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/uncertainties.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/uncertainties.cpp
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/uncertainties.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/uncertainties.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/uncertainties.cpp > CMakeFiles/LibRec.dir/src/uncertainties.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/uncertainties.cpp > CMakeFiles/LibRec.dir/src/uncertainties.cpp.i
 
 LibRecBuild/CMakeFiles/LibRec.dir/src/uncertainties.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/uncertainties.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/uncertainties.cpp -o CMakeFiles/LibRec.dir/src/uncertainties.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/uncertainties.cpp -o CMakeFiles/LibRec.dir/src/uncertainties.cpp.s
+
+LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigManager.cpp.o: LibRecBuild/CMakeFiles/LibRec.dir/flags.make
+LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigManager.cpp.o: /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigManager.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building CXX object LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigManager.cpp.o"
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/LibRec.dir/src/ConfigManager.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigManager.cpp
+
+LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigManager.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/LibRec.dir/src/ConfigManager.cpp.i"
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigManager.cpp > CMakeFiles/LibRec.dir/src/ConfigManager.cpp.i
+
+LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigManager.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/LibRec.dir/src/ConfigManager.cpp.s"
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Include/Codes/src/ConfigManager.cpp -o CMakeFiles/LibRec.dir/src/ConfigManager.cpp.s
 
 # Object files for target LibRec
 LibRec_OBJECTS = \
@@ -436,7 +449,8 @@ LibRec_OBJECTS = \
 "CMakeFiles/LibRec.dir/src/reconstructor.cpp.o" \
 "CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.o" \
 "CMakeFiles/LibRec.dir/src/triple_gaus.cpp.o" \
-"CMakeFiles/LibRec.dir/src/uncertainties.cpp.o"
+"CMakeFiles/LibRec.dir/src/uncertainties.cpp.o" \
+"CMakeFiles/LibRec.dir/src/ConfigManager.cpp.o"
 
 # External object files for target LibRec
 LibRec_EXTERNAL_OBJECTS =
@@ -468,6 +482,7 @@ LibRecBuild/libLibRec.so: LibRecBuild/CMakeFiles/LibRec.dir/src/reconstructor.cp
 LibRecBuild/libLibRec.so: LibRecBuild/CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.o
 LibRecBuild/libLibRec.so: LibRecBuild/CMakeFiles/LibRec.dir/src/triple_gaus.cpp.o
 LibRecBuild/libLibRec.so: LibRecBuild/CMakeFiles/LibRec.dir/src/uncertainties.cpp.o
+LibRecBuild/libLibRec.so: LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigManager.cpp.o
 LibRecBuild/libLibRec.so: LibRecBuild/CMakeFiles/LibRec.dir/build.make
 LibRecBuild/libLibRec.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libCore.so
 LibRecBuild/libLibRec.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libImt.so
@@ -490,7 +505,7 @@ LibRecBuild/libLibRec.so: /internal/big_one/4/users/gamrat/root_dirs/install_roo
 LibRecBuild/libLibRec.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTVecOps.so
 LibRecBuild/libLibRec.so: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTMVA.so
 LibRecBuild/libLibRec.so: LibRecBuild/CMakeFiles/LibRec.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Linking CXX shared library libLibRec.so"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Linking CXX shared library libLibRec.so"
 	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/LibRec.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

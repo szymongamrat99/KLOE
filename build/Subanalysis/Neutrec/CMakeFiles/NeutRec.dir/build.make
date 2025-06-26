@@ -60,54 +60,54 @@ include Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/flags.make
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.o: Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/flags.make
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.o: ../Subanalysis/Neutrec/app/neutrec_main.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/app/neutrec_main.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/app/neutrec_main.cpp
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/app/neutrec_main.cpp > CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/app/neutrec_main.cpp > CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.i
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/app/neutrec_main.cpp -o CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/app/neutrec_main.cpp -o CMakeFiles/NeutRec.dir/app/neutrec_main.cpp.s
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.o: Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/flags.make
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.o: ../Subanalysis/Neutrec/src/triangle_neu_rec.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/triangle_neu_rec.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/triangle_neu_rec.cpp
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/triangle_neu_rec.cpp > CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/triangle_neu_rec.cpp > CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.i
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/triangle_neu_rec.cpp -o CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/triangle_neu_rec.cpp -o CMakeFiles/NeutRec.dir/src/triangle_neu_rec.cpp.s
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.o: Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/flags.make
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.o: ../Subanalysis/Neutrec/src/comp_of_methods.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/comp_of_methods.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/comp_of_methods.cpp
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/comp_of_methods.cpp > CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/comp_of_methods.cpp > CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.i
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/comp_of_methods.cpp -o CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/comp_of_methods.cpp -o CMakeFiles/NeutRec.dir/src/comp_of_methods.cpp.s
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.o: Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/flags.make
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.o: ../Subanalysis/Neutrec/src/trilateration_neu_rec_kin_fit_aux.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/trilateration_neu_rec_kin_fit_aux.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/trilateration_neu_rec_kin_fit_aux.cpp
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/trilateration_neu_rec_kin_fit_aux.cpp > CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/trilateration_neu_rec_kin_fit_aux.cpp > CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.i
 
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/trilateration_neu_rec_kin_fit_aux.cpp -o CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/src/trilateration_neu_rec_kin_fit_aux.cpp -o CMakeFiles/NeutRec.dir/src/trilateration_neu_rec_kin_fit_aux.cpp.s
 
 # Object files for target NeutRec
 NeutRec_OBJECTS = \

@@ -60,54 +60,54 @@ include Subanalysis/CPFit/CMakeFiles/CPFit.dir/flags.make
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/app/cpfit_main.cpp.o: Subanalysis/CPFit/CMakeFiles/CPFit.dir/flags.make
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/app/cpfit_main.cpp.o: ../Subanalysis/CPFit/app/cpfit_main.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object Subanalysis/CPFit/CMakeFiles/CPFit.dir/app/cpfit_main.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CPFit.dir/app/cpfit_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/app/cpfit_main.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CPFit.dir/app/cpfit_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/app/cpfit_main.cpp
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/app/cpfit_main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/CPFit.dir/app/cpfit_main.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/app/cpfit_main.cpp > CMakeFiles/CPFit.dir/app/cpfit_main.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/app/cpfit_main.cpp > CMakeFiles/CPFit.dir/app/cpfit_main.cpp.i
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/app/cpfit_main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/CPFit.dir/app/cpfit_main.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/app/cpfit_main.cpp -o CMakeFiles/CPFit.dir/app/cpfit_main.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/app/cpfit_main.cpp -o CMakeFiles/CPFit.dir/app/cpfit_main.cpp.s
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.o: Subanalysis/CPFit/CMakeFiles/CPFit.dir/flags.make
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.o: ../Subanalysis/CPFit/src/cp_fit_func.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_func.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_func.cpp
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_func.cpp > CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_func.cpp > CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.i
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_func.cpp -o CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_func.cpp -o CMakeFiles/CPFit.dir/src/cp_fit_func.cpp.s
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.o: Subanalysis/CPFit/CMakeFiles/CPFit.dir/flags.make
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.o: ../Subanalysis/CPFit/src/cp_fit_mc_data.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_mc_data.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_mc_data.cpp
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_mc_data.cpp > CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_mc_data.cpp > CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.i
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_mc_data.cpp -o CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cp_fit_mc_data.cpp -o CMakeFiles/CPFit.dir/src/cp_fit_mc_data.cpp.s
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cut_search.cpp.o: Subanalysis/CPFit/CMakeFiles/CPFit.dir/flags.make
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cut_search.cpp.o: ../Subanalysis/CPFit/src/cut_search.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cut_search.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CPFit.dir/src/cut_search.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cut_search.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CPFit.dir/src/cut_search.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cut_search.cpp
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cut_search.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/CPFit.dir/src/cut_search.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cut_search.cpp > CMakeFiles/CPFit.dir/src/cut_search.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cut_search.cpp > CMakeFiles/CPFit.dir/src/cut_search.cpp.i
 
 Subanalysis/CPFit/CMakeFiles/CPFit.dir/src/cut_search.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/CPFit.dir/src/cut_search.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cut_search.cpp -o CMakeFiles/CPFit.dir/src/cut_search.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CPFit/src/cut_search.cpp -o CMakeFiles/CPFit.dir/src/cut_search.cpp.s
 
 # Object files for target CPFit
 CPFit_OBJECTS = \

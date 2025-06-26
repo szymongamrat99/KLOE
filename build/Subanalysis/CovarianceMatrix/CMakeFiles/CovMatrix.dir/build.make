@@ -60,41 +60,41 @@ include Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/flags.make
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.o: Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/flags.make
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.o: ../Subanalysis/CovarianceMatrix/app/covmatrix_main.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/app/covmatrix_main.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/app/covmatrix_main.cpp
 
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/app/covmatrix_main.cpp > CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/app/covmatrix_main.cpp > CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.i
 
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/app/covmatrix_main.cpp -o CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/app/covmatrix_main.cpp -o CMakeFiles/CovMatrix.dir/app/covmatrix_main.cpp.s
 
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.o: Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/flags.make
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.o: ../Subanalysis/CovarianceMatrix/src/cov_matrix_determination.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination.cpp
 
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination.cpp > CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination.cpp > CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.i
 
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination.cpp -o CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination.cpp -o CMakeFiles/CovMatrix.dir/src/cov_matrix_determination.cpp.s
 
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.o: Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/flags.make
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.o: ../Subanalysis/CovarianceMatrix/src/cov_matrix_determination_control_sample.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination_control_sample.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination_control_sample.cpp
 
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination_control_sample.cpp > CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination_control_sample.cpp > CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.i
 
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination_control_sample.cpp -o CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CovarianceMatrix && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination_control_sample.cpp -o CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.s
 
 # Object files for target CovMatrix
 CovMatrix_OBJECTS = \

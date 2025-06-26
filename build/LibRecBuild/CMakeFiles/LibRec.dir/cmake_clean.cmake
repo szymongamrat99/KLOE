@@ -26,6 +26,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/LibRec.dir/src/SplitFileWriter.cpp.o"
   "CMakeFiles/LibRec.dir/src/triple_gaus.cpp.o"
   "CMakeFiles/LibRec.dir/src/uncertainties.cpp.o"
+  "CMakeFiles/LibRec.dir/src/ConfigManager.cpp.o"
   "libLibRec.pdb"
   "libLibRec.so"
 )

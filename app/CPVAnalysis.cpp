@@ -1,4 +1,4 @@
-#include "../inc/klspm00.hpp"
+#include "../Include/klspm00.hpp"
 
 using namespace std;
 using namespace std::chrono;

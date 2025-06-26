@@ -136,6 +136,33 @@ LibRec/fast:
 	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build && $(MAKE) -f LibRecBuild/CMakeFiles/LibRec.dir/build.make LibRecBuild/CMakeFiles/LibRec.dir/build
 .PHONY : LibRec/fast
 
+src/ConfigManager.o: src/ConfigManager.cpp.o
+
+.PHONY : src/ConfigManager.o
+
+# target to build an object file
+src/ConfigManager.cpp.o:
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build && $(MAKE) -f LibRecBuild/CMakeFiles/LibRec.dir/build.make LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigManager.cpp.o
+.PHONY : src/ConfigManager.cpp.o
+
+src/ConfigManager.i: src/ConfigManager.cpp.i
+
+.PHONY : src/ConfigManager.i
+
+# target to preprocess a source file
+src/ConfigManager.cpp.i:
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build && $(MAKE) -f LibRecBuild/CMakeFiles/LibRec.dir/build.make LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigManager.cpp.i
+.PHONY : src/ConfigManager.cpp.i
+
+src/ConfigManager.s: src/ConfigManager.cpp.s
+
+.PHONY : src/ConfigManager.s
+
+# target to generate assembly for a file
+src/ConfigManager.cpp.s:
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build && $(MAKE) -f LibRecBuild/CMakeFiles/LibRec.dir/build.make LibRecBuild/CMakeFiles/LibRec.dir/src/ConfigManager.cpp.s
+.PHONY : src/ConfigManager.cpp.s
+
 src/ConfigWatcher.o: src/ConfigWatcher.cpp.o
 
 .PHONY : src/ConfigWatcher.o
@@ -875,6 +902,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... LibRec"
 	@echo "... test"
+	@echo "... src/ConfigManager.o"
+	@echo "... src/ConfigManager.i"
+	@echo "... src/ConfigManager.s"
 	@echo "... src/ConfigWatcher.o"
 	@echo "... src/ConfigWatcher.i"
 	@echo "... src/ConfigWatcher.s"

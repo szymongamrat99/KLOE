@@ -62,5 +62,5 @@ endif()
 
 
 set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES "gfortran;m;gcc_s;gcc;quadmath;m;gcc_s;gcc;c;gcc_s;gcc")
-set(CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES "/internal/big_one/4/users/gamrat/scripts/Include/FortranAnalysis/lib;/internal/big_one/4/cernlib/new/lib;/usr/lib/gcc/x86_64-linux-gnu/8;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib;/internal/big_one/4/users/gamrat/scripts/Include;/internal/big_one/4/users/gamrat/external_libs;/internal/big_one/4/users/gamrat/scripts/Include/Codes/inc")
+set(CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES "/internal/big_one/4/cernlib/new/lib;/usr/lib/gcc/x86_64-linux-gnu/8;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib;/internal/big_one/4/users/gamrat/scripts/Include;/internal/big_one/4/users/gamrat/external_libs;/internal/big_one/4/users/gamrat/scripts/Include/Codes/inc")
 set(CMAKE_Fortran_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")

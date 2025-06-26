@@ -60,41 +60,41 @@ include Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/flags.make
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/app/genvars_main.cpp.o: Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/flags.make
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/app/genvars_main.cpp.o: ../Subanalysis/GeneratedVars/app/genvars_main.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/app/genvars_main.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/GenVars.dir/app/genvars_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/app/genvars_main.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/GenVars.dir/app/genvars_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/app/genvars_main.cpp
 
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/app/genvars_main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/GenVars.dir/app/genvars_main.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/app/genvars_main.cpp > CMakeFiles/GenVars.dir/app/genvars_main.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/app/genvars_main.cpp > CMakeFiles/GenVars.dir/app/genvars_main.cpp.i
 
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/app/genvars_main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/GenVars.dir/app/genvars_main.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/app/genvars_main.cpp -o CMakeFiles/GenVars.dir/app/genvars_main.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/app/genvars_main.cpp -o CMakeFiles/GenVars.dir/app/genvars_main.cpp.s
 
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/src/generated_variables.cpp.o: Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/flags.make
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/src/generated_variables.cpp.o: ../Subanalysis/GeneratedVars/src/generated_variables.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/src/generated_variables.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/GenVars.dir/src/generated_variables.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/generated_variables.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/GenVars.dir/src/generated_variables.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/generated_variables.cpp
 
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/src/generated_variables.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/GenVars.dir/src/generated_variables.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/generated_variables.cpp > CMakeFiles/GenVars.dir/src/generated_variables.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/generated_variables.cpp > CMakeFiles/GenVars.dir/src/generated_variables.cpp.i
 
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/src/generated_variables.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/GenVars.dir/src/generated_variables.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/generated_variables.cpp -o CMakeFiles/GenVars.dir/src/generated_variables.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/generated_variables.cpp -o CMakeFiles/GenVars.dir/src/generated_variables.cpp.s
 
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/src/split_channels.cpp.o: Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/flags.make
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/src/split_channels.cpp.o: ../Subanalysis/GeneratedVars/src/split_channels.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/src/split_channels.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/GenVars.dir/src/split_channels.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/split_channels.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/GenVars.dir/src/split_channels.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/split_channels.cpp
 
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/src/split_channels.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/GenVars.dir/src/split_channels.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/split_channels.cpp > CMakeFiles/GenVars.dir/src/split_channels.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/split_channels.cpp > CMakeFiles/GenVars.dir/src/split_channels.cpp.i
 
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/src/split_channels.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/GenVars.dir/src/split_channels.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/split_channels.cpp -o CMakeFiles/GenVars.dir/src/split_channels.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/src/split_channels.cpp -o CMakeFiles/GenVars.dir/src/split_channels.cpp.s
 
 # Object files for target GenVars
 GenVars_OBJECTS = \

@@ -60,28 +60,28 @@ include Subanalysis/KchRec/CMakeFiles/KchRec.dir/flags.make
 Subanalysis/KchRec/CMakeFiles/KchRec.dir/app/KchRec_main.cpp.o: Subanalysis/KchRec/CMakeFiles/KchRec.dir/flags.make
 Subanalysis/KchRec/CMakeFiles/KchRec.dir/app/KchRec_main.cpp.o: ../Subanalysis/KchRec/app/KchRec_main.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object Subanalysis/KchRec/CMakeFiles/KchRec.dir/app/KchRec_main.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KchRec.dir/app/KchRec_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/app/KchRec_main.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KchRec.dir/app/KchRec_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/app/KchRec_main.cpp
 
 Subanalysis/KchRec/CMakeFiles/KchRec.dir/app/KchRec_main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/KchRec.dir/app/KchRec_main.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/app/KchRec_main.cpp > CMakeFiles/KchRec.dir/app/KchRec_main.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/app/KchRec_main.cpp > CMakeFiles/KchRec.dir/app/KchRec_main.cpp.i
 
 Subanalysis/KchRec/CMakeFiles/KchRec.dir/app/KchRec_main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/KchRec.dir/app/KchRec_main.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/app/KchRec_main.cpp -o CMakeFiles/KchRec.dir/app/KchRec_main.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/app/KchRec_main.cpp -o CMakeFiles/KchRec.dir/app/KchRec_main.cpp.s
 
 Subanalysis/KchRec/CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.o: Subanalysis/KchRec/CMakeFiles/KchRec.dir/flags.make
 Subanalysis/KchRec/CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.o: ../Subanalysis/KchRec/src/kchrec_Kmass.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object Subanalysis/KchRec/CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/src/kchrec_Kmass.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/src/kchrec_Kmass.cpp
 
 Subanalysis/KchRec/CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/src/kchrec_Kmass.cpp > CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/src/kchrec_Kmass.cpp > CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.i
 
 Subanalysis/KchRec/CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/src/kchrec_Kmass.cpp -o CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/src/kchrec_Kmass.cpp -o CMakeFiles/KchRec.dir/src/kchrec_Kmass.cpp.s
 
 # Object files for target KchRec
 KchRec_OBJECTS = \

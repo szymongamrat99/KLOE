@@ -60,54 +60,54 @@ include Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/flags.make
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.o: Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/flags.make
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.o: ../Subanalysis/OmegaRec/app/omegarec_main.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/app/omegarec_main.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/app/omegarec_main.cpp
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/app/omegarec_main.cpp > CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/app/omegarec_main.cpp > CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.i
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/app/omegarec_main.cpp -o CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/app/omegarec_main.cpp -o CMakeFiles/OmegaRec.dir/app/omegarec_main.cpp.s
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.o: Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/flags.make
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.o: ../Subanalysis/OmegaRec/src/omega_rec.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec.cpp
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec.cpp > CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec.cpp > CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.i
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec.cpp -o CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec.cpp -o CMakeFiles/OmegaRec.dir/src/omega_rec.cpp.s
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.o: Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/flags.make
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.o: ../Subanalysis/OmegaRec/src/omega_rec_kin_fit.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec_kin_fit.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec_kin_fit.cpp
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec_kin_fit.cpp > CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec_kin_fit.cpp > CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.i
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec_kin_fit.cpp -o CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/omega_rec_kin_fit.cpp -o CMakeFiles/OmegaRec.dir/src/omega_rec_kin_fit.cpp.s
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/plots.cpp.o: Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/flags.make
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/plots.cpp.o: ../Subanalysis/OmegaRec/src/plots.cpp
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/plots.cpp.o"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/OmegaRec.dir/src/plots.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/plots.cpp
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/OmegaRec.dir/src/plots.cpp.o -c /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/plots.cpp
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/plots.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/OmegaRec.dir/src/plots.cpp.i"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/plots.cpp > CMakeFiles/OmegaRec.dir/src/plots.cpp.i
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/plots.cpp > CMakeFiles/OmegaRec.dir/src/plots.cpp.i
 
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/src/plots.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/OmegaRec.dir/src/plots.cpp.s"
-	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/plots.cpp -o CMakeFiles/OmegaRec.dir/src/plots.cpp.s
+	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec && /usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/src/plots.cpp -o CMakeFiles/OmegaRec.dir/src/plots.cpp.s
 
 # Object files for target OmegaRec
 OmegaRec_OBJECTS = \
