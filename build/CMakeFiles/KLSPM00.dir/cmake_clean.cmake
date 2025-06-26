@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o"
-  "KLSPM00.pdb"
-  "KLSPM00"
+  "bin/KLSPM00.pdb"
+  "bin/KLSPM00"
 )
 
 # Per-language clean rules from dependency scanning.

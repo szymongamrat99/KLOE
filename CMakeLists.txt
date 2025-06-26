@@ -39,6 +39,11 @@ add_subdirectory(../Include/FortranAnalysis ${CMAKE_BINARY_DIR}/FortBuild)
 # What should be the result of compilation
 add_executable(KLSPM00 app/CPVAnalysis.cpp)
 
+set_target_properties(KLSPM00
+    PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+)
+
 # Inclusion of libraries and header directories
 target_include_directories(KLSPM00 PRIVATE
   ${Boost_INCLUDE_DIRS}

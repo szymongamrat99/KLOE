@@ -14,6 +14,30 @@
 
 #include "../inc/kchrec.hpp"
 
+/**
+ * @brief Reconstructs the kinematics of charged kaon decays and performs analysis for the KchRec control sample.
+ *
+ * This function processes entries from a ROOT TChain, reconstructs the kinematics of charged kaon decays,
+ * calculates momenta using two-body decay kinematics, applies boost corrections, and fills histograms for
+ * further analysis. The results are written to output files for later inspection.
+ *
+ * @param chain     Reference to the ROOT TChain containing the event data.
+ * @param dataType  Reference to the Controls::DataType object specifying the data type (MC/data).
+ * @param logger    Reference to the ErrorHandling::ErrorLogs object for logging errors and messages.
+ * @param Obj       Reference to the KLOE::pm00 object providing utility and transformation methods.
+ * @return int      Returns 0 on successful completion.
+ *
+ * @details
+ * - Sets up branch addresses for all relevant event variables.
+ * - Initializes histograms and output file writers.
+ * - Loops over all entries in the TChain:
+ *   - Reconstructs charged kaon decay vertices and momenta.
+ *   - Calculates pion momenta in the kaon rest frame and boosts them to the lab frame.
+ *   - Rotates momenta to align with the kaon momentum direction.
+ *   - Compares reconstructed and theoretical momenta, filling histograms for differences.
+ *   - Writes results to output files.
+ * - At the end, saves all histograms as images and closes output files.
+ */
 int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
 
@@ -148,371 +172,335 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
       trkKLTwoBody1(4),
       trkKLTwoBody2(4);
 
+  Float_t gamma = 0.0, gamma_theta = 0.0;
+
   for (Int_t i = 0; i < nentries; i++)
   {
     chain.GetEntry(i);
 
-    // // Finding Ks from KSKL->pi+pi-pi+pi-
-    // int
-    //     findKl = 0,
-    //     findKs = 1,
-    //     findClose = 0;
-
-    // int
-    //     last_vtx = 0;
-
-    // minDiff = 999999.;
-
-    // // Set the proper data type to be analyzed
-    // Bool_t data_flag = false;
-    // Int_t mctruth_int = int(baseKin.mctruth), mcflag_int = int(baseKin.mcflag);
-
-    // Obj.dataFlagSetter(dataType, data_flag, mcflag_int, mctruth_int);
-    // // -------------------------------------------------------------------
-
-    // baseKin.errFlag = 1;
-    // baseKin.errFlagKS = 1;
-    // baseKin.errFlagKL = 1;
-    // baseKin.errFlagClosest = 1;
-
-    // baseKin.vtaken.clear();
-    // baseKin.vtakenClosest.clear();
-
-    // baseKin.Kchrecnew.clear();
-    // baseKin.KchrecClosest.clear();
-    // baseKin.KchrecKLTwoBody.clear();
-
-    // for (Int_t i = 0; i < 2; i++)
-    // {
-    //   baseKin.trknew[i].clear();
-    //   baseKin.trkClosest[i].clear();
-    //   baseKin.trkKLTwoBody[i].clear();
-    // }
-
-    // if (data_flag)
-    // {
-    //   // Construction of the charged rec class object
-    //   eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.iv, baseKin.bhabha_vtx, baseKin.Curv, baseKin.Phiv, baseKin.Cotv, baseKin.xv, baseKin.yv, baseKin.zv, mode);
-
-    //   // KMASS HYPOTHESIS
-    //   eventAnalysis->findKchRec(baseKin.Kchrecnew.data(), baseKin.trknew[0].data(), baseKin.trknew[1].data(), baseKin.vtaken.data(), baseKin.errFlag);
-    //   // ------------------------------------------------------------------
-
-    //   // // CLOSEST TO IP
-    //   // eventAnalysis->findKClosestRec(baseKin.KchrecClosest.data(), baseKin.trkClosest[0].data(), baseKin.trkClosest[1].data(), baseKin.vtakenClosest.data(), baseKin.errFlagClosest);
-    //   // // ------------------------------------------------------------------
-
-    //   if (1)
-    //   {
-    //     // 1. Calculation of pions' momenta from two-body decay using the boost method
-
-    //     eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS.data(), baseKin.phi_mom, baseKin.KchboostKS);
-
-    //     Float_t X_line[3] = {baseKin.KchboostKS[6], baseKin.KchboostKS[7], baseKin.KchboostKS[8]},
-    //             p[3] = {baseKin.KchboostKS[0], baseKin.KchboostKS[1], baseKin.KchboostKS[2]},
-    //             xB[3] = {baseKin.bhabha_vtx[0], baseKin.bhabha_vtx[1], baseKin.bhabha_vtx[2]},
-    //             plane_perp[3] = {0., baseKin.phi_mom[1], 0.};
-
-    //     eventAnalysis->IPBoostCorr(X_line, p, xB, plane_perp, baseKin.ip);
-
-    //     baseKin.ip[0] = baseKin.bhabha_vtx[0];
-    //     baseKin.ip[1] = baseKin.bhabha_vtx[1];
-    //     if (abs(baseKin.ip[2] - baseKin.bhabha_vtx[2]) > 2.0)
-    //       baseKin.ip[2] = baseKin.bhabha_vtx[2];
-
-    //     // 1.1 Calculation of KL flight direction
-    //     Double_t KLpath = sqrt(pow(baseKin.KchrecKL[6] - baseKin.ip[0], 2) + pow(baseKin.KchrecKL[7] - baseKin.ip[1], 2) + pow(baseKin.KchrecKL[8] - baseKin.ip[2], 2));
-    //     TVector3 KLflightDirection = {(baseKin.KchrecKL[6] - baseKin.ip[0]) / KLpath,
-    //                                   (baseKin.KchrecKL[7] - baseKin.ip[1]) / KLpath,
-    //                                   (baseKin.KchrecKL[8] - baseKin.ip[2]) / KLpath};
-
-    //     eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL.data(), baseKin.phi_mom, baseKin.KchboostKL);
-
-    //     Double_t KLmomMag = sqrt(pow(baseKin.KchboostKL[0], 2) +
-    //                              pow(baseKin.KchboostKL[1], 2) +
-    //                              pow(baseKin.KchboostKL[2], 2));
-
-    //     // 1.2 Calculation of KL momentum from 2 body decay
-    //     for (Int_t j = 0; j < 3; j++)
-    //     {
-    //       baseKin.KchrecKLTwoBody[j] = KLflightDirection[j] * KLmomMag;
-    //     }
-    //     baseKin.KchrecKLTwoBody[3] = baseKin.KchboostKL[3];
-
-    //     baseKin.KchrecKLTwoBody[4] = sqrt(pow(baseKin.KchrecKLTwoBody[0], 2) +
-    //                                       pow(baseKin.KchrecKLTwoBody[1], 2) +
-    //                                       pow(baseKin.KchrecKLTwoBody[2], 2));
-    //     baseKin.KchrecKLTwoBody[5] = sqrt(pow(baseKin.KchrecKLTwoBody[3], 2) -
-    //                                       pow(baseKin.KchrecKLTwoBody[4], 2));
-    //     baseKin.KchrecKLTwoBody[6] = baseKin.KchrecKL[6];
-    //     baseKin.KchrecKLTwoBody[7] = baseKin.KchrecKL[7];
-    //     baseKin.KchrecKLTwoBody[8] = baseKin.KchrecKL[8];
-
-    //     // ------------------------------------------------------------------
-
-    //     // 2. Rotate the momenta to get the frame along momentum of Kaon
-
-    //     TVector3
-    //         PiMomKaonCM[2],
-    //         PiMomKaonLAB[2],
-    //         x_axis = {1.0, 0.0, 0.0},
-    //         kaonMomLAB = {baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[4],
-    //                       baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[4],
-    //                       baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[4]},
-    //         cross = kaonMomLAB.Cross(x_axis),
-    //         trkKLMomVecLAB[2],
-    //         trkKLMomVecKaonCM[2];
-
-    //     TLorentzVector
-    //         kaon4VecLAB,
-    //         kaon4VecKaonCM,
-    //         trkKL4VecLAB[2],
-    //         trkKL4VecKaonCM[2],
-    //         PiKaon4VecKaonCM[2],
-    //         PiKaon4VecLAB[2];
-
-    //     Double_t rotAngle = kaonMomLAB.Angle(x_axis);
-
-    //     std::cout << "Rotation angle: " << rotAngle * 180./M_PI << std::endl;
-
-    //     TVector3
-    //         boost_KaonTwoBody = {baseKin.KchrecKLTwoBody[4] / baseKin.KchrecKLTwoBody[3],
-    //                              0.0,
-    //                              0.0};
-
-    //     for (Int_t j = 0; j < 2; j++)
-    //     {
-    //       trkKLMomVecLAB[j].SetXYZ(baseKin.trkKL[j][0],
-    //                                baseKin.trkKL[j][1],
-    //                                baseKin.trkKL[j][2]);
-
-    //       trkKL4VecLAB[j].SetPxPyPzE(baseKin.trkKL[j][0],
-    //                                  baseKin.trkKL[j][1],
-    //                                  baseKin.trkKL[j][2],
-    //                                  baseKin.trkKL[j][3]);
-    //     }
-
-    //     std::cout << "Momenta before rotation: " << std::endl;
-    //     trkKLMomVecLAB[0].Print();
-    //     trkKLMomVecLAB[1].Print();
-
-    //     trkKLMomVecLAB[0].Rotate(rotAngle, cross);
-    //     trkKLMomVecLAB[1].Rotate(rotAngle, cross);
-
-    //     std::cout << "Momenta after rotation: " << std::endl;
-    //     trkKLMomVecLAB[0].Print();
-    //     trkKLMomVecLAB[1].Print();
-
-    //     // Going to Kaon's CM frame
-    //     Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
-    //     Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[1], PiKaon4VecLAB[1]);
-
-
-    //     Double_t
-    //         differenceTmp[2] = {999., 999.};
-    //     std::vector<Double_t>
-    //         angle,
-    //         difference;
-
-    //     for (Int_t j = 0; j < numOfPoints; j++)
-    //     {
-    //       angle.push_back(angleStep * (j + 1));
-
-    //       PiMomKaonCM[0].SetXYZ(PiMomMagKaonCM * cos(angle[j]),
-    //                             PiMomMagKaonCM * sin(angle[j]),
-    //                             0.0);
-    //       PiMomKaonCM[1].SetXYZ(PiMomMagKaonCM * cos(M_PI + angle[j]),
-    //                             PiMomMagKaonCM * sin(M_PI + angle[j]),
-    //                             0.0);
-
-    //       PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomMagKaonCM, 2) + pow(mPiCh, 2)));
-    //       PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomMagKaonCM, 2) + pow(mPiCh, 2)));
-
-    //       // Coming back to LAB frame
-    //       Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
-    //       Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[1], PiKaon4VecLAB[1]);
-
-    //       PiMomKaonLAB[0].SetXYZ(PiKaon4VecLAB[0][0],
-    //                              PiKaon4VecLAB[0][1],
-    //                              PiKaon4VecLAB[0][2]);
-    //       PiMomKaonLAB[1].SetXYZ(PiKaon4VecLAB[1][0],
-    //                              PiKaon4VecLAB[1][1],
-    //                              PiKaon4VecLAB[1][2]);
-
-    //       PiMomKaonLAB[0].Rotate(rotAngle, cross);
-    //       PiMomKaonLAB[1].Rotate(rotAngle, cross);
-
-    //       PiKaon4VecLAB[0].SetPxPyPzE(PiMomKaonLAB[0][0],
-    //                                   PiMomKaonLAB[0][1],
-    //                                   PiMomKaonLAB[0][2],
-    //                                   PiKaon4VecLAB[0][3]);
-    //       PiKaon4VecLAB[1].SetPxPyPzE(PiMomKaonLAB[1][0],
-    //                                   PiMomKaonLAB[1][1],
-    //                                   PiMomKaonLAB[1][2],
-    //                                   PiKaon4VecLAB[1][3]);
-
-    //       differenceTmp[0] = pow(((trkKLMomVecLAB[0] - PiMomKaonLAB[0]).Mag() + (trkKLMomVecLAB[1] - PiMomKaonLAB[1]).Mag()) / (trkKLMomVecLAB[0].Mag() + trkKLMomVecLAB[1].Mag()), 2);
-    //       differenceTmp[1] = pow(((trkKLMomVecLAB[0] - PiMomKaonLAB[1]).Mag() + (trkKLMomVecLAB[1] - PiMomKaonLAB[0]).Mag()) / (trkKLMomVecLAB[0].Mag() + trkKLMomVecLAB[1].Mag()), 2);
-
-    //       if (differenceTmp[0] < differenceTmp[1])
-    //       {
-    //         difference.push_back(differenceTmp[0]);
-    //       }
-    //       else
-    //       {
-    //         difference.push_back(differenceTmp[1]);
-    //       }
-    //     }
-
-    //     TF1 *fitFunc = new TF1("myFit", "pol10", 0, M_PI);
-
-    //     TGraph *angleGraph = new TGraph(numOfPoints, &angle[0], &difference[0]);
-
-    //     angleGraph->Fit(fitFunc, "SQ");
-    //     angleGraph->SetTitle("Angle vs. Difference");
-    //     angleGraph->GetXaxis()->SetTitle("Angle [rad]");
-    //     angleGraph->GetYaxis()->SetTitle("Difference [-]");
-
-    //     Double_t
-    //         minAngle = fitFunc->GetMinimumX();
-
-    //     minDiff = fitFunc->GetMinimum();
-
-    //     histDifferences->Fill(minDiff);
-
-    //     TCanvas *canvas_Graph = new TCanvas("canvas_Graph", "Canvas_Graph", 800, 600);
-
-    //     if (graph_flag == 0)
-    //     {
-    //       graph_flag = 1;
-
-    //       angleGraph->SetMarkerStyle(20);
-    //       angleGraph->SetMarkerSize(0.5);
-
-    //       angleGraph->Draw("AP");
-    //       canvas_Graph->Print("angle_graph.png");
-    //     }
-
-    //     delete angleGraph;
-    //     delete canvas_Graph;
-
-    //     PiMomKaonCM[0].SetXYZ(PiMomMagKaonCM * cos(minAngle),
-    //                           PiMomMagKaonCM * sin(minAngle),
-    //                           0.0);
-    //     PiMomKaonCM[1].SetXYZ(PiMomMagKaonCM * cos(M_PI + minAngle),
-    //                           PiMomMagKaonCM * sin(M_PI + minAngle),
-    //                           0.0);
-
-    //     PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomMagKaonCM, 2) + pow(mPiCh, 2)));
-    //     PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomMagKaonCM, 2) + pow(mPiCh, 2)));
-
-    //     // Coming back to LAB frame
-    //     Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
-    //     Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[1], PiKaon4VecLAB[1]);
-
-    //     PiMomKaonLAB[0].SetXYZ(PiKaon4VecLAB[0][0],
-    //                            PiKaon4VecLAB[0][1],
-    //                            PiKaon4VecLAB[0][2]);
-    //     PiMomKaonLAB[1].SetXYZ(PiKaon4VecLAB[1][0],
-    //                            PiKaon4VecLAB[1][1],
-    //                            PiKaon4VecLAB[1][2]);
-
-    //     PiMomKaonLAB[0].Rotate(rotAngle, cross);
-    //     PiMomKaonLAB[1].Rotate(rotAngle, cross);
-
-    //     PiKaon4VecLAB[0].SetPxPyPzE(PiMomKaonLAB[0][0],
-    //                                 PiMomKaonLAB[0][1],
-    //                                 PiMomKaonLAB[0][2],
-    //                                 PiKaon4VecLAB[0][3]);
-    //     PiKaon4VecLAB[1].SetPxPyPzE(PiMomKaonLAB[1][0],
-    //                                 PiMomKaonLAB[1][1],
-    //                                 PiMomKaonLAB[1][2],
-    //                                 PiKaon4VecLAB[1][3]);
-
-    //     // 4. Check for what angle accordance is the best
-
-    //     Double_t
-    //         metric1 = sqrt((PiMomKaonLAB[0] - trkKLMomVecLAB[0]).Mag2() + (PiMomKaonLAB[1] - trkKLMomVecLAB[1]).Mag2()),
-    //         metric2 = sqrt((PiMomKaonLAB[0] - trkKLMomVecLAB[1]).Mag2() + (PiMomKaonLAB[1] - trkKLMomVecLAB[0]).Mag2());
-
-    //     for (Int_t k = 0; k < 4; k++)
-    //     {
-    //       if (metric1 < metric2)
-    //       {
-    //         trkKLTwoBody1[k] = PiKaon4VecLAB[0][k];
-    //         trkKLTwoBody2[k] = PiKaon4VecLAB[1][k];
-    //       }
-    //       else
-    //       {
-    //         trkKLTwoBody1[k] = PiKaon4VecLAB[1][k];
-    //         trkKLTwoBody2[k] = PiKaon4VecLAB[0][k];
-    //       }
-
-    //       if (mcflag_int == 0)
-    //       {
-    //         histMomPiTwoBody[0][k]->Fill(trkKLTwoBody1[k]);
-    //         histMomPiTwoBody[1][k]->Fill(trkKLTwoBody2[k]);
-    //         histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k]);
-    //         histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k]);
-
-    //         histKLTwoBody[k]->Fill(baseKin.KchrecKLTwoBody[k]);
-    //         histKL[k]->Fill(baseKin.KchrecKL[k]);
-    //       }
-    //     }
-    //   }
-
-    //   // Int_t zmienne
-    //   std::map<std::string, Int_t> intVars = {
-    //       {"nrun", 0},
-    //       {"nev", baseKin.nevent},
-    //       {"mcflag", mcflag_int},
-    //       {"mctruth", mctruth_int},
-    //       {"errflag", baseKin.errFlag},
-    //       {"errflagks", baseKin.errFlagKS},
-    //       {"errflagkl", baseKin.errFlagKL},
-    //       {"errflagclosest", baseKin.errFlagClosest}};
-
-    //   std::map<std::string, Float_t> floatVars = {
-    //       {"minDiff", minDiff}};
-
-    //   // Tablice
-    //   std::map<std::string, std::vector<Int_t>> intArrays = {
-    //       {"vtaken", baseKin.vtaken},
-    //       {"vtakenKS", baseKin.vtakenKS},
-    //       {"vtakenKL", baseKin.vtakenKL},
-    //       {"vtakenClosest", baseKin.vtakenClosest}};
-
-    //   std::map<std::string, std::vector<Float_t>> floatArrays = {
-    //       {"Kchrec", baseKin.Kchrecnew},
-    //       {"KchrecKS", baseKin.KchrecKS},
-    //       {"KchrecKL", baseKin.KchrecKL},
-    //       {"KchrecClosest", baseKin.KchrecClosest},
-    //       {"KchrecKLTwoBody", baseKin.KchrecKLTwoBody},
-    //       {"trk1", baseKin.trknew[0]},
-    //       {"trk2", baseKin.trknew[1]},
-    //       {"trk1KS", baseKin.trkKS[0]},
-    //       {"trk2KS", baseKin.trkKS[1]},
-    //       {"trk1KL", baseKin.trkKL[0]},
-    //       {"trk2KL", baseKin.trkKL[1]},
-    //       {"trk1Closest", baseKin.trkClosest[0]},
-    //       {"trk2Closest", baseKin.trkClosest[1]},
-    //       {"trk1TwoBody", trkKLTwoBody1},
-    //       {"trk2TwoBody", trkKLTwoBody2},
-    //   };
-    //   writer.Fill(intVars, floatVars, intArrays, floatArrays);
-    // }
+    // Finding Ks from KSKL->pi+pi-pi+pi-
+    int
+        findKl = 0,
+        findKs = 1,
+        findClose = 0;
+
+    int
+        last_vtx = 0;
+
+    minDiff = 999999.;
+
+    // Set the proper data type to be analyzed
+    Bool_t data_flag = false;
+    Int_t mctruth_int = int(baseKin.mctruth), mcflag_int = int(baseKin.mcflag);
+
+    Obj.dataFlagSetter(dataType, data_flag, mcflag_int, mctruth_int);
+    // -------------------------------------------------------------------
+
+    baseKin.errFlag = 1;
+    baseKin.errFlagKS = 1;
+    baseKin.errFlagKL = 1;
+    baseKin.errFlagClosest = 1;
+
+    baseKin.vtaken.clear();
+    baseKin.vtakenClosest.clear();
+
+    baseKin.Kchrecnew.clear();
+    baseKin.KchrecClosest.clear();
+    baseKin.KchrecKLTwoBody.clear();
+
+    for (Int_t i = 0; i < 2; i++)
+    {
+      baseKin.trknew[i].clear();
+      baseKin.trkClosest[i].clear();
+      baseKin.trkKLTwoBody[i].clear();
+    }
+
+    if (data_flag)
+    {
+      // Construction of the charged rec class object
+      eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.iv, baseKin.bhabha_vtx, baseKin.Curv, baseKin.Phiv, baseKin.Cotv, baseKin.xv, baseKin.yv, baseKin.zv, mode);
+
+      // KMASS HYPOTHESIS
+      eventAnalysis->findKchRec(baseKin.Kchrecnew.data(), baseKin.trknew[0].data(), baseKin.trknew[1].data(), baseKin.vtaken.data(), baseKin.errFlag);
+      // ------------------------------------------------------------------
+
+      // // CLOSEST TO IP
+      // eventAnalysis->findKClosestRec(baseKin.KchrecClosest.data(), baseKin.trkClosest[0].data(), baseKin.trkClosest[1].data(), baseKin.vtakenClosest.data(), baseKin.errFlagClosest);
+      // // ------------------------------------------------------------------
+
+      if (1)
+      {
+        // 1. Calculation of pions' momenta from two-body decay using the boost method
+        // Using the K1 side of the event
+        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS.data(), baseKin.phi_mom, baseKin.KchboostKS);
+
+        Float_t X_line[3] = {baseKin.KchboostKS[6],
+                             baseKin.KchboostKS[7],
+                             baseKin.KchboostKS[8]}, // Vertex laying on the line
+            p[3] = {baseKin.KchboostKS[0],
+                    baseKin.KchboostKS[1],
+                    baseKin.KchboostKS[2]}, // Direction of the line
+            xB[3] = {baseKin.bhabha_vtx[0],
+                     baseKin.bhabha_vtx[1],
+                     baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
+            plane_perp[3] = {0.,
+                             baseKin.phi_mom[1],
+                             0.}; // Vector perpendicular to the plane from Bhabha momentum
+
+        // Corrected IP event by event
+        eventAnalysis->IPBoostCorr(X_line, p, xB, plane_perp, baseKin.ip);
+
+        baseKin.ip[0] = baseKin.bhabha_vtx[0];
+        baseKin.ip[1] = baseKin.bhabha_vtx[1];
+        // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
+        if (abs(baseKin.ip[2] - baseKin.bhabha_vtx[2]) > 2.0)
+          baseKin.ip[2] = baseKin.bhabha_vtx[2];
+
+        // 2. Calculation of KL flight direction
+        Double_t KLpath = sqrt(pow(baseKin.KchrecKL[6] - baseKin.ip[0], 2) +
+                               pow(baseKin.KchrecKL[7] - baseKin.ip[1], 2) +
+                               pow(baseKin.KchrecKL[8] - baseKin.ip[2], 2));
+        TVector3 KLflightDirection = {(baseKin.KchrecKL[6] - baseKin.ip[0]) / KLpath,
+                                      (baseKin.KchrecKL[7] - baseKin.ip[1]) / KLpath,
+                                      (baseKin.KchrecKL[8] - baseKin.ip[2]) / KLpath};
+
+        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL.data(),
+                                        baseKin.phi_mom,
+                                        baseKin.KchboostKL);
+
+        // 2.1 Calculation of KL momentum magnitude
+        Double_t KLmomMag = sqrt(pow(baseKin.KchboostKL[0], 2) +
+                                 pow(baseKin.KchboostKL[1], 2) +
+                                 pow(baseKin.KchboostKL[2], 2));
+
+        // 2.2 Calculation of KL momentum from 2 body decay
+        for (Int_t j = 0; j < 3; j++)
+        {
+          // Components
+          baseKin.KchrecKLTwoBody[j] = KLflightDirection[j] * KLmomMag;
+        }
+        // Energy
+        baseKin.KchrecKLTwoBody[3] = baseKin.KchboostKL[3];
+
+        // Calculate the magnitude of the KL momentum
+        baseKin.KchrecKLTwoBody[4] = sqrt(pow(baseKin.KchrecKLTwoBody[0], 2) +
+                                          pow(baseKin.KchrecKLTwoBody[1], 2) +
+                                          pow(baseKin.KchrecKLTwoBody[2], 2));
+        // Calculate the invariant mass of the KL
+        baseKin.KchrecKLTwoBody[5] = sqrt(pow(baseKin.KchrecKLTwoBody[3], 2) -
+                                          pow(baseKin.KchrecKLTwoBody[4], 2));
+
+        // Copy the rest of the KL vertex components from the original KL vertex
+        baseKin.KchrecKLTwoBody[6] = baseKin.KchrecKL[6];
+        baseKin.KchrecKLTwoBody[7] = baseKin.KchrecKL[7];
+        baseKin.KchrecKLTwoBody[8] = baseKin.KchrecKL[8];
+        // ------------------------------------------------------------------
+
+        // 2. Go to KL CM frame
+        TVector3
+            PiMomKaonCM[2],           // Pion momenta in the KL CM frame
+            PiMomKaonLAB[2],          // Pion momenta in the LAB frame
+            x_axis = {1.0, 0.0, 0.0}, // x-axis for rotation
+            kaonMomLAB = {baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[4],
+                          baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[4],
+                          baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[4]},
+            cross = kaonMomLAB.Cross(x_axis),
+            trkKLMomVecLAB[2], // Track momenta in the LAB frame
+            trkKLMomVecKaonCM[2];
+
+        TLorentzVector
+            kaon4VecLAB,
+            kaon4VecKaonCM,
+            trkKL4VecLAB[2],
+            trkKL4VecKaonCM[2],
+            PiKaon4VecKaonCM[2],
+            PiKaon4VecLAB[2];
+
+        Double_t rotAngle = kaonMomLAB.Angle(x_axis);
+
+        kaonMomLAB.Rotate(rotAngle, cross);
+
+        TVector3
+          boost_KaonTwoBody = { -baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[3],
+                                -baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[3],
+                                -baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[3]};
+            // boost_KaonTwoBody = {-baseKin.KchrecKLTwoBody[4] / baseKin.KchrecKLTwoBody[3],
+            //                      0.0,
+            //                      0.0};
+
+        for (Int_t j = 0; j < 3; j++)
+        {
+          // Components of the track momenta in the LAB frame
+          trkKLMomVecLAB[0][j] = baseKin.trkKL[0][j];
+          trkKLMomVecLAB[1][j] = baseKin.trkKL[1][j];
+        }
+
+        // std::cout << "Momenta before rotation: " << std::endl;
+        // trkKLMomVecLAB[0].Print();
+        // trkKLMomVecLAB[1].Print();
+
+        // trkKLMomVecLAB[0].Rotate(rotAngle, cross);
+        // trkKLMomVecLAB[1].Rotate(rotAngle, cross);
+
+        // std::cout << "Momenta after rotation: " << std::endl;
+        // trkKLMomVecLAB[0].Print();
+        // trkKLMomVecLAB[1].Print();
+
+        trkKL4VecLAB[0].SetPxPyPzE(trkKLMomVecLAB[0][0],
+                                   trkKLMomVecLAB[0][1],
+                                   trkKLMomVecLAB[0][2],
+                                   baseKin.trkKL[0][3]);
+
+        trkKL4VecLAB[1].SetPxPyPzE(trkKLMomVecLAB[1][0],
+                                   trkKLMomVecLAB[1][1],
+                                   trkKLMomVecLAB[1][2],
+                                   baseKin.trkKL[1][3]);
+
+        Obj.lorentz_transf(boost_KaonTwoBody, trkKL4VecLAB[0], trkKL4VecKaonCM[0]);
+        Obj.lorentz_transf(boost_KaonTwoBody, trkKL4VecLAB[1], trkKL4VecKaonCM[1]);
+
+        trkKLMomVecKaonCM[0].SetXYZ(trkKL4VecKaonCM[0][0],
+                                    trkKL4VecKaonCM[0][1],
+                                    trkKL4VecKaonCM[0][2]);
+        trkKLMomVecKaonCM[1].SetXYZ(trkKL4VecKaonCM[1][0],
+                                    trkKL4VecKaonCM[1][1],
+                                    trkKL4VecKaonCM[1][2]);
+
+        Double_t  
+                  PiMomMagKaonCM1 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5],  mPiCh, mPiCh),
+                  PiMomMagKaonCM2 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], mPiCh, mPiCh);
+
+        Double_t angle1 = trkKLMomVecKaonCM[0].Phi(),
+                 angle2 = trkKLMomVecKaonCM[1].Phi(),
+                 theta1 = trkKLMomVecKaonCM[0].Theta(),
+                 theta2 = trkKLMomVecKaonCM[1].Theta();
+
+        gamma = (M_PI_2 - 0.5 * abs(angle1) - 0.5 * abs(angle2));
+        gamma_theta = (M_PI_2 - 0.5 * theta1 - 0.5 * theta2);
+
+        if (angle1 < 0.0)
+          PiMomKaonCM[0].SetXYZ(  PiMomMagKaonCM1 * sin(theta1 + gamma_theta) * cos(angle1 - gamma),
+                                  PiMomMagKaonCM1 * sin(theta1 + gamma_theta) * sin(angle1 - gamma),
+                                  PiMomMagKaonCM1 * cos(theta1 + gamma_theta) );
+        else
+          PiMomKaonCM[0].SetXYZ(  PiMomMagKaonCM1 * sin(theta1 + gamma_theta) * cos(angle1 + gamma),
+                                  PiMomMagKaonCM1 * sin(theta1 + gamma_theta) * sin(angle1 + gamma),
+                                  PiMomMagKaonCM1 * cos(theta1 + gamma_theta) );
+        if (angle2 < 0.0)
+          PiMomKaonCM[1].SetXYZ(  PiMomMagKaonCM1 * sin(theta2 + gamma_theta) * cos(angle2 - gamma),
+                                  PiMomMagKaonCM1 * sin(theta2 + gamma_theta) * sin(angle2 - gamma),
+                                  PiMomMagKaonCM1 * cos(theta2 + gamma_theta) );
+        else
+          PiMomKaonCM[1].SetXYZ(  PiMomMagKaonCM1 * sin(theta2 + gamma_theta) * cos(angle2 + gamma),
+                                  PiMomMagKaonCM1 * sin(theta2 + gamma_theta) * sin(angle2 + gamma),
+                                  PiMomMagKaonCM1 * cos(theta2 + gamma_theta) );
+
+        PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomKaonCM[0][0], 2) + pow(PiMomKaonCM[0][1], 2) + pow(PiMomKaonCM[0][2], 2) + pow(mPiCh, 2)));
+        PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomKaonCM[1][0], 2) + pow(PiMomKaonCM[1][1], 2) + pow(PiMomKaonCM[1][2], 2) + pow(mPiCh, 2)));
+
+        boost_KaonTwoBody = -boost_KaonTwoBody; // Invert the boost direction for the pions
+        Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
+        Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[1], PiKaon4VecLAB[1]);
+
+        PiMomKaonLAB[0].SetXYZ(PiKaon4VecLAB[0][0],
+                               PiKaon4VecLAB[0][1],
+                               PiKaon4VecLAB[0][2]);
+        PiMomKaonLAB[1].SetXYZ(PiKaon4VecLAB[1][0],
+                               PiKaon4VecLAB[1][1],
+                               PiKaon4VecLAB[1][2]);
+
+        // PiMomKaonLAB[0].Rotate(-rotAngle, cross);
+        // PiMomKaonLAB[1].Rotate(-rotAngle, cross);
+
+        for (Int_t j = 0; j < 3; j++)
+        {
+          // Components of the track momenta in the LAB frame
+          trkKLMomVecLAB[0][j] = baseKin.trkKL[0][j];
+          trkKLMomVecLAB[1][j] = baseKin.trkKL[1][j];
+        }
+
+        PiKaon4VecLAB[0].SetPxPyPzE(PiMomKaonLAB[0][0],
+                                    PiMomKaonLAB[0][1],
+                                    PiMomKaonLAB[0][2],
+                                    sqrt(PiMomKaonLAB[0].Mag2() + pow(mPiCh, 2)));
+        PiKaon4VecLAB[1].SetPxPyPzE(PiMomKaonLAB[1][0],
+                                    PiMomKaonLAB[1][1],
+                                    PiMomKaonLAB[1][2],
+                                    sqrt(PiMomKaonLAB[1].Mag2() + pow(mPiCh, 2)));
+
+        trkKL4VecLAB[0].SetPxPyPzE(trkKLMomVecLAB[0][0],
+                                   trkKLMomVecLAB[0][1],
+                                   trkKLMomVecLAB[0][2],
+                                   baseKin.trkKL[0][3]);
+        trkKL4VecLAB[1].SetPxPyPzE(trkKLMomVecLAB[1][0],
+                                   trkKLMomVecLAB[1][1],
+                                   trkKLMomVecLAB[1][2],
+                                   baseKin.trkKL[1][3]);
+
+        for (Int_t k = 0; k < 4; k++)
+        {
+
+          trkKLTwoBody1[k] = PiKaon4VecLAB[0][k];
+          trkKLTwoBody2[k] = PiKaon4VecLAB[1][k];
+
+          if (mcflag_int == 0)
+          {
+            histMomPiTwoBody[0][k]->Fill(trkKLTwoBody1[k]);
+            histMomPiTwoBody[1][k]->Fill(trkKLTwoBody2[k]);
+            histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k]);
+            histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k]);
+
+            histKLTwoBody[k]->Fill(baseKin.KchrecKLTwoBody[k]);
+            histKL[k]->Fill(baseKin.KchrecKL[k]);
+          }
+        }
+      }
+
+      // Int_t zmienne
+      std::map<std::string, Int_t> intVars = {
+          {"nrun", 0},
+          {"nev", baseKin.nevent},
+          {"mcflag", mcflag_int},
+          {"mctruth", mctruth_int},
+          {"errflag", baseKin.errFlag},
+          {"errflagks", baseKin.errFlagKS},
+          {"errflagkl", baseKin.errFlagKL},
+          {"errflagclosest", baseKin.errFlagClosest}};
+
+      std::map<std::string, Float_t> floatVars = {
+          {"gamma", gamma}};
+
+      // Tablice
+      std::map<std::string, std::vector<Int_t>> intArrays = {
+          {"vtaken", baseKin.vtaken},
+          {"vtakenKS", baseKin.vtakenKS},
+          {"vtakenKL", baseKin.vtakenKL},
+          {"vtakenClosest", baseKin.vtakenClosest}};
+
+      std::map<std::string, std::vector<Float_t>> floatArrays = {
+          {"Kchrec", baseKin.Kchrecnew},
+          {"KchrecKS", baseKin.KchrecKS},
+          {"KchrecKL", baseKin.KchrecKL},
+          {"KchrecClosest", baseKin.KchrecClosest},
+          {"KchrecKLTwoBody", baseKin.KchrecKLTwoBody},
+          {"trk1", baseKin.trknew[0]},
+          {"trk2", baseKin.trknew[1]},
+          {"trk1KS", baseKin.trkKS[0]},
+          {"trk2KS", baseKin.trkKS[1]},
+          {"trk1KL", baseKin.trkKL[0]},
+          {"trk2KL", baseKin.trkKL[1]},
+          {"trk1Closest", baseKin.trkClosest[0]},
+          {"trk2Closest", baseKin.trkClosest[1]},
+          {"trk1TwoBody", trkKLTwoBody1},
+          {"trk2TwoBody", trkKLTwoBody2},
+      };
+      writer.Fill(intVars, floatVars, intArrays, floatArrays);
+    }
 
     ++show_progress; // Progress of the loading bar
   }
 
   TCanvas *canvas = new TCanvas("canvas", "Canvas", 800, 600);
-
-  histDifferences->SetTitle("Minimum Difference");
-  histDifferences->GetXaxis()->SetTitle("Difference");
-  histDifferences->GetYaxis()->SetTitle("Counts");
-  histDifferences->Draw();
-
-  canvas->Print("minimum_difference.png");
 
   std::string xTitle[4] = {"p_{x} [MeV/c]", "p_{y} [MeV/c]", "p_{z} [MeV/c]", "E [MeV]"};
 

@@ -77,46 +77,46 @@ KLSPM00_OBJECTS = \
 # External object files for target KLSPM00
 KLSPM00_EXTERNAL_OBJECTS =
 
-KLSPM00: CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o
-KLSPM00: CMakeFiles/KLSPM00.dir/build.make
-KLSPM00: Subanalysis/CovarianceMatrix/libCovMatrix.so
-KLSPM00: Subanalysis/Neutrec/libNeutRec.so
-KLSPM00: Subanalysis/KchRec/libKchRec.so
-KLSPM00: Subanalysis/GeneratedVars/libGenVars.so
-KLSPM00: Subanalysis/CPFit/libCPFit.so
-KLSPM00: Subanalysis/OmegaRec/libOmegaRec.so
-KLSPM00: /usr/lib/x86_64-linux-gnu/libboost_system.so
-KLSPM00: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so
-KLSPM00: /usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so
-KLSPM00: /usr/lib/x86_64-linux-gnu/libcurl.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libCore.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libImt.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libRIO.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libNet.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libHist.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libGraf.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libGraf3d.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libGpad.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTDataFrame.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTree.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTreePlayer.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libRint.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libPostscript.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMatrix.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libPhysics.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMathCore.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libThread.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMultiProc.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTVecOps.so
-KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTMVA.so
-KLSPM00: LibRecBuild/libLibRec.so
-KLSPM00: FortBuild/libLibFort.so
-KLSPM00: CMakeFiles/KLSPM00.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable KLSPM00"
+bin/KLSPM00: CMakeFiles/KLSPM00.dir/app/CPVAnalysis.cpp.o
+bin/KLSPM00: CMakeFiles/KLSPM00.dir/build.make
+bin/KLSPM00: Subanalysis/CovarianceMatrix/libCovMatrix.so
+bin/KLSPM00: Subanalysis/Neutrec/libNeutRec.so
+bin/KLSPM00: Subanalysis/KchRec/libKchRec.so
+bin/KLSPM00: Subanalysis/GeneratedVars/libGenVars.so
+bin/KLSPM00: Subanalysis/CPFit/libCPFit.so
+bin/KLSPM00: Subanalysis/OmegaRec/libOmegaRec.so
+bin/KLSPM00: /usr/lib/x86_64-linux-gnu/libboost_system.so
+bin/KLSPM00: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so
+bin/KLSPM00: /usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so
+bin/KLSPM00: /usr/lib/x86_64-linux-gnu/libcurl.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libCore.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libImt.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libRIO.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libNet.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libHist.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libGraf.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libGraf3d.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libGpad.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTDataFrame.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTree.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTreePlayer.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libRint.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libPostscript.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMatrix.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libPhysics.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMathCore.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libThread.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMultiProc.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTVecOps.so
+bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTMVA.so
+bin/KLSPM00: LibRecBuild/libLibRec.so
+bin/KLSPM00: FortBuild/libLibFort.so
+bin/KLSPM00: CMakeFiles/KLSPM00.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable bin/KLSPM00"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/KLSPM00.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-CMakeFiles/KLSPM00.dir/build: KLSPM00
+CMakeFiles/KLSPM00.dir/build: bin/KLSPM00
 
 .PHONY : CMakeFiles/KLSPM00.dir/build
 

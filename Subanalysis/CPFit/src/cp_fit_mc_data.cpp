@@ -464,6 +464,13 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 					CovMatrixCalcObj.SmearMomentum();
 					CovMatrixCalcObj.GetSmearedMomentum(momVecSmeared);
 
+					// momVecSmeared[0] = momVecMC[0];
+					// momVecSmeared[1] = momVecMC[1];
+					// momVecSmeared[2] = momVecMC[2];
+					// momVecSmeared[3] = momVecMC[3];
+					// momVecSmeared[4] = momVecMC[4];
+					// momVecSmeared[5] = momVecMC[5];
+
 					KchrecSmeared[0] = momVecSmeared[0] + momVecSmeared[3];
 					KchrecSmeared[1] = momVecSmeared[1] + momVecSmeared[4];
 					KchrecSmeared[2] = momVecSmeared[2] + momVecSmeared[5];

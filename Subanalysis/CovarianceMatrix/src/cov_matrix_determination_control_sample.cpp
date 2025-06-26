@@ -31,9 +31,9 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 
 	chainDoublePiPi = new TChain("h1");
 
-	chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-05-17/*.root");
+	chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-06-26/*.root");
 
-	Float_t minDiff;
+	Float_t gamma;
 	Char_t vtxTwoTracks;
 	Int_t mcflag_int, errflagks, errflagkl;
 
@@ -54,7 +54,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	chainDoublePiPi->SetBranchAddress("errflagks", &errflagks);
 	chainDoublePiPi->SetBranchAddress("errflagkl", &errflagkl);
 
-	chainDoublePiPi->SetBranchAddress("minDiff", &minDiff);
+	chainDoublePiPi->SetBranchAddress("gamma", &gamma);
 
 	chainDoublePiPi->SetBranchAddress("trk1KL", &trk1KL);
 	chainDoublePiPi->SetBranchAddress("trk2KL", &trk2KL);
@@ -100,7 +100,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 			};
 
 	TCanvas *canvaDiff = new TCanvas("canvaDiff", "canvaDiff", 790, 790);
-	TH1 *histDiff = new TH1D("histDiff", "", 100, 0, 2.0);
+	TH1 *histDiff = new TH1D("histDiff", "", 100, -2.0, 2.0);
 
 	std::vector<TCanvas *> kaonCanva;
 	TString kaonCanva_name = "";
@@ -137,9 +137,9 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	{
 		chainDoublePiPi->GetEntry(i);
 
-		histDiff->Fill(minDiff);
+		histDiff->Fill(gamma);
 
-		if (minDiff < 0.5)
+		if (abs(gamma) < 0.1 && abs(KchrecKL->at(5) - mK0) < 2.0)
 		{ 
 			KaonHist[0][0]->Fill(KchrecKL->at(0));
 			KaonHist[0][1]->Fill(KchrecKL->at(1));
@@ -147,16 +147,16 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 			KaonHist[0][3]->Fill(KchrecKL->at(3));
 			KaonHist[0][4]->Fill(KchrecKL->at(5));
 
-			KaonHist[1][0]->Fill(KchrecKLTwoBody->at(0));
-			KaonHist[1][1]->Fill(KchrecKLTwoBody->at(1));
-			KaonHist[1][2]->Fill(KchrecKLTwoBody->at(2));
-			KaonHist[1][3]->Fill(KchrecKLTwoBody->at(3));
-			KaonHist[1][4]->Fill(KchrecKLTwoBody->at(5));
+			// KaonHist[1][0]->Fill(KchrecKLTwoBody->at(0));
+			// KaonHist[1][1]->Fill(KchrecKLTwoBody->at(1));
+			// KaonHist[1][2]->Fill(KchrecKLTwoBody->at(2));
+			// KaonHist[1][3]->Fill(KchrecKLTwoBody->at(3));
+			// KaonHist[1][4]->Fill(KchrecKLTwoBody->at(5));
 
 			events[0]++;
 		}
 
-		if (minDiff < 0.5 && abs(KchrecKL->at(5) - mK0) < 2.0)
+		if (abs(gamma) < 0.1 && abs(KchrecKL->at(5) - mK0) < 2.0)
 		{
 			events[1]++;
 			for (Int_t j = 0; j < 4; j++)

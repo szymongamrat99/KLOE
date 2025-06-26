@@ -8,5 +8,15 @@ Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determinati
  /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/inc/covmatrix.hpp
  /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination.cpp
 Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/src/cov_matrix_determination_control_sample.cpp.o
+ /internal/big_one/4/users/gamrat/scripts/Include/Codes/inc/CustomGraph.h
+ /internal/big_one/4/users/gamrat/scripts/Include/Codes/inc/ErrorLogs.h
+ /internal/big_one/4/users/gamrat/scripts/Include/Codes/inc/Logs.h
+ /internal/big_one/4/users/gamrat/scripts/Include/Codes/inc/MainMenu.h
+ /internal/big_one/4/users/gamrat/scripts/Include/Codes/inc/MeasQualityGraph.h
+ /internal/big_one/4/users/gamrat/scripts/Include/Codes/inc/MomentumSmearing.h
+ /internal/big_one/4/users/gamrat/scripts/Include/Codes/inc/interference.h
+ /internal/big_one/4/users/gamrat/scripts/Include/Codes/inc/kloe_class.h
+ /internal/big_one/4/users/gamrat/scripts/Include/Codes/inc/neutral_mom.h
+ /internal/big_one/4/users/gamrat/scripts/Include/Codes/inc/reconstructor.h
  /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/inc/covmatrix.hpp
  /internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/CovarianceMatrix/src/cov_matrix_determination_control_sample.cpp
