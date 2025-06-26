@@ -6,5 +6,5 @@ CXX_FLAGS = -g   -std=c++14
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/internal/big_one/4/users/gamrat/scripts/Scripts/../../Include/Codes/inc -I/internal/big_one/4/users/gamrat/root_dirs/install_root/include -I/usr/include/x86_64-linux-gnu -I/internal/big_one/4/users/gamrat/scripts/Include/Codes/inc 
+CXX_INCLUDES = -I/internal/big_one/4/users/gamrat/scripts/Scripts/../../Include/Codes/inc -I/internal/big_one/4/users/gamrat/root_dirs/install_root/include -I/usr/include/x86_64-linux-gnu -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/Codes/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/Codes/../FortranAnalysis/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/Codes/.. 
 

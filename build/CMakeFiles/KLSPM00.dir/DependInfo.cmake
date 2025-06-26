@@ -12,8 +12,9 @@ set(CMAKE_CXX_COMPILER_ID "GNU")
 set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/usr/include/x86_64-linux-gnu"
   "../inc"
-  "../../Include/Codes/inc"
-  "../../Include/FortranAnalysis/inc"
+  "../Include/Codes/inc"
+  "../Include/FortranAnalysis/inc"
+  "../Include"
   "../Subanalysis/CovarianceMatrix/inc"
   "../Subanalysis/Neutrec/inc"
   "../Subanalysis/KchRec/inc"
@@ -21,8 +22,9 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../Subanalysis/GeneratedVars/../../../Include/FortranAnalysis/inc"
   "../Subanalysis/CPFit/inc"
   "../Subanalysis/OmegaRec/inc"
-  "/internal/big_one/4/users/gamrat/scripts/Include/Codes/inc"
-  "/internal/big_one/4/users/gamrat/scripts/Include/FortranAnalysis/inc"
+  "../Include/Codes/../FortranAnalysis/inc"
+  "../Include/Codes/.."
+  "../Include/FortranAnalysis/.."
   )
 
 # Targets to which this target links.
@@ -33,8 +35,8 @@ set(CMAKE_TARGET_LINKED_INFO_FILES
   "/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/DependInfo.cmake"
   "/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/CPFit/CMakeFiles/CPFit.dir/DependInfo.cmake"
   "/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/DependInfo.cmake"
-  "/internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild/CMakeFiles/LibRec.dir/DependInfo.cmake"
-  "/internal/big_one/4/users/gamrat/scripts/Scripts/build/FortBuild/CMakeFiles/LibFort.dir/DependInfo.cmake"
+  "/internal/big_one/4/users/gamrat/scripts/Scripts/build/Include/Codes/CMakeFiles/LibRec.dir/DependInfo.cmake"
+  "/internal/big_one/4/users/gamrat/scripts/Scripts/build/Include/FortranAnalysis/CMakeFiles/LibFort.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

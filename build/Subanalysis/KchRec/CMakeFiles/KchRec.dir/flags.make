@@ -6,5 +6,5 @@ CXX_FLAGS = -g -fPIC   -std=c++14
 
 CXX_DEFINES = -DKchRec_EXPORTS
 
-CXX_INCLUDES = -I/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/inc -I/internal/big_one/4/users/gamrat/scripts/Include/Codes/inc 
+CXX_INCLUDES = -I/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/KchRec/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/Codes/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/Codes/../FortranAnalysis/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/Codes/.. 
 

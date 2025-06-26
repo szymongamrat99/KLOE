@@ -12,9 +12,9 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/internal/big_one/4/users/gamrat/root_dirs/install_root/cmake/ROOTConfig-version.cmake"
   "/internal/big_one/4/users/gamrat/root_dirs/install_root/cmake/ROOTConfig.cmake"
   "/internal/big_one/4/users/gamrat/root_dirs/install_root/cmake/RootMacros.cmake"
-  "/internal/big_one/4/users/gamrat/scripts/Include/Codes/CMakeLists.txt"
-  "/internal/big_one/4/users/gamrat/scripts/Include/FortranAnalysis/CMakeLists.txt"
   "../CMakeLists.txt"
+  "../Include/Codes/CMakeLists.txt"
+  "../Include/FortranAnalysis/CMakeLists.txt"
   "../Subanalysis/CPFit/CMakeLists.txt"
   "../Subanalysis/CovarianceMatrix/CMakeLists.txt"
   "../Subanalysis/GeneratedVars/CMakeLists.txt"
@@ -75,8 +75,8 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "Subanalysis/KchRec/CMakeFiles/CMakeDirectoryInformation.cmake"
   "Subanalysis/OmegaRec/CMakeFiles/CMakeDirectoryInformation.cmake"
   "Subanalysis/Neutrec/CMakeFiles/CMakeDirectoryInformation.cmake"
-  "LibRecBuild/CMakeFiles/CMakeDirectoryInformation.cmake"
-  "FortBuild/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "Include/Codes/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "Include/FortranAnalysis/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
@@ -89,6 +89,6 @@ set(CMAKE_DEPEND_INFO_FILES
   "Subanalysis/KchRec/CMakeFiles/KchRec.dir/DependInfo.cmake"
   "Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/DependInfo.cmake"
   "Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/DependInfo.cmake"
-  "LibRecBuild/CMakeFiles/LibRec.dir/DependInfo.cmake"
-  "FortBuild/CMakeFiles/LibFort.dir/DependInfo.cmake"
+  "Include/Codes/CMakeFiles/LibRec.dir/DependInfo.cmake"
+  "Include/FortranAnalysis/CMakeFiles/LibFort.dir/DependInfo.cmake"
   )

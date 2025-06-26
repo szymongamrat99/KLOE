@@ -13,12 +13,14 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "../../../Include/Codes/inc"
   "/internal/big_one/4/users/gamrat/root_dirs/install_root/include"
   "/usr/include/x86_64-linux-gnu"
-  "/internal/big_one/4/users/gamrat/scripts/Include/Codes/inc"
+  "../Include/Codes/inc"
+  "../Include/Codes/../FortranAnalysis/inc"
+  "../Include/Codes/.."
   )
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild/CMakeFiles/LibRec.dir/DependInfo.cmake"
+  "/internal/big_one/4/users/gamrat/scripts/Scripts/build/Include/Codes/CMakeFiles/LibRec.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

@@ -46,8 +46,8 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/KchRec/cmake_install.cmake")
   include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/OmegaRec/cmake_install.cmake")
   include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Subanalysis/Neutrec/cmake_install.cmake")
-  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/LibRecBuild/cmake_install.cmake")
-  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/FortBuild/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Include/Codes/cmake_install.cmake")
+  include("/internal/big_one/4/users/gamrat/scripts/Scripts/build/Include/FortranAnalysis/cmake_install.cmake")
 
 endif()
 

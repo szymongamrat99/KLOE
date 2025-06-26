@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_INCLUDE_PATH $ENV{CMAKE_INCLUDE_PATH})
+
 # Set-up required packages
 find_package(ROOT REQUIRED COMPONENTS Tree Physics MathCore Matrix TMVA Hist Graf)
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework)
@@ -28,8 +30,8 @@ add_subdirectory(Subanalysis/GeneratedVars)
 add_subdirectory(Subanalysis/KchRec)
 add_subdirectory(Subanalysis/OmegaRec)
 add_subdirectory(Subanalysis/Neutrec)
-add_subdirectory(../Include/Codes ${CMAKE_BINARY_DIR}/LibRecBuild)
-add_subdirectory(../Include/FortranAnalysis ${CMAKE_BINARY_DIR}/FortBuild)
+add_subdirectory(Include/Codes)
+add_subdirectory(Include/FortranAnalysis)
 # add_subdirectory(Subanalysis/Pipi)
 # add_subdirectory(Subanalysis/Plots)
 # add_subdirectory(Subanalysis/RegenerationAnalysis)
@@ -49,8 +51,9 @@ target_include_directories(KLSPM00 PRIVATE
   ${Boost_INCLUDE_DIRS}
   ${CURL_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/inc
-  ${CMAKE_CURRENT_SOURCE_DIR}/../Include/Codes/inc
-  ${CMAKE_CURRENT_SOURCE_DIR}/../Include/FortranAnalysis/inc
+  ${CMAKE_CURRENT_SOURCE_DIR}/Include/Codes/inc
+  ${CMAKE_CURRENT_SOURCE_DIR}/Include/FortranAnalysis/inc
+  ${CMAKE_CURRENT_SOURCE_DIR}/Include
   )
 
 link_directories(${CERNLIB_DIR})

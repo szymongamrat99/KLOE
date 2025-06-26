@@ -109,8 +109,8 @@ bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libThre
 bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libMultiProc.so
 bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libROOTVecOps.so
 bin/KLSPM00: /internal/big_one/4/users/gamrat/root_dirs/install_root/lib/libTMVA.so
-bin/KLSPM00: LibRecBuild/libLibRec.so
-bin/KLSPM00: FortBuild/libLibFort.so
+bin/KLSPM00: Include/Codes/libLibRec.so
+bin/KLSPM00: Include/FortranAnalysis/libLibFort.so
 bin/KLSPM00: CMakeFiles/KLSPM00.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable bin/KLSPM00"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/KLSPM00.dir/link.txt --verbose=$(VERBOSE)

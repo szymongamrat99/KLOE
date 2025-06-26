@@ -103,7 +103,7 @@ tests/LibRecTest: /usr/lib/x86_64-linux-gnu/libboost_system.so
 tests/LibRecTest: /usr/lib/x86_64-linux-gnu/libboost_filesystem.so
 tests/LibRecTest: /usr/lib/x86_64-linux-gnu/libboost_unit_test_framework.so
 tests/LibRecTest: /usr/lib/x86_64-linux-gnu/libcurl.so
-tests/LibRecTest: LibRecBuild/libLibRec.so
+tests/LibRecTest: Include/Codes/libLibRec.so
 tests/LibRecTest: tests/CMakeFiles/LibRecTest.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/internal/big_one/4/users/gamrat/scripts/Scripts/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable LibRecTest"
 	cd /internal/big_one/4/users/gamrat/scripts/Scripts/build/tests && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/LibRecTest.dir/link.txt --verbose=$(VERBOSE)

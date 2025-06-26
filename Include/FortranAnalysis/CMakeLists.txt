@@ -7,6 +7,7 @@ add_library(LibFort SHARED
 
 target_include_directories(LibFort PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/..
 )
 
 target_link_libraries(LibFort PUBLIC 

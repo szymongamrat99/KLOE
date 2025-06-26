@@ -235,7 +235,7 @@ LibRec: cmake_check_build_system
 
 # fast build rule for target.
 LibRec/fast:
-	$(MAKE) -f LibRecBuild/CMakeFiles/LibRec.dir/build.make LibRecBuild/CMakeFiles/LibRec.dir/build
+	$(MAKE) -f Include/Codes/CMakeFiles/LibRec.dir/build.make Include/Codes/CMakeFiles/LibRec.dir/build
 .PHONY : LibRec/fast
 
 #=============================================================================
@@ -248,7 +248,7 @@ LibFort: cmake_check_build_system
 
 # fast build rule for target.
 LibFort/fast:
-	$(MAKE) -f FortBuild/CMakeFiles/LibFort.dir/build.make FortBuild/CMakeFiles/LibFort.dir/build
+	$(MAKE) -f Include/FortranAnalysis/CMakeFiles/LibFort.dir/build.make Include/FortranAnalysis/CMakeFiles/LibFort.dir/build
 .PHONY : LibFort/fast
 
 app/CPVAnalysis.o: app/CPVAnalysis.cpp.o

@@ -6,5 +6,5 @@ CXX_FLAGS = -g -fPIC   -std=c++14
 
 CXX_DEFINES = -DGenVars_EXPORTS
 
-CXX_INCLUDES = -I/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/../../../Include/FortranAnalysis/inc -I/internal/big_one/4/users/gamrat/scripts/Include/Codes/inc -I/internal/big_one/4/users/gamrat/scripts/Include/FortranAnalysis/inc 
+CXX_INCLUDES = -I/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/../../../Include/FortranAnalysis/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/Codes/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/Codes/../FortranAnalysis/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/Codes/.. -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/FortranAnalysis/inc -I/internal/big_one/4/users/gamrat/scripts/Scripts/Include/FortranAnalysis/.. 
 
