@@ -68,10 +68,10 @@ CMAKE_BINARY_DIR = /internal/big_one/4/users/gamrat/scripts/Scripts/build
 # Target rules for target CMakeFiles/KLSPM00.dir
 
 # All Build rule for target.
-CMakeFiles/KLSPM00.dir/all: Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/all
 CMakeFiles/KLSPM00.dir/all: Subanalysis/CPFit/CMakeFiles/CPFit.dir/all
 CMakeFiles/KLSPM00.dir/all: Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/all
 CMakeFiles/KLSPM00.dir/all: Subanalysis/KchRec/CMakeFiles/KchRec.dir/all
+CMakeFiles/KLSPM00.dir/all: Subanalysis/CovarianceMatrix/CMakeFiles/CovMatrix.dir/all
 CMakeFiles/KLSPM00.dir/all: Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/all
 CMakeFiles/KLSPM00.dir/all: Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/all
 CMakeFiles/KLSPM00.dir/all: Include/Codes/CMakeFiles/LibRec.dir/all
