@@ -1,4 +1,4 @@
-set(CMAKE_CXX_COMPILER "/usr/bin/g++")
+set(CMAKE_CXX_COMPILER "/usr/bin/c++")
 set(CMAKE_CXX_COMPILER_ARG1 "")
 set(CMAKE_CXX_COMPILER_ID "GNU")
 set(CMAKE_CXX_COMPILER_VERSION "8.3.0")
@@ -72,5 +72,5 @@ endif()
 
 
 set(CMAKE_CXX_IMPLICIT_LINK_LIBRARIES "stdc++;m;gcc_s;gcc;c;gcc_s;gcc")
-set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "/internal/big_one/4/cernlib/new/lib;/usr/lib/gcc/x86_64-linux-gnu/8;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib;/internal/big_one/4/users/gamrat/external_libs")
+set(CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES "/data/4/cernlib/new/lib;/usr/lib/gcc/x86_64-linux-gnu/8;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib;/data/ssd/gamrat/KLOE/Include;/data/4/users/gamrat/external_libs;/data/ssd/gamrat/KLOE/Include/Codes/inc")
 set(CMAKE_CXX_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")

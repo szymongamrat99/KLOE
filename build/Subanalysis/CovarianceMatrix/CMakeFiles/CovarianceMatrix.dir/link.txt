@@ -1,2 +1,0 @@
-/usr/bin/ar qc libCovarianceMatrix.a  CMakeFiles/CovarianceMatrix.dir/covmatrix_main.cpp.o
-/usr/bin/ranlib libCovarianceMatrix.a
