@@ -73,3 +73,37 @@ target_link_libraries(KLSPM00 PRIVATE
 # Optional output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+# Sprawdź, czy Doxygen jest dostępny
+# find_package(Doxygen)
+
+# if (DOXYGEN_FOUND)
+#     message(STATUS "Doxygen found, configuring documentation generation.")
+
+#     # Ustaw katalog wyjściowy dla dokumentacji Doxygen
+#     set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/docs)
+#     set(DOXYGEN_RECURSIVE YES)
+#     set(DOXYGEN_EXTRACT_ALL YES)
+#     set(DOXYGEN_EXTRACT_PRIVATE YES)
+#     set(DOXYGEN_EXTRACT_PACKAGE YES)
+#     set(DOXYGEN_EXTRACT_STATIC YES)
+#     set(DOXYGEN_GENERATE_TREEVIEW YES)
+#     set(DOXYGEN_GENERATE_LATEX NO)
+#     set(DOXYGEN_EXCLUDE "${CMAKE_SOURCE_DIR}/tests;${CMAKE_SOURCE_DIR}/build;${CMAKE_SOURCE_DIR}/docs;${CMAKE_SOURCE_DIR}/logs;*png;*.log;${CMAKE_SOURCE_DIR}/.vscode")
+
+#     # Skonfiguruj Doxyfile
+#     # Doxygen_generate_doc(target_name source_files [options])
+#     # Możesz przekazać parametry Doxygena bezpośrednio, np.
+#     doxygen_add_docs(
+#     KLSPM00_docs
+#     ${PROJECT_SOURCE_DIR}
+#     COMMENT "Generate documentation for KLOE project"
+#     )
+
+#     # Jeśli używasz Doxygen_add_docs, to już tworzy cel.
+#     # Wystarczy dodać go do listy "ALL" żeby zawsze budował dokumentacje
+#     add_custom_target(final_doc ALL DEPENDS KLSPM00_docs)
+
+# else()
+#     message(WARNING "Doxygen not found. Documentation will not be generated.")
+# endif()

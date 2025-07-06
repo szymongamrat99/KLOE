@@ -1,7 +1,6 @@
 #ifndef CHARGED_MOM_H
 #define CHARGED_MOM_H
 
-#include <const.h>
 #include <TMath.h>
 
 #include <fort_common.h>

@@ -1,0 +1,25 @@
+var classKLOE_1_1ChargedVtxRec =
+[
+    [ "ChargedVtxRec", "classKLOE_1_1ChargedVtxRec.html#a41a8ce7cab78ccf3e90023c6a4b604dc", null ],
+    [ "ChargedVtxRec", "classKLOE_1_1ChargedVtxRec.html#a2ff18a788b58fe935a2b630005d7c08a", null ],
+    [ "charged_mom", "classKLOE_1_1ChargedVtxRec.html#a56f946f6c8c250a7673319b41d7a005c", null ],
+    [ "charged_mom", "classKLOE_1_1ChargedVtxRec.html#a95474b01b208e64f7010144411d64c0e", null ],
+    [ "findKchRec", "classKLOE_1_1ChargedVtxRec.html#a23530d491bff640e36900d95ebcdee3a", null ],
+    [ "findKClosestRec", "classKLOE_1_1ChargedVtxRec.html#a4dc5636d1ec540987de4cea4ae3b130a", null ],
+    [ "findKSLRec", "classKLOE_1_1ChargedVtxRec.html#a14ea278b94efba653a7258a56f51f42d", null ],
+    [ "IPBoostCorr", "classKLOE_1_1ChargedVtxRec.html#a0164aedd1be8ecb452e814ff9b173e1c", null ],
+    [ "KaonMomFromBoost", "classKLOE_1_1ChargedVtxRec.html#a37687b66cd891f69deee0dcfcd0eb532", null ],
+    [ "_CotV", "classKLOE_1_1ChargedVtxRec.html#ae2ae18245a036f59d6c93cefc256a7ff", null ],
+    [ "_CurV", "classKLOE_1_1ChargedVtxRec.html#a1087fecaf305778811d927ea835c8b00", null ],
+    [ "_dist", "classKLOE_1_1ChargedVtxRec.html#ab096cb25aa4660bd69ac15eb0f96eb1c", null ],
+    [ "_IP", "classKLOE_1_1ChargedVtxRec.html#a7e3bbb5499ea38210a390c051ab3511f", null ],
+    [ "_iv", "classKLOE_1_1ChargedVtxRec.html#ad2f712d769af2cb28d09199e4bf8b261", null ],
+    [ "_mode", "classKLOE_1_1ChargedVtxRec.html#a230b6e972d46c6888dcb8c5fbf53a277", null ],
+    [ "_ntv", "classKLOE_1_1ChargedVtxRec.html#a21faa07ca76d8f32d4818255ebd4ca36", null ],
+    [ "_nv", "classKLOE_1_1ChargedVtxRec.html#ae0ac8e2d66aeeaf1a283948b103d59d7", null ],
+    [ "_PhiV", "classKLOE_1_1ChargedVtxRec.html#a51d2505250e45d11e0c587b601e60bd7", null ],
+    [ "_xv", "classKLOE_1_1ChargedVtxRec.html#a8c956b023e79aa576c90a86fe99ab69f", null ],
+    [ "_yv", "classKLOE_1_1ChargedVtxRec.html#aaa5c91665f97658b9fed6b6c88bb4777", null ],
+    [ "_zv", "classKLOE_1_1ChargedVtxRec.html#abda594e49cdcc25b8ea125772a55d877", null ],
+    [ "def", "classKLOE_1_1ChargedVtxRec.html#a91d06335a32b64527b798d18818376b5", null ]
+];

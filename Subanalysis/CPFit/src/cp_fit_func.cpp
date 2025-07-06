@@ -6,10 +6,13 @@
 #include <Math/Functor.h>
 #include <TMath.h>
 
+
 #include "../inc/cpfit.hpp"
 
 int cp_fit_func(KLOE::interference &event, std::vector<std::vector<Double_t>> &relativeErr, std::vector<std::vector<Double_t>> &real, std::vector<std::vector<Double_t>> &imaginary, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+	
+
 	const Double_t
 			x_min = properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
 			x_max = properties["variables"]["CPFit"]["histoResults"]["rangeX"][1],

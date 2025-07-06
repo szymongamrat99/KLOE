@@ -347,7 +347,7 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 
 		legend->Draw();
 
-		imgNames[alias[index]] = plots_dir + img_dir + alias[index] + ext_img;
+		imgNames[alias[index]] = SystemPath::plots_dir + SystemPath::img_dir + alias[index] + ext_img;
 
 		canvas[index]->Print(imgNames[alias[index]].c_str());
 	}
@@ -389,7 +389,7 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 
 		hist2D[i]->Draw("COLZ");
 
-		std::string hist2DName = (std::string)plots_dir + (std::string)img_dir + "CombinedAnglesZ" + (std::string)hist2D_name + (std::string)ext_img;
+		std::string hist2DName = (std::string)SystemPath::plots_dir + (std::string)SystemPath::img_dir + "CombinedAnglesZ" + (std::string)hist2D_name + (std::string)ext_img;
 
 		canva2D[i]->Print(hist2DName.c_str());
 

@@ -29,7 +29,7 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
         datestamp = Obj.getCurrentDate(),
         name = "";
 
-    name = gen_vars_dir + root_files_dir + mctruth_filename + datestamp + "_" + int(data_type) + ext_root;
+    name = SystemPath::gen_vars_dir + SystemPath::root_files_dir + mctruth_filename + datestamp + "_" + int(data_type) + ext_root;
     // -----------------------------------------------------------------------------------------
 
     file = new TFile(name.c_str(), "recreate");

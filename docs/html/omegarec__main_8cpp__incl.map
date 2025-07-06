@@ -1,0 +1,14 @@
+<map id="Subanalysis/OmegaRec/app/omegarec_main.cpp" name="Subanalysis/OmegaRec/app/omegarec_main.cpp">
+<area shape="rect" id="node4" href="$omegarec_8hpp.html" title="../inc/omegarec.hpp" alt="" coords="1066,95,1204,121"/>
+<area shape="rect" id="node11" href="$const_8h.html" title="const.h" alt="" coords="777,244,842,271"/>
+<area shape="rect" id="node21" href="$ErrorLogs_8h.html" title="ErrorLogs.h" alt="" coords="1020,319,1109,345"/>
+<area shape="rect" id="node23" href="$MainMenu_8h.html" title="MainMenu.h" alt="" coords="23,319,116,345"/>
+<area shape="rect" id="node28" href="$clear__variables_8h.html" title="clear_variables.h" alt="" coords="672,169,792,196"/>
+<area shape="rect" id="node29" href="$kloe__class_8h.html" title="kloe_class.h" alt="" coords="1982,244,2077,271"/>
+<area shape="rect" id="node43" href="$charged__mom_8h.html" title="charged_mom.h" alt="" coords="2036,169,2151,196"/>
+<area shape="rect" id="node24" href="$RealTimeIntegration_8h.html" title="RealTimeIntegration.h" alt="" coords="192,319,342,345"/>
+<area shape="rect" id="node26" href="$SystemPaths_8h.html" title="SystemPaths.h" alt="" coords="1432,319,1544,345"/>
+<area shape="rect" id="node39" href="$reconstructor_8h.html" title="reconstructor.h" alt="" coords="2699,319,2808,345"/>
+<area shape="rect" id="node40" href="$PhysicsConstants_8h.html" title="PhysicsConstants.h" alt="" coords="2484,319,2624,345"/>
+<area shape="rect" id="node42" href="$neutral__mom_8h.html" title="neutral_mom.h" alt="" coords="2884,319,2992,345"/>
+</map>

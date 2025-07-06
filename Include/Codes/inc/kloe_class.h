@@ -17,9 +17,10 @@
 #include <TFormula.h>
 
 #include <reconstructor.h>
-#include <const.h>
+#include <PhysicsConstants.h>
 #include <ErrorLogs.h>
 #include <neutral_mom.h>
+#include <SystemPaths.h>
 
 /**
  * @brief KLOE namespace
@@ -75,12 +76,22 @@ namespace KLOE
         std::vector<TH1 *> frac, frac_data;
         TH1 *data, *mc_sum, *data_sub, *mc_sub;
 
+        const std::string path = SystemPath::pdgConstFilePath; /*!< Path to the PDG constants file */
+        PhysicsConstants constants; /*!< PhysicsConstants object with the physics constants */
+
+
         /**
          * @brief Constructor of pm00 class.
          * @param mom_list Pointer to the list of TLorentzVectors with momenta
          * @param pos_list Pointer to the list of TLorentzVectors with positions
          */
         pm00(TLorentzVector *mom_list, TLorentzVector *pos_list);
+
+        /**
+         * @brief Constructor of pm00 class.
+         * @param constants PhysicsConstants object with the physics constants
+         */
+        pm00(PhysicsConstants &constants);
 
         /**
          * @brief Default constructor of pm00 class.

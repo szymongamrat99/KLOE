@@ -17,10 +17,13 @@
 #include <TLegend.h>
 #include <TBufferJSON.h>
 
+
 #include "../inc/cpfit.hpp"
 
 int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
 {
+	
+
 	// =============================================================================
 	BaseKinematics
 			baseKin;
@@ -41,7 +44,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 	properties = cfgWatcher.getConfig();
 
-	const TString cpfit_res_dir = cpfit_dir + result_dir;
+	const TString cpfit_res_dir = SystemPath::cpfit_dir + SystemPath::result_dir;
 
 	Double_t *eff_vals;
 
@@ -1031,7 +1034,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		legend_chann->AddEntry(event.data, dataName, "le");
 		legend_chann->Draw();
 
-		c1->Print(cpfit_dir + img_dir + "split_fit_with_corr" + ext_img);
+		c1->Print(SystemPath::cpfit_dir + SystemPath::img_dir + "split_fit_with_corr" + ext_img);
 
 		// Residuals graph
 		TCanvas *c2 = new TCanvas("c2", "", 790, 790);
@@ -1059,7 +1062,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 		residuals_hist->Draw();
 
-		c2->Print(cpfit_dir + img_dir + "residuals_hist" + ext_img);
+		c2->Print(SystemPath::cpfit_dir + SystemPath::img_dir + "residuals_hist" + ext_img);
 
 		properties["variables"]["CPFit"]["result"]["value"]["Re"] = par[0];
 		properties["variables"]["CPFit"]["result"]["value"]["Im"] = par[1];
@@ -1098,9 +1101,9 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	{
 		TString
 				mode = "FitResultErr",
-				imageTitle = cpfit_dir + img_dir + "scan_of_errors_fit" + ext_img,
-				realTitle = cpfit_dir + img_dir + "real_errors_vs_value_fit" + ext_img,
-				imaginaryTitle = cpfit_dir + img_dir + "imaginary_errors_vs_value_fit" + ext_img;
+				imageTitle = SystemPath::cpfit_dir + SystemPath::img_dir + "scan_of_errors_fit" + ext_img,
+				realTitle = SystemPath::cpfit_dir + SystemPath::img_dir + "real_errors_vs_value_fit" + ext_img,
+				imaginaryTitle = SystemPath::cpfit_dir + SystemPath::img_dir + "imaginary_errors_vs_value_fit" + ext_img;
 
 		Double_t legendPos[4] = {0.2, 0.5, 0.7, 0.9};
 

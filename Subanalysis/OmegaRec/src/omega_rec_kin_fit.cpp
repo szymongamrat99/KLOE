@@ -23,6 +23,7 @@
 #include <pi0_photon_pair.h>
 #include <KinFitter.h>
 
+
 #include "../inc/omegarec.hpp"
 
 using namespace std;
@@ -37,6 +38,8 @@ Int_t selected[4] = {1, 2, 3, 4};
 
 int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+	
+
 	const int
 			loopcount = properties["variables"]["KinFit"]["Omega"]["loopCount"],
 			M = properties["variables"]["KinFit"]["Omega"]["numOfConstraints"],
@@ -54,7 +57,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 			datestamp = Obj.getCurrentDate(),
 			name = "";
 
-	name = omegarec_dir + root_files_dir + omega_rec_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
+	name = SystemPath::omegarec_dir + SystemPath::root_files_dir + omega_rec_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
 
 	properties["variables"]["tree"]["filename"]["omegarecKinFit"] = name;
 

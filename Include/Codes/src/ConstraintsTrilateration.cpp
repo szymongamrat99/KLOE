@@ -128,7 +128,7 @@ namespace KLOE
                              pow(kaon_mom[1], 2) -
                              pow(kaon_mom[2], 2));
 
-        value[i] = inv_mass_kaon - mK0;
+        value[i] = inv_mass_kaon - constants.getKaonMass();
       }
       else
       {
@@ -209,7 +209,7 @@ namespace KLOE
           ip[2] = p[26];
 
         dist = neu_vtx[_chosenComponent] - ip[_chosenComponent];
-        kaon_vel = cVel * kaon_mom[_chosenComponent] / kaon_mom[3];
+        kaon_vel = constants.cVel * kaon_mom[_chosenComponent] / kaon_mom[3];
 
         value[i] = neu_vtx[3] - (dist / kaon_vel);
       }

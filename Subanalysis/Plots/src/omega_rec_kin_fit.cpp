@@ -56,7 +56,7 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 
 	TString name = "";
 
-	name = omegarec_dir + root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + int(data_type) + ext_root;
+	name = SystemPath::omegarec_dir + SystemPath::root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + int(data_type) + ext_root;
 
 	properties["variables"]["tree"]["filename"]["omegarec"] = name;
 	properties["variables"]["tree"]["treename"]["omegarec"] = omegarec_tree;

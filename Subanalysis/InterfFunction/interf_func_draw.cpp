@@ -5,7 +5,6 @@
 #include <TMath.h>
 #include <TLegend.h>
 
-#include "/internal/big_one/4/users/gamrat/scripts/Include/const.h"
 
 Double_t interf_function(Double_t *x, Double_t *par)
 {

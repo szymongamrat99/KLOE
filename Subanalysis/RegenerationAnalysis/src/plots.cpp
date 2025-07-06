@@ -235,7 +235,7 @@ int plots(Int_t firstFile, Int_t lastFile)
 
   for (Int_t i = 1; i < 7; i++)
   {
-    img_name = img_dir + "RegenerationAnalysis/deltaT" + i + ext_img;
+    img_name = SystemPath::img_dir + "RegenerationAnalysis/deltaT" + i + ext_img;
     deltaTcanva[i - 1]->cd();
 
     deltaT[0]->SetLineColor(kGreen);

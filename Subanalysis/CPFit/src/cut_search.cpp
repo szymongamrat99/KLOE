@@ -16,10 +16,13 @@
 #include <TEfficiency.h>
 #include <TLegend.h>
 
+
 #include "../inc/cpfit.hpp"
 
 int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+	
+	
 	// =============================================================================
 	BaseKinematics
 			baseKin;
@@ -38,7 +41,7 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 			*tree_omega;
 	// =============================================================================
 
-	const TString cpfit_res_dir = cpfit_dir + result_dir;
+	const TString cpfit_res_dir = SystemPath::cpfit_dir + SystemPath::result_dir;
 
 	Double_t *eff_vals;
 
@@ -700,9 +703,9 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 
 	TString
 			modeGraph = "FitResultErr",
-			imageTitle = cpfit_dir + img_dir + "scan_of_errors_fit" + ext_img,
-			realTitle = cpfit_dir + img_dir + "real_errors_vs_value_fit" + ext_img,
-			imaginaryTitle = cpfit_dir + img_dir + "imaginary_errors_vs_value_fit" + ext_img;
+			imageTitle = SystemPath::cpfit_dir + SystemPath::img_dir + "scan_of_errors_fit" + ext_img,
+			realTitle = SystemPath::cpfit_dir + SystemPath::img_dir + "real_errors_vs_value_fit" + ext_img,
+			imaginaryTitle = SystemPath::cpfit_dir + SystemPath::img_dir + "imaginary_errors_vs_value_fit" + ext_img;
 
 	Double_t legendPos[4] = {0.2, 0.5, 0.7, 0.9};
 

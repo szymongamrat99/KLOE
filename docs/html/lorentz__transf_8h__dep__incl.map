@@ -1,0 +1,13 @@
+<map id="Include/Codes/Old/lorentz_transf.h" name="Include/Codes/Old/lorentz_transf.h">
+<area shape="rect" id="node2" href="$constraints__omega_8h.html" title="Include/Codes/Old/constraints\l_omega.h" alt="" coords="209,95,407,136"/>
+<area shape="rect" id="node4" href="$OmegaRec_2backup_2omega__rec__kin__fit_8cpp.html" title="Subanalysis/OmegaRec\l/backup/omega_rec_kin\l_fit.cpp" alt="" coords="5,184,168,240"/>
+<area shape="rect" id="node5" href="$Plots_2src_2omega__rec__kin__fit_8cpp.html" title="Subanalysis/Plots/src\l/omega_rec_kin_fit.cpp" alt="" coords="416,191,573,233"/>
+<area shape="rect" id="node6" href="$constraints__tri_8h.html" title="Include/Codes/Old/constraints\l_tri.h" alt="" coords="514,95,713,136"/>
+<area shape="rect" id="node8" href="$lorentz__transf_8cpp.html" title="Include/Codes/Old/lorentz\l_transf.cpp" alt="" coords="737,95,911,136"/>
+<area shape="rect" id="node9" href="$efficiency__func__dist_8cpp.html" title="Subanalysis/EfficiencyAnalysis\l/src/efficiency_func_dist.cpp" alt="" coords="935,95,1140,136"/>
+<area shape="rect" id="node10" href="$Plots_2src_2omega__rec_8cpp.html" title="Subanalysis/Plots/src\l/omega_rec.cpp" alt="" coords="1164,95,1313,136"/>
+<area shape="rect" id="node11" href="$plots__norm_8cpp.html" title="Subanalysis/Plots/src\l/plots_norm.cpp" alt="" coords="1337,95,1487,136"/>
+<area shape="rect" id="node12" href="$angle__pipi_8cpp.html" title="Subanalysis/SelectionVars\l/src/angle_pipi.cpp" alt="" coords="1511,95,1689,136"/>
+<area shape="rect" id="node3" href="$constraints__omega_8cpp.html" title="Include/Codes/Old/constraints\l_omega.cpp" alt="" coords="193,191,391,233"/>
+<area shape="rect" id="node7" href="$constraints__tri_8cpp.html" title="Include/Codes/Old/constraints\l_tri.cpp" alt="" coords="598,191,797,233"/>
+</map>

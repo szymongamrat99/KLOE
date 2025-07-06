@@ -32,10 +32,10 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			*tree_triangle;
 
 	TString
-			mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
+			mctruth_name = SystemPath::gen_vars_dir + SystemPath::root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
 			omega_name = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
 			tree_name = std::string(properties["variables"]["tree"]["treename"]["omegarec"]),
-			filename_triangle = neutrec_dir + root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
+			filename_triangle = SystemPath::neutrec_dir + SystemPath::root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
 
 	file_mctruth = new TFile(mctruth_name);
 	tree_mctruth = (TTree *)file_mctruth->Get(gen_vars_tree);
@@ -283,7 +283,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	KLOE::interference event("split", 0, 91, -90, 90, split);
 
 	TString
-			name = efficiency_dir + root_files_dir + cut_vars_filename + first_file + "_" + last_file + ext_root;
+			name = SystemPath::efficiency_dir + SystemPath::root_files_dir + cut_vars_filename + first_file + "_" + last_file + ext_root;
 
 	for (Int_t i = 0; i < nentries; i++)
 	{
@@ -526,7 +526,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		// else if (i == 3)
 		// 	legend_chi2->Draw();
 
-		canva[i]->Print(img_dir + "OmegaRec/hist" + std::to_string(i) + ext_img);
+		canva[i]->Print(SystemPath::img_dir + "OmegaRec/hist" + std::to_string(i) + ext_img);
 		// legend_chann->Clear();
 		// legend_chi2->Clear();
 	}
@@ -543,7 +543,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		hist2d[j]->GetYaxis()->SetTitle("#sqrt{#rho_{+-}^{2} + #rho_{00}^{2}} [cm]");
 		hist2d[j]->Draw("COLZ");
 
-		canva2d[j]->Print(img_dir + "OmegaRec/angle_2d_kaon_cm_" + channName[j] + ext_img);
+		canva2d[j]->Print(SystemPath::img_dir + "OmegaRec/angle_2d_kaon_cm_" + channName[j] + ext_img);
 	}
 
 	TString xTitleCont[3] = {"x_{#pi^{+}#pi^{-}} - x_{#pi^{0}#pi^{0}}", "y_{#pi^{+}#pi^{-}} - y_{#pi^{0}#pi^{0}}", "z_{#pi^{+}#pi^{-}} - z_{#pi^{0}#pi^{0}}"};
@@ -606,7 +606,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		hist_control[i]->Draw();
 		fit_text->Draw();
 
-		canvas_cont[i]->Print(img_dir + "OmegaRec/cont_plot_" + std::to_string(i) + ext_img);
+		canvas_cont[i]->Print(SystemPath::img_dir + "OmegaRec/cont_plot_" + std::to_string(i) + ext_img);
 
 		fit_text->Clear();
 	}
@@ -644,7 +644,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		else if (i == 3)
 			legend_chi2->Draw();
 
-		canva[i + 6]->Print(img_dir + "OmegaRec/hist_control_chann" + std::to_string(i) + ext_img);
+		canva[i + 6]->Print(SystemPath::img_dir + "OmegaRec/hist_control_chann" + std::to_string(i) + ext_img);
 		legend_chann_cont->Clear();
 		legend_chi2->Clear();
 	}
@@ -679,7 +679,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		else if (i == 3)
 			legend_chi2->Draw();
 
-		canva[i + 6]->Print(img_dir + "OmegaRec/hist_pm_IP_" + std::to_string(i) + ext_img);
+		canva[i + 6]->Print(SystemPath::img_dir + "OmegaRec/hist_pm_IP_" + std::to_string(i) + ext_img);
 		legend_chann_cont->Clear();
 		legend_chi2->Clear();
 	}
@@ -714,7 +714,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		else if (i == 3)
 			legend_chi2->Draw();
 
-		canva[i + 8]->Print(img_dir + "OmegaRec/hist_00_IP_" + std::to_string(i) + ext_img);
+		canva[i + 8]->Print(SystemPath::img_dir + "OmegaRec/hist_00_IP_" + std::to_string(i) + ext_img);
 		legend_chann_cont->Clear();
 		legend_chi2->Clear();
 	}
@@ -731,7 +731,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		hist2d_00IP_pmIP[0][j]->GetYaxis()->SetTitle("#rho_{00,IP} [cm]");
 		hist2d_00IP_pmIP[0][j]->Draw("COLZ");
 
-		canva2d[j + channNum]->Print(img_dir + "OmegaRec/rho_2d_" + channName[j] + ext_img);
+		canva2d[j + channNum]->Print(SystemPath::img_dir + "OmegaRec/rho_2d_" + channName[j] + ext_img);
 	}
 
 	for (Int_t j = 0; j < channNum; j++)
@@ -746,7 +746,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		hist2d_00IP_pmIP[1][j]->GetYaxis()->SetTitle("z_{00,IP} [cm]");
 		hist2d_00IP_pmIP[1][j]->Draw("COLZ");
 
-		canva2d[j + 2 * channNum]->Print(img_dir + "OmegaRec/z_2d_" + channName[j] + ext_img);
+		canva2d[j + 2 * channNum]->Print(SystemPath::img_dir + "OmegaRec/z_2d_" + channName[j] + ext_img);
 	}
 
 	return 0;

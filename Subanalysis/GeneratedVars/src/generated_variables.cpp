@@ -1,14 +1,18 @@
 #include <cylinder_intersection.h>
+
+
 #include "../inc/genvars.hpp"
 
 Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+	
+
 	// Creation of filename for the analysis step
 	std::string
 			datestamp = Obj.getCurrentDate(),
 			name = "";
 
-	name = gen_vars_dir + root_files_dir + gen_vars_filename + datestamp + "_" + int(data_type) + ext_root;
+	name = SystemPath::gen_vars_dir + SystemPath::root_files_dir + gen_vars_filename + datestamp + "_" + int(data_type) + ext_root;
 	// -----------------------------------------------------------------------------------------
 
 	TFile *file = new TFile(name.c_str(), "recreate");

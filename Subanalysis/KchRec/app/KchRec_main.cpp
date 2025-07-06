@@ -2,10 +2,10 @@
 
 using namespace std;
 
-int KchRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
+int KchRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt, PhysicsConstants &physConst)
 {
   // Set logger for error logging
-  std::string logFilename = (std::string)charged_dir + (std::string)logs_dir + "KchRec_" + Obj.getCurrentDate() + ".log";
+  std::string logFilename = (std::string)SystemPath::charged_dir + (std::string)SystemPath::logs_dir + "KchRec_" + Obj.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   // -----------------------------------------------------------------------------------
   // Set Menu instance

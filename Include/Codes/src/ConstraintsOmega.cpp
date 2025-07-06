@@ -54,5 +54,5 @@ Double_t ConstraintsOmega::PhotonPathConsvLAB(Double_t *x, Double_t *p) const
                  pow(cluster[1] - neu_vtx[1], 2) +
                  pow(cluster[2] - neu_vtx[2], 2));
 
-  return cVel * cluster[3] - R_gamma;
+  return constants.cVel * cluster[3] - R_gamma;
 }

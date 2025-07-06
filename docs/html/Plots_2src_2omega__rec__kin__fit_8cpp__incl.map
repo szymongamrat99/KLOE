@@ -1,0 +1,18 @@
+<map id="Subanalysis/Plots/src/omega_rec_kin_fit.cpp" name="Subanalysis/Plots/src/omega_rec_kin_fit.cpp">
+<area shape="rect" id="node16" href="$reconstructor_8h.html" title="reconstructor.h" alt="" coords="1223,169,1333,196"/>
+<area shape="rect" id="node30" href="$const_8h.html" title="const.h" alt="" coords="987,393,1052,420"/>
+<area shape="rect" id="node40" href="$neutral__mom_8h.html" title="neutral_mom.h" alt="" coords="1912,319,2020,345"/>
+<area shape="rect" id="node41" href="$uncertainties_8h.html" title="uncertainties.h" alt="" coords="2146,244,2253,271"/>
+<area shape="rect" id="node42" href="$charged__mom_8h.html" title="charged_mom.h" alt="" coords="1085,169,1199,196"/>
+<area shape="rect" id="node44" href="$lorentz__transf_8h.html" title="lorentz_transf.h" alt="" coords="1626,244,1738,271"/>
+<area shape="rect" id="node45" href="$plane__intersection_8h.html" title="plane_intersection.h" alt="" coords="1863,169,2002,196"/>
+<area shape="rect" id="node46" href="$closest__approach_8h.html" title="closest_approach.h" alt="" coords="2027,169,2161,196"/>
+<area shape="rect" id="node47" href="$constraints__omega_8h.html" title="constraints_omega.h" alt="" coords="1609,95,1752,121"/>
+<area shape="rect" id="node48" href="$pi0__photon__pair_8h.html" title="pi0_photon_pair.h" alt="" coords="1408,169,1532,196"/>
+<area shape="rect" id="node49" href="$chi2__dist_8h.html" title="chi2_dist.h" alt="" coords="2277,244,2362,271"/>
+<area shape="rect" id="node17" href="$kloe__class_8h.html" title="kloe_class.h" alt="" coords="1095,244,1189,271"/>
+<area shape="rect" id="node27" href="$ErrorLogs_8h.html" title="ErrorLogs.h" alt="" coords="916,319,1005,345"/>
+<area shape="rect" id="node39" href="$SystemPaths_8h.html" title="SystemPaths.h" alt="" coords="474,468,586,495"/>
+<area shape="rect" id="node37" href="$MainMenu_8h.html" title="MainMenu.h" alt="" coords="1362,468,1455,495"/>
+<area shape="rect" id="node38" href="$RealTimeIntegration_8h.html" title="RealTimeIntegration.h" alt="" coords="712,468,863,495"/>
+</map>

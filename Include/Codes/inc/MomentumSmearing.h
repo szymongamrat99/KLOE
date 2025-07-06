@@ -18,7 +18,7 @@ namespace KLOE
   };
 
   template <typename T = Double_t>
-  class MomentumSmearing : private pm00
+  class MomentumSmearing : public pm00
   {
   private:
     TVectorT<T>

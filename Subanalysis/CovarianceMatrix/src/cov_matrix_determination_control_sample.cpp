@@ -16,10 +16,13 @@
 #include <TEfficiency.h>
 #include <TLegend.h>
 
+
 #include "../inc/covmatrix.hpp"
 
 int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+	
+
 	// =============================================================================
 	BaseKinematics
 			baseKin;
@@ -31,7 +34,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 
 	chainDoublePiPi = new TChain("h1");
 
-	chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-06-26/*.root");
+	chainDoublePiPi->Add(SystemPath::charged_dir + SystemPath::root_files_dir + "2025-06-26/*.root");
 
 	Float_t gamma;
 	Char_t vtxTwoTracks;

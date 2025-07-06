@@ -31,18 +31,21 @@
 #include <pi0_photon_pair.h>
 #include <neu_triangle.h>
 
+
 #include "../inc/omegarec.hpp"
 
 using namespace std;
 
 int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+	
+
 	// Creation of filename for the analysis step
 	std::string
 			datestamp = Obj.getCurrentDate(),
 			name = "";
 
-	name = omegarec_dir + root_files_dir + omega_rec_filename + datestamp + "_" + int(data_type) + ext_root;
+	name = SystemPath::omegarec_dir + SystemPath::root_files_dir + omega_rec_filename + datestamp + "_" + int(data_type) + ext_root;
 	// -----------------------------------------------------------------------------------------
 
 	TFile *file = new TFile(name.c_str(), "recreate");

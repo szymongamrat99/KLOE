@@ -268,7 +268,7 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
   {
     for (Int_t j = 0; j < 4; j++)
     {
-      img_name = img_dir + "RegenerationAnalysis/radius_" + method_dict[i] + "_" + region_dict[j] + ext_img;
+      img_name = SystemPath::img_dir + "RegenerationAnalysis/radius_" + method_dict[i] + "_" + region_dict[j] + ext_img;
       canvas[canva_num]->cd();
       canvas[canva_num]->SetLogy();
 
@@ -374,7 +374,7 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
   {
     for (Int_t j = 0; j < 4; j++)
     {
-      img_name = img_dir + "RegenerationAnalysis/radius_ch_" + method_dict[i] + "_" + region_dict[j] + ext_img;
+      img_name = SystemPath::img_dir + "RegenerationAnalysis/radius_ch_" + method_dict[i] + "_" + region_dict[j] + ext_img;
       canvas[canva_num]->cd();
       canvas[canva_num]->SetLogy();
 
@@ -478,7 +478,7 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
   for (Int_t i = 0; i < 2; i++)
     for (Int_t j = 0; j < 4; j++)
     {
-      img_name = img_dir + "RegenerationAnalysis/radius_tri_" + method_dict[i] + "_" + region_dict[j] + ext_img;
+      img_name = SystemPath::img_dir + "RegenerationAnalysis/radius_tri_" + method_dict[i] + "_" + region_dict[j] + ext_img;
       canvas[canva_num]->cd();
       canvas[canva_num]->SetLogy();
 

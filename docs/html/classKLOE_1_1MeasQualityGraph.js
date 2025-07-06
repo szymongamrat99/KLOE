@@ -1,0 +1,28 @@
+var classKLOE_1_1MeasQualityGraph =
+[
+    [ "MeasQualityGraph", "classKLOE_1_1MeasQualityGraph.html#a2462844bef013edd1a4dc4f81d69a62c", null ],
+    [ "DrawGraphs", "classKLOE_1_1MeasQualityGraph.html#a5d4f8fef2be99cf9c1a1485c027251d1", null ],
+    [ "SetGraphStyle", "classKLOE_1_1MeasQualityGraph.html#ac716fac1702cf142dde083b6ff291710", null ],
+    [ "_axis", "classKLOE_1_1MeasQualityGraph.html#a54b3583c0fa6132d00164916d3279c9c", null ],
+    [ "_canva", "classKLOE_1_1MeasQualityGraph.html#a4fc66a9ff134330647c7694bbf6e5d6f", null ],
+    [ "_effGraphs", "classKLOE_1_1MeasQualityGraph.html#a3556023842c3d5cfc72ef8e61a8629db", null ],
+    [ "_ImErrGraph", "classKLOE_1_1MeasQualityGraph.html#aabfbd228dccc9723c8ccb4aef3f1ffe1", null ],
+    [ "_legend", "classKLOE_1_1MeasQualityGraph.html#a3cdd373d73dd98ed977f0ab02cb33bd6", null ],
+    [ "_maxLimit", "classKLOE_1_1MeasQualityGraph.html#ac34aaf89f039b5b1f5090335f2164287", null ],
+    [ "_maxYLimitL", "classKLOE_1_1MeasQualityGraph.html#ab2f46f64207703926fa4b53ec242d533", null ],
+    [ "_maxYLimitR", "classKLOE_1_1MeasQualityGraph.html#a88834d3da19629bead02a275a9ddbdc2", null ],
+    [ "_minLimit", "classKLOE_1_1MeasQualityGraph.html#af244d12606eecdebdd19e9c49945eac7", null ],
+    [ "_minYLimitL", "classKLOE_1_1MeasQualityGraph.html#accd15c39b8edeed53f3131142148c1e0", null ],
+    [ "_minYLimitR", "classKLOE_1_1MeasQualityGraph.html#aec12e1edaad33f742f780c6260d7bc3a", null ],
+    [ "_mode", "classKLOE_1_1MeasQualityGraph.html#a0b83bc611e6307c064a2af4e5e16d035", null ],
+    [ "_multiGraph", "classKLOE_1_1MeasQualityGraph.html#a059956bb04c1739af11c79a3bef33a13", null ],
+    [ "_NumOfPts", "classKLOE_1_1MeasQualityGraph.html#abdf82f471ac8d9862d9ae8c0b627ddfb", null ],
+    [ "_overlay", "classKLOE_1_1MeasQualityGraph.html#a2251977ada38861a3a74257339a68cea", null ],
+    [ "_pad", "classKLOE_1_1MeasQualityGraph.html#a96e5d97ccb5e5026edc8a2f2ccd4c433", null ],
+    [ "_ReErrGraph", "classKLOE_1_1MeasQualityGraph.html#ae8843ff4abbea5cc31d25f992cd65777", null ],
+    [ "_x", "classKLOE_1_1MeasQualityGraph.html#a2ef37535a2d541a33384e759418bd950", null ],
+    [ "_xTitle", "classKLOE_1_1MeasQualityGraph.html#a9f814d654eac39a2d072f1f582fccf75", null ],
+    [ "_y", "classKLOE_1_1MeasQualityGraph.html#a6f6664475f2dbeb898207be7fbe62911", null ],
+    [ "_yRightTitle", "classKLOE_1_1MeasQualityGraph.html#a56717acc1e94c0cdba76a87ca9404d32", null ],
+    [ "_yTitle", "classKLOE_1_1MeasQualityGraph.html#a1ded57fc0466fa9f80dbcf34b28cd5ef", null ]
+];

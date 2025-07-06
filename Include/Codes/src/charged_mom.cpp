@@ -16,11 +16,11 @@ namespace KLOE
     mom_vec[2] = Cotv * 1000. / abs(Curv);
 
     if (mode == 1)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mPiCh, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(constants.mPiCh, 2));
     else if (mode == 2)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mElec, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(constants.mElec, 2));
     else if (mode == 3)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mMuon, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(constants.mMuon, 2));
   }
 
   template <typename F>
@@ -31,11 +31,11 @@ namespace KLOE
     mom_vec[2] = _CotV[i] * 1000. / abs(_CurV[i]);
 
     if (_mode == 1)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mPiCh, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(constants.mPiCh, 2));
     else if (_mode == 2)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mElec, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(constants.mElec, 2));
     else if (_mode == 3)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mMuon, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(constants.mMuon, 2));
   }
 
   template <typename F>
@@ -76,7 +76,7 @@ namespace KLOE
                 KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
                 KchTmp[4] = sqrt(KchTmp[4]);
 
-                if (vtaken[0] <= -1 || abs(KchTmp[5] - mK0) < abs(KchRec[5] - mK0))
+                if (vtaken[0] <= -1 || abs(KchTmp[5] - constants.getKaonMass()) < abs(KchRec[5] - constants.getKaonMass()))
                 {
                   errFlag = 0;
 
@@ -165,7 +165,7 @@ namespace KLOE
                 KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
                 KchTmp[4] = sqrt(KchTmp[4]);
 
-                if (vtaken[0] <= -1 || abs(KchTmp[5] - mK0) < abs(KchRec[5] - mK0))
+                if (vtaken[0] <= -1 || abs(KchTmp[5] - constants.getKaonMass()) < abs(KchRec[5] - constants.getKaonMass()))
                 {
                   errFlag = 0;
 
@@ -270,7 +270,7 @@ namespace KLOE
   {
     std::string
         name = "";
-    name = base_path + logs_dir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
+    name = SystemPath::basePath + SystemPath::logs_dir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
 
     ErrorHandling::ErrorLogs logger(name);
 
@@ -304,11 +304,11 @@ namespace KLOE
     beta_gamma_sq = pow(pb_mod, 2) / (pow(pboost[3], 2) - pow(pb_mod, 2));
     gamma_sq = 1. + beta_gamma_sq;
 
-    pcm_sq = 0.25 * (pow(pboost[3], 2) - pow(pb_mod, 2)) - pow(mK0, 2);
+    pcm_sq = 0.25 * (pow(pboost[3], 2) - pow(pb_mod, 2)) - pow(constants.getKaonMass(), 2);
 
-    C = pow(beta_gamma_sq * pow(mK0, 2) - pcm_sq, 2);
+    C = pow(beta_gamma_sq * pow(constants.getKaonMass(), 2) - pcm_sq, 2);
     A = pow(gamma_sq * (1. - beta_sq * cosb_sq), 2);
-    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * pow(mK0, 2) - pcm_sq) - 2. * beta_gamma_sq * pow(mK0, 2) * cosb_sq);
+    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * pow(constants.getKaonMass(), 2) - pcm_sq) - 2. * beta_gamma_sq * pow(constants.getKaonMass(), 2) * cosb_sq);
 
     F
         disc = pow(B, 2) - A * C;
@@ -353,9 +353,9 @@ namespace KLOE
     for (Int_t i = 0; i < 3; i++)
       pKaonBoost[i] = pKaon[i] * (pK_from_boost / pK_mod);
 
-    pKaonBoost[3] = sqrt(pow(pK_from_boost, 2) + pow(mK0, 2));
+    pKaonBoost[3] = sqrt(pow(pK_from_boost, 2) + pow(constants.getKaonMass(), 2));
     pKaonBoost[4] = pK_from_boost;
-    pKaonBoost[5] = mK0;
+    pKaonBoost[5] = constants.getKaonMass();
     pKaonBoost[6] = pKaon[6];
     pKaonBoost[7] = pKaon[7];
     pKaonBoost[8] = pKaon[8];
@@ -368,7 +368,7 @@ namespace KLOE
   {
     std::string
         name = "";
-    name = base_path + logs_dir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
+    name = SystemPath::basePath + SystemPath::logs_dir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
 
     ErrorHandling::ErrorLogs logger(name);
 

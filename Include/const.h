@@ -16,92 +16,13 @@
 #include <ErrorLogs.h>
 #include <MainMenu.h>
 #include <RealTimeIntegration.h>
+#include <SystemPaths.h> // for system paths
 
 using json = nlohmann::json;
 
 // Get the env variable for properties
-
-const std::string
-    kloedataPath = getenv("KLOE_DBV26_DK0"),
-    kloeMCPath = getenv("KLOE_DBV26_MK0"),
-    workdirPath = getenv("WORKDIR"),
-    chainDataFiles = kloedataPath + "/*.root",
-    chainMCFiles = kloeMCPath + "/*.root",
-    pdgConstFilePath = workdirPath + "/scripts/Scripts/Subanalysis/Properties/pdg_api/pdg_const.json",
-    propertiesPath = getenv("PROPERTIESKLOE"),
-    propName = propertiesPath + "/properties.json";
-
-static std::ifstream propertyFile(propName.c_str());
+static std::ifstream propertyFile(SystemPath::generalPropertiesPath.c_str());
 static json properties = json::parse(propertyFile);
-
-struct PDGids
-{
-    const TString
-        Re = "/S013EPS",
-        Im = "/S013EPI",
-        K0mass = "/S011M",
-        TauS = "/S012T",
-        TauL = "/S013T",
-        deltaM = "/S013D",
-        modEps = "/S013EP",
-        phiPM = "/S013F+-",
-        phi00 = "/S013FOO";
-};
-
-static std::ifstream fconst(pdgConstFilePath);
-static json constants = json::parse(fconst);
-
-// Constants used in the analysis
-// Basic quantities
-const double cVel = 29.9792458;       // cm/ns
-const double hBar = 6.582119569E-34;  // MeV*s
-const double eleCh = 1.602176634E-19; // C
-
-// Particles' masses
-const double mPhi = 1019.461;                               // MeV/c^2
-const double mK0 = (Double_t)constants["values"]["/S011M"]; // MeV/c^2
-const double mPi0 = 134.9768;                               // MeV/c^2
-const double mPiCh = 139.57039;                             // MeV/c^2
-const double mMuon = 105.6583755;                           // MeV/c^2
-const double mElec = 0.510998950;                           // MeV/c^2
-const double mOmega = 782.66;                               // MeV/c^2
-
-// Branching ratios
-// Phi
-const double br_phi_kskl = 0.339;
-const double br_phi_omegapi0 = 4.7E-5;
-
-// K-short
-const double br_ks_pi0pi0 = 0.3069;
-const double br_ks_pippim = 0.6920;
-const double br_ks_pippimgamma = 1.79E-3;
-const double br_ks_piele = 7.04E-4;
-const double br_ks_pimu = 4.56E-4;
-
-// K-long
-const double br_kl_pi0pi0 = 8.64E-4;
-const double br_kl_pippim = 1.967E-3;
-const double br_kl_pippimpi0 = 0.1254;
-const double br_kl_3pi0 = 0.1952;
-const double br_kl_piele = 0.4055;
-const double br_kl_pimu = 0.2704;
-
-// Kaons' properties and CPV
-const double tau_S_nonCPT = (Double_t)constants["values"]["/S012T"] * 1E9; // ns
-const double tau_S_CPT = 0.8954E-1;                                        // ns
-const double tau_L = (Double_t)constants["values"]["/S013T"] * 1E9;        // ns
-const double delta_mass_nonCPT = (Double_t)constants["values"]["/S013D"];  // hbar s^-1
-const double delta_mass_CPT = 0.5293E10;                                   // hbar s^-1
-const double mod_epsilon = (Double_t)constants["values"]["/S013EP"];
-const double Re = (Double_t)constants["values"]["/S013EPS"];
-const double Im_nonCPT = (Double_t)constants["values"]["/S013EPI"] * (M_PI / 180.); // deg
-const double Im_CPT = -0.002;                                                       // deg
-const double phi_pm_nonCPT = (Double_t)constants["values"]["/S013F+-"];             // deg
-const double phi_pm_CPT = 43.51;                                                    // deg
-const double phi_00_nonCPT = (Double_t)constants["values"]["/S013FOO"];             // deg
-const double phi_00_CPT = 43.52;                                                    // deg
-
-const double TRF = 2.715; // ns - time of DAFNE bunch
 
 // General
 const int T0 = 2.715; // ns
@@ -126,7 +47,6 @@ const Color_t dataColor = kBlack;
 const Color_t mcSumColor = kOrange;
 
 const TString
-    base_path = "/internal/big_one/4/users/gamrat/scripts/Scripts/",
     path_tmp = (std::string)properties["variables"]["rootFiles"]["path"],
     path_cs = (std::string)properties["variables"]["rootFiles"]["pathControlSample"],
     prod2root_path_v26 = "/data/k2/DBV-26/DK0",
@@ -143,21 +63,6 @@ const TString
     omega_rec_filename = "omega_rec_",
     omega_rec_kin_fit_filename = "omega_rec_kin_fit_",
     cut_vars_filename = "cut_vars_";
-
-const TString
-    gen_vars_dir = base_path + "Subanalysis/GeneratedVars/",
-    neutrec_dir = base_path + "Subanalysis/Neutrec/",
-    cpfit_dir = base_path + "Subanalysis/CPFit/",
-    covmatrix_dir = base_path + "Subanalysis/CovarianceMatrix/",
-    omegarec_dir = base_path + "Subanalysis/OmegaRec/",
-    efficiency_dir = base_path + "Subanalysis/EfficiencyAnalysis/",
-    charged_dir = base_path + "Subanalysis/KchRec/",
-    plots_dir = base_path + "Subanalysis/Plots/",
-    root_files_dir = "root_files/",
-    input_dir = "input/",
-    logs_dir = "log/",
-    result_dir = "results/",
-    img_dir = "img/";
 
 const TString
     omegaRecPath = (std::string)properties["variables"]["tree"]["filename"]["omegarec"],

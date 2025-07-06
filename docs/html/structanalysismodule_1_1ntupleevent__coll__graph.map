@@ -1,0 +1,13 @@
+<map id="analysismodule::ntupleevent" name="analysismodule::ntupleevent">
+<area shape="rect" id="node2" href="$structanalysismodule_1_1bposition.html" title="analysismodule::bposition" alt="" coords="29,5,201,32"/>
+<area shape="rect" id="node3" href="$structanalysismodule_1_1emccluster.html" title="analysismodule::emccluster" alt="" coords="23,56,207,83"/>
+<area shape="rect" id="node4" href="$structanalysismodule_1_1t0struct.html" title="analysismodule::t0struct" alt="" coords="33,107,197,133"/>
+<area shape="rect" id="node5" href="$structanalysismodule_1_1tracksvertex.html" title="analysismodule::tracksvertex" alt="" coords="19,157,211,184"/>
+<area shape="rect" id="node6" href="$structanalysismodule_1_1alltracksmc.html" title="analysismodule::alltracksmc" alt="" coords="21,208,208,235"/>
+<area shape="rect" id="node7" href="$structanalysismodule_1_1eclsstru.html" title="analysismodule::eclsstru" alt="" coords="31,259,198,285"/>
+<area shape="rect" id="node8" href="$structanalysismodule_1_1trackcluster.html" title="analysismodule::trackcluster" alt="" coords="21,309,209,336"/>
+<area shape="rect" id="node9" href="$structanalysismodule_1_1geanfiinformation.html" title="analysismodule::geanfiinformation" alt="" coords="5,360,224,387"/>
+<area shape="rect" id="node10" href="$structanalysismodule_1_1vertex.html" title="analysismodule::vertex" alt="" coords="37,411,193,437"/>
+<area shape="rect" id="node11" href="$structanalysismodule_1_1eventinfo.html" title="analysismodule::eventinfo" alt="" coords="28,461,201,488"/>
+<area shape="rect" id="node12" href="$structanalysismodule_1_1alltracks.html" title="analysismodule::alltracks" alt="" coords="30,512,199,539"/>
+</map>

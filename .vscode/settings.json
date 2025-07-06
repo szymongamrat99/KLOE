@@ -1,0 +1,7 @@
+{
+  "files.associations": {
+    "*.kloe": "fortran",
+    "*.cin": "fortran",
+    "cmath": "cpp"
+  }
+}

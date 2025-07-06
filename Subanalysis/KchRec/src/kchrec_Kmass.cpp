@@ -12,6 +12,7 @@
 #include <boost/optional.hpp>
 #include <SplitFileWriter.h>
 
+
 #include "../inc/kchrec.hpp"
 
 /**
@@ -38,9 +39,8 @@
  *   - Writes results to output files.
  * - At the end, saves all histograms as images and closes output files.
  */
-int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
+int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, PhysicsConstants &physConst)
 {
-
   // Structure from const.h to ease navigation
   BaseKinematics baseKin;
 
@@ -97,7 +97,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 
   std::string
       base_filename = "KchRec_Control_Sample",
-      dirname = (std::string)charged_dir + (std::string)root_files_dir,
+      dirname = (std::string)SystemPath::charged_dir + (std::string)SystemPath::root_files_dir,
       dated_folder = Obj.CreateDatedFolder(dirname);
 
   SplitFileWriter writer(base_filename, 1.5 * 1024 * 1024 * 1024, false, dated_folder);
@@ -367,8 +367,8 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
                                     trkKL4VecKaonCM[1][2]);
 
         Double_t  
-                  PiMomMagKaonCM1 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5],  mPiCh, mPiCh),
-                  PiMomMagKaonCM2 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], mPiCh, mPiCh);
+                  PiMomMagKaonCM1 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], physConst.mPiCh, physConst.mPiCh),
+                  PiMomMagKaonCM2 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], physConst.mPiCh, physConst.mPiCh);
 
         Double_t angle1 = trkKLMomVecKaonCM[0].Phi(),
                  angle2 = trkKLMomVecKaonCM[1].Phi(),
@@ -395,8 +395,8 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
                                   PiMomMagKaonCM1 * sin(theta2 + gamma_theta) * sin(angle2 + gamma),
                                   PiMomMagKaonCM1 * cos(theta2 + gamma_theta) );
 
-        PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomKaonCM[0][0], 2) + pow(PiMomKaonCM[0][1], 2) + pow(PiMomKaonCM[0][2], 2) + pow(mPiCh, 2)));
-        PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomKaonCM[1][0], 2) + pow(PiMomKaonCM[1][1], 2) + pow(PiMomKaonCM[1][2], 2) + pow(mPiCh, 2)));
+        PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomKaonCM[0][0], 2) + pow(PiMomKaonCM[0][1], 2) + pow(PiMomKaonCM[0][2], 2) + pow(physConst.mPiCh, 2)));
+        PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomKaonCM[1][0], 2) + pow(PiMomKaonCM[1][1], 2) + pow(PiMomKaonCM[1][2], 2) + pow(physConst.mPiCh, 2)));
 
         boost_KaonTwoBody = -boost_KaonTwoBody; // Invert the boost direction for the pions
         Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
@@ -422,11 +422,11 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
         PiKaon4VecLAB[0].SetPxPyPzE(PiMomKaonLAB[0][0],
                                     PiMomKaonLAB[0][1],
                                     PiMomKaonLAB[0][2],
-                                    sqrt(PiMomKaonLAB[0].Mag2() + pow(mPiCh, 2)));
+                                    sqrt(PiMomKaonLAB[0].Mag2() + pow(physConst.mPiCh, 2)));
         PiKaon4VecLAB[1].SetPxPyPzE(PiMomKaonLAB[1][0],
                                     PiMomKaonLAB[1][1],
                                     PiMomKaonLAB[1][2],
-                                    sqrt(PiMomKaonLAB[1].Mag2() + pow(mPiCh, 2)));
+                                    sqrt(PiMomKaonLAB[1].Mag2() + pow(physConst.mPiCh, 2)));
 
         trkKL4VecLAB[0].SetPxPyPzE(trkKLMomVecLAB[0][0],
                                    trkKLMomVecLAB[0][1],

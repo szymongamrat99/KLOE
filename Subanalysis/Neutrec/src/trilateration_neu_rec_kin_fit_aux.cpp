@@ -24,12 +24,15 @@
 #include "chi2_dist.h"
 #include <KinFitter.h>
 
+
 #include "../inc/trilateration.hpp"
 
 using namespace std;
 
 Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+	
+
 	Bool_t
 			good_clus = (Bool_t)properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
 
@@ -60,7 +63,7 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 			datestamp = Obj.getCurrentDate(),
 			name = "";
 
-	name = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
+	name = SystemPath::neutrec_dir + SystemPath::root_files_dir + neu_trilateration_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
 
 	properties["variables"]["tree"]["filename"]["trilaterationKinFit"] = name;
 

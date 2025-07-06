@@ -26,10 +26,13 @@
 #include "uncertainties.h"
 #include "triple_gaus.h"
 
+
 #include "../inc/trilateration.hpp"
 
 Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+  
+
   Double_t cut_prob = 0.0, time_cut = 100.0;
 
   int
@@ -1050,7 +1053,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   chosen_hist[1]->SetLineColor(kRed);
   chosen_hist[0]->Draw();
   chosen_hist[1]->Draw("SAME");
-  canvas[0][74]->Print(img_dir + id_canva + ext_img);
+  canvas[0][74]->Print(SystemPath::img_dir + id_canva + ext_img);
 
   //! Chi2 and Prob histos
 
@@ -1073,7 +1076,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   chi2_hist[1]->SetLineColor(kRed);
   chi2_hist[0]->Draw();
   chi2_hist[1]->Draw("SAME");
-  canvas[0][11]->Print(img_dir + id_canva + ext_img);
+  canvas[0][11]->Print(SystemPath::img_dir + id_canva + ext_img);
   //!
   //! Chi2 and Prob histos
 
@@ -1108,7 +1111,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
   legend->Draw();
 
-  canvas[0][89]->Print(img_dir + id_canva + ext_img);
+  canvas[0][89]->Print(SystemPath::img_dir + id_canva + ext_img);
 
   legend->Clear();
   //!
@@ -1136,7 +1139,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   prob_hist[1]->SetLineColor(kRed);
   prob_hist[0]->Draw();
   prob_hist[1]->Draw("SAME");
-  canvas[0][12]->Print(img_dir + id_canva + ext_img);
+  canvas[0][12]->Print(SystemPath::img_dir + id_canva + ext_img);
   //!
 
   //!
@@ -1161,7 +1164,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   pidmc_hist[1]->SetLineColor(kRed);
   pidmc_hist[0]->Draw();
   pidmc_hist[1]->Draw("SAME");
-  canvas[0][26]->Print(img_dir + id_canva + ext_img);
+  canvas[0][26]->Print(SystemPath::img_dir + id_canva + ext_img);
   //!
   canvas[0][27]->SetRightMargin(0.15);
   canvas[0][27]->SetLeftMargin(0.17);
@@ -1184,7 +1187,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   mcisr_hist[1]->SetLineColor(kRed);
   mcisr_hist[0]->Draw();
   mcisr_hist[1]->Draw("SAME");
-  canvas[0][27]->Print(img_dir + id_canva + ext_img);
+  canvas[0][27]->Print(SystemPath::img_dir + id_canva + ext_img);
   //!
   canvas[0][28]->SetRightMargin(0.15);
   canvas[0][28]->SetLeftMargin(0.17);
@@ -1207,7 +1210,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   first_clus_hist[1]->SetLineColor(kRed);
   first_clus_hist[0]->Draw();
   first_clus_hist[1]->Draw("SAME");
-  canvas[0][28]->Print(img_dir + id_canva + ext_img);
+  canvas[0][28]->Print(SystemPath::img_dir + id_canva + ext_img);
   //!
   //!
   canvas[0][29]->SetRightMargin(0.15);
@@ -1231,7 +1234,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   tcl_hist[1]->SetLineColor(kRed);
   tcl_hist[0]->Draw();
   tcl_hist[1]->Draw("SAME");
-  canvas[0][29]->Print(img_dir + id_canva + ext_img);
+  canvas[0][29]->Print(SystemPath::img_dir + id_canva + ext_img);
   //!
 
   for (Int_t j = 0; j < 2; j++)
@@ -1248,7 +1251,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     angle_vs_time[j][0]->Draw("COLZ");
 
-    canvas[j][70]->Print(img_dir + id_canva + ext_img);
+    canvas[j][70]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     id_canva = "Angle180vstime" + std::to_string(j + 1);
 
@@ -1258,7 +1261,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     angle_vs_time[j][1]->Draw("COLZ");
 
-    canvas[j][71]->Print(img_dir + id_canva + ext_img);
+    canvas[j][71]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     id_canva = "Distvsangle0" + std::to_string(j + 1);
 
@@ -1268,7 +1271,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     dist_vs_time[j][0]->Draw("COLZ");
 
-    canvas[j][72]->Print(img_dir + id_canva + ext_img);
+    canvas[j][72]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     id_canva = "Distvsangle180" + std::to_string(j + 1);
 
@@ -1278,7 +1281,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     dist_vs_time[j][1]->Draw("COLZ");
 
-    canvas[j][74]->Print(img_dir + id_canva + ext_img);
+    canvas[j][74]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     id_canva = "Solerr" + std::to_string(j + 1);
 
@@ -1288,7 +1291,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     sol_err_hist[j]->Draw("COLZ");
 
-    canvas[j][73]->Print(img_dir + id_canva + ext_img);
+    canvas[j][73]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     id_canva = "Clusenergy" + std::to_string(j + 1);
 
@@ -1298,7 +1301,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     clusenergy_hist[j]->Draw();
 
-    canvas[j][75]->Print(img_dir + id_canva + ext_img);
+    canvas[j][75]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     id_canva = "Cluscorr_x_y_" + std::to_string(j + 1);
 
@@ -1308,7 +1311,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     cluscorr_hist[j][0]->Draw("COLZ");
 
-    canvas[j][76]->Print(img_dir + id_canva + ext_img);
+    canvas[j][76]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     id_canva = "Cluscorr_x_z_" + std::to_string(j + 1);
 
@@ -1318,7 +1321,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     cluscorr_hist[j][1]->Draw("COLZ");
 
-    canvas[j][77]->Print(img_dir + id_canva + ext_img);
+    canvas[j][77]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     id_canva = "Time_projection" + std::to_string(j + 1);
 
@@ -1328,7 +1331,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     neu_vtx_corr[j][3]->ProjectionY()->Draw("HIST");
 
-    canvas[j][78]->Print(img_dir + id_canva + ext_img);
+    canvas[j][78]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     id_canva = "Chi2_substraction" + std::to_string(j + 1);
 
@@ -1340,7 +1343,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     chi2subst[j]->Draw("HIST");
 
-    canvas[j][79]->Print(img_dir + id_canva + ext_img);
+    canvas[j][79]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     id_canva = "Chi2_division" + std::to_string(j + 1);
 
@@ -1354,7 +1357,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
     chi2div[j]->Draw("HIST");
 
-    canvas[j][80]->Print(img_dir + id_canva + ext_img);
+    canvas[j][80]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     for (Int_t i = 0; i < 3; i++)
     {
@@ -1370,7 +1373,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       neu_vtx_corr[j][i]->GetYaxis()->SetTitle(y_title);
       neu_vtx_corr[j][i]->Draw("COLZ");
 
-      canvas[j][i]->Print(img_dir + id_canva + ext_img);
+      canvas[j][i]->Print(SystemPath::img_dir + id_canva + ext_img);
       //!
       canvas[j][i + 4]->SetRightMargin(0.15);
       canvas[j][i + 4]->SetLeftMargin(0.17);
@@ -1384,7 +1387,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       ip_coor[j][i]->GetYaxis()->SetTitle(y_title);
       ip_coor[j][i]->Draw("COLZ");
 
-      canvas[j][i + 4]->Print(img_dir + id_canva + ext_img);
+      canvas[j][i + 4]->Print(SystemPath::img_dir + id_canva + ext_img);
       //!
       canvas[j][i + 7]->SetRightMargin(0.15);
       canvas[j][i + 7]->SetLeftMargin(0.17);
@@ -1398,7 +1401,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       neu_mom[j][i]->GetYaxis()->SetTitle(y_title);
       neu_mom[j][i]->Draw("COLZ");
 
-      canvas[j][i + 7]->Print(img_dir + id_canva + ext_img);
+      canvas[j][i + 7]->Print(SystemPath::img_dir + id_canva + ext_img);
     }
     //!
     gStyle->SetOptStat(0);
@@ -1428,7 +1431,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     line_3.Draw("SAME");
     line_4.Draw("SAME");*/
 
-    canvas[j][3]->Print(img_dir + id_canva + ext_img);
+    canvas[j][3]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     gStyle->SetOptStat(1);
     //!
@@ -1444,7 +1447,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     neu_mom[j][3]->GetYaxis()->SetTitle(y_title);
     neu_mom[j][3]->Draw("COLZ");
 
-    canvas[j][10]->Print(img_dir + id_canva + ext_img);
+    canvas[j][10]->Print(SystemPath::img_dir + id_canva + ext_img);
     //!
 
     gStyle->SetOptStat(0);
@@ -1559,7 +1562,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       fit_text->Draw();
 
       id_canva = "pull" + std::to_string(j + 1) + std::to_string(i + 1);
-      canvas[j][i + 13]->Print(img_dir + id_canva + ext_img);
+      canvas[j][i + 13]->Print(SystemPath::img_dir + id_canva + ext_img);
 
       fit_text->Clear();
     }
@@ -1571,7 +1574,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     bunch[j]->Draw();
 
     id_canva = "bunchnum" + std::to_string(j + 1);
-    canvas[j][23]->Print(img_dir + id_canva + ext_root);
+    canvas[j][23]->Print(SystemPath::img_dir + id_canva + ext_root);
 
     canvas[j][25]->SetRightMargin(0.15);
     canvas[j][25]->SetLeftMargin(0.17);
@@ -1596,7 +1599,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     betadt_hist[j]->Draw();
     betadtover90_hist[j]->Draw("SAME");
     legend->Draw();
-    canvas[j][25]->Print(img_dir + id_canva + ext_img);
+    canvas[j][25]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     legend->Clear();
 
@@ -1623,7 +1626,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     betapm_hist[j]->Draw();
     betapmover90_hist[j]->Draw("SAME");
     legend->Draw();
-    canvas[j][81]->Print(img_dir + id_canva + ext_img);
+    canvas[j][81]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     legend->Clear();
 
@@ -1642,7 +1645,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     beta1_hist[j]->GetXaxis()->SetTitle(x_title);
     beta1_hist[j]->GetYaxis()->SetTitle(y_title);
     beta1_hist[j]->Draw("COLZ");
-    canvas[j][26]->Print(img_dir + id_canva + ext_img);
+    canvas[j][26]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     canvas[j][26]->SetRightMargin(0.15);
     canvas[j][26]->SetLeftMargin(0.17);
@@ -1657,7 +1660,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     beta2_hist[j]->GetXaxis()->SetTitle(x_title);
     beta2_hist[j]->GetYaxis()->SetTitle(y_title);
     beta2_hist[j]->Draw("COLZ");
-    canvas[j][26]->Print(img_dir + id_canva + ext_img);
+    canvas[j][26]->Print(SystemPath::img_dir + id_canva + ext_img);
 
     //!
     for (Int_t k = 0; k < 5; k++)
@@ -1704,7 +1707,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
         hist_temp->GetYaxis()->SetTitle(y_title);
 
         hist_temp->Draw();
-        canvas_proj[j][k][i - 1]->Print(img_dir + id_canva + ext_img);
+        canvas_proj[j][k][i - 1]->Print(SystemPath::img_dir + id_canva + ext_img);
       }
 
       canvas_std[j][k]->SetRightMargin(0.15);
@@ -1723,7 +1726,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       sigmas_std[j][k]->GetYaxis()->SetTitle(y_title);
       sigmas_std[j][k]->GetYaxis()->SetRangeUser(-10.0, 10.0);
       sigmas_std[j][k]->Draw("COLZ");
-      canvas_std[j][k]->Print(img_dir + id_canva + ext_img);
+      canvas_std[j][k]->Print(SystemPath::img_dir + id_canva + ext_img);
 
       res_std_hist[j][k]->SetLineColor(res_color[k]);
     }
@@ -1745,7 +1748,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     res_std_hist[j][1]->Draw("PE1SAME");
     res_std_hist[j][2]->Draw("PE1SAME");
     legend->Draw();
-    canvas[j][22]->Print(img_dir + id_canva + ext_img);
+    canvas[j][22]->Print(SystemPath::img_dir + id_canva + ext_img);
     //!
     id_canva = "sigmas_std_times" + std::to_string(j + 1);
     x_title = "K#rightarrow#pi^{0}#pi^{0} path generated [cm]";
@@ -1757,7 +1760,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     res_std_hist[j][3]->GetYaxis()->SetMaxDigits(3);
     res_std_hist[j][3]->GetYaxis()->SetRangeUser(0.0, 5.0);
     res_std_hist[j][3]->Draw("PE1");
-    canvas[j][99]->Print(img_dir + id_canva + ext_img);
+    canvas[j][99]->Print(SystemPath::img_dir + id_canva + ext_img);
     //!
     id_canva = "sigmas_std_length" + std::to_string(j + 1);
     x_title = "K#rightarrow#pi^{0}#pi^{0} path generated [cm]";
@@ -1768,7 +1771,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     res_std_hist[j][4]->SetYTitle(y_title);
     res_std_hist[j][4]->GetYaxis()->SetRangeUser(0.0, 5.0);
     res_std_hist[j][4]->Draw("PE1");
-    canvas[j][24]->Print(img_dir + id_canva + ext_img);
+    canvas[j][24]->Print(SystemPath::img_dir + id_canva + ext_img);
     //!
 
     legend->Clear();

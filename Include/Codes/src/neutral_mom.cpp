@@ -1,6 +1,5 @@
 #include "neutral_mom.h"
 #include "TMath.h"
-#include <const.h>
 
 void neutral_mom(Float_t Xcl, Float_t Ycl, Float_t Zcl, Float_t Enecl, Float_t *neu_vtx, Float_t *mom_vec)
 {

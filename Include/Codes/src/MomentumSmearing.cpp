@@ -1,5 +1,7 @@
 #include <MomentumSmearing.h>
 
+#include <SystemPaths.h>
+
 namespace KLOE
 {
   template class MomentumSmearing<Double_t>;
@@ -132,7 +134,7 @@ namespace KLOE
     std::string json = (std::string)TBufferJSON::ToJSON(&_covMatrix);
     properties["momSmearing"]["covarianceMatrix"] = json;
 
-    std::ofstream outfile(propName);
+    std::ofstream outfile(SystemPath::generalPropertiesPath);
     outfile << properties.dump(4);
     outfile.close();
   }

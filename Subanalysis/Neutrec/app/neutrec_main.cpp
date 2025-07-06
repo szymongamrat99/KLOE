@@ -16,7 +16,7 @@ int Neutrec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt
           jmax = properties["variables"]["KinFit"]["Trilateration"]["bunchMax"];
 
   // Set logger for error logging
-  std::string logFilename = (std::string)neutrec_dir + (std::string)logs_dir + "neutRec.log";
+  std::string logFilename = (std::string)SystemPath::neutrec_dir + (std::string)SystemPath::logs_dir + "neutRec.log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------

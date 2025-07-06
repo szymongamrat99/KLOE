@@ -11,10 +11,12 @@
 #include <neu_triangle.h>
 #include <plane_intersection.h>
 #include <neutral_mom.h>
+
 #include "../inc/trilateration.hpp"
 
 Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+	
 
 	Bool_t
 			good_clus = (Bool_t)properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
@@ -96,7 +98,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 				datestamp = Obj.getCurrentDate(),
 				name = "";
 
-		name = neutrec_dir + root_files_dir + neu_triangle_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
+		name = SystemPath::neutrec_dir + SystemPath::root_files_dir + neu_triangle_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
 
 		properties["variables"]["tree"]["filename"]["trianglefinal"] = name;
 

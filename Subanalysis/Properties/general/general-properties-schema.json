@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "General Properties Schema",
+  "type": "object",
+  "properties": {
+    "general-logs": {
+      "title": "General Logs",
+      "description": "This section contains general logs related to the main program. It includes information about the inclusion of trees to TChain, any errors encountered, and other relevant messages.",
+      "fields": {
+        "log-level": {
+          "type": "string",
+          "enum": ["info", "warning", "error"],
+          "default": "info",
+          "description": "The level of logging to be used for general logs."
+        },
+        "log-file-path": {
+          "type": "string",
+          "default": "",
+          "description": "The file path where general logs will be stored."
+        }
+      }
+    }
+  }
+}

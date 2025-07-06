@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
   KLOE::pm00 eventAnalysis;
   // -------------------------------------------------------------------
   // Set logger for error logging
-  std::string logFilename = (std::string)base_path + (std::string)logs_dir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
+  std::string logFilename = (std::string)SystemPath::basePath + (std::string)SystemPath::logs_dir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
@@ -34,9 +34,12 @@ int main(int argc, char *argv[])
   setGlobalStyle();
   // -------------------------------------------------------------------
   // Set config file watcher
-  ConfigWatcher cfgWatcher(propName);
+  ConfigWatcher cfgWatcher(SystemPath::generalPropertiesPath);
   cfgWatcher.start();
   // -------------------------------------------------------------------
+  // Set PhysicsConstants instance
+  PhysicsConstants physConst(SystemPath::pdgConstFilePath);
+  
 
   try
   {
@@ -123,7 +126,7 @@ int main(int argc, char *argv[])
   properties["variables"]["rootFiles"]["MC"]["firstFile"] = firstFile;
   properties["variables"]["rootFiles"]["MC"]["lastFile"] = lastFile;
 
-  std::ofstream outfile(propName);
+  std::ofstream outfile(SystemPath::generalPropertiesPath);
   outfile << properties.dump(4);
   outfile.close();
 
@@ -252,7 +255,7 @@ int main(int argc, char *argv[])
         infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
         logger.getLog(infoCode, "MC generated variables for analysis");
 
-        GenVars_main(chain, eventAnalysis, dataTypeOpt);
+        GenVars_main(chain, eventAnalysis, dataTypeOpt, physConst);
         break;
       }
       case Controls::MainMenu::KCHREC_NO_BOOST:
@@ -260,7 +263,7 @@ int main(int argc, char *argv[])
         infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
         logger.getLog(infoCode, "Kchrec reconstruction");
 
-        KchRec_main(chain, eventAnalysis, dataTypeOpt);
+        KchRec_main(chain, eventAnalysis, dataTypeOpt, physConst);
         break;
       }
       case Controls::MainMenu::KCHREC_BOOST:
@@ -272,7 +275,7 @@ int main(int argc, char *argv[])
         infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
         logger.getLog(infoCode, "Omega-pi0 Reconstruction");
 
-        OmegaRec_main(chain, eventAnalysis, dataTypeOpt);
+        OmegaRec_main(chain, eventAnalysis, dataTypeOpt, physConst);
         break;
       }
       case Controls::MainMenu::REGEN_REJ:
@@ -282,7 +285,7 @@ int main(int argc, char *argv[])
       }
       case Controls::MainMenu::KNEREC_TRILAT:
       {
-        Neutrec_main(chain, eventAnalysis, dataTypeOpt);
+        Neutrec_main(chain, eventAnalysis, dataTypeOpt, physConst);
         break;
       }
       case Controls::MainMenu::KNEREC_TRIANGLE:
@@ -298,7 +301,7 @@ int main(int argc, char *argv[])
         infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
         logger.getLog(infoCode, "CP Final Fit");
 
-        CPFit_main(chain, eventAnalysis, cfgWatcher, dataTypeOpt);
+        CPFit_main(chain, eventAnalysis, cfgWatcher, dataTypeOpt, physConst);
         break;
       }
       case Controls::MainMenu::PLOTS:
@@ -308,7 +311,7 @@ int main(int argc, char *argv[])
         infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
         logger.getLog(infoCode, "Covariance Matrix Determination");
 
-        CovMatrix_main(chain, eventAnalysis, dataTypeOpt);
+        CovMatrix_main(chain, eventAnalysis, dataTypeOpt, physConst);
         break;
       }
         // Plots_main(chain);
@@ -323,7 +326,7 @@ int main(int argc, char *argv[])
         infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
         logger.getLog(infoCode, "Kchrec reconstruction");
 
-        KchRec_main(chain, eventAnalysis, dataTypeOpt);
+        KchRec_main(chain, eventAnalysis, dataTypeOpt, physConst);
         break;
       }
       case Controls::MainMenuControlSample::COV_MATRIX:
@@ -331,7 +334,7 @@ int main(int argc, char *argv[])
         infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
         logger.getLog(infoCode, "Covariance Matrix Determination");
 
-        CovMatrix_main(chain, eventAnalysis, dataTypeOpt);
+        CovMatrix_main(chain, eventAnalysis, dataTypeOpt, physConst);
         break;
       }
       case Controls::MainMenuControlSample::CORR_FACTOR:

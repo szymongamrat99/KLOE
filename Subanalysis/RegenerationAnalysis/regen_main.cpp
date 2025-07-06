@@ -15,7 +15,7 @@ int Regen_main()
   Controls::Menu *menu = new Controls::Menu(8);
   ErrorHandling::ErrorLogs logger;
   ofstream LogFile;
-  LogFile.open(gen_vars_dir + logs_dir + "Regen.log");
+  LogFile.open(SystemPath::gen_vars_dir + SystemPath::logs_dir + "Regen.log");
   setGlobalStyle();
 
   Int_t firstFile, lastFile, ind_data_mc;

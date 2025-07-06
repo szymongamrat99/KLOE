@@ -1,0 +1,11 @@
+<map id="Include/Codes/inc/Logs.h" name="Include/Codes/inc/Logs.h">
+<area shape="rect" id="node2" href="$covmatrix_8hpp.html" title="Header file for Covariance Matrix determination. " alt="" coords="357,80,556,121"/>
+<area shape="rect" id="node6" href="$cpfit_8hpp.html" title="Header file for CP Fit functions with plots generation. " alt="" coords="878,80,1030,121"/>
+<area shape="rect" id="node3" href="$covmatrix__main_8cpp.html" title="Subanalysis/CovarianceMatrix\l/app/covmatrix_main.cpp" alt="" coords="5,177,204,218"/>
+<area shape="rect" id="node4" href="$cov__matrix__determination_8cpp.html" title="Subanalysis/CovarianceMatrix\l/src/cov_matrix_determination.cpp" alt="" coords="228,177,451,218"/>
+<area shape="rect" id="node5" href="$cov__matrix__determination__control__sample_8cpp.html" title="Subanalysis/CovarianceMatrix\l/src/cov_matrix_determination\l_control_sample.cpp" alt="" coords="475,169,673,225"/>
+<area shape="rect" id="node7" href="$cpfit__main_8cpp.html" title="Subanalysis/CPFit/app\l/cpfit_main.cpp" alt="" coords="697,177,853,218"/>
+<area shape="rect" id="node8" href="$cp__fit__func_8cpp.html" title="Subanalysis/CPFit/src\l/cp_fit_func.cpp" alt="" coords="877,177,1031,218"/>
+<area shape="rect" id="node9" href="$cp__fit__mc__data_8cpp.html" title="Subanalysis/CPFit/src\l/cp_fit_mc_data.cpp" alt="" coords="1055,177,1208,218"/>
+<area shape="rect" id="node10" href="$cut__search_8cpp.html" title="Subanalysis/CPFit/src\l/cut_search.cpp" alt="" coords="1232,177,1385,218"/>
+</map>

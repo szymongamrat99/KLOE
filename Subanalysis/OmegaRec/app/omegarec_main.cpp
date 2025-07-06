@@ -9,7 +9,7 @@ using namespace std;
 int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
   // Set logger for error logging
-  std::string logFilename = (std::string)omegarec_dir + (std::string)logs_dir + "omegaRec_" + Obj.getCurrentDate() + ".log";
+  std::string logFilename = (std::string)SystemPath::omegarec_dir + (std::string)SystemPath::logs_dir + "omegaRec_" + Obj.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------

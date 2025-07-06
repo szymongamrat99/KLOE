@@ -1,6 +1,5 @@
 #include "uncertainties.h"
 #include "TMath.h"
-#include <const.h>
 
 #define sigma_coor 1.3
 

@@ -20,13 +20,13 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 			*tree_cutvars;
 
 	TString
-			mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
+			mctruth_name = SystemPath::gen_vars_dir + SystemPath::root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
 			omega_name = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
 			tree_name = std::string(properties["variables"]["tree"]["treename"]["omegarec"]),
 			cutvars_csv_name = "CutVars";
 
 	// Wrapper to read the CSV file properly
-	std::ifstream CSVfile(efficiency_dir + input_dir + cutvars_csv_name + ext_csv);
+	std::ifstream CSVfile(SystemPath::efficiency_dir + SystemPath::input_dir + cutvars_csv_name + ext_csv);
 
 	std::string
 			line;
@@ -274,7 +274,7 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 
 		legend->Draw();
 
-		TString pngname = img_dir + "eff_" + varName[k] + ".png";
+		TString pngname = SystemPath::img_dir + "eff_" + varName[k] + ".png";
 		canva->Print(pngname);
 	}
 
