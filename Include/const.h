@@ -21,7 +21,18 @@
 using json = nlohmann::json;
 
 // Get the env variable for properties
-static std::ifstream propertyFile(SystemPath::generalPropertiesPath.c_str());
+
+const std::string
+    kloedataPath = getenv("KLOE_DBV26_DK0"),
+    kloeMCPath = getenv("KLOE_DBV26_MK0"),
+    workdirPath = getenv("WORKDIR"),
+    chainDataFiles = kloedataPath + "/*.root",
+    chainMCFiles = kloeMCPath + "/*.root",
+    pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json",
+    propertiesPath = getenv("PROPERTIESKLOE"),
+    propName = propertiesPath + "/properties.json";
+
+static std::ifstream propertyFile(propName.c_str());
 static json properties = json::parse(propertyFile);
 
 // General
@@ -47,6 +58,7 @@ const Color_t dataColor = kBlack;
 const Color_t mcSumColor = kOrange;
 
 const TString
+    base_path = workdirPath + "/KLOE/",
     path_tmp = (std::string)properties["variables"]["rootFiles"]["path"],
     path_cs = (std::string)properties["variables"]["rootFiles"]["pathControlSample"],
     prod2root_path_v26 = "/data/k2/DBV-26/DK0",
