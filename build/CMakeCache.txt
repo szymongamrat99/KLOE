@@ -14,6 +14,69 @@
 # EXTERNAL cache entries
 ########################
 
+//Path to a library.
+BLAS_Accelerate_LIBRARY:FILEPATH=BLAS_Accelerate_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_acml_LIBRARY:FILEPATH=BLAS_acml_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_acml_mp_LIBRARY:FILEPATH=BLAS_acml_mp_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_blas_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libblas.so
+
+//Path to a library.
+BLAS_blis_LIBRARY:FILEPATH=BLAS_blis_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_complib.sgimath_LIBRARY:FILEPATH=BLAS_complib.sgimath_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_cxml_LIBRARY:FILEPATH=BLAS_cxml_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_dxml_LIBRARY:FILEPATH=BLAS_dxml_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_essl_LIBRARY:FILEPATH=BLAS_essl_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_f77blas_LIBRARY:FILEPATH=BLAS_f77blas_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_goto2_LIBRARY:FILEPATH=BLAS_goto2_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_mkl_LIBRARY:FILEPATH=BLAS_mkl_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_mkl_em64t_LIBRARY:FILEPATH=BLAS_mkl_em64t_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_mkl_ia32_LIBRARY:FILEPATH=BLAS_mkl_ia32_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_mkl_intel_LIBRARY:FILEPATH=BLAS_mkl_intel_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_mkl_intel_lp64_LIBRARY:FILEPATH=BLAS_mkl_intel_lp64_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_openblas_LIBRARY:FILEPATH=BLAS_openblas_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_scsl_LIBRARY:FILEPATH=BLAS_scsl_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_sgemm_LIBRARY:FILEPATH=BLAS_sgemm_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_sunperf_LIBRARY:FILEPATH=BLAS_sunperf_LIBRARY-NOTFOUND
+
+//Path to a library.
+BLAS_vecLib_LIBRARY:FILEPATH=BLAS_vecLib_LIBRARY-NOTFOUND
+
 //The directory containing a CMake configuration file for Boost.
 Boost_DIR:PATH=Boost_DIR-NOTFOUND
 
@@ -231,19 +294,37 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Path to a file.
-CURL_INCLUDE_DIR:PATH=CURL_INCLUDE_DIR-NOTFOUND
+CURL_INCLUDE_DIR:PATH=/usr/include/x86_64-linux-gnu
 
 //Path to a library.
 CURL_LIBRARY_DEBUG:FILEPATH=CURL_LIBRARY_DEBUG-NOTFOUND
 
 //Path to a library.
-CURL_LIBRARY_RELEASE:FILEPATH=CURL_LIBRARY_RELEASE-NOTFOUND
+CURL_LIBRARY_RELEASE:FILEPATH=/usr/lib/x86_64-linux-gnu/libcurl.so
 
 //Value Computed by CMake
 KLSPM00_BINARY_DIR:STATIC=/data/ssd/gamrat/KLOE/build
 
 //Value Computed by CMake
 KLSPM00_SOURCE_DIR:STATIC=/data/ssd/gamrat/KLOE
+
+//Path to a library.
+LAPACK_Accelerate_LIBRARY:FILEPATH=LAPACK_Accelerate_LIBRARY-NOTFOUND
+
+//Path to a library.
+LAPACK_flame_LIBRARY:FILEPATH=LAPACK_flame_LIBRARY-NOTFOUND
+
+//Path to a library.
+LAPACK_goto2_LIBRARY:FILEPATH=LAPACK_goto2_LIBRARY-NOTFOUND
+
+//Path to a library.
+LAPACK_lapack_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/liblapack.so
+
+//Path to a library.
+LAPACK_openblas_LIBRARY:FILEPATH=LAPACK_openblas_LIBRARY-NOTFOUND
+
+//Path to a library.
+LAPACK_vecLib_LIBRARY:FILEPATH=LAPACK_vecLib_LIBRARY-NOTFOUND
 
 //Path to a library.
 ROOT_Core_LIBRARY:FILEPATH=/data/4/users/gamrat/root_dirs/install_root/lib/libCore.so
@@ -352,6 +433,56 @@ ROOT_rootrm_CMD:FILEPATH=/data/4/users/gamrat/root_dirs/install_root/bin/rootrm
 # INTERNAL cache entries
 ########################
 
+//ADVANCED property for variable: BLAS_Accelerate_LIBRARY
+BLAS_Accelerate_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_WORKS
+BLAS_WORKS-ADVANCED:INTERNAL=1
+//Have Fortran function sgemm
+BLAS_WORKS:INTERNAL=
+//ADVANCED property for variable: BLAS_acml_LIBRARY
+BLAS_acml_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_acml_mp_LIBRARY
+BLAS_acml_mp_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_blas_LIBRARY
+BLAS_blas_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_blas_WORKS
+BLAS_blas_WORKS-ADVANCED:INTERNAL=1
+//Have Fortran function sgemm
+BLAS_blas_WORKS:INTERNAL=1
+//ADVANCED property for variable: BLAS_blis_LIBRARY
+BLAS_blis_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_complib.sgimath_LIBRARY
+BLAS_complib.sgimath_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_cxml_LIBRARY
+BLAS_cxml_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_dxml_LIBRARY
+BLAS_dxml_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_essl_LIBRARY
+BLAS_essl_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_f77blas_LIBRARY
+BLAS_f77blas_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_goto2_LIBRARY
+BLAS_goto2_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_mkl_LIBRARY
+BLAS_mkl_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_mkl_em64t_LIBRARY
+BLAS_mkl_em64t_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_mkl_ia32_LIBRARY
+BLAS_mkl_ia32_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_mkl_intel_LIBRARY
+BLAS_mkl_intel_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_mkl_intel_lp64_LIBRARY
+BLAS_mkl_intel_lp64_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_openblas_LIBRARY
+BLAS_openblas_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_scsl_LIBRARY
+BLAS_scsl_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_sgemm_LIBRARY
+BLAS_sgemm_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_sunperf_LIBRARY
+BLAS_sunperf_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: BLAS_vecLib_LIBRARY
+BLAS_vecLib_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Boost_DIR
 Boost_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Boost_FILESYSTEM_LIBRARY_DEBUG
@@ -448,6 +579,14 @@ CMAKE_GENERATOR_INSTANCE:INTERNAL=
 CMAKE_GENERATOR_PLATFORM:INTERNAL=
 //Name of generator toolset.
 CMAKE_GENERATOR_TOOLSET:INTERNAL=
+//Have symbol pthread_create
+CMAKE_HAVE_LIBC_CREATE:INTERNAL=
+//Have library pthreads
+CMAKE_HAVE_PTHREADS_CREATE:INTERNAL=
+//Have library pthread
+CMAKE_HAVE_PTHREAD_CREATE:INTERNAL=1
+//Have include pthread.h
+CMAKE_HAVE_PTHREAD_H:INTERNAL=1
 //Source directory with the top level CMakeLists.txt file for this
 // project
 CMAKE_HOME_DIRECTORY:INTERNAL=/data/ssd/gamrat/KLOE
@@ -470,7 +609,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=1
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=10
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -517,6 +656,28 @@ CURL_INCLUDE_DIR-ADVANCED:INTERNAL=1
 CURL_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CURL_LIBRARY_RELEASE
 CURL_LIBRARY_RELEASE-ADVANCED:INTERNAL=1
+//Details about finding BLAS
+FIND_PACKAGE_MESSAGE_DETAILS_BLAS:INTERNAL=[/usr/lib/x86_64-linux-gnu/libblas.so][v()]
+//Details about finding CURL
+FIND_PACKAGE_MESSAGE_DETAILS_CURL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libcurl.so][/usr/include/x86_64-linux-gnu][v7.64.0()]
+//Details about finding Threads
+FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//ADVANCED property for variable: LAPACK_Accelerate_LIBRARY
+LAPACK_Accelerate_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: LAPACK_flame_LIBRARY
+LAPACK_flame_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: LAPACK_goto2_LIBRARY
+LAPACK_goto2_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: LAPACK_lapack_LIBRARY
+LAPACK_lapack_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: LAPACK_lapack_WORKS
+LAPACK_lapack_WORKS-ADVANCED:INTERNAL=1
+//Have Fortran function cheev
+LAPACK_lapack_WORKS:INTERNAL=1
+//ADVANCED property for variable: LAPACK_openblas_LIBRARY
+LAPACK_openblas_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: LAPACK_vecLib_LIBRARY
+LAPACK_vecLib_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: ROOT_Core_LIBRARY
 ROOT_Core_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: ROOT_Gpad_LIBRARY

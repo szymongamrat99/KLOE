@@ -27,7 +27,7 @@ const std::string
     workdirPath = getenv("WORKDIR"),
     chainDataFiles = kloedataPath + "/*.root",
     chainMCFiles = kloeMCPath + "/*.root",
-    pdgConstFilePath = workdirPath + "/scripts/Scripts/Subanalysis/Properties/pdg_api/pdg_const.json",
+    pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json",
     propertiesPath = getenv("PROPERTIESKLOE"),
     propName = propertiesPath + "/properties.json";
 
@@ -126,7 +126,7 @@ const Color_t dataColor = kBlack;
 const Color_t mcSumColor = kOrange;
 
 const TString
-    base_path = "/internal/big_one/4/users/gamrat/scripts/Scripts/",
+    base_path = workdirPath + "/KLOE/",
     path_tmp = (std::string)properties["variables"]["rootFiles"]["path"],
     path_cs = (std::string)properties["variables"]["rootFiles"]["pathControlSample"],
     prod2root_path_v26 = "/data/k2/DBV-26/DK0",
