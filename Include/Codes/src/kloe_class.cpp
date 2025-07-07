@@ -540,6 +540,9 @@ namespace KLOE
     {
         ErrorHandling::InfoCodes infoCode;
 
+        std::ifstream rootFiles(rootfilesName);
+        json filePaths = json::parse(rootFiles);
+
         Bool_t *all_phys;
 
         TString fullname = "",
@@ -560,10 +563,6 @@ namespace KLOE
                 filenamemc.push_back((std::string)properties["variables"]["rootFiles"]["filenameMC"][i]);
             }
         }
-
-        // path = path + "/" + 
-
-        // pm00::ExtractUniqueRuns
         
         dirnamedata = "DATA";
         filenamedata = "data_stream42_";

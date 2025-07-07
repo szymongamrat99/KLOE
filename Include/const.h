@@ -29,7 +29,8 @@ const std::string
     chainMCFiles = kloeMCPath + "/*.root",
     pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json",
     propertiesPath = getenv("PROPERTIESKLOE"),
-    propName = propertiesPath + "/properties.json";
+    propName = propertiesPath + "/properties.json",
+    rootfilesName = propertiesPath + "/root-files.json";
 
 static std::ifstream propertyFile(propName.c_str());
 static json properties = json::parse(propertyFile);
