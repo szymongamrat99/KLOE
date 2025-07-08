@@ -150,6 +150,7 @@ const TString
     neutrec_dir = base_path + "Subanalysis/Neutrec/",
     cpfit_dir = base_path + "Subanalysis/CPFit/",
     covmatrix_dir = base_path + "Subanalysis/CovarianceMatrix/",
+    initialanalysis_dir = base_path + "Subanalysis/InitialAnalysis/",
     omegarec_dir = base_path + "Subanalysis/OmegaRec/",
     efficiency_dir = base_path + "Subanalysis/EfficiencyAnalysis/",
     charged_dir = base_path + "Subanalysis/KchRec/",

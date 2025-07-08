@@ -29,7 +29,8 @@ add_library(LibRec SHARED
             src/SplitFileWriter.cpp
             src/triple_gaus.cpp
             src/uncertainties.cpp
-            src/ConfigManager.cpp)
+            src/ConfigManager.cpp
+            )
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
 # PUBLIC: oznacza, że katalog z nagłówkami (tu: bieżący katalog, '.') będzie

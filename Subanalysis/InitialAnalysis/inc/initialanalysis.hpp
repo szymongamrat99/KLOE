@@ -1,0 +1,24 @@
+#ifndef COVARIANCEMATRIX_H
+#define COVARIANCEMATRIX_H
+
+#include <iostream>
+#include <fstream>
+#include <vector>
+
+#include <TVectorT.h>
+#include <TMatrixT.h>
+
+#include <const.h>
+#include <ErrorLogs.h>
+#include <Logs.h>
+#include <MainMenu.h>
+#include <kloe_class.h>
+#include <MeasQualityGraph.h>
+#include <MomentumSmearing.h>
+#include <CustomGraph.h>
+#include <interference.h>
+#include <fort_common.h>
+
+int InitialAnalysis_full(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
+
+#endif //! COVARIANCEMATRIX_H
