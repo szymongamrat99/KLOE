@@ -1,5 +1,8 @@
 {
     "$schema": "./analysis-schema.json",
+    "flags": {
+        "initialAnalysisExec": true
+    },
     "lastScript": "Final CP Parameters normalization",
     "lastUpdate": "2025-06-26_0711",
     "momSmearing": {
@@ -625,6 +628,7 @@
                 "trilaterationKinFit": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_tri_kin_fit_2025-03-23_24_3_5_20_3.root"
             },
             "treename": {
+                "general": "h1",
                 "generatedvars": "h_gen_vars",
                 "mctruth": "h_gen_vars",
                 "omegarec": "h_omega_rec",

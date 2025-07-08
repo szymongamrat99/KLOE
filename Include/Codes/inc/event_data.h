@@ -35,31 +35,25 @@ struct BhabhaIP
   }
 };
 
-struct TrackProperties
+struct GeneralEventPropertiesMC
 {
-  TrackProperties(TTreeReader &reader) : curv(reader, "CurV"),
-                                  phiv(reader, "PhiV"),
-                                  cotv(reader, "CotV"),
-                                  energy(reader, "Broots"),
-                                  x(reader, "Bx"),
-                                  y(reader, "By"),
-                                  z(reader, "Bz") {}
+  GeneralEventPropertiesMC(TTreeReader &reader) : ntmc(reader, "nTMC"),
+                                           nvtxmc(reader, "nVtxMC"),
+                                           pidmc(reader, "PidMC"),
+                                           mother(reader, "Mother"),
+                                           vtxmc(reader, "VtxMC")
+                                           {}
 
-  TTreeReaderArray<Float_t> curv;
-  TTreeReaderArray<Float_t> phiv;
-  TTreeReaderArray<Float_t> cotv;
-  TTreeReaderValue<Float_t> energy;
-  TTreeReaderValue<Float_t> x;
-  TTreeReaderValue<Float_t> y;
-  TTreeReaderValue<Float_t> z;
+  TTreeReaderValue<Int_t> ntmc;
+  TTreeReaderValue<Int_t> nvtxmc;
 
-  TVector3 getMomentum() const
-  {
-    return TVector3(*px, *py, *pz);
-  };
+  TTreeReaderArray<Int_t> pidmc;
+  TTreeReaderArray<Int_t> mother;
+  TTreeReaderArray<Int_t> vtxmc;
 
   bool isValid() const
   {
-    return px.IsValid() && py.IsValid() && pz.IsValid();
+    return ntmc.IsValid() && nvtxmc.IsValid() && pidmc.IsValid() && mother.IsValid() && vtxmc.IsValid();
   }
+
 };

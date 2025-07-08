@@ -32,6 +32,7 @@ add_subdirectory(Subanalysis/OmegaRec)
 add_subdirectory(Subanalysis/Neutrec)
 add_subdirectory(Include/Codes)
 add_subdirectory(Include/FortranAnalysis)
+add_subdirectory(Include/MainMenuHandler)
 # add_subdirectory(Subanalysis/Pipi)
 # add_subdirectory(Subanalysis/Plots)
 # add_subdirectory(Subanalysis/RegenerationAnalysis)
@@ -64,6 +65,7 @@ target_link_libraries(KLSPM00 PRIVATE
   GenVars
   CPFit
   OmegaRec
+  MainMenuHandler
   ${Boost_LIBRARIES}
   ${CURL_LIBRARIES}
   ${ROOT_LIBRARIES}

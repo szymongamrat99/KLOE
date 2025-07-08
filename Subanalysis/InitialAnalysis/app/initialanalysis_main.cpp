@@ -1,7 +1,5 @@
 #include <chrono>
-
 #include <TMath.h>
-#include <TStyle.h>
 
 #include "../inc/initialanalysis.hpp"
 
@@ -55,26 +53,13 @@ int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTy
 
     switch (menuOpt)
     {
-    case Controls::CovMatrix::USING_MC_DATA:
-    {
-      infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
-      logger.getLog(infoCode, "Using MC generated vs. reconstructed momenta.");
-
-      Obj.startTimer();
-      CovarianceMatrixDetermination(chain, dataTypeOpt, logger, Obj);
-      
-      infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
-      logger.getLog(infoCode, Obj.endTimer());
-
-      break;
-    }
     case Controls::CovMatrix::USING_CONTROL_SAMPLE:
     {
       infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
-      logger.getLog(infoCode, "Using control sample.");
+      logger.getLog(infoCode, "Full initial analysis");
 
       Obj.startTimer();
-      CovarianceMatrixDeterminationControlSample(chain, dataTypeOpt, logger, Obj);
+      InitialAnalysis_full(chain, dataTypeOpt, logger, Obj);
       
       infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
       logger.getLog(infoCode, Obj.endTimer());
