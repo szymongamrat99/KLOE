@@ -5,7 +5,7 @@
 
 using namespace std;
 
-int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
+int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj)
 {
   // Set logger for error logging
   std::string logFilename = (std::string)initialanalysis_dir + (std::string)logs_dir + "InitialAnalysis.log";
@@ -13,8 +13,8 @@ int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTy
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Set Menu instance
-  Controls::Menu *menu = new Controls::Menu(11);
-  Controls::CovMatrix menuOpt;
+  Controls::Menu *menu = new Controls::Menu(13);
+  Controls::InitialAnalysisMenu menuOpt;
   // -------------------------------------------------------------------
 
   bool
@@ -32,7 +32,7 @@ int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTy
       cin >> menuOpt;
 
       dataTypeErr = !cin;
-      menuRangeErr = menuOpt < Controls::CovMatrix::USING_MC_DATA || menuOpt > Controls::CovMatrix::EXIT;
+      menuRangeErr = menuOpt < Controls::InitialAnalysisMenu::INIT_ANALYSIS_FULL || menuOpt > Controls::InitialAnalysisMenu::EXIT;
 
       if (dataTypeErr)
       {
@@ -53,19 +53,19 @@ int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTy
 
     switch (menuOpt)
     {
-    case Controls::CovMatrix::USING_CONTROL_SAMPLE:
+    case Controls::InitialAnalysisMenu::INIT_ANALYSIS_FULL:
     {
       infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
       logger.getLog(infoCode, "Full initial analysis");
 
       Obj.startTimer();
-      InitialAnalysis_full(chain, dataTypeOpt, logger, Obj);
+      InitialAnalysis_full(chain, logger, Obj);
       
       infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
       logger.getLog(infoCode, Obj.endTimer());
       break;
     }
-    case Controls::CovMatrix::EXIT:
+    case Controls::InitialAnalysisMenu::EXIT:
     {
       break;
     }
@@ -73,7 +73,7 @@ int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTy
       break;
     }
 
-  } while (menuOpt != Controls::CovMatrix::EXIT);
+  } while (menuOpt != Controls::InitialAnalysisMenu::EXIT);
 
   logger.printErrStats();
 

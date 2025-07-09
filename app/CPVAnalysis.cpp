@@ -1,6 +1,8 @@
 #include "../Include/klspm00.hpp"
 
 #include "../Include/MainMenuHandler/MainMenuHandler.h"
+#include <FileManager.h>
+#include <event_data.h>
 
 using namespace std;
 using namespace std::chrono;
@@ -42,6 +44,7 @@ int main(int argc, char *argv[])
   ConfigWatcher cfgWatcher(propName);
   cfgWatcher.start();
   // -------------------------------------------------------------------
+  Controls::DataType dataTypeOpt;
 
   try
   {
@@ -132,8 +135,6 @@ int main(int argc, char *argv[])
   outfile << properties.dump(4);
   outfile.close();
 
-  Controls::DataType dataTypeOpt;
-
   try
   {
     dataType->InitMenu();
@@ -157,26 +158,56 @@ int main(int argc, char *argv[])
     return int(err);
   }
 
+  // Set flag for initial analysis
+  Bool_t initialAnalysisExecution = properties["flags"]["initialAnalysisExec"];
+
   // Initialize and fill the TChain object
   TChain chain(generalTreeName.c_str());
-  eventAnalysis.chainInit(chain, dataTypeOpt, firstFile, lastFile, firstFile, lastFile, logger, csFlag);
-  // -------------------------------------------------------------------
 
+  KLOE::FileManager initObj;
   MainMenuHandler mainMenuHandler;
 
-  mainMenuHandler.runMenuLoop(
-      csFlag,
-      mainMenu,
-      mainMenuOpt,
-      mainMenuControlSample,
-      mainMenuControlSampleOpt,
-      chain,
-      eventAnalysis,
-      dataTypeOpt,
-      logger,
-      infoCode,
-      cfgWatcher
-  );
+  if (!initialAnalysisExecution)
+  {
+    initObj.chainInit(chain, dataTypeOpt, firstFile, lastFile, firstFile, lastFile, logger, csFlag);
+
+    mainMenuHandler.runMenuLoop(
+        csFlag,
+        mainMenu,
+        mainMenuOpt,
+        mainMenuControlSample,
+        mainMenuControlSampleOpt,
+        chain,
+        eventAnalysis,
+        dataTypeOpt,
+        logger,
+        infoCode,
+        cfgWatcher);
+  }
+  else
+  {
+    std::ifstream rootFiles(rootfilesName);
+    json filePaths = json::parse(rootFiles);
+
+    std::string
+        DataPath = filePaths["MC"]["path"][2],
+        runRegexPattern = "^.*(\\d{5}).*_v2\\.root$";
+
+    KLOE::RunStats runs = initObj.getRunStats(DataPath, runRegexPattern);
+    initObj.chainInit(chain, logger, DataPath, runRegexPattern,
+                     runs.minRun, runs.maxRun);
+    // -------------------------------------------------------
+    infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
+
+    std::string infoMsg = "Initialized TChain with " + std::to_string(chain.GetEntries()) + " entries.";
+    logger.getLog(infoCode, infoMsg);
+    // -------------------------------------------------------
+    infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
+
+    logger.getLog(infoCode, "Initial analysis execution.");
+    InitAnalysis_main(chain, eventAnalysis);
+
+  }
   // -------------------------------------------------------------------
   logger.printErrStats();
 

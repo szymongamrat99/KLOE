@@ -210,6 +210,14 @@ namespace Controls
     OPT_TOT = 4
   };
 
+  enum class InitialAnalysisMenu
+  {
+    INIT_ANALYSIS_FULL = 1,
+    EXIT = 2,
+
+    OPT_TOT = 3
+  };
+
   enum class DataType
   {
     SIGNAL_TOT = 1,
@@ -237,7 +245,7 @@ namespace Controls
     std::vector<TString> fileOpt;
 
     const int ChooseMenu;
-    std::vector<TString> MenuName = {"KchRec Menu", "NeutRec Menu", "Data Type", "Analysis file", "Final CPV Fit", "Generated Variables", "Omega-pi0 Reconstruction Menu", "Efficiency Check Menu", "Regeneration Rejection Menu", "Plots Menu", "Main Menu", "Covariant Matrix Determination", "Main Menu"};
+    std::vector<TString> MenuName = {"KchRec Menu", "NeutRec Menu", "Data Type", "Analysis file", "Final CPV Fit", "Generated Variables", "Omega-pi0 Reconstruction Menu", "Efficiency Check Menu", "Regeneration Rejection Menu", "Plots Menu", "Main Menu", "Covariant Matrix Determination", "Main Menu", "Initial Analysis Menu"};
 
     TString ChooseOpt = "Choose the option: ";
 
@@ -344,6 +352,14 @@ namespace Controls
         MenuOpt[int(MainMenuControlSample::CORR_FACTOR)] = Form("%d. Correction Factor Determination", int(MainMenuControlSample::CORR_FACTOR));
 
         MenuOpt[int(MainMenuControlSample::EXIT)] = Form("%d. Exit.", int(MainMenuControlSample::EXIT));
+
+        break;
+      }
+      case 13:
+      {
+        MenuOpt[int(InitialAnalysisMenu::INIT_ANALYSIS_FULL)] = Form("%d. Initial analysis with all reconstructions and cuts.", int(InitialAnalysisMenu::INIT_ANALYSIS_FULL));
+
+        MenuOpt[int(InitialAnalysisMenu::EXIT)] = Form("%d. Exit.", int(InitialAnalysisMenu::EXIT));
 
         break;
       }
@@ -454,6 +470,14 @@ namespace Controls
 
         break;
       }
+      case 13:
+      {
+        MenuOpt[int(InitialAnalysisMenu::INIT_ANALYSIS_FULL)] = Form("%d. Initial analysis with all reconstructions and cuts.", int(InitialAnalysisMenu::INIT_ANALYSIS_FULL));
+
+        MenuOpt[int(InitialAnalysisMenu::EXIT)] = Form("%d. Exit.", int(InitialAnalysisMenu::EXIT));
+
+        break;
+      }
       }
     };
 
@@ -561,6 +585,15 @@ namespace Controls
       case 12:
       {
         for (int i = 1; i < int(MainMenuControlSample::OPT_TOT); i++)
+        {
+          std::cout << MenuOpt[i] << std::endl;
+        }
+
+        break;
+      }
+      case 13:
+      {
+        for (int i = 1; i < int(InitialAnalysisMenu::OPT_TOT); i++)
         {
           std::cout << MenuOpt[i] << std::endl;
         }

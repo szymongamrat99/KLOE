@@ -12,7 +12,7 @@
 #include <kloe_class.h>
 #include <ConfigWatcher.h>
 
-int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
+int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj);
 int CPFit_main(TChain &chain, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher, Controls::DataType &dataTypeOpt);
 int GenVars_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
 int KchRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);

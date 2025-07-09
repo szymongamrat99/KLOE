@@ -30,6 +30,7 @@ add_subdirectory(Subanalysis/GeneratedVars)
 add_subdirectory(Subanalysis/KchRec)
 add_subdirectory(Subanalysis/OmegaRec)
 add_subdirectory(Subanalysis/Neutrec)
+add_subdirectory(Subanalysis/InitialAnalysis)
 add_subdirectory(Include/Codes)
 add_subdirectory(Include/FortranAnalysis)
 add_subdirectory(Include/MainMenuHandler)
@@ -66,6 +67,7 @@ target_link_libraries(KLSPM00 PRIVATE
   CPFit
   OmegaRec
   MainMenuHandler
+  InitialAnalysis
   ${Boost_LIBRARIES}
   ${CURL_LIBRARIES}
   ${ROOT_LIBRARIES}

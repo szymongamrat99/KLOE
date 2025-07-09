@@ -24,10 +24,10 @@ struct BhabhaIP
   TTreeReaderValue<Float_t> y;
   TTreeReaderValue<Float_t> z;
 
-  TVector3 getMomentum() const
-  {
-    return TVector3(*px, *py, *pz);
-  };
+  // TVector3 getMomentum() const
+  // {
+  //   return TVector3(*px, *py, *pz);
+  // };
 
   bool isValid() const
   {

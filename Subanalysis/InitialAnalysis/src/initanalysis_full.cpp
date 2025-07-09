@@ -13,7 +13,7 @@
 
 #include "../inc/initialanalysis.hpp"
 
-int InitialAnalysis_full(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
+int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
 	TTreeReader reader(&chain);
 	GeneralEventPropertiesMC eventProps(reader);

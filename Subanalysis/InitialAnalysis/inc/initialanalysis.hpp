@@ -19,6 +19,6 @@
 #include <interference.h>
 #include <fort_common.h>
 
-int InitialAnalysis_full(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
+int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
 
 #endif //! COVARIANCEMATRIX_H

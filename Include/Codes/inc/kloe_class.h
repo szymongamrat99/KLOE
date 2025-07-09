@@ -260,7 +260,7 @@ namespace KLOE
          * @param lastMC last MC file index
          * @param logger address to the ErrorHandling::ErrorLogs object to log the errors / infos during analysis operation
          */
-        void chainInit(TChain &chain_init, Controls::DataType &dataTypeOpt, UInt_t &firstData, UInt_t &lastData, UInt_t &firstMC, UInt_t &lastMC, ErrorHandling::ErrorLogs &logger, Int_t csFlag);
+        // void chainInit(TChain &chain_init, Controls::DataType &dataTypeOpt, UInt_t &firstData, UInt_t &lastData, UInt_t &firstMC, UInt_t &lastMC, ErrorHandling::ErrorLogs &logger, Int_t csFlag);
 
         void checkFilesList();
 
@@ -332,5 +332,8 @@ namespace KLOE
         std::set<Int_t> ExtractUniqueRuns(const std::string& directory, const std::string& pattern);
     };
 }
+
+// Forward declaration for FileManager
+namespace KLOE { class FileManager; }
 
 #endif
