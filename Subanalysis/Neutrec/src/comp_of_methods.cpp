@@ -132,7 +132,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   chain.SetBranchAddress("Xcl", baseKin.cluster[0]);
   chain.SetBranchAddress("Ycl", baseKin.cluster[1]);
   chain.SetBranchAddress("Zcl", baseKin.cluster[2]);
-  chain.SetBranchAddress("Tcl", baseKin.cluster[3]);
+  chain.SetBranchAddress("TclOld", baseKin.cluster[3]);
   chain.SetBranchAddress("Enecl", baseKin.cluster[4]);
 
   chain.SetBranchAddress("Bx", &baseKin.bhabha_vtx[0]);
@@ -145,9 +145,9 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   chain.SetBranchAddress("ntmc", &baseKin.ntmc);
   chain.SetBranchAddress("nvtxmc", &baseKin.nvtxmc);
   chain.SetBranchAddress("nv", &baseKin.nv);
-  chain.SetBranchAddress("pidmc", baseKin.pidmc);
-  chain.SetBranchAddress("vtxmc", baseKin.vtxmc);
-  chain.SetBranchAddress("mother", baseKin.mother);
+  chain.SetBranchAddress("pidmcOld", baseKin.pidmcOld);
+  chain.SetBranchAddress("vtxmcOld", baseKin.vtxmcOld);
+  chain.SetBranchAddress("motherOld", baseKin.motherOld);
 
   chain.SetBranchAddress("mcisr", &baseKin.mcisr);
   chain.SetBranchAddress("T0step1", &baseKin.T0step1);
@@ -928,7 +928,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
           {
 
             for (Int_t k = 0; k < baseKin.ntmc; k++)
-              pidmc_hist[j]->Fill(baseKin.pidmc[k]);
+              pidmc_hist[j]->Fill(baseKin.pidmcOld[k]);
 
             angle_vs_time[j][0]->Fill(angle_min_0, t_neutri);
 
@@ -1147,7 +1147,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
   pidmc_hist[0]->GetYaxis()->SetMaxDigits(3);
 
-  id_canva = "baseKin.pidmc";
+  id_canva = "baseKin.pidmcOld";
 
   pidmc_hist[0]->GetXaxis()->CenterTitle();
   pidmc_hist[0]->GetYaxis()->CenterTitle();

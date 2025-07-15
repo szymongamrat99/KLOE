@@ -9,14 +9,14 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
 
     BaseKinematics baseKin;
 
-    UChar_t pidmc[50], vtxmc[50], mother[50], mctruth, mcflag;
+    UChar_t pidmcOld[50], vtxmcOld[50], motherOld[50], mctruth, mcflag;
 
     chain.SetBranchAddress("ntmc", &interfcommon_.ntmc);
     chain.SetBranchAddress("nvtxmc", &interfcommon_.nvtxmc);
 
-    chain.SetBranchAddress("pidmc", pidmc);
-    chain.SetBranchAddress("vtxmc", vtxmc);
-    chain.SetBranchAddress("mother", mother);
+    chain.SetBranchAddress("pidmcOld", pidmcOld);
+    chain.SetBranchAddress("vtxmcOld", vtxmcOld);
+    chain.SetBranchAddress("motherOld", motherOld);
     chain.SetBranchAddress("mctruth", &mctruth);
     chain.SetBranchAddress("mcflag", &mcflag);
 
@@ -54,59 +54,59 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
         {
             for (Int_t j = 0; j < interfcommon_.ntmc; j++)
             {
-                if (mother[vtxmc[j] - 1] == 50)
+                if (motherOld[vtxmcOld[j] - 1] == 50)
                 {
-                    if (pidmc[j] == 10)
+                    if (pidmcOld[j] == 10)
                         Kl++;
-                    else if (pidmc[j] == 16)
+                    else if (pidmcOld[j] == 16)
                         Ks++;
-                    else if (pidmc[j] == 7)
+                    else if (pidmcOld[j] == 7)
                         pi0phi++;
-                    else if (pidmc[j] == 8)
+                    else if (pidmcOld[j] == 8)
                         piplusphi++;
-                    else if (pidmc[j] == 9)
+                    else if (pidmcOld[j] == 9)
                         piminusphi++;
-                    else if (pidmc[j] == 1)
+                    else if (pidmcOld[j] == 1)
                         gammaphi++;
                     else
                         otherphi++;
                 }
-                else if (mother[vtxmc[j] - 1] == 10)
+                else if (motherOld[vtxmcOld[j] - 1] == 10)
                 {
-                    if (pidmc[j] == 16)
+                    if (pidmcOld[j] == 16)
                         Ksregen++;
-                    else if (pidmc[j] == 7)
+                    else if (pidmcOld[j] == 7)
                         pi0kl++;
-                    else if (pidmc[j] == 8)
+                    else if (pidmcOld[j] == 8)
                         pipluskl++;
-                    else if (pidmc[j] == 9)
+                    else if (pidmcOld[j] == 9)
                         piminuskl++;
-                    else if (pidmc[j] == 5)
+                    else if (pidmcOld[j] == 5)
                         muonpluskl++;
-                    else if (pidmc[j] == 6)
+                    else if (pidmcOld[j] == 6)
                         muonminuskl++;
-                    else if (pidmc[j] == 2)
+                    else if (pidmcOld[j] == 2)
                         positronkl++;
-                    else if (pidmc[j] == 3)
+                    else if (pidmcOld[j] == 3)
                         electronkl++;
                     else
                         otherkl++;
                 }
-                else if (mother[vtxmc[j] - 1] == 16)
+                else if (motherOld[vtxmcOld[j] - 1] == 16)
                 {
-                    if (pidmc[j] == 7)
+                    if (pidmcOld[j] == 7)
                         pi0ks++;
-                    else if (pidmc[j] == 8)
+                    else if (pidmcOld[j] == 8)
                         piplusks++;
-                    else if (pidmc[j] == 9)
+                    else if (pidmcOld[j] == 9)
                         piminusks++;
-                    else if (pidmc[j] == 5)
+                    else if (pidmcOld[j] == 5)
                         muonplusks++;
-                    else if (pidmc[j] == 6)
+                    else if (pidmcOld[j] == 6)
                         muonminusks++;
-                    else if (pidmc[j] == 2)
+                    else if (pidmcOld[j] == 2)
                         positronks++;
-                    else if (pidmc[j] == 3)
+                    else if (pidmcOld[j] == 3)
                         electronks++;
                     else
                         otherks++;

@@ -17,15 +17,15 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 	// Branches' addresses
 	// Bhabha vars
 	Int_t ntmc, nvtxmc, nclu;
-	UChar_t pidmc[200], vtxmc[200], mother[200], mctruth = 0, mcflag = 0;
+	UChar_t pidmcOld[200], vtxmcOld[200], motherOld[200], mctruth = 0, mcflag = 0;
 	Float_t pos_mc[3][200], mom_mc[3][200], Knemc[9], cluster_rec[3][200], ipmc[3];
 
 	chain.SetBranchAddress("ntmc", &ntmc);
 	chain.SetBranchAddress("nvtxmc", &nvtxmc);
 
-	chain.SetBranchAddress("pidmc", pidmc);
-	chain.SetBranchAddress("vtxmc", vtxmc);
-	chain.SetBranchAddress("mother", mother);
+	chain.SetBranchAddress("pidmcOld", pidmcOld);
+	chain.SetBranchAddress("vtxmcOld", vtxmcOld);
+	chain.SetBranchAddress("motherOld", motherOld);
 
 	chain.SetBranchAddress("xvmc", pos_mc[0]);
 	chain.SetBranchAddress("yvmc", pos_mc[1]);
@@ -99,7 +99,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 		{
 			for (Int_t j = 0; j < nvtxmc; j++)
 			{
-				if (mother[j] == 50)
+				if (motherOld[j] == 50)
 				{
 					ipmcnew[0] = pos_mc[0][j];
 					ipmcnew[1] = pos_mc[1][j];
@@ -109,7 +109,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 
 			for (Int_t j = 0; j < nvtxmc; j++)
 			{
-				if (mother[j] == 10)
+				if (motherOld[j] == 10)
 				{
 					Kl[6] = pos_mc[0][j];
 					Kl[7] = pos_mc[1][j];
@@ -119,7 +119,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 
 			for (Int_t j = 0; j < nvtxmc; j++)
 			{
-				if (mother[j] == 16)
+				if (motherOld[j] == 16)
 				{
 					Ks[6] = pos_mc[0][j];
 					Ks[7] = pos_mc[1][j];
@@ -129,7 +129,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 
 			for (Int_t j = 0; j < ntmc; j++)
 			{
-				if (pidmc[j] == 10)
+				if (pidmcOld[j] == 10)
 				{
 					Kl[0] = mom_mc[0][j];
 					Kl[1] = mom_mc[1][j];
@@ -143,7 +143,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 
 			for (Int_t j = 0; j < ntmc; j++)
 			{
-				if (pidmc[j] == 16)
+				if (pidmcOld[j] == 16)
 				{
 					Ks[0] = mom_mc[0][j];
 					Ks[1] = mom_mc[1][j];
@@ -157,9 +157,9 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 
 			for (Int_t j = 0; j < ntmc; j++)
 			{
-				if (mother[vtxmc[j] - 1] == 10)
+				if (motherOld[vtxmcOld[j] - 1] == 10)
 				{
-					if (pidmc[j] == 7)
+					if (pidmcOld[j] == 7)
 					{
 						for (Int_t k = 0; k < 9; k++)
 						{
@@ -167,7 +167,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 							Kchmcnew[k] = Ks[k];
 						}
 					}
-					else if (pidmc[j] == 8 || pidmc[j] == 9)
+					else if (pidmcOld[j] == 8 || pidmcOld[j] == 9)
 					{
 						for (Int_t k = 0; k < 9; k++)
 						{
@@ -177,7 +177,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 					}
 				}
 
-				if ((mother[vtxmc[j] - 1] == 10 || mother[vtxmc[j] - 1] == 16) && (pidmc[j] == 8 || pidmc[j] == 9))
+				if ((motherOld[vtxmcOld[j] - 1] == 10 || motherOld[vtxmcOld[j] - 1] == 16) && (pidmcOld[j] == 8 || pidmcOld[j] == 9))
 				{
 					if (trkMC[0][3] == 0)
 					{
@@ -204,7 +204,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 
 			for (Int_t j = 0; j < ntmc; j++)
 			{
-				if ((mother[vtxmc[j] - 1] == 7) && pidmc[j] == 1)
+				if ((motherOld[vtxmcOld[j] - 1] == 7) && pidmcOld[j] == 1)
 				{
 					pgammc[count][0] = mom_mc[0][j];
 					pgammc[count][1] = mom_mc[1][j];

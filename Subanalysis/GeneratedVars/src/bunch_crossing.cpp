@@ -22,7 +22,7 @@ int bunch_crossing()
 
   chain_init(chain,1,56);
 
-  Float_t Knemc[9], Kchmc[9], Knereclor[9], Tcl[50], Xcl[50], Ycl[50], Zcl[50], ip[3], ipmc[3];
+  Float_t Knemc[9], Kchmc[9], Knereclor[9], TclOld[50], Xcl[50], Ycl[50], Zcl[50], ip[3], ipmc[3];
   UChar_t mctruth, g4taken[4], ncll[50];
 
   chain->SetBranchAddress("Kchmc",Kchmc);
@@ -30,7 +30,7 @@ int bunch_crossing()
   chain->SetBranchAddress("Xcl",Xcl);
   chain->SetBranchAddress("Ycl",Ycl);
   chain->SetBranchAddress("Zcl",Zcl);
-  chain->SetBranchAddress("Tcl",Tcl);
+  chain->SetBranchAddress("TclOld",TclOld);
   chain->SetBranchAddress("g4taken",g4taken);
   chain->SetBranchAddress("ncll",ncll);
   chain->SetBranchAddress("ip",ip);
@@ -79,7 +79,7 @@ int bunch_crossing()
                             pow(Zcl[ncll[g4taken[j] - 1] - 1] - Knemc[8],2));
 
         // t0 = -1.*t_bunch;
-        kaon_time += (Tcl[ncll[g4taken[j] - 1] - 1] - (gamma_path[j]/cVel));
+        kaon_time += (TclOld[ncll[g4taken[j] - 1] - 1] - (gamma_path[j]/cVel));
 
         // if(kaon_time < 2.715/2. && kaon_time > -2.715/2.) vel_histo->Fill(kaon_time);
         // else if(kaon_time < 2.715 + 2.715/2. && kaon_time > 2.715/2.) vel_histo->Fill(kaon_time - 2.715);

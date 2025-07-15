@@ -406,7 +406,7 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    DeltaT_pipi = (tl - ts);
    DeltaT_mc = (tpm_mc - t00_mc);
 
-   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00_tri/(k_beta00_tri*cVel));
+   for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00_tri/(k_beta00_tri*cVel));
    trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
    if(*mctruth == 1)

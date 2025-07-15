@@ -26,7 +26,7 @@ Double_t clu_ene_error(Float_t Enecl)
 };
 
 /**
- * @brief Uncertainty of the Tcl in nanoseconds (ns). Dependent of the energy of photon and the offset.
+ * @brief Uncertainty of the TclOld in nanoseconds (ns). Dependent of the energy of photon and the offset.
  * @param Enecl Cluster's energy in mega-electronvolts (MeV)
  * @return Returns:
  *          - For Enecl > 0. returns the calculated uncertainty

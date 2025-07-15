@@ -1,0 +1,384 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "Analysis-properties",
+  "description": "Schema for the analysis properties of KLOE CPV analysis",
+  "type": "object",
+  "properties": {
+    "lastUpdate": {
+      "description": "The date of last update of the JSON file - changed only during analysis",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}_\\d{4}$"
+    },
+    "lastScript": {
+      "description": "The script, which last caused the change of lastUpdate date",
+      "type": "string"
+    },
+    "variables": {
+      "description": "Variables of the analysis - object used to separate the header from the body of the properties",
+      "type": "object",
+      "properties": {
+        "CPFit": {
+          "description": "Properties for the CPV normalization fit",
+          "type": "object",
+          "properties": {
+            "histoResults": {
+              "description": "Properties of the CPV histogram",
+              "type": "object",
+              "properties": {
+                "logScale": {
+                  "description": "Flag, if Y-axis to be presented as log",
+                  "type": "boolean"
+                },
+                "rangeX": {
+                  "description": "Min and max limits of X-axis",
+                  "type": "array",
+                  "items": { "type": "number" },
+                  "maxItems": 2,
+                  "minItems": 2
+                },
+                "rangeY": {
+                  "description": "Min and max limits of Y-axis",
+                  "type": "array",
+                  "items": { "type": "number", "minimum": 0 },
+                  "maxItems": 2,
+                  "minItems": 2
+                }
+              }
+            },
+            "initParams": {
+              "description": "Initial parameters of the CPV normalization fit",
+              "type": "object",
+              "properties": {
+                "Re": {
+                  "description": "Real part of epsilon'/epsilon",
+                  "type": "number"
+                },
+                "Im": {
+                  "description": "Imaginary part of epsilon'/epsilon",
+                  "type": "number"
+                },
+                "Norm": 
+                {
+                  "description": "Normalization factors of the total MC components",
+                  "type": "object",
+                  "properties": {
+                    "Omegapi0": {
+                      "description": "Normalization factor for omega-pi0",
+                      "type": "number",
+                      "default": 1.0
+                    },
+                    "Other": {
+                      "description": "Normalization factor for other background components",
+                      "type": "number",
+                      "default": 1.0
+                    },
+                    "Semileptonic": {
+                      "description": "Normalization factor for semileptonic channel",
+                      "type": "number",
+                      "default": 1.0
+                    },
+                    "Signal": {
+                      "description": "Normalization factor for pm00 channel",
+                      "type": "number",
+                      "default": 1.0
+                    },
+                    "Threepi0": {
+                      "description": "Normalization factor for pm000 channel",
+                      "type": "number",
+                      "default": 1.0
+                    },
+                    "Regeneration": {
+                      "description": "Normalization factors for regeneration channel - splitted into four peaks",
+                      "type": "object",
+                      "properties": {
+                        "CloseLeft": {
+                          "description": "For beampipe peak - negative",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "CloseRight": {
+                          "description": "For beampipe peak - positive",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "FarLeft": {
+                          "description": "For  peak - negative",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "FarRight": {
+                          "description": "For beampipe peak - negative",
+                          "type": "number",
+                          "default": 1.0
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "limitPer":{
+              "description": "Limit of the fit free parameters",
+              "type": "object",
+              "properties": {
+                "lower": {
+                  "description": "Lower limit",
+                  "type": "number"
+                },
+                "upper": {
+                  "description": "Upper limit",
+                  "type": "number"
+                }
+              },
+              "required": ["lower", "upper"]
+            },
+            "result": {
+              "description": "Result of the CPV fit normalization",
+              "type": "object",
+              "properties": {
+                "chi2": {
+                  "description": "Chi2 between the MC and Data histograms",
+                  "type": "number"
+                },
+                "normChi2": {
+                  "description": "Normalized Chi2 between the MC and Data histograms",
+                  "type": "number"
+                },
+                "error": {
+                  "description": "Errors of fitted parameters",
+                  "type": "object",
+                  "properties": {
+                    "Re": {
+                      "description": "Real part of epsilon'/epsilon",
+                      "type": "number"
+                    },
+                    "Im": {
+                      "description": "Imaginary part of epsilon'/epsilon",
+                      "type": "number"
+                    },
+                    "Norm": 
+                    {
+                      "description": "Normalization factors of the total MC components",
+                      "type": "object",
+                      "properties": {
+                        "Omegapi0": {
+                          "description": "Normalization factor for omega-pi0",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "Other": {
+                          "description": "Normalization factor for other background components",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "Semileptonic": {
+                          "description": "Normalization factor for semileptonic channel",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "Signal": {
+                          "description": "Normalization factor for pm00 channel",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "Threepi0": {
+                          "description": "Normalization factor for pm000 channel",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "Regeneration": {
+                          "description": "Normalization factors for regeneration channel - splitted into four peaks",
+                          "type": "object",
+                          "properties": {
+                            "CloseLeft": {
+                              "description": "For beampipe peak - negative",
+                              "type": "number",
+                              "default": 1.0
+                            },
+                            "CloseRight": {
+                              "description": "For beampipe peak - positive",
+                              "type": "number",
+                              "default": 1.0
+                            },
+                            "FarLeft": {
+                              "description": "For  peak - negative",
+                              "type": "number",
+                              "default": 1.0
+                            },
+                            "FarRight": {
+                              "description": "For beampipe peak - negative",
+                              "type": "number",
+                              "default": 1.0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "value": {
+                  "description": "Values of fitted parameters",
+                  "type": "object",
+                  "properties": {
+                    "Re": {
+                      "description": "Real part of epsilon'/epsilon",
+                      "type": "number"
+                    },
+                    "Im": {
+                      "description": "Imaginary part of epsilon'/epsilon",
+                      "type": "number"
+                    },
+                    "Norm": 
+                    {
+                      "description": "Normalization factors of the total MC components",
+                      "type": "object",
+                      "properties": {
+                        "Omegapi0": {
+                          "description": "Normalization factor for omega-pi0",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "Other": {
+                          "description": "Normalization factor for other background components",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "Semileptonic": {
+                          "description": "Normalization factor for semileptonic channel",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "Signal": {
+                          "description": "Normalization factor for pm00 channel",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "Threepi0": {
+                          "description": "Normalization factor for pm000 channel",
+                          "type": "number",
+                          "default": 1.0
+                        },
+                        "Regeneration": {
+                          "description": "Normalization factors for regeneration channel - splitted into four peaks",
+                          "type": "object",
+                          "properties": {
+                            "CloseLeft": {
+                              "description": "For beampipe peak - negative",
+                              "type": "number",
+                              "default": 1.0
+                            },
+                            "CloseRight": {
+                              "description": "For beampipe peak - positive",
+                              "type": "number",
+                              "default": 1.0
+                            },
+                            "FarLeft": {
+                              "description": "For  peak - negative",
+                              "type": "number",
+                              "default": 1.0
+                            },
+                            "FarRight": {
+                              "description": "For beampipe peak - negative",
+                              "type": "number",
+                              "default": 1.0
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "KinFit": {
+          "description": "Properties of the kinematic fits",
+          "type": "object",
+          "additionalProperties": {
+              "description": "Object of fit parameters",
+              "type": "object",
+              "additionalProperties": {
+                "description": "Fit parameter",
+                "oneOf":[
+                  {"type": "number", "minimum": 0},
+                  {"type": "null"},
+                  {"type": "boolean", "default": false}
+                ]
+              }
+          }
+        },
+        "rootFiles": {
+          "description": "Object to keep min and max limits of root files indices",
+          "type": "object",
+          "properties": {
+            "Data": {
+              "description": "Min and max indices of Data files",
+              "type": "object",
+              "properties": {
+                "firstFile": {
+                  "description": "First file index of the analysis",
+                  "oneOf": [{ "type": "string" }, { "type": "integer" }]
+                },
+                "lastFile": {
+                  "description": "Last file index of the analysis",
+                  "oneOf": [{ "type": "string" }, { "type": "integer" }]
+                }
+              }
+            },
+            "MC": {
+              "description": "Min and max indices of Monte Carlo files",
+              "type": "object",
+              "properties": {
+                "firstFile": {
+                  "description": "First file index of the analysis",
+                  "oneOf": [{ "type": "string" }, { "type": "integer" }]
+                },
+                "lastFile": {
+                  "description": "Last file index of the analysis",
+                  "oneOf": [{ "type": "string" }, { "type": "integer" }]
+                }
+              }
+            },
+            "firstFileMax": {
+              "description": "Minimal limit of the ROOT files",
+              "oneOf": [{ "type": "string" }, { "type": "integer" }]
+            },
+            "lastFileMax": {
+              "description": "Maximal limit of the ROOT files",
+              "oneOf": [{ "type": "string" }, { "type": "integer" }]
+            },
+            "path": {
+              "description": "General path of the ROOT files, e.g. to PROD2ROOT directory",
+              "type": "string"
+            }
+          }
+        },
+        "tree": {
+          "description": "Object to keep filenames and treenames to get ROOT trees for analysis",
+          "type": "object",
+          "properties": {
+            "filename": {
+              "description": "Filenames of ROOT files done during the analysis",
+              "type": "object",
+              "additionalProperties": {
+                "description": "A single filename",
+                "type": "string",
+                "default": ""
+              }
+            },
+            "treename": {
+              "description": "Treenames of ROOT TTrees done during the analysis",
+              "type": "object",
+              "additionalProperties": {
+                "description": "A single treename",
+                "type": "string",
+                "default": ""
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

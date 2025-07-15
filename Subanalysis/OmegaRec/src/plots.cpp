@@ -124,7 +124,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	chain.SetBranchAddress("Xcl", baseKin.cluster[0]);
 	chain.SetBranchAddress("Ycl", baseKin.cluster[1]);
 	chain.SetBranchAddress("Zcl", baseKin.cluster[2]);
-	chain.SetBranchAddress("Tcl", baseKin.cluster[3]);
+	chain.SetBranchAddress("TclOld", baseKin.cluster[3]);
 	chain.SetBranchAddress("Enecl", baseKin.cluster[4]);
 
 	chain.SetBranchAddress("ncll", baseKin.ncll);

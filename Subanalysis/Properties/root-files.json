@@ -3,19 +3,22 @@
     "path": [
       "/data/ssd/gamrat/PROD2ROOT/MC/MK0/all_phys/",
       "/data/ssd/gamrat/PROD2ROOT/MC/MK0/all_phys2/",
-      "/data/ssd/gamrat/PROD2ROOT/MC/MK0/all_phys3/"
+      [
+      "/data/ssd/gamrat/PROD2ROOT/MC/MK0/all_phys3/",
+      "/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys3/"
+      ]
     ],
     "filenameBase": [
       "prod2root_mk0_all_phys_",
       "prod2root_mk0_all_phys2_",
       "prod2root_mk0_all_phys3_"
     ],
-    "extension": "_v2.root"
+    "extension": ".root"
 
   },
   "Data": {
     "path": "/data/ssd/gamrat/PROD2ROOT/DK0/",
     "filenameBase": "prod2root_dk02_",
-    "extension": "_v2.root"
+    "extension": ".root"
   }
 }

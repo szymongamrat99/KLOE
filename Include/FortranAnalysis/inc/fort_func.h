@@ -10,7 +10,7 @@ extern "C"
 #endif
 
   void clearstruct_(); // Setting all elements of INTERF to 0
-  void GetKslEvent_(int *ntmc, int *mother, int *vtxmc, int *pidmc, float *xvmc, float *yvmc,
+  void GetKslEvent_(int *ntmc, int *motherOld, int *vtxmcOld, int *pidmcOld, float *xvmc, float *yvmc,
                     float *zvmc, float *pxmc, float *pymc, float *pzmc, int *nvtxmc, float *ipmc, float *KchMC, float *KneMC, float *DtMC, float *DlMC, bool *truth, bool *truthreg, bool *truthsemi, bool *truththree, bool *truthomega, bool *truthelse,
                     bool *truthdouble);
 
@@ -18,7 +18,7 @@ extern "C"
                  float *DT);
 
   void find_kchrec_(int *findKS, int *findKL, int *last_vtx, int *findClose, float *Bx, float *By,
-                    float *Bz, int *qualv, int *nv, int *ntv, int *IV, float *CurV, float *PhiV, float *CotV, float *xv, float *yv, float *zv, int *vtaken, float *KchRec, float *trk1, float *trk2, float *cosTrk);
+                    float *Bz, int *qualv, int *nv, int *ntv, int *IV, float *CurV, float *PhiV, float *CotV, float *xvOld, float *yvOld, float *zvOld, int *vtaken, float *KchRec, float *trk1, float *trk2, float *cosTrk);
 
   void cor_ip_boost_(float *Kchrec, float *Bpx, float *Bpy, float *Bpz, float *Bx, float *By, float *Bz, float *Broots, float *trk1, float *trk2, float *KchBoost, float *ip_closest, float *ip_plane, float *chdist, float *Qmiss);
 

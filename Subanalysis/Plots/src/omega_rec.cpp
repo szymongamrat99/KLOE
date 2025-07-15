@@ -73,7 +73,7 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 	chain->SetBranchAddress("Xcl", cluster[0]);
 	chain->SetBranchAddress("Ycl", cluster[1]);
 	chain->SetBranchAddress("Zcl", cluster[2]);
-	chain->SetBranchAddress("Tcl", cluster[3]);
+	chain->SetBranchAddress("TclOld", cluster[3]);
 	chain->SetBranchAddress("Enecl", cluster[4]);
 
 	chain->SetBranchAddress("mctruth", &mctruth);

@@ -14,16 +14,16 @@ void pipi_find(UInt_t filenumber = 1, TString directory = "230531_data", TString
     //Branches' addresses
     //Bhabha vars
     Int_t ntmc, nvtxmc;
-    UInt_t pidmc[200], vtxmc[200], mother[200], mctruth = 0, mcflag = 0;
+    UInt_t pidmcOld[200], vtxmcOld[200], motherOld[200], mctruth = 0, mcflag = 0;
     Float_t pos_mc[3][200], mom_mc[3][200];
 
     tree->SetBranchAddress("ntmc", &ntmc);
     tree->SetBranchAddress("nvtxmc", &nvtxmc);
 
     tree->SetBranchAddress("mcflag", &mcflag);
-    tree->SetBranchAddress("pidmc", pidmc);
-    tree->SetBranchAddress("vtxmc", vtxmc);
-    tree->SetBranchAddress("mother", mother);
+    tree->SetBranchAddress("pidmcOld", pidmcOld);
+    tree->SetBranchAddress("vtxmcOld", vtxmcOld);
+    tree->SetBranchAddress("motherOld", motherOld);
 
     tree->SetBranchAddress("xvmc", pos_mc[0]);
     tree->SetBranchAddress("yvmc", pos_mc[1]);
@@ -60,22 +60,22 @@ void pipi_find(UInt_t filenumber = 1, TString directory = "230531_data", TString
 	if(mcflag == 1){
         for(Int_t j = 0; j < ntmc; j++)
         {
-                if(mother[vtxmc[j] - 1] == 16)
+                if(motherOld[vtxmcOld[j] - 1] == 16)
                 {
-                    if(pidmc[j] == 8) kspip++;
-                        else if(pidmc[j] == 9) kspim++;
+                    if(pidmcOld[j] == 8) kspip++;
+                        else if(pidmcOld[j] == 9) kspim++;
                             else ksothers++;
                 }
-                else if(mother[vtxmc[j] - 1] == 10)
+                else if(motherOld[vtxmcOld[j] - 1] == 10)
                 {
-                    if(pidmc[j] == 8) klpip++;
-                        else if(pidmc[j] == 9) klpim++;
+                    if(pidmcOld[j] == 8) klpip++;
+                        else if(pidmcOld[j] == 9) klpim++;
                             else klothers++;
                 }
-                else if(mother[vtxmc[j] - 1] == 50)
+                else if(motherOld[vtxmcOld[j] - 1] == 50)
                 {
-                    if(pidmc[j] == 16) phiks++;
-                        else if(pidmc[j] == 10) phikl++;
+                    if(pidmcOld[j] == 16) phiks++;
+                        else if(pidmcOld[j] == 10) phikl++;
                             else phiothers++;
                 }
             

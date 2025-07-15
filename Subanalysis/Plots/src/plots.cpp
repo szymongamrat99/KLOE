@@ -139,7 +139,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	chain->SetBranchAddress("Xcl", baseKin.cluster[0]);
 	chain->SetBranchAddress("Ycl", baseKin.cluster[1]);
 	chain->SetBranchAddress("Zcl", baseKin.cluster[2]);
-	chain->SetBranchAddress("Tcl", baseKin.cluster[3]);
+	chain->SetBranchAddress("TclOld", baseKin.cluster[3]);
 	chain->SetBranchAddress("Enecl", baseKin.cluster[4]);
 
 	chain->SetBranchAddress("ncll", baseKin.ncll);

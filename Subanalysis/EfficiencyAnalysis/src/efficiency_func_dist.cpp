@@ -36,7 +36,7 @@ void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
 
     Float_t Dtboostlor;
     UChar_t mctruth;
-    Float_t Chi2, minv4gam, Kchrec[9], Qmiss, ip[3], Kchboost[9], phi_mom[4], Xcl[50], Ycl[50], Zcl[50], Tcl[50];
+    Float_t Chi2, minv4gam, Kchrec[9], Qmiss, ip[3], Kchboost[9], phi_mom[4], Xcl[50], Ycl[50], Zcl[50], TclOld[50];
 
     chain->SetBranchAddress("mctruth", &mctruth);
     chain->SetBranchAddress("minv4gam", &minv4gam);
@@ -47,7 +47,7 @@ void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
     chain->SetBranchAddress("Xcl", &Xcl);
     chain->SetBranchAddress("Ycl", &Ycl);
     chain->SetBranchAddress("Zcl", &Zcl);
-    chain->SetBranchAddress("Tcl", &Tcl);
+    chain->SetBranchAddress("TclOld", &TclOld);
 
     chain->SetBranchAddress("ip", ip);
 
@@ -128,7 +128,7 @@ void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
 
             Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3])/(cVel * tau_S_nonCPT);
 
-            for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[g4takentri_kinfit[i]-1] - (sqrt(pow(Xcl[g4takentri_kinfit[i]-1] - fourKnetri[6],2) + pow(Ycl[g4takentri_kinfit[i]-1] - fourKnetri[7],2) + pow(Zcl[g4takentri_kinfit[i]-1] - fourKnetri[8],2))/cVel) - fourKnetri[9];
+            for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[g4takentri_kinfit[i]-1] - (sqrt(pow(Xcl[g4takentri_kinfit[i]-1] - fourKnetri[6],2) + pow(Ycl[g4takentri_kinfit[i]-1] - fourKnetri[7],2) + pow(Zcl[g4takentri_kinfit[i]-1] - fourKnetri[8],2))/cVel) - fourKnetri[9];
 
             trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 

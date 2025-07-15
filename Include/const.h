@@ -109,7 +109,7 @@ const int T0 = 2.715; // ns
 const unsigned int MaxNumtrkv = 200;
 const unsigned int MIN_CLU_ENE = 20;
 
-const unsigned int channNum = 6;
+const unsigned int channNum = 7;
 
 const TString
     channName[channNum] = {"K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{0}#pi^{0}",
@@ -117,12 +117,12 @@ const TString
                            "#omega#pi^{0}#rightarrow#pi^{+}#pi^{-}#pi^{0}#pi^{0}",
                            "K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}3#pi^{0}",
                            "K_{S}K_{L}#rightarrow#pi^{#pm}l^{#mp}#nu#pi^{0}#pi^{0}",
-                           "Other bcg"},
-    channelInt[channNum] = {"1", "3", "4", "5", "6", "7"};
+                           "Other bcg", "K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{+}#pi^{-}"},
+    channelInt[channNum] = {"1", "3", "4", "5", "6", "7", "8"};
 const TString dataName = "DATA";
 const TString mcSumName = "MC sum";
 
-const Color_t channColor[channNum] = {kRed, kGreen, kViolet, kCyan, kBlue, kGreen - 1};
+const Color_t channColor[channNum] = {kRed, kGreen, kViolet, kCyan, kBlue, kGreen - 1, kYellow};
 const Color_t dataColor = kBlack;
 const Color_t mcSumColor = kOrange;
 
@@ -256,7 +256,7 @@ struct BaseKinematics
         Dtmc,
         Dtrec,
         Dtboostlor,
-        Tcl[50],
+        TclOld[50],
         cluster[5][200],
         bhabha_vtx[3],
         T0step1,
@@ -267,25 +267,32 @@ struct BaseKinematics
         omega[9],
         trk[2][4],
         pi0[2][6],
-        Curv[200],
-        Phiv[200],
-        Cotv[200],
-        xv[200],
-        yv[200],
-        zv[200];
+        CurvOld[200],
+        PhivOld[200],
+        CotvOld[200],
+        xvOld[200],
+        yvOld[200],
+        zvOld[200],
+        Bx,
+        By,
+        Bz,
+        Bpx,
+        Bpy,
+        Bpz,
+        Broots;
 
     UChar_t
         mctruth,
         mcisr,
         g4taken[4],
         mcflag,
-        pidmc[MaxNumtrkv],
-        vtxmc[MaxNumtrkv],
-        mother[MaxNumtrkv],
+        pidmcOld[MaxNumtrkv],
+        vtxmcOld[MaxNumtrkv],
+        motherOld[MaxNumtrkv],
         Vtx[MaxNumtrkv],
         ncll[200],
         VtxCh[3][MaxNumtrkv],
-        iv[MaxNumtrkv];
+        ivOld[MaxNumtrkv];
 
     Int_t
         nevent,
@@ -298,7 +305,13 @@ struct BaseKinematics
         errFlag,
         errFlagKS,
         errFlagKL,
-        errFlagClosest;
+        errFlagClosest,
+        nev,
+        nrun,
+        necls,
+        eclfilfo,
+        eclfilfoword,
+        ntcl;
 
     std::vector<Float_t>
         Kchrecnew,
@@ -310,13 +323,39 @@ struct BaseKinematics
         trkKL[2],
         trkClosest[2],
         KchrecKLTwoBody,
-        trkKLTwoBody[2];
+        trkKLTwoBody[2],
+        Xcl,
+        Ycl,
+        Zcl,
+        Tcl,
+        Enecl,
+        Curv,
+        Phiv,
+        Cotv,
+        xv,
+        yv,
+        zv,
+        xvmc,
+        yvmc,
+        zvmc,
+        pxmc,
+        pymc,
+        pzmc;
+
+    TLorentzVector
+        phi4Mom;
 
     std::vector<Int_t>
         vtaken,
         vtakenKS,
         vtakenKL,
-        vtakenClosest;
+        vtakenClosest,
+        eclstream,
+        Asscl,
+        iv,
+        pidmc,
+        vtxmc,
+        mother;
 
     /**
      * @brief Clear all data members of BaseKinematics (scalars to zero, vectors cleared/resized).
@@ -335,28 +374,28 @@ struct BaseKinematics
         memset(ipmc, 0, sizeof(ipmc));
         memset(phi_mom, 0, sizeof(phi_mom));
         Dtmc = Dtrec = Dtboostlor = T0step1 = Chi2 = minv4gam = Qmiss = 0.0f;
-        memset(Tcl, 0, sizeof(Tcl));
+        memset(TclOld, 0, sizeof(TclOld));
         memset(cluster, 0, sizeof(cluster));
         memset(bhabha_vtx, 0, sizeof(bhabha_vtx));
         memset(Pgamrec, 0, sizeof(Pgamrec));
         memset(omega, 0, sizeof(omega));
         memset(trk, 0, sizeof(trk));
         memset(pi0, 0, sizeof(pi0));
-        memset(Curv, 0, sizeof(Curv));
-        memset(Phiv, 0, sizeof(Phiv));
-        memset(Cotv, 0, sizeof(Cotv));
-        memset(xv, 0, sizeof(xv));
-        memset(yv, 0, sizeof(yv));
-        memset(zv, 0, sizeof(zv));
+        memset(CurvOld, 0, sizeof(CurvOld));
+        memset(PhivOld, 0, sizeof(PhivOld));
+        memset(CotvOld, 0, sizeof(CotvOld));
+        memset(xvOld, 0, sizeof(xvOld));
+        memset(yvOld, 0, sizeof(yvOld));
+        memset(zvOld, 0, sizeof(zvOld));
         mctruth = mcisr = mcflag = 0;
         memset(g4taken, 0, sizeof(g4taken));
-        memset(pidmc, 0, sizeof(pidmc));
-        memset(vtxmc, 0, sizeof(vtxmc));
-        memset(mother, 0, sizeof(mother));
+        memset(pidmcOld, 0, sizeof(pidmcOld));
+        memset(vtxmcOld, 0, sizeof(vtxmcOld));
+        memset(motherOld, 0, sizeof(motherOld));
         memset(Vtx, 0, sizeof(Vtx));
         memset(ncll, 0, sizeof(ncll));
         memset(VtxCh, 0, sizeof(VtxCh));
-        memset(iv, 0, sizeof(iv));
+        memset(ivOld, 0, sizeof(ivOld));
         nevent = ntmc = nvtxmc = nclu = nv = ntv = mctruth_int = 0;
         errFlag = errFlagKS = errFlagKL = errFlagClosest = 0;
         // Clear all std::vectors

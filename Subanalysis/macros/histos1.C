@@ -154,7 +154,7 @@ Bool_t histos1::Process(Long64_t entry)
    k_beta00 = sqrt(pow(fourKnetri[0],2) + pow(fourKnetri[1],2) + pow(fourKnetri[2],2))/fourKnetri[3];
    k_path00 = sqrt(pow(fourKnetri[6] - *Bx,2) + pow(fourKnetri[7] - *By,2) + pow(fourKnetri[8] - *Bz,2));
 
-   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00/(k_beta00*cVel));
+   for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00/(k_beta00*cVel));
 
    trcv_sum = TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3];
 	

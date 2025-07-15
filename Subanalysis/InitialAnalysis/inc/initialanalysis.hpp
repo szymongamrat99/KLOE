@@ -21,4 +21,6 @@
 
 int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
 
+void MctruthCounter(Int_t mctruth, UInt_t mctruth_num[8]);
+
 #endif //! COVARIANCEMATRIX_H

@@ -60,19 +60,19 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   // Track - vtx info
   chain.SetBranchAddress("nv", &baseKin.nv);
   chain.SetBranchAddress("ntv", &baseKin.ntv);
-  chain.SetBranchAddress("iv", baseKin.iv);
+  chain.SetBranchAddress("ivOld", baseKin.ivOld);
   // -----------------------------------------------------------
 
   // Track properties
-  chain.SetBranchAddress("Curv", baseKin.Curv);
-  chain.SetBranchAddress("Phiv", baseKin.Phiv);
-  chain.SetBranchAddress("Cotv", baseKin.Cotv);
+  chain.SetBranchAddress("CurvOld", baseKin.CurvOld);
+  chain.SetBranchAddress("PhivOld", baseKin.PhivOld);
+  chain.SetBranchAddress("CotvOld", baseKin.CotvOld);
   // -----------------------------------------------------------
 
   // Vertex position
-  chain.SetBranchAddress("xv", baseKin.xv);
-  chain.SetBranchAddress("yv", baseKin.yv);
-  chain.SetBranchAddress("zv", baseKin.zv);
+  chain.SetBranchAddress("xvOld", baseKin.xvOld);
+  chain.SetBranchAddress("yvOld", baseKin.yvOld);
+  chain.SetBranchAddress("zvOld", baseKin.zvOld);
   // -----------------------------------------------------------
 
   // mcflag and mctruth position
@@ -111,7 +111,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 
   // Initialization of Charged part of decay reconstruction class
   // Constructor is below, in the loop
-  boost::optional<KLOE::ChargedVtxRec<>> eventAnalysis;
+  boost::optional<KLOE::ChargedVtxRec<Float_t, UChar_t>> eventAnalysis;
   // -------------------------------------------------------------
 
   baseKin.vtaken.resize(3);
@@ -218,10 +218,10 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
     if (data_flag)
     {
       // Construction of the charged rec class object
-      eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.iv, baseKin.bhabha_vtx, baseKin.Curv, baseKin.Phiv, baseKin.Cotv, baseKin.xv, baseKin.yv, baseKin.zv, mode);
+      eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.ivOld, baseKin.bhabha_vtx, baseKin.CurvOld, baseKin.PhivOld, baseKin.CotvOld, baseKin.xvOld, baseKin.yvOld, baseKin.zvOld, mode);
 
       // KMASS HYPOTHESIS
-      eventAnalysis->findKchRec(baseKin.Kchrecnew.data(), baseKin.trknew[0].data(), baseKin.trknew[1].data(), baseKin.vtaken.data(), baseKin.errFlag);
+      eventAnalysis->findKchRec(baseKin.Kchrecnew.data(), baseKin.trknew[0].data(), baseKin.trknew[1].data(), baseKin.vtaken.data(), logger);
       // ------------------------------------------------------------------
 
       // // CLOSEST TO IP

@@ -1,6 +1,7 @@
 #include "../Include/klspm00.hpp"
 
 #include "../Include/MainMenuHandler/MainMenuHandler.h"
+#include "../Include/MainMenuHandler/InputParamsHandler.h"
 #include <FileManager.h>
 #include <event_data.h>
 
@@ -46,120 +47,8 @@ int main(int argc, char *argv[])
   // -------------------------------------------------------------------
   Controls::DataType dataTypeOpt;
 
-  try
-  {
-    cout << "Measurement (1) / Control Sample (2)?";
-    cin >> csFlag;
-    cout << endl;
-
-    dataTypeErr = !cin;
-
-    if (dataTypeErr)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (csFlag != 1 && csFlag != 2)
-    {
-      throw ErrorHandling::ErrorCodes::RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    cin.clear();
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-    logger.getErrLog(err);
-    return int(err);
-  }
-
-  try
-  {
-    cout << "Choose the first file: ";
-    cin >> firstFile;
-    cout << endl;
-
-    dataTypeErr = !cin;
-    firstFileRangeErr = firstFile < 1 || firstFile > lastFileMax;
-
-    if (dataTypeErr)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (firstFileRangeErr)
-    {
-      throw ErrorHandling::ErrorCodes::RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    cin.clear();
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-    logger.getErrLog(err);
-    return int(err);
-  }
-
-  try
-  {
-    cout << "Choose the last file: ";
-    cin >> lastFile;
-    cout << endl;
-
-    dataTypeErr = !cin;
-    lastFileRangeErr = lastFile < firstFile || lastFile > lastFileMax;
-
-    if (dataTypeErr)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (lastFileRangeErr)
-    {
-      throw ErrorHandling::ErrorCodes::RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    cin.clear();
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
-    logger.getErrLog(err);
-    return int(err);
-  }
-
-  properties["variables"]["rootFiles"]["Data"]["firstFile"] = firstFile;
-  properties["variables"]["rootFiles"]["Data"]["lastFile"] = lastFile;
-  properties["variables"]["rootFiles"]["MC"]["firstFile"] = firstFile;
-  properties["variables"]["rootFiles"]["MC"]["lastFile"] = lastFile;
-
-  std::ofstream outfile(propName);
-  outfile << properties.dump(4);
-  outfile.close();
-
-  try
-  {
-    dataType->InitMenu();
-    dataType->ShowOpt();
-    dataType->EndMenu();
-
-    cin >> dataTypeOpt;
-
-    if (!cin)
-    {
-      throw ErrorHandling::ErrorCodes::DATA_TYPE;
-    }
-    else if (dataTypeOpt < Controls::DataType::SIGNAL_TOT || dataTypeOpt > Controls::DataType::SIGNAL_MAX)
-    {
-      throw ErrorHandling::ErrorCodes::MENU_RANGE;
-    }
-  }
-  catch (ErrorHandling::ErrorCodes err)
-  {
-    logger.getErrLog(err);
-    return int(err);
-  }
-
   // Set flag for initial analysis
-  Bool_t initialAnalysisExecution = properties["flags"]["initialAnalysisExec"];
+  Bool_t initialAnalysisExecution = properties["flags"]["initialAnalysisExec"]["flag"];
 
   // Initialize and fill the TChain object
   TChain chain(generalTreeName.c_str());
@@ -169,17 +58,21 @@ int main(int argc, char *argv[])
 
   if (!initialAnalysisExecution)
   {
-    initObj.chainInit(chain, dataTypeOpt, firstFile, lastFile, firstFile, lastFile, logger, csFlag);
+    // Set the data type options
+    auto callParams = InputParamsHandler::getParams(
+        properties, lastFileMax, propName, logger, dataType);
+
+    initObj.chainInit(chain, callParams.dataTypeOpt, callParams.firstFile, callParams.lastFile, callParams.firstFile, callParams.lastFile, logger, callParams.csFlag);
 
     mainMenuHandler.runMenuLoop(
-        csFlag,
+        callParams.csFlag,
         mainMenu,
         mainMenuOpt,
         mainMenuControlSample,
         mainMenuControlSampleOpt,
         chain,
         eventAnalysis,
-        dataTypeOpt,
+        callParams.dataTypeOpt,
         logger,
         infoCode,
         cfgWatcher);
@@ -190,12 +83,13 @@ int main(int argc, char *argv[])
     json filePaths = json::parse(rootFiles);
 
     std::string
-        DataPath = filePaths["MC"]["path"][2],
-        runRegexPattern = "^.*(\\d{5}).*_v2\\.root$";
+        DataPath = filePaths["MC"]["path"][2][1],
+        // DataPath = filePaths["Data"]["path"],
+        runRegexPattern = "^.*(\\d{5}).*\\.root$";
 
     KLOE::RunStats runs = initObj.getRunStats(DataPath, runRegexPattern);
     initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                     runs.minRun, runs.maxRun);
+                      runs.minRun, 30400);
     // -------------------------------------------------------
     infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
@@ -206,7 +100,6 @@ int main(int argc, char *argv[])
 
     logger.getLog(infoCode, "Initial analysis execution.");
     InitAnalysis_main(chain, eventAnalysis);
-
   }
   // -------------------------------------------------------------------
   logger.printErrStats();

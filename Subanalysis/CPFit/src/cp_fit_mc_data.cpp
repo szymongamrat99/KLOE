@@ -76,7 +76,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	chain.SetBranchAddress("Xcl", baseKin.cluster[0]);
 	chain.SetBranchAddress("Ycl", baseKin.cluster[1]);
 	chain.SetBranchAddress("Zcl", baseKin.cluster[2]);
-	chain.SetBranchAddress("Tcl", baseKin.cluster[3]);
+	chain.SetBranchAddress("TclOld", baseKin.cluster[3]);
 	chain.SetBranchAddress("Enecl", baseKin.cluster[4]);
 
 	chain.SetBranchAddress("ip", baseKin.ip);
@@ -440,7 +440,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				covMatrix(nRows, nCols, elems.data());
 
 		KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
-		KLOE::ChargedVtxRec<Float_t> BoostMethodObj;
+		KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj;
 		
 
 		for (UInt_t i = 0; i < nentries; i++)

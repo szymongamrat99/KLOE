@@ -108,9 +108,9 @@ Bool_t kin_fits::Process(Long64_t entry)
 
       for(Int_t i = 0; i < 2; i++)
       {
-         P[i*3 + 4] = Curv[vtaken[i + 1] - 1];
-         P[i*3 + 5] = Phiv[vtaken[i + 1] - 1];
-         P[i*3 + 6] = Cotv[vtaken[i + 1] - 1];
+         P[i*3 + 4] = CurvOld[vtaken[i + 1] - 1];
+         P[i*3 + 5] = PhivOld[vtaken[i + 1] - 1];
+         P[i*3 + 6] = CotvOld[vtaken[i + 1] - 1];
 
          DP[i*3 + 4] = 0.025;
          DP[i*3 + 5] = 0.013;
@@ -122,7 +122,7 @@ Bool_t kin_fits::Process(Long64_t entry)
          P[10 + i*5] = Xcl[ncll[g4taken[i] - 1] - 1];
          P[10 + i*5 + 1] = Ycl[ncll[g4taken[i] - 1] - 1];
          P[10 + i*5 + 2] = Zcl[ncll[g4taken[i] - 1] - 1];
-         P[10 + i*5 + 3] = Tcl[ncll[g4taken[i] - 1] - 1];
+         P[10 + i*5 + 3] = TclOld[ncll[g4taken[i] - 1] - 1];
          P[10 + i*5 + 4] = Enecl[ncll[g4taken[i] - 1] - 1];
 
          DP[10 + i*5] = 1.2;

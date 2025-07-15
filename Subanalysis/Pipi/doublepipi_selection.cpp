@@ -28,21 +28,21 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
     //Charged vars
     Float_t charged_vtx[3][MaxNumVtx], charged_vars[3][MaxNumtrkv];
     Int_t ntv, nv, qualv[MaxNumVtx];
-    UInt_t iv[MaxNumtrkv], vtx[MaxNumVtx];
+    UInt_t ivOld[MaxNumtrkv], vtx[MaxNumVtx];
 
     tree->SetBranchAddress("ntv", &ntv);
     tree->SetBranchAddress("nv", &nv);
 
-    tree->SetBranchAddress("xv", charged_vtx[0]);
-    tree->SetBranchAddress("yv", charged_vtx[1]);
-    tree->SetBranchAddress("zv", charged_vtx[2]);
+    tree->SetBranchAddress("xvOld", charged_vtx[0]);
+    tree->SetBranchAddress("yvOld", charged_vtx[1]);
+    tree->SetBranchAddress("zvOld", charged_vtx[2]);
 
-    tree->SetBranchAddress("Curv", charged_vars[0]);
-    tree->SetBranchAddress("Phiv", charged_vars[1]);
-    tree->SetBranchAddress("Cotv", charged_vars[2]);
+    tree->SetBranchAddress("CurvOld", charged_vars[0]);
+    tree->SetBranchAddress("PhivOld", charged_vars[1]);
+    tree->SetBranchAddress("CotvOld", charged_vars[2]);
 
     tree->SetBranchAddress("qualv", qualv);
-    tree->SetBranchAddress("iv", iv);
+    tree->SetBranchAddress("ivOld", ivOld);
     tree->SetBranchAddress("vtx", vtx);
 
     UInt_t nentries = tree->GetEntries();
@@ -111,13 +111,13 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                     {
                         
                         sign[0] = charged_vars[0][k1]/abs(charged_vars[0][k1]);
-                        if(iv[k1]-1 == j) 
+                        if(ivOld[k1]-1 == j) 
                             charged_mom(charged_vars[0][k1], charged_vars[1][k1], charged_vars[2][k1], mom_vec[0], 1);
 
                         for(Int_t k2 = k1 + 1; k2 < ntv; k2++)
                         {
                             sign[1] = charged_vars[0][k2]/abs(charged_vars[0][k2]);
-                            if(iv[k2]-1 == j && sign[0] != sign[1])
+                            if(ivOld[k2]-1 == j && sign[0] != sign[1])
                             { 
                                 charged_mom(charged_vars[0][k2], charged_vars[1][k2], charged_vars[2][k2], mom_vec[1], 1);
                                 inv_mass = sqrt(pow(mom_vec[0][3] + mom_vec[1][3],2) - 
@@ -180,13 +180,13 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                     {
                         
                         sign[0] = charged_vars[0][k1]/abs(charged_vars[0][k1]);
-                        if(iv[k1]-1 == j) 
+                        if(ivOld[k1]-1 == j) 
                             charged_mom(charged_vars[0][k1], charged_vars[1][k1], charged_vars[2][k1], mom_vec[0], 1);
 
                         for(Int_t k2 = k1 + 1; k2 < ntv; k2++)
                         {
                             sign[1] = charged_vars[0][k2]/abs(charged_vars[0][k2]);
-                            if(iv[k2]-1 == j && sign[0] != sign[1])
+                            if(ivOld[k2]-1 == j && sign[0] != sign[1])
                             { 
                                 charged_mom(charged_vars[0][k2], charged_vars[1][k2], charged_vars[2][k2], mom_vec[1], 1);
                                 inv_mass = sqrt(pow(mom_vec[0][3] + mom_vec[1][3],2) - 

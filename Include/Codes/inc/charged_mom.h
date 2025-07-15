@@ -10,7 +10,7 @@
 namespace KLOE
 {
   // Template for function definition
-  template <typename F = Float_t> 
+  template <typename F = Float_t, typename T = Int_t> 
   class ChargedVtxRec : public pm00
   {
   private:
@@ -20,7 +20,7 @@ namespace KLOE
         def = 0,
         &_mode;
 
-    UChar_t
+    T
           *_iv;
 
     F
@@ -36,15 +36,17 @@ namespace KLOE
     void charged_mom(Int_t &i, F *mom_vec);
 
   public:
-    ChargedVtxRec(Int_t &nv, Int_t &ntv, UChar_t *iv, F *IP, F *CurV, F *PhiV, F *CotV, F *xv, F *yv, F *zv, Int_t &mode);
+    ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PhiV, F *CotV, F *xvOld, F *yvOld, F *zvOld, Int_t &mode);
     ChargedVtxRec();
 
-    void charged_mom(F Curv, F Phiv, F Cotv, F *mom_vec, Int_t mode);
+    void charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode);
 
-    void findKchRec(F *KchRec, F *trk1, F *trk2, Int_t *vtaken, Int_t &errFlag);
-    void findKSLRec(Int_t kaonFlag, Int_t KSvtx, F *KchRec, F *trk1, F *trk2, Int_t *vtaken, Int_t &errFlag);
-
-    void findKClosestRec(F *KchRec, F *trk1, F *trk2, Int_t *vtaken, Int_t &errFlag);
+    ErrorHandling::ErrorCodes findKchRec(F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger);
+    ErrorHandling::ErrorCodes findKchRec(std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger);
+    ErrorHandling::ErrorCodes findKSLRec(Int_t kaonFlag, Int_t KSvtx, F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger);
+    ErrorHandling::ErrorCodes findKSLRec(Int_t kaonFlag, Int_t KSvtx, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger);
+    ErrorHandling::ErrorCodes findKClosestRec(F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger);
+    ErrorHandling::ErrorCodes findKClosestRec(std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger);
 
     Int_t KaonMomFromBoost(F *pKaon, F *pboost, F *pKaonBoost);
 

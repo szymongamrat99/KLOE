@@ -26,6 +26,15 @@
  */
 namespace KLOE
 {
+    enum class HypothesisCode
+    {
+        SIGNAL = 1,  // For Pi+Pi-Pi0Pi0
+        OMEGAPI = 2, // For Omega-Pi0
+        FOUR_PI = 3, // For Pi+Pi-Pi+Pi-
+
+        INVALID_VALUE // For invalid values
+    };
+
     /**
      * @class General pm00 class for KLOE analysis. Includes most fundamental functions like timestamp, datestamp, array clearing functions, etc.
      * @author @szymongamrat99
@@ -300,20 +309,20 @@ namespace KLOE
                 numerator = 0,
                 denominator = 0,
                 value = 0;
-    
-            numerator = sqrt(pow(p[0] - p[4] * cos(p[5]),2) + pow(p[1] - p[4] * sin(p[5]),2)) + 
-                        sqrt(pow(p[2] - p[4] * cos(M_PI + p[5]),2) + pow(p[3] - p[4] * sin(M_PI + p[5]),2));
-            denominator = sqrt(pow(p[0],2) + pow(p[1],2)) + sqrt(pow(p[2],2) + pow(p[3],2));
-    
-            if(denominator != 0 && !TMath::IsNaN(denominator) && !TMath::IsNaN(numerator) )
+
+            numerator = sqrt(pow(p[0] - p[4] * cos(p[5]), 2) + pow(p[1] - p[4] * sin(p[5]), 2)) +
+                        sqrt(pow(p[2] - p[4] * cos(M_PI + p[5]), 2) + pow(p[3] - p[4] * sin(M_PI + p[5]), 2));
+            denominator = sqrt(pow(p[0], 2) + pow(p[1], 2)) + sqrt(pow(p[2], 2) + pow(p[3], 2));
+
+            if (denominator != 0 && !TMath::IsNaN(denominator) && !TMath::IsNaN(numerator))
                 value = numerator / denominator;
             else
                 value = 999.;
-    
+
             return value;
         }
 
-        std::string CreateDatedFolder(const std::string& basePath);
+        std::string CreateDatedFolder(const std::string &basePath);
 
         Double_t WeightedAverageSymmetric(std::vector<Double_t> &values, std::vector<Double_t> &errors);
         Double_t WAvgSymmError(std::vector<Double_t> &errors);
@@ -329,11 +338,33 @@ namespace KLOE
          * @param pattern Regex pattern to extract run numbers (e.g. R"(data_stream42_(\\d+)\\.ntu)").
          * @returns Set of unique run numbers found in filenames.
          */
-        std::set<Int_t> ExtractUniqueRuns(const std::string& directory, const std::string& pattern);
+        std::set<Int_t> ExtractUniqueRuns(const std::string &directory, const std::string &pattern);
+
+        // -------------------------------------------------------------------------------
+        HypothesisCode StringToHypothesisCode(const std::string &str)
+        {
+            static const std::map<std::string, HypothesisCode> enumMap = {
+                {"SIGNAL", HypothesisCode::SIGNAL},
+                {"OMEGAPI", HypothesisCode::OMEGAPI},
+                {"FOUR_PI", HypothesisCode::FOUR_PI}};
+
+            auto it = enumMap.find(str);
+            if (it != enumMap.end())
+            {
+                return it->second;
+            }
+
+            std::cout << "Wrong analysis code!" << std::endl;
+
+            return HypothesisCode::INVALID_VALUE;
+        };
     };
 }
 
 // Forward declaration for FileManager
-namespace KLOE { class FileManager; }
+namespace KLOE
+{
+    class FileManager;
+}
 
 #endif

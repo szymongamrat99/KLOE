@@ -1,0 +1,25 @@
+{
+  "$schema": "./schemas/cut-schema.json",
+  "analysisCode": 1,
+  "analysisDescription": "This analysis applies cuts to select events that match the signal hypothesis.",
+  "listOfCuts": [
+    {
+      "order": 1,
+      "cutDescription": "K->pi+pi- decay invariant mass.",
+      "cutId": "InvMassKch",
+      "cutType": "T",
+      "cutValue": 20.0,
+      "cutCondition": "<=",
+      "centralValue": 497.611
+    },
+    {
+      "order": 2,
+      "cutDescription": "K->pi+pi- decay invariant mass.",
+      "cutId": "InvMassKch",
+      "cutType": "T",
+      "cutValue": 20.0,
+      "cutCondition": "<=",
+      "centralValue": 497.611
+    }
+  ]
+}

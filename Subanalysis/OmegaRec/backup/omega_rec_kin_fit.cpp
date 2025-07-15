@@ -92,7 +92,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 	chain.SetBranchAddress("Xcl", cluster[0]);
 	chain.SetBranchAddress("Ycl", cluster[1]);
 	chain.SetBranchAddress("Zcl", cluster[2]);
-	chain.SetBranchAddress("Tcl", cluster[3]);
+	chain.SetBranchAddress("TclOld", cluster[3]);
 	chain.SetBranchAddress("Enecl", cluster[4]);
 
 	chain.SetBranchAddress("mctruth", &mctruth);
@@ -102,13 +102,13 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 	// Charged vars
 	chain.SetBranchAddress("nv", &baseKin.nv);
 	chain.SetBranchAddress("ntv", &baseKin.ntv);
-	chain.SetBranchAddress("iv", baseKin.iv);
-	chain.SetBranchAddress("Curv", baseKin.Curv);
-	chain.SetBranchAddress("Phiv", baseKin.Phiv);
-	chain.SetBranchAddress("Cotv", baseKin.Cotv);
-	chain.SetBranchAddress("xv", baseKin.xv);
-	chain.SetBranchAddress("yv", baseKin.yv);
-	chain.SetBranchAddress("zv", baseKin.zv);
+	chain.SetBranchAddress("ivOld", baseKin.ivOld);
+	chain.SetBranchAddress("CurvOld", baseKin.CurvOld);
+	chain.SetBranchAddress("PhivOld", baseKin.PhivOld);
+	chain.SetBranchAddress("CotvOld", baseKin.CotvOld);
+	chain.SetBranchAddress("xvOld", baseKin.xvOld);
+	chain.SetBranchAddress("yvOld", baseKin.yvOld);
+	chain.SetBranchAddress("zvOld", baseKin.zvOld);
 
 	Int_t nentries = 10000; //(Int_t)chain.GetEntries();
 
@@ -224,7 +224,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
 	// Initialization of Charged part of decay reconstruction class
 	// Constructor is below, in the loop
-	boost::optional<KLOE::ChargedVtxRec<>> eventAnalysis;
+	boost::optional<KLOE::ChargedVtxRec<Float_t, UChar_t>> eventAnalysis;
 	// -------------------------------------------------------------
 
 	for (Int_t i = 0; i < nentries; i++)
@@ -248,7 +248,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 			// Reconstruction of the charged part of the decay - vtx closest to the IP - to be included
 
 			// Construction of the charged rec class object
-			eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.iv, bhabha_vtx, baseKin.Curv, baseKin.Phiv, baseKin.Cotv, baseKin.xv, baseKin.yv, baseKin.zv, mode);
+			eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.ivOld, bhabha_vtx, baseKin.CurvOld, baseKin.PhivOld, baseKin.CotvOld, baseKin.xvOld, baseKin.yvOld, baseKin.zvOld, mode);
 
 			// Finding the vtx closest to the interaction point
 			eventAnalysis->findKClosestRec(baseKin.Kchrec, baseKin.trk[0], baseKin.trk[1], baseKin.vtaken, baseKin.errFlag);

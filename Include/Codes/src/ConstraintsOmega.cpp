@@ -6,7 +6,7 @@ Double_t ConstraintsOmega::FourMomConsvLAB(Double_t *x, Double_t *p) const
 {
   // Local variables
   Double_t
-      cluster[4][5],   // Cluster in LAB: Xcl, Ycl, Zcl, Tcl, EneCl
+      cluster[4][5],   // Cluster in LAB: Xcl, Ycl, Zcl, TclOld, EneCl
       gamma_mom[4][4], // Photon momentum in LAB: Px, Py, Pz, E
       neu_vtx[3],      // Derived neutral vertex: Xneu, Yneu, Zneu
       bhabha_mom[4],   // Phi momentum average per run in LAB: Px, Py, Pz, Sqrt(S)
@@ -38,7 +38,7 @@ Double_t ConstraintsOmega::FourMomConsvLAB(Double_t *x, Double_t *p) const
 Double_t ConstraintsOmega::PhotonPathConsvLAB(Double_t *x, Double_t *p) const
 {
   Double_t
-      cluster[4],   // Cluster in LAB: Xcl, Ycl, Zcl, Tcl, EneCl
+      cluster[4],   // Cluster in LAB: Xcl, Ycl, Zcl, TclOld, EneCl
       neu_vtx[3],   // Derived neutral vertex: Xneu, Yneu, Zneu
       R_gamma = 0.; // Path of Photon from the neutral vtx
 

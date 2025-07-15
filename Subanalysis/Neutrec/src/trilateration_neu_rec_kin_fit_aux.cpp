@@ -96,7 +96,7 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 	chain.SetBranchAddress("Xcl", cluster[0]);
 	chain.SetBranchAddress("Ycl", cluster[1]);
 	chain.SetBranchAddress("Zcl", cluster[2]);
-	chain.SetBranchAddress("Tcl", cluster[3]);
+	chain.SetBranchAddress("TclOld", cluster[3]);
 	chain.SetBranchAddress("Enecl", cluster[4]);
 
 	chain.SetBranchAddress("mctruth", &mctruth);

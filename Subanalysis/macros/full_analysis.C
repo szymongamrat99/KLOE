@@ -492,7 +492,7 @@ Bool_t full_analysis::Process(Long64_t entry)
 
    ///////////////////////////////////////////////////////////////////////////////////////////////
 
-   //for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00/(k_beta00*cVel));
+   //for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00/(k_beta00*cVel));
 
    //trcv_sum = TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3];
 
@@ -501,7 +501,7 @@ Bool_t full_analysis::Process(Long64_t entry)
    //Signal truth check
    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-   for(Int_t i = 0; i < 4; i++) TRCV[i] = Tcl[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00_tri/(k_beta00_tri*cVel));
+   for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00_tri/(k_beta00_tri*cVel));
    trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
    if(*mctruth == 1)

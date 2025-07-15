@@ -47,13 +47,13 @@ int main(int argc, const char *argv[])
   chain->SetBranchAddress("nV", &interfcommon_.nv);
   chain->SetBranchAddress("nClu", &interfcommon_.nclu);
   chain->SetBranchAddress("nTv", &interfcommon_.ntv);
-  chain->SetBranchAddress("iV", interfcommon_.iv);
+  chain->SetBranchAddress("iV", interfcommon_.ivOld);
   chain->SetBranchAddress("CurV", interfcommon_.CurV);
   chain->SetBranchAddress("PhiV", interfcommon_.PhiV);
   chain->SetBranchAddress("CoTv", interfcommon_.CotV);
-  chain->SetBranchAddress("xV", interfcommon_.xv);
-  chain->SetBranchAddress("yV", interfcommon_.yv);
-  chain->SetBranchAddress("zV", interfcommon_.zv);
+  chain->SetBranchAddress("xV", interfcommon_.xvOld);
+  chain->SetBranchAddress("yV", interfcommon_.yvOld);
+  chain->SetBranchAddress("zV", interfcommon_.zvOld);
   chain->SetBranchAddress("EneCl", interfcommon_.EneCl);
 
   TFile
@@ -119,7 +119,7 @@ int main(int argc, const char *argv[])
 
     if (interfcommon_.nclu >= 4 && interfcommon_.nv > 1)
     {
-      find_kchrec_(&findKs, &findKl, &last_vtx, &findClose, &interfcommon_.Bx, &interfcommon_.By, &interfcommon_.Bz, interfcommon_.qualv, &interfcommon_.nv, &interfcommon_.ntv, interfcommon_.iv, interfcommon_.CurV, interfcommon_.PhiV, interfcommon_.CotV, interfcommon_.xv, interfcommon_.yv, interfcommon_.zv, interfcommon_.vtakenks, interfcommon_.KchRecKS, interfcommon_.trk1KS, interfcommon_.trk2KS, &interfcommon_.cosTrkKS);
+      find_kchrec_(&findKs, &findKl, &last_vtx, &findClose, &interfcommon_.Bx, &interfcommon_.By, &interfcommon_.Bz, interfcommon_.qualv, &interfcommon_.nv, &interfcommon_.ntv, interfcommon_.ivOld, interfcommon_.CurV, interfcommon_.PhiV, interfcommon_.CotV, interfcommon_.xvOld, interfcommon_.yvOld, interfcommon_.zvOld, interfcommon_.vtakenks, interfcommon_.KchRecKS, interfcommon_.trk1KS, interfcommon_.trk2KS, &interfcommon_.cosTrkKS);
 
       // Finding Kl from KSKL->pi+pi-pi+pi-
       findKs = 0;
@@ -127,13 +127,13 @@ int main(int argc, const char *argv[])
 
       last_vtx = interfcommon_.vtakenks[0];
 
-      find_kchrec_(&findKs, &findKl, &last_vtx, &findClose, &interfcommon_.Bx, &interfcommon_.By, &interfcommon_.Bz, interfcommon_.qualv, &interfcommon_.nv, &interfcommon_.ntv, interfcommon_.iv, interfcommon_.CurV, interfcommon_.PhiV, interfcommon_.CotV, interfcommon_.xv, interfcommon_.yv, interfcommon_.zv, interfcommon_.vtakenkl, interfcommon_.KchRecKL, interfcommon_.trk1KL, interfcommon_.trk2KL, &interfcommon_.cosTrkKL);
+      find_kchrec_(&findKs, &findKl, &last_vtx, &findClose, &interfcommon_.Bx, &interfcommon_.By, &interfcommon_.Bz, interfcommon_.qualv, &interfcommon_.nv, &interfcommon_.ntv, interfcommon_.ivOld, interfcommon_.CurV, interfcommon_.PhiV, interfcommon_.CotV, interfcommon_.xvOld, interfcommon_.yvOld, interfcommon_.zvOld, interfcommon_.vtakenkl, interfcommon_.KchRecKL, interfcommon_.trk1KL, interfcommon_.trk2KL, &interfcommon_.cosTrkKL);
 
       // Finding Kch from KSKL->pi+pi-pi0pi0
       findKs = 0;
       findKl = 0;
 
-      find_kchrec_(&findKs, &findKl, &last_vtx, &findClose, &interfcommon_.Bx, &interfcommon_.By, &interfcommon_.Bz, interfcommon_.qualv, &interfcommon_.nv, &interfcommon_.ntv, interfcommon_.iv, interfcommon_.CurV, interfcommon_.PhiV, interfcommon_.CotV, interfcommon_.xv, interfcommon_.yv, interfcommon_.zv, interfcommon_.vtaken, interfcommon_.KchRec, interfcommon_.trk1, interfcommon_.trk2, &interfcommon_.cosTrk);
+      find_kchrec_(&findKs, &findKl, &last_vtx, &findClose, &interfcommon_.Bx, &interfcommon_.By, &interfcommon_.Bz, interfcommon_.qualv, &interfcommon_.nv, &interfcommon_.ntv, interfcommon_.ivOld, interfcommon_.CurV, interfcommon_.PhiV, interfcommon_.CotV, interfcommon_.xvOld, interfcommon_.yvOld, interfcommon_.zvOld, interfcommon_.vtaken, interfcommon_.KchRec, interfcommon_.trk1, interfcommon_.trk2, &interfcommon_.cosTrk);
 
       cor_ip_boost_(interfcommon_.KchRec, &interfcommon_.Bpx, &interfcommon_.Bpy, &interfcommon_.Bpz, &interfcommon_.Bx, &interfcommon_.By, &interfcommon_.Bz, &interfcommon_.Broots, interfcommon_.trk1, interfcommon_.trk2, interfcommon_.KchBoost, interfcommon_.ip_closest, interfcommon_.ip_plane, &interfcommon_.chdist, &interfcommon_.Qmiss);
 
@@ -142,7 +142,7 @@ int main(int argc, const char *argv[])
       // Finding vtx closest to IP without any other hypothesis
       findClose = 1;
 
-      find_kchrec_(&findKs, &findKl, &last_vtx, &findClose, &interfcommon_.Bx, &interfcommon_.By, &interfcommon_.Bz, interfcommon_.qualv, &interfcommon_.nv, &interfcommon_.ntv, interfcommon_.iv, interfcommon_.CurV, interfcommon_.PhiV, interfcommon_.CotV, interfcommon_.xv, interfcommon_.yv, interfcommon_.zv, interfcommon_.vtakenclose, interfcommon_.KchRecClose, interfcommon_.trk1Close, interfcommon_.trk2Close, &interfcommon_.cosTrkClose);
+      find_kchrec_(&findKs, &findKl, &last_vtx, &findClose, &interfcommon_.Bx, &interfcommon_.By, &interfcommon_.Bz, interfcommon_.qualv, &interfcommon_.nv, &interfcommon_.ntv, interfcommon_.ivOld, interfcommon_.CurV, interfcommon_.PhiV, interfcommon_.CotV, interfcommon_.xvOld, interfcommon_.yvOld, interfcommon_.zvOld, interfcommon_.vtakenclose, interfcommon_.KchRecClose, interfcommon_.trk1Close, interfcommon_.trk2Close, &interfcommon_.cosTrkClose);
 
       // Kch from KSKL->pi+pi-pi0pi0 is saved to tree
       if (interfcommon_.KchRec[5] < 485.)

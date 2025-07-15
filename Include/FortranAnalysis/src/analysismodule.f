@@ -132,7 +132,7 @@ C=== Include /kloe/soft/off/offline/inc/development/tls/vtxstru.cin ====
         TYPE TracksVertex
          SEQUENCE
          INTEGER n
-         INTEGER iv(MaxNumtrkv)
+         INTEGER ivOld(MaxNumtrkv)
          INTEGER TrkPoi(MaxNumtrkv)
          REAL    cur(MaxNumtrkv)
          REAL    phi(MaxNumtrkv)
@@ -291,7 +291,7 @@ C= Include /kloe/soft/off/offline/inc/development/tls/geanfistruct.cin =
          REAL    pzlhmc(MaxNtrkGen)
          INTEGER NumVtx
          INTEGER Kinmom(MaxNvtxGen)
-         INTEGER mother(MaxNvtxGen)
+         INTEGER motherOld(MaxNvtxGen)
          REAL    Tof(MaxNvtxGen)
          REAL    Xv(MaxNvtxGen)
          REAL    Yv(MaxNvtxGen)
@@ -450,7 +450,7 @@ C====================== Include interfstruct.cin =======================
           INTEGER ECLevtype2(MaxNumOverlapStream)
           INTEGER nclu
           REAL    EneCl(MaxNumClu)
-          REAL    Tcl(MaxNumClu)
+          REAL    TclOld(MaxNumClu)
           REAL    Xcl(MaxNumClu)
           REAL    Ycl(MaxNumClu)
           REAL    Zcl(MaxNumClu)
@@ -471,7 +471,7 @@ C====================== Include interfstruct.cin =======================
           INTEGER Pnum3(MaxNumClu)
           INTEGER Pid3(MaxNumClu)
           INTEGER ntv
-          INTEGER iv(MaxNumtrkv)
+          INTEGER ivOld(MaxNumtrkv)
           INTEGER trknumv(MaxNumtrkv)
           REAL    CurV(MaxNumtrkv)
           REAL    PhiV(MaxNumtrkv)
@@ -481,9 +481,9 @@ C====================== Include interfstruct.cin =======================
           REAL    PzTV(MaxNumtrkv)
           INTEGER nv
           INTEGER vtx(MaxNumVtx)
-          REAL    xv(MaxNumVtx)
-          REAL    yv(MaxNumVtx)
-          REAL    zv(MaxNumVtx)
+          REAL    xvOld(MaxNumVtx)
+          REAL    yvOld(MaxNumVtx)
+          REAL    zvOld(MaxNumVtx)
           REAL    chivtx(MaxNumVtx)
           INTEGER qualv(MaxNumVtx)
           INTEGER fitidv(MaxNumVtx)
@@ -509,17 +509,17 @@ C====================== Include interfstruct.cin =======================
           INTEGER trhits3(MaxNumTrk)
           INTEGER ntmc
           INTEGER kine(MaxNtrkGen)
-          INTEGER pidmc(MaxNtrkGen)
+          INTEGER pidmcOld(MaxNtrkGen)
           INTEGER virmom(MaxNtrkGen)
           REAL    pxmc(MaxNtrkGen)
           REAL    pymc(MaxNtrkGen)
           REAL    pzmc(MaxNtrkGen)
           REAL    themc(MaxNtrkGen)
           REAL    phimc(MaxNtrkGen)
-          INTEGER vtxmc(MaxNtrkGen)
+          INTEGER vtxmcOld(MaxNtrkGen)
           INTEGER nvtxmc
           INTEGER kinmom(MaxNvtxGen)
-          INTEGER mother(MaxNvtxGen)
+          INTEGER motherOld(MaxNvtxGen)
           REAL    xvmc(MaxNvtxGen)
           REAL    yvmc(MaxNvtxGen)
           REAL    zvmc(MaxNvtxGen)

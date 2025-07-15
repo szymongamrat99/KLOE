@@ -46,7 +46,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 	chain->SetBranchAddress("Xacl", cluster[0]);
 	chain->SetBranchAddress("Yacl", cluster[1]);
 	chain->SetBranchAddress("Zacl", cluster[2]);
-	chain->SetBranchAddress("Tcl", cluster[3]);
+	chain->SetBranchAddress("TclOld", cluster[3]);
 	chain->SetBranchAddress("Enecl", cluster[4]);
 
 	chain->SetBranchAddress("mctruth", &mctruth);

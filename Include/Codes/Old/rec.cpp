@@ -63,7 +63,7 @@ void reconstruct3pi0_(int * ncl,
 		      float * Xcl,
 		      float * Ycl,
 		      float * Zcl,
-		      float * Tcl,
+		      float * TclOld,
 		      float * Enecl,
 		      int * g6mcok,
 		      int * g6mc,
@@ -83,7 +83,7 @@ void reconstruct3pi0_(int * ncl,
 		      float * Xcl,
 		      float * Ycl,
 		      float * Zcl,
-		      float * Tcl,
+		      float * TclOld,
 		      float * Enecl,
 		      int * g6mcok,
 		      int * g6mc,
@@ -132,7 +132,7 @@ void reconstruct3pi0_(int * ncl,
 	clusterEnergyTooLow = true;
       }
       // set values into the reconstructor
-      Rec->SetClu(i, Xcl[cc], Ycl[cc], Zcl[cc], Tcl[cc], Enecl[cc]);
+      Rec->SetClu(i, Xcl[cc], Ycl[cc], Zcl[cc], TclOld[cc], Enecl[cc]);
     }
     
     

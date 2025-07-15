@@ -39,7 +39,7 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
     tree->SetBranchAddress("Xcl", cluster[0]);
     tree->SetBranchAddress("Ycl", cluster[1]);
     tree->SetBranchAddress("Zcl", cluster[2]);
-    tree->SetBranchAddress("Tcl", cluster[3]);
+    tree->SetBranchAddress("TclOld", cluster[3]);
     tree->SetBranchAddress("Enecl", cluster[4]);
 
     Int_t nentries = (Int_t)tree->GetEntries();

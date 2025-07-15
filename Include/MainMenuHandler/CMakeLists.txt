@@ -2,7 +2,8 @@
 
 # Deklarujemy bibliotekę dla Analizy A
 add_library(MainMenuHandler SHARED 
-            MainMenuHandler.cpp)
+            MainMenuHandler.cpp
+            InputParamsHandler.cpp)
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
 # PUBLIC: oznacza, że katalog z nagłówkami (tu: bieżący katalog, '.') będzie

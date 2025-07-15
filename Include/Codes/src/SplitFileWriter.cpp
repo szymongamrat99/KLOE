@@ -12,7 +12,7 @@ SplitFileWriter::SplitFileWriter(const std::string &baseName,
       _currentRun(-1),
       _file(nullptr),
       _tree(nullptr),
-      _fileCounter(0),
+      _fileCounter(1),
       _start(1)
 {
   EnsureOutputDirExists();

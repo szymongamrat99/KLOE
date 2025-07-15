@@ -8,7 +8,7 @@
 /*List of variables (order is the following)*/
 /*
   For 4 gamma decay, without charged decay:
-  4 x 5 (Xcl, Ycl, Zcl, Tcl, EneCl)
+  4 x 5 (Xcl, Ycl, Zcl, TclOld, EneCl)
   1 x 4 (Px_Phi, Py_Phi, Pz_Phi, sqrt(S))
 
   IP determined during fit (using direction of Kne momentum from clusters)
@@ -17,8 +17,8 @@
 --------------------------------------------------------------------------------
 
   For 4 gamma decay, with charged decay:
-  2 x 3 (Curv, Phiv, Cotv)
-  4 x 5 (Xcl, Ycl, Zcl, Tcl, EneCl)
+  2 x 3 (CurvOld, PhivOld, CotvOld)
+  4 x 5 (Xcl, Ycl, Zcl, TclOld, EneCl)
   1 x 4 (Px_Phi, Py_Phi, Pz_Phi, sqrt(S))
 
   IP determined during fit (using direction of Kch momentum)
@@ -29,7 +29,7 @@
 --------------------------------------------------------------------------------
 
   For 6 gamma decay, without charged decay:
-  6 x 5 (Xcl, Ycl, Zcl, Tcl, EneCl)
+  6 x 5 (Xcl, Ycl, Zcl, TclOld, EneCl)
   1 x 4 (Px_Phi, Py_Phi, Pz_Phi, sqrt(S))
 
   IP determined during fit (using direction of Kne momentum from clusters)
@@ -38,8 +38,8 @@
 --------------------------------------------------------------------------------
 
   For 6 gamma decay, with charged decay:
-  2 x 3 (Curv, Phiv, Cotv)
-  6 x 5 (Xcl, Ycl, Zcl, Tcl, EneCl)
+  2 x 3 (CurvOld, PhivOld, CotvOld)
+  6 x 5 (Xcl, Ycl, Zcl, TclOld, EneCl)
   1 x 4 (Px_Phi, Py_Phi, Pz_Phi, sqrt(S))
 
   IP determined during fit (using direction of Kch momentum)

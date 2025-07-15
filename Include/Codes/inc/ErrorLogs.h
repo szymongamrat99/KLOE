@@ -35,9 +35,17 @@ namespace ErrorHandling
     NAN_VAL = 203,       /*!< NaN value in return*/
     CHI_SQR_STEP = 204,  /*!< Step of minimization too small*/
 
+    // Physics-related errors
+    NOT_ENOUGH_NEUTRAL_CLUSTERS = 300, /*!< Not enough neutral clusters */
+    NOT_ENOUGH_CHARGED_TRACKS = 301,   /*!< Not enough charged tracks for analysis*/
+    CHARGED_KAON_MASS_PRE = 302,           /*!< Did not pass charged kaon ivariant mass in preselection*/
+
+
     NOT_RECOGNIZED = 666, /*!< Unexpected exception*/
 
-    NUM_CODES = 11 /*!< Number of codes for loops*/
+    NO_ERROR = 0, /*!< No error occurred*/
+
+    NUM_CODES = 16 /*!< Number of codes for loops*/
   };
 
   /**
@@ -68,6 +76,11 @@ namespace ErrorHandling
 
     std::ofstream
         _logFile; /*!< Log file object*/
+
+    bool _printToScreen = false; /*!< If true, print logs to screen */
+
+    // Counter for physics-related errors per mctruth value (codes 300-399)
+    std::map<int, std::map<ErrorCodes, int>> _physicsErrCountPerMctruth;
 
     /**
      * @brief private method to get the error message with ErrorCodes parameter.
@@ -103,6 +116,14 @@ namespace ErrorHandling
         return "Value is NaN!";
       case ErrorCodes::CHI_SQR_STEP:
         return "Chi-squared step less than threshold!";
+
+      // Physics-related logs
+      case ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS:
+        return "Not enough charged vertices.";
+      case ErrorCodes::NOT_ENOUGH_NEUTRAL_CLUSTERS:
+        return "Not enough neutral clusters.";
+      case ErrorCodes::CHARGED_KAON_MASS_PRE:
+        return "Did not pass charged kaon ivariant mass in preselection.";
 
       // Not recognized logs
       case ErrorCodes::NOT_RECOGNIZED:
@@ -168,21 +189,46 @@ namespace ErrorHandling
       }
     }
 
-    void getErrLog(ErrorCodes &errCode, const std::string &additionalInfo = "")
+    /**
+     * @brief Increment physics-related error counter for a given mctruth value.
+     * @param errCode Error code (should be in 300-399)
+     * @param mctruth MC truth value
+     */
+    void countPhysicsError(ErrorCodes errCode, int mctruth)
     {
-      std::string
-          timestamp = _getTimestamp(),
-          errorMessage = _getErrorMessage(errCode),
-          concatMessage = "[" + timestamp + "] Error: " + errorMessage + " - " + additionalInfo;
+      if (static_cast<int>(errCode) >= 300 && static_cast<int>(errCode) <= 399)
+        _physicsErrCountPerMctruth[mctruth][errCode]++;
+    }
 
-      _errCount[errCode]++;
-      std::cerr << concatMessage << std::endl;
-
-      if (_logFile.is_open())
+    void getErrLog(ErrorCodes &errCode, const std::string &additionalInfo = "", int mctruth = -1)
+    {
+      if (errCode == ErrorCodes::NO_ERROR)
+        return; // No error, nothing to log
+      else
       {
-        _logFile << concatMessage << std::endl;
+        std::string
+            timestamp = _getTimestamp(),
+            errorMessage = _getErrorMessage(errCode),
+            concatMessage = "[" + timestamp + "] Error: " + errorMessage + " - " + additionalInfo;
+
+        _errCount[errCode]++;
+
+        Bool_t isPhysicsError = (static_cast<int>(errCode) >= 300 && static_cast<int>(errCode) <= 399);
+        // Zliczaj błędy fizyczne dla każdego wywołania getErrLog jeśli mctruth podany
+        if (mctruth != -1)
+          countPhysicsError(errCode, mctruth);
+        if (_printToScreen && !isPhysicsError)
+          std::cerr << concatMessage << std::endl;
+
+        if (_logFile.is_open() && !isPhysicsError)
+        {
+          _logFile << concatMessage << std::endl;
+        }
       }
     };
+
+    void setPrintToScreen(bool print) { _printToScreen = print; }
+    bool getPrintToScreen() const { return _printToScreen; }
 
     void getLog(InfoCodes &infoCode, const std::string &additionalInfo = "")
     {
@@ -191,7 +237,8 @@ namespace ErrorHandling
           infoMessage = _getInfoMessage(infoCode),
           concatMessage = "[" + timestamp + "] Info: " + infoMessage + " - " + additionalInfo;
 
-      std::cerr << concatMessage << std::endl;
+      if (_printToScreen)
+        std::cerr << concatMessage << std::endl;
 
       if (_logFile.is_open())
       {
@@ -207,6 +254,44 @@ namespace ErrorHandling
       {
         std::cout << _getErrorMessage(pair.first) << ": " << pair.second << " occurrences" << std::endl;
       }
+    }
+
+    /**
+     * @brief Print physics-related error statistics per mctruth to the log file and optionally to screen.
+     * @param printToScreen If true, also print to screen (default: false)
+     */
+    void printPhysicsErrorStatsPerMctruth(bool printToScreen = false)
+    {
+      if (!_logFile.is_open()) return;
+      _logFile << "Physics-related error statistics per mctruth:\n";
+      for (const auto &mctruth_pair : _physicsErrCountPerMctruth)
+      {
+        int mctruth = mctruth_pair.first;
+        _logFile << "mctruth = " << mctruth << ":\n";
+        if (printToScreen)
+          std::cout << "mctruth = " << mctruth << ":\n";
+        for (const auto &err_pair : mctruth_pair.second)
+        {
+          _logFile << "  " << _getErrorMessage(err_pair.first) << ": " << err_pair.second << " occurrences\n";
+          if (printToScreen)
+            std::cout << "  " << _getErrorMessage(err_pair.first) << ": " << err_pair.second << " occurrences\n";
+        }
+      }
+      _logFile.flush();
+    }
+
+    /**
+     * @brief Get map of physics error counts for a given mctruth value.
+     * @param mctruth MC truth value
+     * @return Map of ErrorCodes to error counts for the given mctruth (empty if not present)
+     */
+    std::map<ErrorCodes, int> getPhysicsErrorCountsForMctruth(int mctruth) const
+    {
+      auto it = _physicsErrCountPerMctruth.find(mctruth);
+      if (it != _physicsErrCountPerMctruth.end())
+        return it->second;
+      else
+        return {};
     }
   };
 }

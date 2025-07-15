@@ -90,7 +90,7 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 	chain->SetBranchAddress("Xcl", cluster[0]);
 	chain->SetBranchAddress("Ycl", cluster[1]);
 	chain->SetBranchAddress("Zcl", cluster[2]);
-	chain->SetBranchAddress("Tcl", cluster[3]);
+	chain->SetBranchAddress("TclOld", cluster[3]);
 	chain->SetBranchAddress("Enecl", cluster[4]);
 
 	chain->SetBranchAddress("mctruth", &mctruth);

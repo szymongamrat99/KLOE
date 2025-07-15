@@ -108,7 +108,7 @@ C loops
       ENDDO
       DO i = 1,MaxNumClu
           Interf%EneCl(i)=0.
-          Interf%Tcl(i)=0.
+          Interf%TclOld(i)=0.
           Interf%Xcl(i)=0.
           Interf%Ycl(i)=0.
           Interf%Zcl(i)=0.
@@ -133,7 +133,7 @@ C loops
           Interf%ncllwrong(i)=0
       ENDDO
       DO i = 1,MaxNumtrkv
-          Interf%iv(i)=0
+          Interf%ivOld(i)=0
           Interf%trknumv(i)=0
           Interf%CurV(i)=0.
           Interf%PhiV(i)=0.
@@ -144,9 +144,9 @@ C loops
       ENDDO
       DO i = 1,MaxNumVtx
           Interf%vtx(i)=0
-          Interf%xv(i)=0.
-          Interf%yv(i)=0.
-          Interf%zv(i)=0.
+          Interf%xvOld(i)=0.
+          Interf%yvOld(i)=0.
+          Interf%zvOld(i)=0.
           Interf%chivtx(i)=0.
           Interf%qualv(i)=0
           Interf%fitidv(i)=0
@@ -173,11 +173,11 @@ C loops
       ENDDO
       DO i = 1,MaxNtrkGen
           Interf%kine(i)=0
-          Interf%pidmc(i)=0
+          Interf%pidmcOld(i)=0
           Interf%virmom(i)=0
-          Interf%vtxmc(i)=0
+          Interf%vtxmcOld(i)=0
           Interf%kinmom(i)=0
-          Interf%mother(i)=0
+          Interf%motherOld(i)=0
           Interf%pxmc(i)=0.
           Interf%pymc(i)=0.
           Interf%pzmc(i)=0.
@@ -270,7 +270,7 @@ C======================================================================
 C======================================================================
 C======================================================================
 
-      SUBROUTINE GetKslEvent(ntmc,mother,vtxmc,pidmc,xvmc,yvmc,zvmc,
+      SUBROUTINE GetKslEvent(ntmc,motherOld,vtxmcOld,pidmcOld,xvmc,yvmc,zvmc,
      &           pxmc,pymc,pzmc,nvtxmc,ipmc,KchMC,KneMC,DtMC,DlMC,
      &           truth,truthreg,truthsemi,truththree,truthomega,
      &           truthelse,
@@ -279,7 +279,7 @@ C-----------------------------------------------------------------------
 C
 C  Description:
 C  ------------
-C in: ntmc,mother(),vtxmc(),pidmc(),xvmc(),yvmc(),zvmc(),
+C in: ntmc,motherOld(),vtxmcOld(),pidmcOld(),xvmc(),yvmc(),zvmc(),
 C in: pxmc(),pymc(),pzmc(),nvtxmc
 C out: truth,truthreg,truthsemi,truththree,truthomega,truthelse,ipmc(),KchMC(),K
 C      neMC(),DtMC,DlMC                                                         
@@ -298,8 +298,8 @@ C
      &        NothKs,NpioKl,NpipKl,NpimKl,NepKl,
      &        NemKl,NmupKl,NmumKl,NothKl,Nreg,Nother,
      &        Npiow,Npipw,Npimw,Nothw,NKS,NKL,Nisr,nvtxmc
-      INTEGER ntmc,mother(MaxNvtxGen),vtxmc(MaxNtrkGen),
-     &        pidmc(MaxNtrkGen)
+      INTEGER ntmc,motherOld(MaxNvtxGen),vtxmcOld(MaxNtrkGen),
+     &        pidmcOld(MaxNtrkGen)
       INTEGER KLpic(2),KLpio(2),KSpic(2),KSpio(2),i
       REAL    xvmc(MaxNvtxGen),yvmc(MaxNvtxGen),zvmc(MaxNvtxGen),Broots
       REAL    ipmc(3),KchMC(9),KneMC(9),Ks(9),Kl(9),DtMC,DlMC,PhiPMC(3)
@@ -346,78 +346,78 @@ C
 C
       DO i = 1,ntmc
 C Kl vertex
-         IF( mother(vtxmc(i)).EQ.10 )THEN  
+         IF( motherOld(vtxmcOld(i)).EQ.10 )THEN  
 C pi0
-            IF( pidmc(i).EQ.7 )THEN        
+            IF( pidmcOld(i).EQ.7 )THEN        
                NpioKl = NpioKl + 1
 C pi+
-            ELSEIF( pidmc(i).EQ.8 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.8 ) THEN   
                NpipKl = NpipKl + 1
 C pi-
-            ELSEIF( pidmc(i).EQ.9 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.9 ) THEN   
                NpimKl = NpimKl + 1
 C e+
-            ELSEIF( pidmc(i).EQ.2 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.2 ) THEN   
                NepKl = NepKl + 1
 C e-
-            ELSEIF( pidmc(i).EQ.3 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.3 ) THEN   
                NemKl = NemKl + 1
 C mu+
-            ELSEIF( pidmc(i).EQ.5 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.5 ) THEN   
                NmupKl = NmupKl + 1
 C mu-
-            ELSEIF( pidmc(i).EQ.6 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.6 ) THEN   
                NmumKl = NmumKl + 1
 C regeneration
-            ELSEIF( pidmc(i).EQ.16 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.16 ) THEN   
                Nreg = Nreg + 1
             ELSE
                NothKl = NothKl + 1
             ENDIF
 C Ks vertex
-         ELSEIF( mother(vtxmc(i)).EQ.16 )THEN   
+         ELSEIF( motherOld(vtxmcOld(i)).EQ.16 )THEN   
 C pi0
-            IF( pidmc(i).EQ.7 )THEN             
+            IF( pidmcOld(i).EQ.7 )THEN             
                NpioKs = NpioKs + 1
 C pi+
-            ELSEIF( pidmc(i).EQ.8 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.8 ) THEN   
                NpipKs = NpipKs + 1
 C pi-
-            ELSEIF( pidmc(i).EQ.9 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.9 ) THEN   
                NpimKs = NpimKs + 1
 C e+
-            ELSEIF( pidmc(i).EQ.2 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.2 ) THEN   
                NepKs = NepKs + 1
 C e-
-            ELSEIF( pidmc(i).EQ.3 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.3 ) THEN   
                NemKs = NemKs + 1
 C mu+
-            ELSEIF( pidmc(i).EQ.5 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.5 ) THEN   
                NmupKs = NmupKs + 1
 C mu-
-            ELSEIF( pidmc(i).EQ.6 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.6 ) THEN   
                NmumKs = NmumKs + 1
             ELSE
                NothKs = NothKs + 1
             ENDIF
 C Omega vertex
-         ELSEIF( mother(vtxmc(i)).EQ.50 )THEN   
+         ELSEIF( motherOld(vtxmcOld(i)).EQ.50 )THEN   
 C pi0
-            IF( pidmc(i).EQ.7 )THEN             
+            IF( pidmcOld(i).EQ.7 )THEN             
                Npiow = Npiow + 1
 C pi+
-            ELSEIF( pidmc(i).EQ.8 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.8 ) THEN   
                Npipw = Npipw + 1
 C pi-
-            ELSEIF( pidmc(i).EQ.9 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.9 ) THEN   
                Npimw = Npimw + 1
 C Kl
-            ELSEIF( pidmc(i).EQ.10 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.10 ) THEN   
                NKL = NKL + 1
 C Ks
-            ELSEIF( pidmc(i).EQ.16 ) THEN   
+            ELSEIF( pidmcOld(i).EQ.16 ) THEN   
                NKS = NKS + 1
-            ELSEIF( pidmc(i).EQ.1 ) THEN
+            ELSEIF( pidmcOld(i).EQ.1 ) THEN
                Nisr = Nisr + 1
             ELSE
                Nothw = Nothw + 1
@@ -493,7 +493,7 @@ C Ks
       ENDIF
       IF( truth ) THEN
         DO i = 1,nvtxmc
-           IF( mother(i).eq.50 ) THEN
+           IF( motherOld(i).eq.50 ) THEN
               ipmc(1) = xvmc(i)
               ipmc(2) = yvmc(i)
               ipmc(3) = zvmc(i)
@@ -502,7 +502,7 @@ C Ks
         ENDDO
         DO i = 1,nvtxmc
 C KL
-           IF( mother(i).eq.10 ) THEN 
+           IF( motherOld(i).eq.10 ) THEN 
               Kl(7)=xvmc(i)
               Kl(8)=yvmc(i)
               Kl(9)=zvmc(i)
@@ -511,7 +511,7 @@ C KL
         ENDDO
         DO i = 1,nvtxmc
 C KS
-           IF( mother(i).eq.16 ) THEN 
+           IF( motherOld(i).eq.16 ) THEN 
               Ks(7)=xvmc(i)
               Ks(8)=yvmc(i)
               Ks(9)=zvmc(i)
@@ -520,7 +520,7 @@ C KS
         ENDDO
        DO i = 1,ntmc
 CKL
-           IF( pidmc(i).eq.10 ) THEN 
+           IF( pidmcOld(i).eq.10 ) THEN 
               Kl(1)=pxmc(i)
               Kl(2)=pymc(i)
               Kl(3)=pzmc(i)
@@ -533,7 +533,7 @@ CKL
         ENDDO
         DO i = 1,ntmc
 CKS
-           IF( pidmc(i).eq.16 ) THEN 
+           IF( pidmcOld(i).eq.16 ) THEN 
               Ks(1)=pxmc(i)
               Ks(2)=pymc(i)
               Ks(3)=pzmc(i)
@@ -546,13 +546,13 @@ CKS
         ENDDO
         DO i = 1,ntmc
 C Kl vertex
-           IF( mother(vtxmc(i)).EQ.10 ) THEN      
+           IF( motherOld(vtxmcOld(i)).EQ.10 ) THEN      
 C pi0
-              IF( pidmc(i).EQ.7 ) THEN             
+              IF( pidmcOld(i).EQ.7 ) THEN             
                  KneMC=Kl
                  KchMC=Ks
                  EXIT
-              ELSEIF( pidmc(i).EQ.8 .OR. pidmc(i).EQ.9 ) THEN
+              ELSEIF( pidmcOld(i).EQ.8 .OR. pidmcOld(i).EQ.9 ) THEN
                  KchMC=Kl
                  KneMC=Ks
                  EXIT
@@ -581,9 +581,9 @@ C 3 pz
 C 4 E
 C 5 |p|
 C 6 minv
-C 7 xv
-C 8 yv
-C 9 zv
+C 7 xvOld
+C 8 yvOld
+C 9 zvOld
 C Kch(9)  = 4-momentum of first kaon (pi+pi- final state)
 C Kne(9)  = 4-momentum of second kaon (pi0pi0 final state)
 C PhiVtx(3) = Phi vertex coordinate
@@ -692,12 +692,12 @@ C=======================================================================
       SUBROUTINE find_kchrec(findKS,findKL,last_vtx,findClose,
      &                       Bx,By,Bz,qualv,nv,ntv,
      &                       IV,CurV,PhiV,CotV,
-     &                       xv,yv,zv,vtaken,KchRec,
+     &                       xvOld,yvOld,zvOld,vtaken,KchRec,
      &                       trk1,trk2,cosTrk)
 C-----------------------------------------------------------------------
       USE ANALYSISMODULE
 C-----------------------------------------------------------------------
-C in:qualv(),nv,ntv,IV(),xv(),yv(),zv()
+C in:qualv(),nv,ntv,IV(),xvOld(),yvOld(),zvOld()
 C in:CurV(),PhiV(),CotV() or PxTV(),PyTV(),PzTV()
 C out:vtaken(),Kchrec(),trk1(),trk2(),cosTrk
 C 1 px
@@ -706,16 +706,16 @@ C 3 pz
 C 4 E
 C 5 |p|
 C 6 minv
-C 7 xv
-C 8 yv
-C 9 zv
+C 7 xvOld
+C 8 yvOld
+C 9 zvOld
 C Local variables
       INTEGER findKS,findKL,findClose
-      INTEGER vtaken(3),i,j,k,l,nv,ntv,iv(MaxNumtrkv),ii,last_vtx
+      INTEGER vtaken(3),i,j,k,l,nv,ntv,ivOld(MaxNumtrkv),ii,last_vtx
       REAL    KchRec(9),KchTmp(9),P4trkRec1(4),P4trkRec2(4)
       REAL    CurV(MaxNumtrkv),PhiV(MaxNumtrkv),CotV(MaxNumtrkv)
       REAL    PxTV(MaxNumtrkv),PyTV(MaxNumtrkv),PzTV(MaxNumtrkv)
-      REAL    xv(MaxNumVtx),yv(MaxNumVtx),zv(MaxNumVtx)
+      REAL    xvOld(MaxNumVtx),yvOld(MaxNumVtx),zvOld(MaxNumVtx)
       INTEGER qualv(MaxNumVtx)
       REAL    P4trkRec1mod,P4trkRec2mod
       REAL    trk1(4),trk2(4),cosTrk
@@ -731,8 +731,8 @@ C --- rec
       dist = 1000000.
       KchRec(6) = 1000000000.
       DO i = 1,nv
-         cyl_vol(1) = SQRT( (xv(i) - Bx)**2 + (yv(i) - By)**2 )
-         cyl_vol(2) = ABS( zv(i) - Bz )
+         cyl_vol(1) = SQRT( (xvOld(i) - Bx)**2 + (yvOld(i) - By)**2 )
+         cyl_vol(2) = ABS( zvOld(i) - Bz )
 C --- Find the conditions for KS or KL candidate
          IF(findKS .EQ. 1) THEN
             pipi_bool = (cyl_vol(1).LE.10) .AND. (cyl_vol(2).LE.20)
@@ -798,8 +798,8 @@ C vtx id
      &                                 (P4trkRec1mod*P4trkRec2mod)
                            ENDIF
                         ELSE
-                           dist_tmp = SQRT((xv(i) - Bx)**2 
-     &                                      + (yv(i) - By)**2) 
+                           dist_tmp = SQRT((xvOld(i) - Bx)**2 
+     &                                      + (yvOld(i) - By)**2) 
                            IF( (vtaken(1).eq.0).or.
      &                        ( dist_tmp.lt.
      &                           dist ) ) THEN
@@ -829,9 +829,9 @@ C vtx id
          ENDIF
       ENDDO
       IF( vtaken(1).ne.0 ) THEN
-         KchRec(7) = xv(vtaken(1))
-         KchRec(8) = yv(vtaken(1))
-         KchRec(9) = zv(vtaken(1))
+         KchRec(7) = xvOld(vtaken(1))
+         KchRec(8) = yvOld(vtaken(1))
+         KchRec(9) = zvOld(vtaken(1))
       ELSE
          ErrFlag = .TRUE.
       ENDIF
@@ -856,9 +856,9 @@ C 3 pz
 C 4 E
 C 5 |p|
 C 6 minv
-C 7 xv
-C 8 yv
-C 9 zv
+C 7 xvOld
+C 8 yvOld
+C 9 zvOld
 C in: KchRec(),Bpx,Bpy,Bpz,Bx,By,Bz,Broots,trk1(),trk2()
 C out: KchBoost(),ip,chdist,Qmiss
 C Local variables
@@ -1221,18 +1221,18 @@ C------------------------------------------------------------------------------
       WRITE(*,*)'----------------------------------------'
       END
 
-      SUBROUTINE check_isr(ntmc,pidmc,virmom,vtxmc,mother,isr)
+      SUBROUTINE check_isr(ntmc,pidmcOld,virmom,vtxmcOld,motherOld,isr)
          USE ANALYSISMODULE
 C-----------------------------------------------------------------------
-C in: ntmc,pidmc(),virmom(),vtxmc(),mother()
+C in: ntmc,pidmcOld(),virmom(),vtxmcOld(),motherOld()
 C out: isr
-      INTEGER isr,i,ntmc,pidmc(MaxNtrkGen),virmom(MaxNtrkGen)
-      INTEGER vtxmc(MaxNtrkGen),mother(MaxNvtxGen)
+      INTEGER isr,i,ntmc,pidmcOld(MaxNtrkGen),virmom(MaxNtrkGen)
+      INTEGER vtxmcOld(MaxNtrkGen),motherOld(MaxNvtxGen)
       ISR = 0
       DO i = 1,ntmc
-          IF( pidmc(i).eq.1.and.virmom(i).eq.1.and.
-     &        vtxmc(i).eq.1.and.
-     &        mother(vtxmc(i)).eq.50 ) THEN
+          IF( pidmcOld(i).eq.1.and.virmom(i).eq.1.and.
+     &        vtxmcOld(i).eq.1.and.
+     &        motherOld(vtxmcOld(i)).eq.50 ) THEN
             ISR = 1
             EXIT
           ENDIF
@@ -1292,7 +1292,7 @@ C
       REAL    costhe,beta_k_mod,ia_mod,NeuVtx(3)
       REAL    Bpx,Bpy,Bpz,Broots,KchBoost(9),EneCl(MaxNumClu)
       REAL    Xcl(MaxNumClu),Ycl(MaxNumClu),Zcl(MaxNumClu),ip(3)
-      REAL    Tcl(MaxNumClu),cldist,trc_tmp
+      REAL    TclOld(MaxNumClu),cldist,trc_tmp
       REAL    trc(MaxNumCLu),trcvtmp(MaxNumClu)
       REAL    KneRec(9),minv4gam,minv4gam_tmp,pi0(2),pi0tmp(2)
       REAL    numerator(3),vcoor(3),x2(3),vdist,denominator(3)
@@ -1310,9 +1310,9 @@ C 3 pz
 C 4 E
 C 5 |p|
 C 6 minv
-C 7 xv
-C 8 yv
-C 9 zv
+C 7 xvOld
+C 8 yvOld
+C 9 zvOld
 C in:  Bpx,Bpy,Bpz,Broots,KchBoost(),ncl,enecl(),ncll(),xcl(),ycl(),zcl(),ip(),t
 C      cl()                                                                     
 C out: cldistKneRecLor(),trc(),nclwrong,ncllwrong
