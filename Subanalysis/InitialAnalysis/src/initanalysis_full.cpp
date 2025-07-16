@@ -135,11 +135,11 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 		else
 		{
 			errorCode = genVarClassifier.FindNeutralCluster(*clusterProps.nclu,
-																										*clusterProps.ntcl,
-																										&clusterProps.asscl[0],
-																										NCLMIN,
-																										logger,
-																										neuclulist);
+																											*clusterProps.ntcl,
+																											&clusterProps.asscl[0],
+																											NCLMIN,
+																											logger,
+																											neuclulist);
 		}
 
 		if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
@@ -161,7 +161,6 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 			// VTX CLOSEST TO BHABHA IP - FOR OMEGAPI
 			hypoMap[KLOE::HypothesisCode::OMEGAPI] = eventAnalysis->findKClosestRec(baseKin.KchrecClosest, baseKin.trkClosest[0], baseKin.trkClosest[1], baseKin.vtakenClosest, logger);
 
-
 			ErrorHandling::ErrorCodes errTmp[2];
 
 			// VTX OF KS - FOR PIPIPIPI
@@ -171,7 +170,7 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 			errTmp[1] = eventAnalysis->findKSLRec(10, baseKin.vtakenKS[0], baseKin.KchrecKL, baseKin.trkKL[0], baseKin.trkKL[1], baseKin.vtakenKL, logger);
 			// --------------------------------------------------------------------------------
 
-			if	(errTmp[0] != ErrorHandling::ErrorCodes::NO_ERROR)
+			if (errTmp[0] != ErrorHandling::ErrorCodes::NO_ERROR)
 				hypoMap[KLOE::HypothesisCode::FOUR_PI] = errTmp[0];
 			else if (errTmp[1] != ErrorHandling::ErrorCodes::NO_ERROR)
 				hypoMap[KLOE::HypothesisCode::FOUR_PI] = errTmp[1];
@@ -184,7 +183,88 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 				logger.getErrLog(errorCode, "", mctruth);
 			else
 			{
-				if (abs(baseKin.KchrecKS[5] - mK0) < 5 && abs(baseKin.KchrecKL[5] - mK0) < 5)
+				Bool_t cutCombined = false;
+				std::vector<Bool_t> cutOrdered;
+
+				if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
+				{
+					cutOrdered.push_back(abs(baseKin.KchrecKS[5] - mK0) < 5);
+					cutOrdered.push_back(abs(baseKin.KchrecKL[5] - mK0) < 5);
+
+					if (cutOrdered[0] && cutOrdered[1])
+					{
+
+						Float_t
+								pKTwoBody = Obj.TwoBodyDecayMass(mPhi, mK0, mK0),
+								boostPhi[3] = {
+										-*bhabhaProps.px / *bhabhaProps.energy,
+										-*bhabhaProps.py / *bhabhaProps.energy,
+										-*bhabhaProps.pz / *bhabhaProps.energy},
+								phiMom[4] = {
+										*bhabhaProps.px,
+										*bhabhaProps.py,
+										*bhabhaProps.pz,
+										*bhabhaProps.energy},
+								trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, KchrecKSMom = 0, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {}, KchrecKLMom = 0;
+
+						Obj.lorentz_transf(boostPhi, baseKin.trkKS[0].data(), trkKS_PhiCM[0]);
+						Obj.lorentz_transf(boostPhi, baseKin.trkKS[1].data(), trkKS_PhiCM[1]);
+						Obj.lorentz_transf(boostPhi, baseKin.trkKL[0].data(), trkKL_PhiCM[0]);
+						Obj.lorentz_transf(boostPhi, baseKin.trkKL[1].data(), trkKL_PhiCM[1]);
+
+						for (Int_t part = 0; part < 2; part++)
+							for (Int_t comp = 0; comp < 4; comp++)
+							{
+								KchrecKS_PhiCM[comp] += trkKS_PhiCM[part][comp];
+								KchrecKL_PhiCM[comp] += trkKL_PhiCM[part][comp];
+							}
+
+						KchrecKSMom = sqrt(pow(KchrecKS_PhiCM[0], 2) + pow(KchrecKS_PhiCM[1], 2) + pow(KchrecKS_PhiCM[2], 2));
+						KchrecKLMom = sqrt(pow(KchrecKL_PhiCM[0], 2) + pow(KchrecKL_PhiCM[1], 2) + pow(KchrecKL_PhiCM[2], 2));
+
+						cutOrdered.push_back(abs(KchrecKSMom - pKTwoBody) < 10);
+						cutOrdered.push_back(abs(KchrecKLMom - pKTwoBody) < 10);
+
+						Float_t
+								KchboostKS[9],
+								KchboostKL[9];
+						
+						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS.data(), phiMom, KchboostKS);
+						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL.data(), phiMom, KchboostKL);
+
+						Float_t
+								PhiMom[3] = {*bhabhaProps.px, *bhabhaProps.py, *bhabhaProps.pz},
+								MissMomKS[3] = {},
+								MissMomKL[3] = {},
+								PmissKS = 0,
+								PmissKL = 0,
+								EmissKS = 0,
+								EmissKL = 0;
+
+						for (Int_t comp = 0; comp < 3; comp++)
+						{
+							MissMomKS[comp] = PhiMom[comp] - KchboostKS[comp] - baseKin.KchrecKL[comp];
+							MissMomKL[comp] = PhiMom[comp] - KchboostKL[comp] - baseKin.KchrecKS[comp];
+						}
+
+						PmissKS = sqrt(pow(MissMomKS[0], 2) + pow(MissMomKS[1], 2) + pow(MissMomKS[2], 2));
+						PmissKL = sqrt(pow(MissMomKL[0], 2) + pow(MissMomKL[1], 2) + pow(MissMomKL[2], 2));
+
+						EmissKS = KchboostKS[3] - baseKin.KchrecKS[3];
+						EmissKL = KchboostKL[3] - baseKin.KchrecKL[3];
+						
+						cutOrdered.push_back(sqrt(pow(EmissKS,2) + pow(PmissKS,2)) < 10);
+						cutOrdered.push_back(sqrt(pow(EmissKL,2) + pow(PmissKL,2)) < 10);
+
+						cutOrdered.push_back((pow(EmissKL,2) - pow(PmissKL,2) < 10) && (pow(EmissKL,2) - pow(PmissKL,2) > -50));
+
+						cutOrdered.push_back((pow(EmissKS,2) - pow(PmissKS,2) < 10) && (pow(EmissKS,2) - pow(PmissKS,2) > -50));
+
+						cutCombined = cutOrdered[0] && cutOrdered[1] && cutOrdered[2] && cutOrdered[3] && cutOrdered[4] && cutOrdered[5] && cutOrdered[6] && cutOrdered[7];
+					}
+				}
+
+				if (cutCombined)
 				{
 					errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
 
