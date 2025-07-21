@@ -66,6 +66,7 @@
     "typeinfo": "cpp",
     "valarray": "cpp",
     "variant": "cpp",
-    "kin_fits.C": "cpp"
+    "kin_fits.C": "cpp",
+    "PlotsPiPi.C": "cpp"
   }
 }

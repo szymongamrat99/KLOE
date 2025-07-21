@@ -531,9 +531,141 @@ namespace KLOE
 
     return 0;
   }
+  template <typename F, typename T>
+  Int_t ChargedVtxRec<F, T>::KaonMomFromBoost(std::vector<F> &pKaon, F *pboost, std::vector<F> &pKaonBoost)
+  {
+    std::string
+        name = "";
+    name = base_path + logs_dir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
+
+    ErrorHandling::ErrorLogs logger(name);
+
+    F
+        pK_from_boost = 0.,
+        pb_mod = 0.,
+        pK_mod = 0.,
+        dot = 0.,
+        cosb_sq = 0.,
+        beta_sq = 0.,
+        beta_gamma_sq = 0.,
+        gamma_sq = 0.,
+        pcm_sq = 0.,
+        C = 0.,
+        A = 0.,
+        B = 0.;
+
+    for (Int_t i = 0; i < 3; i++)
+    {
+      pb_mod += pow(pboost[i], 2);
+      pK_mod += pow(pKaon[i], 2);
+      dot += pKaon[i] * pboost[i];
+    }
+
+    cosb_sq = pow(dot, 2) / (pb_mod * pK_mod);
+
+    pb_mod = sqrt(pb_mod);
+    pK_mod = sqrt(pK_mod);
+
+    beta_sq = pow(pb_mod / pboost[3], 2);
+    beta_gamma_sq = pow(pb_mod, 2) / (pow(pboost[3], 2) - pow(pb_mod, 2));
+    gamma_sq = 1. + beta_gamma_sq;
+
+    pcm_sq = 0.25 * (pow(pboost[3], 2) - pow(pb_mod, 2)) - pow(mK0, 2);
+
+    C = pow(beta_gamma_sq * pow(mK0, 2) - pcm_sq, 2);
+    A = pow(gamma_sq * (1. - beta_sq * cosb_sq), 2);
+    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * pow(mK0, 2) - pcm_sq) - 2. * beta_gamma_sq * pow(mK0, 2) * cosb_sq);
+
+    F
+        disc = pow(B, 2) - A * C;
+
+    try
+    {
+      // Check, if this is a quadratic equation
+      if (A == 0)
+        throw ErrorHandling::ErrorCodes::DENOM_EQ_ZERO;
+
+      // Check, if discriminant is good
+      if (disc < 0. && disc > -100.)
+        disc = 0.;
+      else if (disc < -100.)
+        throw ErrorHandling::ErrorCodes::DELTA_LT_ZERO;
+    }
+    catch (ErrorHandling::ErrorCodes err)
+    {
+
+      return Int_t(err);
+    }
+
+    disc = sqrt(disc);
+
+    F
+        P1 = (-B + disc) / A,
+        P2 = (-B - disc) / A;
+
+    if (P1 > 0. && P2 < 0.)
+      pK_from_boost = sqrt(P1);
+    else if (P2 > 0. && P1 < 0.)
+      pK_from_boost = sqrt(P2);
+    else if (P1 > 0. && P2 > 0.)
+    {
+      if (dot < 0.)
+        pK_from_boost = sqrt(std::min(P1, P2));
+      else
+        pK_from_boost = sqrt(std::max(P1, P2));
+    }
+
+    for (Int_t i = 0; i < 3; i++)
+      pKaonBoost[i] = pKaon[i] * (pK_from_boost / pK_mod);
+
+    pKaonBoost[3] = sqrt(pow(pK_from_boost, 2) + pow(mK0, 2));
+    pKaonBoost[4] = pK_from_boost;
+    pKaonBoost[5] = mK0;
+    pKaonBoost[6] = pKaon[6];
+    pKaonBoost[7] = pKaon[7];
+    pKaonBoost[8] = pKaon[8];
+
+    return 0;
+  }
 
   template <typename F, typename T>
   Int_t ChargedVtxRec<F, T>::IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, F *int_point)
+  {
+    std::string
+        name = "";
+    name = base_path + logs_dir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
+
+    ErrorHandling::ErrorLogs logger(name);
+
+    F dot_prod_up = 0.,
+      dot_prod_down = 0.;
+
+    for (Int_t i = 0; i < 3; i++)
+    {
+      dot_prod_up += (X_line[i] - X_plane[i]) * vec_plane[i];
+      dot_prod_down += vec_line[i] * vec_plane[i];
+    }
+
+    try
+    {
+      if (dot_prod_down == 0)
+        throw ErrorHandling::ErrorCodes::DENOM_EQ_ZERO;
+
+      for (Int_t i = 0; i < 3; i++)
+      {
+        int_point[i] = X_line[i] + (dot_prod_up / dot_prod_down) * vec_line[i];
+      }
+
+      return 0;
+    }
+    catch (ErrorHandling::ErrorCodes err)
+    {
+      return Int_t(err);
+    }
+  }
+
+  template <typename F, typename T>
+  Int_t ChargedVtxRec<F, T>::IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, std::vector<F> &int_point)
   {
     std::string
         name = "";

@@ -83,14 +83,26 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 		mctruth = 0;
 
 		baseKin.vtaken.clear();
+		baseKin.vtakenKS.clear();
+		baseKin.vtakenKL.clear();
 		baseKin.vtakenClosest.clear();
 
 		baseKin.Kchrecnew.clear();
+		baseKin.KchrecKS.clear();
+		baseKin.KchrecKL.clear();
 		baseKin.KchrecClosest.clear();
+
+		baseKin.KchboostKS.clear();
+		baseKin.KchboostKL.clear();
+
+		baseKin.ipKS.clear();
+		baseKin.ipKL.clear();
 
 		for (Int_t i = 0; i < 2; i++)
 		{
 			baseKin.trknew[i].clear();
+			baseKin.trkKS[i].clear();
+			baseKin.trkKL[i].clear();
 			baseKin.trkClosest[i].clear();
 		}
 
@@ -103,7 +115,12 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 		baseKin.KchrecKS.resize(9);
 		baseKin.KchrecKL.resize(9);
 		baseKin.KchrecClosest.resize(9);
-		baseKin.KchrecKLTwoBody.resize(9);
+
+		baseKin.KchboostKS.resize(9);
+		baseKin.KchboostKL.resize(9);
+
+		baseKin.ipKS.resize(3);
+		baseKin.ipKL.resize(3);
 
 		for (Int_t i = 0; i < 2; i++)
 		{
@@ -200,12 +217,7 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 										-*bhabhaProps.px / *bhabhaProps.energy,
 										-*bhabhaProps.py / *bhabhaProps.energy,
 										-*bhabhaProps.pz / *bhabhaProps.energy},
-								phiMom[4] = {
-										*bhabhaProps.px,
-										*bhabhaProps.py,
-										*bhabhaProps.pz,
-										*bhabhaProps.energy},
-								trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, KchrecKSMom = 0, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {}, KchrecKLMom = 0;
+								phiMom[4] = {*bhabhaProps.px, *bhabhaProps.py, *bhabhaProps.pz, *bhabhaProps.energy}, trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, KchrecKSMom = 0, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {}, KchrecKLMom = 0;
 
 						Obj.lorentz_transf(boostPhi, baseKin.trkKS[0].data(), trkKS_PhiCM[0]);
 						Obj.lorentz_transf(boostPhi, baseKin.trkKS[1].data(), trkKS_PhiCM[1]);
@@ -225,12 +237,43 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 						cutOrdered.push_back(abs(KchrecKSMom - pKTwoBody) < 10);
 						cutOrdered.push_back(abs(KchrecKLMom - pKTwoBody) < 10);
 
-						Float_t
-								KchboostKS[9],
-								KchboostKL[9];
-						
-						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS.data(), phiMom, KchboostKS);
-						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL.data(), phiMom, KchboostKL);
+						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS, phiMom, baseKin.KchboostKS);
+						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL, phiMom, baseKin.KchboostKL);
+
+						Float_t X_lineKS[3] = {baseKin.KchboostKS[6],
+																	 baseKin.KchboostKS[7],
+																	 baseKin.KchboostKS[8]}, // Vertex laying on the line
+								X_lineKL[3] = {baseKin.KchboostKL[6],
+															 baseKin.KchboostKL[7],
+															 baseKin.KchboostKL[8]}, // Vertex laying on the line
+								pKS[3] = {baseKin.KchboostKS[0],
+													baseKin.KchboostKS[1],
+													baseKin.KchboostKS[2]}, // Direction of the line
+								pKL[3] = {baseKin.KchboostKL[0],
+													baseKin.KchboostKL[1],
+													baseKin.KchboostKL[2]}, // Direction of the line
+								xB[3] = {baseKin.bhabha_vtx[0],
+												 baseKin.bhabha_vtx[1],
+												 baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
+								plane_perp[3] = {0.,
+																 baseKin.phi_mom[1],
+																 0.}; // Vector perpendicular to the plane from Bhabha momentum
+
+						// Corrected IP event by event
+						eventAnalysis->IPBoostCorr(X_lineKS, pKL, xB, plane_perp, baseKin.ipKS);
+						eventAnalysis->IPBoostCorr(X_lineKL, pKL, xB, plane_perp, baseKin.ipKL);
+
+						baseKin.ipKS[0] = baseKin.bhabha_vtx[0];
+						baseKin.ipKS[1] = baseKin.bhabha_vtx[1];
+						// z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
+						if (abs(baseKin.ipKS[2] - baseKin.bhabha_vtx[2]) > 2.0)
+							baseKin.ipKS[2] = baseKin.bhabha_vtx[2];
+
+						baseKin.ipKL[0] = baseKin.bhabha_vtx[0];
+						baseKin.ipKL[1] = baseKin.bhabha_vtx[1];
+						// z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
+						if (abs(baseKin.ipKL[2] - baseKin.bhabha_vtx[2]) > 2.0)
+							baseKin.ipKL[2] = baseKin.bhabha_vtx[2];
 
 						Float_t
 								PhiMom[3] = {*bhabhaProps.px, *bhabhaProps.py, *bhabhaProps.pz},
@@ -243,22 +286,22 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 
 						for (Int_t comp = 0; comp < 3; comp++)
 						{
-							MissMomKS[comp] = PhiMom[comp] - KchboostKS[comp] - baseKin.KchrecKL[comp];
-							MissMomKL[comp] = PhiMom[comp] - KchboostKL[comp] - baseKin.KchrecKS[comp];
+							MissMomKS[comp] = PhiMom[comp] - baseKin.KchboostKS[comp] - baseKin.KchrecKL[comp];
+							MissMomKL[comp] = PhiMom[comp] - baseKin.KchboostKL[comp] - baseKin.KchrecKS[comp];
 						}
 
 						PmissKS = sqrt(pow(MissMomKS[0], 2) + pow(MissMomKS[1], 2) + pow(MissMomKS[2], 2));
 						PmissKL = sqrt(pow(MissMomKL[0], 2) + pow(MissMomKL[1], 2) + pow(MissMomKL[2], 2));
 
-						EmissKS = KchboostKS[3] - baseKin.KchrecKS[3];
-						EmissKL = KchboostKL[3] - baseKin.KchrecKL[3];
-						
-						cutOrdered.push_back(sqrt(pow(EmissKS,2) + pow(PmissKS,2)) < 10);
-						cutOrdered.push_back(sqrt(pow(EmissKL,2) + pow(PmissKL,2)) < 10);
+						EmissKS = baseKin.KchboostKS[3] - baseKin.KchrecKS[3];
+						EmissKL = baseKin.KchboostKL[3] - baseKin.KchrecKL[3];
 
-						cutOrdered.push_back((pow(EmissKL,2) - pow(PmissKL,2) < 10) && (pow(EmissKL,2) - pow(PmissKL,2) > -50));
+						cutOrdered.push_back(sqrt(pow(EmissKS, 2) + pow(PmissKS, 2)) < 10);
+						cutOrdered.push_back(sqrt(pow(EmissKL, 2) + pow(PmissKL, 2)) < 10);
 
-						cutOrdered.push_back((pow(EmissKS,2) - pow(PmissKS,2) < 10) && (pow(EmissKS,2) - pow(PmissKS,2) > -50));
+						cutOrdered.push_back((pow(EmissKL, 2) - pow(PmissKL, 2) < 10) && (pow(EmissKL, 2) - pow(PmissKL, 2) > -50));
+
+						cutOrdered.push_back((pow(EmissKS, 2) - pow(PmissKS, 2) < 10) && (pow(EmissKS, 2) - pow(PmissKS, 2) > -50));
 
 						cutCombined = cutOrdered[0] && cutOrdered[1] && cutOrdered[2] && cutOrdered[3] && cutOrdered[4] && cutOrdered[5] && cutOrdered[6] && cutOrdered[7];
 					}
@@ -408,7 +451,12 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 							{"trk2KS", baseKin.trkKS[1]},
 							{"KchrecKL", baseKin.KchrecKL},
 							{"trk1KL", baseKin.trkKL[0]},
-							{"trk2KL", baseKin.trkKL[1]}};
+							{"trk2KL", baseKin.trkKL[1]},
+							{"KchboostKS", baseKin.KchboostKS},
+							{"KchboostKL", baseKin.KchboostKL},
+							{"ipKS", baseKin.ipKS},
+							{"ipKL", baseKin.ipKL}
+																		};
 
 					writer.Fill(intVars, floatVars, intArrays, floatArrays);
 				}

@@ -49,8 +49,11 @@ namespace KLOE
     ErrorHandling::ErrorCodes findKClosestRec(std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger);
 
     Int_t KaonMomFromBoost(F *pKaon, F *pboost, F *pKaonBoost);
+    Int_t KaonMomFromBoost(std::vector<F> &pKaon, F *pboost, std::vector<F> &pKaonBoost);
 
     Int_t IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, F *int_point);
+    Int_t IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, std::vector<F> &int_point);
+
   };
 
 }

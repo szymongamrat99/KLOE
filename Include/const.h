@@ -6,7 +6,7 @@
 #include <ctime>
 #include <stdlib.h>
 #include <boost/progress.hpp> // for loading bar display
-#include <omp.h>              // for multi-threading using OpenMP
+// #include <omp.h>              // for multi-threading using OpenMP
 
 #include <TString.h>
 #include <TStyle.h>
@@ -243,8 +243,8 @@ struct BaseKinematics
 {
     Float_t
         Kchboost[9],
-        KchboostKS[9],
-        KchboostKL[9],
+        KchboostKSOld[9],
+        KchboostKLOld[9],
         Knereclor[9],
         Knerec[9],
         Kchrec[9],
@@ -340,7 +340,11 @@ struct BaseKinematics
         zvmc,
         pxmc,
         pymc,
-        pzmc;
+        pzmc,
+        KchboostKS,
+        KchboostKL,
+        ipKS,
+        ipKL;
 
     TLorentzVector
         phi4Mom;
@@ -363,8 +367,8 @@ struct BaseKinematics
     void clear() {
         // Zero all fixed-size arrays and scalars
         memset(Kchboost, 0, sizeof(Kchboost));
-        memset(KchboostKS, 0, sizeof(KchboostKS));
-        memset(KchboostKL, 0, sizeof(KchboostKL));
+        memset(KchboostKSOld, 0, sizeof(KchboostKSOld));
+        memset(KchboostKLOld, 0, sizeof(KchboostKLOld));
         memset(Knereclor, 0, sizeof(Knereclor));
         memset(Knerec, 0, sizeof(Knerec));
         memset(Kchrec, 0, sizeof(Kchrec));

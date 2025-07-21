@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 
     KLOE::RunStats runs = initObj.getRunStats(DataPath, runRegexPattern);
     initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                      runs.minRun, 31000);
+                      runs.minRun, 30400);
     // -------------------------------------------------------
     infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 

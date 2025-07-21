@@ -232,14 +232,14 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
       {
         // 1. Calculation of pions' momenta from two-body decay using the boost method
         // Using the K1 side of the event
-        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS.data(), baseKin.phi_mom, baseKin.KchboostKS);
+        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS.data(), baseKin.phi_mom, baseKin.KchboostKSOld);
 
-        Float_t X_line[3] = {baseKin.KchboostKS[6],
-                             baseKin.KchboostKS[7],
-                             baseKin.KchboostKS[8]}, // Vertex laying on the line
-            p[3] = {baseKin.KchboostKS[0],
-                    baseKin.KchboostKS[1],
-                    baseKin.KchboostKS[2]}, // Direction of the line
+        Float_t X_line[3] = {baseKin.KchboostKSOld[6],
+                             baseKin.KchboostKSOld[7],
+                             baseKin.KchboostKSOld[8]}, // Vertex laying on the line
+            p[3] = {baseKin.KchboostKSOld[0],
+                    baseKin.KchboostKSOld[1],
+                    baseKin.KchboostKSOld[2]}, // Direction of the line
             xB[3] = {baseKin.bhabha_vtx[0],
                      baseKin.bhabha_vtx[1],
                      baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
@@ -266,12 +266,12 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 
         eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL.data(),
                                         baseKin.phi_mom,
-                                        baseKin.KchboostKL);
+                                        baseKin.KchboostKLOld);
 
         // 2.1 Calculation of KL momentum magnitude
-        Double_t KLmomMag = sqrt(pow(baseKin.KchboostKL[0], 2) +
-                                 pow(baseKin.KchboostKL[1], 2) +
-                                 pow(baseKin.KchboostKL[2], 2));
+        Double_t KLmomMag = sqrt(pow(baseKin.KchboostKLOld[0], 2) +
+                                 pow(baseKin.KchboostKLOld[1], 2) +
+                                 pow(baseKin.KchboostKLOld[2], 2));
 
         // 2.2 Calculation of KL momentum from 2 body decay
         for (Int_t j = 0; j < 3; j++)
@@ -280,7 +280,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
           baseKin.KchrecKLTwoBody[j] = KLflightDirection[j] * KLmomMag;
         }
         // Energy
-        baseKin.KchrecKLTwoBody[3] = baseKin.KchboostKL[3];
+        baseKin.KchrecKLTwoBody[3] = baseKin.KchboostKLOld[3];
 
         // Calculate the magnitude of the KL momentum
         baseKin.KchrecKLTwoBody[4] = sqrt(pow(baseKin.KchrecKLTwoBody[0], 2) +
