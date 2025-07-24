@@ -51,6 +51,7 @@ private:
   std::map<std::string, Float_t> _floatVars;     // Zmienne Float_t
   std::map<std::string, std::vector<Int_t>> _intArrays;     // Zmienne Int_t
   std::map<std::string, std::vector<Float_t>> _floatArrays; // Tablice Float_t
+
 };
 
 #endif // !SPLITFILEWRITER_H

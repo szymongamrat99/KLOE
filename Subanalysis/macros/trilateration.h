@@ -110,9 +110,9 @@ public :
    TTreeReaderValue<UChar_t> mctruth = {fReader, "mctruth"};
    TTreeReaderValue<UChar_t> Errid = {fReader, "Errid"};
    TTreeReaderValue<UChar_t> Cutid = {fReader, "Cutid"};
-   TTreeReaderArray<Float_t> Kchmc = {fReader, "Kchmc"};
-   TTreeReaderArray<Float_t> Knemc = {fReader, "Knemc"};
-   TTreeReaderArray<Float_t> ipmc = {fReader, "ipmc"};
+   TTreeReaderArray<Float_t> KchmcOld = {fReader, "KchmcOld"};
+   TTreeReaderArray<Float_t> KnemcOld = {fReader, "KnemcOld"};
+   TTreeReaderArray<Float_t> ipmcOld = {fReader, "ipmcOld"};
    TTreeReaderArray<Float_t> Kchrec = {fReader, "Kchrec"};
    TTreeReaderArray<Float_t> Kchboost = {fReader, "Kchboost"};
    TTreeReaderArray<Float_t> Knerec = {fReader, "Knerec"};

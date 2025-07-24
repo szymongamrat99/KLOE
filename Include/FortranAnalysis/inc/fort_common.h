@@ -198,7 +198,7 @@ extern "C"
     Float_t ip[3];
     Float_t ip_closest[3];
     Float_t ip_plane[3];
-    Float_t ipmc[3];
+    Float_t ipmcOld[3];
     Int_t vtaken[3];
     Int_t vtakenks[3];
     Int_t vtakenkl[3];

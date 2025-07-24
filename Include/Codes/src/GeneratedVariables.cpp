@@ -220,8 +220,7 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 		std::vector<Float_t> &ipmc,
 		std::vector<Float_t> &Knemc,
 		std::vector<Float_t> &Kchmc,
-		std::vector<Float_t> &trk1MC,
-		std::vector<Float_t> &trk2MC,
+		std::vector<std::vector<Float_t>> &trkMC,
 		const Int_t numberOfClusters,
 		std::vector<std::vector<Float_t>> &pgammaMC,
 		std::vector<Int_t> &good_clus_ind,
@@ -235,8 +234,7 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 	Int_t
 			count = 0,
 			ind_gam[4] = {},
-			min_ind[4] = {},
-			mc_ind[numberOfClusters];
+			min_ind[4] = {};
 
 	std::vector<Bool_t>
 			clus_time;
@@ -249,13 +247,15 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 			region,
 			cluster;
 
+	std::vector<Int_t>
+						mc_ind(numberOfClusters);
+
 	KLOE::CylinderIntersection CylIndObj;
 
 	ipmc.clear();
 	Knemc.clear();
 	Kchmc.clear();
-	trk1MC.clear();
-	trk2MC.clear();
+	trkMC.clear();
 
 	cluster.clear();
 	region.clear();
@@ -266,17 +266,8 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 	ipmc.resize(3);
 	Knemc.resize(9);
 	Kchmc.resize(9);
-	trk1MC.resize(4);
-	trk2MC.resize(4);
 
-	region.resize(4);
 	cluster.resize(3);
-
-	for (Int_t i = 0; i < numberOfClusters; i++)
-	{
-		// pgammaMC.push_back(std::vector<Float_t>(8));
-		mc_ind[i] = i;
-	}
 
 	IPGenerated(nvtxmc, mother, ipmc, xvmc, yvmc, zvmc);
 
@@ -284,16 +275,13 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 	{
 		KSLGenerated(nvtxmc, mother, Kl, xvmc, yvmc, zvmc, Ks, ntmc, pidmc, pxmc, pymc, pzmc);
 
+		twoTracksFinder(ntmc, mother, vtxmc, pidmc, Knemc, Kl, Kchmc, Ks, trkMC, pxmc, pymc, pzmc, mctruth);
+
 		if (mctruth == 1 || mctruth == 3 || mctruth == 4 || mctruth == 5)
 		{
-			twoTracksFinder(ntmc, mother, vtxmc, pidmc, Knemc, Kl, Kchmc, Ks, trk1MC, pxmc, pymc, pzmc, trk2MC);
-
 			ClusterVariableFinder(ntmc, mother, vtxmc, pidmc, pgammaMC, count, pxmc, pymc, pzmc, neu_vtx, Knemc, region, CylIndObj, cluster, ipmc);
 		}
   };
-
-  if (0)
-  	GeneratedClusterFinder(nclu, ind_gam, max_count, clus_diff, cluster_rec, pgammaMC, mc_ind, clus_time, min_ind, clus_diff_min, good_clus_ind);
 
   count = 0;
 
@@ -305,22 +293,14 @@ void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, Int_t *mother, Int_t 
   {
     if ((mother[vtxmc[j] - 1] == 7) && pidmc[j] == 1)
     {
-      pgammaMC[count][0] = pxmc[j];
-      pgammaMC[count][1] = pymc[j];
-      pgammaMC[count][2] = pzmc[j];
-      pgammaMC[count][3] = sqrt(pow(pgammaMC[count][0], 2) +
-                                pow(pgammaMC[count][1], 2) +
-                                pow(pgammaMC[count][2], 2));
+			Float_t auxEne = sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2) + pow(pzmc[j], 2));
+			std::vector<Float_t> pgammaAux = {pxmc[j], pymc[j], pzmc[j], auxEne};
 
       neu_vtx[0] = Knemc[6];
       neu_vtx[1] = Knemc[7];
       neu_vtx[2] = Knemc[8];
 
-      region[count] = CylIndObj.inter_point(pgammaMC[count].data(), neu_vtx, cluster.data());
-
-      pgammaMC[count][4] = cluster[0];
-      pgammaMC[count][5] = cluster[1];
-      pgammaMC[count][6] = cluster[2];
+      region.push_back(CylIndObj.inter_point(pgammaAux.data(), neu_vtx, cluster.data()));
 
       Float_t
           beta_c = cVel * Knemc[4] / Knemc[3],
@@ -332,12 +312,14 @@ void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, Int_t *mother, Int_t 
                              pow(cluster[1] - Knemc[7], 2) +
                              pow(cluster[2] - Knemc[8], 2));
 
-      pgammaMC[count][7] = time_K + (length_clus / cVel);
+			Float_t auxTim = time_K + (length_clus / cVel);
+			std::vector<Float_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, cluster[0], cluster[1], cluster[2], auxTim};
 
-      count++;
+			pgammaMC.push_back(auxiliaryVec);
     }
   }
 }
+
 void GeneratedVariables::GeneratedClusterFinder(Int_t nclu, Int_t ind_gam[4], const Int_t max_count, std::vector<Float_t> &clus_diff, std::vector<std::vector<Float_t>> &cluster_rec, std::vector<std::vector<Float_t>> &pgammaMC, Int_t mc_ind[4], std::vector<bool> &clus_time, Int_t min_ind[4], Float_t &clus_diff_min, std::vector<Int_t> &good_clus_ind)
 {
   for (Int_t j1 = 0; j1 < nclu - 3; j1++)
@@ -384,52 +366,53 @@ void GeneratedVariables::GeneratedClusterFinder(Int_t nclu, Int_t ind_gam[4], co
           }
         }
 }
-void GeneratedVariables::twoTracksFinder(Int_t ntmc, Int_t *mother, Int_t *vtxmc, Int_t *pidmc, std::vector<Float_t> &Knemc, Float_t Kl[9], std::vector<Float_t> &Kchmc, Float_t Ks[9], std::vector<Float_t> &trk1MC, Float_t *pxmc, Float_t *pymc, Float_t *pzmc, std::vector<Float_t> &trk2MC)
+
+void GeneratedVariables::twoTracksFinder(Int_t ntmc, Int_t *mother, Int_t *vtxmc, Int_t *pidmc, std::vector<Float_t> &Knemc, Float_t Kl[9], std::vector<Float_t> &Kchmc, Float_t Ks[9], std::vector<std::vector<Float_t>> &trkMC, Float_t *pxmc, Float_t *pymc, Float_t *pzmc, Int_t mctruth)
 {
   for (Int_t j = 0; j < ntmc; j++)
   {
     if (mother[vtxmc[j] - 1] == 10)
     {
-      if (pidmc[j] == 7)
-      {
-        for (Int_t k = 0; k < 9; k++)
-        {
-          Knemc[k] = Kl[k];
-          Kchmc[k] = Ks[k];
-        }
-      }
-      else if (pidmc[j] == 8 || pidmc[j] == 9)
-      {
-        for (Int_t k = 0; k < 9; k++)
-        {
-          Kchmc[k] = Kl[k];
-          Knemc[k] = Ks[k];
-        }
-      }
+			if(mctruth != 7)
+			{
+      	if (pidmc[j] == 7)
+      	{
+        	std::copy(Ks, Ks + 9, Kchmc.begin());
+					std::copy(Kl, Kl + 9, Knemc.begin());
+      	}
+      	else if (pidmc[j] == 8 || pidmc[j] == 9)
+      	{
+        	std::copy(Ks, Ks + 9, Knemc.begin());
+					std::copy(Kl, Kl + 9, Kchmc.begin());
+      	}
+			}
+			else
+			{
+				std::copy(Ks, Ks + 9, Kchmc.begin());
+				std::copy(Kl, Kl + 9, Knemc.begin());
+			}
     }
 
-    if ((mother[vtxmc[j] - 1] == 10 || mother[vtxmc[j] - 1] == 16) && (pidmc[j] == 8 || pidmc[j] == 9))
+    if ((mother[vtxmc[j] - 1] == 10) && (pidmc[j] == 8 || pidmc[j] == 9))
     {
-      if (trk1MC[3] == 0)
-      {
-        trk1MC[0] = pxmc[j];
-        trk1MC[1] = pymc[j];
-        trk1MC[2] = pzmc[j];
-        trk1MC[3] = sqrt(pow(trk1MC[0], 2) +
-                         pow(trk1MC[1], 2) +
-                         pow(trk1MC[2], 2) +
-                         pow(mPiCh, 2));
-      }
-      else
-      {
-        trk2MC[0] = pxmc[j];
-        trk2MC[1] = pymc[j];
-        trk2MC[2] = pzmc[j];
-        trk2MC[3] = sqrt(pow(trk2MC[0], 2) +
-                         pow(trk2MC[1], 2) +
-                         pow(trk2MC[2], 2) +
-                         pow(mPiCh, 2));
-      }
+			Float_t auxEne = sqrt(pow(pxmc[j], 2) + 
+														pow(pymc[j], 2) + 
+														pow(pzmc[j], 2) + 
+														pow(mPiCh, 2));
+			std::vector<Float_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 10};
+
+			trkMC.push_back(auxiliaryVec);
+    }
+
+		if ((mother[vtxmc[j] - 1] == 16) && (pidmc[j] == 8 || pidmc[j] == 9))
+    {
+			Float_t auxEne = sqrt(pow(pxmc[j], 2) + 
+														pow(pymc[j], 2) + 
+														pow(pzmc[j], 2) + 
+														pow(mPiCh, 2));
+			std::vector<Float_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 16};
+
+			trkMC.push_back(auxiliaryVec);
     }
   }
 }

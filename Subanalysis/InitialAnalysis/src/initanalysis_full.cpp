@@ -17,6 +17,7 @@
 #include <boost/optional.hpp>
 #include <SplitFileWriter.h>
 #include <charged_mom.h>
+#include <StatisticalCutter.h>
 
 #include "../inc/initialanalysis.hpp"
 #include "initialanalysis.hpp"
@@ -32,6 +33,11 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 	BaseKinematics baseKin;
 
 	GeneratedVariables genVarClassifier;
+
+	std::ifstream file(cutlimitsName);
+	json j = json::parse(file);
+
+	StatisticalCutter cutter(cutlimitsName, 7);
 
 	// Set flag for initial analysis
 	Bool_t MonteCarloInitAnalysis = properties["flags"]["initialAnalysisExec"]["MC"];
@@ -72,6 +78,18 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 	if (MonteCarloInitAnalysis)
 		eventProps = new GeneralEventPropertiesMC(reader);
 
+	Float_t
+			KchrecKSMom = 0, KchrecKLMom = 0;
+
+	cutter.RegisterVariableGetter("InvMassKch", [&]()
+																{ return baseKin.KchrecKS[5]; });
+	cutter.RegisterVariableGetter("InvMassKne", [&]()
+																{ return baseKin.KchrecKL[5]; });
+	cutter.RegisterVariableGetter("TwoBodyMomKS", [&]()
+																{ return KchrecKSMom; });
+	cutter.RegisterVariableGetter("TwoBodyMomKL", [&]()
+																{ return KchrecKLMom; });
+
 	while (reader.Next())
 	{
 		// Here you would process each entry in the tree.
@@ -104,6 +122,8 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 			baseKin.trkKS[i].clear();
 			baseKin.trkKL[i].clear();
 			baseKin.trkClosest[i].clear();
+			baseKin.trkKLmc[i].clear();
+			baseKin.trkKSmc[i].clear();
 		}
 
 		baseKin.vtaken.resize(3);
@@ -130,6 +150,11 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 			baseKin.trkClosest[i].resize(4);
 		}
 
+		std::vector<std::vector<Float_t>>
+				trkMC,
+				pgammaMC,
+				clusterMC;
+
 		if (MonteCarloInitAnalysis)
 		{
 			mcflag = 1;
@@ -145,6 +170,50 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 
 			MctruthCounter(mctruth, mctruth_num);
 			// -------------------------------------------------------------------
+
+			genVarClassifier.genVars(*eventProps->ntmc,
+															 *eventProps->nvtxmc,
+															 *clusterProps.nclu,
+															 &eventProps->pidmc[0],
+															 &eventProps->vtxmc[0],
+															 &eventProps->mother[0],
+															 &eventProps->xvmc[0],
+															 &eventProps->yvmc[0],
+															 &eventProps->zvmc[0],
+															 &eventProps->pxmc[0],
+															 &eventProps->pymc[0],
+															 &eventProps->pzmc[0],
+															 mcflag,
+															 mctruth,
+															 baseKin.ipmc,
+															 baseKin.Knemc,
+															 baseKin.Kchmc,
+															 trkMC,
+															 4,
+															 pgammaMC,
+															 baseKin.goodClusIndex,
+															 clusterMC);
+
+			if (mctruth == 7)
+			{
+				for (Int_t iter = 0; iter < 4; iter++)
+				{
+					if (trkMC[iter][4] == 10)
+					{
+						if (baseKin.trkKLmc[0].size() == 0)
+							baseKin.trkKLmc[0].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
+						else
+							baseKin.trkKLmc[1].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
+					}
+					else if (trkMC[iter][4] == 16)
+					{
+						if (baseKin.trkKSmc[0].size() == 0)
+							baseKin.trkKSmc[0].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
+						else
+							baseKin.trkKSmc[1].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
+					}
+				}
+			}
 		}
 
 		if (hypoCode == KLOE::HypothesisCode::FOUR_PI) // If we look for pipipipi - clusters do not matter
@@ -217,7 +286,7 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 										-*bhabhaProps.px / *bhabhaProps.energy,
 										-*bhabhaProps.py / *bhabhaProps.energy,
 										-*bhabhaProps.pz / *bhabhaProps.energy},
-								phiMom[4] = {*bhabhaProps.px, *bhabhaProps.py, *bhabhaProps.pz, *bhabhaProps.energy}, trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, KchrecKSMom = 0, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {}, KchrecKLMom = 0;
+								phiMom[4] = {*bhabhaProps.px, *bhabhaProps.py, *bhabhaProps.pz, *bhabhaProps.energy}, trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {};
 
 						Obj.lorentz_transf(boostPhi, baseKin.trkKS[0].data(), trkKS_PhiCM[0]);
 						Obj.lorentz_transf(boostPhi, baseKin.trkKS[1].data(), trkKS_PhiCM[1]);
@@ -304,10 +373,26 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 						cutOrdered.push_back((pow(EmissKS, 2) - pow(PmissKS, 2) < 10) && (pow(EmissKS, 2) - pow(PmissKS, 2) > -50));
 
 						cutCombined = cutOrdered[0] && cutOrdered[1] && cutOrdered[2] && cutOrdered[3] && cutOrdered[4] && cutOrdered[5] && cutOrdered[6] && cutOrdered[7];
+
+						cutter.UpdateStats(mctruth);
+
+						baseKin.cuts.clear();
+						baseKin.cuts.resize(cutOrdered.size());
+
+						for (Int_t iter = 0; iter < cutOrdered.size(); iter++)
+							if (cutOrdered[iter])
+								baseKin.cuts[iter] = 1;
+							else if (!cutOrdered[iter])
+							{
+								baseKin.cuts[iter] = 0;
+
+								if (mctruth == 7)
+									mctruth = 0;
+							}
 					}
 				}
 
-				if (cutCombined)
+				if (cutCombined || mctruth == 7 || mctruth == 0)
 				{
 					errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
 
@@ -420,7 +505,8 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 							{"pidmc", baseKin.pidmc},
 							{"mother", baseKin.mother},
 							{"vtakenClosest", baseKin.vtakenClosest},
-							{"vtaken", baseKin.vtaken}};
+							{"vtaken", baseKin.vtaken},
+							{"cutsApplied", baseKin.cuts}};
 
 					std::map<std::string, std::vector<Float_t>> floatArrays = {
 							{"Xcl", baseKin.Xcl},
@@ -455,8 +541,14 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 							{"KchboostKS", baseKin.KchboostKS},
 							{"KchboostKL", baseKin.KchboostKL},
 							{"ipKS", baseKin.ipKS},
-							{"ipKL", baseKin.ipKL}
-																		};
+							{"ipKL", baseKin.ipKL},
+							{"ipmc", baseKin.ipmc},
+							{"Kchmc", baseKin.Kchmc},
+							{"Knemc", baseKin.Knemc},
+							{"trk1KSmc", baseKin.trkKSmc[0]},
+							{"trk2KSmc", baseKin.trkKSmc[1]},
+							{"trk1KLmc", baseKin.trkKLmc[0]},
+							{"trk2KLmc", baseKin.trkKLmc[1]}};
 
 					writer.Fill(intVars, floatVars, intArrays, floatArrays);
 				}
@@ -470,6 +562,14 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 		}
 
 		++show_progress; // Progress of the loading bar
+	}
+
+	// Wyniki
+	for (size_t i = 0; i < 4; ++i)
+	{
+		std::cout << "Cut " << i << ": Eff=" << cutter.GetEfficiency(i)
+							<< " Purity=" << cutter.GetPurity(i)
+							<< " S/B=" << cutter.GetSignalToBackground(i) << "\n";
 	}
 
 	std::map<ErrorHandling::ErrorCodes, int> physicsErrorCountsPerMctruth[8];

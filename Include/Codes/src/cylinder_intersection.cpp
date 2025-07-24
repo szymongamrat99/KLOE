@@ -3,7 +3,7 @@
 namespace KLOE
 {
   // Default constructor
-  CylinderIntersection::CylinderIntersection(Double_t zmax, Double_t Rmax) : _zmax(zmax), _Rmax(Rmax) { std::cout << "Cylinder intersection finder initialized." << std::endl; };
+  CylinderIntersection::CylinderIntersection(Double_t zmax, Double_t Rmax) : _zmax(zmax), _Rmax(Rmax) {};
 
   Int_t CylinderIntersection::inter_point(Float_t *momentum, Float_t *neu_vtx, Float_t *cluster)
   {

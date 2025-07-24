@@ -17,7 +17,7 @@ void ip_reconstruction(UInt_t filenumber = 1, TString directory = "data_root_fil
     //Branches' addresses
     //Bhabha vars
     UInt_t mctruth;
-    Float_t bhabha_mom[3], bhabha_vtx[3], Kchboost[9], ipmc[3];
+    Float_t bhabha_mom[3], bhabha_vtx[3], Kchboost[9], ipmcOld[3];
 
     tree->SetBranchAddress("Bpx", &bhabha_mom[0]);
     tree->SetBranchAddress("Bpy", &bhabha_mom[1]);

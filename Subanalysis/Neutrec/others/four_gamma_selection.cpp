@@ -33,7 +33,7 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
     //Cluster vars
     Int_t nclu;
     UChar_t mctruth;
-    Float_t cluster[5][500], Kchboost[9], Knereclor[9], Knemc[9];
+    Float_t cluster[5][500], Kchboost[9], Knereclor[9], KnemcOld[9];
 
     tree->SetBranchAddress("nclu", &nclu);
     tree->SetBranchAddress("Xcl", cluster[0]);

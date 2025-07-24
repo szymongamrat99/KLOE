@@ -223,10 +223,10 @@ Bool_t full_analysis::Process(Long64_t entry)
 
    ////////////////////////////////////////////////////////////////////////////////////////////////
    //Momentum and position of Phi in LAB
-   momPhi_mc(0) = Kchmc[0] + Knemc[0];
-   momPhi_mc(1) = Kchmc[1] + Knemc[1];
-   momPhi_mc(2) = Kchmc[2] + Knemc[2];
-   momPhi_mc(3) = Kchmc[3] + Knemc[3];
+   momPhi_mc(0) = KchmcOld[0] + KnemcOld[0];
+   momPhi_mc(1) = KchmcOld[1] + KnemcOld[1];
+   momPhi_mc(2) = KchmcOld[2] + KnemcOld[2];
+   momPhi_mc(3) = KchmcOld[3] + KnemcOld[3];
 
    //Momentum and position of Phi in LAB
    momPhi(0) = *Bpx;
@@ -242,29 +242,29 @@ Bool_t full_analysis::Process(Long64_t entry)
    pos_phi(3) = cVel*(sqrt(pow(pos_phi(0),2) + pow(pos_phi(1),2) + pow(pos_phi(2),2))/phi_vel);
 
    //Momentum and position of charged kaon MC
-   mom_kch_mc(0) = Kchmc[0];
-   mom_kch_mc(1) = Kchmc[1];
-   mom_kch_mc(2) = Kchmc[2];
-   mom_kch_mc(3) = Kchmc[3];
+   mom_kch_mc(0) = KchmcOld[0];
+   mom_kch_mc(1) = KchmcOld[1];
+   mom_kch_mc(2) = KchmcOld[2];
+   mom_kch_mc(3) = KchmcOld[3];
 
    kaon_pm_vel = cVel*(sqrt(pow(mom_kch_mc(0),2) + pow(mom_kch_mc(1),2) + pow(mom_kch_mc(2),2))/mom_kch_mc(3));
 
-   pos_kch_mc(0) = Kchmc[6] - ipmc[0];
-   pos_kch_mc(1) = Kchmc[7] - ipmc[1];
-   pos_kch_mc(2) = Kchmc[8] - ipmc[2];
+   pos_kch_mc(0) = KchmcOld[6] - ipmcOld[0];
+   pos_kch_mc(1) = KchmcOld[7] - ipmcOld[1];
+   pos_kch_mc(2) = KchmcOld[8] - ipmcOld[2];
    pos_kch_mc(3) = cVel*(sqrt(pow(pos_kch_mc(0),2) + pow(pos_kch_mc(1),2) + pow(pos_kch_mc(2),2))/kaon_pm_vel);
 
    //Momentum and position of neutral kaon MC
-   mom_kne_mc(0) = Knemc[0];
-   mom_kne_mc(1) = Knemc[1];
-   mom_kne_mc(2) = Knemc[2];
-   mom_kne_mc(3) = Knemc[3];
+   mom_kne_mc(0) = KnemcOld[0];
+   mom_kne_mc(1) = KnemcOld[1];
+   mom_kne_mc(2) = KnemcOld[2];
+   mom_kne_mc(3) = KnemcOld[3];
 
    kaon_pm_vel = cVel*(sqrt(pow(mom_kne_mc(0),2) + pow(mom_kne_mc(1),2) + pow(mom_kne_mc(2),2))/mom_kne_mc(3));
 
-   pos_kne_mc(0) = Knemc[6] - ipmc[0];
-   pos_kne_mc(1) = Knemc[7] - ipmc[1];
-   pos_kne_mc(2) = Knemc[8] - ipmc[2];
+   pos_kne_mc(0) = KnemcOld[6] - ipmcOld[0];
+   pos_kne_mc(1) = KnemcOld[7] - ipmcOld[1];
+   pos_kne_mc(2) = KnemcOld[8] - ipmcOld[2];
    pos_kne_mc(3) = cVel*(sqrt(pow(pos_kne_mc(0),2) + pow(pos_kne_mc(1),2) + pow(pos_kne_mc(2),2))/kaon_pm_vel);
 
    //Momentum and position of charged kaon

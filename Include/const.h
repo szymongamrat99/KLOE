@@ -30,7 +30,8 @@ const std::string
     pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json",
     propertiesPath = getenv("PROPERTIESKLOE"),
     propName = propertiesPath + "/properties.json",
-    rootfilesName = propertiesPath + "/root-files.json";
+    rootfilesName = propertiesPath + "/root-files.json",
+    cutlimitsName = propertiesPath + "/cut-limits.json";
 
 static std::ifstream propertyFile(propName.c_str());
 static json properties = json::parse(propertyFile);
@@ -248,10 +249,10 @@ struct BaseKinematics
         Knereclor[9],
         Knerec[9],
         Kchrec[9],
-        Kchmc[9],
-        Knemc[9],
+        KchmcOld[9],
+        KnemcOld[9],
         ip[3],
-        ipmc[3],
+        ipmcOld[3],
         phi_mom[4],
         Dtmc,
         Dtrec,
@@ -344,7 +345,13 @@ struct BaseKinematics
         KchboostKS,
         KchboostKL,
         ipKS,
-        ipKL;
+        ipKL,
+        ipmc,
+        Knemc,
+        Kchmc,
+        trkMC[2],
+        trkKSmc[2],
+        trkKLmc[2];
 
     TLorentzVector
         phi4Mom;
@@ -359,7 +366,10 @@ struct BaseKinematics
         iv,
         pidmc,
         vtxmc,
-        mother;
+        mother,
+        goodClusIndex,
+        errors,
+        cuts;
 
     /**
      * @brief Clear all data members of BaseKinematics (scalars to zero, vectors cleared/resized).
@@ -372,10 +382,10 @@ struct BaseKinematics
         memset(Knereclor, 0, sizeof(Knereclor));
         memset(Knerec, 0, sizeof(Knerec));
         memset(Kchrec, 0, sizeof(Kchrec));
-        memset(Kchmc, 0, sizeof(Kchmc));
-        memset(Knemc, 0, sizeof(Knemc));
+        memset(KchmcOld, 0, sizeof(KchmcOld));
+        memset(KnemcOld, 0, sizeof(KnemcOld));
         memset(ip, 0, sizeof(ip));
-        memset(ipmc, 0, sizeof(ipmc));
+        memset(ipmcOld, 0, sizeof(ipmcOld));
         memset(phi_mom, 0, sizeof(phi_mom));
         Dtmc = Dtrec = Dtboostlor = T0step1 = Chi2 = minv4gam = Qmiss = 0.0f;
         memset(TclOld, 0, sizeof(TclOld));

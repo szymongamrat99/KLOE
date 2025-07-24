@@ -22,11 +22,11 @@ int bunch_crossing()
 
   chain_init(chain,1,56);
 
-  Float_t Knemc[9], Kchmc[9], Knereclor[9], TclOld[50], Xcl[50], Ycl[50], Zcl[50], ip[3], ipmc[3];
+  Float_t KnemcOld[9], KchmcOld[9], Knereclor[9], TclOld[50], Xcl[50], Ycl[50], Zcl[50], ip[3], ipmcOld[3];
   UChar_t mctruth, g4taken[4], ncll[50];
 
-  chain->SetBranchAddress("Kchmc",Kchmc);
-  chain->SetBranchAddress("Knemc",Knemc);
+  chain->SetBranchAddress("KchmcOld",KchmcOld);
+  chain->SetBranchAddress("KnemcOld",KnemcOld);
   chain->SetBranchAddress("Xcl",Xcl);
   chain->SetBranchAddress("Ycl",Ycl);
   chain->SetBranchAddress("Zcl",Zcl);
@@ -34,7 +34,7 @@ int bunch_crossing()
   chain->SetBranchAddress("g4taken",g4taken);
   chain->SetBranchAddress("ncll",ncll);
   chain->SetBranchAddress("ip",ip);
-  chain->SetBranchAddress("ipmc",ipmc);
+  chain->SetBranchAddress("ipmcOld",ipmcOld);
   chain->SetBranchAddress("Knerec",Knereclor);
   chain->SetBranchAddress("mctruth",&mctruth);
 
@@ -55,9 +55,9 @@ int bunch_crossing()
 
     if(mctruth == 1 || mctruth == 2)
     {
-      phi_vel[0] = (Kchmc[0] + Knemc[0])/(Kchmc[3] + Knemc[3]);
-      phi_vel[1] = (Kchmc[1] + Knemc[1])/(Kchmc[3] + Knemc[3]);
-      phi_vel[2] = (Kchmc[2] + Knemc[2])/(Kchmc[3] + Knemc[3]);
+      phi_vel[0] = (KchmcOld[0] + KnemcOld[0])/(KchmcOld[3] + KnemcOld[3]);
+      phi_vel[1] = (KchmcOld[1] + KnemcOld[1])/(KchmcOld[3] + KnemcOld[3]);
+      phi_vel[2] = (KchmcOld[2] + KnemcOld[2])/(KchmcOld[3] + KnemcOld[3]);
 
       Knemc_init[0] = Knereclor[0];
       Knemc_init[1] = Knereclor[1];
@@ -74,9 +74,9 @@ int bunch_crossing()
 
       for(Int_t j = 0; j < 4; j++)
       {
-        gamma_path[j] = sqrt(pow(Xcl[ncll[g4taken[j] - 1] - 1] - Knemc[6],2) + 
-                            pow(Ycl[ncll[g4taken[j] - 1] - 1] - Knemc[7],2) +
-                            pow(Zcl[ncll[g4taken[j] - 1] - 1] - Knemc[8],2));
+        gamma_path[j] = sqrt(pow(Xcl[ncll[g4taken[j] - 1] - 1] - KnemcOld[6],2) + 
+                            pow(Ycl[ncll[g4taken[j] - 1] - 1] - KnemcOld[7],2) +
+                            pow(Zcl[ncll[g4taken[j] - 1] - 1] - KnemcOld[8],2));
 
         // t0 = -1.*t_bunch;
         kaon_time += (TclOld[ncll[g4taken[j] - 1] - 1] - (gamma_path[j]/cVel));

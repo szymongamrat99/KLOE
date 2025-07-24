@@ -200,7 +200,7 @@ extern "C"
     double ip[3];
     double ip_closest[3];
     double ip_plane[3];
-    double ipmc[3];
+    double ipmcOld[3];
     int vtaken[3];
     int vtakenks[3];
     int vtakenkl[3];

@@ -18,7 +18,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 	// Bhabha vars
 	Int_t ntmc, nvtxmc, nclu;
 	UChar_t pidmcOld[200], vtxmcOld[200], motherOld[200], mctruth = 0, mcflag = 0;
-	Float_t pos_mc[3][200], mom_mc[3][200], Knemc[9], cluster_rec[3][200], ipmc[3];
+	Float_t pos_mc[3][200], mom_mc[3][200], KnemcOld[9], cluster_rec[3][200], ipmcOld[3];
 
 	chain.SetBranchAddress("ntmc", &ntmc);
 	chain.SetBranchAddress("nvtxmc", &nvtxmc);
@@ -35,7 +35,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 	chain.SetBranchAddress("pymc", mom_mc[1]);
 	chain.SetBranchAddress("pzmc", mom_mc[2]);
 
-	chain.SetBranchAddress("Knemc", Knemc);
+	chain.SetBranchAddress("KnemcOld", KnemcOld);
 
 	chain.SetBranchAddress("nclu", &nclu);
 	chain.SetBranchAddress("Xcl", cluster_rec[0]);
@@ -44,7 +44,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 
 	chain.SetBranchAddress("mctruth", &mctruth);
 	chain.SetBranchAddress("mcflag", &mcflag);
-	chain.SetBranchAddress("ipmc", ipmc);
+	chain.SetBranchAddress("ipmcOld", ipmcOld);
 
 	Int_t nentries = (Int_t)chain.GetEntries();
 
@@ -213,9 +213,9 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 																	pow(pgammc[count][1], 2) +
 																	pow(pgammc[count][2], 2));
 
-					neu_vtx[0] = Knemc[6];
-					neu_vtx[1] = Knemc[7];
-					neu_vtx[2] = Knemc[8];
+					neu_vtx[0] = KnemcOld[6];
+					neu_vtx[1] = KnemcOld[7];
+					neu_vtx[2] = KnemcOld[8];
 
 					region[count] = CylIndObj.inter_point(pgammc[count], neu_vtx, cluster);
 
@@ -223,9 +223,9 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 					pgammc[count][5] = cluster[1];
 					pgammc[count][6] = cluster[2];
 
-					Float_t beta_c = cVel * Knemc[4] / Knemc[3], length = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2) + pow(Knemc[8] - ipmc[2], 2)), time_K = length / beta_c;
+					Float_t beta_c = cVel * KnemcOld[4] / KnemcOld[3], length = sqrt(pow(KnemcOld[6] - ipmcOld[0], 2) + pow(KnemcOld[7] - ipmcOld[1], 2) + pow(KnemcOld[8] - ipmcOld[2], 2)), time_K = length / beta_c;
 
-					Float_t length_clus = sqrt(pow(cluster[0] - Knemc[6], 2) + pow(cluster[1] - Knemc[7], 2) + pow(cluster[2] - Knemc[8], 2));
+					Float_t length_clus = sqrt(pow(cluster[0] - KnemcOld[6], 2) + pow(cluster[1] - KnemcOld[7], 2) + pow(cluster[2] - KnemcOld[8], 2));
 
 					pgammc[count][7] = time_K + (length_clus / cVel);
 

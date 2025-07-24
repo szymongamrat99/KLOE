@@ -162,7 +162,7 @@ Bool_t kin_fits::Process(Long64_t entry)
 
          chi2->Fill(TMath::Prob(CHISQR, M));
          pull->Fill((P[10] - P_final(10))/sqrt(pow(DP[10],2) - V_final(10,10)));
-         pull_init->Fill((P[32] - Knemc[8])/DP[32]);
+         pull_init->Fill((P[32] - KnemcOld[8])/DP[32]);
       }
 
    }

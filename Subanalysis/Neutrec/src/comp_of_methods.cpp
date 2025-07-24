@@ -122,8 +122,8 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   chain.SetBranchAddress("Knereclor", baseKin.Knereclor);
   chain.SetBranchAddress("Knerec", baseKin.Knerec);
   chain.SetBranchAddress("Kchrec", baseKin.Kchrec);
-  chain.SetBranchAddress("Kchmc", baseKin.Kchmc);
-  chain.SetBranchAddress("Knemc", baseKin.Knemc);
+  chain.SetBranchAddress("KchmcOld", baseKin.KchmcOld);
+  chain.SetBranchAddress("KnemcOld", baseKin.KnemcOld);
 
   chain.SetBranchAddress("trk1", baseKin.trk[0]);
   chain.SetBranchAddress("trk2", baseKin.trk[1]);
@@ -140,7 +140,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   chain.SetBranchAddress("Bz", &baseKin.bhabha_vtx[2]);
 
   chain.SetBranchAddress("ip", baseKin.ip);
-  chain.SetBranchAddress("ipmc", baseKin.ipmc);
+  chain.SetBranchAddress("ipmcOld", baseKin.ipmcOld);
 
   chain.SetBranchAddress("ntmc", &baseKin.ntmc);
   chain.SetBranchAddress("nvtxmc", &baseKin.nvtxmc);
@@ -587,10 +587,10 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
       {
 
-        lengthch_mc = sqrt(pow(baseKin.Kchmc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Kchmc[7] - baseKin.ipmc[1], 2) + pow(baseKin.Kchmc[8] - baseKin.ipmc[2], 2));
-        Rtch_mc = sqrt(pow(baseKin.Kchmc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Kchmc[7] - baseKin.ipmc[1], 2));
-        lengthneu_mc = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2) + pow(baseKin.Knemc[8] - baseKin.ipmc[2], 2));
-        Rtneu_mc = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2));
+        lengthch_mc = sqrt(pow(baseKin.KchmcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KchmcOld[7] - baseKin.ipmcOld[1], 2) + pow(baseKin.KchmcOld[8] - baseKin.ipmcOld[2], 2));
+        Rtch_mc = sqrt(pow(baseKin.KchmcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KchmcOld[7] - baseKin.ipmcOld[1], 2));
+        lengthneu_mc = sqrt(pow(baseKin.KnemcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KnemcOld[7] - baseKin.ipmcOld[1], 2) + pow(baseKin.KnemcOld[8] - baseKin.ipmcOld[2], 2));
+        Rtneu_mc = sqrt(pow(baseKin.KnemcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KnemcOld[7] - baseKin.ipmcOld[1], 2));
       }
       else if (baseKin.mctruth == 6)
       {
@@ -606,7 +606,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
       //
       // Kaon transverse radius
-      // Rtneu_mc = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2));
+      // Rtneu_mc = sqrt(pow(baseKin.KnemcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KnemcOld[7] - baseKin.ipmcOld[1], 2));
       Rtneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2));
       Rtneu_rec = sqrt(pow(baseKin.Knereclor[6] - baseKin.ip[0], 2) + pow(baseKin.Knereclor[7] - baseKin.ip[1], 2));
 
@@ -614,14 +614,14 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       //
       // Kaon velocity
       if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
-        v_Kchmc = cVel * baseKin.Kchmc[4] / baseKin.Kchmc[3];
+        v_Kchmc = cVel * baseKin.KchmcOld[4] / baseKin.KchmcOld[3];
       else
         v_Kchmc = cVel * Kchmc_bcg[4] / Kchmc_bcg[3];
 
       v_Kchrec = cVel * baseKin.Kchboost[4] / baseKin.Kchboost[3];
 
       if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
-        v_Kneumc = cVel * baseKin.Knemc[4] / baseKin.Knemc[3];
+        v_Kneumc = cVel * baseKin.KnemcOld[4] / baseKin.KnemcOld[3];
       else
         v_Kneumc = cVel * Knemc_bcg[4] / Knemc_bcg[3];
 
@@ -859,7 +859,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
           }
 
           for (Int_t k = 0; k < 3; k++)
-            ip_coor[j][k]->Fill(baseKin.ipmc[k], baseKin.ip[k]);
+            ip_coor[j][k]->Fill(baseKin.ipmcOld[k], baseKin.ip[k]);
 
           for (Int_t k = 0; k < 5; k++)
           {
@@ -869,18 +869,18 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
               {
                 if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
                 {
-                  neu_vtx_corr[j][k]->Fill(baseKin.Knemc[6 + k], Knetri_kinfit[6 + k]);
-                  sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - baseKin.Knemc[6 + k]);
-                  pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - baseKin.Knemc[6 + k]);
-                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
-                  neu_mom[j][k]->Fill(baseKin.Knemc[k], Knetri_kinfit[k]);
+                  neu_vtx_corr[j][k]->Fill(baseKin.KnemcOld[6 + k], Knetri_kinfit[6 + k]);
+                  sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - baseKin.KnemcOld[6 + k]);
+                  pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - baseKin.KnemcOld[6 + k]);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.KnemcOld[k]);
+                  neu_mom[j][k]->Fill(baseKin.KnemcOld[k], Knetri_kinfit[k]);
                 }
                 else
                 {
                   neu_vtx_corr[j][k]->Fill(Knemc_bcg[6 + k], Knetri_kinfit[6 + k]);
                   sigmas_std[j][k]->Fill(lengthneu_mc, Knetri_kinfit[6 + k] - Knemc_bcg[6 + k]);
                   pulls[j][4 + k]->Fill(Knetri_kinfit[6 + k] - Knemc_bcg[6 + k]);
-                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.KnemcOld[k]);
                   neu_mom[j][k]->Fill(Knemc_bcg[k], Knetri_kinfit[k]);
                 }
               }
@@ -894,15 +894,15 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
                   neu_vtx_corr[j][3]->Fill(t_neumc, t_neutri); // Knetri_kinfit[6 + k]);
                   sigmas_std[j][3]->Fill(lengthneu_mc, (t_neutri - t_neumc) / tau_S_nonCPT);
                   pulls[j][4 + k]->Fill((t_neutri - t_neumc) / tau_S_nonCPT);
-                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
-                  neu_mom[j][k]->Fill(baseKin.Knemc[k], Knetri_kinfit[k]);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.KnemcOld[k]);
+                  neu_mom[j][k]->Fill(baseKin.KnemcOld[k], Knetri_kinfit[k]);
                 }
                 else
                 {
                   neu_vtx_corr[j][3]->Fill(t_neumc, t_neutri); // Knetri_kinfit[6 + k]);
                   sigmas_std[j][3]->Fill(lengthneu_mc, (t_neutri - t_neumc) / tau_S_nonCPT);
                   pulls[j][4 + k]->Fill((t_neutri - t_neumc) / tau_S_nonCPT);
-                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.Knemc[k]);
+                  pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.KnemcOld[k]);
                   neu_mom[j][k]->Fill(Knemc_bcg[k], Knetri_kinfit[k]);
                 }
               }

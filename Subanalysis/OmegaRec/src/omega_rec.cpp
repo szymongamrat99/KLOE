@@ -75,7 +75,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	// Cluster vars
 	Int_t nclu;
 	UChar_t mctruth, mcflag;
-	Float_t cluster[5][500], Kchboost[9], Knerec[9], Knemc[9], ipmc[3], ip[3], Dtmc, bunch_corr;
+	Float_t cluster[5][500], Kchboost[9], Knerec[9], KnemcOld[9], ipmcOld[3], ip[3], Dtmc, bunch_corr;
 
 	chain.SetBranchAddress("nclu", &nclu);
 	chain.SetBranchAddress("Xcl", cluster[0]);

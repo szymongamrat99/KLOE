@@ -68,7 +68,7 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 	// Cluster vars
 	Int_t nclu;
 	UChar_t mctruth;
-	Float_t cluster[5][500], Kchboost[9], Knerec[9], Knemc[9], ipmc[3], ip[3], Dtmc;
+	Float_t cluster[5][500], Kchboost[9], Knerec[9], KnemcOld[9], ipmcOld[3], ip[3], Dtmc;
 
 	chain->SetBranchAddress("nclu", &nclu);
 	chain->SetBranchAddress("Xcl", cluster[0]);
@@ -79,13 +79,13 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 
 	chain->SetBranchAddress("mctruth", &mctruth);
 
-	chain->SetBranchAddress("Knemc", Knemc);
+	chain->SetBranchAddress("KnemcOld", KnemcOld);
 	chain->SetBranchAddress("Knerec", Knerec);
 
 	chain->SetBranchAddress("Kchboost", Kchboost);
 	chain->SetBranchAddress("Dtmc", &Dtmc);
 
-	chain->SetBranchAddress("ipmc", ipmc);
+	chain->SetBranchAddress("ipmcOld", ipmcOld);
 	chain->SetBranchAddress("ip", ip);
 
 	//! Parameters for fitting

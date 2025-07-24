@@ -31,7 +31,8 @@ add_library(LibRec SHARED
             src/uncertainties.cpp
             src/ConfigManager.cpp
             src/GeneratedVariables.cpp
-            src/FileManager.cpp)
+            src/FileManager.cpp
+            src/StatisticalCutter.cpp)
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
 # PUBLIC: oznacza, że katalog z nagłówkami (tu: bieżący katalog, '.') będzie

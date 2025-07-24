@@ -59,7 +59,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 		// Cluster vars
 		Int_t nclu;
 		UChar_t mctruth, mcflag, g4taken[4], ncll[50];
-		Float_t cluster[5][500], Kchboost[9], Knereclor[9], Knemc[9], ip[3];
+		Float_t cluster[5][500], Kchboost[9], Knereclor[9], KnemcOld[9], ip[3];
 		BaseKinematics baseKin;
 
 		chain.SetBranchAddress("nclu", &nclu);

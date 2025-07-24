@@ -28,7 +28,7 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
     //Cluster vars
     Int_t nclu;
     UChar_t mctruth;
-    Float_t cluster[5][200], Knemc[9];
+    Float_t cluster[5][200], KnemcOld[9];
 
     tree->SetBranchAddress("nclu", &nclu);
     tree->SetBranchAddress("Xcl", cluster[0]);
@@ -315,8 +315,8 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
         /*if(total_err_def < 999999.)
         {   
             distance = sqrt(pow(Knetri[6] - bhabha_vtx[0],2) + pow(Knetri[7] - bhabha_vtx[1],2));
-            distance_mc = sqrt(pow(Knemc[6] - bhabha_vtx[0],2) + pow(Knemc[7] - bhabha_vtx[1],2));
-            distance_diff = sqrt(pow(Knetri[6] - Knemc[6],2) + pow(Knetri[7] - Knemc[7],2));
+            distance_mc = sqrt(pow(KnemcOld[6] - bhabha_vtx[0],2) + pow(KnemcOld[7] - bhabha_vtx[1],2));
+            distance_diff = sqrt(pow(Knetri[6] - KnemcOld[6],2) + pow(Knetri[7] - KnemcOld[7],2));
 
             hist->Fill(Knetri[5]);
             hist2d->Fill(distance_mc, distance_diff);    

@@ -40,7 +40,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 	// Cluster vars
 	Int_t nclu;
 	UChar_t mctruth;
-	Float_t cluster[5][500], Kchboost[9], Knereclor[9], Knemc[9];
+	Float_t cluster[5][500], Kchboost[9], Knereclor[9], KnemcOld[9];
 
 	chain->SetBranchAddress("nclu", &nclu);
 	chain->SetBranchAddress("Xacl", cluster[0]);

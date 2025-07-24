@@ -11,7 +11,7 @@ extern "C"
 
   void clearstruct_(); // Setting all elements of INTERF to 0
   void GetKslEvent_(int *ntmc, int *motherOld, int *vtxmcOld, int *pidmcOld, float *xvmc, float *yvmc,
-                    float *zvmc, float *pxmc, float *pymc, float *pzmc, int *nvtxmc, float *ipmc, float *KchMC, float *KneMC, float *DtMC, float *DlMC, bool *truth, bool *truthreg, bool *truthsemi, bool *truththree, bool *truthomega, bool *truthelse,
+                    float *zvmc, float *pxmc, float *pymc, float *pzmc, int *nvtxmc, float *ipmcOld, float *KchMC, float *KneMC, float *DtMC, float *DlMC, bool *truth, bool *truthreg, bool *truthsemi, bool *truththree, bool *truthomega, bool *truthelse,
                     bool *truthdouble);
 
   void GetTdiff_(float *Kch, float *Kne, float *PhiVtx, float *PhiP, float *Broots, float *DL,

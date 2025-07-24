@@ -494,6 +494,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
           {"trk1TwoBody", trkKLTwoBody1},
           {"trk2TwoBody", trkKLTwoBody2},
       };
+
       writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }
 

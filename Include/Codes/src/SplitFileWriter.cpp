@@ -54,6 +54,7 @@ void SplitFileWriter::SetBranches()
   {
     _tree->Branch(arr.first.c_str(), &(arr.second));
   }
+
 }
 
 void SplitFileWriter::OpenNewFile()

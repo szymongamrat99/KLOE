@@ -1,25 +1,42 @@
 {
-  "$schema": "./schemas/cut-schema.json",
-  "analysisCode": 1,
+  "analysisCode": 7,
   "analysisDescription": "This analysis applies cuts to select events that match the signal hypothesis.",
   "listOfCuts": [
     {
-      "order": 1,
+      "order": 4,
       "cutDescription": "K->pi+pi- decay invariant mass.",
       "cutId": "InvMassKch",
       "cutType": "T",
-      "cutValue": 20.0,
+      "cutValue": 1.2,
+      "cutCondition": "<=",
+      "centralValue": 497.611
+    },
+    {
+      "order": 3,
+      "cutDescription": "K->pi+pi- decay invariant mass.",
+      "cutId": "InvMassKne",
+      "cutType": "T",
+      "cutValue": 1.2,
       "cutCondition": "<=",
       "centralValue": 497.611
     },
     {
       "order": 2,
       "cutDescription": "K->pi+pi- decay invariant mass.",
-      "cutId": "InvMassKch",
+      "cutId": "TwoBodyMomKS",
       "cutType": "T",
-      "cutValue": 20.0,
+      "cutValue": 10,
       "cutCondition": "<=",
-      "centralValue": 497.611
+      "centralValue": 110.493
+    },
+    {
+      "order": 1,
+      "cutDescription": "K->pi+pi- decay invariant mass.",
+      "cutId": "TwoBodyMomKL",
+      "cutType": "T",
+      "cutValue": 10,
+      "cutCondition": "<=",
+      "centralValue": 110.493
     }
   ]
 }

@@ -245,7 +245,7 @@ c ENDDO
           Interf%ip(i)=0.
           Interf%ip_closest(i)=0.
           Interf%ip_plane(i)=0.
-          Interf%ipmc(i)=0.
+          Interf%ipmcOld(i)=0.
           Interf%g4vtxerr(i)=0.
           Interf%Trkk1(i)=0.
           Interf%Trkk2(i)=0.
@@ -598,7 +598,7 @@ C==============================================================================
 C==============================================================================
 C==============================================================================
       SUBROUTINE GetKslEvent(ntmc,motherOld,vtxmcOld,pidmcOld,xvmc,yvmc,zvmc,
-     &           pxmc,pymc,pzmc,nvtxmc,ipmc,KchMC,KneMC,DtMC,DlMC,
+     &           pxmc,pymc,pzmc,nvtxmc,ipmcOld,KchMC,KneMC,DtMC,DlMC,
      &           truth,truthreg,truthsemi,truththree,truthomega,truthelse,
      &           truthdouble)
 C-----------------------------------------------------------------------
@@ -607,7 +607,7 @@ C  Description:
 C  ------------
 C in: ntmc,motherOld(),vtxmcOld(),pidmcOld(),xvmc(),yvmc(),zvmc(),
 C in: pxmc(),pymc(),pzmc(),nvtxmc
-C out: truth,truthreg,truthsemi,truththree,truthomega,truthelse,ipmc(),KchMC(),KneMC(),DtMC,DlMC
+C out: truth,truthreg,truthsemi,truththree,truthomega,truthelse,ipmcOld(),KchMC(),KneMC(),DtMC,DlMC
 C
 C-----------------------------------------------------------------------
 C
@@ -632,7 +632,7 @@ C
      &        pidmcOld(MaxNtrkGen)
       INTEGER KLpic(2),KLpio(2),KSpic(2),KSpio(2),i
       REAL    xvmc(MaxNvtxGen),yvmc(MaxNvtxGen),zvmc(MaxNvtxGen),Broots
-      REAL    ipmc(3),KchMC(9),KneMC(9),Ks(9),Kl(9),DtMC,DlMC,PhiPMC(3)
+      REAL    ipmcOld(3),KchMC(9),KneMC(9),Ks(9),Kl(9),DtMC,DlMC,PhiPMC(3)
       REAL    pxmc(MaxNtrkGen),pymc(MaxNtrkGen),pzmc(MaxNtrkGen)
       LOGICAL truth,truthreg,truthsemi,truththree,truthomega,truthelse,
      &        truthdouble
@@ -790,9 +790,9 @@ C
       IF( truth .OR. truththree .OR. truthsemi .OR. truthreg .OR. truthdouble ) THEN
         DO i = 1,nvtxmc
            IF( motherOld(i).eq.50 ) THEN
-              ipmc(1) = xvmc(i)
-              ipmc(2) = yvmc(i)
-              ipmc(3) = zvmc(i)
+              ipmcOld(1) = xvmc(i)
+              ipmcOld(2) = yvmc(i)
+              ipmcOld(3) = zvmc(i)
               EXIT
            ENDIF
         ENDDO
@@ -853,7 +853,7 @@ C
           PhiPMC(i) = KchMC(i)+KneMC(i)
         ENDDO
         Broots = KchMC(4)+KneMC(4)
-        CALL GetTdiff(KchMC,KneMC,ipmc,PhiPMC,Broots,DlMC,DtMC)
+        CALL GetTdiff(KchMC,KneMC,ipmcOld,PhiPMC,Broots,DlMC,DtMC)
       ENDIF
 
       END

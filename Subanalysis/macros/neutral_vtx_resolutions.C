@@ -121,13 +121,13 @@ Bool_t neutral_vtx_resolutions::Process(Long64_t entry)
 
    if (*mctruth == 1)
    {
-      length_mc = sqrt(pow(Knemc[6] - ipmc[0], 2) + pow(Knemc[7] - ipmc[1], 2) + pow(Knemc[8] - ipmc[2], 2));
+      length_mc = sqrt(pow(KnemcOld[6] - ipmcOld[0], 2) + pow(KnemcOld[7] - ipmcOld[1], 2) + pow(KnemcOld[8] - ipmcOld[2], 2));
 
       length_std = sqrt(pow(Knerec[6] - *Bx, 2) + pow(Knerec[7] - *By, 2) + pow(Knerec[8] - *Bz, 2));
 
-      sigmas_std[0]->Fill(Knemc[6], Knerec[6] - Knemc[6]);
-      sigmas_std[1]->Fill(Knemc[7], Knerec[7] - Knemc[7]);
-      sigmas_std[2]->Fill(Knemc[8], Knerec[8] - Knemc[8]);
+      sigmas_std[0]->Fill(KnemcOld[6], Knerec[6] - KnemcOld[6]);
+      sigmas_std[1]->Fill(KnemcOld[7], Knerec[7] - KnemcOld[7]);
+      sigmas_std[2]->Fill(KnemcOld[8], Knerec[8] - KnemcOld[8]);
       sigmas_std[3]->Fill(length_mc, length_std - length_mc);
    }
 
