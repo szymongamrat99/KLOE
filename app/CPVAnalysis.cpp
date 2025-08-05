@@ -82,54 +82,14 @@ int main(int argc, char *argv[])
     std::ifstream rootFiles(rootfilesName);
     json filePaths = json::parse(rootFiles);
 
-    Int_t fileType;
-
-    std::cout << "Choose the file type to analyze: " << std::endl;
-    std::cin >> fileType;
-
     std::string
-        DataPath = "",
-        runRegexPattern = R"(.*_(\d{5})(?:_v2)?\.root$)";
+        DataPath = filePaths["MC"]["path"][2][1],
+        // DataPath = filePaths["Data"]["path"],
+        runRegexPattern = "^.*(\\d{5}).*\\.root$";
 
-    std::vector<std::string> DataPathList(std::begin(filePaths["MC"]["path"][2]),std::end(filePaths["MC"]["path"][2]));
-
-    KLOE::RunStats runs;
-
-    switch (fileType)
-    {
-      case 0:
-      {
-        DataPath = filePaths["Data"]["path"];
-        runs = initObj.getRunStats(DataPath, runRegexPattern);
-        initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                      runs.minRun, runs.minRun);
-        break;
-      }
-      case 1:
-      {
-        DataPath = filePaths["MC"]["path"][0];
-        runs = initObj.getRunStats(DataPath, runRegexPattern);
-        initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                      runs.minRun, runs.minRun);
-        break;
-      }
-      case 2:
-      {
-        DataPath = filePaths["MC"]["path"][1];
-        runs = initObj.getRunStats(DataPath, runRegexPattern);
-        initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                      runs.minRun, runs.minRun);
-        break;
-      }
-      case 3:
-      {
-        runs = initObj.getRunStats(DataPathList, runRegexPattern);
-        initObj.chainInit(chain, logger, DataPathList, runRegexPattern,
-                      runs.minRun, runs.minRun);
-        break;
-      }
-    }
-    
+    KLOE::RunStats runs = initObj.getRunStats(DataPath, runRegexPattern);
+    initObj.chainInit(chain, logger, DataPath, runRegexPattern,
+                      runs.minRun, 30400);
     // -------------------------------------------------------
     infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 

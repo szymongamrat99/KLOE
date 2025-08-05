@@ -67,10 +67,6 @@
     "valarray": "cpp",
     "variant": "cpp",
     "kin_fits.C": "cpp",
-    "PlotsPiPi.C": "cpp",
-    "full_analysis.C": "cpp",
-    "correction_factor.C": "cpp",
-    "neutral_vtx_resolutions.C": "cpp",
-    "codecvt": "cpp"
+    "PlotsPiPi.C": "cpp"
   }
 }
