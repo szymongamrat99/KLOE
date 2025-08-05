@@ -79,16 +79,31 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 		eventProps = new GeneralEventPropertiesMC(reader);
 
 	Float_t
-			KchrecKSMom = 0, KchrecKLMom = 0;
+			KchrecKSMom = 0,
+			KchrecKLMom = 0,
+			PmissKS = 0,
+			PmissKL = 0,
+			EmissKS = 0,
+			EmissKL = 0,
+			pKTwoBody = 0;
 
 	cutter.RegisterVariableGetter("InvMassKch", [&]()
 																{ return baseKin.KchrecKS[5]; });
+	cutter.RegisterCentralValueGetter("InvMassKch", [&]()
+																		{ return mK0; });
 	cutter.RegisterVariableGetter("InvMassKne", [&]()
 																{ return baseKin.KchrecKL[5]; });
+	cutter.RegisterCentralValueGetter("InvMassKne", [&]()
+																		{ return mK0; });
+
 	cutter.RegisterVariableGetter("TwoBodyMomKS", [&]()
 																{ return KchrecKSMom; });
+	cutter.RegisterCentralValueGetter("TwoBodyMomKS", [&]()
+																		{ return pKTwoBody; });
 	cutter.RegisterVariableGetter("TwoBodyMomKL", [&]()
 																{ return KchrecKLMom; });
+	cutter.RegisterCentralValueGetter("TwoBodyMomKL", [&]()
+																		{ return pKTwoBody; });
 
 	while (reader.Next())
 	{
@@ -281,12 +296,13 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 					{
 
 						Float_t
-								pKTwoBody = Obj.TwoBodyDecayMass(mPhi, mK0, mK0),
 								boostPhi[3] = {
 										-*bhabhaProps.px / *bhabhaProps.energy,
 										-*bhabhaProps.py / *bhabhaProps.energy,
 										-*bhabhaProps.pz / *bhabhaProps.energy},
 								phiMom[4] = {*bhabhaProps.px, *bhabhaProps.py, *bhabhaProps.pz, *bhabhaProps.energy}, trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {};
+
+						pKTwoBody = Obj.TwoBodyDecayMass(mPhi, mK0, mK0);
 
 						Obj.lorentz_transf(boostPhi, baseKin.trkKS[0].data(), trkKS_PhiCM[0]);
 						Obj.lorentz_transf(boostPhi, baseKin.trkKS[1].data(), trkKS_PhiCM[1]);
@@ -347,11 +363,7 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 						Float_t
 								PhiMom[3] = {*bhabhaProps.px, *bhabhaProps.py, *bhabhaProps.pz},
 								MissMomKS[3] = {},
-								MissMomKL[3] = {},
-								PmissKS = 0,
-								PmissKL = 0,
-								EmissKS = 0,
-								EmissKL = 0;
+								MissMomKL[3] = {};
 
 						for (Int_t comp = 0; comp < 3; comp++)
 						{
@@ -403,7 +415,7 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 
 					baseKin.necls = *generalProps.necls;
 					baseKin.eclfilfo = *generalProps.eclfilfo;
-					baseKin.eclfilfoword = *generalProps.eclfilfoword;
+					// baseKin.eclfilfoword = *generalProps.eclfilfoword;
 
 					baseKin.eclstream.assign(generalProps.eclstream.begin(), generalProps.eclstream.end());
 					// -------------------------------------------------------------------------------------
@@ -475,7 +487,7 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 							{"nev", baseKin.nev},										// Number of event
 							{"necls", baseKin.necls},								// Number of ECL words
 							{"Eclfilfo", baseKin.eclfilfo},					// Which filfo was used
-							{"Eclfilfoword", baseKin.eclfilfoword}, // Filfo word
+							// {"Eclfilfoword", baseKin.eclfilfoword}, // Filfo word
 							{"mcflag", mcflag},											// If event from MC of Data
 							{"mctruth", mctruth},										// What event type
 							{"nclu", baseKin.nclu},

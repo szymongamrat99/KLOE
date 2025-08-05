@@ -6,21 +6,30 @@
 #include <stdexcept>
 #include <json.hpp>
 #include <fstream>
+#include <algorithm>
 
 struct Cut {
+    int order = 0;
     std::string cutId;
     std::string cutType;
-    std::string cutCondition; // "<=", ">=", "==", etc.
+    std::string cutCondition;
     double cutValue;
     double centralValue;
-    std::function<double()> valueGetter; // Getter do zmiennej
+    bool centralValueDynamic = false;
+    std::function<double()> valueGetter;
+    std::function<double()> centralValueGetter;
 };
 
 class StatisticalCutter {
 public:
+    // Konstruktor z jednym plikiem JSON (dla kompatybilności)
     StatisticalCutter(const std::string& jsonPath, int signalMctruth);
 
+    // Konstruktor z dwoma plikami (properties i cuts)
+    StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath);
+
     void RegisterVariableGetter(const std::string& varName, std::function<double()> getter);
+    void RegisterCentralValueGetter(const std::string& cutId, std::function<double()> getter);
 
     bool PassCut(size_t cutIndex);
     bool PassAllCuts();
@@ -34,8 +43,13 @@ public:
     size_t GetSurvivedSignal(size_t cutIndex) const;
     size_t GetSurvivedBackground(size_t cutIndex) const;
 
+    // Dostęp do cięć (np. po nazwach)
+    const std::vector<Cut>& GetCuts() const { return cuts_; }
+
 private:
+    void LoadCuts(const nlohmann::json& j);
     void LoadCuts(const std::string& jsonPath);
+    void LoadCutsFromFiles(const std::string& propertiesPath, const std::string& cutsPath);
     bool EvaluateCondition(double value, const Cut& cut) const;
 
     std::vector<Cut> cuts_;

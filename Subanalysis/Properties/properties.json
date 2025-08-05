@@ -8,7 +8,7 @@
         "signalInitialAnalysisExec": true,
         "omegaInitialAnalysisExec": false
       },
-      "MC": true
+      "MC": false
     },
     "analysisCode": "FOUR_PI"
   },

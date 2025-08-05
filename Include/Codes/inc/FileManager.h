@@ -57,6 +57,10 @@ public:
     void chainInit(TChain &chain_init, ErrorHandling::ErrorLogs &logger,
                   const std::string& directory, const std::string& regex_pattern,
                   int minRun, int maxRun);
+
+    void chainInit(TChain &chain_init, ErrorHandling::ErrorLogs &logger,
+                  const std::vector<std::string>& fileList, const std::string& regex_pattern,
+                  int minRun, int maxRun);
 };
 }
 

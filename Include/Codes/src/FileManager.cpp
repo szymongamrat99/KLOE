@@ -172,37 +172,71 @@ namespace KLOE
     }
   }
 
-  void FileManager::chainInit(TChain &chain_init, ErrorHandling::ErrorLogs &logger,
-                              const std::string &directory, const std::string &regex_pattern,
-                              int minRun, int maxRun)
-  {
-    ErrorHandling::InfoCodes infoCode;
-    std::regex run_regex(regex_pattern);
-    for (auto &entry : boost::filesystem::directory_iterator(directory))
-    {
-      if (!boost::filesystem::is_regular_file(entry.status()))
-        continue;
-      std::string filename = entry.path().filename().string();
-      std::smatch match;
-      if (std::regex_search(filename, match, run_regex) && match.size() > 1)
-      {
-        int run = -1;
-        try
-        {
-          run = std::stoi(match[1].str());
+void FileManager::chainInit(TChain& chain, ErrorHandling::ErrorLogs& logger,
+                            const std::string& DataPath, const std::string& runRegexPattern,
+                            int minRun, int maxRun)
+{
+    std::regex runRegex(runRegexPattern);
+    std::map<int, std::string> runFiles;
+
+    for (boost::filesystem::directory_iterator it(DataPath), end; it != end; ++it) {
+        if (!boost::filesystem::is_regular_file(it->status()))
+            continue;
+        const std::string fname = it->path().filename().string();
+        std::smatch match;
+        if (std::regex_match(fname, match, runRegex)) {
+            int runNum = std::stoi(match[1]);
+            if (runNum < minRun || runNum > maxRun) continue;
+
+            // Priorytet dla v2.root
+            if (fname.find("_v2.root") != std::string::npos) {
+                runFiles[runNum] = it->path().string();
+            }
+            // } else {
+            //     // Dodaj tylko jeśli nie ma już v2 dla tego runu
+            //     if (runFiles.count(runNum) == 0)
+            //         runFiles[runNum] = it->path().string();
+            // }
         }
-        catch (...)
-        {
-          continue;
-        }
-        if (run >= minRun && run <= maxRun)
-        {
-          std::string fullpath = entry.path().string();
-          chain_init.Add(fullpath.c_str());
-          infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
-          logger.getLog(infoCode, filename);
-        }
-      }
+    }
+
+    // Dodaj wybrane pliki do TChain
+    for (const auto& kv : runFiles) {
+        chain.Add(kv.second.c_str());
     }
   }
+
+void FileManager::chainInit(TChain& chain, ErrorHandling::ErrorLogs& logger,
+                            const std::vector<std::string>& fileList, const std::string& runRegexPattern,
+                            int minRun, int maxRun)
+{
+    std::regex runRegex(runRegexPattern);
+    std::map<int, std::string> runFiles;
+
+    for (const auto& filePath : fileList) {
+        boost::filesystem::path pathObj(filePath);
+        if (!boost::filesystem::is_regular_file(pathObj))
+            continue;
+        const std::string fname = pathObj.filename().string();
+        std::smatch match;
+        if (std::regex_match(fname, match, runRegex)) {
+            int runNum = std::stoi(match[1]);
+            if (runNum < minRun || runNum > maxRun) continue;
+
+            // Priorytet dla v2.root
+            if (fname.find("_v2.root") != std::string::npos) {
+                runFiles[runNum] = filePath;
+            }
+            // } else {
+            //     if (runFiles.count(runNum) == 0)
+            //         runFiles[runNum] = filePath;
+            // }
+        }
+    }
+
+    // Dodaj wybrane pliki do TChain
+    for (const auto& kv : runFiles) {
+        chain.Add(kv.second.c_str());
+    }
+}
 } // namespace KLOE

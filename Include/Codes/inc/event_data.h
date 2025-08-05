@@ -137,7 +137,7 @@ struct GeneralEventProperties
                                                 nrun(reader, "nRun"),
                                                 necls(reader, "NEcls"),
                                                 eclfilfo(reader, "EclFilfo"),
-                                                eclfilfoword(reader, "EclFilfoWord"),
+                                                // eclfilfoword(reader, "EclFilfoWord"),
                                                 eclstream(reader, "EclStream")
   {
   }
@@ -146,7 +146,7 @@ struct GeneralEventProperties
   TTreeReaderValue<Int_t> nrun;
   TTreeReaderValue<Int_t> necls;
   TTreeReaderValue<Int_t> eclfilfo;
-  TTreeReaderValue<Int_t> eclfilfoword;
+  // TTreeReaderValue<Int_t> eclfilfoword;
 
   TTreeReaderArray<Int_t> eclstream;
 };
