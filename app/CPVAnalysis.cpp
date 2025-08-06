@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
   cfgWatcher.start();
   // -------------------------------------------------------------------
   Controls::DataType dataTypeOpt;
+  Controls::FileType fileTypeOpt;
 
   // Set flag for initial analysis
   Bool_t initialAnalysisExecution = properties["flags"]["initialAnalysisExec"]["flag"];
@@ -82,14 +83,62 @@ int main(int argc, char *argv[])
     std::ifstream rootFiles(rootfilesName);
     json filePaths = json::parse(rootFiles);
 
-    std::string
-        DataPath = filePaths["MC"]["path"][2][1],
-        // DataPath = filePaths["Data"]["path"],
-        runRegexPattern = "^.*(\\d{5}).*\\.root$";
+    std::cout << "Choose the file type to analyze: " << std::endl;
+    std::cin >> fileTypeOpt;
 
-    KLOE::RunStats runs = initObj.getRunStats(DataPath, runRegexPattern);
-    initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                      runs.minRun, 30400);
+    std::string
+        DataPath = "",
+        runRegexPattern = R"(.*_(\d{5})_v2\.root$)";
+
+    std::vector<std::string> DataPathList(std::begin(filePaths["MC"]["path"][2]), std::end(filePaths["MC"]["path"][2]));
+
+    KLOE::RunStats runs;
+
+    switch (fileTypeOpt)
+    {
+    case Controls::FileType::DATA:
+    {
+      DataPath = filePaths["Data"]["path"];
+      runs = initObj.getRunStats(DataPath, runRegexPattern);
+      initObj.chainInit(chain, logger, DataPath, runRegexPattern,
+                        runs.minRun, runs.minRun);
+
+      break;
+    }
+    case Controls::FileType::ALL_PHYS:
+    {
+      DataPath = filePaths["MC"]["path"][0];
+      runs = initObj.getRunStats(DataPath, runRegexPattern);
+      initObj.chainInit(chain, logger, DataPath, runRegexPattern,
+                        runs.minRun, runs.minRun);
+      break;
+    }
+    case Controls::FileType::ALL_PHYS2:
+    {
+      DataPath = filePaths["MC"]["path"][1];
+      runs = initObj.getRunStats(DataPath, runRegexPattern);
+      initObj.chainInit(chain, logger, DataPath, runRegexPattern,
+                        runs.minRun, runs.minRun);
+      break;
+    }
+    case Controls::FileType::ALL_PHYS3:
+    {
+      for (const auto &path : DataPathList)
+      {
+        runs = initObj.getRunStats(path, runRegexPattern);
+        initObj.chainInit(chain, logger, path, runRegexPattern,
+                          runs.minRun, runs.minRun);
+      }
+
+      break;
+    }
+    default:
+    {
+      std::cerr << "Invalid file type selected." << std::endl;
+      return 1;
+    }
+    }
+    
     // -------------------------------------------------------
     infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
@@ -99,7 +148,7 @@ int main(int argc, char *argv[])
     infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
 
     logger.getLog(infoCode, "Initial analysis execution.");
-    InitAnalysis_main(chain, eventAnalysis);
+    InitAnalysis_main(chain, fileTypeOpt, eventAnalysis);
   }
   // -------------------------------------------------------------------
   logger.printErrStats();

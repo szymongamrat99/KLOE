@@ -19,7 +19,7 @@
 #include <interference.h>
 #include <fort_common.h>
 
-int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
+int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
 
 void MctruthCounter(Int_t mctruth, UInt_t mctruth_num[8]);
 

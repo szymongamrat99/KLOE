@@ -5,7 +5,7 @@
 
 using namespace std;
 
-int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj)
+int InitAnalysis_main(TChain &chain, Controls::FileType &fileTypeOpt, KLOE::pm00 &Obj)
 {
   // Set logger for error logging
   std::string logFilename = (std::string)initialanalysis_dir + (std::string)logs_dir + "InitialAnalysis.log";
@@ -59,7 +59,7 @@ int InitAnalysis_main(TChain &chain, KLOE::pm00 &Obj)
       logger.getLog(infoCode, "Full initial analysis");
 
       Obj.startTimer();
-      InitialAnalysis_full(chain, logger, Obj);
+      InitialAnalysis_full(chain, fileTypeOpt, logger, Obj);
       
       infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
       logger.getLog(infoCode, Obj.endTimer());

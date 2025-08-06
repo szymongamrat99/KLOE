@@ -22,7 +22,7 @@
 #include "../inc/initialanalysis.hpp"
 #include "initialanalysis.hpp"
 
-int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
+int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
 	TTreeReader reader(&chain);
 	GeneralEventProperties generalProps(reader);
@@ -48,12 +48,19 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 	if (hypoCode == KLOE::HypothesisCode::INVALID_VALUE)
 		return 1;
 
+	std::ifstream rootFiles(rootfilesName);
+  json filePaths = json::parse(rootFiles);
+
+	std::vector<std::string> baseFilenames = {filePaths["Data"]["filenameBase"],
+																						filePaths["MC"]["filenameBase"][0],
+																						filePaths["MC"]["filenameBase"][1],
+																						filePaths["MC"]["filenameBase"][2]};
+
 	std::string
-			base_filename = "mk0_all_phys3",
 			dirname = (std::string)initialanalysis_dir + (std::string)root_files_dir,
 			dated_folder = Obj.CreateDatedFolder(dirname);
 
-	SplitFileWriter writer(base_filename, 1.5 * 1024 * 1024 * 1024, false, dated_folder);
+	SplitFileWriter writer(baseFilenames[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024, false, dated_folder);
 
 	Int_t mcflag = 0, mctruth = 0, NCLMIN = 4; // Assuming NCLMIN is 4, adjust as needed;
 	std::vector<Int_t> neuclulist;
@@ -284,7 +291,7 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 				logger.getErrLog(errorCode, "", mctruth);
 			else
 			{
-				Bool_t cutCombined = false;
+				Bool_t cutCombined = false, passed = false;
 				std::vector<Bool_t> cutOrdered;
 
 				if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
@@ -399,12 +406,15 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 								baseKin.cuts[iter] = 0;
 
 								if (mctruth == 7)
+								{
+									passed = true;
 									mctruth = 0;
+								}
 							}
 					}
 				}
 
-				if (cutCombined || mctruth == 7 || mctruth == 0)
+				if (cutCombined || passed)
 				{
 					errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
 
@@ -415,7 +425,7 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 
 					baseKin.necls = *generalProps.necls;
 					baseKin.eclfilfo = *generalProps.eclfilfo;
-					// baseKin.eclfilfoword = *generalProps.eclfilfoword;
+					baseKin.eclfilfoword = *generalProps.eclfilfoword;
 
 					baseKin.eclstream.assign(generalProps.eclstream.begin(), generalProps.eclstream.end());
 					// -------------------------------------------------------------------------------------
@@ -478,6 +488,13 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 						baseKin.pxmc = {};
 						baseKin.pymc = {};
 						baseKin.pzmc = {};
+						baseKin.ipmc = {};
+						baseKin.Kchmc = {};
+						baseKin.Knemc = {};
+						baseKin.trkKSmc[0] = {};
+						baseKin.trkKSmc[1] = {};
+						baseKin.trkKLmc[0] = {};
+						baseKin.trkKLmc[1] = {};
 					}
 					// -------------------------------------------------------------------------------------
 
@@ -487,7 +504,7 @@ int InitialAnalysis_full(TChain &chain, ErrorHandling::ErrorLogs &logger, KLOE::
 							{"nev", baseKin.nev},										// Number of event
 							{"necls", baseKin.necls},								// Number of ECL words
 							{"Eclfilfo", baseKin.eclfilfo},					// Which filfo was used
-							// {"Eclfilfoword", baseKin.eclfilfoword}, // Filfo word
+							{"Eclfilfoword", baseKin.eclfilfoword}, // Filfo word
 							{"mcflag", mcflag},											// If event from MC of Data
 							{"mctruth", mctruth},										// What event type
 							{"nclu", baseKin.nclu},

@@ -228,6 +228,16 @@ namespace Controls
     OPT_TOT = 5
   };
 
+  enum class FileType
+  {
+    DATA = 0,
+    ALL_PHYS = 1,
+    ALL_PHYS2 = 2,
+    ALL_PHYS3 = 3,
+
+    OPT_TOT = 4
+  };
+
   template <typename T>
   inline std::istream &operator>>(std::istream &is, T &opt)
   {
@@ -245,7 +255,7 @@ namespace Controls
     std::vector<TString> fileOpt;
 
     const int ChooseMenu;
-    std::vector<TString> MenuName = {"KchRec Menu", "NeutRec Menu", "Data Type", "Analysis file", "Final CPV Fit", "Generated Variables", "Omega-pi0 Reconstruction Menu", "Efficiency Check Menu", "Regeneration Rejection Menu", "Plots Menu", "Main Menu", "Covariant Matrix Determination", "Main Menu", "Initial Analysis Menu"};
+    std::vector<TString> MenuName = {"KchRec Menu", "NeutRec Menu", "Data Type", "Analysis file", "Final CPV Fit", "Generated Variables", "Omega-pi0 Reconstruction Menu", "Efficiency Check Menu", "Regeneration Rejection Menu", "Plots Menu", "Main Menu", "Covariant Matrix Determination", "Main Menu", "Initial Analysis Menu", "File Type to analyze"};
 
     TString ChooseOpt = "Choose the option: ";
 
@@ -363,6 +373,15 @@ namespace Controls
 
         break;
       }
+      case 14:
+      {
+        MenuOpt[int(FileType::DATA)] = Form("%d. Data.", int(FileType::DATA));
+        MenuOpt[int(FileType::ALL_PHYS)] = Form("%d. MC all_phys.", int(FileType::ALL_PHYS));
+        MenuOpt[int(FileType::ALL_PHYS2)] = Form("%d. MC all_phys2.", int(FileType::ALL_PHYS2));
+        MenuOpt[int(FileType::ALL_PHYS3)] = Form("%d. MC all_phys3.", int(FileType::ALL_PHYS3));
+
+        break;
+      }
       }
     };
 
@@ -475,6 +494,15 @@ namespace Controls
         MenuOpt[int(InitialAnalysisMenu::INIT_ANALYSIS_FULL)] = Form("%d. Initial analysis with all reconstructions and cuts.", int(InitialAnalysisMenu::INIT_ANALYSIS_FULL));
 
         MenuOpt[int(InitialAnalysisMenu::EXIT)] = Form("%d. Exit.", int(InitialAnalysisMenu::EXIT));
+
+        break;
+      }
+      case 14:
+      {
+        MenuOpt[int(FileType::DATA)] = Form("%d. Data.", int(FileType::DATA));
+        MenuOpt[int(FileType::ALL_PHYS)] = Form("%d. MC all_phys.", int(FileType::ALL_PHYS));
+        MenuOpt[int(FileType::ALL_PHYS2)] = Form("%d. MC all_phys2.", int(FileType::ALL_PHYS2));
+        MenuOpt[int(FileType::ALL_PHYS3)] = Form("%d. MC all_phys3.", int(FileType::ALL_PHYS3));
 
         break;
       }
@@ -594,6 +622,15 @@ namespace Controls
       case 13:
       {
         for (int i = 1; i < int(InitialAnalysisMenu::OPT_TOT); i++)
+        {
+          std::cout << MenuOpt[i] << std::endl;
+        }
+
+        break;
+      }
+      case 14:
+      {
+        for (int i = 1; i < int(FileType::OPT_TOT); i++)
         {
           std::cout << MenuOpt[i] << std::endl;
         }

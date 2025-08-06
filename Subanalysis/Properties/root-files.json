@@ -9,16 +9,16 @@
       ]
     ],
     "filenameBase": [
-      "prod2root_mk0_all_phys_",
-      "prod2root_mk0_all_phys2_",
-      "prod2root_mk0_all_phys3_"
+      "mk0_initial_analysis_all_phys",
+      "mk0_initial_analysis_all_phys2",
+      "mk0_initial_analysis_all_phys3"
     ],
     "extension": ".root"
 
   },
   "Data": {
     "path": "/data/ssd/gamrat/PROD2ROOT/DK0/",
-    "filenameBase": "prod2root_dk02_",
+    "filenameBase": "dk0_initial_analysis",
     "extension": ".root"
   }
 }
