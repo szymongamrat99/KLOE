@@ -603,6 +603,16 @@ namespace KLOE
             dataFlag = (mcflag == 1 && (mctruth == 1 || mctruth == 2 || mctruth == 0));
             break;
         }
+        case Controls::DataType::MC_ONLY:
+        {
+            dataFlag = (mcflag == 1 && mctruth != 0);
+            break;
+        }
+        case Controls::DataType::DATA_ONLY:
+        {
+            dataFlag = (mcflag == 0);
+            break;
+        }
         }
     }
 

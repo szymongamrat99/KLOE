@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
   setGlobalStyle();
   // -------------------------------------------------------------------
   // Set config file watcher
-  ConfigWatcher cfgWatcher(propName);
-  cfgWatcher.start();
+  // ConfigWatcher cfgWatcher(propName);
+  // cfgWatcher.start();
   // -------------------------------------------------------------------
   Controls::DataType dataTypeOpt;
   Controls::FileType fileTypeOpt;
@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
         eventAnalysis,
         callParams.dataTypeOpt,
         logger,
-        infoCode,
-        cfgWatcher);
+        infoCode);
+        // cfgWatcher);
   }
   else
   {
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
       DataPath = filePaths["Data"]["path"];
       runs = initObj.getRunStats(DataPath, runRegexPattern);
       initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                        runs.minRun, runs.minRun);
+                        runs.minRun, runs.minRun + 1000);
 
       break;
     }
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
       DataPath = filePaths["MC"]["path"][0];
       runs = initObj.getRunStats(DataPath, runRegexPattern);
       initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                        runs.minRun, runs.minRun);
+                        runs.minRun, runs.minRun + 1000);
       break;
     }
     case Controls::FileType::ALL_PHYS2:
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
       DataPath = filePaths["MC"]["path"][1];
       runs = initObj.getRunStats(DataPath, runRegexPattern);
       initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                        runs.minRun, runs.minRun);
+                        runs.minRun, runs.minRun + 1000);
       break;
     }
     case Controls::FileType::ALL_PHYS3:
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
       {
         runs = initObj.getRunStats(path, runRegexPattern);
         initObj.chainInit(chain, logger, path, runRegexPattern,
-                          runs.minRun, runs.minRun);
+                          runs.minRun, runs.minRun + 500);
       }
 
       break;
@@ -153,6 +153,6 @@ int main(int argc, char *argv[])
   // -------------------------------------------------------------------
   logger.printErrStats();
 
-  cfgWatcher.stop();
+  // cfgWatcher.stop();
   return 0;
 }

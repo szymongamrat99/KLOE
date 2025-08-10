@@ -8,9 +8,12 @@
 #include <TFitResult.h>
 #include <TLegend.h>
 #include <THStack.h>
+#include <TTreeReader.h>
 
 #include <boost/optional.hpp>
 #include <SplitFileWriter.h>
+#include <event_data.h>
+
 
 #include "../inc/kchrec.hpp"
 
@@ -40,11 +43,16 @@
  */
 int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
-
   // Structure from const.h to ease navigation
   BaseKinematics baseKin;
 
-  chain.SetBranchAddress("nev", &baseKin.nevent);
+  TTreeReader reader(&chain);
+
+  BhabhaIP bhabhaProps(reader);
+
+
+  chain.SetBranchAddress("nev", &baseKin.nev);
+  chain.SetBranchAddress("nrun", &baseKin.nrun);
 
   // Bhabha variables - avg per run
   chain.SetBranchAddress("Bx", &baseKin.bhabha_vtx[0]);
@@ -55,48 +63,82 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   chain.SetBranchAddress("Bpy", &baseKin.phi_mom[1]);
   chain.SetBranchAddress("Bpz", &baseKin.phi_mom[2]);
   chain.SetBranchAddress("Broots", &baseKin.phi_mom[3]);
-  // -----------------------------------------------------------
 
-  // Track - vtx info
-  chain.SetBranchAddress("nv", &baseKin.nv);
-  chain.SetBranchAddress("ntv", &baseKin.ntv);
-  chain.SetBranchAddress("ivOld", baseKin.ivOld);
-  // -----------------------------------------------------------
+  std::vector<Float_t>
+      *ipKS(&baseKin.ipKS),
+      *ipKL(&baseKin.ipKL),
+      *ipmc(&baseKin.ipmc),
+      *trkKS[2],
+      *trkKL[2],
+      *trkKLmc[2],
+      *trkKSmc[2],
+      *KchrecKS(&baseKin.KchrecKS),
+      *KchrecKL(&baseKin.KchrecKL),
+      *KchboostKS(&baseKin.KchboostKS),
+      *KchboostKL(&baseKin.KchboostKL),
+      *Knemc(&baseKin.Knemc),
+      *Kchmc(&baseKin.Kchmc);
 
-  // Track properties
-  chain.SetBranchAddress("CurvOld", baseKin.CurvOld);
-  chain.SetBranchAddress("PhivOld", baseKin.PhivOld);
-  chain.SetBranchAddress("CotvOld", baseKin.CotvOld);
-  // -----------------------------------------------------------
+    trkKS[0] = &baseKin.trkKS[0];
+    trkKS[1] = &baseKin.trkKS[1];
+    trkKL[0] = &baseKin.trkKL[0];
+    trkKL[1] = &baseKin.trkKL[1];
+    trkKSmc[0] = &baseKin.trkKSmc[0];
+    trkKSmc[1] = &baseKin.trkKSmc[1];
+    trkKLmc[0] = &baseKin.trkKLmc[0];
+    trkKLmc[1] = &baseKin.trkKLmc[1];
 
-  // Vertex position
-  chain.SetBranchAddress("xvOld", baseKin.xvOld);
-  chain.SetBranchAddress("yvOld", baseKin.yvOld);
-  chain.SetBranchAddress("zvOld", baseKin.zvOld);
+  baseKin.ipKS.resize(3);
+  baseKin.ipKL.resize(3);
+  baseKin.ipmc.resize(3);
+
+  chain.SetBranchAddress("ipKS", &ipKS);
+  chain.SetBranchAddress("ipKL", &ipKL);
+  chain.SetBranchAddress("ipmc", &ipmc);
   // -----------------------------------------------------------
 
   // mcflag and mctruth position
-  chain.SetBranchAddress("mcflag", &baseKin.mcflag);
-  chain.SetBranchAddress("mctruth", &baseKin.mctruth);
+  Int_t mcflag, mctruth;
+  chain.SetBranchAddress("mcflag", &mcflag);
+  chain.SetBranchAddress("mctruth", &mctruth);
   // -----------------------------------------------------------
 
   // Trk momentum
   baseKin.KchrecKS.resize(9);
   baseKin.KchrecKL.resize(9);
+  baseKin.KchboostKS.resize(9);
+  baseKin.KchboostKL.resize(9);
   baseKin.trkKS[0].resize(4);
   baseKin.trkKS[1].resize(4);
   baseKin.trkKL[0].resize(4);
   baseKin.trkKL[1].resize(4);
-  chain.SetBranchAddress("Kchrecks", baseKin.KchrecKS.data());
-  chain.SetBranchAddress("Kchreckl", baseKin.KchrecKL.data());
-  chain.SetBranchAddress("trk1ks", baseKin.trkKS[0].data());
-  chain.SetBranchAddress("trk2ks", baseKin.trkKS[1].data());
-  chain.SetBranchAddress("trk1kl", baseKin.trkKL[0].data());
-  chain.SetBranchAddress("trk2kl", baseKin.trkKL[1].data());
+
+  chain.SetBranchAddress("KchrecKS", &KchrecKS);
+  chain.SetBranchAddress("KchrecKL", &KchrecKL);
+  chain.SetBranchAddress("KchboostKS", &KchboostKS);
+  chain.SetBranchAddress("KchboostKL", &KchboostKL);
+  chain.SetBranchAddress("trk1KS", &trkKS[0]);
+  chain.SetBranchAddress("trk2KS", &trkKS[1]);
+  chain.SetBranchAddress("trk1KL", &trkKL[0]);
+  chain.SetBranchAddress("trk2KL", &trkKL[1]);
+
+  baseKin.Kchmc.resize(9);
+  baseKin.Knemc.resize(9);
+  baseKin.trkKSmc[0].resize(4);
+  baseKin.trkKSmc[1].resize(4);
+  baseKin.trkKLmc[0].resize(4);
+  baseKin.trkKLmc[1].resize(4);
+
+  chain.SetBranchAddress("Kchmc", &Kchmc);
+  chain.SetBranchAddress("Knemc", &Knemc);
+  chain.SetBranchAddress("trk1KSmc", &trkKSmc[0]);
+  chain.SetBranchAddress("trk2KSmc", &trkKSmc[1]);
+  chain.SetBranchAddress("trk1KLmc", &trkKLmc[0]);
+  chain.SetBranchAddress("trk2KLmc", &trkKLmc[1]);
   // -----------------------------------------------------------
 
   std::string
-      base_filename = "KchRec_Control_Sample",
+      base_filename = "KchRec_4pi",
       dirname = (std::string)charged_dir + (std::string)root_files_dir,
       dated_folder = Obj.CreateDatedFolder(dirname);
 
@@ -109,29 +151,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 
   Int_t mode = 1; // Model for pi+pi-
 
-  // Initialization of Charged part of decay reconstruction class
-  // Constructor is below, in the loop
-  boost::optional<KLOE::ChargedVtxRec<Float_t, UChar_t>> eventAnalysis;
-  // -------------------------------------------------------------
-
-  baseKin.vtaken.resize(3);
-  // baseKin.vtakenKS.resize(3);
-  // baseKin.vtakenKL.resize(3);
-  baseKin.vtakenClosest.resize(3);
-
-  baseKin.Kchrecnew.resize(9);
-  // baseKin.KchrecKS.resize(9);
-  // baseKin.KchrecKL.resize(9);
-  baseKin.KchrecClosest.resize(9);
   baseKin.KchrecKLTwoBody.resize(9);
-
-  for (Int_t i = 0; i < 2; i++)
-  {
-    baseKin.trknew[i].resize(4);
-    // baseKin.trkKS[i].resize(4);
-    // baseKin.trkKL[i].resize(4);
-    baseKin.trkClosest[i].resize(4);
-  }
 
   TH1 *histDifferences = new TH1F("histDifferences", "Histogram", 100, 0, M_PI);
 
@@ -141,22 +161,24 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   std::vector<TH1 *> histKLTwoBody;
   std::vector<TH1 *> histKL;
 
+
+
   for (Int_t i = 0; i < 2; i++)
     for (Int_t j = 0; j < 4; j++)
     {
       if (j < 3)
       {
-        histMomPiTwoBody[i].push_back(new TH1F(Form("histMomPiTwoBody_%d_%d", i, j), Form("Histogram Pi Two Body %d %d", i, j), 100, -400, 400));
-        histMomtrkKL[i].push_back(new TH1F(Form("histMomtrkKL_%d_%d", i, j), Form("Histogram trk KL %d %d", i, j), 100, -400, 400));
-        histKLTwoBody.push_back(new TH1F(Form("histKLTwoBody_%d_%d", i, j), Form("Histogram KL Two Body %d %d", i, j), 100, -600, 600));
-        histKL.push_back(new TH1F(Form("histKL_%d_%d", i, j), Form("Histogram KL %d %d", i, j), 100, -600, 600));
+        histMomPiTwoBody[i].push_back(new TH1F(Form("histMomPiTwoBody_%d_%d", i, j), Form("Histogram Pi Two Body %d %d", i, j), 50, -5, 5));
+        histMomtrkKL[i].push_back(new TH1F(Form("histMomtrkKL_%d_%d", i, j), Form("Histogram trk KL %d %d", i, j), 50, -5, 5));
+        histKLTwoBody.push_back(new TH1F(Form("histKLTwoBody_%d_%d", i, j), Form("Histogram KL Two Body %d %d", i, j), 50, -5, 5));
+        histKL.push_back(new TH1F(Form("histKL_%d_%d", i, j), Form("Histogram KL %d %d", i, j), 50, -5, 5));
       }
       else
       {
-        histMomPiTwoBody[i].push_back(new TH1F(Form("histMomPiTwoBody_%d_%d", i, j), Form("Histogram Pi Two Body %d %d", i, j), 100, 100, 400));
-        histMomtrkKL[i].push_back(new TH1F(Form("histMomtrkKL_%d_%d", i, j), Form("Histogram trk KL %d %d", i, j), 100, 100, 400));
-        histKLTwoBody.push_back(new TH1F(Form("histKLTwoBody_%d_%d", i, j), Form("Histogram KL Two Body %d %d", i, j), 100, 100, 1000));
-        histKL.push_back(new TH1F(Form("histKL_%d_%d", i, j), Form("Histogram KL %d %d", i, j), 100, 200, 600));
+        histMomPiTwoBody[i].push_back(new TH1F(Form("histMomPiTwoBody_%d_%d", i, j), Form("Histogram Pi Two Body %d %d", i, j), 50, -5, 5));
+        histMomtrkKL[i].push_back(new TH1F(Form("histMomtrkKL_%d_%d", i, j), Form("Histogram trk KL %d %d", i, j), 50, -5, 5));
+        histKLTwoBody.push_back(new TH1F(Form("histKLTwoBody_%d_%d", i, j), Form("Histogram KL Two Body %d %d", i, j), 50, -5, 5));
+        histKL.push_back(new TH1F(Form("histKL_%d_%d", i, j), Form("Histogram KL %d %d", i, j), 50, -5, 5));
       }
     }
 
@@ -189,11 +211,11 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 
     minDiff = 999999.;
 
-    // Set the proper data type to be analyzed
-    Bool_t data_flag = false;
-    Int_t mctruth_int = int(baseKin.mctruth), mcflag_int = int(baseKin.mcflag);
+    // Set the proper data type to
 
-    Obj.dataFlagSetter(dataType, data_flag, mcflag_int, mctruth_int);
+    Bool_t data_flag = false;
+
+    Obj.dataFlagSetter(dataType, data_flag, mcflag, mctruth);
     // -------------------------------------------------------------------
 
     baseKin.errFlag = 1;
@@ -201,86 +223,38 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
     baseKin.errFlagKL = 1;
     baseKin.errFlagClosest = 1;
 
-    baseKin.vtaken.clear();
-    baseKin.vtakenClosest.clear();
-
-    baseKin.Kchrecnew.clear();
-    baseKin.KchrecClosest.clear();
     baseKin.KchrecKLTwoBody.clear();
 
     for (Int_t i = 0; i < 2; i++)
     {
-      baseKin.trknew[i].clear();
-      baseKin.trkClosest[i].clear();
       baseKin.trkKLTwoBody[i].clear();
     }
 
-    if (data_flag)
+    if (1)
     {
-      // Construction of the charged rec class object
-      eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.ivOld, baseKin.bhabha_vtx, baseKin.CurvOld, baseKin.PhivOld, baseKin.CotvOld, baseKin.xvOld, baseKin.yvOld, baseKin.zvOld, mode);
-
-      // KMASS HYPOTHESIS
-      eventAnalysis->findKchRec(baseKin.Kchrecnew.data(), baseKin.trknew[0].data(), baseKin.trknew[1].data(), baseKin.vtaken.data(), logger);
-      // ------------------------------------------------------------------
-
-      // // CLOSEST TO IP
-      // eventAnalysis->findKClosestRec(baseKin.KchrecClosest.data(), baseKin.trkClosest[0].data(), baseKin.trkClosest[1].data(), baseKin.vtakenClosest.data(), baseKin.errFlagClosest);
-      // // ------------------------------------------------------------------
-
       if (1)
       {
-        // 1. Calculation of pions' momenta from two-body decay using the boost method
-        // Using the K1 side of the event
-        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS.data(), baseKin.phi_mom, baseKin.KchboostKSOld);
-
-        Float_t X_line[3] = {baseKin.KchboostKSOld[6],
-                             baseKin.KchboostKSOld[7],
-                             baseKin.KchboostKSOld[8]}, // Vertex laying on the line
-            p[3] = {baseKin.KchboostKSOld[0],
-                    baseKin.KchboostKSOld[1],
-                    baseKin.KchboostKSOld[2]}, // Direction of the line
-            xB[3] = {baseKin.bhabha_vtx[0],
-                     baseKin.bhabha_vtx[1],
-                     baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
-            plane_perp[3] = {0.,
-                             baseKin.phi_mom[1],
-                             0.}; // Vector perpendicular to the plane from Bhabha momentum
-
-        // Corrected IP event by event
-        eventAnalysis->IPBoostCorr(X_line, p, xB, plane_perp, baseKin.ip);
-
-        baseKin.ip[0] = baseKin.bhabha_vtx[0];
-        baseKin.ip[1] = baseKin.bhabha_vtx[1];
-        // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
-        if (abs(baseKin.ip[2] - baseKin.bhabha_vtx[2]) > 2.0)
-          baseKin.ip[2] = baseKin.bhabha_vtx[2];
-
         // 2. Calculation of KL flight direction
-        Double_t KLpath = sqrt(pow(baseKin.KchrecKL[6] - baseKin.ip[0], 2) +
-                               pow(baseKin.KchrecKL[7] - baseKin.ip[1], 2) +
-                               pow(baseKin.KchrecKL[8] - baseKin.ip[2], 2));
-        TVector3 KLflightDirection = {(baseKin.KchrecKL[6] - baseKin.ip[0]) / KLpath,
-                                      (baseKin.KchrecKL[7] - baseKin.ip[1]) / KLpath,
-                                      (baseKin.KchrecKL[8] - baseKin.ip[2]) / KLpath};
-
-        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL.data(),
-                                        baseKin.phi_mom,
-                                        baseKin.KchboostKLOld);
+        Double_t KLpath = sqrt(pow(KchboostKL->at(6) - ipKS->at(0), 2) +
+                               pow(KchboostKL->at(7) - ipKS->at(1), 2) +
+                               pow(KchboostKL->at(8) - ipKS->at(2), 2));
+        TVector3 KLflightDirection = {(KchboostKL->at(6) - ipKS->at(0)) / KLpath,
+                                      (KchboostKL->at(7) - ipKS->at(1)) / KLpath,
+                                      (KchboostKL->at(8) - ipKS->at(2)) / KLpath};
 
         // 2.1 Calculation of KL momentum magnitude
-        Double_t KLmomMag = sqrt(pow(baseKin.KchboostKLOld[0], 2) +
-                                 pow(baseKin.KchboostKLOld[1], 2) +
-                                 pow(baseKin.KchboostKLOld[2], 2));
+        Double_t KLmomMag = sqrt(pow(KchboostKL->at(0), 2) +
+                                 pow(KchboostKL->at(1), 2) +
+                                 pow(KchboostKL->at(2), 2));
 
         // 2.2 Calculation of KL momentum from 2 body decay
         for (Int_t j = 0; j < 3; j++)
         {
           // Components
-          baseKin.KchrecKLTwoBody[j] = KLflightDirection[j] * KLmomMag;
+          baseKin.KchrecKLTwoBody[j] = KchboostKL->at(j);// KLflightDirection[j] * KLmomMag;
         }
         // Energy
-        baseKin.KchrecKLTwoBody[3] = baseKin.KchboostKLOld[3];
+        baseKin.KchrecKLTwoBody[3] = KchboostKL->at(3);
 
         // Calculate the magnitude of the KL momentum
         baseKin.KchrecKLTwoBody[4] = sqrt(pow(baseKin.KchrecKLTwoBody[0], 2) +
@@ -291,20 +265,28 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
                                           pow(baseKin.KchrecKLTwoBody[4], 2));
 
         // Copy the rest of the KL vertex components from the original KL vertex
-        baseKin.KchrecKLTwoBody[6] = baseKin.KchrecKL[6];
-        baseKin.KchrecKLTwoBody[7] = baseKin.KchrecKL[7];
-        baseKin.KchrecKLTwoBody[8] = baseKin.KchrecKL[8];
+        baseKin.KchrecKLTwoBody[6] = KchboostKL->at(6);
+        baseKin.KchrecKLTwoBody[7] = KchboostKL->at(7);
+        baseKin.KchrecKLTwoBody[8] = KchboostKL->at(8);
         // ------------------------------------------------------------------
 
         // 2. Go to KL CM frame
         TVector3
             PiMomKaonCM[2],           // Pion momenta in the KL CM frame
             PiMomKaonLAB[2],          // Pion momenta in the LAB frame
+            z_axis = {0.0, 0.0, 1.0}, // z-axis for rotation,
             x_axis = {1.0, 0.0, 0.0}, // x-axis for rotation
-            kaonMomLAB = {baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[4],
-                          baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[4],
-                          baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[4]},
-            cross = kaonMomLAB.Cross(x_axis),
+            kaonMomLAB = {-baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[3],
+                          -baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[3],
+                          -baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[3]},
+            Pi1MomLAB = {trkKL[0]->at(0),
+                         trkKL[0]->at(1),
+                         trkKL[0]->at(2)},
+            Pi2MomLAB = {trkKL[1]->at(0),
+                         trkKL[1]->at(1),
+                         trkKL[1]->at(2)},
+            nVec = Pi1MomLAB.Cross(Pi2MomLAB), // Normal vector to the plane of the two pions
+            cross = nVec.Cross(z_axis),
             trkKLMomVecLAB[2], // Track momenta in the LAB frame
             trkKLMomVecKaonCM[2];
 
@@ -316,48 +298,40 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
             PiKaon4VecKaonCM[2],
             PiKaon4VecLAB[2];
 
-        Double_t rotAngle = kaonMomLAB.Angle(x_axis);
+        Double_t rotAngle = nVec.Angle(z_axis);
 
         kaonMomLAB.Rotate(rotAngle, cross);
 
-        TVector3
-          boost_KaonTwoBody = { -baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[3],
-                                -baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[3],
-                                -baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[3]};
-            // boost_KaonTwoBody = {-baseKin.KchrecKLTwoBody[4] / baseKin.KchrecKLTwoBody[3],
-            //                      0.0,
-            //                      0.0};
+        Double_t rotAngleKaonX = kaonMomLAB.Angle(x_axis);
+
+        kaonMomLAB.Rotate(rotAngleKaonX, z_axis);
 
         for (Int_t j = 0; j < 3; j++)
         {
           // Components of the track momenta in the LAB frame
-          trkKLMomVecLAB[0][j] = baseKin.trkKL[0][j];
-          trkKLMomVecLAB[1][j] = baseKin.trkKL[1][j];
+          trkKLMomVecLAB[0][j] = trkKL[0]->at(j);
+          trkKLMomVecLAB[1][j] = trkKL[1]->at(j);
         }
 
-        // std::cout << "Momenta before rotation: " << std::endl;
-        // trkKLMomVecLAB[0].Print();
-        // trkKLMomVecLAB[1].Print();
+        trkKLMomVecLAB[0].Rotate(rotAngle, cross);
+        trkKLMomVecLAB[0].Rotate(rotAngleKaonX, z_axis);
 
-        // trkKLMomVecLAB[0].Rotate(rotAngle, cross);
-        // trkKLMomVecLAB[1].Rotate(rotAngle, cross);
+        trkKLMomVecLAB[1].Rotate(rotAngle, cross);
+        trkKLMomVecLAB[1].Rotate(rotAngleKaonX, z_axis);
 
-        // std::cout << "Momenta after rotation: " << std::endl;
-        // trkKLMomVecLAB[0].Print();
-        // trkKLMomVecLAB[1].Print();
 
         trkKL4VecLAB[0].SetPxPyPzE(trkKLMomVecLAB[0][0],
                                    trkKLMomVecLAB[0][1],
                                    trkKLMomVecLAB[0][2],
-                                   baseKin.trkKL[0][3]);
+                                   trkKL[0]->at(3));
 
         trkKL4VecLAB[1].SetPxPyPzE(trkKLMomVecLAB[1][0],
                                    trkKLMomVecLAB[1][1],
                                    trkKLMomVecLAB[1][2],
-                                   baseKin.trkKL[1][3]);
+                                   trkKL[1]->at(3));
 
-        Obj.lorentz_transf(boost_KaonTwoBody, trkKL4VecLAB[0], trkKL4VecKaonCM[0]);
-        Obj.lorentz_transf(boost_KaonTwoBody, trkKL4VecLAB[1], trkKL4VecKaonCM[1]);
+        Obj.lorentz_transf(kaonMomLAB, trkKL4VecLAB[0], trkKL4VecKaonCM[0]);
+        Obj.lorentz_transf(kaonMomLAB, trkKL4VecLAB[1], trkKL4VecKaonCM[1]);
 
         trkKLMomVecKaonCM[0].SetXYZ(trkKL4VecKaonCM[0][0],
                                     trkKL4VecKaonCM[0][1],
@@ -366,9 +340,9 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
                                     trkKL4VecKaonCM[1][1],
                                     trkKL4VecKaonCM[1][2]);
 
-        Double_t  
-                  PiMomMagKaonCM1 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5],  mPiCh, mPiCh),
-                  PiMomMagKaonCM2 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], mPiCh, mPiCh);
+        Double_t
+            PiMomMagKaonCM1 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], mPiCh, mPiCh),
+            PiMomMagKaonCM2 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], mPiCh, mPiCh);
 
         Double_t angle1 = trkKLMomVecKaonCM[0].Phi(),
                  angle2 = trkKLMomVecKaonCM[1].Phi(),
@@ -376,31 +350,31 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
                  theta2 = trkKLMomVecKaonCM[1].Theta();
 
         gamma = (M_PI_2 - 0.5 * abs(angle1) - 0.5 * abs(angle2));
-        gamma_theta = (M_PI_2 - 0.5 * theta1 - 0.5 * theta2);
+        gamma_theta = 0.0;//(M_PI_2 - 0.5 * theta1 - 0.5 * theta2);
 
         if (angle1 < 0.0)
-          PiMomKaonCM[0].SetXYZ(  PiMomMagKaonCM1 * sin(theta1 + gamma_theta) * cos(angle1 - gamma),
-                                  PiMomMagKaonCM1 * sin(theta1 + gamma_theta) * sin(angle1 - gamma),
-                                  PiMomMagKaonCM1 * cos(theta1 + gamma_theta) );
+          PiMomKaonCM[0].SetXYZ(PiMomMagKaonCM1 * sin(theta1) * cos(angle1 - gamma),
+                                PiMomMagKaonCM1 * sin(theta1) * sin(angle1 - gamma),
+                                PiMomMagKaonCM1 * cos(theta1));
         else
-          PiMomKaonCM[0].SetXYZ(  PiMomMagKaonCM1 * sin(theta1 + gamma_theta) * cos(angle1 + gamma),
-                                  PiMomMagKaonCM1 * sin(theta1 + gamma_theta) * sin(angle1 + gamma),
-                                  PiMomMagKaonCM1 * cos(theta1 + gamma_theta) );
+          PiMomKaonCM[0].SetXYZ(PiMomMagKaonCM1 * sin(theta1) * cos(angle1 + gamma),
+                                PiMomMagKaonCM1 * sin(theta1) * sin(angle1 + gamma),
+                                PiMomMagKaonCM1 * cos(theta1));
         if (angle2 < 0.0)
-          PiMomKaonCM[1].SetXYZ(  PiMomMagKaonCM1 * sin(theta2 + gamma_theta) * cos(angle2 - gamma),
-                                  PiMomMagKaonCM1 * sin(theta2 + gamma_theta) * sin(angle2 - gamma),
-                                  PiMomMagKaonCM1 * cos(theta2 + gamma_theta) );
+          PiMomKaonCM[1].SetXYZ(PiMomMagKaonCM1 * sin(theta2) * cos(angle2 - gamma),
+                                PiMomMagKaonCM1 * sin(theta2) * sin(angle2 - gamma),
+                                PiMomMagKaonCM1 * cos(theta2));
         else
-          PiMomKaonCM[1].SetXYZ(  PiMomMagKaonCM1 * sin(theta2 + gamma_theta) * cos(angle2 + gamma),
-                                  PiMomMagKaonCM1 * sin(theta2 + gamma_theta) * sin(angle2 + gamma),
-                                  PiMomMagKaonCM1 * cos(theta2 + gamma_theta) );
+          PiMomKaonCM[1].SetXYZ(PiMomMagKaonCM1 * sin(theta2) * cos(angle2 + gamma),
+                                PiMomMagKaonCM1 * sin(theta2) * sin(angle2 + gamma),
+                                PiMomMagKaonCM1 * cos(theta2));
 
         PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomKaonCM[0][0], 2) + pow(PiMomKaonCM[0][1], 2) + pow(PiMomKaonCM[0][2], 2) + pow(mPiCh, 2)));
         PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomKaonCM[1][0], 2) + pow(PiMomKaonCM[1][1], 2) + pow(PiMomKaonCM[1][2], 2) + pow(mPiCh, 2)));
 
-        boost_KaonTwoBody = -boost_KaonTwoBody; // Invert the boost direction for the pions
-        Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
-        Obj.lorentz_transf(boost_KaonTwoBody, PiKaon4VecKaonCM[1], PiKaon4VecLAB[1]);
+        kaonMomLAB = -kaonMomLAB; // Invert the boost direction for the pions
+        Obj.lorentz_transf(kaonMomLAB, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
+        Obj.lorentz_transf(kaonMomLAB, PiKaon4VecKaonCM[1], PiKaon4VecLAB[1]);
 
         PiMomKaonLAB[0].SetXYZ(PiKaon4VecLAB[0][0],
                                PiKaon4VecLAB[0][1],
@@ -409,14 +383,19 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
                                PiKaon4VecLAB[1][1],
                                PiKaon4VecLAB[1][2]);
 
-        // PiMomKaonLAB[0].Rotate(-rotAngle, cross);
-        // PiMomKaonLAB[1].Rotate(-rotAngle, cross);
+        // Rotate the pion momenta to align with the kaon momentum direction
+
+        PiMomKaonLAB[0].Rotate(-rotAngleKaonX, z_axis);
+        PiMomKaonLAB[0].Rotate(-rotAngle, cross);
+
+        PiMomKaonLAB[1].Rotate(-rotAngleKaonX, z_axis);
+        PiMomKaonLAB[1].Rotate(-rotAngle, cross);
 
         for (Int_t j = 0; j < 3; j++)
         {
           // Components of the track momenta in the LAB frame
-          trkKLMomVecLAB[0][j] = baseKin.trkKL[0][j];
-          trkKLMomVecLAB[1][j] = baseKin.trkKL[1][j];
+          trkKLMomVecLAB[0][j] = trkKL[0]->at(j);
+          trkKLMomVecLAB[1][j] = trkKL[1]->at(j);
         }
 
         PiKaon4VecLAB[0].SetPxPyPzE(PiMomKaonLAB[0][0],
@@ -431,11 +410,11 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
         trkKL4VecLAB[0].SetPxPyPzE(trkKLMomVecLAB[0][0],
                                    trkKLMomVecLAB[0][1],
                                    trkKLMomVecLAB[0][2],
-                                   baseKin.trkKL[0][3]);
+                                   trkKL[0]->at(3));
         trkKL4VecLAB[1].SetPxPyPzE(trkKLMomVecLAB[1][0],
                                    trkKLMomVecLAB[1][1],
                                    trkKLMomVecLAB[1][2],
-                                   baseKin.trkKL[1][3]);
+                                   trkKL[1]->at(3));
 
         for (Int_t k = 0; k < 4; k++)
         {
@@ -443,57 +422,68 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
           trkKLTwoBody1[k] = PiKaon4VecLAB[0][k];
           trkKLTwoBody2[k] = PiKaon4VecLAB[1][k];
 
-          if (mcflag_int == 0)
+          if (mcflag == 1 && mctruth == 7)
           {
-            histMomPiTwoBody[0][k]->Fill(trkKLTwoBody1[k]);
-            histMomPiTwoBody[1][k]->Fill(trkKLTwoBody2[k]);
-            histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k]);
-            histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k]);
+            if(trkKLTwoBody1[k] - trkKLmc[0]->at(k) < trkKLTwoBody2[k] - trkKLmc[0]->at(k))
+            {
+              histMomPiTwoBody[0][k]->Fill(trkKLTwoBody1[k] - trkKLmc[0]->at(k));
+              histMomPiTwoBody[1][k]->Fill(trkKLTwoBody2[k] - trkKLmc[1]->at(k));
+            }
+            else
+            {
+              histMomPiTwoBody[0][k]->Fill(trkKLTwoBody1[k] - trkKLmc[1]->at(k));
+              histMomPiTwoBody[1][k]->Fill(trkKLTwoBody2[k] - trkKLmc[0]->at(k));
+            }
 
-            histKLTwoBody[k]->Fill(baseKin.KchrecKLTwoBody[k]);
-            histKL[k]->Fill(baseKin.KchrecKL[k]);
+            if(trkKL4VecLAB[0][k] - trkKLmc[0]->at(k) < trkKL4VecLAB[1][k] - trkKLmc[0]->at(k))
+            {
+              histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k] - trkKLmc[0]->at(k));
+              histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[1]->at(k));
+            }
+            else
+            {
+              histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k] - trkKLmc[1]->at(k));
+              histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[0]->at(k));
+            }
+
+            histKLTwoBody[k]->Fill(baseKin.KchrecKLTwoBody[k] - Knemc->at(k));
+            histKL[k]->Fill(KchrecKL->at(k) - Knemc->at(k));
           }
         }
       }
 
       // Int_t zmienne
       std::map<std::string, Int_t> intVars = {
-          {"nrun", 0},
-          {"nev", baseKin.nevent},
-          {"mcflag", mcflag_int},
-          {"mctruth", mctruth_int},
-          {"errflag", baseKin.errFlag},
-          {"errflagks", baseKin.errFlagKS},
-          {"errflagkl", baseKin.errFlagKL},
-          {"errflagclosest", baseKin.errFlagClosest}};
+          {"nrun", baseKin.nrun},
+          {"nev", baseKin.nev},
+          {"mcflag", mcflag},
+          {"mctruth", mctruth}};
 
       std::map<std::string, Float_t> floatVars = {
-          {"gamma", gamma}};
+          {"gamma", gamma},
+          {"gamma_theta", gamma_theta}};
 
       // Tablice
-      std::map<std::string, std::vector<Int_t>> intArrays = {
-          {"vtaken", baseKin.vtaken},
-          {"vtakenKS", baseKin.vtakenKS},
-          {"vtakenKL", baseKin.vtakenKL},
-          {"vtakenClosest", baseKin.vtakenClosest}};
+      std::map<std::string, std::vector<Int_t>> intArrays = {};
 
       std::map<std::string, std::vector<Float_t>> floatArrays = {
-          {"Kchrec", baseKin.Kchrecnew},
-          {"KchrecKS", baseKin.KchrecKS},
-          {"KchrecKL", baseKin.KchrecKL},
-          {"KchrecClosest", baseKin.KchrecClosest},
+          {"Kchmc", *Kchmc},
+          {"Knemc", *Knemc},
+          {"KchrecKS", *KchrecKS},
+          {"KchrecKL", *KchrecKL},
+          {"KchboostKS", *KchboostKS},
+          {"KchboostKL", *KchboostKL},
           {"KchrecKLTwoBody", baseKin.KchrecKLTwoBody},
-          {"trk1", baseKin.trknew[0]},
-          {"trk2", baseKin.trknew[1]},
-          {"trk1KS", baseKin.trkKS[0]},
-          {"trk2KS", baseKin.trkKS[1]},
-          {"trk1KL", baseKin.trkKL[0]},
-          {"trk2KL", baseKin.trkKL[1]},
-          {"trk1Closest", baseKin.trkClosest[0]},
-          {"trk2Closest", baseKin.trkClosest[1]},
+          {"trk1KS", *trkKS[0]},
+          {"trk2KS", *trkKS[1]},
+          {"trk1KL", *trkKL[0]},
+          {"trk2KL", *trkKL[1]},
           {"trk1TwoBody", trkKLTwoBody1},
           {"trk2TwoBody", trkKLTwoBody2},
-      };
+          {"trk1KSmc", *trkKSmc[0]},
+          {"trk2KSmc", *trkKSmc[1]},
+          {"trk1KLmc", *trkKLmc[0]},
+          {"trk2KLmc", *trkKLmc[1]}};
 
       writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }

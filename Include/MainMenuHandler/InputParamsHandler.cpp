@@ -81,8 +81,8 @@ InputParamsHandler::Params InputParamsHandler::getParams(
     // Zapis do properties
     properties["variables"]["rootFiles"]["Data"]["firstFile"] = params.firstFile;
     properties["variables"]["rootFiles"]["Data"]["lastFile"] = params.lastFile;
-    properties["variables"]["rootFiles"]["MC"]["firstFile"] = params.firstFile;
-    properties["variables"]["rootFiles"]["MC"]["lastFile"] = params.lastFile;
+    // properties["variables"]["rootFiles"]["MC"]["firstFile"] = params.firstFile;
+    // properties["variables"]["rootFiles"]["MC"]["lastFile"] = params.lastFile;
 
     std::ofstream outfile(propName);
     if (outfile.is_open()) {
@@ -106,7 +106,7 @@ InputParamsHandler::Params InputParamsHandler::getParams(
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             continue;
         }
-        if (params.dataTypeOpt < Controls::DataType::SIGNAL_TOT || params.dataTypeOpt > Controls::DataType::SIGNAL_MAX) {
+        if (params.dataTypeOpt < Controls::DataType::SIGNAL_TOT || params.dataTypeOpt > Controls::DataType::DATA_ONLY) {
             auto err = ErrorHandling::ErrorCodes::MENU_RANGE;
             logger.getErrLog(err);
             continue;

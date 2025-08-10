@@ -17,8 +17,8 @@ public:
         KLOE::pm00& eventAnalysis,
         Controls::DataType dataTypeOpt,
         ErrorHandling::ErrorLogs& logger,
-        ErrorHandling::InfoCodes& infoCode,
-        ConfigWatcher& cfgWatcher
+        ErrorHandling::InfoCodes& infoCode
+        // ConfigWatcher& cfgWatcher
     );
 };
 

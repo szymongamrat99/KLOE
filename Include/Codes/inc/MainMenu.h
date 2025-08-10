@@ -224,8 +224,10 @@ namespace Controls
     SIG_BCG = 2,
     MC_DATA = 3,
     SIGNAL_MAX = 4,
+    MC_ONLY = 5,
+    DATA_ONLY = 6,
 
-    OPT_TOT = 5
+    OPT_TOT = 7
   };
 
   enum class FileType
@@ -290,6 +292,8 @@ namespace Controls
         MenuOpt[int(DataType::SIG_BCG)] = Form("%d. Signal + background MC.", int(DataType::SIG_BCG));
         MenuOpt[int(DataType::MC_DATA)] = Form("%d. MC + Data.", int(DataType::MC_DATA));
         MenuOpt[int(DataType::SIGNAL_MAX)] = Form("%d. MC - without cuts and errors.", int(DataType::SIGNAL_MAX));
+        MenuOpt[int(DataType::MC_ONLY)] = Form("%d. MC only after initial analysis.", int(DataType::MC_ONLY));
+        MenuOpt[int(DataType::DATA_ONLY)] = Form("%d. Data only after initial analysis.", int(DataType::DATA_ONLY));
 
         break;
       }
@@ -414,6 +418,8 @@ namespace Controls
         MenuOpt[int(DataType::SIG_BCG)] = Form("%d. Signal + background MC.", int(DataType::SIG_BCG));
         MenuOpt[int(DataType::MC_DATA)] = Form("%d. MC + Data.", int(DataType::MC_DATA));
         MenuOpt[int(DataType::SIGNAL_MAX)] = Form("%d. MC - without cuts and errors.", int(DataType::SIGNAL_MAX));
+        MenuOpt[int(DataType::MC_ONLY)] = Form("%d. MC only after initial analysis.", int(DataType::MC_ONLY));
+        MenuOpt[int(DataType::DATA_ONLY)] = Form("%d. Data only after initial analysis.", int(DataType::DATA_ONLY));
 
         break;
       }

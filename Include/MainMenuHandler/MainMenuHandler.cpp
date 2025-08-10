@@ -12,9 +12,11 @@ void MainMenuHandler::runMenuLoop(
     KLOE::pm00& eventAnalysis,
     Controls::DataType dataTypeOpt,
     ErrorHandling::ErrorLogs& logger,
-    ErrorHandling::InfoCodes& infoCode,
-    ConfigWatcher& cfgWatcher
+    ErrorHandling::InfoCodes& infoCode
+    // ConfigWatcher& cfgWatcher
 ) {
+    ConfigWatcher cfgWatcher(propName);
+
     bool dataTypeErr = false, menuRangeErr = false;
     do
     {

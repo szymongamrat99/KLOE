@@ -31,11 +31,11 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 
 	chainDoublePiPi = new TChain("h1");
 
-	chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-06-26/*.root");
+	chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-11/*.root");
 
 	Float_t gamma;
 	Char_t vtxTwoTracks;
-	Int_t mcflag_int, errflagks, errflagkl;
+	Int_t mcflag_int;
 
 	std::vector<Float_t>
 			*trk1KL = &baseKin.trkKL[0],
@@ -50,9 +50,10 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	baseKin.trkKLTwoBody[0].resize(4);
 	baseKin.trkKLTwoBody[1].resize(4);
 
+	baseKin.KchrecKL.resize(9);
+	baseKin.KchrecKLTwoBody.resize(9);
+
 	chainDoublePiPi->SetBranchAddress("mcflag", &mcflag_int);
-	chainDoublePiPi->SetBranchAddress("errflagks", &errflagks);
-	chainDoublePiPi->SetBranchAddress("errflagkl", &errflagkl);
 
 	chainDoublePiPi->SetBranchAddress("gamma", &gamma);
 
@@ -100,7 +101,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 			};
 
 	TCanvas *canvaDiff = new TCanvas("canvaDiff", "canvaDiff", 790, 790);
-	TH1 *histDiff = new TH1D("histDiff", "", 100, -2.0, 2.0);
+	TH1 *histDiff = new TH1D("histDiff", "", 100, -0.1, 0.1);
 
 	std::vector<TCanvas *> kaonCanva;
 	TString kaonCanva_name = "";
@@ -137,9 +138,11 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	{
 		chainDoublePiPi->GetEntry(i);
 
+
+
 		histDiff->Fill(gamma);
 
-		if (abs(gamma) < 0.1 && abs(KchrecKL->at(5) - mK0) < 2.0)
+		if (1)
 		{ 
 			KaonHist[0][0]->Fill(KchrecKL->at(0));
 			KaonHist[0][1]->Fill(KchrecKL->at(1));
@@ -147,16 +150,19 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 			KaonHist[0][3]->Fill(KchrecKL->at(3));
 			KaonHist[0][4]->Fill(KchrecKL->at(5));
 
-			// KaonHist[1][0]->Fill(KchrecKLTwoBody->at(0));
-			// KaonHist[1][1]->Fill(KchrecKLTwoBody->at(1));
-			// KaonHist[1][2]->Fill(KchrecKLTwoBody->at(2));
-			// KaonHist[1][3]->Fill(KchrecKLTwoBody->at(3));
-			// KaonHist[1][4]->Fill(KchrecKLTwoBody->at(5));
+			KaonHist[1][0]->Fill(trk1KLTwoBody->at(0) + trk2KLTwoBody->at(0));
+			KaonHist[1][1]->Fill(trk1KLTwoBody->at(1) + trk2KLTwoBody->at(1));
+			KaonHist[1][2]->Fill(trk1KLTwoBody->at(2) + trk2KLTwoBody->at(2));
+			KaonHist[1][3]->Fill(trk1KLTwoBody->at(3) + trk2KLTwoBody->at(3));
+			KaonHist[1][4]->Fill(sqrt(pow(trk1KLTwoBody->at(3) + trk2KLTwoBody->at(3),2) - 
+				pow(trk1KLTwoBody->at(0) + trk2KLTwoBody->at(0), 2) - 
+				pow(trk1KLTwoBody->at(1) + trk2KLTwoBody->at(1), 2) - 
+				pow(trk1KLTwoBody->at(2) + trk2KLTwoBody->at(2), 2)));
 
 			events[0]++;
 		}
 
-		if (abs(gamma) < 0.1 && abs(KchrecKL->at(5) - mK0) < 2.0)
+		if (1)
 		{
 			events[1]++;
 			for (Int_t j = 0; j < 4; j++)
@@ -236,7 +242,12 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 			TString name_canva = Form("%s_%d.png", "Kaon", i);
 			kaonCanva[i]->cd();
 
+			TLegend *legendPi = new TLegend(0.2, 0.7, 0.5, 0.9);
+			legendPi->AddEntry(KaonHist[0][i], "Reconstructed charged K^{2}", "l");
+			legendPi->AddEntry(KaonHist[1][i], "Corrected K^{2} based on 2-body decay", "l");
+
 			KaonHist[0][i]->SetLineColor(kBlue);
+			KaonHist[1][i]->SetLineColor(kRed);
 
 			KaonHist[0][i]->GetXaxis()->SetTitle(x_names_kaon[i]);
 			KaonHist[0][i]->GetYaxis()->SetTitle("Counts");
@@ -248,6 +259,9 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 			KaonHist[0][i]->GetYaxis()->SetRangeUser(0.0, 1.2 * maxY);
 
 			KaonHist[0][i]->Draw("HIST");
+			KaonHist[1][i]->Draw("SAME");
+
+			legendPi->Draw();
 
 			kaonCanva[i]->Print(name_canva);
 		}
@@ -255,7 +269,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	canvaDiff->cd();
 
 	histDiff->SetLineColor(kBlue);
-	histDiff->GetXaxis()->SetTitle("Difference");
+	histDiff->GetXaxis()->SetTitle("Correcting #gamma angle [^{#circ}]");
 	histDiff->GetYaxis()->SetTitle("Counts");
 
 	Float_t maxY = histDiff->GetMaximum();

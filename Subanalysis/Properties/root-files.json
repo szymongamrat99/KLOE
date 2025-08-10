@@ -1,8 +1,8 @@
 {
   "MC": {
     "path": [
-      "/data/ssd/gamrat/PROD2ROOT/MC/MK0/all_phys/",
-      "/data/ssd/gamrat/PROD2ROOT/MC/MK0/all_phys2/",
+      "/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/",
+      "/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys2/",
       [
       "/data/ssd/gamrat/PROD2ROOT/MC/MK0/all_phys3/",
       "/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys3/"

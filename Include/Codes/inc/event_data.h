@@ -24,11 +24,6 @@ struct BhabhaIP
   TTreeReaderValue<Float_t> y;
   TTreeReaderValue<Float_t> z;
 
-  // TVector3 getMomentum() const
-  // {
-  //   return TVector3(*px, *py, *pz);
-  // };
-
   bool isValid() const
   {
     return px.IsValid() && py.IsValid() && pz.IsValid();
