@@ -31,7 +31,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 
 	chainDoublePiPi = new TChain("h1");
 
-	chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-11/*.root");
+	chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-18/*.root");
 
 	Float_t gamma;
 	Char_t vtxTwoTracks;

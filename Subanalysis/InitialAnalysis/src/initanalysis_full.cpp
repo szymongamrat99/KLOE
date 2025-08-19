@@ -19,6 +19,8 @@
 #include <charged_mom.h>
 #include <StatisticalCutter.h>
 
+#include "../../Neutrec/inc/trilateration.hpp"
+
 #include "../inc/initialanalysis.hpp"
 #include "initialanalysis.hpp"
 
@@ -49,7 +51,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		return 1;
 
 	std::ifstream rootFiles(rootfilesName);
-  json filePaths = json::parse(rootFiles);
+	json filePaths = json::parse(rootFiles);
 
 	std::vector<std::string> baseFilenames = {filePaths["Data"]["filenameBase"],
 																						filePaths["MC"]["filenameBase"][0],
@@ -94,23 +96,73 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			EmissKL = 0,
 			pKTwoBody = 0;
 
+	// Cuts application
+	///////////////////////////////////////////////////////////////////
 	cutter.RegisterVariableGetter("InvMassKch", [&]()
 																{ return baseKin.KchrecKS[5]; });
 	cutter.RegisterCentralValueGetter("InvMassKch", [&]()
 																		{ return mK0; });
+	///////////////////////////////////////////////////////////////////
 	cutter.RegisterVariableGetter("InvMassKne", [&]()
 																{ return baseKin.KchrecKL[5]; });
 	cutter.RegisterCentralValueGetter("InvMassKne", [&]()
 																		{ return mK0; });
-
+	///////////////////////////////////////////////////////////////////
 	cutter.RegisterVariableGetter("TwoBodyMomKS", [&]()
 																{ return KchrecKSMom; });
 	cutter.RegisterCentralValueGetter("TwoBodyMomKS", [&]()
 																		{ return pKTwoBody; });
-	cutter.RegisterVariableGetter("TwoBodyMomKL", [&]()
-																{ return KchrecKLMom; });
-	cutter.RegisterCentralValueGetter("TwoBodyMomKL", [&]()
-																		{ return pKTwoBody; });
+	///////////////////////////////////////////////////////////////////
+	cutter.RegisterVariableGetter("MissTotKS", [&]()
+																{ return sqrt(pow(PmissKS, 2) + pow(EmissKS, 2)); });
+	///////////////////////////////////////////////////////////////////
+	cutter.RegisterVariableGetter("MissHigherKS", [&]()
+																{ return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+	cutter.RegisterVariableGetter("MissLowerKS", [&]()
+																{ return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+	///////////////////////////////////////////////////////////////////
+	cutter.RegisterVariableGetter("MissTotKL", [&]()
+																{ return sqrt(pow(PmissKL, 2) + pow(EmissKL, 2)); });
+	///////////////////////////////////////////////////////////////////
+	cutter.RegisterVariableGetter("MissHigherKL", [&]()
+																{ return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+	cutter.RegisterVariableGetter("MissLowerKL", [&]()
+																{ return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+
+	// Initialization of momentum smearing
+	// -------------------------------------------------------------
+	const Int_t numberOfMomenta = 2;
+
+	TVectorT<Double_t>
+			momVecMC(numberOfMomenta * 3),
+			momVecSmeared(numberOfMomenta * 3);
+
+	std::vector<double> elems = properties["momSmearing"]["covarianceMatrix"]["fElements"].get<std::vector<Double_t>>();
+
+	Int_t nRows = properties["momSmearing"]["covarianceMatrix"]["fNrows"],
+				nCols = properties["momSmearing"]["covarianceMatrix"]["fNcols"];
+
+	TMatrixT<Double_t>
+			covMatrix(nRows, nCols, elems.data());
+
+	KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
+	KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj;
+	// -------------------------------------------------------------
+
+	Bool_t
+			good_clus = (Bool_t)properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
+
+	const Short_t
+			loopcount = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+			jmin = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+			jmax = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
+			M = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+			N_const = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["fixedVars"],
+			N_free = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["freeVars"],
+			range = Int_t(jmax - jmin) + 1;
+
+	const Double_t
+			chiSqrStep = (Double_t)properties["variables"]["KinFit"]["Trilateration"]["chiSqrStep"];
 
 	while (reader.Next())
 	{
@@ -131,12 +183,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		baseKin.KchrecKS.clear();
 		baseKin.KchrecKL.clear();
 		baseKin.KchrecClosest.clear();
+		baseKin.Kchrecsmeared.clear();
 
 		baseKin.KchboostKS.clear();
 		baseKin.KchboostKL.clear();
+		baseKin.Kchboostsmeared.clear();
+		baseKin.Kchboostnew.clear();
 
 		baseKin.ipKS.clear();
 		baseKin.ipKL.clear();
+		baseKin.ipnew.clear();
 
 		for (Int_t i = 0; i < 2; i++)
 		{
@@ -146,6 +202,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			baseKin.trkClosest[i].clear();
 			baseKin.trkKLmc[i].clear();
 			baseKin.trkKSmc[i].clear();
+			baseKin.trksmeared[i].clear();
 		}
 
 		baseKin.vtaken.resize(3);
@@ -157,12 +214,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		baseKin.KchrecKS.resize(9);
 		baseKin.KchrecKL.resize(9);
 		baseKin.KchrecClosest.resize(9);
+		baseKin.Kchrecsmeared.resize(9);
 
 		baseKin.KchboostKS.resize(9);
 		baseKin.KchboostKL.resize(9);
+		baseKin.Kchboostsmeared.resize(9);
+		baseKin.Kchboostnew.resize(9);
 
 		baseKin.ipKS.resize(3);
 		baseKin.ipKL.resize(3);
+		baseKin.ipnew.resize(3);
 
 		for (Int_t i = 0; i < 2; i++)
 		{
@@ -170,6 +231,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			baseKin.trkKS[i].resize(4);
 			baseKin.trkKL[i].resize(4);
 			baseKin.trkClosest[i].resize(4);
+			baseKin.trksmeared[i].resize(4);
 		}
 
 		std::vector<std::vector<Float_t>>
@@ -215,6 +277,45 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 															 pgammaMC,
 															 baseKin.goodClusIndex,
 															 clusterMC);
+
+			Float_t
+					knemcVel = sqrt(pow(baseKin.Knemc[0], 2) + pow(baseKin.Knemc[1], 2) + pow(baseKin.Knemc[2], 2)) / baseKin.Knemc[3],
+					knemcPath = sqrt(pow(baseKin.Knemc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Knemc[7] - baseKin.ipmc[1], 2) + pow(baseKin.Knemc[8] - baseKin.ipmc[2], 2)),
+					kchmcVel = sqrt(pow(baseKin.Kchmc[0], 2) + pow(baseKin.Kchmc[1], 2) + pow(baseKin.Kchmc[2], 2)) / baseKin.Kchmc[3],
+					kchmcPath = sqrt(pow(baseKin.Kchmc[6] - baseKin.ipmc[0], 2) + pow(baseKin.Kchmc[7] - baseKin.ipmc[1], 2) + pow(baseKin.Kchmc[8] - baseKin.ipmc[2], 2));
+
+			baseKin.kaonNeTimeLABMC = knemcPath / (knemcVel);
+			baseKin.kaonChTimeLABMC = kchmcPath / (kchmcVel);
+
+			// Go to Kaon CM frame to get the proper time
+			TVector3
+					kaonNeMomLAB = {-baseKin.Knemc[0] / baseKin.Knemc[3],
+													-baseKin.Knemc[1] / baseKin.Knemc[3],
+													-baseKin.Knemc[2] / baseKin.Knemc[3]},
+					kaonChMomLAB = {-baseKin.Kchmc[0] / baseKin.Kchmc[3],
+													-baseKin.Kchmc[1] / baseKin.Kchmc[3],
+													-baseKin.Kchmc[2] / baseKin.Kchmc[3]};
+
+			TLorentzVector
+					KaonNe4VecLAB = {baseKin.Knemc[6] - baseKin.ipmc[0], // cm
+													 baseKin.Knemc[7] - baseKin.ipmc[1], // cm
+													 baseKin.Knemc[8] - baseKin.ipmc[2], // cm
+													 baseKin.kaonNeTimeLABMC},					 // cm
+					KaonNe4VecKaonCM = {0., 0., 0., 0.},
+					KaonCh4VecLAB = {baseKin.Kchmc[6] - baseKin.ipmc[0], // cm
+													 baseKin.Kchmc[7] - baseKin.ipmc[1], // cm
+													 baseKin.Kchmc[8] - baseKin.ipmc[2], // cm
+													 baseKin.kaonChTimeLABMC},					 // cm
+					KaonCh4VecKaonCM = {0., 0., 0., 0.};
+
+			Obj.lorentz_transf(kaonNeMomLAB, KaonNe4VecLAB, KaonNe4VecKaonCM);
+			Obj.lorentz_transf(kaonChMomLAB, KaonCh4VecLAB, KaonCh4VecKaonCM);
+
+			baseKin.kaonNeTimeCMMC = KaonNe4VecKaonCM.T() / (cVel * tau_S_nonCPT);
+			baseKin.kaonNeTimeLABMC = baseKin.kaonNeTimeLABMC / (cVel * tau_S_nonCPT);
+
+			baseKin.kaonChTimeCMMC = KaonCh4VecKaonCM.T() / (cVel * tau_S_nonCPT);
+			baseKin.kaonChTimeLABMC = baseKin.kaonChTimeLABMC / (cVel * tau_S_nonCPT);
 
 			if (mctruth == 7)
 			{
@@ -264,7 +365,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			std::map<KLOE::HypothesisCode, ErrorHandling::ErrorCodes> hypoMap;
 
 			// KMASS HYPOTHESIS - FOR SIGNAL
-			hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+			hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
 
 			// VTX CLOSEST TO BHABHA IP - FOR OMEGAPI
 			hypoMap[KLOE::HypothesisCode::OMEGAPI] = eventAnalysis->findKClosestRec(baseKin.KchrecClosest, baseKin.trkClosest[0], baseKin.trkClosest[1], baseKin.vtakenClosest, logger);
@@ -413,6 +514,136 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 							}
 					}
 				}
+				else if (hypoCode == KLOE::HypothesisCode::SIGNAL)
+				{
+					// -----------------------------------------------------------------------
+					// Boost of the charged part of the decay
+					Float_t
+							phiMom[4] = {*bhabhaProps.px, *bhabhaProps.py, *bhabhaProps.pz, *bhabhaProps.energy};
+
+					BoostMethodObj.KaonMomFromBoost(baseKin.Kchrecnew, phiMom, baseKin.Kchboostnew);
+
+					Float_t X_line[3] = {baseKin.Kchboostnew[6],
+															 baseKin.Kchboostnew[7],
+															 baseKin.Kchboostnew[8]}, // Vertex laying on the line
+							p[3] = {baseKin.Kchboostnew[0],
+											baseKin.Kchboostnew[1],
+											baseKin.Kchboostnew[2]}, // Direction of the line
+							xB[3] = {baseKin.bhabha_vtx[0],
+											 baseKin.bhabha_vtx[1],
+											 baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
+							plane_perp[3] = {0.,
+															 baseKin.phi_mom[1],
+															 0.}; // Vector perpendicular to the plane from Bhabha momentum
+
+					// Corrected IP event by event
+					eventAnalysis->IPBoostCorr(X_line, p, xB, plane_perp, baseKin.ip);
+
+					baseKin.ip[0] = baseKin.bhabha_vtx[0];
+					baseKin.ip[1] = baseKin.bhabha_vtx[1];
+					// z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
+					if (abs(baseKin.ip[2] - baseKin.bhabha_vtx[2]) > 2.0)
+						baseKin.ip[2] = baseKin.bhabha_vtx[2];
+
+					// Go to Kaon CM frame to get the proper time
+					TVector3
+							kaonMomLAB = {-baseKin.Kchboostnew[0] / baseKin.Kchboostnew[3],
+														-baseKin.Kchboostnew[1] / baseKin.Kchboostnew[3],
+														-baseKin.Kchboostnew[2] / baseKin.Kchboostnew[3]};
+
+					Double_t
+							KaonPathLAB = sqrt(pow(baseKin.Kchboostnew[6] - baseKin.ipnew[0], 2) +
+																 pow(baseKin.Kchboostnew[7] - baseKin.ipnew[1], 2) +
+																 pow(baseKin.Kchboostnew[8] - baseKin.ipnew[2], 2)),
+							KaonVelocityLAB = kaonMomLAB.Mag();
+
+					baseKin.kaonChTimeLAB = KaonPathLAB / KaonVelocityLAB;
+
+					TLorentzVector
+							Kaon4VecLAB = {baseKin.Kchboostnew[6] - baseKin.ipnew[0], // cm
+														 baseKin.Kchboostnew[7] - baseKin.ipnew[1], // cm
+														 baseKin.Kchboostnew[8] - baseKin.ipnew[2], // cm
+														 baseKin.kaonChTimeLAB},										// cm
+							Kaon4VecKaonCM = {0., 0., 0., 0.};
+
+					Obj.lorentz_transf(kaonMomLAB, Kaon4VecLAB, Kaon4VecKaonCM);
+
+					baseKin.kaonChTimeCM = Kaon4VecKaonCM.T() / (cVel * tau_S_nonCPT);
+					baseKin.kaonChTimeLAB = baseKin.kaonChTimeLAB / (cVel * tau_S_nonCPT);
+					// ----------------------------------------------------------------------
+
+					// Application of the cuts
+					// 1. Invariant mass of the charged kaon
+					// 2. Missing energy Qmiss
+
+					cutOrdered.push_back(abs(baseKin.Kchrecnew[5] - mK0) < 50);
+
+					Float_t Emiss = 0., Pmiss = 0., MissMom[3] = {};
+
+					for (Int_t comp = 0; comp < 3; comp++)
+					{
+						MissMom[comp] = baseKin.Kchboostnew[comp] - baseKin.Kchrecnew[comp];
+					}
+
+					Pmiss = sqrt(pow(MissMom[0], 2) + pow(MissMom[1], 2) + pow(MissMom[2], 2));
+					Emiss = baseKin.Kchboostnew[3] - baseKin.Kchrecnew[3];
+
+					baseKin.Qmiss = sqrt(pow(Emiss, 2) + pow(Pmiss, 2));
+
+					cutOrdered.push_back(baseKin.Qmiss < 100);
+
+					ErrorHandling::ErrorCodes codeTri = ErrorHandling::ErrorCodes::CHARGED_KAON_MASS_PRE;
+
+					if (cutOrdered[0] && cutOrdered[1])
+					{
+
+						std::vector<Float_t> cluster[5];
+
+						cluster[0].assign(clusterProps.xcl.begin(), clusterProps.xcl.end());
+						cluster[1].assign(clusterProps.ycl.begin(), clusterProps.ycl.end());
+						cluster[2].assign(clusterProps.zcl.begin(), clusterProps.zcl.end());
+						cluster[3].assign(clusterProps.tcl.begin(), clusterProps.tcl.end());
+						cluster[4].assign(clusterProps.enecl.begin(), clusterProps.enecl.end());
+
+						std::vector<Float_t>
+								bhabha_mom_err = {*bhabhaProps.pxerr,
+																	*bhabhaProps.pyerr,
+																	*bhabhaProps.pzerr,
+																	*bhabhaProps.energyerr},
+								bhabha_mom = {*bhabhaProps.px,
+															*bhabhaProps.py,
+															*bhabhaProps.pz,
+															*bhabhaProps.energy},
+								bhabha_vtx = {*bhabhaProps.x,
+															*bhabhaProps.y,
+															*bhabhaProps.z},
+								gamma_mom_final[4];
+
+						gamma_mom_final[0].resize(8);
+						gamma_mom_final[1].resize(8);
+						gamma_mom_final[2].resize(8);
+						gamma_mom_final[3].resize(8);
+
+						codeTri = TrilaterationKinFit(N_free, N_const, M, loopcount, chiSqrStep, jmin, jmax, *clusterProps.nclu, cluster, neuclulist, bhabha_mom, bhabha_mom_err, bhabha_vtx, baseKin.bunchnum, baseKin.ipTriKinFit, baseKin.g4takenTriKinFit, gamma_mom_final, baseKin.KnetriKinFit, baseKin.neuVtxTriKinFit, logger);
+
+						baseKin.gammaMomTriKinFit1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
+						baseKin.gammaMomTriKinFit2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
+						baseKin.gammaMomTriKinFit3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
+						baseKin.gammaMomTriKinFit4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
+
+						if (ErrorHandling::ErrorCodes::NO_ERROR != codeTri)
+							cutOrdered.push_back(true);
+						else
+							cutOrdered.push_back(false);
+						
+					}
+					else
+					{
+						cutOrdered.push_back(false);
+					}
+
+					cutCombined = cutOrdered[0] && cutOrdered[1] && cutOrdered[2];
+				}
 
 				if (cutCombined || passed)
 				{
@@ -433,10 +664,17 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 					baseKin.Bx = *bhabhaProps.x;
 					baseKin.By = *bhabhaProps.y;
 					baseKin.Bz = *bhabhaProps.z;
+					baseKin.Bsx = *bhabhaProps.xerr;
+					baseKin.Bsy = *bhabhaProps.yerr;
+					baseKin.Bsz = *bhabhaProps.zerr;
 					baseKin.Bpx = *bhabhaProps.px;
 					baseKin.Bpy = *bhabhaProps.py;
 					baseKin.Bpz = *bhabhaProps.pz;
+					baseKin.Bpxerr = *bhabhaProps.pxerr;
+					baseKin.Bpyerr = *bhabhaProps.pyerr;
+					baseKin.Bpzerr = *bhabhaProps.pzerr;
 					baseKin.Broots = *bhabhaProps.energy;
+					baseKin.BrootsErr = *bhabhaProps.energyerr;
 					// -------------------------------------------------------------------------------------
 					// Cluster data
 					baseKin.nclu = *clusterProps.nclu;
@@ -512,7 +750,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 							{"nv", baseKin.nv},
 							{"ntv", baseKin.ntv},
 							{"ntmc", baseKin.ntmc},
-							{"nvtxmc", baseKin.nvtxmc}};
+							{"nvtxmc", baseKin.nvtxmc},
+							{"bunchnum", baseKin.bunchnum}};
 
 					// Float_t zmienne
 					std::map<std::string, Float_t> floatVars = {
@@ -523,7 +762,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 							{"Bpx", baseKin.Bpx},
 							{"Bpy", baseKin.Bpy},
 							{"Bpz", baseKin.Bpz},
-							{"Broots", baseKin.Broots}};
+							{"Broots", baseKin.Broots},
+							{"KaonChTimeLAB", baseKin.kaonChTimeLAB},
+							{"KaonChTimeCM", baseKin.kaonChTimeCM},
+							{"KaonNeTimeLAB", baseKin.kaonNeTimeLAB},
+							{"KaonNeTimeCM", baseKin.kaonNeTimeCM},
+							{"KaonNeTimeLABMC", baseKin.kaonNeTimeLABMC},
+							{"KaonNeTimeCMMC", baseKin.kaonNeTimeCMMC},
+							{"KaonChTimeLABMC", baseKin.kaonChTimeLABMC},
+							{"KaonChTimeCMMC", baseKin.kaonChTimeCMMC},
+							{"Qmiss", baseKin.Qmiss}};
 
 					// Tablice
 					std::map<std::string, std::vector<Int_t>> intArrays = {
@@ -535,7 +783,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 							{"mother", baseKin.mother},
 							{"vtakenClosest", baseKin.vtakenClosest},
 							{"vtaken", baseKin.vtaken},
-							{"cutsApplied", baseKin.cuts}};
+							{"cutsApplied", baseKin.cuts},
+							{"g4takenTriKinFit", baseKin.g4takenTriKinFit}};
 
 					std::map<std::string, std::vector<Float_t>> floatArrays = {
 							{"Xcl", baseKin.Xcl},
@@ -559,6 +808,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 							{"trk1Closest", baseKin.trkClosest[0]},
 							{"trk2Closest", baseKin.trkClosest[1]},
 							{"Kchrec", baseKin.Kchrecnew},
+							{"Kchboost", baseKin.Kchboostnew},
+							{"ip", baseKin.ipnew},
 							{"trk1", baseKin.trknew[0]},
 							{"trk2", baseKin.trknew[1]},
 							{"KchrecKS", baseKin.KchrecKS},
@@ -577,9 +828,18 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 							{"trk1KSmc", baseKin.trkKSmc[0]},
 							{"trk2KSmc", baseKin.trkKSmc[1]},
 							{"trk1KLmc", baseKin.trkKLmc[0]},
-							{"trk2KLmc", baseKin.trkKLmc[1]}};
+							{"trk2KLmc", baseKin.trkKLmc[1]},
+							{"KnetriKinFit", baseKin.KnetriKinFit},
+							{"ipTriKinFit", baseKin.ipTriKinFit},
+							{"neuVtxTriKinFit", baseKin.neuVtxTriKinFit},
+							{"gammaMomTriKinFit1", baseKin.gammaMomTriKinFit1},
+							{"gammaMomTriKinFit2", baseKin.gammaMomTriKinFit2},
+							{"gammaMomTriKinFit3", baseKin.gammaMomTriKinFit3},
+							{"gammaMomTriKinFit4", baseKin.gammaMomTriKinFit4}};
 
 					writer.Fill(intVars, floatVars, intArrays, floatArrays);
+
+					neuclulist.clear(); // Clear the list of neutral clusters for the next event
 				}
 				else
 				{
@@ -594,7 +854,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 	}
 
 	// Wyniki
-	for (size_t i = 0; i < 4; ++i)
+	for (size_t i = 0; i < 10; ++i)
 	{
 		std::cout << "Cut " << i << ": Eff=" << cutter.GetEfficiency(i)
 							<< " Purity=" << cutter.GetPurity(i)

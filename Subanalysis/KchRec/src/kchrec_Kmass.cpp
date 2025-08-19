@@ -251,7 +251,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
         for (Int_t j = 0; j < 3; j++)
         {
           // Components
-          baseKin.KchrecKLTwoBody[j] = KchboostKL->at(j);// KLflightDirection[j] * KLmomMag;
+          baseKin.KchrecKLTwoBody[j] = KLflightDirection[j] * KLmomMag;
         }
         // Energy
         baseKin.KchrecKLTwoBody[3] = KchboostKL->at(3);

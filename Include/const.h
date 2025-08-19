@@ -242,6 +242,17 @@ struct Phi
 
 struct BaseKinematics
 {
+    BaseKinematics () : 
+                       ipTriKinFit(3, 0.0),
+                       KnetriKinFit(9, 0.0),
+                       neuVtxTriKinFit(3, 0.0),
+                       gammaMomTriKinFit1(8, 0.0),
+                       gammaMomTriKinFit2(8, 0.0),
+                       gammaMomTriKinFit3(8, 0.0),
+                       gammaMomTriKinFit4(8, 0.0),
+                       g4takenTriKinFit(4, 0)
+    {};
+
     Float_t
         Kchboost[9],
         KchboostKSOld[9],
@@ -277,10 +288,25 @@ struct BaseKinematics
         Bx,
         By,
         Bz,
+        Bsx,
+        Bsy,
+        Bsz,
         Bpx,
         Bpy,
         Bpz,
-        Broots;
+        Bpxerr,
+        Bpyerr,
+        Bpzerr,
+        Broots,
+        BrootsErr,
+        kaonChTimeCM,
+        kaonChTimeLAB,
+        kaonNeTimeLAB,
+        kaonNeTimeCM,
+        kaonNeTimeLABMC,
+        kaonNeTimeCMMC,
+        kaonChTimeLABMC,
+        kaonChTimeCMMC;
 
     UChar_t
         mctruth,
@@ -312,7 +338,8 @@ struct BaseKinematics
         necls,
         eclfilfo,
         eclfilfoword,
-        ntcl;
+        ntcl,
+        bunchnum;
 
     std::vector<Float_t>
         Kchrecnew,
@@ -351,7 +378,19 @@ struct BaseKinematics
         Kchmc,
         trkMC[2],
         trkKSmc[2],
-        trkKLmc[2];
+        trkKLmc[2],
+        Kchrecsmeared,
+        Kchboostsmeared,
+        trksmeared[2],
+        Kchboostnew,
+        ipnew,
+        ipTriKinFit,
+        KnetriKinFit,
+        neuVtxTriKinFit,
+        gammaMomTriKinFit1,
+        gammaMomTriKinFit2,
+        gammaMomTriKinFit3,
+        gammaMomTriKinFit4;
 
     TLorentzVector
         phi4Mom;
@@ -369,7 +408,8 @@ struct BaseKinematics
         mother,
         goodClusIndex,
         errors,
-        cuts;
+        cuts,
+        g4takenTriKinFit;
 
     /**
      * @brief Clear all data members of BaseKinematics (scalars to zero, vectors cleared/resized).

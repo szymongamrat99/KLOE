@@ -11,18 +11,32 @@ struct BhabhaIP
   BhabhaIP(TTreeReader &reader) : px(reader, "BPx"),
                                   py(reader, "BPy"),
                                   pz(reader, "BPz"),
+                                  pxerr(reader, "BWidPx"),
+                                  pyerr(reader, "BWidPy"),
+                                  pzerr(reader, "BWidPz"),
                                   energy(reader, "Broots"),
+                                  energyerr(reader, "BrootsErr"),
                                   x(reader, "Bx"),
                                   y(reader, "By"),
-                                  z(reader, "Bz") {}
+                                  z(reader, "Bz"),
+                                  xerr(reader, "BSx"),
+                                  yerr(reader, "BSy"),
+                                  zerr(reader, "BSz") {}
 
   TTreeReaderValue<Float_t> px;
   TTreeReaderValue<Float_t> py;
   TTreeReaderValue<Float_t> pz;
+  TTreeReaderValue<Float_t> pxerr;
+  TTreeReaderValue<Float_t> pyerr;
+  TTreeReaderValue<Float_t> pzerr;
   TTreeReaderValue<Float_t> energy;
+  TTreeReaderValue<Float_t> energyerr;
   TTreeReaderValue<Float_t> x;
   TTreeReaderValue<Float_t> y;
   TTreeReaderValue<Float_t> z;
+  TTreeReaderValue<Float_t> xerr;
+  TTreeReaderValue<Float_t> yerr;
+  TTreeReaderValue<Float_t> zerr;
 
   bool isValid() const
   {
