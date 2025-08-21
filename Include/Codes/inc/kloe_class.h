@@ -20,21 +20,14 @@
 #include <const.h>
 #include <ErrorLogs.h>
 #include <neutral_mom.h>
+#include <HypothesisCodes.h>
 
 /**
  * @brief KLOE namespace
  */
 namespace KLOE
 {
-    enum class HypothesisCode
-    {
-        SIGNAL = 1,  // For Pi+Pi-Pi0Pi0
-        OMEGAPI = 2, // For Omega-Pi0
-        FOUR_PI = 3, // For Pi+Pi-Pi+Pi-
-
-        INVALID_VALUE // For invalid values
-    };
-
+    
     /**
      * @class General pm00 class for KLOE analysis. Includes most fundamental functions like timestamp, datestamp, array clearing functions, etc.
      * @author @szymongamrat99

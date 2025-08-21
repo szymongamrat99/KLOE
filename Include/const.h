@@ -244,13 +244,21 @@ struct BaseKinematics
 {
     BaseKinematics () : 
                        ipTriKinFit(3, 0.0),
-                       KnetriKinFit(9, 0.0),
-                       neuVtxTriKinFit(3, 0.0),
+                       KnetriKinFit(10, 0.0),
+                       neuVtxTriKinFit(4, 0.0),
                        gammaMomTriKinFit1(8, 0.0),
                        gammaMomTriKinFit2(8, 0.0),
                        gammaMomTriKinFit3(8, 0.0),
                        gammaMomTriKinFit4(8, 0.0),
-                       g4takenTriKinFit(4, 0)
+                       ipTriangle(3, 0.0),
+                       KneTriangle(10, 0.0),
+                       neuVtxTriangle(4, 0.0),
+                       gammaMomTriangle1(8, 0.0),
+                       gammaMomTriangle2(8, 0.0),
+                       gammaMomTriangle3(8, 0.0),
+                       gammaMomTriangle4(8, 0.0),
+                       g4takenTriKinFit(4, 0),
+                       trcfinal(4, 0.0)
     {};
 
     Float_t
@@ -306,7 +314,8 @@ struct BaseKinematics
         kaonNeTimeLABMC,
         kaonNeTimeCMMC,
         kaonChTimeLABMC,
-        kaonChTimeCMMC;
+        kaonChTimeCMMC,
+        Chi2TriKinFit;
 
     UChar_t
         mctruth,
@@ -390,7 +399,18 @@ struct BaseKinematics
         gammaMomTriKinFit1,
         gammaMomTriKinFit2,
         gammaMomTriKinFit3,
-        gammaMomTriKinFit4;
+        gammaMomTriKinFit4,
+        ipTriangle,
+        KneTriangle,
+        neuVtxTriangle,
+        gammaMomTriangle1,
+        gammaMomTriangle2,
+        gammaMomTriangle3,
+        gammaMomTriangle4,
+        trcfinal,
+        CurvMC,
+        PhivMC,
+        CotvMC;
 
     TLorentzVector
         phi4Mom;

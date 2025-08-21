@@ -68,6 +68,8 @@
     "variant": "cpp",
     "kin_fits.C": "cpp",
     "PlotsPiPi.C": "cpp",
-    "codecvt": "cpp"
+    "codecvt": "cpp",
+    "init_analysis.C": "cpp",
+    ".rootlogon.C": "cpp"
   }
 }

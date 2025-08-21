@@ -90,15 +90,15 @@
     ],
     "SIGNAL": [
       {
-        "order": 1,
+        "order": 0,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKch",
         "cutType": "T",
-        "cutValue": 50,
+        "cutValue": 1.2,
         "cutCondition": "<="
       },
       {
-        "order": 2,
+        "order": 1,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "Qmiss",
         "cutType": "O",
@@ -106,7 +106,7 @@
         "cutCondition": "<="
       },
       {
-        "order": 3,
+        "order": 2,
         "cutDescription": "K->pi0pi0 decay invariant mass.",
         "cutId": "InvMassKne",
         "cutType": "T",

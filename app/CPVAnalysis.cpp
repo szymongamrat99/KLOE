@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
       DataPath = filePaths["Data"]["path"];
       runs = initObj.getRunStats(DataPath, runRegexPattern);
       initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                        runs.minRun, runs.minRun + 1);
+                        runs.minRun, runs.minRun + 500);
 
       break;
     }
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
       DataPath = filePaths["MC"]["path"][0];
       runs = initObj.getRunStats(DataPath, runRegexPattern);
       initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                        runs.minRun, runs.maxRun);
+                        runs.minRun, runs.minRun + 500);
       break;
     }
     case Controls::FileType::ALL_PHYS2:
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
       DataPath = filePaths["MC"]["path"][1];
       runs = initObj.getRunStats(DataPath, runRegexPattern);
       initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                        runs.minRun, runs.minRun + 50);
+                        runs.minRun, runs.minRun + 500);
       break;
     }
     case Controls::FileType::ALL_PHYS3:
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
       {
         runs = initObj.getRunStats(path, runRegexPattern);
         initObj.chainInit(chain, logger, path, runRegexPattern,
-                          runs.minRun, runs.minRun + 1);
+                          runs.minRun, runs.minRun + 500);
       }
 
       break;

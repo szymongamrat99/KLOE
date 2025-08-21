@@ -1,6 +1,6 @@
 {  
   cout << "Loading shared library..." << endl << endl;
-  gSystem->Load("/internal/big_one/4/users/gamrat/scripts/Include/librec.so");
+  gSystem->Load("/data/ssd/gamrat/KLOE/build/Include/Codes/libLibRec.so");
 
   //Global style of histograms, pads, etc.
 
@@ -44,4 +44,15 @@
 
   cout << "Units: cm, ns, tau_{S}, MeV/c^{2}, MeV/c, MeV" << endl;
   TString units[6] = {" [cm]", " [ns]", " [#tau_{S}]", " [MeV/c^{2}]", " [MeV/c]", " [MeV]"};
+
+  const unsigned int channNum = 7;
+  const Color_t channColor[channNum] = {kRed, kGreen, kViolet, kCyan, kBlue, kGreen - 1, kYellow};
+  const std::vector<TString> channNames = {"K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{0}#pi^{0}", "Regeneration",
+                           "#omega#pi^{0}#rightarrow#pi^{+}#pi^{-}#pi^{0}#pi^{0}",
+                           "K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}3#pi^{0}",
+                           "K_{S}K_{L}#rightarrow#pi^{#pm}l^{#mp}#nu#pi^{0}#pi^{0}",
+                           "Other bcg", "K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{+}#pi^{-}"};
+  const Color_t dataColor = kBlack;
+
+  const Float_t mK0 = 497.611; // MeV/c^{2}
 }

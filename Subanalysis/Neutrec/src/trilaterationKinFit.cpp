@@ -7,7 +7,7 @@
 
 #include "../inc/trilateration.hpp"
 
-ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Float_t chiSqrStep, Int_t jmin, Int_t jmax, Int_t nclu, std::vector<Float_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Float_t> bhabha_mom, std::vector<Float_t> bhabha_mom_err, std::vector<Float_t> bhabha_vtx, Int_t &bunchnum, std::vector<Float_t> &iptri_kinfit, std::vector<Int_t> &g4takentri_kinfit, std::vector<Float_t> gamma_mom_final[4], std::vector<Float_t> &fourKnetri_kinfit, std::vector<Float_t> &neu_vtx_min, ErrorHandling::ErrorLogs &logger)
+ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Float_t chiSqrStep, Int_t jmin, Int_t jmax, Int_t nclu, std::vector<Float_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Float_t> bhabha_mom, std::vector<Float_t> bhabha_mom_err, std::vector<Float_t> bhabha_vtx, Int_t &bunchnum, std::vector<Float_t> &iptri_kinfit, std::vector<Int_t> &g4takentri_kinfit, std::vector<Float_t> gamma_mom_final[4], std::vector<Float_t> &fourKnetri_kinfit, std::vector<Float_t> &neu_vtx_min, Float_t &Chi2TriKinFit, ErrorHandling::ErrorLogs &logger)
 {
   gErrorIgnoreLevel = 6001;
 
@@ -258,6 +258,8 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
                   FUNVALMIN = FUNVALTMP;
                   CHISQRMIN = CHISQRTMP;
 
+                  Chi2TriKinFit = CHISQRMIN;
+
                   kinematicFitObj->GetResults(X_min, V_min, X_init_min, V_init, C_min, L_min);
 
                   g4takentri_kinfit[0] = ind_gam[0];
@@ -308,6 +310,8 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
                   isConverged = 1;
                   FUNVALMIN = FUNVALTMP;
                   CHISQRMIN = CHISQRTMP;
+
+                  Chi2TriKinFit = CHISQRMIN;
 
                   kinematicFitObj->GetResults(X_min, V_min, X_init_min, V_init, C_min, L_min);
 

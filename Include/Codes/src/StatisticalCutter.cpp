@@ -3,15 +3,16 @@
 
 using json = nlohmann::json;
 
-StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctruth)
-    : signalMctruth_(signalMctruth)
+StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::HypothesisCode hypoCode)
+    : signalMctruth_(signalMctruth), hypoCode_(hypoCode)
 {
     LoadCuts(jsonPath);
     survivedSignal_.resize(cuts_.size(), 0);
     survivedBackground_.resize(cuts_.size(), 0);
 }
 
-StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath)
+StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode)
+    : hypoCode_(hypoCode)
 {
     LoadCutsFromFiles(propertiesPath, cutsPath);
     survivedSignal_.resize(cuts_.size(), 0);
@@ -52,7 +53,31 @@ void StatisticalCutter::LoadCuts(const std::string& jsonPath) {
 
 void StatisticalCutter::LoadCuts(const json& j) {
     cuts_.clear();
-    for (const auto& cutj : j["listOfCuts"]) {
+    
+    // Wybierz właściwą listę cięć na podstawie hypoCode_
+    std::string cutListKey;
+    switch(hypoCode_) {
+        case KLOE::HypothesisCode::SIGNAL:
+            cutListKey = "SIGNAL";
+            break;
+        case KLOE::HypothesisCode::FOUR_PI:
+            cutListKey = "FOUR_PI";
+            break;
+        case KLOE::HypothesisCode::OMEGAPI:
+            cutListKey = "OMEGA";
+            break;
+        default:
+            std::cout << "Warning: Using default cuts for unknown hypothesis code" << std::endl;
+            return;
+    }
+
+    // Sprawdź czy mamy odpowiednią sekcję w listOfCuts
+    if (!j.contains("listOfCuts") || !j["listOfCuts"].contains(cutListKey)) {
+        std::cout << "Warning: No cuts found for hypothesis " << cutListKey << std::endl;
+        return;
+    }
+
+    for (const auto& cutj : j["listOfCuts"][cutListKey]) {
         Cut cut;
         cut.order = cutj.value("order", 0);
         cut.cutId = cutj["cutId"];
@@ -63,9 +88,10 @@ void StatisticalCutter::LoadCuts(const json& j) {
         cut.centralValueDynamic = false;
         cuts_.push_back(cut);
     }
+    
     // Sortuj po order malejąco (zmień na rosnąco jeśli wolisz)
     std::sort(cuts_.begin(), cuts_.end(), [](const Cut& a, const Cut& b) {
-        return a.order > b.order;
+        return a.order < b.order;
     });
 }
 
@@ -167,4 +193,39 @@ size_t StatisticalCutter::GetSurvivedSignal(size_t cutIndex) const {
 
 size_t StatisticalCutter::GetSurvivedBackground(size_t cutIndex) const {
     return survivedBackground_[cutIndex];
-};
+}
+
+double StatisticalCutter::GetEfficiencyError(size_t cutIndex) const {
+    if (totalSignal_ == 0) return 0.0;
+    double eff = GetEfficiency(cutIndex);
+    // Niepewność z rozkładu dwumianowego
+    return std::sqrt(eff * (1.0 - eff) / totalSignal_);
+}
+
+double StatisticalCutter::GetPurityError(size_t cutIndex) const {
+    size_t sig = survivedSignal_[cutIndex];
+    size_t bkg = survivedBackground_[cutIndex];
+    double total = sig + bkg;
+    
+    if (total == 0) return 0.0;
+    
+    double purity = static_cast<double>(sig) / total;
+    // Propagacja niepewności dla stosunku, zakładając rozkład Poissona
+    if (sig == 0) return 0.0;  // Unikamy dzielenia przez 0
+    
+    return purity * std::sqrt(
+        (1.0 - purity) * (1.0 - purity) / sig + 
+        purity * purity / total
+    );
+}
+
+double StatisticalCutter::GetSignalToBackgroundError(size_t cutIndex) const {
+    size_t sig = survivedSignal_[cutIndex];
+    size_t bkg = survivedBackground_[cutIndex];
+    
+    if (bkg == 0) return 0.0;  // Unikamy dzielenia przez 0
+    
+    double sb = static_cast<double>(sig) / bkg;
+    // Propagacja niepewności dla stosunku, zakładając rozkład Poissona
+    return sb * std::sqrt(1.0/sig + 1.0/bkg);
+}

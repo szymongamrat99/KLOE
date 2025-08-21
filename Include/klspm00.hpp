@@ -11,6 +11,7 @@
 #include <ErrorLogs.h>
 #include <kloe_class.h>
 #include <ConfigWatcher.h>
+#include <HypothesisCodes.h>
 
 int InitAnalysis_main(TChain &chain, Controls::FileType &fileTypeOpt, KLOE::pm00 &Obj);
 int CPFit_main(TChain &chain, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher, Controls::DataType &dataTypeOpt);

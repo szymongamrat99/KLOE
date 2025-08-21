@@ -3,7 +3,7 @@
     "flags": {
         "analysisCode": "SIGNAL",
         "initialAnalysisExec": {
-            "MC": true,
+            "MC": false,
             "flag": true,
             "parts": {
                 "covMatrixInitialAnalysisExec": false,

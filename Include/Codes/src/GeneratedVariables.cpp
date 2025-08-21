@@ -223,6 +223,9 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 		std::vector<std::vector<Float_t>> &trkMC,
 		const Int_t numberOfClusters,
 		std::vector<std::vector<Float_t>> &pgammaMC,
+		std::vector<Float_t> &CurvMC,
+		std::vector<Float_t> &PhivMC,
+		std::vector<Float_t> &CotvMC,
 		std::vector<Int_t> &good_clus_ind,
 		std::vector<std::vector<Float_t>> cluster_rec)
 {
@@ -275,7 +278,7 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 	{
 		KSLGenerated(nvtxmc, mother, Kl, xvmc, yvmc, zvmc, Ks, ntmc, pidmc, pxmc, pymc, pzmc);
 
-		twoTracksFinder(ntmc, mother, vtxmc, pidmc, Knemc, Kl, Kchmc, Ks, trkMC, pxmc, pymc, pzmc, mctruth);
+		twoTracksFinder(ntmc, mother, vtxmc, pidmc, Knemc, Kl, Kchmc, Ks, trkMC, pxmc, pymc, pzmc, mctruth, CurvMC, PhivMC, CotvMC);
 
 		if (mctruth == 1 || mctruth == 3 || mctruth == 4 || mctruth == 5)
 		{
@@ -367,7 +370,7 @@ void GeneratedVariables::GeneratedClusterFinder(Int_t nclu, Int_t ind_gam[4], co
         }
 }
 
-void GeneratedVariables::twoTracksFinder(Int_t ntmc, Int_t *mother, Int_t *vtxmc, Int_t *pidmc, std::vector<Float_t> &Knemc, Float_t Kl[9], std::vector<Float_t> &Kchmc, Float_t Ks[9], std::vector<std::vector<Float_t>> &trkMC, Float_t *pxmc, Float_t *pymc, Float_t *pzmc, Int_t mctruth)
+void GeneratedVariables::twoTracksFinder(Int_t ntmc, Int_t *mother, Int_t *vtxmc, Int_t *pidmc, std::vector<Float_t> &Knemc, Float_t Kl[9], std::vector<Float_t> &Kchmc, Float_t Ks[9], std::vector<std::vector<Float_t>> &trkMC, Float_t *pxmc, Float_t *pymc, Float_t *pzmc, Int_t mctruth, std::vector<Float_t> &CurvMC, std::vector<Float_t> &PhivMC, std::vector<Float_t> &CotvMC)
 {
   for (Int_t j = 0; j < ntmc; j++)
   {
@@ -414,6 +417,15 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, Int_t *mother, Int_t *vtxmc
 
 			trkMC.push_back(auxiliaryVec);
     }
+
+		CurvMC.push_back(1000./sqrt(pow(pxmc[j],2) + pow(pymc[j],2)));
+		PhivMC.push_back(acos(pxmc[j] / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2))));
+		CotvMC.push_back(pzmc[j] / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2)));
+
+		if (pidmc[j] == 9 || pidmc[j] == 3 || pidmc[j] == 6 || pidmc[j] == 12 || pidmc[j] == 15)
+		{
+			CurvMC[j] = -CurvMC[j];
+		}
   }
 }
 void GeneratedVariables::KSLGenerated(Int_t nvtxmc, Int_t *mother, Float_t Kl[9], Float_t *xvmc, Float_t *yvmc, Float_t *zvmc, Float_t Ks[9], Int_t ntmc, Int_t *pidmc, Float_t *pxmc, Float_t *pymc, Float_t *pzmc)

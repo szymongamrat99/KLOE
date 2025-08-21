@@ -7,6 +7,8 @@
 #include <json.hpp>
 #include <fstream>
 #include <algorithm>
+// #include "../../klspm00.hpp"  // dla KLOE::HypothesisCode
+#include <HypothesisCodes.h>
 
 struct Cut {
     int order = 0;
@@ -23,10 +25,10 @@ struct Cut {
 class StatisticalCutter {
 public:
     // Konstruktor z jednym plikiem JSON (dla kompatybilności)
-    StatisticalCutter(const std::string& jsonPath, int signalMctruth);
+    StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::HypothesisCode hypoCode);
 
     // Konstruktor z dwoma plikami (properties i cuts)
-    StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath);
+    StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode);
 
     void RegisterVariableGetter(const std::string& varName, std::function<double()> getter);
     void RegisterCentralValueGetter(const std::string& cutId, std::function<double()> getter);
@@ -37,8 +39,13 @@ public:
     void UpdateStats(int mctruth);
 
     double GetEfficiency(size_t cutIndex) const;
+    double GetEfficiencyError(size_t cutIndex) const;
+    
     double GetPurity(size_t cutIndex) const;
+    double GetPurityError(size_t cutIndex) const;
+    
     double GetSignalToBackground(size_t cutIndex) const;
+    double GetSignalToBackgroundError(size_t cutIndex) const;
 
     size_t GetSurvivedSignal(size_t cutIndex) const;
     size_t GetSurvivedBackground(size_t cutIndex) const;
@@ -51,6 +58,8 @@ private:
     void LoadCuts(const std::string& jsonPath);
     void LoadCutsFromFiles(const std::string& propertiesPath, const std::string& cutsPath);
     bool EvaluateCondition(double value, const Cut& cut) const;
+
+    KLOE::HypothesisCode hypoCode_;
 
     std::vector<Cut> cuts_;
     int signalMctruth_;

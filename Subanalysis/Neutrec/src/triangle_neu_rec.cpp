@@ -236,17 +236,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 							{
 								Knetriangle[l] = Knerec[l];
 
-								// if (l == 3)
-								// {
-								// 	if (Knetri_kinfit[9] < 0.)
-								// 		Knetriangle[6 + l] = -neu_vtx[l];
-								// 	else if (Knetri_kinfit[9] >= 0.)
-								// 		Knetriangle[6 + l] = neu_vtx[l];
-								// }
-								// else
-								// {
 								Knetriangle[6 + l] = neu_vtx[l];
-								//}
 
 								fourg4taken[l] = ind_gam[l];
 
