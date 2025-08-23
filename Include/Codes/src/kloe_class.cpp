@@ -1,4 +1,5 @@
 #include <kloe_class.h>
+#include <const.h>
 
 namespace KLOE
 {

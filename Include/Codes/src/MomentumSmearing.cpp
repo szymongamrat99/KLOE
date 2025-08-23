@@ -1,4 +1,5 @@
 #include <MomentumSmearing.h>
+#include <const.h>
 
 namespace KLOE
 {

@@ -5,6 +5,7 @@
 #include <ErrorLogs.h>
 #include <vector>
 #include <string>
+#include <MainMenu.h>
 
 namespace KLOE {
 struct RunStats {

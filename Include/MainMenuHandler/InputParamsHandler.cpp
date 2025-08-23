@@ -2,6 +2,8 @@
 #include <iostream>
 #include <fstream>
 #include <limits>
+#include <const.h>
+#include <MainMenu.h>
 
 InputParamsHandler::Params InputParamsHandler::getParams(
     nlohmann::json& properties,

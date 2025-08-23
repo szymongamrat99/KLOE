@@ -16,11 +16,11 @@
 #include <TVectorD.h>
 #include <TFormula.h>
 
+#include <HypothesisCodes.h>
 #include <reconstructor.h>
-#include <const.h>
 #include <ErrorLogs.h>
 #include <neutral_mom.h>
-#include <HypothesisCodes.h>
+#include <MainMenu.h>
 
 /**
  * @brief KLOE namespace

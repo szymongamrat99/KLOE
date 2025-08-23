@@ -1,9 +1,9 @@
 {
     "$schema": "./schemas/analysis-schema.json",
     "flags": {
-        "analysisCode": "SIGNAL",
+        "analysisCode": "FOUR_PI",
         "initialAnalysisExec": {
-            "MC": false,
+            "MC": true,
             "flag": true,
             "parts": {
                 "covMatrixInitialAnalysisExec": false,

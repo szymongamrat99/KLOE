@@ -48,7 +48,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 	std::ifstream file(cutlimitsName);
 	json j = json::parse(file);
 
-	StatisticalCutter cutter(cutlimitsName, 1, hypoCode);
+	StatisticalCutter cutter(cutlimitsName, 7, hypoCode);
 
 	std::ifstream rootFiles(rootfilesName);
 	json filePaths = json::parse(rootFiles);
@@ -116,6 +116,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		cutter.RegisterVariableGetter("TwoBodyMomKS", [&]()
 																	{ return KchrecKSMom; });
 		cutter.RegisterCentralValueGetter("TwoBodyMomKS", [&]()
+																			{ return pKTwoBody; });
+		///////////////////////////////////////////////////////////////////
+		cutter.RegisterVariableGetter("TwoBodyMomKL", [&]()
+																	{ return KchrecKLMom; });
+		cutter.RegisterCentralValueGetter("TwoBodyMomKL", [&]()
 																			{ return pKTwoBody; });
 		///////////////////////////////////////////////////////////////////
 		cutter.RegisterVariableGetter("MissTotKS", [&]()
@@ -394,7 +399,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			std::map<KLOE::HypothesisCode, ErrorHandling::ErrorCodes> hypoMap;
 
 			// KMASS HYPOTHESIS - FOR SIGNAL
-			hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+			hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 0, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
 
 			// VTX CLOSEST TO BHABHA IP - FOR OMEGAPI
 			hypoMap[KLOE::HypothesisCode::OMEGAPI] = eventAnalysis->findKClosestRec(baseKin.KchrecClosest, baseKin.trkClosest[0], baseKin.trkClosest[1], baseKin.vtakenClosest, logger);
@@ -422,14 +427,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			else
 			{
 				Bool_t cutCombined = false, passed = false;
-				std::vector<Bool_t> cutOrdered;
 
 				if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
 				{
-					cutOrdered.push_back(abs(baseKin.KchrecKS[5] - mK0) < 5);
-					cutOrdered.push_back(abs(baseKin.KchrecKL[5] - mK0) < 5);
 
-					if (cutOrdered[0] && cutOrdered[1])
+					if (cutter.PassCut(0) && cutter.PassCut(1))
 					{
 
 						Float_t
@@ -456,8 +458,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						KchrecKSMom = sqrt(pow(KchrecKS_PhiCM[0], 2) + pow(KchrecKS_PhiCM[1], 2) + pow(KchrecKS_PhiCM[2], 2));
 						KchrecKLMom = sqrt(pow(KchrecKL_PhiCM[0], 2) + pow(KchrecKL_PhiCM[1], 2) + pow(KchrecKL_PhiCM[2], 2));
 
-						cutOrdered.push_back(abs(KchrecKSMom - pKTwoBody) < 10);
-						cutOrdered.push_back(abs(KchrecKLMom - pKTwoBody) < 10);
 
 						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS, phiMom, baseKin.KchboostKS);
 						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL, phiMom, baseKin.KchboostKL);
@@ -514,24 +514,15 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						EmissKS = baseKin.KchboostKS[3] - baseKin.KchrecKS[3];
 						EmissKL = baseKin.KchboostKL[3] - baseKin.KchrecKL[3];
 
-						cutOrdered.push_back(sqrt(pow(EmissKS, 2) + pow(PmissKS, 2)) < 10);
-						cutOrdered.push_back(sqrt(pow(EmissKL, 2) + pow(PmissKL, 2)) < 10);
-
-						cutOrdered.push_back((pow(EmissKL, 2) - pow(PmissKL, 2) < 10) && (pow(EmissKL, 2) - pow(PmissKL, 2) > -50));
-
-						cutOrdered.push_back((pow(EmissKS, 2) - pow(PmissKS, 2) < 10) && (pow(EmissKS, 2) - pow(PmissKS, 2) > -50));
-
-						cutCombined = cutOrdered[0] && cutOrdered[1] && cutOrdered[2] && cutOrdered[3] && cutOrdered[4] && cutOrdered[5] && cutOrdered[6] && cutOrdered[7];
-
 						cutter.UpdateStats(mctruth);
 
 						baseKin.cuts.clear();
-						baseKin.cuts.resize(cutOrdered.size());
+						baseKin.cuts.resize(cutter.GetCuts().size());
 
-						for (Int_t iter = 0; iter < cutOrdered.size(); iter++)
-							if (cutOrdered[iter])
+						for (Int_t iter = 0; iter < cutter.GetCuts().size(); iter++)
+							if (cutter.PassCut(iter))
 								baseKin.cuts[iter] = 1;
-							else if (!cutOrdered[iter])
+							else if (!cutter.PassCut(iter))
 							{
 								baseKin.cuts[iter] = 0;
 
@@ -605,8 +596,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 					// 1. Invariant mass of the charged kaon
 					// 2. Missing energy Qmiss
 
-					cutOrdered.push_back(abs(baseKin.Kchrecnew[5] - mK0) < 50);
-
 					for (Int_t comp = 0; comp < 3; comp++)
 					{
 						MissMom[comp] = baseKin.Kchboostnew[comp] - baseKin.Kchrecnew[comp];
@@ -617,11 +606,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
 					baseKin.Qmiss = sqrt(pow(Emiss, 2) + pow(Pmiss, 2));
 
-					cutOrdered.push_back(baseKin.Qmiss < 100);
-
 					ErrorHandling::ErrorCodes codeTri = ErrorHandling::ErrorCodes::CHARGED_KAON_MASS_PRE;
 
-					if (cutOrdered[0] && cutOrdered[1])
+					if (cutter.PassCut(0) && cutter.PassCut(1))
 					{
 
 						std::vector<Float_t> cluster[5];
@@ -651,20 +638,18 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						gamma_mom_final[2].resize(8);
 						gamma_mom_final[3].resize(8);
 
-						codeTri = TrilaterationKinFit(N_free, N_const, M, loopcount, chiSqrStep, jmin, jmax, *clusterProps.nclu, cluster, neuclulist, bhabha_mom, bhabha_mom_err, bhabha_vtx, baseKin.bunchnum, baseKin.ipTriKinFit, baseKin.g4takenTriKinFit, gamma_mom_final, baseKin.KnetriKinFit, baseKin.neuVtxTriKinFit, baseKin.Chi2TriKinFit, logger);
+						errorCode = TrilaterationKinFit(N_free, N_const, M, loopcount, chiSqrStep, jmin, jmax, *clusterProps.nclu, cluster, neuclulist, bhabha_mom, bhabha_mom_err, bhabha_vtx, baseKin.bunchnum, baseKin.ipTriKinFit, baseKin.g4takenTriKinFit, gamma_mom_final, baseKin.KnetriKinFit, baseKin.neuVtxTriKinFit, baseKin.Chi2TriKinFit, logger);
 
 						baseKin.gammaMomTriKinFit1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
 						baseKin.gammaMomTriKinFit2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
 						baseKin.gammaMomTriKinFit3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
 						baseKin.gammaMomTriKinFit4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
 
-						if (ErrorHandling::ErrorCodes::NO_ERROR != codeTri)
-							cutOrdered.push_back(false);
+						if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+							logger.getErrLog(errorCode, "", mctruth);
 						else
 						{
-							cutOrdered.push_back(true);
-
-							codeTri = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.KneTriangle, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
+							errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.KneTriangle, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
 
 							baseKin.gammaMomTriangle1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
 							baseKin.gammaMomTriangle2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
@@ -704,17 +689,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 							baseKin.kaonNeTimeLAB = baseKin.kaonNeTimeLAB / (cVel * tau_S_nonCPT);
 						}
 					}
-					else
-					{
-						cutOrdered.push_back(false);
-					}
 
 					cutter.UpdateStats(mctruth);
-
-					cutCombined = cutter.PassAllCuts();
 				}
 
-				if (cutCombined || passed)
+				if (cutter.PassAllCuts() || passed)
 				{
 					errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
 
@@ -931,12 +910,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 	}
 
 	// Wyniki
-	for (size_t i = 0; i < cutter.GetCuts().size(); ++i)
-	{
-		std::cout << "Cut " << i << ": Eff=" << cutter.GetEfficiency(i)
-							<< " Purity=" << cutter.GetPurity(i)
-							<< " S/B=" << cutter.GetSignalToBackground(i) << "\n";
-	}
+   for (size_t i = 0; i < cutter.GetCuts().size(); ++i)
+   {
+      std::cout << "Cut " << i << ": Eff=" << cutter.GetEfficiency(i) << " +- " << cutter.GetEfficiencyError(i)
+                << " Purity=" << cutter.GetPurity(i) << " +- " << cutter.GetPurityError(i) 
+                << " S/B=" << cutter.GetSignalToBackground(i) << " +- " << cutter.GetSignalToBackgroundError(i) << "\n";
+   }
 
 	std::map<ErrorHandling::ErrorCodes, int> physicsErrorCountsPerMctruth[8];
 

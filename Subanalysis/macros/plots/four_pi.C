@@ -1,5 +1,5 @@
-#define init_analysis_cxx
-// The class definition in init_analysis.h has been generated automatically
+#define four_pi_cxx
+// The class definition in four_pi.h has been generated automatically
 // by the ROOT utility TTree::MakeSelector(). This class is derived
 // from the ROOT class TSelector. For more information on the TSelector
 // framework see $ROOTSYS/README/README.SELECTOR or the ROOT User Manual.
@@ -18,17 +18,18 @@
 //
 // To use this file, try the following session on your Tree T:
 //
-// root> T->Process("init_analysis.C")
-// root> T->Process("init_analysis.C","some options")
-// root> T->Process("init_analysis.C+")
+// root> T->Process("four_pi.C")
+// root> T->Process("four_pi.C","some options")
+// root> T->Process("four_pi.C+")
 //
 
-#include "init_analysis.h"
+#include "four_pi.h"
 #include <TH2.h>
 #include <TStyle.h>
 #include <HistManager.h>
 #include <interf_function.h>
 #include <StatisticalCutter.h>
+#include <kloe_class.h>
 
 HistManager *histMgr;
 StatisticalCutter *cutter;
@@ -39,7 +40,16 @@ HistManager::HistConfig invMassKchMCConfig;
 HistManager::HistConfig timeDiffConfig;
 HistManager::HistConfig timeDiffMCConfig;
 
-void init_analysis::Begin(TTree * /*tree*/)
+Float_t EmissKS = 0.0;
+Float_t EmissKL = 0.0;
+Float_t PmissKS = 0.0;
+Float_t PmissKL = 0.0;
+Float_t KchrecKSMom = 0.0;
+Float_t KchrecKLMom = 0.0;
+
+KLOE::pm00 *Obj;
+
+void four_pi::Begin(TTree * /*tree*/)
 {
    // The Begin() function is called at the start of the query.
    // When running with PROOF Begin() is only called on the client.
@@ -51,27 +61,55 @@ void init_analysis::Begin(TTree * /*tree*/)
 
    std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
 
-   cutter = new StatisticalCutter(cutFileName, 1, KLOE::HypothesisCode::SIGNAL);
+   cutter = new StatisticalCutter(cutFileName, 7, KLOE::HypothesisCode::FOUR_PI);
 
+   Obj = new KLOE::pm00();
+
+   Float_t pKTwoBody = Obj->TwoBodyDecayMass(mPhi, mK0, mK0);
+
+   ///////////////////////////////////////////////////////////////////
    cutter->RegisterVariableGetter("InvMassKch", [&]()
-                                 { return Kchrec[5]; });
+                                  { return KchrecKS[5]; });
    cutter->RegisterCentralValueGetter("InvMassKch", [&]()
-                                     { return mK0; });
-
-   cutter->RegisterVariableGetter("Qmiss", [&]()
-                                 { return *Qmiss; });
-
+                                      { return mK0; });
+   ///////////////////////////////////////////////////////////////////
    cutter->RegisterVariableGetter("InvMassKne", [&]()
-                                 { return *minv4gam; });
+                                  { return KchrecKL[5]; });
    cutter->RegisterCentralValueGetter("InvMassKne", [&]()
-                                     { return mK0; });
+                                      { return mK0; });
+   ///////////////////////////////////////////////////////////////////
+   cutter->RegisterVariableGetter("TwoBodyMomKS", [&]()
+                                  { return KchrecKSMom; });
+   cutter->RegisterCentralValueGetter("TwoBodyMomKS", [&]()
+                                      { return pKTwoBody; });
+   ///////////////////////////////////////////////////////////////////
+   cutter->RegisterVariableGetter("TwoBodyMomKL", [&]()
+                                  { return KchrecKLMom; });
+   cutter->RegisterCentralValueGetter("TwoBodyMomKL", [&]()
+                                      { return pKTwoBody; });
+   ///////////////////////////////////////////////////////////////////
+   cutter->RegisterVariableGetter("MissTotKS", [&]()
+                                  { return sqrt(pow(PmissKS, 2) + pow(EmissKS, 2)); });
+   ///////////////////////////////////////////////////////////////////
+   cutter->RegisterVariableGetter("MissHigherKS", [&]()
+                                  { return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+   cutter->RegisterVariableGetter("MissLowerKS", [&]()
+                                  { return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+   ///////////////////////////////////////////////////////////////////
+   cutter->RegisterVariableGetter("MissTotKL", [&]()
+                                  { return sqrt(pow(PmissKL, 2) + pow(EmissKL, 2)); });
+   ///////////////////////////////////////////////////////////////////
+   cutter->RegisterVariableGetter("MissHigherKL", [&]()
+                                  { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+   cutter->RegisterVariableGetter("MissLowerKL", [&]()
+                                  { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
 
    invMassKchConfig.name = "invMassKch";
    invMassKchConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
    invMassKchConfig.ytitle = "Counts/2";
    invMassKchConfig.bins = 100;
-   invMassKchConfig.xmin = 400;
-   invMassKchConfig.xmax = 600;
+   invMassKchConfig.xmin = 490;
+   invMassKchConfig.xmax = 500;
    invMassKchConfig.logy = true;
    invMassKchConfig.showStats = false;
 
@@ -79,8 +117,8 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKchMCConfig.xtitle = "m^{inv,MC}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
    invMassKchMCConfig.ytitle = "Counts/2";
    invMassKchMCConfig.bins = 100;
-   invMassKchMCConfig.xmin = -100;
-   invMassKchMCConfig.xmax = 100;
+   invMassKchMCConfig.xmin = -5;
+   invMassKchMCConfig.xmax = 5;
    invMassKchMCConfig.logy = true;
    invMassKchMCConfig.showStats = false;
 
@@ -88,8 +126,8 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKneConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{0}#pi^{0}} [MeV/c^{2}]";
    invMassKneConfig.ytitle = "Counts/10";
    invMassKneConfig.bins = 100;
-   invMassKneConfig.xmin = 0;
-   invMassKneConfig.xmax = 1000;
+   invMassKneConfig.xmin = 490;
+   invMassKneConfig.xmax = 500;
    invMassKneConfig.logy = true;
    invMassKneConfig.showStats = false;
 
@@ -97,8 +135,8 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKneMCConfig.xtitle = "m^{inv,MC}_{K#rightarrow#pi^{0}#pi^{0}} [MeV/c^{2}]";
    invMassKneMCConfig.ytitle = "Counts/10";
    invMassKneMCConfig.bins = 100;
-   invMassKneMCConfig.xmin = -100;
-   invMassKneMCConfig.xmax = 100;
+   invMassKneMCConfig.xmin = -5;
+   invMassKneMCConfig.xmax = 5;
    invMassKneMCConfig.logy = true;
    invMassKneMCConfig.showStats = false;
 
@@ -128,7 +166,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    histMgr->CreateHistSet1D("timeDiffMC", timeDiffMCConfig);
 }
 
-void init_analysis::SlaveBegin(TTree * /*tree*/)
+void four_pi::SlaveBegin(TTree * /*tree*/)
 {
    // The SlaveBegin() function is called after the Begin() function.
    // When running with PROOF SlaveBegin() is called on each slave server.
@@ -137,7 +175,7 @@ void init_analysis::SlaveBegin(TTree * /*tree*/)
    TString option = GetOption();
 }
 
-Bool_t init_analysis::Process(Long64_t entry)
+Bool_t four_pi::Process(Long64_t entry)
 {
    // The Process() function is called for each entry in the tree (or possibly
    // keyed object in the case of PROOF) to be processed. The entry argument
@@ -157,19 +195,58 @@ Bool_t init_analysis::Process(Long64_t entry)
 
    fReader.SetLocalEntry(entry);
 
+   Float_t
+       PhiMom[3] = {*Bpx, *Bpy, *Bpz},
+       MissMomKS[3] = {},
+       MissMomKL[3] = {};
+
+   for (Int_t comp = 0; comp < 3; comp++)
+   {
+      MissMomKS[comp] = PhiMom[comp] - KchboostKS[comp] - KchrecKL[comp];
+      MissMomKL[comp] = PhiMom[comp] - KchboostKL[comp] - KchrecKS[comp];
+   }
+
+   PmissKS = sqrt(pow(MissMomKS[0], 2) + pow(MissMomKS[1], 2) + pow(MissMomKS[2], 2));
+   PmissKL = sqrt(pow(MissMomKL[0], 2) + pow(MissMomKL[1], 2) + pow(MissMomKL[2], 2));
+
+   EmissKS = KchboostKS[3] - KchrecKS[3];
+   EmissKL = KchboostKL[3] - KchrecKL[3];
+
+   Float_t
+       boostPhi[3] = {
+           -*Bpx / *Broots,
+           -*Bpy / *Broots,
+           -*Bpz / *Broots},
+       phiMom[4] = {*Bpx, *Bpy, *Bpz, *Broots}, trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {};
+
+   Obj->lorentz_transf(boostPhi, &trk1KS[0], trkKS_PhiCM[0]);
+   Obj->lorentz_transf(boostPhi, &trk2KS[0], trkKS_PhiCM[1]);
+   Obj->lorentz_transf(boostPhi, &trk1KL[0], trkKL_PhiCM[0]);
+   Obj->lorentz_transf(boostPhi, &trk2KL[0], trkKL_PhiCM[1]);
+
+   for (Int_t part = 0; part < 2; part++)
+      for (Int_t comp = 0; comp < 4; comp++)
+      {
+         KchrecKS_PhiCM[comp] += trkKS_PhiCM[part][comp];
+         KchrecKL_PhiCM[comp] += trkKL_PhiCM[part][comp];
+      }
+
+   KchrecKSMom = sqrt(pow(KchrecKS_PhiCM[0], 2) + pow(KchrecKS_PhiCM[1], 2) + pow(KchrecKS_PhiCM[2], 2));
+   KchrecKLMom = sqrt(pow(KchrecKL_PhiCM[0], 2) + pow(KchrecKL_PhiCM[1], 2) + pow(KchrecKL_PhiCM[2], 2));
+
    Float_t weight = 1.0;
 
-   if(1)
+   if (1)
    {
       if (*mctruth == 1)
          weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
-      histMgr->Fill1D("invMassKch", *mctruth, Kchrec[5], weight);
-      histMgr->Fill1D("invMassKne", *mctruth, *minv4gam, weight);
+      histMgr->Fill1D("invMassKch", *mctruth, KchrecKS[5], weight);
+      histMgr->Fill1D("invMassKne", *mctruth, KchrecKL[5], weight);
       histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeCM - *KaonNeTimeCM, weight);
 
-      histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - Kchrec[5], weight);
-      histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - *minv4gam, weight);
+      histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - KchrecKS[5], weight);
+      histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - KchrecKL[5], weight);
       histMgr->Fill1D("timeDiffMC", *mctruth, (*KaonChTimeCMMC - *KaonNeTimeCMMC) - (*KaonChTimeCM - *KaonNeTimeCM), weight);
    }
 
@@ -178,14 +255,14 @@ Bool_t init_analysis::Process(Long64_t entry)
    return kTRUE;
 }
 
-void init_analysis::SlaveTerminate()
+void four_pi::SlaveTerminate()
 {
    // The SlaveTerminate() function is called after all entries or objects
    // have been processed. When running with PROOF SlaveTerminate() is called
    // on each slave server.
 }
 
-void init_analysis::Terminate()
+void four_pi::Terminate()
 {
    // The Terminate() function is the last function to be called during
    // a query. It always runs on the client, it can be used to present
@@ -214,7 +291,7 @@ void init_analysis::Terminate()
    for (size_t i = 0; i < cutter->GetCuts().size(); ++i)
    {
       std::cout << "Cut " << i << ": Eff=" << cutter->GetEfficiency(i) << " +- " << cutter->GetEfficiencyError(i)
-                << " Purity=" << cutter->GetPurity(i) << " +- " << cutter->GetPurityError(i) 
+                << " Purity=" << cutter->GetPurity(i) << " +- " << cutter->GetPurityError(i)
                 << " S/B=" << cutter->GetSignalToBackground(i) << " +- " << cutter->GetSignalToBackgroundError(i) << "\n";
    }
 

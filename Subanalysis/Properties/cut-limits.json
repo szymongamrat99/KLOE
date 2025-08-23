@@ -4,11 +4,20 @@
   "listOfCuts": {
     "FOUR_PI": [
       {
-        "order": 2,
+        "order": 1,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKne",
         "cutType": "T",
-        "cutValue": 1.2,
+        "cutValue": 30,
+        "cutCondition": "<=",
+        "centralValue": 497.611
+      },
+      {
+        "order": 2,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "InvMassKch",
+        "cutType": "T",
+        "cutValue": 30,
         "cutCondition": "<=",
         "centralValue": 497.611
       },
@@ -17,34 +26,25 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "TwoBodyMomKS",
         "cutType": "T",
-        "cutValue": 10,
-        "cutCondition": "<=",
-        "centralValue": 110.493
-      },
-      {
-        "order": 1,
-        "cutDescription": "K->pi+pi- decay invariant mass.",
-        "cutId": "TwoBodyMomKL",
-        "cutType": "T",
-        "cutValue": 10,
+        "cutValue": 100,
         "cutCondition": "<=",
         "centralValue": 110.493
       },
       {
         "order": 4,
         "cutDescription": "K->pi+pi- decay invariant mass.",
-        "cutId": "InvMassKch",
+        "cutId": "TwoBodyMomKL",
         "cutType": "T",
-        "cutValue": 1.2,
+        "cutValue": 100,
         "cutCondition": "<=",
-        "centralValue": 497.611
+        "centralValue": 110.493
       },
       {
         "order": 5,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "MissTotKS",
         "cutType": "O",
-        "cutValue": 10,
+        "cutValue": 100,
         "cutCondition": "<"
       },
       {
@@ -52,7 +52,7 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "MissTotKL",
         "cutType": "O",
-        "cutValue": 10,
+        "cutValue": 100,
         "cutCondition": "<"
       },
       {
@@ -60,7 +60,7 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "MissHigherKS",
         "cutType": "O",
-        "cutValue": 10,
+        "cutValue": 100,
         "cutCondition": "<"
       },
       {
@@ -68,7 +68,7 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "MissLowerKS",
         "cutType": "O",
-        "cutValue": -50,
+        "cutValue": -100,
         "cutCondition": ">"
       },
       {
@@ -76,7 +76,7 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "MissHigherKL",
         "cutType": "O",
-        "cutValue": 10,
+        "cutValue": 100,
         "cutCondition": "<"
       },
       {
@@ -84,7 +84,7 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "MissLowerKL",
         "cutType": "O",
-        "cutValue": -50,
+        "cutValue": -100,
         "cutCondition": ">"
       }
     ],

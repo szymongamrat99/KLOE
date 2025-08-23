@@ -4,9 +4,18 @@
   "listOfCuts": {
     "FOUR_PI": [
       {
-        "order": 2,
+        "order": 1,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKne",
+        "cutType": "T",
+        "cutValue": 1.2,
+        "cutCondition": "<=",
+        "centralValue": 497.611
+      },
+      {
+        "order": 2,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "InvMassKch",
         "cutType": "T",
         "cutValue": 1.2,
         "cutCondition": "<=",
@@ -22,22 +31,13 @@
         "centralValue": 110.493
       },
       {
-        "order": 1,
+        "order": 4,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "TwoBodyMomKL",
         "cutType": "T",
         "cutValue": 10,
         "cutCondition": "<=",
         "centralValue": 110.493
-      },
-      {
-        "order": 4,
-        "cutDescription": "K->pi+pi- decay invariant mass.",
-        "cutId": "InvMassKch",
-        "cutType": "T",
-        "cutValue": 1.2,
-        "cutCondition": "<=",
-        "centralValue": 497.611
       },
       {
         "order": 5,
@@ -90,27 +90,27 @@
     ],
     "SIGNAL": [
       {
-        "order": 0,
+        "order": 1,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKch",
         "cutType": "T",
-        "cutValue": 1.2,
-        "cutCondition": "<="
-      },
-      {
-        "order": 1,
-        "cutDescription": "K->pi+pi- decay invariant mass.",
-        "cutId": "Qmiss",
-        "cutType": "O",
-        "cutValue": 100,
+        "cutValue": 5,
         "cutCondition": "<="
       },
       {
         "order": 2,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "Qmiss",
+        "cutType": "O",
+        "cutValue": 30,
+        "cutCondition": "<="
+      },
+      {
+        "order": 3,
         "cutDescription": "K->pi0pi0 decay invariant mass.",
         "cutId": "InvMassKne",
         "cutType": "T",
-        "cutValue": 200,
+        "cutValue": 80,
         "cutCondition": "<="
       }
     ]

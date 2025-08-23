@@ -8,7 +8,6 @@
 
 #include <TString.h>
 
-#include <const.h>
 
 /**
  * @namespace ErrorHandling

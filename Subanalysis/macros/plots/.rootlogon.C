@@ -55,4 +55,5 @@
   const Color_t dataColor = kBlack;
 
   const Float_t mK0 = 497.611; // MeV/c^{2}
+  const Float_t mPhi = 1019.455; // MeV/c^{2}
 }

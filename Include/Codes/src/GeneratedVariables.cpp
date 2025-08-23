@@ -1,4 +1,5 @@
 #include <GeneratedVariables.h>
+#include <const.h>
 
 void GeneratedVariables::classifyChannel(
 		Int_t ntmc,

@@ -70,6 +70,8 @@
     "PlotsPiPi.C": "cpp",
     "codecvt": "cpp",
     "init_analysis.C": "cpp",
-    ".rootlogon.C": "cpp"
+    ".rootlogon.C": "cpp",
+    "init_analysis copy.C": "cpp",
+    "four_pi.C": "cpp"
   }
 }

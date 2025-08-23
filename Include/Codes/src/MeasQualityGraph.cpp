@@ -1,4 +1,5 @@
 #include <MeasQualityGraph.h>
+#include <const.h>
 
 namespace KLOE
 {

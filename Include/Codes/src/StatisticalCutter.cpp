@@ -123,12 +123,25 @@ bool StatisticalCutter::EvaluateCondition(double value, const Cut& cut) const {
     double central = cut.centralValueDynamic && cut.centralValueGetter
         ? cut.centralValueGetter()
         : cut.centralValue;
-    if (cut.cutCondition == "<=") return value <= central + cut.cutValue;
-    if (cut.cutCondition == ">=") return value >= central - cut.cutValue;
-    if (cut.cutCondition == "<")  return value <  central + cut.cutValue;
-    if (cut.cutCondition == ">")  return value >  central - cut.cutValue;
-    if (cut.cutCondition == "==") return value == central;
-    throw std::runtime_error("Unknown cut condition: " + cut.cutCondition);
+
+    // One-sided cuts ("O")
+    if (cut.cutType == "O") {
+        if (cut.cutCondition == "<=") return value <= cut.cutValue;
+        if (cut.cutCondition == ">=") return value >= cut.cutValue;
+        if (cut.cutCondition == "<")  return value < cut.cutValue;
+        if (cut.cutCondition == ">")  return value > cut.cutValue;
+    }
+    // Two-sided cuts ("T")
+    else if (cut.cutType == "T") {
+        double deviation = std::abs(value - central);
+        if (cut.cutCondition == "<=") return deviation <= cut.cutValue;
+        if (cut.cutCondition == ">=") return deviation >= cut.cutValue;
+        if (cut.cutCondition == "<")  return deviation < cut.cutValue;
+        if (cut.cutCondition == ">")  return deviation > cut.cutValue;
+        if (cut.cutCondition == "==") return deviation == cut.cutValue;
+    }
+    
+    throw std::runtime_error("Invalid cut type '" + cut.cutType + "' or condition '" + cut.cutCondition + "'");
 }
 
 bool StatisticalCutter::PassCut(size_t cutIndex) {

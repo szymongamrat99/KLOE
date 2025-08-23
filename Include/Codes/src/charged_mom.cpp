@@ -155,7 +155,7 @@ namespace KLOE
   }
 
   template <typename F, typename T>
-  ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKchRec(T mcflag, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger)
+  ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKchRec(T mcflag, Bool_t smearingFlag, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger)
   {
     F mom_vec1Tmp[4], mom_vec2Tmp[4], KchTmp[9];
     std::vector<Int_t> ivTmp(_iv, _iv + MaxNumTrkV);
@@ -206,7 +206,7 @@ namespace KLOE
 
                 Float_t KchrecSmeared[9], KchboostSmeared[9], energyPion[2];
 
-                if (mcflag == 1)
+                if (mcflag == 1 && smearingFlag)
                 {
                   momVecMC[0] = mom_vec1Tmp[0];
                   momVecMC[1] = mom_vec1Tmp[1];
