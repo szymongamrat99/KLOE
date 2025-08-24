@@ -891,7 +891,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 							{"gammaMomTriangle2", baseKin.gammaMomTriangle2},
 							{"gammaMomTriangle3", baseKin.gammaMomTriangle3},
 							{"gammaMomTriangle4", baseKin.gammaMomTriangle4},
-							{"trcfinal", baseKin.trcfinal}};
+							{"trcfinal", baseKin.trcfinal},
+							{"PhivMC", baseKin.PhivMC},
+							{"CurvMC", baseKin.CurvMC},
+							{"CotvMC", baseKin.CotvMC}};
 
 					writer.Fill(intVars, floatVars, intArrays, floatArrays);
 

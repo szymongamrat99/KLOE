@@ -6,18 +6,18 @@
       {
         "order": 1,
         "cutDescription": "K->pi+pi- decay invariant mass.",
-        "cutId": "InvMassKne",
+        "cutId": "InvMassKS",
         "cutType": "T",
-        "cutValue": 1.2,
+        "cutValue": 5,
         "cutCondition": "<=",
         "centralValue": 497.611
       },
       {
         "order": 2,
         "cutDescription": "K->pi+pi- decay invariant mass.",
-        "cutId": "InvMassKch",
+        "cutId": "InvMassKL",
         "cutType": "T",
-        "cutValue": 1.2,
+        "cutValue": 5,
         "cutCondition": "<=",
         "centralValue": 497.611
       },
@@ -26,7 +26,7 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "TwoBodyMomKS",
         "cutType": "T",
-        "cutValue": 10,
+        "cutValue": 1000,
         "cutCondition": "<=",
         "centralValue": 110.493
       },
@@ -35,7 +35,7 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "TwoBodyMomKL",
         "cutType": "T",
-        "cutValue": 10,
+        "cutValue": 1000,
         "cutCondition": "<=",
         "centralValue": 110.493
       },

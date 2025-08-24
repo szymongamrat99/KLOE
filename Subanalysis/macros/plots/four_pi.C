@@ -33,12 +33,14 @@
 
 HistManager *histMgr;
 StatisticalCutter *cutter;
-HistManager::HistConfig invMassKneConfig;
-HistManager::HistConfig invMassKneMCConfig;
-HistManager::HistConfig invMassKchConfig;
-HistManager::HistConfig invMassKchMCConfig;
-HistManager::HistConfig timeDiffConfig;
-HistManager::HistConfig timeDiffMCConfig;
+HistManager::HistConfig invMassKSConfig;
+HistManager::HistConfig invMassKLConfig;
+HistManager::HistConfig twoBodyMomKSConfig;
+HistManager::HistConfig twoBodyMomKLConfig;
+HistManager::HistConfig missTotKSConfig;
+HistManager::HistConfig missTotKLConfig;
+HistManager::HistConfig missSqKSConfig;
+HistManager::HistConfig missSqKLConfig;
 
 Float_t EmissKS = 0.0;
 Float_t EmissKL = 0.0;
@@ -68,14 +70,14 @@ void four_pi::Begin(TTree * /*tree*/)
    Float_t pKTwoBody = Obj->TwoBodyDecayMass(mPhi, mK0, mK0);
 
    ///////////////////////////////////////////////////////////////////
-   cutter->RegisterVariableGetter("InvMassKch", [&]()
+   cutter->RegisterVariableGetter("InvMassKS", [&]()
                                   { return KchrecKS[5]; });
-   cutter->RegisterCentralValueGetter("InvMassKch", [&]()
+   cutter->RegisterCentralValueGetter("InvMassKS", [&]()
                                       { return mK0; });
    ///////////////////////////////////////////////////////////////////
-   cutter->RegisterVariableGetter("InvMassKne", [&]()
+   cutter->RegisterVariableGetter("InvMassKL", [&]()
                                   { return KchrecKL[5]; });
-   cutter->RegisterCentralValueGetter("InvMassKne", [&]()
+   cutter->RegisterCentralValueGetter("InvMassKL", [&]()
                                       { return mK0; });
    ///////////////////////////////////////////////////////////////////
    cutter->RegisterVariableGetter("TwoBodyMomKS", [&]()
@@ -104,66 +106,90 @@ void four_pi::Begin(TTree * /*tree*/)
    cutter->RegisterVariableGetter("MissLowerKL", [&]()
                                   { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
 
-   invMassKchConfig.name = "invMassKch";
-   invMassKchConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
-   invMassKchConfig.ytitle = "Counts/2";
-   invMassKchConfig.bins = 100;
-   invMassKchConfig.xmin = 490;
-   invMassKchConfig.xmax = 500;
-   invMassKchConfig.logy = true;
-   invMassKchConfig.showStats = false;
+   invMassKSConfig.name = "invMassKS";
+   invMassKSConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
+   invMassKSConfig.ytitle = "Counts/2";
+   invMassKSConfig.bins = 100;
+   invMassKSConfig.xmin = 470;
+   invMassKSConfig.xmax = 520;
+   invMassKSConfig.logy = false;
+   invMassKSConfig.showStats = false;
 
-   invMassKchMCConfig.name = "invMassKchMC";
-   invMassKchMCConfig.xtitle = "m^{inv,MC}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
-   invMassKchMCConfig.ytitle = "Counts/2";
-   invMassKchMCConfig.bins = 100;
-   invMassKchMCConfig.xmin = -5;
-   invMassKchMCConfig.xmax = 5;
-   invMassKchMCConfig.logy = true;
-   invMassKchMCConfig.showStats = false;
+   invMassKLConfig.name = "invMassKL";
+   invMassKLConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{0}#pi^{0}} [MeV/c^{2}]";
+   invMassKLConfig.ytitle = "Counts/10";
+   invMassKLConfig.bins = 100;
+   invMassKLConfig.xmin = 470;
+   invMassKLConfig.xmax = 520;
+   invMassKLConfig.logy = false;
+   invMassKLConfig.showStats = false;
 
-   invMassKneConfig.name = "invMassKne";
-   invMassKneConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{0}#pi^{0}} [MeV/c^{2}]";
-   invMassKneConfig.ytitle = "Counts/10";
-   invMassKneConfig.bins = 100;
-   invMassKneConfig.xmin = 490;
-   invMassKneConfig.xmax = 500;
-   invMassKneConfig.logy = true;
-   invMassKneConfig.showStats = false;
+   twoBodyMomKSConfig.name = "twoBodyMomKS";
+   twoBodyMomKSConfig.xtitle = "Two body mom KS [MeV/c]";
+   twoBodyMomKSConfig.ytitle = "Counts";
+   twoBodyMomKSConfig.bins = 100;
+   twoBodyMomKSConfig.xmin = 0;
+   twoBodyMomKSConfig.xmax = 150;
+   twoBodyMomKSConfig.logy = false;
+   twoBodyMomKSConfig.showStats = false;
 
-   invMassKneMCConfig.name = "invMassKneMC";
-   invMassKneMCConfig.xtitle = "m^{inv,MC}_{K#rightarrow#pi^{0}#pi^{0}} [MeV/c^{2}]";
-   invMassKneMCConfig.ytitle = "Counts/10";
-   invMassKneMCConfig.bins = 100;
-   invMassKneMCConfig.xmin = -5;
-   invMassKneMCConfig.xmax = 5;
-   invMassKneMCConfig.logy = true;
-   invMassKneMCConfig.showStats = false;
+   twoBodyMomKLConfig.name = "twoBodyMomKL";
+   twoBodyMomKLConfig.xtitle = "Two body mom KL [MeV/c]";
+   twoBodyMomKLConfig.ytitle = "Counts";
+   twoBodyMomKLConfig.bins = 100;
+   twoBodyMomKLConfig.xmin = 0;
+   twoBodyMomKLConfig.xmax = 150;
+   twoBodyMomKLConfig.logy = false;
+   twoBodyMomKLConfig.showStats = false;
 
-   timeDiffConfig.name = "timeDiff";
-   timeDiffConfig.xtitle = "#DeltaT [#tau_{S}]";
-   timeDiffConfig.ytitle = "Counts/2";
-   timeDiffConfig.bins = 20;
-   timeDiffConfig.xmin = -20;
-   timeDiffConfig.xmax = 20;
-   timeDiffConfig.logy = true;
-   timeDiffConfig.showStats = false;
+   missTotKSConfig.name = "missTotKS";
+   missTotKSConfig.xtitle = "Miss tot KS [MeV]";
+   missTotKSConfig.ytitle = "Counts";
+   missTotKSConfig.bins = 100;
+   missTotKSConfig.xmin = 0;
+   missTotKSConfig.xmax = 50;
+   missTotKSConfig.logy = false;
+   missTotKSConfig.showStats = false;
 
-   timeDiffMCConfig.name = "timeDiffMC";
-   timeDiffMCConfig.xtitle = "#DeltaT [#tau_{S}]";
-   timeDiffMCConfig.ytitle = "Counts/2";
-   timeDiffMCConfig.bins = 301;
-   timeDiffMCConfig.xmin = -10;
-   timeDiffMCConfig.xmax = 10;
-   timeDiffMCConfig.logy = true;
-   timeDiffMCConfig.showStats = false;
+   missTotKLConfig.name = "missTotKL";
+   missTotKLConfig.xtitle = "Miss tot KL [MeV]";
+   missTotKLConfig.ytitle = "Counts";
+   missTotKLConfig.bins = 100;
+   missTotKLConfig.xmin = 0;
+   missTotKLConfig.xmax = 50;
+   missTotKLConfig.logy = false;
+   missTotKLConfig.showStats = false;
 
-   histMgr->CreateHistSet1D("invMassKch", invMassKchConfig);
-   histMgr->CreateHistSet1D("invMassKne", invMassKneConfig);
-   histMgr->CreateHistSet1D("timeDiff", timeDiffConfig);
-   histMgr->CreateHistSet1D("invMassKchMC", invMassKchMCConfig);
-   histMgr->CreateHistSet1D("invMassKneMC", invMassKneMCConfig);
-   histMgr->CreateHistSet1D("timeDiffMC", timeDiffMCConfig);
+   missSqKSConfig.name = "missSqKS";
+   missSqKSConfig.xtitle = "Miss sq KS [MeV^{2}/c^{4}]";
+   missSqKSConfig.ytitle = "Counts";
+   missSqKSConfig.bins = 100;
+   missSqKSConfig.xmin = -150;
+   missSqKSConfig.xmax = 150;
+   missSqKSConfig.logy = false;
+   missSqKSConfig.showStats = false;
+
+   missSqKLConfig.name = "missSqKL";
+   missSqKLConfig.xtitle = "Miss sq KL [MeV^{2}/c^{4}]";
+   missSqKLConfig.ytitle = "Counts";
+   missSqKLConfig.bins = 100;
+   missSqKLConfig.xmin = -150;
+   missSqKLConfig.xmax = 150;
+   missSqKLConfig.logy = false;
+   missSqKLConfig.showStats = false;
+
+
+   histMgr->CreateHistSet1D("invMassKS", invMassKSConfig);
+   histMgr->CreateHistSet1D("invMassKL", invMassKLConfig);
+
+   histMgr->CreateHistSet1D("missTotKS", missTotKSConfig);
+   histMgr->CreateHistSet1D("missTotKL", missTotKLConfig);
+
+   histMgr->CreateHistSet1D("twoBodyMomKS", twoBodyMomKSConfig);
+   histMgr->CreateHistSet1D("twoBodyMomKL", twoBodyMomKLConfig);
+
+   histMgr->CreateHistSet1D("missSqKS", missSqKSConfig);
+   histMgr->CreateHistSet1D("missSqKL", missSqKLConfig);
 }
 
 void four_pi::SlaveBegin(TTree * /*tree*/)
@@ -236,18 +262,18 @@ Bool_t four_pi::Process(Long64_t entry)
 
    Float_t weight = 1.0;
 
-   if (1)
+   if (cutter->PassAllCuts())
    {
-      if (*mctruth == 1)
-         weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
+      histMgr->Fill1D("invMassKS", *mctruth, KchrecKS[5], weight);
+      histMgr->Fill1D("invMassKL", *mctruth, KchrecKL[5], weight);
+      histMgr->Fill1D("twoBodyMomKS", *mctruth, KchrecKSMom, weight);
+      histMgr->Fill1D("twoBodyMomKL", *mctruth, KchrecKLMom, weight);
 
-      histMgr->Fill1D("invMassKch", *mctruth, KchrecKS[5], weight);
-      histMgr->Fill1D("invMassKne", *mctruth, KchrecKL[5], weight);
-      histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeCM - *KaonNeTimeCM, weight);
+      histMgr->Fill1D("missTotKS", *mctruth, sqrt(pow(EmissKS,2) + pow(PmissKS,2)), weight);
+      histMgr->Fill1D("missTotKL", *mctruth, sqrt(pow(EmissKL,2) + pow(PmissKL,2)), weight);
+      histMgr->Fill1D("missSqKS", *mctruth, pow(EmissKS,2) - pow(PmissKS,2), weight);
+      histMgr->Fill1D("missSqKL", *mctruth, pow(EmissKL,2) - pow(PmissKL,2), weight);
 
-      histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - KchrecKS[5], weight);
-      histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - KchrecKL[5], weight);
-      histMgr->Fill1D("timeDiffMC", *mctruth, (*KaonChTimeCMMC - *KaonNeTimeCMMC) - (*KaonChTimeCM - *KaonNeTimeCM), weight);
    }
 
    cutter->UpdateStats(*mctruth);
@@ -269,23 +295,32 @@ void four_pi::Terminate()
    // the results graphically or save the results to file.
 
    // 1D histogramy z danymi
-   histMgr->DrawSet1D("invMassKch", "HIST", false);
-   histMgr->DrawSet1D("invMassKne", "HIST", false);
-   histMgr->DrawSet1D("timeDiff", "HIST", false);
+   histMgr->DrawSet1D("invMassKS", "HIST", false);
+   histMgr->DrawSet1D("invMassKL", "HIST", false);
 
-   histMgr->DrawSet1D("invMassKchMC", "HIST", false);
-   histMgr->DrawSet1D("invMassKneMC", "HIST", false);
-   histMgr->DrawSet1D("timeDiffMC", "HIST", false);
+   histMgr->DrawSet1D("twoBodyMomKS", "HIST", false);
+   histMgr->DrawSet1D("twoBodyMomKL", "HIST", false);
 
-   // histMgr->SaveToRoot("analysis_results.root");
+   histMgr->DrawSet1D("missTotKS", "HIST", false);
+   histMgr->DrawSet1D("missTotKL", "HIST", false);
 
-   histMgr->SaveSet("invMassKch", "invMassKch");
-   histMgr->SaveSet("invMassKne", "invMassKne");
-   histMgr->SaveSet("timeDiff", "timeDiff");
+   histMgr->DrawSet1D("missSqKS", "HIST", false);
+   histMgr->DrawSet1D("missSqKL", "HIST", false);
 
-   histMgr->SaveSet("invMassKchMC", "invMassKchMC");
-   histMgr->SaveSet("invMassKneMC", "invMassKneMC");
-   histMgr->SaveSet("timeDiffMC", "timeDiffMC");
+   histMgr->SaveToRoot("analysis_results.root");
+
+   histMgr->SaveSet("invMassKS", "invMassKS");
+   histMgr->SaveSet("invMassKL", "invMassKL");
+
+   histMgr->SaveSet("twoBodyMomKS", "twoBodyMomKS");
+   histMgr->SaveSet("twoBodyMomKL", "twoBodyMomKL");
+
+   histMgr->SaveSet("missTotKS", "missTotKS");
+   histMgr->SaveSet("missTotKL", "missTotKL");
+
+   histMgr->SaveSet("missSqKS", "missSqKS");
+   histMgr->SaveSet("missSqKL", "missSqKL");
+
 
    // Wyniki
    for (size_t i = 0; i < cutter->GetCuts().size(); ++i)
