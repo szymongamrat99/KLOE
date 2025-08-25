@@ -6,8 +6,14 @@
 #include <TDecompChol.h> // For Cholesky Decomposition V = LLT
 #include <TVector.h>     // For Vector operations
 #include <TBufferJSON.h> // To store results in JSON file
+#include <vector>        // For storing multiple data vectors
+#include <string>
+#include <iostream>
+#include <fstream>
+#include "json.hpp"      // Assuming a JSON library is available, e.g., nlohmann/json
 
-#include <kloe_class.h>  // Standard KLOE class
+// Standard KLOE class - assuming this is part of your project
+#include <kloe_class.h>  
 
 namespace KLOE
 {
@@ -22,34 +28,43 @@ namespace KLOE
   {
   private:
     TVectorT<T>
-        _momVecMC,
-        _momVecData;
+        _momVecMC; // Current momentum vector to be smeared
 
     TMatrixT<T>
-        _covMatrix,
+        _covMatrix, // The final covariance matrix
         _U,
         _UT;
 
     Int_t
-        _vecSize,
-        _numberOfPoints = 0;
+        _vecSize;
 
     CovMatrixMode
-              _flag;
+        _flag;
 
+    // We store the full differences to allow for proper bootstrapping
+    std::vector<TVectorT<T>>
+        _diffVectors; 
+
+    // Helper functions for internal use
     void _CovMatrixToJSON();
     void _CholeskyDecomposition();
+    TMatrixT<T> _calculateCovarianceFromSample(const std::vector<Int_t>& indices);
 
   public:
-    MomentumSmearing(TVectorT<T> &momVecMC, TVectorT<T> &momVecData, TMatrixT<T> &covMatrix); // 1
-    MomentumSmearing(TVectorT<T> &momVecMC, TMatrixT<T> &covMatrix);                          // 2
+    // Constructor for covariance matrix calculation mode
+    MomentumSmearing(TVectorT<T> &momVecMC, TVectorT<T> &momVecData, TMatrixT<T> &covMatrix); 
+    // Constructor for momentum smearing mode
+    MomentumSmearing(TVectorT<T> &momVecMC, TMatrixT<T> &covMatrix);                          
 
-    void CovCalcPart(); // Usable only for constructor 1
+    // Accumulates a new data point for covariance calculation
+    void AddCovariancePoint(TVectorT<T> &momVecMC, TVectorT<T> &momVecData); 
+    // Calculates the final covariance matrix from accumulated points
     void GetCovMatrix();
+    // Calculates the uncertainty of the covariance matrix using bootstrap
     void CovMatrixUncertainty(Int_t numberOfSamples);
 
-
-    void SmearMomentum(); // Usable only for constructor 2
+    // Applies momentum smearing to the MC vector
+    void SmearMomentum(); 
     void GetSmearedMomentum(TVectorT<T> &momVecMC);
 
     void SetCovMatrix(TMatrixT<T> &covMatrix)
@@ -60,11 +75,6 @@ namespace KLOE
     void SetMCVector(TVectorT<T> &momVecMC)
     {
       _momVecMC = momVecMC;
-    }
-
-    void SetDataVector(TVectorT<T> &momVecData)
-    {
-      _momVecData = momVecData;
     }
 
   };

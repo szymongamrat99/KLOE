@@ -129,9 +129,9 @@ int CovarianceMatrixDetermination(TChain &chain, Controls::DataType &data_type, 
 				}
 
 				CovMatrixCalcObj.SetMCVector(momVecMC);
-				CovMatrixCalcObj.SetDataVector(momVecData);
+				// CovMatrixCalcObj.SetDataVector(momVecData);
 
-				CovMatrixCalcObj.CovCalcPart();
+				// CovMatrixCalcObj.CovCalcPart();
 			}
 		}
 	}

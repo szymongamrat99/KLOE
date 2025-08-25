@@ -33,8 +33,6 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 
 	chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-24/*.root");
 
-	
-
 	Float_t gamma;
 	Char_t vtxTwoTracks;
 	Int_t mcflag_int;
@@ -140,12 +138,10 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	{
 		chainDoublePiPi->GetEntry(i);
 
-
-
 		histDiff->Fill(gamma);
 
 		if (1)
-		{ 
+		{
 			KaonHist[0][0]->Fill(KchrecKL->at(0));
 			KaonHist[0][1]->Fill(KchrecKL->at(1));
 			KaonHist[0][2]->Fill(KchrecKL->at(2));
@@ -156,10 +152,10 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 			KaonHist[1][1]->Fill(trk1KLTwoBody->at(1) + trk2KLTwoBody->at(1));
 			KaonHist[1][2]->Fill(trk1KLTwoBody->at(2) + trk2KLTwoBody->at(2));
 			KaonHist[1][3]->Fill(trk1KLTwoBody->at(3) + trk2KLTwoBody->at(3));
-			KaonHist[1][4]->Fill(sqrt(pow(trk1KLTwoBody->at(3) + trk2KLTwoBody->at(3),2) - 
-				pow(trk1KLTwoBody->at(0) + trk2KLTwoBody->at(0), 2) - 
-				pow(trk1KLTwoBody->at(1) + trk2KLTwoBody->at(1), 2) - 
-				pow(trk1KLTwoBody->at(2) + trk2KLTwoBody->at(2), 2)));
+			KaonHist[1][4]->Fill(sqrt(pow(trk1KLTwoBody->at(3) + trk2KLTwoBody->at(3), 2) -
+																pow(trk1KLTwoBody->at(0) + trk2KLTwoBody->at(0), 2) -
+																pow(trk1KLTwoBody->at(1) + trk2KLTwoBody->at(1), 2) -
+																pow(trk1KLTwoBody->at(2) + trk2KLTwoBody->at(2), 2)));
 
 			events[0]++;
 		}
@@ -185,20 +181,16 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 				}
 			}
 
-			CovMatrixCalcObj.SetMCVector(momVecMC);
-			CovMatrixCalcObj.SetDataVector(momVecData);
-
-			CovMatrixCalcObj.CovCalcPart();
+			CovMatrixCalcObj.AddCovariancePoint(momVecMC, momVecData);
 		}
 	}
 
-	efficiency[0] = events[0] / (Float_t)nentries;
-	efficiency[1] = events[1] / (Float_t)nentries;
-
-	std::cout << "After cut on Difference: " << efficiency[0] << std::endl;
-	std::cout << "After cut on all: " << efficiency[1] << std::endl;
-
 	CovMatrixCalcObj.GetCovMatrix();
+
+	// --- Phase 2: Uncertainty Calculation using Bootstrap ---
+	const int num_bootstrap_samples = 100;
+	std::cout << "\n--- Calculating Uncertainty with Bootstrap (" << num_bootstrap_samples << " samples) ---" << std::endl;
+	CovMatrixCalcObj.CovMatrixUncertainty(num_bootstrap_samples);
 
 	TString x_names_pi[4] = {"p^{#pi}_{x} [MeV/c]", "p^{#pi}_{y} [MeV/c]", "p^{#pi}_{z} [MeV/c]", "E^{#pi} [MeV]"};
 
@@ -237,36 +229,36 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 			canvases_pi[i][j]->Print(name_canva);
 		}
 
-		TString x_names_kaon[5] = {"p^{K2}_{x} [MeV/c]", "p^{K2}_{y} [MeV/c]", "p^{K2}_{z} [MeV/c]", "E^{K2} [MeV]", "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]"};
+	TString x_names_kaon[5] = {"p^{K2}_{x} [MeV/c]", "p^{K2}_{y} [MeV/c]", "p^{K2}_{z} [MeV/c]", "E^{K2} [MeV]", "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]"};
 
 	for (Int_t i = 0; i < 5; i++)
-		{
-			TString name_canva = Form("%s_%d.png", "Kaon", i);
-			kaonCanva[i]->cd();
+	{
+		TString name_canva = Form("%s_%d.png", "Kaon", i);
+		kaonCanva[i]->cd();
 
-			TLegend *legendPi = new TLegend(0.2, 0.7, 0.5, 0.9);
-			legendPi->AddEntry(KaonHist[0][i], "Reconstructed charged K^{2}", "l");
-			legendPi->AddEntry(KaonHist[1][i], "Corrected K^{2} based on 2-body decay", "l");
+		TLegend *legendPi = new TLegend(0.2, 0.7, 0.5, 0.9);
+		legendPi->AddEntry(KaonHist[0][i], "Reconstructed charged K^{2}", "l");
+		legendPi->AddEntry(KaonHist[1][i], "Corrected K^{2} based on 2-body decay", "l");
 
-			KaonHist[0][i]->SetLineColor(kBlue);
-			KaonHist[1][i]->SetLineColor(kRed);
+		KaonHist[0][i]->SetLineColor(kBlue);
+		KaonHist[1][i]->SetLineColor(kRed);
 
-			KaonHist[0][i]->GetXaxis()->SetTitle(x_names_kaon[i]);
-			KaonHist[0][i]->GetYaxis()->SetTitle("Counts");
+		KaonHist[0][i]->GetXaxis()->SetTitle(x_names_kaon[i]);
+		KaonHist[0][i]->GetYaxis()->SetTitle("Counts");
 
-			Float_t maxY;
+		Float_t maxY;
 
-			maxY = KaonHist[0][i]->GetMaximum();
+		maxY = KaonHist[0][i]->GetMaximum();
 
-			KaonHist[0][i]->GetYaxis()->SetRangeUser(0.0, 1.2 * maxY);
+		KaonHist[0][i]->GetYaxis()->SetRangeUser(0.0, 1.2 * maxY);
 
-			KaonHist[0][i]->Draw("HIST");
-			KaonHist[1][i]->Draw("SAME");
+		KaonHist[0][i]->Draw("HIST");
+		KaonHist[1][i]->Draw("SAME");
 
-			legendPi->Draw();
+		legendPi->Draw();
 
-			kaonCanva[i]->Print(name_canva);
-		}
+		kaonCanva[i]->Print(name_canva);
+	}
 
 	canvaDiff->cd();
 

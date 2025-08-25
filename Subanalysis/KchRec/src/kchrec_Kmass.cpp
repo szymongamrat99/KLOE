@@ -14,7 +14,6 @@
 #include <SplitFileWriter.h>
 #include <event_data.h>
 
-
 #include "../inc/kchrec.hpp"
 
 /**
@@ -50,7 +49,6 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 
   BhabhaIP bhabhaProps(reader);
 
-
   chain.SetBranchAddress("nev", &baseKin.nev);
   chain.SetBranchAddress("nrun", &baseKin.nrun);
 
@@ -79,16 +77,16 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
       *Knemc(&baseKin.Knemc),
       *Kchmc(&baseKin.Kchmc);
 
-    trkKS[0] = &baseKin.trkKS[0];
-    trkKS[1] = &baseKin.trkKS[1];
-    trkKL[0] = &baseKin.trkKL[0];
-    trkKL[1] = &baseKin.trkKL[1];
-    trkKSmc[0] = &baseKin.trkKSmc[0];
-    trkKSmc[1] = &baseKin.trkKSmc[1];
-    trkKLmc[0] = &baseKin.trkKLmc[0];
-    trkKLmc[1] = &baseKin.trkKLmc[1];
+  trkKS[0] = &baseKin.trkKS[0];
+  trkKS[1] = &baseKin.trkKS[1];
+  trkKL[0] = &baseKin.trkKL[0];
+  trkKL[1] = &baseKin.trkKL[1];
+  trkKSmc[0] = &baseKin.trkKSmc[0];
+  trkKSmc[1] = &baseKin.trkKSmc[1];
+  trkKLmc[0] = &baseKin.trkKLmc[0];
+  trkKLmc[1] = &baseKin.trkKLmc[1];
 
-  baseKin.ipKS.resize(3);
+  baseKin.ipKL.resize(3);
   baseKin.ipKL.resize(3);
   baseKin.ipmc.resize(3);
 
@@ -161,8 +159,6 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   std::vector<TH1 *> histKLTwoBody;
   std::vector<TH1 *> histKL;
 
-
-
   for (Int_t i = 0; i < 2; i++)
     for (Int_t j = 0; j < 4; j++)
     {
@@ -230,263 +226,256 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
       baseKin.trkKLTwoBody[i].clear();
     }
 
-    if (1)
+    // 2. Calculation of KL flight direction
+    Double_t KLpath = sqrt(pow(KchboostKL->at(6) - ipKL->at(0), 2) +
+                           pow(KchboostKL->at(7) - ipKL->at(1), 2) +
+                           pow(KchboostKL->at(8) - ipKL->at(2), 2));
+    TVector3 KLflightDirection = {(KchboostKL->at(6) - ipKL->at(0)) / KLpath,
+                                  (KchboostKL->at(7) - ipKL->at(1)) / KLpath,
+                                  (KchboostKL->at(8) - ipKL->at(2)) / KLpath};
+
+    // 2.1 Calculation of KL momentum magnitude
+    Double_t KLmomMag = sqrt(pow(KchboostKL->at(0), 2) +
+                             pow(KchboostKL->at(1), 2) +
+                             pow(KchboostKL->at(2), 2));
+
+    // 2.2 Calculation of KL momentum from 2 body decay
+    for (Int_t j = 0; j < 3; j++)
     {
-      if (1)
-      {
-        // 2. Calculation of KL flight direction
-        Double_t KLpath = sqrt(pow(KchboostKL->at(6) - ipKS->at(0), 2) +
-                               pow(KchboostKL->at(7) - ipKS->at(1), 2) +
-                               pow(KchboostKL->at(8) - ipKS->at(2), 2));
-        TVector3 KLflightDirection = {(KchboostKL->at(6) - ipKS->at(0)) / KLpath,
-                                      (KchboostKL->at(7) - ipKS->at(1)) / KLpath,
-                                      (KchboostKL->at(8) - ipKS->at(2)) / KLpath};
-
-        // 2.1 Calculation of KL momentum magnitude
-        Double_t KLmomMag = sqrt(pow(KchboostKL->at(0), 2) +
-                                 pow(KchboostKL->at(1), 2) +
-                                 pow(KchboostKL->at(2), 2));
-
-        // 2.2 Calculation of KL momentum from 2 body decay
-        for (Int_t j = 0; j < 3; j++)
-        {
-          // Components
-          baseKin.KchrecKLTwoBody[j] = KLflightDirection[j] * KLmomMag;
-        }
-        // Energy
-        baseKin.KchrecKLTwoBody[3] = KchboostKL->at(3);
-
-        // Calculate the magnitude of the KL momentum
-        baseKin.KchrecKLTwoBody[4] = sqrt(pow(baseKin.KchrecKLTwoBody[0], 2) +
-                                          pow(baseKin.KchrecKLTwoBody[1], 2) +
-                                          pow(baseKin.KchrecKLTwoBody[2], 2));
-        // Calculate the invariant mass of the KL
-        baseKin.KchrecKLTwoBody[5] = sqrt(pow(baseKin.KchrecKLTwoBody[3], 2) -
-                                          pow(baseKin.KchrecKLTwoBody[4], 2));
-
-        // Copy the rest of the KL vertex components from the original KL vertex
-        baseKin.KchrecKLTwoBody[6] = KchboostKL->at(6);
-        baseKin.KchrecKLTwoBody[7] = KchboostKL->at(7);
-        baseKin.KchrecKLTwoBody[8] = KchboostKL->at(8);
-        // ------------------------------------------------------------------
-
-        // 2. Go to KL CM frame
-        TVector3
-            PiMomKaonCM[2],           // Pion momenta in the KL CM frame
-            PiMomKaonLAB[2],          // Pion momenta in the LAB frame
-            z_axis = {0.0, 0.0, 1.0}, // z-axis for rotation,
-            x_axis = {1.0, 0.0, 0.0}, // x-axis for rotation
-            kaonMomLAB = {-baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[3],
-                          -baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[3],
-                          -baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[3]},
-            Pi1MomLAB = {trkKL[0]->at(0),
-                         trkKL[0]->at(1),
-                         trkKL[0]->at(2)},
-            Pi2MomLAB = {trkKL[1]->at(0),
-                         trkKL[1]->at(1),
-                         trkKL[1]->at(2)},
-            nVec = Pi1MomLAB.Cross(Pi2MomLAB), // Normal vector to the plane of the two pions
-            cross = nVec.Cross(z_axis),
-            trkKLMomVecLAB[2], // Track momenta in the LAB frame
-            trkKLMomVecKaonCM[2];
-
-        TLorentzVector
-            kaon4VecLAB,
-            kaon4VecKaonCM,
-            trkKL4VecLAB[2],
-            trkKL4VecKaonCM[2],
-            PiKaon4VecKaonCM[2],
-            PiKaon4VecLAB[2];
-
-        Double_t rotAngle = nVec.Angle(z_axis);
-
-        kaonMomLAB.Rotate(rotAngle, cross);
-
-        Double_t rotAngleKaonX = kaonMomLAB.Angle(x_axis);
-
-        kaonMomLAB.Rotate(rotAngleKaonX, z_axis);
-
-        for (Int_t j = 0; j < 3; j++)
-        {
-          // Components of the track momenta in the LAB frame
-          trkKLMomVecLAB[0][j] = trkKL[0]->at(j);
-          trkKLMomVecLAB[1][j] = trkKL[1]->at(j);
-        }
-
-        trkKLMomVecLAB[0].Rotate(rotAngle, cross);
-        trkKLMomVecLAB[0].Rotate(rotAngleKaonX, z_axis);
-
-        trkKLMomVecLAB[1].Rotate(rotAngle, cross);
-        trkKLMomVecLAB[1].Rotate(rotAngleKaonX, z_axis);
-
-
-        trkKL4VecLAB[0].SetPxPyPzE(trkKLMomVecLAB[0][0],
-                                   trkKLMomVecLAB[0][1],
-                                   trkKLMomVecLAB[0][2],
-                                   trkKL[0]->at(3));
-
-        trkKL4VecLAB[1].SetPxPyPzE(trkKLMomVecLAB[1][0],
-                                   trkKLMomVecLAB[1][1],
-                                   trkKLMomVecLAB[1][2],
-                                   trkKL[1]->at(3));
-
-        Obj.lorentz_transf(kaonMomLAB, trkKL4VecLAB[0], trkKL4VecKaonCM[0]);
-        Obj.lorentz_transf(kaonMomLAB, trkKL4VecLAB[1], trkKL4VecKaonCM[1]);
-
-        trkKLMomVecKaonCM[0].SetXYZ(trkKL4VecKaonCM[0][0],
-                                    trkKL4VecKaonCM[0][1],
-                                    trkKL4VecKaonCM[0][2]);
-        trkKLMomVecKaonCM[1].SetXYZ(trkKL4VecKaonCM[1][0],
-                                    trkKL4VecKaonCM[1][1],
-                                    trkKL4VecKaonCM[1][2]);
-
-        Double_t
-            PiMomMagKaonCM1 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], mPiCh, mPiCh),
-            PiMomMagKaonCM2 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], mPiCh, mPiCh);
-
-        Double_t angle1 = trkKLMomVecKaonCM[0].Phi(),
-                 angle2 = trkKLMomVecKaonCM[1].Phi(),
-                 theta1 = trkKLMomVecKaonCM[0].Theta(),
-                 theta2 = trkKLMomVecKaonCM[1].Theta();
-
-        gamma = (M_PI_2 - 0.5 * abs(angle1) - 0.5 * abs(angle2));
-        gamma_theta = 0.0;//(M_PI_2 - 0.5 * theta1 - 0.5 * theta2);
-
-        if (angle1 < 0.0)
-          PiMomKaonCM[0].SetXYZ(PiMomMagKaonCM1 * sin(theta1) * cos(angle1 - gamma),
-                                PiMomMagKaonCM1 * sin(theta1) * sin(angle1 - gamma),
-                                PiMomMagKaonCM1 * cos(theta1));
-        else
-          PiMomKaonCM[0].SetXYZ(PiMomMagKaonCM1 * sin(theta1) * cos(angle1 + gamma),
-                                PiMomMagKaonCM1 * sin(theta1) * sin(angle1 + gamma),
-                                PiMomMagKaonCM1 * cos(theta1));
-        if (angle2 < 0.0)
-          PiMomKaonCM[1].SetXYZ(PiMomMagKaonCM1 * sin(theta2) * cos(angle2 - gamma),
-                                PiMomMagKaonCM1 * sin(theta2) * sin(angle2 - gamma),
-                                PiMomMagKaonCM1 * cos(theta2));
-        else
-          PiMomKaonCM[1].SetXYZ(PiMomMagKaonCM1 * sin(theta2) * cos(angle2 + gamma),
-                                PiMomMagKaonCM1 * sin(theta2) * sin(angle2 + gamma),
-                                PiMomMagKaonCM1 * cos(theta2));
-
-        PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomKaonCM[0][0], 2) + pow(PiMomKaonCM[0][1], 2) + pow(PiMomKaonCM[0][2], 2) + pow(mPiCh, 2)));
-        PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomKaonCM[1][0], 2) + pow(PiMomKaonCM[1][1], 2) + pow(PiMomKaonCM[1][2], 2) + pow(mPiCh, 2)));
-
-        kaonMomLAB = -kaonMomLAB; // Invert the boost direction for the pions
-        Obj.lorentz_transf(kaonMomLAB, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
-        Obj.lorentz_transf(kaonMomLAB, PiKaon4VecKaonCM[1], PiKaon4VecLAB[1]);
-
-        PiMomKaonLAB[0].SetXYZ(PiKaon4VecLAB[0][0],
-                               PiKaon4VecLAB[0][1],
-                               PiKaon4VecLAB[0][2]);
-        PiMomKaonLAB[1].SetXYZ(PiKaon4VecLAB[1][0],
-                               PiKaon4VecLAB[1][1],
-                               PiKaon4VecLAB[1][2]);
-
-        // Rotate the pion momenta to align with the kaon momentum direction
-
-        PiMomKaonLAB[0].Rotate(-rotAngleKaonX, z_axis);
-        PiMomKaonLAB[0].Rotate(-rotAngle, cross);
-
-        PiMomKaonLAB[1].Rotate(-rotAngleKaonX, z_axis);
-        PiMomKaonLAB[1].Rotate(-rotAngle, cross);
-
-        for (Int_t j = 0; j < 3; j++)
-        {
-          // Components of the track momenta in the LAB frame
-          trkKLMomVecLAB[0][j] = trkKL[0]->at(j);
-          trkKLMomVecLAB[1][j] = trkKL[1]->at(j);
-        }
-
-        PiKaon4VecLAB[0].SetPxPyPzE(PiMomKaonLAB[0][0],
-                                    PiMomKaonLAB[0][1],
-                                    PiMomKaonLAB[0][2],
-                                    sqrt(PiMomKaonLAB[0].Mag2() + pow(mPiCh, 2)));
-        PiKaon4VecLAB[1].SetPxPyPzE(PiMomKaonLAB[1][0],
-                                    PiMomKaonLAB[1][1],
-                                    PiMomKaonLAB[1][2],
-                                    sqrt(PiMomKaonLAB[1].Mag2() + pow(mPiCh, 2)));
-
-        trkKL4VecLAB[0].SetPxPyPzE(trkKLMomVecLAB[0][0],
-                                   trkKLMomVecLAB[0][1],
-                                   trkKLMomVecLAB[0][2],
-                                   trkKL[0]->at(3));
-        trkKL4VecLAB[1].SetPxPyPzE(trkKLMomVecLAB[1][0],
-                                   trkKLMomVecLAB[1][1],
-                                   trkKLMomVecLAB[1][2],
-                                   trkKL[1]->at(3));
-
-        for (Int_t k = 0; k < 4; k++)
-        {
-
-          trkKLTwoBody1[k] = PiKaon4VecLAB[0][k];
-          trkKLTwoBody2[k] = PiKaon4VecLAB[1][k];
-
-          if (mcflag == 1 && mctruth == 7)
-          {
-            if(trkKLTwoBody1[k] - trkKLmc[0]->at(k) < trkKLTwoBody2[k] - trkKLmc[0]->at(k))
-            {
-              histMomPiTwoBody[0][k]->Fill(trkKLTwoBody1[k] - trkKLmc[0]->at(k));
-              histMomPiTwoBody[1][k]->Fill(trkKLTwoBody2[k] - trkKLmc[1]->at(k));
-            }
-            else
-            {
-              histMomPiTwoBody[0][k]->Fill(trkKLTwoBody1[k] - trkKLmc[1]->at(k));
-              histMomPiTwoBody[1][k]->Fill(trkKLTwoBody2[k] - trkKLmc[0]->at(k));
-            }
-
-            if(trkKL4VecLAB[0][k] - trkKLmc[0]->at(k) < trkKL4VecLAB[1][k] - trkKLmc[0]->at(k))
-            {
-              histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k] - trkKLmc[0]->at(k));
-              histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[1]->at(k));
-            }
-            else
-            {
-              histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k] - trkKLmc[1]->at(k));
-              histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[0]->at(k));
-            }
-
-            histKLTwoBody[k]->Fill(baseKin.KchrecKLTwoBody[k] - Knemc->at(k));
-            histKL[k]->Fill(KchrecKL->at(k) - Knemc->at(k));
-          }
-        }
-      }
-
-      // Int_t zmienne
-      std::map<std::string, Int_t> intVars = {
-          {"nrun", baseKin.nrun},
-          {"nev", baseKin.nev},
-          {"mcflag", mcflag},
-          {"mctruth", mctruth}};
-
-      std::map<std::string, Float_t> floatVars = {
-          {"gamma", gamma},
-          {"gamma_theta", gamma_theta}};
-
-      // Tablice
-      std::map<std::string, std::vector<Int_t>> intArrays = {};
-
-      std::map<std::string, std::vector<Float_t>> floatArrays = {
-          {"Kchmc", *Kchmc},
-          {"Knemc", *Knemc},
-          {"KchrecKS", *KchrecKS},
-          {"KchrecKL", *KchrecKL},
-          {"KchboostKS", *KchboostKS},
-          {"KchboostKL", *KchboostKL},
-          {"KchrecKLTwoBody", baseKin.KchrecKLTwoBody},
-          {"trk1KS", *trkKS[0]},
-          {"trk2KS", *trkKS[1]},
-          {"trk1KL", *trkKL[0]},
-          {"trk2KL", *trkKL[1]},
-          {"trk1TwoBody", trkKLTwoBody1},
-          {"trk2TwoBody", trkKLTwoBody2},
-          {"trk1KSmc", *trkKSmc[0]},
-          {"trk2KSmc", *trkKSmc[1]},
-          {"trk1KLmc", *trkKLmc[0]},
-          {"trk2KLmc", *trkKLmc[1]}};
-
-      writer.Fill(intVars, floatVars, intArrays, floatArrays);
+      // Components
+      baseKin.KchrecKLTwoBody[j] = KLflightDirection[j] * KLmomMag;
     }
+    // Energy
+    baseKin.KchrecKLTwoBody[3] = KchboostKL->at(3);
+
+    // Calculate the magnitude of the KL momentum
+    baseKin.KchrecKLTwoBody[4] = sqrt(pow(baseKin.KchrecKLTwoBody[0], 2) +
+                                      pow(baseKin.KchrecKLTwoBody[1], 2) +
+                                      pow(baseKin.KchrecKLTwoBody[2], 2));
+    // Calculate the invariant mass of the KL
+    baseKin.KchrecKLTwoBody[5] = sqrt(pow(baseKin.KchrecKLTwoBody[3], 2) -
+                                      pow(baseKin.KchrecKLTwoBody[4], 2));
+
+    // Copy the rest of the KL vertex components from the original KL vertex
+    baseKin.KchrecKLTwoBody[6] = KchboostKL->at(6);
+    baseKin.KchrecKLTwoBody[7] = KchboostKL->at(7);
+    baseKin.KchrecKLTwoBody[8] = KchboostKL->at(8);
+    // ------------------------------------------------------------------
+
+    // 2. Go to KL CM frame
+    TVector3
+        PiMomKaonCM[2],           // Pion momenta in the KL CM frame
+        PiMomKaonLAB[2],          // Pion momenta in the LAB frame
+        z_axis = {0.0, 0.0, 1.0}, // z-axis for rotation,
+        x_axis = {1.0, 0.0, 0.0}, // x-axis for rotation
+        kaonMomLAB = {-baseKin.KchrecKLTwoBody[0] / baseKin.KchrecKLTwoBody[3],
+                      -baseKin.KchrecKLTwoBody[1] / baseKin.KchrecKLTwoBody[3],
+                      -baseKin.KchrecKLTwoBody[2] / baseKin.KchrecKLTwoBody[3]},
+        Pi1MomLAB = {trkKL[0]->at(0),
+                     trkKL[0]->at(1),
+                     trkKL[0]->at(2)},
+        Pi2MomLAB = {trkKL[1]->at(0),
+                     trkKL[1]->at(1),
+                     trkKL[1]->at(2)},
+        nVec = Pi1MomLAB.Cross(Pi2MomLAB), // Normal vector to the plane of the two pions
+        cross = nVec.Cross(z_axis),
+        trkKLMomVecLAB[2], // Track momenta in the LAB frame
+        trkKLMomVecKaonCM[2];
+
+    TLorentzVector
+        kaon4VecLAB,
+        kaon4VecKaonCM,
+        trkKL4VecLAB[2],
+        trkKL4VecKaonCM[2],
+        PiKaon4VecKaonCM[2],
+        PiKaon4VecLAB[2];
+
+    Double_t rotAngle = nVec.Angle(z_axis);
+
+    kaonMomLAB.Rotate(rotAngle, cross);
+
+    Double_t rotAngleKaonX = kaonMomLAB.Angle(x_axis);
+
+    kaonMomLAB.Rotate(rotAngleKaonX, z_axis);
+
+    for (Int_t j = 0; j < 3; j++)
+    {
+      // Components of the track momenta in the LAB frame
+      trkKLMomVecLAB[0][j] = trkKL[0]->at(j);
+      trkKLMomVecLAB[1][j] = trkKL[1]->at(j);
+    }
+
+    trkKLMomVecLAB[0].Rotate(rotAngle, cross);
+    trkKLMomVecLAB[0].Rotate(rotAngleKaonX, z_axis);
+
+    trkKLMomVecLAB[1].Rotate(rotAngle, cross);
+    trkKLMomVecLAB[1].Rotate(rotAngleKaonX, z_axis);
+
+    trkKL4VecLAB[0].SetPxPyPzE(trkKLMomVecLAB[0][0],
+                               trkKLMomVecLAB[0][1],
+                               trkKLMomVecLAB[0][2],
+                               trkKL[0]->at(3));
+
+    trkKL4VecLAB[1].SetPxPyPzE(trkKLMomVecLAB[1][0],
+                               trkKLMomVecLAB[1][1],
+                               trkKLMomVecLAB[1][2],
+                               trkKL[1]->at(3));
+
+    Obj.lorentz_transf(kaonMomLAB, trkKL4VecLAB[0], trkKL4VecKaonCM[0]);
+    Obj.lorentz_transf(kaonMomLAB, trkKL4VecLAB[1], trkKL4VecKaonCM[1]);
+
+    trkKLMomVecKaonCM[0].SetXYZ(trkKL4VecKaonCM[0][0],
+                                trkKL4VecKaonCM[0][1],
+                                trkKL4VecKaonCM[0][2]);
+    trkKLMomVecKaonCM[1].SetXYZ(trkKL4VecKaonCM[1][0],
+                                trkKL4VecKaonCM[1][1],
+                                trkKL4VecKaonCM[1][2]);
+
+    Double_t
+        PiMomMagKaonCM1 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], mPiCh, mPiCh),
+        PiMomMagKaonCM2 = Obj.TwoBodyDecayMass(baseKin.KchrecKLTwoBody[5], mPiCh, mPiCh);
+
+    Double_t angle1 = trkKLMomVecKaonCM[0].Phi(),
+             angle2 = trkKLMomVecKaonCM[1].Phi(),
+             theta1 = trkKLMomVecKaonCM[0].Theta(),
+             theta2 = trkKLMomVecKaonCM[1].Theta();
+
+    gamma = (M_PI_2 - 0.5 * abs(angle1) - 0.5 * abs(angle2));
+    gamma_theta = 0.0; //(M_PI_2 - 0.5 * theta1 - 0.5 * theta2);
+
+    if (angle1 < 0.0)
+      PiMomKaonCM[0].SetXYZ(PiMomMagKaonCM1 * sin(theta1) * cos(angle1 - gamma),
+                            PiMomMagKaonCM1 * sin(theta1) * sin(angle1 - gamma),
+                            PiMomMagKaonCM1 * cos(theta1));
+    else
+      PiMomKaonCM[0].SetXYZ(PiMomMagKaonCM1 * sin(theta1) * cos(angle1 + gamma),
+                            PiMomMagKaonCM1 * sin(theta1) * sin(angle1 + gamma),
+                            PiMomMagKaonCM1 * cos(theta1));
+    if (angle2 < 0.0)
+      PiMomKaonCM[1].SetXYZ(PiMomMagKaonCM1 * sin(theta2) * cos(angle2 - gamma),
+                            PiMomMagKaonCM1 * sin(theta2) * sin(angle2 - gamma),
+                            PiMomMagKaonCM1 * cos(theta2));
+    else
+      PiMomKaonCM[1].SetXYZ(PiMomMagKaonCM1 * sin(theta2) * cos(angle2 + gamma),
+                            PiMomMagKaonCM1 * sin(theta2) * sin(angle2 + gamma),
+                            PiMomMagKaonCM1 * cos(theta2));
+
+    PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomKaonCM[0][0], 2) + pow(PiMomKaonCM[0][1], 2) + pow(PiMomKaonCM[0][2], 2) + pow(mPiCh, 2)));
+    PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomKaonCM[1][0], 2) + pow(PiMomKaonCM[1][1], 2) + pow(PiMomKaonCM[1][2], 2) + pow(mPiCh, 2)));
+
+    kaonMomLAB = -kaonMomLAB; // Invert the boost direction for the pions
+    Obj.lorentz_transf(kaonMomLAB, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
+    Obj.lorentz_transf(kaonMomLAB, PiKaon4VecKaonCM[1], PiKaon4VecLAB[1]);
+
+    PiMomKaonLAB[0].SetXYZ(PiKaon4VecLAB[0][0],
+                           PiKaon4VecLAB[0][1],
+                           PiKaon4VecLAB[0][2]);
+    PiMomKaonLAB[1].SetXYZ(PiKaon4VecLAB[1][0],
+                           PiKaon4VecLAB[1][1],
+                           PiKaon4VecLAB[1][2]);
+
+    // Rotate the pion momenta to align with the kaon momentum direction
+
+    PiMomKaonLAB[0].Rotate(-rotAngleKaonX, z_axis);
+    PiMomKaonLAB[0].Rotate(-rotAngle, cross);
+
+    PiMomKaonLAB[1].Rotate(-rotAngleKaonX, z_axis);
+    PiMomKaonLAB[1].Rotate(-rotAngle, cross);
+
+    for (Int_t j = 0; j < 3; j++)
+    {
+      // Components of the track momenta in the LAB frame
+      trkKLMomVecLAB[0][j] = trkKL[0]->at(j);
+      trkKLMomVecLAB[1][j] = trkKL[1]->at(j);
+    }
+
+    PiKaon4VecLAB[0].SetPxPyPzE(PiMomKaonLAB[0][0],
+                                PiMomKaonLAB[0][1],
+                                PiMomKaonLAB[0][2],
+                                sqrt(PiMomKaonLAB[0].Mag2() + pow(mPiCh, 2)));
+    PiKaon4VecLAB[1].SetPxPyPzE(PiMomKaonLAB[1][0],
+                                PiMomKaonLAB[1][1],
+                                PiMomKaonLAB[1][2],
+                                sqrt(PiMomKaonLAB[1].Mag2() + pow(mPiCh, 2)));
+
+    trkKL4VecLAB[0].SetPxPyPzE(trkKLMomVecLAB[0][0],
+                               trkKLMomVecLAB[0][1],
+                               trkKLMomVecLAB[0][2],
+                               trkKL[0]->at(3));
+    trkKL4VecLAB[1].SetPxPyPzE(trkKLMomVecLAB[1][0],
+                               trkKLMomVecLAB[1][1],
+                               trkKLMomVecLAB[1][2],
+                               trkKL[1]->at(3));
+
+    for (Int_t k = 0; k < 4; k++)
+    {
+
+      trkKLTwoBody1[k] = PiKaon4VecLAB[0][k];
+      trkKLTwoBody2[k] = PiKaon4VecLAB[1][k];
+
+      if (mcflag == 1 && mctruth == 7)
+      {
+        if (trkKLTwoBody1[k] - trkKLmc[0]->at(k) < trkKLTwoBody2[k] - trkKLmc[0]->at(k))
+        {
+          histMomPiTwoBody[0][k]->Fill(trkKLTwoBody1[k] - trkKLmc[0]->at(k));
+          histMomPiTwoBody[1][k]->Fill(trkKLTwoBody2[k] - trkKLmc[1]->at(k));
+        }
+        else
+        {
+          histMomPiTwoBody[0][k]->Fill(trkKLTwoBody1[k] - trkKLmc[1]->at(k));
+          histMomPiTwoBody[1][k]->Fill(trkKLTwoBody2[k] - trkKLmc[0]->at(k));
+        }
+
+        if (trkKL4VecLAB[0][k] - trkKLmc[0]->at(k) < trkKL4VecLAB[1][k] - trkKLmc[0]->at(k))
+        {
+          histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k] - trkKLmc[0]->at(k));
+          histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[1]->at(k));
+        }
+        else
+        {
+          histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k] - trkKLmc[1]->at(k));
+          histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[0]->at(k));
+        }
+
+        histKLTwoBody[k]->Fill(baseKin.KchrecKLTwoBody[k] - Knemc->at(k));
+        histKL[k]->Fill(KchrecKL->at(k) - Knemc->at(k));
+      }
+    }
+
+    // Int_t zmienne
+    std::map<std::string, Int_t> intVars = {
+        {"nrun", baseKin.nrun},
+        {"nev", baseKin.nev},
+        {"mcflag", mcflag},
+        {"mctruth", mctruth}};
+
+    std::map<std::string, Float_t> floatVars = {
+        {"gamma", gamma},
+        {"gamma_theta", gamma_theta}};
+
+    // Tablice
+    std::map<std::string, std::vector<Int_t>> intArrays = {};
+
+    std::map<std::string, std::vector<Float_t>> floatArrays = {
+        {"Kchmc", *Kchmc},
+        {"Knemc", *Knemc},
+        {"KchrecKS", *KchrecKS},
+        {"KchrecKL", *KchrecKL},
+        {"KchboostKS", *KchboostKS},
+        {"KchboostKL", *KchboostKL},
+        {"KchrecKLTwoBody", baseKin.KchrecKLTwoBody},
+        {"trk1KS", *trkKS[0]},
+        {"trk2KS", *trkKS[1]},
+        {"trk1KL", *trkKL[0]},
+        {"trk2KL", *trkKL[1]},
+        {"trk1TwoBody", trkKLTwoBody1},
+        {"trk2TwoBody", trkKLTwoBody2},
+        {"trk1KSmc", *trkKSmc[0]},
+        {"trk2KSmc", *trkKSmc[1]},
+        {"trk1KLmc", *trkKLmc[0]},
+        {"trk2KLmc", *trkKLmc[1]}};
+
+    writer.Fill(intVars, floatVars, intArrays, floatArrays);
 
     ++show_progress; // Progress of the loading bar
   }

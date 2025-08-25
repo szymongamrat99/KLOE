@@ -33,7 +33,8 @@ add_library(LibRec SHARED
             src/GeneratedVariables.cpp
             src/FileManager.cpp
             src/StatisticalCutter.cpp
-            src/HistManager.cpp)
+            src/HistManager.cpp
+            src/KaonMassReconstructor.cpp)
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
 # PUBLIC: oznacza, że katalog z nagłówkami (tu: bieżący katalog, '.') będzie
