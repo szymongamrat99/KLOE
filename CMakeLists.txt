@@ -37,6 +37,8 @@ add_subdirectory(Include/FortranAnalysis)
 # add_subdirectory(Subanalysis/RegenerationAnalysis)
 # add_subdirectory(Subanalysis/Semileptonic)
 
+# Dodaj przykłady aplikacji desktopowych
+add_subdirectory(examples)
 
 # What should be the result of compilation
 add_executable(KLSPM00 app/CPVAnalysis.cpp)
