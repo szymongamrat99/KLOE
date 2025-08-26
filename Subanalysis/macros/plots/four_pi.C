@@ -178,7 +178,6 @@ void four_pi::Begin(TTree * /*tree*/)
    missSqKLConfig.logy = false;
    missSqKLConfig.showStats = false;
 
-
    histMgr->CreateHistSet1D("invMassKS", invMassKSConfig);
    histMgr->CreateHistSet1D("invMassKL", invMassKLConfig);
 
@@ -264,16 +263,32 @@ Bool_t four_pi::Process(Long64_t entry)
 
    if (cutter->PassAllCuts())
    {
-      histMgr->Fill1D("invMassKS", *mctruth, KchrecKS[5], weight);
-      histMgr->Fill1D("invMassKL", *mctruth, KchrecKL[5], weight);
-      histMgr->Fill1D("twoBodyMomKS", *mctruth, KchrecKSMom, weight);
-      histMgr->Fill1D("twoBodyMomKL", *mctruth, KchrecKLMom, weight);
 
-      histMgr->Fill1D("missTotKS", *mctruth, sqrt(pow(EmissKS,2) + pow(PmissKS,2)), weight);
-      histMgr->Fill1D("missTotKL", *mctruth, sqrt(pow(EmissKL,2) + pow(PmissKL,2)), weight);
-      histMgr->Fill1D("missSqKS", *mctruth, pow(EmissKS,2) - pow(PmissKS,2), weight);
-      histMgr->Fill1D("missSqKL", *mctruth, pow(EmissKL,2) - pow(PmissKL,2), weight);
+      if (*mcflag == 1)
+      {
+         histMgr->Fill1D("invMassKS", *mctruth, KchrecKS[5], weight);
+         histMgr->Fill1D("invMassKL", *mctruth, KchrecKL[5], weight);
+         histMgr->Fill1D("twoBodyMomKS", *mctruth, KchrecKSMom, weight);
+         histMgr->Fill1D("twoBodyMomKL", *mctruth, KchrecKLMom, weight);
 
+         histMgr->Fill1D("missTotKS", *mctruth, sqrt(pow(EmissKS, 2) + pow(PmissKS, 2)), weight);
+         histMgr->Fill1D("missTotKL", *mctruth, sqrt(pow(EmissKL, 2) + pow(PmissKL, 2)), weight);
+         histMgr->Fill1D("missSqKS", *mctruth, pow(EmissKS, 2) - pow(PmissKS, 2), weight);
+         histMgr->Fill1D("missSqKL", *mctruth, pow(EmissKL, 2) - pow(PmissKL, 2), weight);
+      }
+
+      if (*mcflag == 0)
+      {
+         histMgr->FillData1D("invMassKS", KchrecKS[5], weight);
+         histMgr->FillData1D("invMassKL", KchrecKL[5], weight);
+         histMgr->FillData1D("twoBodyMomKS", KchrecKSMom, weight);
+         histMgr->FillData1D("twoBodyMomKL", KchrecKLMom, weight);
+
+         histMgr->FillData1D("missTotKS", sqrt(pow(EmissKS, 2) + pow(PmissKS, 2)), weight);
+         histMgr->FillData1D("missTotKL", sqrt(pow(EmissKL, 2) + pow(PmissKL, 2)), weight);
+         histMgr->FillData1D("missSqKS", pow(EmissKS, 2) - pow(PmissKS, 2), weight);
+         histMgr->FillData1D("missSqKL", pow(EmissKL, 2) - pow(PmissKL, 2), weight);
+      }
    }
 
    cutter->UpdateStats(*mctruth);
@@ -295,17 +310,17 @@ void four_pi::Terminate()
    // the results graphically or save the results to file.
 
    // 1D histogramy z danymi
-   histMgr->DrawSet1D("invMassKS", "HIST", false);
-   histMgr->DrawSet1D("invMassKL", "HIST", false);
+   histMgr->DrawSet1D("invMassKS", "HIST", true);
+   histMgr->DrawSet1D("invMassKL", "HIST", true);
 
-   histMgr->DrawSet1D("twoBodyMomKS", "HIST", false);
-   histMgr->DrawSet1D("twoBodyMomKL", "HIST", false);
+   histMgr->DrawSet1D("twoBodyMomKS", "HIST", true);
+   histMgr->DrawSet1D("twoBodyMomKL", "HIST", true);
 
-   histMgr->DrawSet1D("missTotKS", "HIST", false);
-   histMgr->DrawSet1D("missTotKL", "HIST", false);
+   histMgr->DrawSet1D("missTotKS", "HIST", true);
+   histMgr->DrawSet1D("missTotKL", "HIST", true);
 
-   histMgr->DrawSet1D("missSqKS", "HIST", false);
-   histMgr->DrawSet1D("missSqKL", "HIST", false);
+   histMgr->DrawSet1D("missSqKS", "HIST", true);
+   histMgr->DrawSet1D("missSqKL", "HIST", true);
 
    histMgr->SaveToRoot("analysis_results.root");
 
@@ -320,7 +335,6 @@ void four_pi::Terminate()
 
    histMgr->SaveSet("missSqKS", "missSqKS");
    histMgr->SaveSet("missSqKL", "missSqKL");
-
 
    // Wyniki
    for (size_t i = 0; i < cutter->GetCuts().size(); ++i)
