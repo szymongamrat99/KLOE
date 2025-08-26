@@ -1,6 +1,7 @@
 #include "HistManager.h"
 #include <TMath.h>
 #include <TStyle.h>
+#include <Math/MinimizerOptions.h>
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>
@@ -223,9 +224,93 @@ void HistManager::DrawSet1D(const TString& setName, const TString& drawOpt, Bool
     if(drawData) {
         auto dataIt = fData1D.find(setName);
         if(dataIt != fData1D.end()) {
+            // Wykonaj normalizację w zależności od ustawionego typu
+            if(fNormalizationType == NormalizationType::FRACTION_FIT) {
+                try {
+                    FitResult fitResult = PerformFractionFit(setName);
+                    
+                    if(fitResult.converged && fitResult.status == 0) {
+                        // Po ficie, ponownie oblicz zakres Y uwzględniając przeskalowane histogramy
+                        maxY = CalculateYRange(histIt->second, setName, configIt->second.logy);
+                        
+                        // Zaktualizuj zakres Y dla wszystkich histogramów
+                        for(size_t i = 0; i < histIt->second.size(); ++i) {
+                            histIt->second[i]->GetYaxis()->SetRangeUser(configIt->second.logy ? 0.1 : 0, maxY);
+                        }
+                        
+                        // Wyświetl informacje o ficie
+                        TPaveText* fitInfo = new TPaveText(0.15, 0.7, 0.5, 0.9, "NDC");
+                        fitInfo->SetFillColor(kWhite);
+                        fitInfo->SetBorderSize(1);
+                        fitInfo->AddText("Fraction Fit Results:");
+                        fitInfo->AddText(Form("#chi^{2}/NDF = %.2f/%d", fitResult.chi2, fitResult.ndf));
+                        
+                        for(Int_t i = 0; i < fChannNum && i < static_cast<Int_t>(fitResult.fractions.size()); ++i) {
+                            if(fitResult.fractions[i] > 0) {
+                                fitInfo->AddText(Form("%s: %.3f #pm %.3f", 
+                                                    fChannelNames[i].Data(), 
+                                                    fitResult.fractions[i], 
+                                                    fitResult.errors[i]));
+                            } else {
+                                fitInfo->AddText(Form("%s: not used (empty)", 
+                                                    fChannelNames[i].Data()));
+                            }
+                        }
+                        
+                        if(!fitResult.fitInfo.IsNull()) {
+                            fitInfo->AddText(fitResult.fitInfo);
+                        }
+                        
+                        fitInfo->Draw();
+                    } else {
+                        // Wyświetl informację o nieudanym ficie
+                        TPaveText* fitInfo = new TPaveText(0.15, 0.8, 0.5, 0.9, "NDC");
+                        fitInfo->SetFillColor(kYellow);
+                        fitInfo->SetBorderSize(1);
+                        fitInfo->AddText("Fraction Fit Failed");
+                        if(!fitResult.fitInfo.IsNull()) {
+                            fitInfo->AddText(fitResult.fitInfo);
+                        }
+                        fitInfo->Draw();
+                    }
+                } catch(const std::exception& e) {
+                    std::cerr << "Error during FractionFit: " << e.what() << std::endl;
+                }
+            } else if(fNormalizationType == NormalizationType::SIMPLE_SCALE) {
+                try {
+                    Double_t scaleFactor = PerformSimpleScaling(setName);
+                    
+                    if(scaleFactor > 0) {
+                        // Po skalowaniu, ponownie oblicz zakres Y
+                        maxY = CalculateYRange(histIt->second, setName, configIt->second.logy);
+                        
+                        // Zaktualizuj zakres Y dla wszystkich histogramów
+                        for(size_t i = 0; i < histIt->second.size(); ++i) {
+                            histIt->second[i]->GetYaxis()->SetRangeUser(configIt->second.logy ? 0.1 : 0, maxY);
+                        }
+                        
+                        // Wyświetl informacje o skalowaniu
+                        TPaveText* scaleInfo = new TPaveText(0.15, 0.8, 0.5, 0.9, "NDC");
+                        scaleInfo->SetFillColor(kCyan-10);
+                        scaleInfo->SetBorderSize(1);
+                        scaleInfo->AddText("Simple Scaling Applied:");
+                        scaleInfo->AddText(Form("Scale Factor = %.3f", scaleFactor));
+                        scaleInfo->AddText(Form("Data Events: %.0f", dataIt->second->Integral()));
+                        scaleInfo->AddText(Form("MC Events: %.0f", histIt->second[0]->Integral()));
+                        scaleInfo->Draw();
+                    }
+                } catch(const std::exception& e) {
+                    std::cerr << "Error during Simple Scaling: " << e.what() << std::endl;
+                }
+            }
+            
             dataIt->second->SetMarkerStyle(fDataStyle);
             dataIt->second->SetMarkerColor(fDataColor);
             dataIt->second->SetLineColor(fDataColor);
+            // Upewnij się, że dane mają poprawny zakres Y (może być zaktualizowany po normalizacji)
+            if(fNormalizationType != NormalizationType::NONE) {
+                dataIt->second->GetYaxis()->SetRangeUser(configIt->second.logy ? 0.1 : 0, maxY);
+            }
             dataIt->second->Draw("SAME PE1");
         }
     }
@@ -455,4 +540,346 @@ TLegend* HistManager::CreateLegend(const std::vector<TH1*>& hists, const TH1* da
     }
     
     return legend;
+}
+
+// ==================== FRACTIONFIT IMPLEMENTATION ====================
+
+void HistManager::SetFitConstraints(const TString& setName, const FitConstraints& constraints) {
+    // Sprawdź czy zestaw istnieje
+    if(fHists1D.find(setName) == fHists1D.end()) {
+        throw std::runtime_error("Histogram set not found: " + std::string(setName.Data()));
+    }
+    
+    // Sprawdź poprawność ograniczeń
+    if(constraints.lowerBounds.size() != static_cast<size_t>(fChannNum) || 
+       constraints.upperBounds.size() != static_cast<size_t>(fChannNum) ||
+       constraints.initialValues.size() != static_cast<size_t>(fChannNum)) {
+        throw std::runtime_error("Constraint vectors must have size equal to number of channels");
+    }
+    
+    // Sprawdź zakresy
+    for(Int_t i = 0; i < fChannNum; ++i) {
+        if(constraints.lowerBounds[i] < 0.0 || 
+           constraints.upperBounds[i] < 0.0 ||
+           constraints.lowerBounds[i] >= constraints.upperBounds[i]) {
+            throw std::runtime_error(Form("Invalid constraints for channel %d", i));
+        }
+    }
+    
+    fFitConstraints[setName] = constraints;
+}
+
+HistManager::FitResult HistManager::PerformFractionFit(const TString& setName, Bool_t useStoredConstraints) {
+    auto histIt = fHists1D.find(setName);
+    if(histIt == fHists1D.end()) {
+        throw std::runtime_error("Histogram set not found: " + std::string(setName.Data()));
+    }
+    
+    auto dataIt = fData1D.find(setName);
+    if(dataIt == fData1D.end()) {
+        throw std::runtime_error("No data histogram found for set: " + std::string(setName.Data()));
+    }
+    
+    // Przygotuj wektor histogramów MC (bez sumy - indeks 0)
+    std::vector<TH1*> mcHists;
+    for(size_t i = 1; i < histIt->second.size(); ++i) {
+        mcHists.push_back(histIt->second[i]);
+    }
+    
+    // Użyj zapisanych ograniczeń lub domyślnych
+    FitConstraints constraints(fChannNum);
+    if(useStoredConstraints) {
+        auto constraintIt = fFitConstraints.find(setName);
+        if(constraintIt != fFitConstraints.end()) {
+            constraints = constraintIt->second;
+        }
+    }
+    
+    // Wykonaj fit
+    FitResult result = DoFractionFit(mcHists, dataIt->second, constraints);
+    
+    // Zapisz wyniki
+    fFitResults[setName] = result;
+    fLastFitResult = result;
+    
+    // Jeśli fit się udał, zaktualizuj histogramy
+    if(result.converged && result.status == 0) {
+        UpdateMCHistograms(mcHists, histIt->second[0], result);
+    }
+    
+    return result;
+}
+
+HistManager::FitResult HistManager::DoFractionFit(const std::vector<TH1*>& mcHists, TH1* dataHist, 
+                                                 const FitConstraints& constraints) {
+    FitResult result;
+    result.fractions.resize(fChannNum);
+    result.errors.resize(fChannNum);
+    
+    try {
+        // Sprawdź czy histogramy mają wystarczającą statystykę
+        Double_t dataIntegral = dataHist->Integral();
+        if(dataIntegral < 10) {
+            result.fitInfo = "Insufficient statistics in data histogram";
+            return result;
+        }
+        
+        // Sprawdź które histogramy MC mają wystarczającą statystykę
+        std::vector<Bool_t> useInFit(mcHists.size(), false);
+        std::vector<Int_t> fitIndexMap; // Mapowanie z indeksu w ficie na indeks w mcHists
+        Int_t nHistsForFit = 0;
+        
+        for(size_t i = 0; i < mcHists.size(); ++i) {
+            if(mcHists[i]->Integral() >= 1) {
+                useInFit[i] = true;
+                fitIndexMap.push_back(i);
+                nHistsForFit++;
+            }
+        }
+        
+        if(nHistsForFit == 0) {
+            result.fitInfo = "No MC histograms with sufficient statistics for fit";
+            return result;
+        }
+        
+        // Stwórz kopie histogramów MC do fitowania (tylko te z wystarczającą statystyką)
+        TObjArray mcArray;
+        std::vector<TH1*> mcCopies;
+        Double_t totalMC = 0;
+        
+        for(size_t i = 0; i < mcHists.size(); ++i) {
+            if(useInFit[i]) {
+                TH1* copy = (TH1*)mcHists[i]->Clone(Form("%s_fitcopy_%zu", mcHists[i]->GetName(), i));
+                mcCopies.push_back(copy);
+                totalMC += copy->Integral();
+            }
+        }
+        
+        // Normalizuj MC do danych jako punkt startowy
+        if(totalMC > 0) {
+            Double_t scale = dataIntegral / totalMC;
+            for(auto copy : mcCopies) {
+                copy->Scale(scale);
+                mcArray.Add(copy);
+            }
+        } else {
+            result.fitInfo = "No events in MC histograms";
+            return result;
+        }
+        
+        // Inicjalizuj TFractionFitter
+        TFractionFitter fitter(dataHist, &mcArray);
+        
+        // Ustaw zakres fitu jeśli określony
+        if(constraints.fitRangeMin > 0 && constraints.fitRangeMax > constraints.fitRangeMin) {
+            fitter.SetRangeX(constraints.fitRangeMin, constraints.fitRangeMax);
+        }
+        
+        // Ustaw ograniczenia tylko dla histogramów używanych w ficie
+        for(Int_t i = 0; i < nHistsForFit; ++i) {
+            Int_t originalIndex = fitIndexMap[i];
+            fitter.Constrain(i, constraints.lowerBounds[originalIndex], constraints.upperBounds[originalIndex]);
+        }
+        
+        // Zwiększ liczbę iteracji
+        ROOT::Math::MinimizerOptions::SetDefaultMaxIterations(500000);
+        ROOT::Math::MinimizerOptions::SetDefaultMaxFunctionCalls(500000);
+        
+        // Wykonaj fit z zabezpieczeniem stabilności
+        result.status = EnsureFitStability(&fitter, constraints, nHistsForFit);
+        
+        if(result.status == 0) {
+            result.converged = true;
+            
+            // Pobierz wyniki - tylko dla histogramów używanych w ficie
+            for(Int_t i = 0; i < nHistsForFit; ++i) {
+                Int_t originalIndex = fitIndexMap[i];
+                fitter.GetResult(i, result.fractions[originalIndex], result.errors[originalIndex]);
+            }
+            
+            // Ustaw frakcje na 0 dla histogramów nie używanych w ficie
+            for(size_t i = 0; i < mcHists.size(); ++i) {
+                if(!useInFit[i]) {
+                    result.fractions[i] = 0.0;
+                    result.errors[i] = 0.0;
+                }
+            }
+            
+            result.chi2 = fitter.GetChisquare();
+            result.ndf = fitter.GetNDF();
+            
+            // Sprawdź jakość fitu
+            if(result.ndf > 0) {
+                Double_t chi2_ndf = result.chi2 / result.ndf;
+                if(chi2_ndf > 10.0) {
+                    result.fitInfo = Form("Poor fit quality: chi2/ndf = %.2f", chi2_ndf);
+                } else if(chi2_ndf > 3.0) {
+                    result.fitInfo = Form("Moderate fit quality: chi2/ndf = %.2f", chi2_ndf);
+                } else {
+                    result.fitInfo = Form("Good fit quality: chi2/ndf = %.2f", chi2_ndf);
+                }
+            }
+            
+        } else {
+            result.fitInfo = Form("Fit failed with status: %d", result.status);
+        }
+        
+        // Cleanup kopii
+        for(auto copy : mcCopies) {
+            delete copy;
+        }
+        
+    } catch(const std::exception& e) {
+        result.fitInfo = Form("Exception during fit: %s", e.what());
+        result.status = -999;
+    }
+    
+    return result;
+}
+
+Int_t HistManager::EnsureFitStability(TFractionFitter* fitter, const FitConstraints& constraints, 
+                                     Int_t maxRetries) {
+    Int_t status = -1;
+    
+    for(Int_t attempt = 0; attempt < maxRetries; ++attempt) {
+        status = fitter->Fit();
+        
+        if(status == 0) {
+            // Sprawdź czy wyniki są sensowne
+            Bool_t resultsValid = true;
+            Double_t sumFractions = 0.0;
+            
+            // Sprawdź wszystkie parametry fitu używając liczby histogramów w ficie
+            // Liczba parametrów to liczba histogramów MC używanych w ficie
+            Int_t nPars = maxRetries; // maxRetries jest teraz przekazywane jako nHistsForFit
+            for(Int_t i = 0; i < nPars; ++i) {
+                Double_t fraction, error;
+                fitter->GetResult(i, fraction, error);
+                
+                // Sprawdź czy frakcje są w rozsądnych granicach
+                if(fraction < -0.1 || fraction > 10.0 || error <= 0) {
+                    resultsValid = false;
+                    break;
+                }
+                sumFractions += fraction;
+            }
+            
+            // Sprawdź czy suma frakcji jest rozsądna
+            if(resultsValid && sumFractions > 0.1 && sumFractions < 10.0) {
+                break; // Fit OK
+            }
+        }
+        
+        // Jeśli fit nie udał się, spróbuj ponownie (TFractionFitter ma wewnętrzną randomizację)
+        if(attempt < 3) { // Maksymalnie 3 próby
+            std::cout << "Fit attempt " << attempt + 1 << " failed, retrying..." << std::endl;
+        }
+    }
+    
+    return status;
+}
+
+void HistManager::UpdateMCHistograms(const std::vector<TH1*>& mcHists, TH1* sumHist, 
+                                    const FitResult& fitResult) {
+    if(!fitResult.converged || fitResult.status != 0) {
+        return;
+    }
+    
+    // Wyczyść histogram sumy
+    sumHist->Reset();
+    
+    // Znajdź histogram danych dla tego zestawu
+    Double_t dataIntegral = 0;
+    for(const auto& pair : fData1D) {
+        dataIntegral = pair.second->Integral();
+        break; // Używamy pierwszego znalezionego (powinien być tylko jeden dla tego zestawu)
+    }
+    
+    if(dataIntegral <= 0) {
+        return;
+    }
+    
+    // Przeskaluj histogramy MC i zaktualizuj sumę
+    for(Int_t i = 0; i < fChannNum && i < static_cast<Int_t>(mcHists.size()) && i < static_cast<Int_t>(fitResult.fractions.size()); ++i) {
+        if(fitResult.fractions[i] > 0) {
+            // Histogram został użyty w ficie
+            Double_t currentIntegral = mcHists[i]->Integral();
+            if(currentIntegral > 0) {
+                Double_t scaleFactor = (fitResult.fractions[i] * dataIntegral) / currentIntegral;
+                mcHists[i]->Scale(scaleFactor);
+            }
+            
+            // Dodaj do sumy
+            sumHist->Add(mcHists[i]);
+        } else {
+            // Histogram nie został użyty w ficie (frakcja = 0)
+            // Wyzeruj go żeby nie był widoczny na płótnie
+            mcHists[i]->Scale(0);
+        }
+    }
+}
+
+HistManager::FitResult HistManager::GetFitResult(const TString& setName) const {
+    auto it = fFitResults.find(setName);
+    if(it != fFitResults.end()) {
+        return it->second;
+    }
+    return FitResult(); // Pusty wynik jeśli nie znaleziono
+}
+
+Bool_t HistManager::HasFitResult(const TString& setName) const {
+    return fFitResults.find(setName) != fFitResults.end();
+}
+
+Double_t HistManager::PerformSimpleScaling(const TString& setName) {
+    auto histIt = fHists1D.find(setName);
+    if(histIt == fHists1D.end()) {
+        throw std::runtime_error("Histogram set not found: " + std::string(setName.Data()));
+    }
+    
+    auto dataIt = fData1D.find(setName);
+    if(dataIt == fData1D.end()) {
+        throw std::runtime_error("No data histogram found for set: " + std::string(setName.Data()));
+    }
+    
+    // Pobierz liczbę zdarzeń w danych i w sumie MC
+    Double_t dataEntries = dataIt->second->Integral();
+    Double_t mcSumEntries = histIt->second[0]->Integral(); // Indeks 0 to suma MC
+    
+    if(mcSumEntries <= 0) {
+        std::cerr << "Warning: MC sum histogram is empty for set " << setName << std::endl;
+        return 0.0;
+    }
+    
+    // Oblicz czynnik skalujący
+    Double_t scaleFactor = dataEntries / mcSumEntries;
+    
+    // Przygotuj wektor histogramów MC (bez sumy - indeks 0)
+    std::vector<TH1*> mcHists;
+    for(size_t i = 1; i < histIt->second.size(); ++i) {
+        mcHists.push_back(histIt->second[i]);
+    }
+    
+    // Zastosuj skalowanie
+    ApplySimpleScaling(mcHists, histIt->second[0], scaleFactor);
+    
+    std::cout << "Simple scaling applied to set " << setName 
+              << ": scale factor = " << scaleFactor 
+              << " (Data: " << dataEntries << ", MC: " << mcSumEntries << ")" << std::endl;
+    
+    return scaleFactor;
+}
+
+void HistManager::ApplySimpleScaling(const std::vector<TH1*>& mcHists, TH1* sumHist, Double_t scaleFactor) {
+    if(scaleFactor <= 0) {
+        return;
+    }
+    
+    // Przeskaluj wszystkie składowe MC
+    for(auto hist : mcHists) {
+        hist->Scale(scaleFactor);
+    }
+    
+    // Przeskaluj sumę MC
+    sumHist->Scale(scaleFactor);
 }

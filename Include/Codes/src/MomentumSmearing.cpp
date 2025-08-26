@@ -86,7 +86,6 @@ namespace KLOE
     _covMatrix *= (1.0 / (_diffVectors.size() - 1.0));
 
     _CholeskyDecomposition();
-    _CovMatrixToJSON();
     std::cout << "Calculated Covariance Matrix:" << std::endl;
     _covMatrix.Print();
   }
@@ -188,6 +187,15 @@ namespace KLOE
     std::cout << "--------------------------" << std::endl;
 
     _covMatrix = meanCovMatrix; // Update the main covariance matrix with the bootstrap mean
+    
+    // Zapisz macierz średnią i macierz niepewności do JSON
+    _CovMatrixToJSON("bootstrapMeanCovMatrix");
+    
+    // Tymczasowo zastąp _covMatrix macierzą niepewności aby ją zapisać
+    TMatrixT<T> tempMatrix = _covMatrix;
+    _covMatrix = uncertaintyMatrix;
+    _CovMatrixToJSON("bootstrapUncertaintyMatrix");
+    _covMatrix = tempMatrix; // Przywróć oryginalną macierz
   }
 
   template <typename T>
@@ -224,15 +232,56 @@ namespace KLOE
   }
 
   template <typename T>
-  void MomentumSmearing<T>::_CovMatrixToJSON()
+  void MomentumSmearing<T>::_CovMatrixToJSON(const std::string& varName)
   {
     std::string json = (std::string)TBufferJSON::ToJSON(&_covMatrix);
-    properties["momSmearing"]["covarianceMatrix"] = json;
+    
+    // Usuwanie niepotrzebnych znaków formatujących
+    std::string cleaned_json = json;
+    
+    // Usuwanie \n
+    size_t pos = 0;
+    while ((pos = cleaned_json.find("\\n", pos)) != std::string::npos) {
+        cleaned_json.replace(pos, 2, "");
+        pos += 0;
+    }
+    
+    // Usuwanie nadmiarowych spacji
+    pos = 0;
+    while ((pos = cleaned_json.find("  ", pos)) != std::string::npos) {
+        cleaned_json.replace(pos, 2, " ");
+        pos += 1;
+    }
+    
+    // Usuwanie \" (escaped quotes)
+    pos = 0;
+    while ((pos = cleaned_json.find("\\\"", pos)) != std::string::npos) {
+        cleaned_json.replace(pos, 2, "\"");
+        pos += 1;
+    }
+    
+    // Usuwanie okalających cudzysłowów jeśli istnieją
+    if (cleaned_json.front() == '"' && cleaned_json.back() == '"') {
+        cleaned_json = cleaned_json.substr(1, cleaned_json.length() - 2);
+    }
+    
+    // Parsowanie do JSON object zamiast string
+    try {
+        nlohmann::json jsonObj = nlohmann::json::parse(cleaned_json);
+        properties["momSmearing"][varName] = jsonObj;
+    } catch (const std::exception& e) {
+        std::cerr << "ERROR: Failed to parse JSON: " << e.what() << std::endl;
+        std::cerr << "Raw JSON: " << json << std::endl;
+        std::cerr << "Cleaned JSON: " << cleaned_json << std::endl;
+        // Fallback - save as string if parsing fails
+        properties["momSmearing"][varName] = cleaned_json;
+    }
 
     std::ofstream outfile(propName); // Assuming propName is defined in your project
     if (outfile.is_open()) {
         outfile << properties.dump(4);
         outfile.close();
+        std::cout << "Covariance matrix saved to JSON as '" << varName << "'" << std::endl;
     } else {
         std::cerr << "ERROR: Unable to open JSON file for writing." << std::endl;
     }

@@ -23,53 +23,29 @@ int CovarianceMatrixDetermination(TChain &chain, Controls::DataType &data_type, 
 	// =============================================================================
 	BaseKinematics
 			baseKin;
-	NeutRec4
-			neutVars;
-	Int_t
-			file_num;
-	TFile
-			*file_cs_pippim,
-			*file_gen;
-	TTree
-			*tree_cs_pippim,
-			*tree_gen;
 	// =============================================================================
 
-	TString
-			filename_gen = std::string(properties["variables"]["tree"]["filename"]["generatedvars"]),
-			treename_gen = std::string(properties["variables"]["tree"]["treename"]["generatedvars"]);
+	std::vector<Float_t>
+			*trk1KL = &baseKin.trkKL[0],
+			*trk2KL = &baseKin.trkKL[1],
+			*trk1KLmc = &baseKin.trkKLmc[0],
+			*trk2KLmc = &baseKin.trkKLmc[1];
 
-	try
-	{
+	baseKin.trkKL[0].resize(4);
+	baseKin.trkKL[1].resize(4);
+	baseKin.trkKLmc[0].resize(4);
+	baseKin.trkKLmc[1].resize(4);
 
-		file_gen = new TFile(filename_gen);
+	Int_t mcflag = 0;
 
-		if (file_gen->IsZombie())
-			throw(ErrorHandling::ErrorCodes::FILE_NOT_EXIST);
+	chain.SetBranchAddress("trk1KL", &trk1KL);
+	chain.SetBranchAddress("trk2KL", &trk2KL);
 
-		tree_gen = (TTree *)file_gen->Get(treename_gen);
+	chain.SetBranchAddress("mcflag", &mcflag);
+	chain.SetBranchAddress("mctruth", &baseKin.mctruth_int);
 
-		if (tree_gen->IsZombie())
-			throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
-	}
-	catch (ErrorHandling::ErrorCodes err)
-	{
-		logger.getErrLog(err);
-		return int(err);
-	}
-
-	chain.SetBranchAddress("trk1", baseKin.trk[0]);
-	chain.SetBranchAddress("trk2", baseKin.trk[1]);
-
-	chain.SetBranchAddress("mcflag", &baseKin.mcflag);
-	chain.SetBranchAddress("mctruth", &baseKin.mctruth);
-
-	Float_t trkMC[2][4];
-
-	tree_gen->SetBranchAddress("trkMC1", trkMC[0]);
-	tree_gen->SetBranchAddress("trkMC2", trkMC[1]);
-
-	chain.AddFriend(tree_gen);
+	chain.SetBranchAddress("trk1KLmc", &trk1KLmc);
+	chain.SetBranchAddress("trk2KLmc", &trk2KLmc);
 
 	const Int_t numberOfMomenta = 2;
 
@@ -93,50 +69,54 @@ int CovarianceMatrixDetermination(TChain &chain, Controls::DataType &data_type, 
 		checkMC[0] = 999.;
 		checkMC[1] = 999.;
 
-		checkMC[0] = sqrt(pow(trkMC[0][0] - baseKin.trk[0][0], 2) +
-											pow(trkMC[0][1] - baseKin.trk[0][1], 2) +
-											pow(trkMC[0][2] - baseKin.trk[0][2], 2) +
-											pow(trkMC[1][0] - baseKin.trk[1][0], 2) +
-											pow(trkMC[1][1] - baseKin.trk[1][1], 2) +
-											pow(trkMC[1][2] - baseKin.trk[1][2], 2));
-
-		checkMC[1] = sqrt(pow(trkMC[0][0] - baseKin.trk[1][0], 2) +
-											pow(trkMC[0][1] - baseKin.trk[1][1], 2) +
-											pow(trkMC[0][2] - baseKin.trk[1][2], 2) +
-											pow(trkMC[1][0] - baseKin.trk[0][0], 2) +
-											pow(trkMC[1][1] - baseKin.trk[0][1], 2) +
-											pow(trkMC[1][2] - baseKin.trk[0][2], 2));
-
-		for (Int_t j = 0; j < 3; j++)
+		if (mcflag == 1 && baseKin.mctruth_int == 7)
 		{
-			if (baseKin.mcflag == 1 && baseKin.mctruth == 1)
+			checkMC[0] = sqrt(pow(trk1KLmc->at(0) - trk1KL->at(0), 2) +
+												pow(trk1KLmc->at(1) - trk1KL->at(1), 2) +
+												pow(trk1KLmc->at(2) - trk1KL->at(2), 2) +
+												pow(trk2KLmc->at(0) - trk2KL->at(0), 2) +
+												pow(trk2KLmc->at(1) - trk2KL->at(1), 2) +
+												pow(trk2KLmc->at(2) - trk2KL->at(2), 2));
+
+			checkMC[1] = sqrt(pow(trk1KLmc->at(0) - trk2KL->at(0), 2) +
+												pow(trk1KLmc->at(1) - trk2KL->at(1), 2) +
+												pow(trk1KLmc->at(2) - trk2KL->at(2), 2) +
+												pow(trk2KLmc->at(0) - trk1KL->at(0), 2) +
+												pow(trk2KLmc->at(1) - trk1KL->at(1), 2) +
+												pow(trk2KLmc->at(2) - trk1KL->at(2), 2));
+
+			for (Int_t j = 0; j < 3; j++)
 			{
 				if (checkMC[0] < checkMC[1])
 				{
-					momVecMC[j] = trkMC[0][j];
-					momVecData[j] = baseKin.trk[0][j];
+					momVecMC[j] = trk1KLmc->at(j);
+					momVecData[j] = trk1KL->at(j);
 
-					momVecMC[3 + j] = trkMC[1][j];
-					momVecData[3 + j] = baseKin.trk[1][j];
+					momVecMC[3 + j] = trk2KLmc->at(j);
+					momVecData[3 + j] = trk2KL->at(j);
 				}
 				else
 				{
-					momVecMC[j] = trkMC[0][j];
-					momVecData[j] = baseKin.trk[1][j];
+					momVecMC[j] = trk1KLmc->at(j);
+					momVecData[j] = trk2KL->at(j);
 
-					momVecMC[3 + j] = trkMC[1][j];
-					momVecData[3 + j] = baseKin.trk[0][j];
+					momVecMC[3 + j] = trk2KLmc->at(j);
+					momVecData[3 + j] = trk1KL->at(j);
 				}
-
-				CovMatrixCalcObj.SetMCVector(momVecMC);
-				// CovMatrixCalcObj.SetDataVector(momVecData);
-
-				// CovMatrixCalcObj.CovCalcPart();
 			}
+
+			CovMatrixCalcObj.AddCovariancePoint(momVecMC, momVecData);
 		}
 	}
 
 	CovMatrixCalcObj.GetCovMatrix();
+
+	CovMatrixCalcObj.SaveCovMatrixToJSON("covarianceMatrixMCGenerated");
+
+		// --- Phase 2: Uncertainty Calculation using Bootstrap ---
+	const int num_bootstrap_samples = 100;
+	std::cout << "\n--- Calculating Uncertainty with Bootstrap (" << num_bootstrap_samples << " samples) ---" << std::endl;
+	CovMatrixCalcObj.CovMatrixUncertainty(num_bootstrap_samples);
 
 	return 0;
 }

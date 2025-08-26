@@ -46,7 +46,7 @@ namespace KLOE
         _diffVectors; 
 
     // Helper functions for internal use
-    void _CovMatrixToJSON();
+    void _CovMatrixToJSON(const std::string& varName = "covarianceMatrix");
     void _CholeskyDecomposition();
     TMatrixT<T> _calculateCovarianceFromSample(const std::vector<Int_t>& indices);
 
@@ -75,6 +75,12 @@ namespace KLOE
     void SetMCVector(TVectorT<T> &momVecMC)
     {
       _momVecMC = momVecMC;
+    }
+
+    // Zapisuje macierz kowariancji do JSON z określoną nazwą zmiennej
+    void SaveCovMatrixToJSON(const std::string& varName = "covarianceMatrix")
+    {
+      _CovMatrixToJSON(varName);
     }
 
   };

@@ -31,7 +31,10 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 
 	chainDoublePiPi = new TChain("h1");
 
-	chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-24/*.root");
+	if (data_type == Controls::DataType::MC_ONLY)
+		chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-26/*.root");
+	else if (data_type == Controls::DataType::DATA_ONLY)
+		chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-26/*.root");
 
 	Float_t gamma;
 	Char_t vtxTwoTracks;
@@ -186,6 +189,11 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	}
 
 	CovMatrixCalcObj.GetCovMatrix();
+
+	if (data_type == Controls::DataType::MC_ONLY)
+		CovMatrixCalcObj.SaveCovMatrixToJSON("covarianceMatrixMC");
+	else if (data_type == Controls::DataType::DATA_ONLY)
+		CovMatrixCalcObj.SaveCovMatrixToJSON("covarianceMatrix");
 
 	// --- Phase 2: Uncertainty Calculation using Bootstrap ---
 	const int num_bootstrap_samples = 100;

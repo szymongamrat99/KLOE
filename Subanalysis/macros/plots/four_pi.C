@@ -61,9 +61,13 @@ void four_pi::Begin(TTree * /*tree*/)
 
    histMgr = new HistManager(channNum, channColor, channNames, kFullCircle, kBlack, kOrange);
 
+
    std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
 
    cutter = new StatisticalCutter(cutFileName, 7, KLOE::HypothesisCode::FOUR_PI);
+   HistManager::FitConstraints constraints(7);
+   constraints.lowerBounds = {0.2, 0.0, 0.2, 0.2, 0.2, 0.0, 0.2};
+   constraints.upperBounds = {1.0, 0.1, 1.0, 1.0, 1.0, 0.1, 1.0};
 
    Obj = new KLOE::pm00();
 
@@ -189,6 +193,15 @@ void four_pi::Begin(TTree * /*tree*/)
 
    histMgr->CreateHistSet1D("missSqKS", missSqKSConfig);
    histMgr->CreateHistSet1D("missSqKL", missSqKLConfig);
+
+   histMgr->SetFitConstraints("invMassKS", constraints);
+   histMgr->SetFitConstraints("invMassKL", constraints);
+   histMgr->SetFitConstraints("missTotKS", constraints);
+   histMgr->SetFitConstraints("missTotKL", constraints);
+   histMgr->SetFitConstraints("twoBodyMomKS", constraints);
+   histMgr->SetFitConstraints("twoBodyMomKL", constraints);
+   histMgr->SetFitConstraints("missSqKS", constraints);
+   histMgr->SetFitConstraints("missSqKL", constraints);
 }
 
 void four_pi::SlaveBegin(TTree * /*tree*/)
@@ -291,7 +304,8 @@ Bool_t four_pi::Process(Long64_t entry)
       }
    }
 
-   cutter->UpdateStats(*mctruth);
+   if (*mcflag == 1)
+      cutter->UpdateStats(*mctruth);
 
    return kTRUE;
 }
@@ -308,6 +322,8 @@ void four_pi::Terminate()
    // The Terminate() function is the last function to be called during
    // a query. It always runs on the client, it can be used to present
    // the results graphically or save the results to file.
+
+   histMgr->SetNormalizationType(HistManager::NormalizationType::SIMPLE_SCALE); // Ustaw proste skalowanie --- IGNORE ---
 
    // 1D histogramy z danymi
    histMgr->DrawSet1D("invMassKS", "HIST", true);
