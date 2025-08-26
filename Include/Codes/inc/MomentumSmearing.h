@@ -6,6 +6,9 @@
 #include <TDecompChol.h> // For Cholesky Decomposition V = LLT
 #include <TVector.h>     // For Vector operations
 #include <TBufferJSON.h> // To store results in JSON file
+#include <TH1D.h>        // For creating histograms
+#include <TCanvas.h>     // For creating plots
+#include <TStyle.h>      // For plot styling
 #include <vector>        // For storing multiple data vectors
 #include <string>
 #include <iostream>
@@ -49,6 +52,7 @@ namespace KLOE
     void _CovMatrixToJSON(const std::string& varName = "covarianceMatrix");
     void _CholeskyDecomposition();
     TMatrixT<T> _calculateCovarianceFromSample(const std::vector<Int_t>& indices);
+    void _plotBootstrapDistributions(const std::vector<TMatrixT<T>>& bootstrap_covs, const TMatrixT<T>& meanCovMatrix, const TMatrixT<T>& uncertaintyMatrix);
 
   public:
     // Constructor for covariance matrix calculation mode

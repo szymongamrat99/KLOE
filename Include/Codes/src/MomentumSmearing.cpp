@@ -1,5 +1,11 @@
 #include <MomentumSmearing.h>
 #include <const.h>
+#include <TH1D.h>
+#include <TCanvas.h>
+#include <TStyle.h>
+#include <TLine.h>
+#include <TLegend.h>
+#include <TText.h>
 
 namespace KLOE
 {
@@ -186,6 +192,9 @@ namespace KLOE
     uncertaintyMatrix.Print();
     std::cout << "--------------------------" << std::endl;
 
+    // Plot bootstrap distributions for each matrix element
+    _plotBootstrapDistributions(bootstrap_covs, meanCovMatrix, uncertaintyMatrix);
+
     _covMatrix = meanCovMatrix; // Update the main covariance matrix with the bootstrap mean
     
     // Zapisz macierz średnią i macierz niepewności do JSON
@@ -300,5 +309,122 @@ namespace KLOE
     
     _U = decomposition.GetU();
     _UT.Transpose(_U);
+  }
+
+  template <typename T>
+  void MomentumSmearing<T>::_plotBootstrapDistributions(const std::vector<TMatrixT<T>>& bootstrap_covs, const TMatrixT<T>& meanCovMatrix, const TMatrixT<T>& uncertaintyMatrix)
+  {
+    std::cout << "Creating bootstrap distribution plots..." << std::endl;
+    
+    // Labels for momentum components (can be customized)
+    std::vector<std::string> componentLabels;
+    for (Int_t i = 0; i < _vecSize; i++) {
+      componentLabels.push_back("p" + std::to_string(i));
+    }
+    
+    // Set ROOT plotting style
+    gStyle->SetOptStat(1111); // Show statistics box
+    gStyle->SetOptTitle(1);   // Show titles
+    
+    // Create histograms and plots for each matrix element
+    for (Int_t i = 0; i < _vecSize; i++) {
+      for (Int_t j = 0; j <= i; j++) { // Only lower triangular + diagonal (covariance matrix is symmetric)
+        
+        // Create histogram for this matrix element
+        std::string histName = Form("h_cov_%d_%d", i, j);
+        std::string histTitle = Form("Bootstrap Distribution of Cov(%s,%s);Covariance Value;Frequency", 
+                                   componentLabels[i].c_str(), componentLabels[j].c_str());
+        
+        // Find min and max values for binning
+        T minVal = bootstrap_covs[0](i, j);
+        T maxVal = bootstrap_covs[0](i, j);
+        for (const auto& matrix : bootstrap_covs) {
+          T val = matrix(i, j);
+          if (val < minVal) minVal = val;
+          if (val > maxVal) maxVal = val;
+        }
+        
+        // Add some margin to the range
+        T range = maxVal - minVal;
+        if (range == 0) range = std::abs(maxVal * 0.1); // Handle case where all values are the same
+        minVal -= range * 0.1;
+        maxVal += range * 0.1;
+        
+        // Create histogram
+        TH1D* hist = new TH1D(histName.c_str(), histTitle.c_str(), 50, minVal, maxVal);
+        hist->SetLineColor(kBlue);
+        hist->SetFillColor(kCyan);
+        hist->SetFillStyle(3001);
+        
+        // Fill histogram with bootstrap values
+        for (const auto& matrix : bootstrap_covs) {
+          hist->Fill(matrix(i, j));
+        }
+        
+        // Create canvas
+        std::string canvasName = Form("c_cov_%d_%d", i, j);
+        TCanvas* canvas = new TCanvas(canvasName.c_str(), histTitle.c_str(), 800, 600);
+        canvas->cd();
+        
+        // Draw histogram
+        hist->Draw("HIST");
+        
+        // Add vertical lines for mean and ±1σ
+        T mean = meanCovMatrix(i, j);
+        T sigma = uncertaintyMatrix(i, j);
+        
+        TLine* meanLine = new TLine(mean, 0, mean, hist->GetMaximum());
+        meanLine->SetLineColor(kRed);
+        meanLine->SetLineWidth(2);
+        meanLine->SetLineStyle(1);
+        meanLine->Draw("same");
+        
+        TLine* sigmaLow = new TLine(mean - sigma, 0, mean - sigma, hist->GetMaximum());
+        sigmaLow->SetLineColor(kGreen);
+        sigmaLow->SetLineWidth(2);
+        sigmaLow->SetLineStyle(2);
+        sigmaLow->Draw("same");
+        
+        TLine* sigmaHigh = new TLine(mean + sigma, 0, mean + sigma, hist->GetMaximum());
+        sigmaHigh->SetLineColor(kGreen);
+        sigmaHigh->SetLineWidth(2);
+        sigmaHigh->SetLineStyle(2);
+        sigmaHigh->Draw("same");
+        
+        // Add legend
+        TLegend* legend = new TLegend(0.65, 0.75, 0.95, 0.95);
+        legend->AddEntry(hist, "Bootstrap samples", "f");
+        legend->AddEntry(meanLine, Form("Mean: %.4e", (double)mean), "l");
+        legend->AddEntry(sigmaLow, Form("#pm1#sigma: %.4e", (double)sigma), "l");
+        legend->Draw();
+        
+        // Add text with statistics
+        TText* text = new TText();
+        text->SetNDC(true);
+        text->SetTextSize(0.03);
+        text->DrawText(0.15, 0.85, Form("Samples: %d", (int)bootstrap_covs.size()));
+        text->DrawText(0.15, 0.80, Form("Mean: %.6e", (double)mean));
+        text->DrawText(0.15, 0.75, Form("Std Dev: %.6e", (double)sigma));
+        text->DrawText(0.15, 0.70, Form("RMS/Mean: %.3f%%", (double)(sigma/std::abs(mean)*100)));
+        
+        // Save plot
+        std::string filename = Form("bootstrap_cov_%s_%s.png", 
+                                  componentLabels[i].c_str(), componentLabels[j].c_str());
+        canvas->SaveAs(filename.c_str());
+        
+        std::cout << "Saved bootstrap distribution plot: " << filename << std::endl;
+        
+        // Clean up
+        delete canvas;
+        delete hist;
+        delete meanLine;
+        delete sigmaLow;
+        delete sigmaHigh;
+        delete legend;
+        delete text;
+      }
+    }
+    
+    std::cout << "Bootstrap distribution plots completed." << std::endl;
   }
 }
