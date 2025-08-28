@@ -6,7 +6,6 @@
 #include <ctime>
 #include <stdlib.h>
 #include <boost/progress.hpp> // for loading bar display
-// #include <omp.h>              // for multi-threading using OpenMP
 
 #include <TString.h>
 #include <TStyle.h>
@@ -18,6 +17,7 @@
 #include <RealTimeIntegration.h>
 
 using json = nlohmann::json;
+
 
 // Get the env variable for properties
 
@@ -360,7 +360,9 @@ struct BaseKinematics
         trkKL[2],
         trkClosest[2],
         KchrecKLTwoBody,
+        KchrecKSTwoBody,
         trkKLTwoBody[2],
+        trkKSTwoBody[2],
         Xcl,
         Ycl,
         Zcl,

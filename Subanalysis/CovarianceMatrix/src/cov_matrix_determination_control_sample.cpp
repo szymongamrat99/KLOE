@@ -32,9 +32,9 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	chainDoublePiPi = new TChain("h1");
 
 	if (data_type == Controls::DataType::MC_ONLY)
-		chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-26/*.root");
+		chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-27/*.root");
 	else if (data_type == Controls::DataType::DATA_ONLY)
-		chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-26/*.root");
+		chainDoublePiPi->Add(charged_dir + root_files_dir + "2025-08-27/*.root");
 
 	Float_t gamma;
 	Char_t vtxTwoTracks;
@@ -63,8 +63,8 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	chainDoublePiPi->SetBranchAddress("trk1KL", &trk1KL);
 	chainDoublePiPi->SetBranchAddress("trk2KL", &trk2KL);
 
-	chainDoublePiPi->SetBranchAddress("trk1TwoBody", &trk1KLTwoBody);
-	chainDoublePiPi->SetBranchAddress("trk2TwoBody", &trk2KLTwoBody);
+	chainDoublePiPi->SetBranchAddress("trk1KLTwoBody", &trk1KLTwoBody);
+	chainDoublePiPi->SetBranchAddress("trk2KLTwoBody", &trk2KLTwoBody);
 
 	chainDoublePiPi->SetBranchAddress("KchrecKL", &KchrecKL);
 	chainDoublePiPi->SetBranchAddress("KchrecKLTwoBody", &KchrecKLTwoBody);

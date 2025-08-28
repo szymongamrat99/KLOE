@@ -38,14 +38,14 @@ int CovarianceMatrixDetermination(TChain &chain, Controls::DataType &data_type, 
 
 	Int_t mcflag = 0;
 
-	chain.SetBranchAddress("trk1KL", &trk1KL);
-	chain.SetBranchAddress("trk2KL", &trk2KL);
+	chain.SetBranchAddress("trk1KS", &trk1KL);
+	chain.SetBranchAddress("trk2KS", &trk2KL);
 
 	chain.SetBranchAddress("mcflag", &mcflag);
 	chain.SetBranchAddress("mctruth", &baseKin.mctruth_int);
 
-	chain.SetBranchAddress("trk1KLmc", &trk1KLmc);
-	chain.SetBranchAddress("trk2KLmc", &trk2KLmc);
+	chain.SetBranchAddress("trk1KSmc", &trk1KLmc);
+	chain.SetBranchAddress("trk2KSmc", &trk2KLmc);
 
 	const Int_t numberOfMomenta = 2;
 

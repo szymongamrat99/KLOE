@@ -150,6 +150,21 @@ public:
         FitResult() : chi2(0), ndf(0), status(-1), converged(false) {}
     };
 
+    /**
+     * @struct Chi2Result
+     * @brief Wyniki porównania chi-kwadrat między danymi a MC Sum
+     */
+    struct Chi2Result {
+        Double_t chi2;                      ///< Wartość chi-kwadrat
+        Int_t ndf;                          ///< Liczba stopni swobody
+        Double_t pValue;                    ///< Prawdopodobieństwo (p-value)
+        Double_t chi2_ndf;                  ///< Chi2/ndf
+        Int_t nBinsUsed;                    ///< Liczba binów użytych w obliczeniu
+        TString comparisonInfo;             ///< Dodatkowe informacje o porównaniu
+        
+        Chi2Result() : chi2(0), ndf(0), pValue(0), chi2_ndf(0), nBinsUsed(0) {}
+    };
+
     enum class ImageFormat { PNG, SVG, PDF };
 
     /**
@@ -269,6 +284,32 @@ public:
      */
     Bool_t HasFitResult(const TString& setName) const;
 
+    /**
+     * @brief Oblicza chi-kwadrat między histogramem danych a sumą MC
+     * @param setName Nazwa zestawu histogramów
+     * @param minBinContent Minimalna zawartość binu do uwzględnienia w obliczeniu (domyślnie 5)
+     * @return Wyniki porównania chi-kwadrat
+     */
+    Chi2Result CalculateDataMCChi2(const TString& setName, Double_t minBinContent = 5.0);
+    
+    /**
+     * @brief Pobiera wyniki ostatniego porównania chi-kwadrat
+     * @return Referencja do wyników ostatniego porównania
+     */
+    const Chi2Result& GetLastChi2Result() const { return fLastChi2Result; }
+    
+    /**
+     * @brief Włącza/wyłącza automatyczne obliczanie chi-kwadrat podczas rysowania
+     * @param calculate Czy obliczać chi-kwadrat automatycznie
+     */
+    void SetCalculateDataMCChi2(Bool_t calculate = true) { fCalculateDataMCChi2 = calculate; }
+    
+    /**
+     * @brief Sprawdza czy automatyczne obliczanie chi-kwadrat jest włączone
+     * @return true jeśli automatyczne obliczanie jest włączone
+     */
+    Bool_t GetCalculateDataMCChi2() const { return fCalculateDataMCChi2; }
+
 private:
     Int_t fChannNum;                                    ///< Liczba kanałów MC
     std::vector<Int_t> fChannColors;                    ///< Kolory kanałów MC
@@ -278,6 +319,7 @@ private:
     Int_t fSumColor;                                    ///< Kolor sumy MC
     Bool_t fUseFractionFitter{false};                   ///< Czy używać FractionFit
     NormalizationType fNormalizationType{NormalizationType::NONE}; ///< Typ normalizacji
+    Bool_t fCalculateDataMCChi2{true};                  ///< Czy automatycznie obliczać chi2 Data vs MC Sum
     
     // Kontenery danych
     std::map<TString, std::vector<TH1*>> fHists1D;      ///< Histogramy 1D MC
@@ -292,12 +334,16 @@ private:
     std::map<TString, FitConstraints> fFitConstraints;  ///< Ograniczenia fitu dla każdego zestawu
     std::map<TString, FitResult> fFitResults;           ///< Wyniki fitów dla każdego zestawu
     FitResult fLastFitResult;                           ///< Wyniki ostatniego fitu
+    
+    // Chi2 Data vs MC Sum related
+    std::map<TString, Chi2Result> fChi2Results;         ///< Wyniki porównań chi2 dla każdego zestawu
+    Chi2Result fLastChi2Result;                         ///< Wyniki ostatniego porównania chi2
 
     // Metody pomocnicze
     void ConfigureHistogram(TH1* hist, Int_t color, Bool_t showStats);
     Double_t CalculateYRange(const std::vector<TH1*>& hists, const TString& setName, Bool_t logy);
     void CleanupSet(const TString& setName);
-    TLegend* CreateLegend(const std::vector<TH1*>& hists, const TH1* dataHist = nullptr);
+    TLegend* CreateLegend(const std::vector<TH1*>& hists, const TH1* dataHist = nullptr, const Chi2Result* chi2Result = nullptr);
     
     /**
      * @brief Wykonuje FractionFit z daną konfiguracją
@@ -335,4 +381,13 @@ private:
      */
     Int_t EnsureFitStability(TFractionFitter* fitter, const FitConstraints& constraints, 
                             Int_t maxRetries = 3);
+    
+    /**
+     * @brief Wykonuje obliczenie chi-kwadrat między dwoma histogramami
+     * @param dataHist Histogram z danymi
+     * @param mcSumHist Histogram sumy MC
+     * @param minBinContent Minimalna zawartość binu do uwzględnienia
+     * @return Wyniki porównania chi-kwadrat
+     */
+    Chi2Result DoDataMCChi2Calculation(TH1* dataHist, TH1* mcSumHist, Double_t minBinContent);
 };
