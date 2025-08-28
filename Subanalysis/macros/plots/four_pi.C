@@ -61,6 +61,7 @@ void four_pi::Begin(TTree * /*tree*/)
 
    histMgr = new HistManager(channNum, channColor, channNames, kFullCircle, kBlack, kOrange);
 
+
    std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
 
    cutter = new StatisticalCutter(cutFileName, 7, KLOE::HypothesisCode::FOUR_PI);
@@ -131,8 +132,8 @@ void four_pi::Begin(TTree * /*tree*/)
    twoBodyMomKSConfig.xtitle = "Two body mom KS [MeV/c]";
    twoBodyMomKSConfig.ytitle = "Counts";
    twoBodyMomKSConfig.bins = 100;
-   twoBodyMomKSConfig.xmin = 40;
-   twoBodyMomKSConfig.xmax = 160;
+   twoBodyMomKSConfig.xmin = 0;
+   twoBodyMomKSConfig.xmax = 150;
    twoBodyMomKSConfig.logy = false;
    twoBodyMomKSConfig.showStats = false;
 
@@ -140,8 +141,8 @@ void four_pi::Begin(TTree * /*tree*/)
    twoBodyMomKLConfig.xtitle = "Two body mom KL [MeV/c]";
    twoBodyMomKLConfig.ytitle = "Counts";
    twoBodyMomKLConfig.bins = 100;
-   twoBodyMomKLConfig.xmin = 40;
-   twoBodyMomKLConfig.xmax = 160;
+   twoBodyMomKLConfig.xmin = 0;
+   twoBodyMomKLConfig.xmax = 150;
    twoBodyMomKLConfig.logy = false;
    twoBodyMomKLConfig.showStats = false;
 
@@ -150,7 +151,7 @@ void four_pi::Begin(TTree * /*tree*/)
    missTotKSConfig.ytitle = "Counts";
    missTotKSConfig.bins = 100;
    missTotKSConfig.xmin = 0;
-   missTotKSConfig.xmax = 15;
+   missTotKSConfig.xmax = 50;
    missTotKSConfig.logy = false;
    missTotKSConfig.showStats = false;
 
@@ -159,7 +160,7 @@ void four_pi::Begin(TTree * /*tree*/)
    missTotKLConfig.ytitle = "Counts";
    missTotKLConfig.bins = 100;
    missTotKLConfig.xmin = 0;
-   missTotKLConfig.xmax = 15;
+   missTotKLConfig.xmax = 50;
    missTotKLConfig.logy = false;
    missTotKLConfig.showStats = false;
 
@@ -303,7 +304,7 @@ Bool_t four_pi::Process(Long64_t entry)
       }
    }
 
-   if (*mcflag == 1 && *mctruth != 0)
+   if (*mcflag == 1)
       cutter->UpdateStats(*mctruth);
 
    return kTRUE;

@@ -18,16 +18,14 @@
 #include <SplitFileWriter.h>
 #include <charged_mom.h>
 #include <StatisticalCutter.h>
-#include <ConfigManager.h>
 
 #include "../../Neutrec/inc/trilateration.hpp"
 
+#include "../inc/initialanalysis.hpp"
 #include "initialanalysis.hpp"
 
 int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
-	ConfigManager &config = ConfigManager::getInstance();
-
 	TTreeReader reader(&chain);
 	GeneralEventProperties generalProps(reader);
 	ClusterProperties clusterProps(reader);
@@ -38,12 +36,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
 	GeneratedVariables genVarClassifier;
 
-	Bool_t MonteCarloInitAnalysis;
-	config.getProperty("flags.initialAnalysisExec.MC", MonteCarloInitAnalysis);
+	// Set flag for initial analysis
+	Bool_t MonteCarloInitAnalysis = properties["flags"]["initialAnalysisExec"]["MC"];
 
-	std::string hypoCodeStr;
-	config.getProperty("flags.analysisCode", hypoCodeStr);
-	KLOE::HypothesisCode hypoCode = Obj.StringToHypothesisCode(hypoCodeStr);
+	// Which analysis to follow
+	KLOE::HypothesisCode hypoCode = Obj.StringToHypothesisCode((std::string)properties["flags"]["analysisCode"]);
 
 	if (hypoCode == KLOE::HypothesisCode::INVALID_VALUE)
 		return 1;
@@ -461,6 +458,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						KchrecKSMom = sqrt(pow(KchrecKS_PhiCM[0], 2) + pow(KchrecKS_PhiCM[1], 2) + pow(KchrecKS_PhiCM[2], 2));
 						KchrecKLMom = sqrt(pow(KchrecKL_PhiCM[0], 2) + pow(KchrecKL_PhiCM[1], 2) + pow(KchrecKL_PhiCM[2], 2));
 
+
 						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS, phiMom, baseKin.KchboostKS);
 						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL, phiMom, baseKin.KchboostKL);
 
@@ -667,22 +665,22 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
 							TVector3
 									kaonMomTriangleLAB = {-Knereclor[0] / Knereclor[3],
-																				-Knereclor[1] / Knereclor[3],
+																			  -Knereclor[1] / Knereclor[3],
 																				-Knereclor[2] / Knereclor[3]};
 
 							Double_t
 									KaonPathTriangleLAB = sqrt(pow(baseKin.KneTriangle[6] - baseKin.ipnew[0], 2) +
-																						 pow(baseKin.KneTriangle[7] - baseKin.ipnew[1], 2) +
-																						 pow(baseKin.KneTriangle[8] - baseKin.ipnew[2], 2)),
+																		 pow(baseKin.KneTriangle[7] - baseKin.ipnew[1], 2) +
+																		 pow(baseKin.KneTriangle[8] - baseKin.ipnew[2], 2)),
 									KaonVelocityTriangleLAB = kaonMomTriangleLAB.Mag();
 
 							baseKin.kaonNeTimeLAB = KaonPathTriangleLAB / KaonVelocityTriangleLAB;
 
 							TLorentzVector
 									Kaon4VecTriangleLAB = {baseKin.KneTriangle[6] - baseKin.ipnew[0], // cm
-																				 baseKin.KneTriangle[7] - baseKin.ipnew[1], // cm
-																				 baseKin.KneTriangle[8] - baseKin.ipnew[2], // cm
-																				 baseKin.kaonNeTimeLAB},										// cm
+																 baseKin.KneTriangle[7] - baseKin.ipnew[1], // cm
+																 baseKin.KneTriangle[8] - baseKin.ipnew[2], // cm
+																 baseKin.kaonNeTimeLAB},										// cm
 									Kaon4VecKaonTriangleCM = {0., 0., 0., 0.};
 
 							Obj.lorentz_transf(kaonMomTriangleLAB, Kaon4VecTriangleLAB, Kaon4VecKaonTriangleCM);
@@ -915,12 +913,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 	}
 
 	// Wyniki
-	for (size_t i = 0; i < cutter.GetCuts().size(); ++i)
-	{
-		std::cout << "Cut " << i << ": Eff=" << cutter.GetEfficiency(i) << " +- " << cutter.GetEfficiencyError(i)
-							<< " Purity=" << cutter.GetPurity(i) << " +- " << cutter.GetPurityError(i)
-							<< " S/B=" << cutter.GetSignalToBackground(i) << " +- " << cutter.GetSignalToBackgroundError(i) << "\n";
-	}
+   for (size_t i = 0; i < cutter.GetCuts().size(); ++i)
+   {
+      std::cout << "Cut " << i << ": Eff=" << cutter.GetEfficiency(i) << " +- " << cutter.GetEfficiencyError(i)
+                << " Purity=" << cutter.GetPurity(i) << " +- " << cutter.GetPurityError(i) 
+                << " S/B=" << cutter.GetSignalToBackground(i) << " +- " << cutter.GetSignalToBackgroundError(i) << "\n";
+   }
 
 	std::map<ErrorHandling::ErrorCodes, int> physicsErrorCountsPerMctruth[8];
 

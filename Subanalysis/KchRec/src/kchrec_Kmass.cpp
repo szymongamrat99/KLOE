@@ -13,7 +13,6 @@
 #include <boost/optional.hpp>
 #include <SplitFileWriter.h>
 #include <event_data.h>
-#include <ConfigManager.h>
 
 #include "../inc/kchrec.hpp"
 
@@ -189,9 +188,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 
   std::vector<Float_t>
       trkKLTwoBody1(4),
-      trkKLTwoBody2(4),
-      trkKSTwoBody1(4),
-      trkKSTwoBody2(4);
+      trkKLTwoBody2(4);
 
   Float_t gamma = 0.0, gamma_theta = 0.0;
 
@@ -440,8 +437,8 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
           histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[0]->at(k));
         }
 
-        histKLTwoBody[k]->Fill(baseKin.KchrecKLTwoBody[k] - Kchmc->at(k));
-        histKL[k]->Fill(KchrecKL->at(k) - Kchmc->at(k));
+        histKLTwoBody[k]->Fill(baseKin.KchrecKLTwoBody[k] - Knemc->at(k));
+        histKL[k]->Fill(KchrecKL->at(k) - Knemc->at(k));
       }
     }
 
@@ -467,15 +464,12 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
         {"KchboostKS", *KchboostKS},
         {"KchboostKL", *KchboostKL},
         {"KchrecKLTwoBody", baseKin.KchrecKLTwoBody},
-        {"KchrecKSTwoBody", baseKin.KchrecKSTwoBody},
         {"trk1KS", *trkKS[0]},
         {"trk2KS", *trkKS[1]},
         {"trk1KL", *trkKL[0]},
         {"trk2KL", *trkKL[1]},
-        {"trk1KLTwoBody", trkKLTwoBody1},
-        {"trk2KLTwoBody", trkKLTwoBody2},
-        {"trk1KSTwoBody", trkKSTwoBody1},
-        {"trk2KSTwoBody", trkKSTwoBody2},
+        {"trk1TwoBody", trkKLTwoBody1},
+        {"trk2TwoBody", trkKLTwoBody2},
         {"trk1KSmc", *trkKSmc[0]},
         {"trk2KSmc", *trkKSmc[1]},
         {"trk1KLmc", *trkKLmc[0]},

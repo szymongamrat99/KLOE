@@ -1,7 +1,6 @@
 #include "HistManager.h"
 #include <TMath.h>
 #include <TStyle.h>
-#include <TPaveText.h>
 #include <Math/MinimizerOptions.h>
 #include <algorithm>
 #include <stdexcept>
@@ -316,27 +315,12 @@ void HistManager::DrawSet1D(const TString& setName, const TString& drawOpt, Bool
         }
     }
 
-    // Calculate chi2 if enabled and data is available
-    Chi2Result chi2Result;
-    Bool_t hasChi2 = false;
-    if(drawData && fCalculateDataMCChi2) {
-        auto dataIt = fData1D.find(setName);
-        if(dataIt != fData1D.end()) {
-            try {
-                chi2Result = CalculateDataMCChi2(setName);
-                hasChi2 = true;
-            } catch(const std::exception& e) {
-                std::cerr << "Error during chi2 calculation: " << e.what() << std::endl;
-            }
-        }
-    }
-
-    // Add legend with data and chi2 if present
+    // Add legend with data if present
     TH1* dataHist = nullptr;
     if(drawData && fData1D.find(setName) != fData1D.end()) {
         dataHist = fData1D[setName];
     }
-    TLegend* legend = CreateLegend(histIt->second, dataHist, hasChi2 ? &chi2Result : nullptr);
+    TLegend* legend = CreateLegend(histIt->second, dataHist);
     legend->Draw();
 
     canvas->Update();
@@ -538,21 +522,10 @@ void HistManager::CleanupSet(const TString& setName) {
     }
 }
 
-TLegend* HistManager::CreateLegend(const std::vector<TH1*>& hists, const TH1* dataHist, const Chi2Result* chi2Result) {
-    // Oblicz rozmiar legendy w zależności od zawartości
-    Int_t nEntries = hists.size(); // MC sum + składowe
-    if(dataHist) nEntries++; // Data
-    if(chi2Result && chi2Result->nBinsUsed > 0) nEntries += 3; // Chi2 info (3 linie)
-    
-    // Dostosuj rozmiar legendy
-    Double_t legendHeight = TMath::Max(0.15, TMath::Min(0.5, nEntries * 0.04));
-    Double_t legendTop = 0.9;
-    Double_t legendBottom = legendTop - legendHeight;
-    
-    TLegend* legend = new TLegend(0.65, legendBottom, 0.9, legendTop);
-    legend->SetBorderSize(1);
-    legend->SetFillStyle(0); // Przezroczyste tło
-    legend->SetTextSize(0.03);
+TLegend* HistManager::CreateLegend(const std::vector<TH1*>& hists, const TH1* dataHist) {
+    TLegend* legend = new TLegend(0.7, 0.7, 0.9, 0.9);
+    // legend->SetBorderSize(0);
+    legend->SetFillStyle(0);
     
     // Dodaj najpierw sumę MC
     legend->AddEntry(hists[0], "MC sum", "l");
@@ -562,20 +535,8 @@ TLegend* HistManager::CreateLegend(const std::vector<TH1*>& hists, const TH1* da
         legend->AddEntry(hists[i], fChannelNames[i-1], "l");
     }
     
-    // Dodaj dane jeśli są dostępne
     if(dataHist) {
         legend->AddEntry(dataHist, "Data", "pe");
-    }
-    
-    // Dodaj informacje o chi-squared jeśli są dostępne
-    if(chi2Result && chi2Result->nBinsUsed > 0) {
-        // Dodaj separator
-        legend->AddEntry((TObject*)0, "", "");
-        
-        // Dodaj chi2 informacje
-        legend->AddEntry((TObject*)0, Form("#chi^{2}/NDF = %.1f/%d", chi2Result->chi2, chi2Result->ndf), "");
-        legend->AddEntry((TObject*)0, Form("= %.2f", chi2Result->chi2_ndf), "");
-        legend->AddEntry((TObject*)0, Form("p-value = %.3f", chi2Result->pValue), "");
     }
     
     return legend;
@@ -921,110 +882,4 @@ void HistManager::ApplySimpleScaling(const std::vector<TH1*>& mcHists, TH1* sumH
     
     // Przeskaluj sumę MC
     sumHist->Scale(scaleFactor);
-}
-
-// ==================== CHI2 DATA vs MC SUM IMPLEMENTATION ====================
-
-HistManager::Chi2Result HistManager::CalculateDataMCChi2(const TString& setName, Double_t minBinContent) {
-    auto histIt = fHists1D.find(setName);
-    if(histIt == fHists1D.end()) {
-        throw std::runtime_error("Histogram set not found: " + std::string(setName.Data()));
-    }
-    
-    auto dataIt = fData1D.find(setName);
-    if(dataIt == fData1D.end()) {
-        throw std::runtime_error("No data histogram found for set: " + std::string(setName.Data()));
-    }
-    
-    // Histogram sumy MC jest pod indeksem 0
-    TH1* mcSumHist = histIt->second[0];
-    TH1* dataHist = dataIt->second;
-    
-    // Wykonaj obliczenie chi-kwadrat
-    Chi2Result result = DoDataMCChi2Calculation(dataHist, mcSumHist, minBinContent);
-    
-    // Zapisz wyniki
-    fChi2Results[setName] = result;
-    fLastChi2Result = result;
-    
-    // Wypisz wyniki
-    std::cout << "=== Chi2 Data vs MC Sum for set: " << setName << " ===" << std::endl;
-    std::cout << "Chi2: " << result.chi2 << std::endl;
-    std::cout << "NDF: " << result.ndf << std::endl;
-    std::cout << "Chi2/NDF: " << result.chi2_ndf << std::endl;
-    std::cout << "p-value: " << result.pValue << std::endl;
-    std::cout << "Bins used: " << result.nBinsUsed << std::endl;
-    if(!result.comparisonInfo.IsNull()) {
-        std::cout << "Info: " << result.comparisonInfo << std::endl;
-    }
-    std::cout << "=================================================" << std::endl;
-    
-    return result;
-}
-
-HistManager::Chi2Result HistManager::DoDataMCChi2Calculation(TH1* dataHist, TH1* mcSumHist, Double_t minBinContent) {
-    Chi2Result result;
-    
-    if(!dataHist || !mcSumHist) {
-        result.comparisonInfo = "Invalid histogram pointers";
-        return result;
-    }
-    
-    // Sprawdź czy histogramy mają ten sam binning
-    if(dataHist->GetNbinsX() != mcSumHist->GetNbinsX()) {
-        result.comparisonInfo = "Histograms have different number of bins";
-        return result;
-    }
-    
-    Int_t nBins = dataHist->GetNbinsX();
-    Double_t chi2 = 0.0;
-    Int_t nValidBins = 0;
-    
-    // Oblicz chi-kwadrat bin po binie
-    for(Int_t bin = 1; bin <= nBins; ++bin) {
-        Double_t dataContent = dataHist->GetBinContent(bin);
-        Double_t mcContent = mcSumHist->GetBinContent(bin);
-        
-        // Pomiń biny z małą statystyką
-        if(dataContent < minBinContent && mcContent < minBinContent) {
-            continue;
-        }
-        
-        // Użyj błędu Poissona dla danych
-        Double_t dataError = dataHist->GetBinError(bin);
-        if(dataError <= 0) {
-            dataError = TMath::Sqrt(TMath::Max(1.0, dataContent)); // Błąd Poissona
-        }
-        
-        // Oblicz wkład do chi-kwadrat
-        if(dataError > 0) {
-            Double_t diff = dataContent - mcContent;
-            chi2 += (diff * diff) / (dataError * dataError);
-            nValidBins++;
-        }
-    }
-    
-    // Wypełnij wyniki
-    result.chi2 = chi2;
-    result.nBinsUsed = nValidBins;
-    result.ndf = TMath::Max(1, nValidBins - 1); // NDF = liczba binów - 1 (brak parametrów fitu)
-    result.chi2_ndf = (result.ndf > 0) ? result.chi2 / result.ndf : 0.0;
-    
-    // Oblicz p-value używając funkcji gamma niekompletnej
-    if(result.ndf > 0 && result.chi2 >= 0) {
-        result.pValue = TMath::Prob(result.chi2, result.ndf);
-    }
-    
-    // Dodaj informacje o jakości porównania
-    if(nValidBins < 3) {
-        result.comparisonInfo = "Too few bins for reliable chi2 calculation";
-    } else if(result.chi2_ndf > 5.0) {
-        result.comparisonInfo = "Poor agreement between data and MC";
-    } else if(result.chi2_ndf > 2.0) {
-        result.comparisonInfo = "Moderate agreement between data and MC";
-    } else {
-        result.comparisonInfo = "Good agreement between data and MC";
-    }
-    
-    return result;
 }
