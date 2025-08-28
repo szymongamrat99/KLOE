@@ -12,8 +12,8 @@
             }
         }
     },
-    "lastScript": "Final CP Parameters normalization",
-    "lastUpdate": "2025-06-26_0711",
+    "lastScript": "Two body KS-KL reconstruction.",
+    "lastUpdate": "2025-08-29_0146",
     "momSmearing": {
         "bootstrapMeanCovMatrix": {
             "_typename": "TMatrixT<double>",

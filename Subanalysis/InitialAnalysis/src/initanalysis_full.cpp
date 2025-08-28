@@ -18,6 +18,7 @@
 #include <SplitFileWriter.h>
 #include <charged_mom.h>
 #include <StatisticalCutter.h>
+#include <ConfigManager.h>
 
 #include "../../Neutrec/inc/trilateration.hpp"
 
@@ -26,6 +27,8 @@
 
 int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+	ConfigManager &config = ConfigManager::getInstance();
+
 	TTreeReader reader(&chain);
 	GeneralEventProperties generalProps(reader);
 	ClusterProperties clusterProps(reader);
@@ -35,12 +38,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 	BaseKinematics baseKin;
 
 	GeneratedVariables genVarClassifier;
-
 	// Set flag for initial analysis
-	Bool_t MonteCarloInitAnalysis = properties["flags"]["initialAnalysisExec"]["MC"];
+	Bool_t MonteCarloInitAnalysis = config.getProperty<Bool_t>("flags.initialAnalysisExec.MC"); 
 
 	// Which analysis to follow
-	KLOE::HypothesisCode hypoCode = Obj.StringToHypothesisCode((std::string)properties["flags"]["analysisCode"]);
+	KLOE::HypothesisCode hypoCode = Obj.StringToHypothesisCode(config.getProperty<std::string>("flags.analysisCode"));
 
 	if (hypoCode == KLOE::HypothesisCode::INVALID_VALUE)
 		return 1;
@@ -930,6 +932,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 	logger.printPhysicsErrorStatsPerMctruth(false);
 
 	writer.Close();
+
+	config.setProperty<std::string>("lastUpdate", Obj.getCurrentDate());
+	config.setProperty<std::string>("lastScript", "Initial analysis");
+
+	config.saveProperties();
 
 	return 0;
 }

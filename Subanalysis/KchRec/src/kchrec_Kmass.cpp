@@ -13,6 +13,7 @@
 #include <boost/optional.hpp>
 #include <SplitFileWriter.h>
 #include <event_data.h>
+#include <ConfigManager.h>
 
 #include "../inc/kchrec.hpp"
 
@@ -42,6 +43,8 @@
  */
 int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
+  ConfigManager &config = ConfigManager::getInstance();
+
   // Structure from const.h to ease navigation
   BaseKinematics baseKin;
 
@@ -522,6 +525,11 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   }
 
   writer.Close();
+
+  config.setProperty<std::string>("lastUpdate", Obj.getCurrentTimestamp());
+  config.setProperty<std::string>("lastScript", "Two body KS-KL reconstruction.");
+
+  config.saveProperties();
 
   return 0;
 }
