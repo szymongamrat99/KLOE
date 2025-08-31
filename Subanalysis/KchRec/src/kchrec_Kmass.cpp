@@ -14,6 +14,7 @@
 #include <SplitFileWriter.h>
 #include <event_data.h>
 #include <ConfigManager.h>
+#include <StatisticalCutter.h>
 
 #include "../inc/kchrec.hpp"
 
@@ -138,6 +139,55 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   chain.SetBranchAddress("trk2KLmc", &trkKLmc[1]);
   // -----------------------------------------------------------
 
+  Float_t EmissKS = 0.0;
+  Float_t EmissKL = 0.0;
+  Float_t PmissKS = 0.0;
+  Float_t PmissKL = 0.0;
+  Float_t KchrecKSMom = 0.0;
+  Float_t KchrecKLMom = 0.0;
+
+  std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
+  StatisticalCutter cutter(cutFileName, 7, KLOE::HypothesisCode::FOUR_PI);
+
+  Float_t pKTwoBody = Obj.TwoBodyDecayMass(mPhi, mK0, mK0);
+
+  ///////////////////////////////////////////////////////////////////
+  cutter.RegisterVariableGetter("InvMassKS", [&]()
+                                { return KchrecKS->at(5); });
+  cutter.RegisterCentralValueGetter("InvMassKS", [&]()
+                                    { return mK0; });
+  ///////////////////////////////////////////////////////////////////
+  cutter.RegisterVariableGetter("InvMassKL", [&]()
+                                { return KchrecKL->at(5); });
+  cutter.RegisterCentralValueGetter("InvMassKL", [&]()
+                                    { return mK0; });
+  ///////////////////////////////////////////////////////////////////
+  cutter.RegisterVariableGetter("TwoBodyMomKS", [&]()
+                                { return KchrecKSMom; });
+  cutter.RegisterCentralValueGetter("TwoBodyMomKS", [&]()
+                                    { return pKTwoBody; });
+  ///////////////////////////////////////////////////////////////////
+  cutter.RegisterVariableGetter("TwoBodyMomKL", [&]()
+                                { return KchrecKLMom; });
+  cutter.RegisterCentralValueGetter("TwoBodyMomKL", [&]()
+                                    { return pKTwoBody; });
+  ///////////////////////////////////////////////////////////////////
+  cutter.RegisterVariableGetter("MissTotKS", [&]()
+                                { return sqrt(pow(PmissKS, 2) + pow(EmissKS, 2)); });
+  ///////////////////////////////////////////////////////////////////
+  cutter.RegisterVariableGetter("MissHigherKS", [&]()
+                                { return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+  cutter.RegisterVariableGetter("MissLowerKS", [&]()
+                                { return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+  ///////////////////////////////////////////////////////////////////
+  cutter.RegisterVariableGetter("MissTotKL", [&]()
+                                { return sqrt(pow(PmissKL, 2) + pow(EmissKL, 2)); });
+  ///////////////////////////////////////////////////////////////////
+  cutter.RegisterVariableGetter("MissHigherKL", [&]()
+                                { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+  cutter.RegisterVariableGetter("MissLowerKL", [&]()
+                                { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+
   std::string
       dirname = (std::string)charged_dir + (std::string)root_files_dir,
       dated_folder = Obj.CreateDatedFolder(dirname);
@@ -171,6 +221,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   std::vector<std::vector<TH1 *>> histMomtrkKL(2);
 
   std::vector<TH1 *> histKLTwoBody;
+  std::vector<TH1 *> histKLBoost;
   std::vector<TH1 *> histKL;
 
   for (Int_t i = 0; i < 2; i++)
@@ -178,16 +229,18 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
     {
       if (j < 3)
       {
-        histMomPiKLTwoBody[i].push_back(new TH1F(Form("histMomPiKLTwoBody_%d_%d", i, j), Form("Histogram Pi Two Body %d %d", i, j), 50, -5, 5));
+        histMomPiKLTwoBody[i].push_back(new TH1F(Form("histMomPiKLTwoBody_%d_%d", i, j), Form("Histogram Pi KL Two Body %d %d", i, j), 50, -5, 5));
         histMomtrkKL[i].push_back(new TH1F(Form("histMomtrkKL_%d_%d", i, j), Form("Histogram trk KL %d %d", i, j), 50, -5, 5));
         histKLTwoBody.push_back(new TH1F(Form("histKLTwoBody_%d_%d", i, j), Form("Histogram KL Two Body %d %d", i, j), 50, -5, 5));
+        histKLBoost.push_back(new TH1F(Form("histKLBoost_%d_%d", i, j), Form("Histogram KL Boost %d %d", i, j), 50, -5, 5));
         histKL.push_back(new TH1F(Form("histKL_%d_%d", i, j), Form("Histogram KL %d %d", i, j), 50, -5, 5));
       }
       else
       {
-        histMomPiKLTwoBody[i].push_back(new TH1F(Form("histMomPiKLTwoBody_%d_%d", i, j), Form("Histogram Pi Two Body %d %d", i, j), 50, -5, 5));
+        histMomPiKLTwoBody[i].push_back(new TH1F(Form("histMomPiKLTwoBody_%d_%d", i, j), Form("Histogram Pi KL Two Body %d %d", i, j), 50, -5, 5));
         histMomtrkKL[i].push_back(new TH1F(Form("histMomtrkKL_%d_%d", i, j), Form("Histogram trk KL %d %d", i, j), 50, -5, 5));
         histKLTwoBody.push_back(new TH1F(Form("histKLTwoBody_%d_%d", i, j), Form("Histogram KL Two Body %d %d", i, j), 50, -5, 5));
+        histKLBoost.push_back(new TH1F(Form("histKLBoost_%d_%d", i, j), Form("Histogram KL Boost %d %d", i, j), 50, -5, 5));
         histKL.push_back(new TH1F(Form("histKL_%d_%d", i, j), Form("Histogram KL %d %d", i, j), 50, -5, 5));
       }
     }
@@ -196,6 +249,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   std::vector<std::vector<TH1 *>> histMomtrkKS(2);
 
   std::vector<TH1 *> histKSTwoBody;
+  std::vector<TH1 *> histKSBoost;
   std::vector<TH1 *> histKS;
 
   for (Int_t i = 0; i < 2; i++)
@@ -203,17 +257,19 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
     {
       if (j < 3)
       {
-        histMomPiKSTwoBody[i].push_back(new TH1F(Form("histMomPiKSTwoBody_%d_%d", i, j), Form("Histogram Pi Two Body %d %d", i, j), 50, -5, 5));
-        histMomtrkKS[i].push_back(new TH1F(Form("histMomtrkKS_%d_%d", i, j), Form("Histogram trk KL %d %d", i, j), 50, -5, 5));
-        histKSTwoBody.push_back(new TH1F(Form("histKSTwoBody_%d_%d", i, j), Form("Histogram KL Two Body %d %d", i, j), 50, -5, 5));
-        histKS.push_back(new TH1F(Form("histKS_%d_%d", i, j), Form("Histogram KL %d %d", i, j), 50, -5, 5));
+        histMomPiKSTwoBody[i].push_back(new TH1F(Form("histMomPiKSTwoBody_%d_%d", i, j), Form("Histogram Pi KS Two Body %d %d", i, j), 50, -5, 5));
+        histMomtrkKS[i].push_back(new TH1F(Form("histMomtrkKS_%d_%d", i, j), Form("Histogram trk KS %d %d", i, j), 50, -5, 5));
+        histKSTwoBody.push_back(new TH1F(Form("histKSTwoBody_%d_%d", i, j), Form("Histogram KS Two Body %d %d", i, j), 50, -5, 5));
+        histKSBoost.push_back(new TH1F(Form("histKSBoost_%d_%d", i, j), Form("Histogram KS Boost %d %d", i, j), 50, -5, 5));
+        histKS.push_back(new TH1F(Form("histKS_%d_%d", i, j), Form("Histogram KS %d %d", i, j), 50, -5, 5));
       }
       else
       {
-        histMomPiKSTwoBody[i].push_back(new TH1F(Form("histMomPiKSTwoBody_%d_%d", i, j), Form("Histogram Pi Two Body %d %d", i, j), 50, -5, 5));
-        histMomtrkKS[i].push_back(new TH1F(Form("histMomtrkKS_%d_%d", i, j), Form("Histogram trk KL %d %d", i, j), 50, -5, 5));
-        histKSTwoBody.push_back(new TH1F(Form("histKSTwoBody_%d_%d", i, j), Form("Histogram KL Two Body %d %d", i, j), 50, -5, 5));
-        histKS.push_back(new TH1F(Form("histKS_%d_%d", i, j), Form("Histogram KL %d %d", i, j), 50, -5, 5));
+        histMomPiKSTwoBody[i].push_back(new TH1F(Form("histMomPiKSTwoBody_%d_%d", i, j), Form("Histogram Pi KS Two Body %d %d", i, j), 50, -5, 5));
+        histMomtrkKS[i].push_back(new TH1F(Form("histMomtrkKS_%d_%d", i, j), Form("Histogram trk KS %d %d", i, j), 50, -5, 5));
+        histKSTwoBody.push_back(new TH1F(Form("histKSTwoBody_%d_%d", i, j), Form("Histogram KS Two Body %d %d", i, j), 50, -5, 5));
+        histKSBoost.push_back(new TH1F(Form("histKSBoost_%d_%d", i, j), Form("Histogram KS Boost %d %d", i, j), 50, -5, 5));
+        histKS.push_back(new TH1F(Form("histKS_%d_%d", i, j), Form("Histogram KS %d %d", i, j), 50, -5, 5));
       }
     }
 
@@ -236,6 +292,45 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   for (Int_t i = 0; i < nentries; i++)
   {
     chain.GetEntry(i);
+
+    Float_t
+        PhiMom[3] = {baseKin.phi_mom[0], baseKin.phi_mom[1], baseKin.phi_mom[2]},
+        MissMomKS[3] = {},
+        MissMomKL[3] = {};
+
+    for (Int_t comp = 0; comp < 3; comp++)
+    {
+      MissMomKS[comp] = PhiMom[comp] - KchboostKS->at(comp) - KchrecKL->at(comp);
+      MissMomKL[comp] = PhiMom[comp] - KchboostKL->at(comp) - KchrecKS->at(comp);
+    }
+
+    PmissKS = sqrt(pow(MissMomKS[0], 2) + pow(MissMomKS[1], 2) + pow(MissMomKS[2], 2));
+    PmissKL = sqrt(pow(MissMomKL[0], 2) + pow(MissMomKL[1], 2) + pow(MissMomKL[2], 2));
+
+    EmissKS = KchboostKS->at(3) - KchrecKS->at(3);
+    EmissKL = KchboostKL->at(3) - KchrecKL->at(3);
+
+    Float_t
+        boostPhi[3] = {
+            -baseKin.phi_mom[0] / baseKin.phi_mom[3],
+            -baseKin.phi_mom[1] / baseKin.phi_mom[3],
+            -baseKin.phi_mom[2] / baseKin.phi_mom[3]},
+        phiMom[4] = {baseKin.phi_mom[0], baseKin.phi_mom[1], baseKin.phi_mom[2], baseKin.phi_mom[3]}, trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {};
+
+    Obj.lorentz_transf(boostPhi, trkKS[0]->data(), trkKS_PhiCM[0]);
+    Obj.lorentz_transf(boostPhi, trkKS[1]->data(), trkKS_PhiCM[1]);
+    Obj.lorentz_transf(boostPhi, trkKL[0]->data(), trkKL_PhiCM[0]);
+    Obj.lorentz_transf(boostPhi, trkKL[1]->data(), trkKL_PhiCM[1]);
+
+    for (Int_t part = 0; part < 2; part++)
+      for (Int_t comp = 0; comp < 4; comp++)
+      {
+        KchrecKS_PhiCM[comp] += trkKS_PhiCM[part][comp];
+        KchrecKL_PhiCM[comp] += trkKL_PhiCM[part][comp];
+      }
+
+    KchrecKSMom = sqrt(pow(KchrecKS_PhiCM[0], 2) + pow(KchrecKS_PhiCM[1], 2) + pow(KchrecKS_PhiCM[2], 2));
+    KchrecKLMom = sqrt(pow(KchrecKL_PhiCM[0], 2) + pow(KchrecKL_PhiCM[1], 2) + pow(KchrecKL_PhiCM[2], 2));
 
     // Finding Ks from KSKL->pi+pi-pi+pi-
     int
@@ -276,197 +371,229 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
     baseKin.KchrecKLTwoBody.resize(9);
     baseKin.KchrecKSTwoBody.resize(9);
 
-    TwoBodyReconstruction(KchboostKL, ipKL, trkKL, Obj, baseKin.KchrecKLTwoBody, gammaKL, PiKL4VecLAB, trkKL4VecLAB);
-
-    TwoBodyReconstruction(KchboostKS, ipKS, trkKS, Obj, baseKin.KchrecKSTwoBody, gammaKS, PiKS4VecLAB, trkKS4VecLAB);
-
-    for (Int_t k = 0; k < 4; k++)
+    if (cutter.PassAllCuts())
     {
 
-      trkKLTwoBody1[k] = PiKL4VecLAB[0][k];
-      trkKLTwoBody2[k] = PiKL4VecLAB[1][k];
+      TwoBodyReconstruction(KchboostKL, ipKL, trkKL, Obj, baseKin.KchrecKLTwoBody, gammaKL, PiKL4VecLAB, trkKL4VecLAB);
 
-      trkKSTwoBody1[k] = PiKS4VecLAB[0][k];
-      trkKSTwoBody2[k] = PiKS4VecLAB[1][k];
+      TwoBodyReconstruction(KchboostKS, ipKS, trkKS, Obj, baseKin.KchrecKSTwoBody, gammaKS, PiKS4VecLAB, trkKS4VecLAB);
 
-      if (mcflag == 1 && mctruth == 7)
+      for (Int_t k = 0; k < 4; k++)
       {
-        if (trkKLTwoBody1[k] - trkKLmc[0]->at(k) < trkKLTwoBody2[k] - trkKLmc[0]->at(k))
-        {
-          histMomPiKLTwoBody[0][k]->Fill(trkKLTwoBody1[k] - trkKLmc[0]->at(k));
-          histMomPiKLTwoBody[1][k]->Fill(trkKLTwoBody2[k] - trkKLmc[1]->at(k));
-        }
-        else
-        {
-          histMomPiKLTwoBody[0][k]->Fill(trkKLTwoBody1[k] - trkKLmc[1]->at(k));
-          histMomPiKLTwoBody[1][k]->Fill(trkKLTwoBody2[k] - trkKLmc[0]->at(k));
-        }
+        trkKLTwoBody1[k] = PiKL4VecLAB[0][k];
+        trkKLTwoBody2[k] = PiKL4VecLAB[1][k];
 
-        if (trkKL4VecLAB[0][k] - trkKLmc[0]->at(k) < trkKL4VecLAB[1][k] - trkKLmc[0]->at(k))
-        {
-          histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k] - trkKLmc[0]->at(k));
-          histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[1]->at(k));
-        }
-        else
-        {
-          histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k] - trkKLmc[1]->at(k));
-          histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[0]->at(k));
-        }
+        trkKSTwoBody1[k] = PiKS4VecLAB[0][k];
+        trkKSTwoBody2[k] = PiKS4VecLAB[1][k];
 
-        histKLTwoBody[k]->Fill(baseKin.KchrecKLTwoBody[k] - Knemc->at(k));
-        histKL[k]->Fill(KchrecKL->at(k) - Knemc->at(k));
+        baseKin.KchrecKLTwoBody[k] = trkKLTwoBody1[k] + trkKLTwoBody2[k];
+        baseKin.KchrecKSTwoBody[k] = trkKSTwoBody1[k] + trkKSTwoBody2[k];
       }
 
-      trkKLTwoBody1[k] = PiKL4VecLAB[0][k];
-      trkKLTwoBody2[k] = PiKL4VecLAB[1][k];
+      baseKin.KchrecKLTwoBody[4] = sqrt(pow(baseKin.KchrecKLTwoBody[0], 2) +
+                                        pow(baseKin.KchrecKLTwoBody[1], 2) +
+                                        pow(baseKin.KchrecKLTwoBody[2], 2));
+      baseKin.KchrecKLTwoBody[5] = sqrt(pow(baseKin.KchrecKLTwoBody[3], 2) -
+                                        pow(baseKin.KchrecKLTwoBody[4], 2));
 
-      trkKSTwoBody1[k] = PiKS4VecLAB[0][k];
-      trkKSTwoBody2[k] = PiKS4VecLAB[1][k];
+      baseKin.KchrecKSTwoBody[4] = sqrt(pow(baseKin.KchrecKSTwoBody[0], 2) +
+                                        pow(baseKin.KchrecKSTwoBody[1], 2) +
+                                        pow(baseKin.KchrecKSTwoBody[2], 2));
+      baseKin.KchrecKSTwoBody[5] = sqrt(pow(baseKin.KchrecKSTwoBody[3], 2) -
+                                        pow(baseKin.KchrecKSTwoBody[4], 2));
 
-      if (mcflag == 1 && mctruth == 7)
+      for (Int_t k = 0; k < 4; k++)
       {
-        if (trkKSTwoBody1[k] - trkKSmc[0]->at(k) < trkKSTwoBody2[k] - trkKSmc[0]->at(k))
+
+        if (mcflag == 1 && mctruth == 7)
         {
-          histMomPiKSTwoBody[0][k]->Fill(trkKSTwoBody1[k] - trkKSmc[0]->at(k));
-          histMomPiKSTwoBody[1][k]->Fill(trkKSTwoBody2[k] - trkKSmc[1]->at(k));
-        }
-        else
-        {
-          histMomPiKSTwoBody[0][k]->Fill(trkKSTwoBody1[k] - trkKSmc[1]->at(k));
-          histMomPiKSTwoBody[1][k]->Fill(trkKSTwoBody2[k] - trkKSmc[0]->at(k));
+          if (trkKLTwoBody1[k] - trkKLmc[0]->at(k) < trkKLTwoBody2[k] - trkKLmc[0]->at(k))
+          {
+            histMomPiKLTwoBody[0][k]->Fill(trkKLTwoBody1[k] - trkKLmc[0]->at(k));
+            histMomPiKLTwoBody[1][k]->Fill(trkKLTwoBody2[k] - trkKLmc[1]->at(k));
+          }
+          else
+          {
+            histMomPiKLTwoBody[0][k]->Fill(trkKLTwoBody1[k] - trkKLmc[1]->at(k));
+            histMomPiKLTwoBody[1][k]->Fill(trkKLTwoBody2[k] - trkKLmc[0]->at(k));
+          }
+
+          if (trkKL4VecLAB[0][k] - trkKLmc[0]->at(k) < trkKL4VecLAB[1][k] - trkKLmc[0]->at(k))
+          {
+            histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k] - trkKLmc[0]->at(k));
+            histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[1]->at(k));
+          }
+          else
+          {
+            histMomtrkKL[0][k]->Fill(trkKL4VecLAB[0][k] - trkKLmc[1]->at(k));
+            histMomtrkKL[1][k]->Fill(trkKL4VecLAB[1][k] - trkKLmc[0]->at(k));
+          }
+
+          histKLTwoBody[k]->Fill(baseKin.KchrecKLTwoBody[k] - Knemc->at(k));
+          histKLBoost[k]->Fill(KchboostKL->at(k) - Knemc->at(k));
+          histKL[k]->Fill(KchrecKL->at(k) - Knemc->at(k));
         }
 
-        if (trkKS4VecLAB[0][k] - trkKSmc[0]->at(k) < trkKS4VecLAB[1][k] - trkKSmc[0]->at(k))
+        if (mcflag == 1 && mctruth == 7)
         {
-          histMomtrkKS[0][k]->Fill(trkKS4VecLAB[0][k] - trkKSmc[0]->at(k));
-          histMomtrkKS[1][k]->Fill(trkKS4VecLAB[1][k] - trkKSmc[1]->at(k));
-        }
-        else
-        {
-          histMomtrkKS[0][k]->Fill(trkKS4VecLAB[0][k] - trkKSmc[1]->at(k));
-          histMomtrkKS[1][k]->Fill(trkKS4VecLAB[1][k] - trkKSmc[0]->at(k));
-        }
+          if (trkKSTwoBody1[k] - trkKSmc[0]->at(k) < trkKSTwoBody2[k] - trkKSmc[0]->at(k))
+          {
+            histMomPiKSTwoBody[0][k]->Fill(trkKSTwoBody1[k] - trkKSmc[0]->at(k));
+            histMomPiKSTwoBody[1][k]->Fill(trkKSTwoBody2[k] - trkKSmc[1]->at(k));
+          }
+          else
+          {
+            histMomPiKSTwoBody[0][k]->Fill(trkKSTwoBody1[k] - trkKSmc[1]->at(k));
+            histMomPiKSTwoBody[1][k]->Fill(trkKSTwoBody2[k] - trkKSmc[0]->at(k));
+          }
 
-        histKSTwoBody[k]->Fill(baseKin.KchrecKSTwoBody[k] - Knemc->at(k));
-        histKS[k]->Fill(KchrecKS->at(k) - Knemc->at(k));
+          if (trkKS4VecLAB[0][k] - trkKSmc[0]->at(k) < trkKS4VecLAB[1][k] - trkKSmc[0]->at(k))
+          {
+            histMomtrkKS[0][k]->Fill(trkKS4VecLAB[0][k] - trkKSmc[0]->at(k));
+            histMomtrkKS[1][k]->Fill(trkKS4VecLAB[1][k] - trkKSmc[1]->at(k));
+          }
+          else
+          {
+            histMomtrkKS[0][k]->Fill(trkKS4VecLAB[0][k] - trkKSmc[1]->at(k));
+            histMomtrkKS[1][k]->Fill(trkKS4VecLAB[1][k] - trkKSmc[0]->at(k));
+          }
+
+          histKSTwoBody[k]->Fill(baseKin.KchrecKSTwoBody[k] - Kchmc->at(k));
+          histKSBoost[k]->Fill(KchboostKS->at(k) - Kchmc->at(k));
+          histKS[k]->Fill(KchrecKS->at(k) - Kchmc->at(k));
+        }
       }
+
+      // Int_t zmienne
+      std::map<std::string, Int_t> intVars = {
+          {"nrun", baseKin.nrun},
+          {"nev", baseKin.nev},
+          {"mcflag", mcflag},
+          {"mctruth", mctruth}};
+
+      std::map<std::string, Float_t> floatVars = {
+          {"gammaKS", gammaKS},
+          {"gammaKL", gammaKL}};
+
+      // Tablice
+      std::map<std::string, std::vector<Int_t>> intArrays = {};
+
+      std::map<std::string, std::vector<Float_t>> floatArrays = {
+          {"Kchmc", *Kchmc},
+          {"Knemc", *Knemc},
+          {"KchrecKS", *KchrecKS},
+          {"KchrecKL", *KchrecKL},
+          {"KchboostKS", *KchboostKS},
+          {"KchboostKL", *KchboostKL},
+          {"KchrecKSTwoBody", baseKin.KchrecKSTwoBody},
+          {"KchrecKLTwoBody", baseKin.KchrecKLTwoBody},
+          {"trk1KS", *trkKS[0]},
+          {"trk2KS", *trkKS[1]},
+          {"trk1KL", *trkKL[0]},
+          {"trk2KL", *trkKL[1]},
+          {"trk1KSTwoBody", trkKSTwoBody1},
+          {"trk2KSTwoBody", trkKSTwoBody2},
+          {"trk1KLTwoBody", trkKLTwoBody1},
+          {"trk2KLTwoBody", trkKLTwoBody2},
+          {"trk1KSmc", *trkKSmc[0]},
+          {"trk2KSmc", *trkKSmc[1]},
+          {"trk1KLmc", *trkKLmc[0]},
+          {"trk2KLmc", *trkKLmc[1]}};
+
+      writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }
-
-    // Int_t zmienne
-    std::map<std::string, Int_t> intVars = {
-        {"nrun", baseKin.nrun},
-        {"nev", baseKin.nev},
-        {"mcflag", mcflag},
-        {"mctruth", mctruth}};
-
-    std::map<std::string, Float_t> floatVars = {
-        {"gammaKS", gammaKS},
-        {"gammaKL", gammaKL}};
-
-    // Tablice
-    std::map<std::string, std::vector<Int_t>> intArrays = {};
-
-    std::map<std::string, std::vector<Float_t>> floatArrays = {
-        {"Kchmc", *Kchmc},
-        {"Knemc", *Knemc},
-        {"KchrecKS", *KchrecKS},
-        {"KchrecKL", *KchrecKL},
-        {"KchboostKS", *KchboostKS},
-        {"KchboostKL", *KchboostKL},
-        {"KchrecKSTwoBody", baseKin.KchrecKSTwoBody},
-        {"KchrecKLTwoBody", baseKin.KchrecKLTwoBody},
-        {"trk1KS", *trkKS[0]},
-        {"trk2KS", *trkKS[1]},
-        {"trk1KL", *trkKL[0]},
-        {"trk2KL", *trkKL[1]},
-        {"trk1KSTwoBody", trkKSTwoBody1},
-        {"trk2KSTwoBody", trkKSTwoBody2},
-        {"trk1KLTwoBody", trkKLTwoBody1},
-        {"trk2KLTwoBody", trkKLTwoBody2},
-        {"trk1KSmc", *trkKSmc[0]},
-        {"trk2KSmc", *trkKSmc[1]},
-        {"trk1KLmc", *trkKLmc[0]},
-        {"trk2KLmc", *trkKLmc[1]}};
-
-    writer.Fill(intVars, floatVars, intArrays, floatArrays);
 
     ++show_progress; // Progress of the loading bar
   }
 
-  TCanvas *canvas = new TCanvas("canvas", "Canvas", 800, 600);
-
-  std::string xTitle[4] = {"p_{x} [MeV/c]", "p_{y} [MeV/c]", "p_{z} [MeV/c]", "E [MeV]"};
-
-  gStyle->SetOptStat(0);
-
-  for (Int_t j = 0; j < 4; j++)
+  if (dataType == Controls::DataType::MC_ONLY)
   {
-    for (Int_t i = 0; i < 2; i++)
+    std::string
+        hist_dir = (std::string)charged_dir + (std::string)img_dir;
+
+    std::string dated_hist_dir = Obj.CreateDatedFolder(hist_dir);
+
+    TCanvas *canvas = new TCanvas("canvas", "Canvas", 800, 600);
+
+    std::string xTitle[4] = {"p_{x} [MeV/c]", "p_{y} [MeV/c]", "p_{z} [MeV/c]", "E [MeV]"};
+
+    gStyle->SetOptStat(0);
+
+    for (Int_t j = 0; j < 4; j++)
     {
-      TLegend *legendPi = new TLegend(0.1, 0.7, 0.3, 0.9);
-      legendPi->AddEntry(histMomtrkKL[i][j], Form("Reconstructed charged pion %d", i), "l");
-      legendPi->AddEntry(histMomPiKLTwoBody[i][j], Form("Charged pion %d from 2-body decay", i), "l");
-      histMomPiKLTwoBody[i][j]->SetTitle(Form("Histogram Pi Two Body %d %d", i, j));
-      histMomPiKLTwoBody[i][j]->GetXaxis()->SetTitle(xTitle[j].c_str());
-      histMomPiKLTwoBody[i][j]->GetYaxis()->SetTitle("Counts");
-      histMomPiKLTwoBody[i][j]->GetYaxis()->SetRangeUser(0, histMomPiKLTwoBody[i][j]->GetMaximum() * 2.0);
-      histMomPiKLTwoBody[i][j]->SetLineColor(kBlue);
-      histMomPiKLTwoBody[i][j]->Draw();
-      histMomtrkKL[i][j]->SetLineColor(kRed);
-      histMomtrkKL[i][j]->Draw("SAME");
-      legendPi->Draw();
-      canvas->Print(Form("hist_mom_piKL_two_body_%d_%d.png", i, j));
+      for (Int_t i = 0; i < 2; i++)
+      {
+        TLegend *legendPi = new TLegend(0.15, 0.8, 0.6, 0.9);
+        legendPi->AddEntry(histMomtrkKL[i][j], Form("Reconstructed charged pion %d", i), "l");
+        legendPi->AddEntry(histMomPiKLTwoBody[i][j], Form("Charged pion %d from 2-body decay", i), "l");
+        histMomPiKLTwoBody[i][j]->SetTitle(Form("Histogram Pi Two Body %d %d", i, j));
+        histMomPiKLTwoBody[i][j]->GetXaxis()->SetTitle(xTitle[j].c_str());
+        histMomPiKLTwoBody[i][j]->GetYaxis()->SetTitle("Counts");
+        histMomPiKLTwoBody[i][j]->GetYaxis()->SetRangeUser(0, histMomPiKLTwoBody[i][j]->GetMaximum() * 2.0);
+        histMomPiKLTwoBody[i][j]->SetLineColor(kBlue);
+        histMomPiKLTwoBody[i][j]->Draw();
+        histMomtrkKL[i][j]->SetLineColor(kRed);
+        histMomtrkKL[i][j]->Draw("SAME");
+        legendPi->Draw();
+        canvas->Print(Form((dated_hist_dir + "/hist_mom_piKL_two_body_%d_%d.png").c_str(), i, j));
+      }
+
+      TLegend *legendKaon = new TLegend(0.15, 0.8, 0.6, 0.9);
+      legendKaon->AddEntry(histKL[j], "Reconstructed KL", "l");
+      legendKaon->AddEntry(histKLBoost[j], "KL from boost method", "l");
+      legendKaon->AddEntry(histKLTwoBody[j], "KL from 2-body decay", "l");
+
+      histKLTwoBody[j]->SetTitle(Form("Histogram KL Two Body %d", j));
+      histKLTwoBody[j]->GetXaxis()->SetTitle(xTitle[j].c_str());
+      histKLTwoBody[j]->GetYaxis()->SetTitle("Counts");
+      histKLTwoBody[j]->GetYaxis()->SetRangeUser(0, histKLTwoBody[j]->GetMaximum() * 2.0);
+      histKLTwoBody[j]->SetLineColor(kBlue);
+      histKLTwoBody[j]->Draw();
+      histKLBoost[j]->SetLineColor(kGreen);
+      histKLBoost[j]->Draw("SAME");
+      histKL[j]->SetLineColor(kRed);
+      histKL[j]->Draw("SAME");
+      legendKaon->Draw();
+      canvas->Print(Form((dated_hist_dir + "/hist_kl_two_body_%d.png").c_str(), j));
     }
 
-    TLegend *legendKaon = new TLegend(0.1, 0.7, 0.3, 0.9);
-    legendKaon->AddEntry(histKL[j], "Reconstructed KL", "l");
-    legendKaon->AddEntry(histKLTwoBody[j], "KL from 2-body decay", "l");
-
-    histKLTwoBody[j]->SetTitle(Form("Histogram KL Two Body %d", j));
-    histKLTwoBody[j]->GetXaxis()->SetTitle(xTitle[j].c_str());
-    histKLTwoBody[j]->GetYaxis()->SetTitle("Counts");
-    histKLTwoBody[j]->GetYaxis()->SetRangeUser(0, histKLTwoBody[j]->GetMaximum() * 2.0);
-    histKLTwoBody[j]->SetLineColor(kBlue);
-    histKLTwoBody[j]->Draw();
-    histKL[j]->SetLineColor(kRed);
-    histKL[j]->Draw("SAME");
-    legendKaon->Draw();
-    canvas->Print(Form("hist_kl_two_body_%d.png", j));
-  }
-
-   for (Int_t j = 0; j < 4; j++)
-  {
-    for (Int_t i = 0; i < 2; i++)
+    for (Int_t j = 0; j < 4; j++)
     {
-      TLegend *legendPi = new TLegend(0.1, 0.7, 0.3, 0.9);
-      legendPi->AddEntry(histMomtrkKS[i][j], Form("Reconstructed charged pion %d", i), "l");
-      legendPi->AddEntry(histMomPiKSTwoBody[i][j], Form("Charged pion %d from 2-body decay", i), "l");
-      histMomPiKSTwoBody[i][j]->SetTitle(Form("Histogram Pi Two Body %d %d", i, j));
-      histMomPiKSTwoBody[i][j]->GetXaxis()->SetTitle(xTitle[j].c_str());
-      histMomPiKSTwoBody[i][j]->GetYaxis()->SetTitle("Counts");
-      histMomPiKSTwoBody[i][j]->GetYaxis()->SetRangeUser(0, histMomPiKSTwoBody[i][j]->GetMaximum() * 2.0);
-      histMomPiKSTwoBody[i][j]->SetLineColor(kBlue);
-      histMomPiKSTwoBody[i][j]->Draw();
-      histMomtrkKS[i][j]->SetLineColor(kRed);
-      histMomtrkKS[i][j]->Draw("SAME");
-      legendPi->Draw();
-      canvas->Print(Form("hist_mom_piKS_two_body_%d_%d.png", i, j));
+      for (Int_t i = 0; i < 2; i++)
+      {
+        TLegend *legendPi = new TLegend(0.15, 0.8, 0.6, 0.9);
+        legendPi->AddEntry(histMomtrkKS[i][j], Form("Reconstructed charged pion %d", i), "l");
+        legendPi->AddEntry(histMomPiKSTwoBody[i][j], Form("Charged pion %d from 2-body decay", i), "l");
+        histMomPiKSTwoBody[i][j]->SetTitle(Form("Histogram Pi Two Body %d %d", i, j));
+        histMomPiKSTwoBody[i][j]->GetXaxis()->SetTitle(xTitle[j].c_str());
+        histMomPiKSTwoBody[i][j]->GetYaxis()->SetTitle("Counts");
+        histMomPiKSTwoBody[i][j]->GetYaxis()->SetRangeUser(0, histMomPiKSTwoBody[i][j]->GetMaximum() * 2.0);
+        histMomPiKSTwoBody[i][j]->SetLineColor(kBlue);
+        histMomPiKSTwoBody[i][j]->Draw();
+        histMomtrkKS[i][j]->SetLineColor(kRed);
+        histMomtrkKS[i][j]->Draw("SAME");
+        legendPi->Draw();
+        canvas->Print(Form((dated_hist_dir + "/hist_mom_piKS_two_body_%d_%d.png").c_str(), i, j));
+      }
+
+      TLegend *legendKaon = new TLegend(0.15, 0.8, 0.6, 0.9);
+      legendKaon->AddEntry(histKS[j], "Reconstructed KS", "l");
+      legendKaon->AddEntry(histKSBoost[j], "KS from boost method", "l");
+      legendKaon->AddEntry(histKSTwoBody[j], "KS from 2-body decay", "l");
+
+      histKSTwoBody[j]->SetTitle(Form("Histogram KS Two Body %d", j));
+      histKSTwoBody[j]->GetXaxis()->SetTitle(xTitle[j].c_str());
+      histKSTwoBody[j]->GetYaxis()->SetTitle("Counts");
+      histKSTwoBody[j]->GetYaxis()->SetRangeUser(0, histKSTwoBody[j]->GetMaximum() * 2.0);
+      histKSTwoBody[j]->SetLineColor(kBlue);
+      histKSTwoBody[j]->Draw();
+      histKSBoost[j]->SetLineColor(kGreen);
+      histKSBoost[j]->Draw("SAME");
+      histKS[j]->SetLineColor(kRed);
+      histKS[j]->Draw("SAME");
+      legendKaon->Draw();
+      canvas->Print(Form((dated_hist_dir + "/hist_ks_two_body_%d.png").c_str(), j));
     }
-
-    TLegend *legendKaon = new TLegend(0.1, 0.7, 0.3, 0.9);
-    legendKaon->AddEntry(histKS[j], "Reconstructed KS", "l");
-    legendKaon->AddEntry(histKSTwoBody[j], "KS from 2-body decay", "l");
-
-    histKSTwoBody[j]->SetTitle(Form("Histogram KS Two Body %d", j));
-    histKSTwoBody[j]->GetXaxis()->SetTitle(xTitle[j].c_str());
-    histKSTwoBody[j]->GetYaxis()->SetTitle("Counts");
-    histKSTwoBody[j]->GetYaxis()->SetRangeUser(0, histKSTwoBody[j]->GetMaximum() * 2.0);
-    histKSTwoBody[j]->SetLineColor(kBlue);
-    histKSTwoBody[j]->Draw();
-    histKS[j]->SetLineColor(kRed);
-    histKS[j]->Draw("SAME");
-    legendKaon->Draw();
-    canvas->Print(Form("hist_ks_two_body_%d.png", j));
   }
 
   writer.Close();
@@ -489,7 +616,7 @@ ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Float_t> *Kchboost, 
   //                               (Kchboost->at(7) - ip->at(1)) / KLpath,
   //                               (Kchboost->at(8) - ip->at(2)) / KLpath};
 
-  // // 2.1 Calculation of KL momentum magnitude
+  // // // 2.1 Calculation of KL momentum magnitude
   // Double_t KLmomMag = sqrt(pow(Kchboost->at(0), 2) +
   //                          pow(Kchboost->at(1), 2) +
   //                          pow(Kchboost->at(2), 2));
