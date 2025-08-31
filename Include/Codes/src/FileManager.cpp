@@ -70,7 +70,8 @@ namespace KLOE
             dirnamedata,
             filenamedata,
             extension = ext_root,
-            newestDateStamp = (std::string)properties["variables"]["rootFiles"]["newestFileDateStamp"],
+            newestDateStampData = (std::string)properties["variables"]["rootFiles"]["newestFileDateStampData"],
+            newestDateStampMC = (std::string)properties["variables"]["rootFiles"]["newestFileDateStampMC"],
             path = (std::string)properties["variables"]["rootFiles"]["path"];
 
     Int_t fileNumData[2] = {properties["variables"]["rootFiles"]["Data"]["firstFile"],
@@ -85,13 +86,13 @@ namespace KLOE
     for (Int_t i = 0; i < 3; i++)
     {
 
-      dirnamemc.push_back(path + newestDateStamp);
+      dirnamemc.push_back(path + newestDateStampMC);
       filenamemc.push_back((std::string)filePaths["MC"]["filenameBase"][i]);
       fileNumMC[i].push_back(properties["variables"]["rootFiles"]["MC"][i]["firstFile"]);
       fileNumMC[i].push_back(properties["variables"]["rootFiles"]["MC"][i]["lastFile"]);
     }
 
-    dirnamedata = path + newestDateStamp;
+    dirnamedata = path + newestDateStampData;
     filenamedata = (std::string)filePaths["Data"]["filenameBase"];
 
     switch (dataTypeOpt)

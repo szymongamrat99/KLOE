@@ -10,6 +10,7 @@
   "settings": {
     "files.associations": {
       "*.kloe": "fortran",
+      "*.cin": "fortran",
       "cp_fit.C": "cpp",
       ".rootlogon.C": "cpp",
       "data_fit_interference.C": "cpp",
@@ -83,7 +84,16 @@
       "cp_fit_mc_tri.C": "cpp",
       "cp_fit_tri.C": "cpp",
       "kin_fits.C": "cpp",
-      "load_sel.C": "cpp"
+      "load_sel.C": "cpp",
+      "strstream": "cpp",
+      "bitset": "cpp",
+      "complex": "cpp",
+      "regex": "cpp",
+      "set": "cpp",
+      "cfenv": "cpp",
+      "typeindex": "cpp",
+      "valarray": "cpp",
+      "variant": "cpp"
     },
     "C_Cpp.default.includePath": [
       "${default}",
