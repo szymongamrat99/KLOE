@@ -176,7 +176,7 @@ int CovarianceMatrixDetermination(TChain &chain, Controls::DataType &data_type, 
 	CovMatrixCalcObj.SaveCovMatrixToJSON("covarianceMatrixMCGenerated" + covMatrixType);
 
 	// --- Phase 2: Uncertainty Calculation using Bootstrap ---
-	const int num_bootstrap_samples = 10000;
+	const int num_bootstrap_samples = 100;
 	std::cout << "\n--- Calculating Uncertainty with Bootstrap (" << num_bootstrap_samples << " samples) ---" << std::endl;
 	CovMatrixCalcObj.CovMatrixUncertainty(num_bootstrap_samples);
 

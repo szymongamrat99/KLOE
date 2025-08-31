@@ -6,6 +6,8 @@
 #include <TF1.h>
 #include <TFitResultPtr.h>
 #include <TFitResult.h>
+#include <TLatex.h>
+#include <triple_gaus.h>
 #include <TLegend.h>
 #include <THStack.h>
 #include <TTreeReader.h>
@@ -513,7 +515,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 
     std::string dated_hist_dir = Obj.CreateDatedFolder(hist_dir);
 
-    TCanvas *canvas = new TCanvas("canvas", "Canvas", 800, 600);
+    TCanvas *canvas = new TCanvas("canvas", "Canvas", 790, 790);
 
     std::string xTitle[4] = {"p_{x} [MeV/c]", "p_{y} [MeV/c]", "p_{z} [MeV/c]", "E [MeV]"};
 
@@ -530,10 +532,96 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
         histMomPiKLTwoBody[i][j]->GetXaxis()->SetTitle(xTitle[j].c_str());
         histMomPiKLTwoBody[i][j]->GetYaxis()->SetTitle("Counts");
         histMomPiKLTwoBody[i][j]->GetYaxis()->SetRangeUser(0, histMomPiKLTwoBody[i][j]->GetMaximum() * 2.0);
+        histMomPiKLTwoBody[i][j]->GetYaxis()->SetMaxDigits(3);
         histMomPiKLTwoBody[i][j]->SetLineColor(kBlue);
         histMomPiKLTwoBody[i][j]->Draw();
         histMomtrkKL[i][j]->SetLineColor(kRed);
         histMomtrkKL[i][j]->Draw("SAME");
+        // Triple Gaussian fit
+        TF1 *fitFunc = new TF1("fitFunc", triple_gaus, histMomPiKLTwoBody[i][j]->GetXaxis()->GetXmin(), histMomPiKLTwoBody[i][j]->GetXaxis()->GetXmax(), 9);
+        fitFunc->SetNpx(1000);
+
+        fitFunc->SetParLimits(0, 0.0, 1000000.0);
+        fitFunc->SetParLimits(1, -3.0, 3.0);
+        fitFunc->SetParLimits(2, 0.0, 10.0);
+
+        fitFunc->SetParLimits(3, 0.0, 1000000.0);
+        fitFunc->SetParLimits(4, -3.0, 3.0);
+        fitFunc->SetParLimits(5, 0.0, 10.0);
+
+        fitFunc->SetParLimits(6, 0.0, 1000000.0);
+        fitFunc->SetParLimits(7, -3.0, 3.0);
+        fitFunc->SetParLimits(8, 0.0, 10.0);
+
+        fitFunc->SetParameter(0, 1000.0);
+        fitFunc->SetParameter(1, 0.0);
+        fitFunc->SetParameter(2, 1.0);
+
+        fitFunc->SetParameter(3, 1000.0);
+        fitFunc->SetParameter(4, 2.0);
+        fitFunc->SetParameter(5, 1.0);
+
+        fitFunc->SetParameter(6, 1000.0);
+        fitFunc->SetParameter(7, -2.0);
+        fitFunc->SetParameter(8, 1.0);
+
+        // Triple Gaussian fit
+        TF1 *fitFunc1 = new TF1("fitFunc1", triple_gaus, histMomPiKLTwoBody[i][j]->GetXaxis()->GetXmin(), histMomPiKLTwoBody[i][j]->GetXaxis()->GetXmax(), 9);
+        fitFunc1->SetNpx(1000);
+
+        fitFunc1->SetParLimits(0, 0.0, 1000000.0);
+        fitFunc1->SetParLimits(1, -3.0, 3.0);
+        fitFunc1->SetParLimits(2, 0.0, 10.0);
+
+        fitFunc1->SetParLimits(3, 0.0, 1000000.0);
+        fitFunc1->SetParLimits(4, -3.0, 3.0);
+        fitFunc1->SetParLimits(5, 0.0, 10.0);
+
+        fitFunc1->SetParLimits(6, 0.0, 1000000.0);
+        fitFunc1->SetParLimits(7, -3.0, 3.0);
+        fitFunc1->SetParLimits(8, 0.0, 10.0);
+
+        fitFunc1->SetParameter(0, 1000.0);
+        fitFunc1->SetParameter(1, 0.0);
+        fitFunc1->SetParameter(2, 1.0);
+
+        fitFunc1->SetParameter(3, 1000.0);
+        fitFunc1->SetParameter(4, 2.0);
+        fitFunc1->SetParameter(5, 1.0);
+
+        fitFunc1->SetParameter(6, 1000.0);
+        fitFunc1->SetParameter(7, -2.0);
+        fitFunc1->SetParameter(8, 1.0);
+
+        TFitResultPtr fitRes = histMomPiKLTwoBody[i][j]->Fit(fitFunc, "S");
+        TFitResultPtr fitRes1 = histMomtrkKL[i][j]->Fit(fitFunc1, "S");
+        // Get fit parameters and errors
+        Double_t params[9], errors[9];
+        for (int k = 0; k < 9; ++k)
+        {
+          params[k] = fitFunc->GetParameter(k);
+          errors[k] = fitFunc->GetParError(k);
+        }
+
+        // Annotate fit results
+        TLatex latex;
+        latex.SetNDC();
+        latex.SetTextSize(0.03);
+        latex.DrawLatex(0.15, 0.75 - 0.05, Form("Two body / boost: #mu=%.2f#pm%.2f, #sigma=%.2f#pm%.2f", comb_mean(params, errors), comb_mean_err(params, errors), comb_std_dev(params, errors), comb_std_dev_err(params, errors)));
+
+        Double_t params1[9], errors1[9];
+        for (int k = 0; k < 9; ++k)
+        {
+          params1[k] = fitFunc1->GetParameter(k);
+          errors1[k] = fitFunc1->GetParError(k);
+        }
+
+        // Annotate fit results
+        TLatex latex1;
+        latex1.SetNDC();
+        latex1.SetTextSize(0.03);
+        latex1.DrawLatex(0.15, 0.75, Form("Tracks: #mu=%.2f#pm%.2f, #sigma=%.2f#pm%.2f", comb_mean(params1, errors1), comb_mean_err(params1, errors1), comb_std_dev(params1, errors1), comb_std_dev_err(params1, errors1)));
+
         legendPi->Draw();
         canvas->Print(Form((dated_hist_dir + "/hist_mom_piKL_two_body_%d_%d.png").c_str(), i, j));
       }
@@ -547,12 +635,96 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
       histKLTwoBody[j]->GetXaxis()->SetTitle(xTitle[j].c_str());
       histKLTwoBody[j]->GetYaxis()->SetTitle("Counts");
       histKLTwoBody[j]->GetYaxis()->SetRangeUser(0, histKLTwoBody[j]->GetMaximum() * 2.0);
+      histKLTwoBody[j]->GetYaxis()->SetMaxDigits(3);
       histKLTwoBody[j]->SetLineColor(kBlue);
       histKLTwoBody[j]->Draw();
-      histKLBoost[j]->SetLineColor(kGreen);
-      histKLBoost[j]->Draw("SAME");
       histKL[j]->SetLineColor(kRed);
       histKL[j]->Draw("SAME");
+      // Triple Gaussian fit
+      TF1 *fitFuncKL = new TF1("fitFuncKL", triple_gaus, histKLTwoBody[j]->GetXaxis()->GetXmin(), histKLTwoBody[j]->GetXaxis()->GetXmax(), 9);
+      fitFuncKL->SetNpx(1000);
+
+      fitFuncKL->SetParLimits(0, 0.0, 1000000.0);
+      fitFuncKL->SetParLimits(1, -3.0, 3.0);
+      fitFuncKL->SetParLimits(2, 0.0, 10.0);
+
+      fitFuncKL->SetParLimits(3, 0.0, 1000000.0);
+      fitFuncKL->SetParLimits(4, -3.0, 3.0);
+      fitFuncKL->SetParLimits(5, 0.0, 10.0);
+
+      fitFuncKL->SetParLimits(6, 0.0, 1000000.0);
+      fitFuncKL->SetParLimits(7, -3.0, 3.0);
+      fitFuncKL->SetParLimits(8, 0.0, 10.0);
+
+      fitFuncKL->SetParameter(0, 1000.0);
+      fitFuncKL->SetParameter(1, 0.0);
+      fitFuncKL->SetParameter(2, 1.0);
+
+      fitFuncKL->SetParameter(3, 1000.0);
+      fitFuncKL->SetParameter(4, 2.0);
+      fitFuncKL->SetParameter(5, 1.0);
+
+      fitFuncKL->SetParameter(6, 1000.0);
+      fitFuncKL->SetParameter(7, -2.0);
+      fitFuncKL->SetParameter(8, 1.0);
+
+      TFitResultPtr fitResKL = histKLTwoBody[j]->Fit(fitFuncKL, "S");
+      Double_t paramsKL[9], errorsKL[9];
+      for (int k = 0; k < 9; ++k)
+      {
+        paramsKL[k] = fitFuncKL->GetParameter(k);
+        errorsKL[k] = fitFuncKL->GetParError(k);
+      }
+      TLatex latexKL;
+      latexKL.SetNDC();
+      latexKL.SetTextSize(0.03);
+      latexKL.DrawLatex(0.15, 0.75 - 0.05, Form("Two body / boost: #mu=%.2f#pm%.2f, #sigma=%.2f#pm%.2f", comb_mean(paramsKL, errorsKL), comb_mean_err(paramsKL, errorsKL), comb_std_dev(paramsKL, errorsKL), comb_std_dev_err(paramsKL, errorsKL)));
+
+      // Triple Gaussian fit
+      TF1 *fitFuncKL1 = new TF1("fitFuncKL1", triple_gaus, histKL[j]->GetXaxis()->GetXmin(), histKL[j]->GetXaxis()->GetXmax(), 9);
+      fitFuncKL1->SetNpx(1000);
+
+      fitFuncKL1->SetParLimits(0, 0.0, 1000000.0);
+      fitFuncKL1->SetParLimits(1, -3.0, 3.0);
+      fitFuncKL1->SetParLimits(2, 0.0, 10.0);
+
+      fitFuncKL1->SetParLimits(3, 0.0, 1000000.0);
+      fitFuncKL1->SetParLimits(4, -3.0, 3.0);
+      fitFuncKL1->SetParLimits(5, 0.0, 10.0);
+
+      fitFuncKL1->SetParLimits(6, 0.0, 1000000.0);
+      fitFuncKL1->SetParLimits(7, -3.0, 3.0);
+      fitFuncKL1->SetParLimits(8, 0.0, 10.0);
+
+      fitFuncKL1->SetParameter(0, 1000.0);
+      fitFuncKL1->SetParameter(1, 0.0);
+      fitFuncKL1->SetParameter(2, 1.0);
+
+      fitFuncKL1->SetParameter(3, 1000.0);
+      fitFuncKL1->SetParameter(4, 2.0);
+      fitFuncKL1->SetParameter(5, 1.0);
+
+      fitFuncKL1->SetParameter(6, 1000.0);
+      fitFuncKL1->SetParameter(7, -2.0);
+      fitFuncKL1->SetParameter(8, 1.0);
+
+      TFitResultPtr fitRes1 = histKL[j]->Fit(fitFuncKL1, "S");
+
+      Double_t params1[9], errors1[9];
+      for (int k = 0; k < 9; ++k)
+      {
+        params1[k] = fitFuncKL1->GetParameter(k);
+        errors1[k] = fitFuncKL1->GetParError(k);
+      }
+
+      // Annotate fit results
+      TLatex latex1;
+      latex1.SetNDC();
+      latex1.SetTextSize(0.03);
+      latex1.DrawLatex(0.15, 0.75, Form("Tracks: #mu=%.2f#pm%.2f, #sigma=%.2f#pm%.2f", comb_mean(params1, errors1), comb_mean_err(params1, errors1), comb_std_dev(params1, errors1), comb_std_dev_err(params1, errors1)));
+
+      histKLBoost[j]->SetLineColor(kGreen);
+      histKLBoost[j]->Draw("SAME");
       legendKaon->Draw();
       canvas->Print(Form((dated_hist_dir + "/hist_kl_two_body_%d.png").c_str(), j));
     }
@@ -568,10 +740,97 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
         histMomPiKSTwoBody[i][j]->GetXaxis()->SetTitle(xTitle[j].c_str());
         histMomPiKSTwoBody[i][j]->GetYaxis()->SetTitle("Counts");
         histMomPiKSTwoBody[i][j]->GetYaxis()->SetRangeUser(0, histMomPiKSTwoBody[i][j]->GetMaximum() * 2.0);
+        histMomPiKSTwoBody[i][j]->GetYaxis()->SetMaxDigits(3);
         histMomPiKSTwoBody[i][j]->SetLineColor(kBlue);
         histMomPiKSTwoBody[i][j]->Draw();
         histMomtrkKS[i][j]->SetLineColor(kRed);
         histMomtrkKS[i][j]->Draw("SAME");
+        // Triple Gaussian fit
+        TF1 *fitFuncKS = new TF1("fitFuncKS", triple_gaus, histMomPiKSTwoBody[i][j]->GetXaxis()->GetXmin(), histMomPiKSTwoBody[i][j]->GetXaxis()->GetXmax(), 9);
+        fitFuncKS->SetNpx(1000);
+
+        fitFuncKS->SetParLimits(0, 0.0, 1000000.0);
+        fitFuncKS->SetParLimits(1, -3.0, 3.0);
+        fitFuncKS->SetParLimits(2, 0.0, 10.0);
+
+        fitFuncKS->SetParLimits(3, 0.0, 1000000.0);
+        fitFuncKS->SetParLimits(4, -3.0, 3.0);
+        fitFuncKS->SetParLimits(5, 0.0, 10.0);
+
+        fitFuncKS->SetParLimits(6, 0.0, 1000000.0);
+        fitFuncKS->SetParLimits(7, -3.0, 3.0);
+        fitFuncKS->SetParLimits(8, 0.0, 10.0);
+
+        fitFuncKS->SetParameter(0, 1000.0);
+        fitFuncKS->SetParameter(1, 0.0);
+        fitFuncKS->SetParameter(2, 1.0);
+
+        fitFuncKS->SetParameter(3, 1000.0);
+        fitFuncKS->SetParameter(4, 2.0);
+        fitFuncKS->SetParameter(5, 1.0);
+
+        fitFuncKS->SetParameter(6, 1000.0);
+        fitFuncKS->SetParameter(7, -2.0);
+        fitFuncKS->SetParameter(8, 1.0);
+
+        // Triple Gaussian fit
+        TF1 *fitFunc1 = new TF1("fitFunc1", triple_gaus, histMomPiKLTwoBody[i][j]->GetXaxis()->GetXmin(), histMomPiKLTwoBody[i][j]->GetXaxis()->GetXmax(), 9);
+        fitFunc1->SetNpx(1000);
+
+        fitFunc1->SetParLimits(0, 0.0, 1000000.0);
+        fitFunc1->SetParLimits(1, -3.0, 3.0);
+        fitFunc1->SetParLimits(2, 0.0, 10.0);
+
+        fitFunc1->SetParLimits(3, 0.0, 1000000.0);
+        fitFunc1->SetParLimits(4, -3.0, 3.0);
+        fitFunc1->SetParLimits(5, 0.0, 10.0);
+
+        fitFunc1->SetParLimits(6, 0.0, 1000000.0);
+        fitFunc1->SetParLimits(7, -3.0, 3.0);
+        fitFunc1->SetParLimits(8, 0.0, 10.0);
+
+        fitFunc1->SetParameter(0, 1000.0);
+        fitFunc1->SetParameter(1, 0.0);
+        fitFunc1->SetParameter(2, 1.0);
+
+        fitFunc1->SetParameter(3, 1000.0);
+        fitFunc1->SetParameter(4, 2.0);
+        fitFunc1->SetParameter(5, 1.0);
+
+        fitFunc1->SetParameter(6, 1000.0);
+        fitFunc1->SetParameter(7, -2.0);
+        fitFunc1->SetParameter(8, 1.0);
+
+        TFitResultPtr fitRes = histMomPiKSTwoBody[i][j]->Fit(fitFuncKS, "S");
+        TFitResultPtr fitRes1 = histMomtrkKS[i][j]->Fit(fitFunc1, "S");
+
+        // Get fit parameters and errors
+        Double_t params[9], errors[9];
+        for (int k = 0; k < 9; ++k)
+        {
+          params[k] = fitFuncKS->GetParameter(k);
+          errors[k] = fitFuncKS->GetParError(k);
+        }
+
+        // Annotate fit results
+        TLatex latex;
+        latex.SetNDC();
+        latex.SetTextSize(0.03);
+        latex.DrawLatex(0.15, 0.75 - 0.05, Form("Two body / boost: #mu=%.2f#pm%.2f, #sigma=%.2f#pm%.2f", comb_mean(params, errors), comb_mean_err(params, errors), comb_std_dev(params, errors), comb_std_dev_err(params, errors)));
+
+        Double_t params1[9], errors1[9];
+        for (int k = 0; k < 9; ++k)
+        {
+          params1[k] = fitFunc1->GetParameter(k);
+          errors1[k] = fitFunc1->GetParError(k);
+        }
+
+        // Annotate fit results
+        TLatex latex1;
+        latex1.SetNDC();
+        latex1.SetTextSize(0.03);
+        latex1.DrawLatex(0.15, 0.75, Form("Tracks: #mu=%.2f#pm%.2f, #sigma=%.2f#pm%.2f", comb_mean(params1, errors1), comb_mean_err(params1, errors1), comb_std_dev(params1, errors1), comb_std_dev_err(params1, errors1)));
+
         legendPi->Draw();
         canvas->Print(Form((dated_hist_dir + "/hist_mom_piKS_two_body_%d_%d.png").c_str(), i, j));
       }
@@ -585,12 +844,97 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
       histKSTwoBody[j]->GetXaxis()->SetTitle(xTitle[j].c_str());
       histKSTwoBody[j]->GetYaxis()->SetTitle("Counts");
       histKSTwoBody[j]->GetYaxis()->SetRangeUser(0, histKSTwoBody[j]->GetMaximum() * 2.0);
+      histKSTwoBody[j]->GetYaxis()->SetMaxDigits(3);
       histKSTwoBody[j]->SetLineColor(kBlue);
       histKSTwoBody[j]->Draw();
-      histKSBoost[j]->SetLineColor(kGreen);
-      histKSBoost[j]->Draw("SAME");
       histKS[j]->SetLineColor(kRed);
       histKS[j]->Draw("SAME");
+      // Triple Gaussian fit
+      TF1 *fitFuncKSTwo = new TF1("fitFuncKSTwo", triple_gaus, histKSTwoBody[j]->GetXaxis()->GetXmin(), histKSTwoBody[j]->GetXaxis()->GetXmax(), 9);
+      fitFuncKSTwo->SetNpx(1000);
+
+      fitFuncKSTwo->SetParLimits(0, 0.0, 1000000.0);
+      fitFuncKSTwo->SetParLimits(1, -3.0, 3.0);
+      fitFuncKSTwo->SetParLimits(2, 0.0, 10.0);
+
+      fitFuncKSTwo->SetParLimits(3, 0.0, 1000000.0);
+      fitFuncKSTwo->SetParLimits(4, -3.0, 3.0);
+      fitFuncKSTwo->SetParLimits(5, 0.0, 10.0);
+
+      fitFuncKSTwo->SetParLimits(6, 0.0, 1000000.0);
+      fitFuncKSTwo->SetParLimits(7, -3.0, 3.0);
+      fitFuncKSTwo->SetParLimits(8, 0.0, 10.0);
+
+      fitFuncKSTwo->SetParameter(0, 1000.0);
+      fitFuncKSTwo->SetParameter(1, 0.0);
+      fitFuncKSTwo->SetParameter(2, 1.0);
+
+      fitFuncKSTwo->SetParameter(3, 1000.0);
+      fitFuncKSTwo->SetParameter(4, 2.0);
+      fitFuncKSTwo->SetParameter(5, 1.0);
+
+      fitFuncKSTwo->SetParameter(6, 1000.0);
+      fitFuncKSTwo->SetParameter(7, -2.0);
+      fitFuncKSTwo->SetParameter(8, 1.0);
+
+      TFitResultPtr fitResKSTwo = histKSTwoBody[j]->Fit(fitFuncKSTwo, "S");
+      Double_t paramsKSTwo[9], errorsKSTwo[9];
+      for (int k = 0; k < 9; ++k)
+      {
+        paramsKSTwo[k] = fitFuncKSTwo->GetParameter(k);
+        errorsKSTwo[k] = fitFuncKSTwo->GetParError(k);
+      }
+      TLatex latexKSTwo;
+      latexKSTwo.SetNDC();
+      latexKSTwo.SetTextSize(0.03);
+
+      latexKSTwo.DrawLatex(0.15, 0.75 - 0.05, Form("Two body / boost: #mu=%.2f#pm%.2f, #sigma=%.2f#pm%.2f", comb_mean(paramsKSTwo, errorsKSTwo), comb_mean_err(paramsKSTwo, errorsKSTwo), comb_std_dev(paramsKSTwo, errorsKSTwo), comb_std_dev_err(paramsKSTwo, errorsKSTwo)));
+
+      // Triple Gaussian fit
+      TF1 *fitFuncKS1 = new TF1("fitFuncKS1", triple_gaus, histKS[j]->GetXaxis()->GetXmin(), histKS[j]->GetXaxis()->GetXmax(), 9);
+      fitFuncKS1->SetNpx(1000);
+
+      fitFuncKS1->SetParLimits(0, 0.0, 1000000.0);
+      fitFuncKS1->SetParLimits(1, -3.0, 3.0);
+      fitFuncKS1->SetParLimits(2, 0.0, 10.0);
+
+      fitFuncKS1->SetParLimits(3, 0.0, 1000000.0);
+      fitFuncKS1->SetParLimits(4, -3.0, 3.0);
+      fitFuncKS1->SetParLimits(5, 0.0, 10.0);
+
+      fitFuncKS1->SetParLimits(6, 0.0, 1000000.0);
+      fitFuncKS1->SetParLimits(7, -3.0, 3.0);
+      fitFuncKS1->SetParLimits(8, 0.0, 10.0);
+
+      fitFuncKS1->SetParameter(0, 1000.0);
+      fitFuncKS1->SetParameter(1, 0.0);
+      fitFuncKS1->SetParameter(2, 1.0);
+
+      fitFuncKS1->SetParameter(3, 1000.0);
+      fitFuncKS1->SetParameter(4, 2.0);
+      fitFuncKS1->SetParameter(5, 1.0);
+
+      fitFuncKS1->SetParameter(6, 1000.0);
+      fitFuncKS1->SetParameter(7, -2.0);
+      fitFuncKS1->SetParameter(8, 1.0);
+
+      TFitResultPtr fitRes1 = histKS[j]->Fit(fitFuncKS1, "S");
+
+      Double_t params1[9], errors1[9];
+      for (int k = 0; k < 9; ++k)
+      {
+        params1[k] = fitFuncKS1->GetParameter(k);
+        errors1[k] = fitFuncKS1->GetParError(k);
+      }
+
+      // Annotate fit results
+      TLatex latex1;
+      latex1.SetNDC();
+      latex1.SetTextSize(0.03);
+      latex1.DrawLatex(0.15, 0.75, Form("Tracks: #mu=%.2f#pm%.2f, #sigma=%.2f#pm%.2f", comb_mean(params1, errors1), comb_mean_err(params1, errors1), comb_std_dev(params1, errors1), comb_std_dev_err(params1, errors1)));
+
+      histKSBoost[j]->SetLineColor(kGreen);
+      histKSBoost[j]->Draw("SAME");
       legendKaon->Draw();
       canvas->Print(Form((dated_hist_dir + "/hist_ks_two_body_%d.png").c_str(), j));
     }

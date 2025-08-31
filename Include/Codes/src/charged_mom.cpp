@@ -155,7 +155,7 @@ namespace KLOE
   }
 
   template <typename F, typename T>
-  ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKchRec(T mcflag, Bool_t smearingFlag, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger)
+  ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKchRec(T mcflag, Bool_t smearingFlag, TMatrixT<Double_t> covMatrix, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger)
   {
     F mom_vec1Tmp[4], mom_vec2Tmp[4], KchTmp[9];
     std::vector<Int_t> ivTmp(_iv, _iv + MaxNumTrkV);
@@ -172,14 +172,6 @@ namespace KLOE
     TVectorT<Double_t>
         momVecMC(numberOfMomenta * 3),
         momVecSmeared(numberOfMomenta * 3);
-
-    std::vector<double> elems = properties["momSmearing"]["covarianceMatrix"]["fElements"].get<std::vector<Double_t>>();
-
-    Int_t nRows = properties["momSmearing"]["covarianceMatrix"]["fNrows"],
-          nCols = properties["momSmearing"]["covarianceMatrix"]["fNcols"];
-
-    TMatrixT<Double_t>
-        covMatrix(nRows, nCols, elems.data());
 
     KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
     // -------------------------------------------------------------

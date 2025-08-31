@@ -39,10 +39,27 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
 	GeneratedVariables genVarClassifier;
 	// Set flag for initial analysis
-	Bool_t MonteCarloInitAnalysis = config.getProperty<Bool_t>("flags.initialAnalysisExec.MC"); 
+	Bool_t MonteCarloInitAnalysis = config.getProperty<Bool_t>("flags.initialAnalysisExec.MC");
+
+	// Set flag for covariance matrix type
+	std::string covMatrixType = config.getProperty<std::string>("flags.covMatrixType");
+	std::string covMatrixName = "momSmearing.covarianceMatrix" + covMatrixType;
+
+	std::vector<double> elems = config.getProperty<std::vector<double>>(covMatrixName + ".fElements");
+
+	Int_t nRows = config.getProperty<Int_t>(covMatrixName + ".fNrows"),
+				nCols = config.getProperty<Int_t>(covMatrixName + ".fNcols");
+
+	TMatrixT<Double_t>
+			covMatrix(nRows, nCols, elems.data());
+
+	covMatrix.Print();
+
+	// --------------------------------------------------------------------------------
 
 	// Which analysis to follow
-	KLOE::HypothesisCode hypoCode = Obj.StringToHypothesisCode(config.getProperty<std::string>("flags.analysisCode"));
+	std::string hypoCodeStr = config.getProperty<std::string>("flags.analysisCode");
+	KLOE::HypothesisCode hypoCode = Obj.StringToHypothesisCode(hypoCodeStr);
 
 	if (hypoCode == KLOE::HypothesisCode::INVALID_VALUE)
 		return 1;
@@ -59,6 +76,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 																						filePaths["MC"]["filenameBase"][0],
 																						filePaths["MC"]["filenameBase"][1],
 																						filePaths["MC"]["filenameBase"][2]};
+
+	for (Int_t i = 0; i < baseFilenames.size(); i++)
+	{
+		baseFilenames[i] = baseFilenames[i] + "_" + hypoCodeStr;
+	}
 
 	std::string
 			dirname = (std::string)initialanalysis_dir + (std::string)root_files_dir,
@@ -160,21 +182,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
 	// Initialization of momentum smearing
 	// -------------------------------------------------------------
-	const Int_t numberOfMomenta = 2;
-
-	TVectorT<Double_t>
-			momVecMC(numberOfMomenta * 3),
-			momVecSmeared(numberOfMomenta * 3);
-
-	std::vector<double> elems = properties["momSmearing"]["covarianceMatrix"]["fElements"].get<std::vector<Double_t>>();
-
-	Int_t nRows = properties["momSmearing"]["covarianceMatrix"]["fNrows"],
-				nCols = properties["momSmearing"]["covarianceMatrix"]["fNcols"];
-
-	TMatrixT<Double_t>
-			covMatrix(nRows, nCols, elems.data());
-
-	KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
 	KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj;
 	// -------------------------------------------------------------
 
@@ -198,6 +205,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		// Here you would process each entry in the tree.
 		// For example, you can read values from the tree and perform calculations.
 		// This is a placeholder for your actual analysis logic.
+
+		Bool_t noError = true;
 
 		// Initial values of mcflag and mctruth
 		mcflag = 0;
@@ -388,7 +397,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		}
 
 		if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+		{
 			logger.getErrLog(errorCode, "", mctruth);
+			noError = false;
+		}
 		else
 		{
 			// Construction of the charged rec class object
@@ -401,7 +413,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			std::map<KLOE::HypothesisCode, ErrorHandling::ErrorCodes> hypoMap;
 
 			// KMASS HYPOTHESIS - FOR SIGNAL
-			hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 0, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+			hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 1, covMatrix, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
 
 			// VTX CLOSEST TO BHABHA IP - FOR OMEGAPI
 			hypoMap[KLOE::HypothesisCode::OMEGAPI] = eventAnalysis->findKClosestRec(baseKin.KchrecClosest, baseKin.trkClosest[0], baseKin.trkClosest[1], baseKin.vtakenClosest, logger);
@@ -425,7 +437,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			errorCode = hypoMap[hypoCode]; // error code based on the hypothesis
 
 			if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+			{
 				logger.getErrLog(errorCode, "", mctruth);
+				noError = false;
+			}
 			else
 			{
 				Bool_t cutCombined = false, passed = false;
@@ -459,7 +474,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
 						KchrecKSMom = sqrt(pow(KchrecKS_PhiCM[0], 2) + pow(KchrecKS_PhiCM[1], 2) + pow(KchrecKS_PhiCM[2], 2));
 						KchrecKLMom = sqrt(pow(KchrecKL_PhiCM[0], 2) + pow(KchrecKL_PhiCM[1], 2) + pow(KchrecKL_PhiCM[2], 2));
-
 
 						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS, phiMom, baseKin.KchboostKS);
 						eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL, phiMom, baseKin.KchboostKL);
@@ -648,54 +662,65 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						baseKin.gammaMomTriKinFit4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
 
 						if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+						{
 							logger.getErrLog(errorCode, "", mctruth);
+							noError = false;
+						}
 						else
 						{
 							errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.KneTriangle, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
 
-							baseKin.gammaMomTriangle1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
-							baseKin.gammaMomTriangle2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
-							baseKin.gammaMomTriangle3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
-							baseKin.gammaMomTriangle4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
+							if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+							{
+								logger.getErrLog(errorCode, "", mctruth);
+								noError = false;
+							}
+							else
+							{
+								baseKin.gammaMomTriangle1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
+								baseKin.gammaMomTriangle2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
+								baseKin.gammaMomTriangle3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
+								baseKin.gammaMomTriangle4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
 
-							// Go to Kaon CM frame to get the proper time
+								// Go to Kaon CM frame to get the proper time
 
-							std::vector<Float_t> Knereclor = {bhabha_mom[0] - baseKin.Kchboostnew[0],
-																								bhabha_mom[1] - baseKin.Kchboostnew[1],
-																								bhabha_mom[2] - baseKin.Kchboostnew[2],
-																								bhabha_mom[3] - baseKin.Kchboostnew[3]};
+								std::vector<Float_t> Knereclor = {bhabha_mom[0] - baseKin.Kchboostnew[0],
+																									bhabha_mom[1] - baseKin.Kchboostnew[1],
+																									bhabha_mom[2] - baseKin.Kchboostnew[2],
+																									bhabha_mom[3] - baseKin.Kchboostnew[3]};
 
-							TVector3
-									kaonMomTriangleLAB = {-Knereclor[0] / Knereclor[3],
-																			  -Knereclor[1] / Knereclor[3],
-																				-Knereclor[2] / Knereclor[3]};
+								TVector3
+										kaonMomTriangleLAB = {-Knereclor[0] / Knereclor[3],
+																					-Knereclor[1] / Knereclor[3],
+																					-Knereclor[2] / Knereclor[3]};
 
-							Double_t
-									KaonPathTriangleLAB = sqrt(pow(baseKin.KneTriangle[6] - baseKin.ipnew[0], 2) +
-																		 pow(baseKin.KneTriangle[7] - baseKin.ipnew[1], 2) +
-																		 pow(baseKin.KneTriangle[8] - baseKin.ipnew[2], 2)),
-									KaonVelocityTriangleLAB = kaonMomTriangleLAB.Mag();
+								Double_t
+										KaonPathTriangleLAB = sqrt(pow(baseKin.KneTriangle[6] - baseKin.ipnew[0], 2) +
+																							 pow(baseKin.KneTriangle[7] - baseKin.ipnew[1], 2) +
+																							 pow(baseKin.KneTriangle[8] - baseKin.ipnew[2], 2)),
+										KaonVelocityTriangleLAB = kaonMomTriangleLAB.Mag();
 
-							baseKin.kaonNeTimeLAB = KaonPathTriangleLAB / KaonVelocityTriangleLAB;
+								baseKin.kaonNeTimeLAB = KaonPathTriangleLAB / KaonVelocityTriangleLAB;
 
-							TLorentzVector
-									Kaon4VecTriangleLAB = {baseKin.KneTriangle[6] - baseKin.ipnew[0], // cm
-																 baseKin.KneTriangle[7] - baseKin.ipnew[1], // cm
-																 baseKin.KneTriangle[8] - baseKin.ipnew[2], // cm
-																 baseKin.kaonNeTimeLAB},										// cm
-									Kaon4VecKaonTriangleCM = {0., 0., 0., 0.};
+								TLorentzVector
+										Kaon4VecTriangleLAB = {baseKin.KneTriangle[6] - baseKin.ipnew[0], // cm
+																					 baseKin.KneTriangle[7] - baseKin.ipnew[1], // cm
+																					 baseKin.KneTriangle[8] - baseKin.ipnew[2], // cm
+																					 baseKin.kaonNeTimeLAB},										// cm
+										Kaon4VecKaonTriangleCM = {0., 0., 0., 0.};
 
-							Obj.lorentz_transf(kaonMomTriangleLAB, Kaon4VecTriangleLAB, Kaon4VecKaonTriangleCM);
+								Obj.lorentz_transf(kaonMomTriangleLAB, Kaon4VecTriangleLAB, Kaon4VecKaonTriangleCM);
 
-							baseKin.kaonNeTimeCM = Kaon4VecKaonTriangleCM.T() / (cVel * tau_S_nonCPT);
-							baseKin.kaonNeTimeLAB = baseKin.kaonNeTimeLAB / (cVel * tau_S_nonCPT);
+								baseKin.kaonNeTimeCM = Kaon4VecKaonTriangleCM.T() / (cVel * tau_S_nonCPT);
+								baseKin.kaonNeTimeLAB = baseKin.kaonNeTimeLAB / (cVel * tau_S_nonCPT);
+							}
 						}
 					}
 
 					cutter.UpdateStats(mctruth);
 				}
 
-				if (cutter.PassAllCuts() || passed)
+				if ((cutter.PassAllCuts() && noError) || passed)
 				{
 					errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
 
@@ -915,12 +940,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 	}
 
 	// Wyniki
-   for (size_t i = 0; i < cutter.GetCuts().size(); ++i)
-   {
-      std::cout << "Cut " << i << ": Eff=" << cutter.GetEfficiency(i) << " +- " << cutter.GetEfficiencyError(i)
-                << " Purity=" << cutter.GetPurity(i) << " +- " << cutter.GetPurityError(i) 
-                << " S/B=" << cutter.GetSignalToBackground(i) << " +- " << cutter.GetSignalToBackgroundError(i) << "\n";
-   }
+	for (size_t i = 0; i < cutter.GetCuts().size(); ++i)
+	{
+		std::cout << "Cut " << i << ": Eff=" << cutter.GetEfficiency(i) << " +- " << cutter.GetEfficiencyError(i)
+							<< " Purity=" << cutter.GetPurity(i) << " +- " << cutter.GetPurityError(i)
+							<< " S/B=" << cutter.GetSignalToBackground(i) << " +- " << cutter.GetSignalToBackgroundError(i) << "\n";
+	}
 
 	std::map<ErrorHandling::ErrorCodes, int> physicsErrorCountsPerMctruth[8];
 

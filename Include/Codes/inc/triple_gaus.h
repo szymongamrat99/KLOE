@@ -2,6 +2,7 @@
 #define TRIPLE_GAUS_H
 
 #include <TMath.h>
+#include <TLatex.h>
 
 Double_t triple_gaus(Double_t *, Double_t *);
 Double_t single_gaus(Double_t *, Double_t *);

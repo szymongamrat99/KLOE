@@ -43,7 +43,7 @@ namespace KLOE
     void charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode);
 
     ErrorHandling::ErrorCodes findKchRec(T mcflag, F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger);
-    ErrorHandling::ErrorCodes findKchRec(T mcflag, Bool_t smearingFlag, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger);
+    ErrorHandling::ErrorCodes findKchRec(T mcflag, Bool_t smearingFlag, TMatrixT<Double_t> covMatrix, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger);
     ErrorHandling::ErrorCodes findKSLRec(Int_t kaonFlag, Int_t KSvtx, F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger);
     ErrorHandling::ErrorCodes findKSLRec(Int_t kaonFlag, Int_t KSvtx, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger);
     ErrorHandling::ErrorCodes findKClosestRec(F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger);
