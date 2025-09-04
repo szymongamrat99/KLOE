@@ -73,6 +73,8 @@
     ".rootlogon.C": "cpp",
     "init_analysis copy.C": "cpp",
     "four_pi.C": "cpp",
-    "correction_factor.C": "cpp"
+    "correction_factor.C": "cpp",
+    "conferenceCuts.C": "cpp",
+    "conferenceNew.C": "cpp"
   }
 }

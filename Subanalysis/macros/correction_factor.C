@@ -36,8 +36,8 @@
 #include <TGraphAsymmErrors.h>
 
 #include "../Include/const.h"
-#include "../Include/Codes/kloe_class.h"
-#include "../Include/Codes/interference.h"
+#include <kloe_class.h>
+#include <interference.h>
 
 auto *corr_file = new TFile("corr_file.root","RECREATE");
 //auto *corr_tree = new TTree("corr","Correction factor histo");

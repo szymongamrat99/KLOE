@@ -105,10 +105,10 @@ void init_analysis::Begin(TTree * /*tree*/)
    timeDiffConfig.name = "timeDiff";
    timeDiffConfig.xtitle = "#DeltaT [#tau_{S}]";
    timeDiffConfig.ytitle = "Counts/2";
-   timeDiffConfig.bins = 20;
-   timeDiffConfig.xmin = -20;
-   timeDiffConfig.xmax = 20;
-   timeDiffConfig.logy = true;
+   timeDiffConfig.bins = 200;
+   timeDiffConfig.xmin = -200;
+   timeDiffConfig.xmax = 200;
+   timeDiffConfig.logy = false;
    timeDiffConfig.showStats = false;
 
    timeDiffMCConfig.name = "timeDiffMC";
@@ -117,7 +117,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    timeDiffMCConfig.bins = 301;
    timeDiffMCConfig.xmin = -10;
    timeDiffMCConfig.xmax = 10;
-   timeDiffMCConfig.logy = true;
+   timeDiffMCConfig.logy = false;
    timeDiffMCConfig.showStats = false;
 
    histMgr->CreateHistSet1D("invMassKch", invMassKchConfig);

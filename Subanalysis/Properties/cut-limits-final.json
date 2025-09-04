@@ -91,26 +91,50 @@
     "SIGNAL": [
       {
         "order": 1,
-        "cutDescription": "K->pi+pi- decay invariant mass.",
-        "cutId": "InvMassKch",
-        "cutType": "T",
-        "cutValue": 5,
+        "cutDescription": "Chi2 kinematic fit.",
+        "cutId": "Chi2KinFit",
+        "cutType": "O",
+        "cutValue": 40,
         "cutCondition": "<="
       },
       {
         "order": 2,
-        "cutDescription": "K->pi+pi- decay invariant mass.",
-        "cutId": "Qmiss",
+        "cutDescription": "Combined fitted pi0 masses",
+        "cutId": "FittedPi0Masses",
         "cutType": "O",
-        "cutValue": 30,
+        "cutValue": 35,
         "cutCondition": "<="
       },
       {
         "order": 3,
+        "cutDescription": "TrcvSum",
+        "cutId": "TrcvSum",
+        "cutType": "O",
+        "cutValue": -1,
+        "cutCondition": ">="
+      },
+      {
+        "order": 4,
         "cutDescription": "K->pi0pi0 decay invariant mass.",
         "cutId": "InvMassKne",
         "cutType": "T",
-        "cutValue": 80,
+        "cutValue": 76,
+        "cutCondition": "<="
+      },
+      {
+        "order": 5,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "InvMassKch",
+        "cutType": "T",
+        "cutValue": 1.2,
+        "cutCondition": "<="
+      },
+      {
+        "order": 6,
+        "cutDescription": "Missing energy in event.",
+        "cutId": "Qmiss",
+        "cutType": "O",
+        "cutValue": 3.75,
         "cutCondition": "<="
       }
     ]
