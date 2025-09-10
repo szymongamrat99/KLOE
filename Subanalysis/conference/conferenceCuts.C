@@ -36,6 +36,11 @@ HistManager::HistConfig invMassKneConfig;
 HistManager::HistConfig invMassKneMCConfig;
 HistManager::HistConfig invMassKchConfig;
 HistManager::HistConfig QmissConfig;
+HistManager::HistConfig chi2KinFitConfig;
+HistManager::HistConfig fittedPi0MassesConfig;
+HistManager::HistConfig trcvSumConfig;
+HistManager::HistConfig pi0Mass1Config;
+HistManager::HistConfig pi0Mass2Config;
 
 TTree *tree;
 TFile *file;
@@ -90,16 +95,77 @@ void conferenceCuts::Begin(TTree * /*tree*/)
 	invMassKchConfig.showStats = false;
 
 	QmissConfig.name = "Qmiss";
-	QmissConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
+	QmissConfig.xtitle = "Q_{miss} [MeV/c^{2}]";
 	QmissConfig.ytitle = "Counts/2";
 	QmissConfig.bins = 50;
 	QmissConfig.xmin = 0;
-	QmissConfig.xmax = 20;
+	QmissConfig.xmax = 6;
 	QmissConfig.logy = false;
 	QmissConfig.showStats = false;
 
+	chi2KinFitConfig.name = "chi2KinFit";
+	chi2KinFitConfig.xtitle = "#chi^{2} Kinematic Fit";
+	chi2KinFitConfig.ytitle = "Counts";
+	chi2KinFitConfig.bins = 50;
+	chi2KinFitConfig.xmin = 0;
+	chi2KinFitConfig.xmax = 60;
+	chi2KinFitConfig.logy = false;
+	chi2KinFitConfig.showStats = false;
+
+	fittedPi0MassesConfig.name = "fittedPi0Masses";
+	fittedPi0MassesConfig.xtitle = "Combined #pi^{0} Mass Deviation [MeV/c^{2}]";
+	fittedPi0MassesConfig.ytitle = "Counts";
+	fittedPi0MassesConfig.bins = 50;
+	fittedPi0MassesConfig.xmin = 0;
+	fittedPi0MassesConfig.xmax = 50;
+	fittedPi0MassesConfig.logy = false;
+	fittedPi0MassesConfig.showStats = false;
+
+	trcvSumConfig.name = "trcvSum";
+	trcvSumConfig.xtitle = "Time deviation of neutral vertex [ns]";
+	trcvSumConfig.ytitle = "Counts";
+	trcvSumConfig.bins = 50;
+	trcvSumConfig.xmin = -0.5;
+	trcvSumConfig.xmax = 0.5;
+	trcvSumConfig.logy = false;
+	trcvSumConfig.showStats = false;
+
+	invMassKneConfig.name = "invMassKne";
+	invMassKneConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{0}#pi^{0}} [MeV/c^{2}]";
+	invMassKneConfig.ytitle = "Counts";
+	invMassKneConfig.bins = 50;
+	invMassKneConfig.xmin = 400;
+	invMassKneConfig.xmax = 600;
+	invMassKneConfig.logy = false;
+	invMassKneConfig.showStats = false;
+
+	pi0Mass1Config.name = "pi0Mass1";
+	pi0Mass1Config.xtitle = "m^{inv}_{#pi^{0}} first [MeV/c^{2}]";
+	pi0Mass1Config.ytitle = "Counts";
+	pi0Mass1Config.bins = 50;
+	pi0Mass1Config.xmin = 120;
+	pi0Mass1Config.xmax = 150;
+	pi0Mass1Config.logy = false;
+	pi0Mass1Config.showStats = false;
+
+	pi0Mass2Config.name = "pi0Mass2";
+	pi0Mass2Config.xtitle = "m^{inv}_{#pi^{0}} second [MeV/c^{2}]";
+	pi0Mass2Config.ytitle = "Counts";
+	pi0Mass2Config.bins = 50;
+	pi0Mass2Config.xmin = 120;
+	pi0Mass2Config.xmax = 150;
+	pi0Mass2Config.logy = false;
+	pi0Mass2Config.showStats = false;
+
 	histMgr->CreateHistSet1D("invMassKch", invMassKchConfig);
 	histMgr->CreateHistSet1D("Qmiss", QmissConfig);
+	histMgr->CreateHistSet1D("chi2KinFit", chi2KinFitConfig);
+	histMgr->CreateHistSet1D("fittedPi0Masses", fittedPi0MassesConfig);
+	histMgr->CreateHistSet1D("trcvSum", trcvSumConfig);
+	histMgr->CreateHistSet1D("invMassKne", invMassKneConfig);
+	histMgr->CreateHistSet1D("pi0Mass1", pi0Mass1Config);
+	histMgr->CreateHistSet1D("pi0Mass2", pi0Mass2Config);
+
 }
 
 void conferenceCuts::SlaveBegin(TTree * /*tree*/)
@@ -146,21 +212,27 @@ Bool_t conferenceCuts::Process(Long64_t entry)
 
 	if (cutter->PassAllCuts())
 	{
-		if (*mcflag == 1 && *mctruth_int != 0 && *mctruth_int != 2)
+		if (*mcflag == 1 && *mctruth_int != 0)
 		{
-
-			// if (*mctruth == 1 || *mctruth == 2)
-			// 	weight = interf_function(*Dtmc);
-
 			histMgr->Fill1D("invMassKch", mctruth_corr, Kchrec[5], weight);
 			histMgr->Fill1D("Qmiss", mctruth_corr, *Qmiss, weight);
-			histMgr->Fill1D("Chi2", mctruth_corr, *Qmiss, weight);
+			histMgr->Fill1D("chi2KinFit", mctruth_corr, *Chi2, weight);
+			histMgr->Fill1D("fittedPi0Masses", mctruth_corr, CombinedPi0Masses, weight);
+			histMgr->Fill1D("trcvSum", mctruth_corr, trcvsum, weight);
+			histMgr->Fill1D("invMassKne", mctruth_corr, *minv4gam, weight);
+			histMgr->Fill1D("pi0Mass1", mctruth_corr, pi0fit[0], weight);
+			histMgr->Fill1D("pi0Mass2", mctruth_corr, pi0fit[1], weight);
 		}
 		else if (*mcflag == 0)
 		{
 			histMgr->FillData1D("invMassKch", Kchrec[5]);
 			histMgr->FillData1D("Qmiss", *Qmiss);
-			
+			histMgr->FillData1D("chi2KinFit", *Chi2);
+			histMgr->FillData1D("fittedPi0Masses", CombinedPi0Masses);
+			histMgr->FillData1D("trcvSum", trcvsum);
+			histMgr->FillData1D("invMassKne", *minv4gam);
+			histMgr->FillData1D("pi0Mass1", pi0fit[0]);
+			histMgr->FillData1D("pi0Mass2", pi0fit[1]);
 		}
 	}
 
@@ -183,14 +255,28 @@ void conferenceCuts::Terminate()
 	// a query. It always runs on the client, it can be used to present
 	// the results graphically or save the results to file.
 
+	histMgr->SetNormalizationType(HistManager::NormalizationType::SIMPLE_SCALE);
+
 	// 1D histogramy z danymi
 	histMgr->DrawSet1D("invMassKch", "HIST", true);
 	histMgr->DrawSet1D("Qmiss", "HIST", true);
+	histMgr->DrawSet1D("chi2KinFit", "HIST", true);
+	histMgr->DrawSet1D("fittedPi0Masses", "HIST", true);
+	histMgr->DrawSet1D("trcvSum", "HIST", true);
+	histMgr->DrawSet1D("invMassKne", "HIST", true);
+	histMgr->DrawSet1D("pi0Mass1", "HIST", true);
+	histMgr->DrawSet1D("pi0Mass2", "HIST", true);
 
 	// histMgr->SaveToRoot("analysis_results.root");
 
 	histMgr->SaveSet("invMassKch", "invMassKch");
 	histMgr->SaveSet("Qmiss", "Qmiss");
+	histMgr->SaveSet("chi2KinFit", "chi2KinFit");
+	histMgr->SaveSet("fittedPi0Masses", "fittedPi0Masses");
+	histMgr->SaveSet("trcvSum", "trcvSum");
+	histMgr->SaveSet("invMassKne", "invMassKne");
+	histMgr->SaveSet("pi0Mass1", "pi0Mass1");
+	histMgr->SaveSet("pi0Mass2", "pi0Mass2");
 
 	// Wyniki
 	for (size_t i = 0; i < cutter->GetCuts().size(); ++i)
