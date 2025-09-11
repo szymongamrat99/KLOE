@@ -334,7 +334,7 @@ namespace KLOE
         std::set<Int_t> ExtractUniqueRuns(const std::string &directory, const std::string &pattern);
 
         // -------------------------------------------------------------------------------
-        HypothesisCode StringToHypothesisCode(const std::string &str)
+        static HypothesisCode StringToHypothesisCode(const std::string &str)
         {
             static const std::map<std::string, HypothesisCode> enumMap = {
                 {"SIGNAL", HypothesisCode::SIGNAL},
@@ -351,6 +351,26 @@ namespace KLOE
 
             return HypothesisCode::INVALID_VALUE;
         };
+
+        // -------------------------------------------------------------------------------
+        static TrilaterationCode StringToTrilaterationCode(const std::string &str)
+        {
+            static const std::map<std::string, TrilaterationCode> enumMap = {
+                {"TWO_PI0", TrilaterationCode::TWO_PI0},
+                {"THREE_PI0", TrilaterationCode::THREE_PI0}
+            };
+
+            auto it = enumMap.find(str);
+            if (it != enumMap.end())
+            {
+                return it->second;
+            }
+
+            std::cout << "Wrong analysis code!" << std::endl;
+
+            return TrilaterationCode::INVALID_VALUE;
+        };
+        
     };
 }
 

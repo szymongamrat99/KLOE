@@ -1,6 +1,7 @@
 {
     "$schema": "./schemas/analysis-schema.json",
     "flags": {
+        "trilaterationReconstructionMode": "TWO_PI0",
         "analysisCode": "SIGNAL",
         "covMatrixType": "MIXED",
         "initialAnalysisExec": {

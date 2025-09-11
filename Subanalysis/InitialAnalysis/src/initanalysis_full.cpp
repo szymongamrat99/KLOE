@@ -44,16 +44,26 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 	// Set flag for covariance matrix type
 	std::string covMatrixType = config.getProperty<std::string>("flags.covMatrixType");
 	std::string covMatrixName = "momSmearing.covarianceMatrix" + covMatrixType;
+	std::string covMatrixNameMC = "momSmearing.covarianceMatrixMC" + covMatrixType;
 
 	std::vector<double> elems = config.getProperty<std::vector<double>>(covMatrixName + ".fElements");
+		std::vector<double> elemsMC = config.getProperty<std::vector<double>>(covMatrixName + ".fElements");
+
 
 	Int_t nRows = config.getProperty<Int_t>(covMatrixName + ".fNrows"),
 				nCols = config.getProperty<Int_t>(covMatrixName + ".fNcols");
 
-	TMatrixT<Double_t>
-			covMatrix(nRows, nCols, elems.data());
+	Int_t nRowsMC = config.getProperty<Int_t>(covMatrixName + ".fNrows"),
+				nColsMC = config.getProperty<Int_t>(covMatrixName + ".fNcols");
 
-	covMatrix.Print();
+	TMatrixT<Double_t>
+			covMatrix(nRows, nCols, elems.data()),
+			covMatrixMC(nRowsMC, nColsMC, elemsMC.data()),
+			covMatrixTot(nRows, nCols);
+
+	covMatrixTot = covMatrix;
+
+	covMatrixTot.Print();
 
 	// --------------------------------------------------------------------------------
 
@@ -97,7 +107,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 	boost::progress_display show_progress(reader.GetEntries());
 	// ---------------------------------------------------
 
-	ErrorHandling::ErrorCodes errorCode;
+	ErrorHandling::ErrorCodes errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
 
 	// Initialization of Charged part of decay reconstruction class
 	// Constructor is below, in the loop
@@ -413,7 +423,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			std::map<KLOE::HypothesisCode, ErrorHandling::ErrorCodes> hypoMap;
 
 			// KMASS HYPOTHESIS - FOR SIGNAL
-			hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 1, covMatrix, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+			hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
 
 			// VTX CLOSEST TO BHABHA IP - FOR OMEGAPI
 			hypoMap[KLOE::HypothesisCode::OMEGAPI] = eventAnalysis->findKClosestRec(baseKin.KchrecClosest, baseKin.trkClosest[0], baseKin.trkClosest[1], baseKin.vtakenClosest, logger);

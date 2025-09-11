@@ -11,7 +11,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 {
   gErrorIgnoreLevel = 6001;
 
-  KLOE::ChargedVtxRec<> *eventAnalysis = new KLOE::ChargedVtxRec<>();
+  std::unique_ptr<KLOE::ChargedVtxRec<>> eventAnalysis = std::make_unique<KLOE::ChargedVtxRec<>>();
 
   std::vector<std::string> ConstSet = {
       "EnergyConsvCM",
@@ -20,14 +20,12 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
       "NeutralYPathConsvLAB",
       "NeutralZPathConsvLAB"};
 
-  KLOE::KinFitter *kinematicFitObj = new KLOE::KinFitter("Trilateration", N_free, N_const, M, 0, loopcount, chiSqrStep, logger);
+  std::unique_ptr<KLOE::KinFitter> kinematicFitObj = std::make_unique<KLOE::KinFitter>("Trilateration", N_free, N_const, M, 0, loopcount, chiSqrStep, logger);
   kinematicFitObj->ConstraintSet(ConstSet);
 
   Double_t
       Param[N_free + N_const],
       Errors[N_free + N_const];
-
-  TF1 *constraints[M];
 
   Double_t det;
   Float_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, Tcorr;
@@ -42,30 +40,30 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
   Float_t gamma_mom_min[4][4], kaon_mom_min[4], kaon_vel[3], kaon_vel_tot, kaon_path_tot, bhabha_vtx_min[3], ip_min[3], time_diff[2][4], time_diff_fin, gamma_path[2][4], neu_vtx[2][4], dist_tmp[2], value[2];
 
   TMatrixD
-      V(N_free + N_const, N_free + N_const),
-      D(M, N_free + N_const),
-      D_T(N_free + N_const, M),
-      V_final(N_free + N_const, N_free + N_const),
-      V_aux(N_free + N_const, N_free + N_const),
-      V_min(N_free + N_const, N_free + N_const),
-      Aux(M, M),
-      V_invert(N_free, N_free),
-      V_init(N_free + N_const, N_free + N_const);
+      *V = new TMatrixD(N_free + N_const, N_free + N_const),
+      *D = new TMatrixD(M, N_free + N_const),
+      *D_T = new TMatrixD(N_free + N_const, M),
+      *V_final = new TMatrixD(N_free + N_const, N_free + N_const),
+      *V_aux = new TMatrixD(N_free + N_const, N_free + N_const),
+      *V_min = new TMatrixD(N_free + N_const, N_free + N_const),
+      *Aux = new TMatrixD(M, M),
+      *V_invert = new TMatrixD(N_free, N_free),
+      *V_init = new TMatrixD(N_free + N_const, N_free + N_const);
 
   TVectorD
-      X(N_free + N_const),
-      C(M),
-      X_final(N_free + N_const),
-      L(M),
-      CORR(N_free + N_const),
-      X_init(N_free + N_const),
-      X_min(N_free + N_const),
-      C_min(M),
-      L_min(M),
-      C_aux(M),
-      L_aux(M),
-      X_init_min(N_free + N_const),
-      X_init_aux(N_free + N_const);
+      *X = new TVectorD(N_free + N_const),
+      *C = new TVectorD(M),
+      *X_final = new TVectorD(N_free + N_const),
+      *L = new TVectorD(M),
+      *CORR = new TVectorD(N_free + N_const),
+      *X_init = new TVectorD(N_free + N_const),
+      *X_min = new TVectorD(N_free + N_const),
+      *C_min = new TVectorD(M),
+      *L_min = new TVectorD(M),
+      *C_aux = new TVectorD(M),
+      *L_aux = new TVectorD(M),
+      *X_init_min = new TVectorD(N_free + N_const),
+      *X_init_aux = new TVectorD(N_free + N_const);
 
   min_value_def = 999999.;
   FUNVALMIN = 999999.;
@@ -84,22 +82,22 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
           ind_gam[2] = j3;
           ind_gam[3] = j4;
 
-          Reconstructor R;
-          Solution S;
+          Reconstructor *R = new Reconstructor();
+          Solution *S = new Solution();
 
           for (Int_t k = 0; k < 4; k++)
           {
-            R.SetClu(k, cluster[0][Asscl[ind_gam[k]] - 1],
-                     cluster[1][Asscl[ind_gam[k]] - 1],
-                     cluster[2][Asscl[ind_gam[k]] - 1],
-                     cluster[3][Asscl[ind_gam[k]] - 1],
-                     cluster[4][Asscl[ind_gam[k]] - 1]);
+            R->SetClu(k, cluster[0][Asscl[ind_gam[k]] - 1],
+                      cluster[1][Asscl[ind_gam[k]] - 1],
+                      cluster[2][Asscl[ind_gam[k]] - 1],
+                      cluster[3][Asscl[ind_gam[k]] - 1],
+                      cluster[4][Asscl[ind_gam[k]] - 1]);
 
-            R.SetClu(4, 0., 0., 0., 0., 0.);
-            R.SetClu(5, 0., 0., 0., 0., 0.);
+            R->SetClu(4, 0., 0., 0., 0., 0.);
+            R->SetClu(5, 0., 0., 0., 0., 0.);
           }
 
-          S = R.MySolve(selected);
+          *S = R->MySolve(selected);
 
           clusterEnergy = cluster[4][Asscl[ind_gam[0]] - 1] > MIN_CLU_ENE &&
                           cluster[4][Asscl[ind_gam[1]] - 1] > MIN_CLU_ENE &&
@@ -115,10 +113,10 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
                 cluster[2][Asscl[ind_gam[k]] - 1] != 0;
 
             if (k < 2)
-              cond_time_clus[k] = S.sol[k][3] < cluster[3][Asscl[ind_gam[0]] - 1] &&
-                                  S.sol[k][3] < cluster[3][Asscl[ind_gam[1]] - 1] &&
-                                  S.sol[k][3] < cluster[3][Asscl[ind_gam[2]] - 1] &&
-                                  S.sol[k][3] < cluster[3][Asscl[ind_gam[3]] - 1];
+              cond_time_clus[k] = S->sol[k][3] < cluster[3][Asscl[ind_gam[0]] - 1] &&
+                                  S->sol[k][3] < cluster[3][Asscl[ind_gam[1]] - 1] &&
+                                  S->sol[k][3] < cluster[3][Asscl[ind_gam[2]] - 1] &&
+                                  S->sol[k][3] < cluster[3][Asscl[ind_gam[3]] - 1];
           }
 
           Bool_t cond_tot = cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
@@ -165,18 +163,18 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
               CHISQRTMP = kinematicFitObj->FitFunction(Tcorr);
 
-              kinematicFitObj->GetResults(X, V, X_init, V_init, C, L);
+              kinematicFitObj->GetResults(*X, *V, *X_init, *V_init, *C, *L);
 
               Reconstructor R;
               Solution S;
 
               for (Int_t k = 0; k < 4; k++)
               {
-                R.SetClu(k, X[k * 5],
-                         X[k * 5 + 1],
-                         X[k * 5 + 2],
-                         X[k * 5 + 3],
-                         X[k * 5 + 4]);
+                R.SetClu(k, (*X)[k * 5],
+                         (*X)[k * 5 + 1],
+                         (*X)[k * 5 + 2],
+                         (*X)[k * 5 + 3],
+                         (*X)[k * 5 + 4]);
 
                 R.SetClu(4, 0., 0., 0., 0., 0.);
                 R.SetClu(5, 0., 0., 0., 0., 0.);
@@ -201,12 +199,12 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
                 for (Int_t l = 0; l < 4; l++)
                 {
-                  neutral_mom(X[l * 5], X[l * 5 + 1], X[l * 5 + 2], X[l * 5 + 4], neu_vtx[k], gamma_mom_tmp[l]);
+                  neutral_mom((*X)[l * 5], (*X)[l * 5 + 1], (*X)[l * 5 + 2], (*X)[l * 5 + 4], neu_vtx[k], gamma_mom_tmp[l]);
 
-                  gamma_mom_tmp[l][4] = X[l * 5];
-                  gamma_mom_tmp[l][5] = X[l * 5 + 1];
-                  gamma_mom_tmp[l][6] = X[l * 5 + 2];
-                  gamma_mom_tmp[l][7] = X[l * 5 + 3];
+                  gamma_mom_tmp[l][4] = (*X)[l * 5];
+                  gamma_mom_tmp[l][5] = (*X)[l * 5 + 1];
+                  gamma_mom_tmp[l][6] = (*X)[l * 5 + 2];
+                  gamma_mom_tmp[l][7] = (*X)[l * 5 + 3];
                 }
 
                 fourKnetri_tmp[k][0] = gamma_mom_tmp[0][0] + gamma_mom_tmp[1][0] + gamma_mom_tmp[2][0] + gamma_mom_tmp[3][0];
@@ -220,7 +218,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
                 kaon_vel_tmp[k] = cVel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
 
                 y_axis[0] = 0.;
-                y_axis[1] = X[21];
+                y_axis[1] = (*X)[21];
                 y_axis[2] = 0.;
 
                 eventAnalysis->IPBoostCorr(bhabha_vtx.data(), y_axis, neu_vtx[k], fourKnetri_tmp[k], ip_tmp[k]);
@@ -240,15 +238,15 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
                   value[k] = 999999.;
               }
 
-              cond_time_clus[0] = S.sol[0][3] < X(3) &&
-                                  S.sol[0][3] < X(8) &&
-                                  S.sol[0][3] < X(13) &&
-                                  S.sol[0][3] < X(18);
+              cond_time_clus[0] = S.sol[0][3] < (*X)(3) &&
+                                  S.sol[0][3] < (*X)(8) &&
+                                  S.sol[0][3] < (*X)(13) &&
+                                  S.sol[0][3] < (*X)(18);
 
-              cond_time_clus[1] = S.sol[1][3] < X(3) &&
-                                  S.sol[1][3] < X(8) &&
-                                  S.sol[1][3] < X(13) &&
-                                  S.sol[1][3] < X(18);
+              cond_time_clus[1] = S.sol[1][3] < (*X)(3) &&
+                                  S.sol[1][3] < (*X)(8) &&
+                                  S.sol[1][3] < (*X)(13) &&
+                                  S.sol[1][3] < (*X)(18);
 
               if (abs(CHISQRTMP) < abs(CHISQRMIN))
               {
@@ -260,7 +258,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
                   Chi2TriKinFit = CHISQRMIN;
 
-                  kinematicFitObj->GetResults(X_min, V_min, X_init_min, V_init, C_min, L_min);
+                  kinematicFitObj->GetResults((*X_min), (*V_min), (*X_init_min), (*V_init), (*C_min), (*L_min));
 
                   g4takentri_kinfit[0] = ind_gam[0];
                   g4takentri_kinfit[1] = ind_gam[1];
@@ -274,18 +272,18 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
                   for (Int_t l = 0; l < 4; l++)
                   {
-                    distance[l] = sqrt(pow(X[l * 5] - neu_vtx[0][0], 2) +
-                                       pow(X[l * 5 + 1] - neu_vtx[0][1], 2) +
-                                       pow(X[l * 5 + 2] - neu_vtx[0][2], 2));
+                    distance[l] = sqrt(pow((*X)[l * 5] - neu_vtx[0][0], 2) +
+                                       pow((*X)[l * 5 + 1] - neu_vtx[0][1], 2) +
+                                       pow((*X)[l * 5 + 2] - neu_vtx[0][2], 2));
 
-                    gamma_mom_final[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[0][0]) / distance[l]);
-                    gamma_mom_final[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[0][1]) / distance[l]);
-                    gamma_mom_final[l][2] = X[l * 5 + 4] * ((X[l * 5 + 2] - neu_vtx[0][2]) / distance[l]);
-                    gamma_mom_final[l][3] = X[l * 5 + 4];
-                    gamma_mom_final[l][4] = X[l * 5];
-                    gamma_mom_final[l][5] = X[l * 5 + 1];
-                    gamma_mom_final[l][6] = X[l * 5 + 2];
-                    gamma_mom_final[l][7] = X[l * 5 + 3];
+                    gamma_mom_final[l][0] = (*X)[l * 5 + 4] * (((*X)[l * 5] - neu_vtx[0][0]) / distance[l]);
+                    gamma_mom_final[l][1] = (*X)[l * 5 + 4] * (((*X)[l * 5 + 1] - neu_vtx[0][1]) / distance[l]);
+                    gamma_mom_final[l][2] = (*X)[l * 5 + 4] * (((*X)[l * 5 + 2] - neu_vtx[0][2]) / distance[l]);
+                    gamma_mom_final[l][3] = (*X)[l * 5 + 4];
+                    gamma_mom_final[l][4] = (*X)[l * 5];
+                    gamma_mom_final[l][5] = (*X)[l * 5 + 1];
+                    gamma_mom_final[l][6] = (*X)[l * 5 + 2];
+                    gamma_mom_final[l][7] = (*X)[l * 5 + 3];
                   }
 
                   fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
@@ -313,7 +311,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
                   Chi2TriKinFit = CHISQRMIN;
 
-                  kinematicFitObj->GetResults(X_min, V_min, X_init_min, V_init, C_min, L_min);
+                  kinematicFitObj->GetResults((*X_min), (*V_min), (*X_init_min), (*V_init), (*C_min), (*L_min));
 
                   g4takentri_kinfit[0] = ind_gam[0];
                   g4takentri_kinfit[1] = ind_gam[1];
@@ -327,18 +325,18 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
                   for (Int_t l = 0; l < 4; l++)
                   {
-                    distance[l] = sqrt(pow(X[l * 5] - neu_vtx[1][0], 2) +
-                                       pow(X[l * 5 + 1] - neu_vtx[1][1], 2) +
-                                       pow(X[l * 5 + 2] - neu_vtx[1][2], 2));
+                    distance[l] = sqrt(pow((*X)[l * 5] - neu_vtx[1][0], 2) +
+                                       pow((*X)[l * 5 + 1] - neu_vtx[1][1], 2) +
+                                       pow((*X)[l * 5 + 2] - neu_vtx[1][2], 2));
 
-                    gamma_mom_final[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[1][0]) / distance[l]);
-                    gamma_mom_final[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[1][1]) / distance[l]);
-                    gamma_mom_final[l][2] = X[l * 5 + 4] * ((X[l * 5 + 2] - neu_vtx[1][2]) / distance[l]);
-                    gamma_mom_final[l][3] = X[l * 5 + 4];
-                    gamma_mom_final[l][4] = X[l * 5];
-                    gamma_mom_final[l][5] = X[l * 5 + 1];
-                    gamma_mom_final[l][6] = X[l * 5 + 2];
-                    gamma_mom_final[l][7] = X[l * 5 + 3];
+                    gamma_mom_final[l][0] = (*X)[l * 5 + 4] * (((*X)[l * 5] - neu_vtx[1][0]) / distance[l]);
+                    gamma_mom_final[l][1] = (*X)[l * 5 + 4] * (((*X)[l * 5 + 1] - neu_vtx[1][1]) / distance[l]);
+                    gamma_mom_final[l][2] = (*X)[l * 5 + 4] * (((*X)[l * 5 + 2] - neu_vtx[1][2]) / distance[l]);
+                    gamma_mom_final[l][3] = (*X)[l * 5 + 4];
+                    gamma_mom_final[l][4] = (*X)[l * 5];
+                    gamma_mom_final[l][5] = (*X)[l * 5 + 1];
+                    gamma_mom_final[l][6] = (*X)[l * 5 + 2];
+                    gamma_mom_final[l][7] = (*X)[l * 5 + 3];
                   }
 
                   fourKnetri_kinfit[0] = gamma_mom_final[0][0] + gamma_mom_final[1][0] + gamma_mom_final[2][0] + gamma_mom_final[3][0];
@@ -397,7 +395,33 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
               }
             }
           }
+
+          delete S;
+          delete R;
         }
+
+  delete V;
+  delete D;
+  delete D_T;
+  delete V_final;
+  delete V_aux;
+  delete V_min;
+  delete Aux;
+  delete V_invert;
+  delete V_init;
+  delete X;
+  delete C;
+  delete X_final;
+  delete L;
+  delete CORR;
+  delete X_init;
+  delete X_min;
+  delete C_min;
+  delete L_min;
+  delete C_aux;
+  delete L_aux;
+  delete X_init_min;
+  delete X_init_aux;
 
   if (isConverged == 0)
     return ErrorHandling::ErrorCodes::TRILATERATION_KIN_FIT;

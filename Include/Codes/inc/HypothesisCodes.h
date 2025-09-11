@@ -11,4 +11,12 @@ namespace KLOE
     INVALID_VALUE // For invalid values
   };
 
+  enum class TrilaterationCode
+  {
+    THREE_PI0 = 1, // For 3Pi0
+    TWO_PI0 = 2,  // For 2Pi0
+
+    INVALID_VALUE // For invalid values
+  };
+
 }
