@@ -379,6 +379,7 @@ struct BaseKinematics
         Ycl,
         Zcl,
         Tcl,
+        TclCorr,
         Enecl,
         Curv,
         Phiv,

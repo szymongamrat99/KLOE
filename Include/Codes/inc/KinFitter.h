@@ -18,6 +18,7 @@
 
 #include <ConstraintsOmega.h>
 #include <ConstraintsTrilateration.h>
+#include <ConstraintsSignal.h>
 
 namespace KLOE
 {

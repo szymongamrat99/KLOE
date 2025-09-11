@@ -38,6 +38,9 @@ HistManager::HistConfig invMassKchConfig;
 HistManager::HistConfig invMassKchMCConfig;
 HistManager::HistConfig timeDiffConfig;
 HistManager::HistConfig timeDiffMCConfig;
+HistManager::HistConfig chi2TriKinFitConfig;
+HistManager::Hist2DConfig TimeNeutral2dConfig;
+
 
 void init_analysis::Begin(TTree * /*tree*/)
 {
@@ -54,17 +57,17 @@ void init_analysis::Begin(TTree * /*tree*/)
    cutter = new StatisticalCutter(cutFileName, 1, KLOE::HypothesisCode::SIGNAL);
 
    cutter->RegisterVariableGetter("InvMassKch", [&]()
-                                 { return Kchrec[5]; });
+                                  { return Kchrec[5]; });
    cutter->RegisterCentralValueGetter("InvMassKch", [&]()
-                                     { return mK0; });
+                                      { return mK0; });
 
    cutter->RegisterVariableGetter("Qmiss", [&]()
-                                 { return *Qmiss; });
+                                  { return *Qmiss; });
 
    cutter->RegisterVariableGetter("InvMassKne", [&]()
-                                 { return *minv4gam; });
+                                  { return *minv4gam; });
    cutter->RegisterCentralValueGetter("InvMassKne", [&]()
-                                     { return mK0; });
+                                      { return mK0; });
 
    invMassKchConfig.name = "invMassKch";
    invMassKchConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
@@ -105,20 +108,41 @@ void init_analysis::Begin(TTree * /*tree*/)
    timeDiffConfig.name = "timeDiff";
    timeDiffConfig.xtitle = "#DeltaT [#tau_{S}]";
    timeDiffConfig.ytitle = "Counts/2";
-   timeDiffConfig.bins = 200;
-   timeDiffConfig.xmin = -200;
-   timeDiffConfig.xmax = 200;
-   timeDiffConfig.logy = false;
+   timeDiffConfig.bins = 21;
+   timeDiffConfig.xmin = -20;
+   timeDiffConfig.xmax = 20;
+   timeDiffConfig.logy = true;
    timeDiffConfig.showStats = false;
 
    timeDiffMCConfig.name = "timeDiffMC";
    timeDiffMCConfig.xtitle = "#DeltaT [#tau_{S}]";
    timeDiffMCConfig.ytitle = "Counts/2";
-   timeDiffMCConfig.bins = 301;
-   timeDiffMCConfig.xmin = -10;
-   timeDiffMCConfig.xmax = 10;
-   timeDiffMCConfig.logy = false;
+   timeDiffMCConfig.bins = 20;
+   timeDiffMCConfig.xmin = -5;
+   timeDiffMCConfig.xmax = 5;
+   timeDiffMCConfig.logy = true;
    timeDiffMCConfig.showStats = false;
+
+   chi2TriKinFitConfig.name = "chi2TriKinFit";
+   chi2TriKinFitConfig.xtitle = "#DeltaT [#tau_{S}]";
+   chi2TriKinFitConfig.ytitle = "Counts/2";
+   chi2TriKinFitConfig.bins = 50;
+   chi2TriKinFitConfig.xmin = -10;
+   chi2TriKinFitConfig.xmax = 100;
+   chi2TriKinFitConfig.logy = true;
+   chi2TriKinFitConfig.showStats = false;
+
+   TimeNeutral2dConfig.name = "TimeNeutral2d";
+   TimeNeutral2dConfig.xtitle = "t^{MC}_{neu} [#tau_{S}]";
+   TimeNeutral2dConfig.ytitle = "t^{rec}_{neu} [#tau_{S}]";
+   TimeNeutral2dConfig.bins = 50;
+   TimeNeutral2dConfig.xmin = -10;
+   TimeNeutral2dConfig.xmax = 100;
+   TimeNeutral2dConfig.binsy = 50;
+   TimeNeutral2dConfig.ymin = -10;
+   TimeNeutral2dConfig.ymax = 100;
+   TimeNeutral2dConfig.logy = false;
+   TimeNeutral2dConfig.showStats = false;
 
    histMgr->CreateHistSet1D("invMassKch", invMassKchConfig);
    histMgr->CreateHistSet1D("invMassKne", invMassKneConfig);
@@ -126,6 +150,8 @@ void init_analysis::Begin(TTree * /*tree*/)
    histMgr->CreateHistSet1D("invMassKchMC", invMassKchMCConfig);
    histMgr->CreateHistSet1D("invMassKneMC", invMassKneMCConfig);
    histMgr->CreateHistSet1D("timeDiffMC", timeDiffMCConfig);
+   histMgr->CreateHistSet1D("chi2TriKinFit", chi2TriKinFitConfig);
+   histMgr->CreateHistSet2D("TimeNeutral2d", TimeNeutral2dConfig);
 }
 
 void init_analysis::SlaveBegin(TTree * /*tree*/)
@@ -159,7 +185,7 @@ Bool_t init_analysis::Process(Long64_t entry)
 
    Float_t weight = 1.0;
 
-   if(1)
+   if (1)
    {
       if (*mctruth == 1)
          weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
@@ -167,13 +193,18 @@ Bool_t init_analysis::Process(Long64_t entry)
       histMgr->Fill1D("invMassKch", *mctruth, Kchrec[5], weight);
       histMgr->Fill1D("invMassKne", *mctruth, *minv4gam, weight);
       histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeCM - *KaonNeTimeCM, weight);
+      histMgr->Fill1D("chi2TriKinFit", *mctruth, *Chi2TriKinFit, weight);
+      
+      if(*mctruth == 1 && std::isnan(*KaonNeTimeCMMC) == 0 && std::isnan(*KaonNeTimeCM) == 0)
+         histMgr->Fill2D("TimeNeutral2d", *mctruth, *KaonNeTimeCMMC, *KaonNeTimeCM, weight);
 
       histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - Kchrec[5], weight);
       histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - *minv4gam, weight);
       histMgr->Fill1D("timeDiffMC", *mctruth, (*KaonChTimeCMMC - *KaonNeTimeCMMC) - (*KaonChTimeCM - *KaonNeTimeCM), weight);
    }
 
-   cutter->UpdateStats(*mctruth);
+   if (*mctruth != 0 && *mcflag == 1)
+      cutter->UpdateStats(*mctruth);
 
    return kTRUE;
 }
@@ -195,6 +226,9 @@ void init_analysis::Terminate()
    histMgr->DrawSet1D("invMassKch", "HIST", false);
    histMgr->DrawSet1D("invMassKne", "HIST", false);
    histMgr->DrawSet1D("timeDiff", "HIST", false);
+   histMgr->DrawSet1D("chi2TriKinFit", "HIST", false);
+
+   histMgr->DrawSet2D("TimeNeutral2d", "COLZ", false);
 
    histMgr->DrawSet1D("invMassKchMC", "HIST", false);
    histMgr->DrawSet1D("invMassKneMC", "HIST", false);
@@ -205,6 +239,9 @@ void init_analysis::Terminate()
    histMgr->SaveSet("invMassKch", "invMassKch");
    histMgr->SaveSet("invMassKne", "invMassKne");
    histMgr->SaveSet("timeDiff", "timeDiff");
+   histMgr->SaveSet("chi2TriKinFit", "chi2TriKinFit");
+
+   histMgr->SaveSet("TimeNeutral2d", "TimeNeutral2d");
 
    histMgr->SaveSet("invMassKchMC", "invMassKchMC");
    histMgr->SaveSet("invMassKneMC", "invMassKneMC");
@@ -214,7 +251,7 @@ void init_analysis::Terminate()
    for (size_t i = 0; i < cutter->GetCuts().size(); ++i)
    {
       std::cout << "Cut " << i << ": Eff=" << cutter->GetEfficiency(i) << " +- " << cutter->GetEfficiencyError(i)
-                << " Purity=" << cutter->GetPurity(i) << " +- " << cutter->GetPurityError(i) 
+                << " Purity=" << cutter->GetPurity(i) << " +- " << cutter->GetPurityError(i)
                 << " S/B=" << cutter->GetSignalToBackground(i) << " +- " << cutter->GetSignalToBackgroundError(i) << "\n";
    }
 

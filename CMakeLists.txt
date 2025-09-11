@@ -17,8 +17,6 @@ find_package(BLAS REQUIRED)
 # Enable tests for the files
 enable_testing()
 
-add_subdirectory(tests)
-
 
 # Inclusion of directories to the project 
 add_subdirectory(Subanalysis/CovarianceMatrix)

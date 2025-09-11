@@ -90,6 +90,30 @@
     ],
     "SIGNAL": [
       {
+        "order": 1,
+        "cutDescription": "Chi2 kinematic fit.",
+        "cutId": "Chi2KinFit",
+        "cutType": "O",
+        "cutValue": 40,
+        "cutCondition": "<="
+      },
+      {
+        "order": 2,
+        "cutDescription": "Combined fitted pi0 masses",
+        "cutId": "FittedPi0Masses",
+        "cutType": "O",
+        "cutValue": 35,
+        "cutCondition": "<="
+      },
+      {
+        "order": 3,
+        "cutDescription": "TrcvSum",
+        "cutId": "TrcvSum",
+        "cutType": "O",
+        "cutValue": -1,
+        "cutCondition": ">="
+      },
+      {
         "order": 4,
         "cutDescription": "K->pi0pi0 decay invariant mass.",
         "cutId": "InvMassKne",

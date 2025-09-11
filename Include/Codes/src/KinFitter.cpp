@@ -26,6 +26,7 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
     _baseObj = new ConstraintsTrilateration();
 };
 
+
 Int_t KinFitter::ParameterInitialization(Float_t *Params, Float_t *Errors)
 {
   TMatrixD SubV(_N_free, _N_free);

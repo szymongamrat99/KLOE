@@ -1,21 +1,21 @@
 {
     "$schema": "./schemas/analysis-schema.json",
     "flags": {
-        "trilaterationReconstructionMode": "TWO_PI0",
         "analysisCode": "SIGNAL",
         "covMatrixType": "MIXED",
         "initialAnalysisExec": {
-            "MC": true,
+            "MC": false,
             "flag": true,
             "parts": {
                 "covMatrixInitialAnalysisExec": false,
                 "omegaInitialAnalysisExec": false,
                 "signalInitialAnalysisExec": true
             }
-        }
+        },
+        "trilaterationReconstructionMode": "TWO_PI0"
     },
     "lastScript": "Initial analysis",
-    "lastUpdate": "2025-09-01",
+    "lastUpdate": "2025-09-11",
     "momSmearing": {
         "bootstrapMeanCovMatrix": {
             "_typename": "TMatrixT<double>",

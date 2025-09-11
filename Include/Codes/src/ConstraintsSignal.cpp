@@ -18,7 +18,8 @@ Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p) const
       Kchrec[4],
       Kchboost[4],
       bhabha_vtx[3],
-      ip[3]; // Charged Kaons' momentum in LAB: Px, Py, Pz, E
+      ip[3],
+      neu_vtx[3]; // Charged Kaons' momentum in LAB: Px, Py, Pz, E
 
   for (Int_t i = 0; i < 2; i++)
   {
@@ -35,6 +36,10 @@ Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p) const
     bhabha_mom[i] = p[27 + i];
   }
 
+  bhabha_vtx[0] = p[31];
+  bhabha_vtx[1] = p[32];
+  bhabha_vtx[2] = p[33];
+
   ChargedVtxRec::charged_mom(Curv[0], Phiv[0], Cotv[0], trk[0], 1);
   ChargedVtxRec::charged_mom(Curv[1], Phiv[1], Cotv[1], trk[1], 1);
 
@@ -48,7 +53,7 @@ Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p) const
   Float_t X_line[3] = {Kchboost[6],
                        Kchboost[7],
                        Kchboost[8]}, // Vertex laying on the line
-      p[3] = {Kchboost[0],
+      mom[3] = {Kchboost[0],
               Kchboost[1],
               Kchboost[2]}, // Direction of the line
       xB[3] = {bhabha_vtx[0],
@@ -59,7 +64,13 @@ Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p) const
                        0.}; // Vector perpendicular to the plane from Bhabha momentum
 
   // Corrected IP event by event
-  ChargedVtxRec::IPBoostCorr(X_line, p, xB, plane_perp, ip);
+  ChargedVtxRec::IPBoostCorr(X_line, mom, xB, plane_perp, ip);
+
+  ip[0] = bhabha_vtx[0];
+  ip[1] = bhabha_vtx[1];
+  if(abs(ip[2] - bhabha_vtx[2]) > 2.0)
+    ip[2] = bhabha_vtx[2];
+
 
   // Reconstruction of neutral momentum for the photons
   for (Int_t i = 0; i < 4; i++)

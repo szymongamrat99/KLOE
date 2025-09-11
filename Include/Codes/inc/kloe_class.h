@@ -370,6 +370,8 @@ namespace KLOE
 
             return TrilaterationCode::INVALID_VALUE;
         };
+
+        void CorrectClusterTime(Float_t T0, std::vector<Float_t> &cluTimeCorrected);
         
     };
 }

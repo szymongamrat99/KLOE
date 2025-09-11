@@ -753,45 +753,62 @@ namespace KLOE
 
         Double_t
             lambda = (pow(M, 4) + pow(m1, 4) + pow(m2, 4) - 2 * pow(M, 2) * pow(m1, 2) - 2 * pow(M, 2) * pow(m2, 2) - 2 * pow(m1, 2) * pow(m2, 2)),
-            p = sqrt(lambda)/(2 * M);
+            p = sqrt(lambda) / (2 * M);
 
         return p;
     }
 
     /**
- * @brief Extract unique run numbers from filenames in a directory using regex pattern.
- * @param directory Path to the directory to search.
- * @param regex_pattern Regex pattern with a capturing group for the run number (e.g. R"(_(\\d+)\\.ntu$)").
- * @return std::vector<Int_t> of unique run numbers (sorted ascending).
- */
-std::set<Int_t> KLOE::pm00::ExtractUniqueRuns(const std::string& directory, const std::string& regex_pattern) {
-    std::set<Int_t> unique_runs; // Set to store unique run numbers
-    std::regex run_regex(regex_pattern); // Regex to extract run number from filename
-    boost::filesystem::path dir_path(directory); // Directory path
-    if (!boost::filesystem::exists(dir_path) || !boost::filesystem::is_directory(dir_path)) {
-        // Return empty set if directory does not exist or is not a directory
-        return {};
-    }
-    // Iterate over all files in the directory
-    for (auto& entry : boost::filesystem::directory_iterator(dir_path)) {
-        if (!boost::filesystem::is_regular_file(entry.status())) continue; // Skip non-regular files
-        std::string filename = entry.path().filename().string(); // Get filename as string
-        std::smatch match;
-        // Search for run number using regex
-        if (std::regex_search(filename, match, run_regex)) {
-            if (match.size() > 1) {
-                try {
-                    Int_t run = std::stoi(match[1].str()); // Convert matched string to integer
-                    unique_runs.insert(run); // Insert run number into set
-                } catch (...) {
-                    // Ignore parse errors
+     * @brief Extract unique run numbers from filenames in a directory using regex pattern.
+     * @param directory Path to the directory to search.
+     * @param regex_pattern Regex pattern with a capturing group for the run number (e.g. R"(_(\\d+)\\.ntu$)").
+     * @return std::vector<Int_t> of unique run numbers (sorted ascending).
+     */
+    std::set<Int_t> KLOE::pm00::ExtractUniqueRuns(const std::string &directory, const std::string &regex_pattern)
+    {
+        std::set<Int_t> unique_runs;                 // Set to store unique run numbers
+        std::regex run_regex(regex_pattern);         // Regex to extract run number from filename
+        boost::filesystem::path dir_path(directory); // Directory path
+        if (!boost::filesystem::exists(dir_path) || !boost::filesystem::is_directory(dir_path))
+        {
+            // Return empty set if directory does not exist or is not a directory
+            return {};
+        }
+        // Iterate over all files in the directory
+        for (auto &entry : boost::filesystem::directory_iterator(dir_path))
+        {
+            if (!boost::filesystem::is_regular_file(entry.status()))
+                continue;                                            // Skip non-regular files
+            std::string filename = entry.path().filename().string(); // Get filename as string
+            std::smatch match;
+            // Search for run number using regex
+            if (std::regex_search(filename, match, run_regex))
+            {
+                if (match.size() > 1)
+                {
+                    try
+                    {
+                        Int_t run = std::stoi(match[1].str()); // Convert matched string to integer
+                        unique_runs.insert(run);               // Insert run number into set
+                    }
+                    catch (...)
+                    {
+                        // Ignore parse errors
+                    }
                 }
             }
         }
+        // Return set of unique run numbers
+        return std::set<Int_t>(unique_runs.begin(), unique_runs.end());
     }
-    // Return set of unique run numbers
-    return std::set<Int_t>(unique_runs.begin(), unique_runs.end());
-}
+
+    void pm00::CorrectClusterTime(Float_t T0, std::vector<Float_t> &cluTimeCorrected)
+    {
+        for (size_t i = 0; i < cluTimeCorrected.size(); ++i)
+        {
+            cluTimeCorrected[i] = cluTimeCorrected[i] - T0;
+        }
+    }
 }
 
 void KLOE::pm00::trilaterationReconstruction(TVectorD X, Double_t neuVtx[2][4], Bool_t neuVtxErr[2])
