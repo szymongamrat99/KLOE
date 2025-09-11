@@ -40,7 +40,7 @@ namespace KLOE
     ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PhiV, F *CotV, F *xvOld, F *yvOld, F *zvOld, Int_t &mode);
     ChargedVtxRec();
 
-    void charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode);
+    static void charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode);
 
     ErrorHandling::ErrorCodes findKchRec(T mcflag, F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger);
     ErrorHandling::ErrorCodes findKchRec(T mcflag, Bool_t smearingFlag, TMatrixT<Double_t> covMatrix, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger);
@@ -49,11 +49,11 @@ namespace KLOE
     ErrorHandling::ErrorCodes findKClosestRec(F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger);
     ErrorHandling::ErrorCodes findKClosestRec(std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger);
 
-    Int_t KaonMomFromBoost(F *pKaon, F *pboost, F *pKaonBoost);
-    Int_t KaonMomFromBoost(std::vector<F> &pKaon, F *pboost, std::vector<F> &pKaonBoost);
+    static Int_t KaonMomFromBoost(F *pKaon, F *pboost, F *pKaonBoost);
+    static Int_t KaonMomFromBoost(std::vector<F> &pKaon, F *pboost, std::vector<F> &pKaonBoost);
 
-    Int_t IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, F *int_point);
-    Int_t IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, std::vector<F> &int_point);
+    static Int_t IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, F *int_point);
+    static Int_t IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, std::vector<F> &int_point);
 
   };
 

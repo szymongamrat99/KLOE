@@ -258,7 +258,13 @@ struct BaseKinematics
                        gammaMomTriangle3(8, 0.0),
                        gammaMomTriangle4(8, 0.0),
                        g4takenTriKinFit(4, 0),
-                       trcfinal(4, 0.0)
+                       trcfinal(4, 0.0),
+                       CurvSmeared1(0.0),
+                       PhivSmeared1(0.0),
+                       CotvSmeared1(0.0),
+                       CurvSmeared2(0.0),
+                       PhivSmeared2(0.0),
+                       CotvSmeared2(0.0)
     {};
 
     Float_t
@@ -315,7 +321,13 @@ struct BaseKinematics
         kaonNeTimeCMMC,
         kaonChTimeLABMC,
         kaonChTimeCMMC,
-        Chi2TriKinFit;
+        Chi2TriKinFit,
+        CurvSmeared1,
+        PhivSmeared1,
+        CotvSmeared1,
+        CurvSmeared2,
+        PhivSmeared2,
+        CotvSmeared2;
 
     UChar_t
         mctruth,

@@ -198,7 +198,7 @@ namespace KLOE
 
                 Float_t KchrecSmeared[9], KchboostSmeared[9], energyPion[2];
 
-                if (mcflag == 1 && smearingFlag)
+                if (mcflag == 1 && smearingFlag == 1)
                 {
                   momVecMC[0] = mom_vec1Tmp[0];
                   momVecMC[1] = mom_vec1Tmp[1];
@@ -242,11 +242,16 @@ namespace KLOE
                   KchRec[6] = _xv[vtaken[0]];
                   KchRec[7] = _yv[vtaken[0]];
                   KchRec[8] = _zv[vtaken[0]];
-                  for (Int_t k = 0; k < 4; k++)
+
+                  for (Int_t k = 0; k < 3; k++)
                   {
-                    trk1[k] = mom_vec1Tmp[k];
-                    trk2[k] = mom_vec2Tmp[k];
+                    trk1[k] = momVecSmeared[k];
+                    trk2[k] = momVecSmeared[k + 3];
                   }
+
+                  trk1[3] = sqrt(pow(trk1[0], 2) + pow(trk1[1], 2) + pow(trk1[2], 2) + pow(mPiCh, 2));
+                  trk2[3] = sqrt(pow(trk2[0], 2) + pow(trk2[1], 2) + pow(trk2[2], 2) + pow(mPiCh, 2));
+                  
                   found = true;
                 }
               }

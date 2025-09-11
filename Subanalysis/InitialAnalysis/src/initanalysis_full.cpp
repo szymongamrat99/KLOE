@@ -428,6 +428,34 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			// KMASS HYPOTHESIS - FOR SIGNAL
 			hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
 
+			baseKin.CurvSmeared1 = 1000. / sqrt(pow(baseKin.trknew[0][0], 2) + pow(baseKin.trknew[0][1], 2));
+			baseKin.PhivSmeared1 = acos(baseKin.trknew[0][0] / sqrt(pow(baseKin.trknew[0][0], 2) + pow(baseKin.trknew[0][1], 2)));
+			baseKin.CotvSmeared1 = baseKin.trknew[0][2] / sqrt(pow(baseKin.trknew[0][0], 2) + pow(baseKin.trknew[0][1], 2));
+
+			baseKin.CurvSmeared2 = 1000. / sqrt(pow(baseKin.trknew[1][0], 2) + pow(baseKin.trknew[1][1], 2));
+			baseKin.PhivSmeared2 = acos(baseKin.trknew[1][0] / sqrt(pow(baseKin.trknew[1][0], 2) + pow(baseKin.trknew[1][1], 2)));
+			baseKin.CotvSmeared2 = baseKin.trknew[1][2] / sqrt(pow(baseKin.trknew[1][0], 2) + pow(baseKin.trknew[1][1], 2));
+
+			if (Obj.signum(chVtxProps.Curv[baseKin.vtaken[1]]) != Obj.signum(baseKin.CurvSmeared1))
+			{
+				baseKin.CurvSmeared1 = -baseKin.CurvSmeared1;
+			}
+
+			if (Obj.signum(chVtxProps.Curv[baseKin.vtaken[2]]) != Obj.signum(baseKin.CurvSmeared2))
+			{
+				baseKin.CurvSmeared2 = -baseKin.CurvSmeared2;
+			}
+
+			if (Obj.signum(chVtxProps.Phiv[baseKin.vtaken[1]]) != Obj.signum(baseKin.PhivSmeared1))
+			{
+				baseKin.PhivSmeared1 = -baseKin.PhivSmeared1;
+			}
+
+			if (Obj.signum(chVtxProps.Phiv[baseKin.vtaken[2]]) != Obj.signum(baseKin.PhivSmeared2))
+			{
+				baseKin.PhivSmeared2 = -baseKin.PhivSmeared2;
+			}
+
 			// VTX CLOSEST TO BHABHA IP - FOR OMEGAPI
 			hypoMap[KLOE::HypothesisCode::OMEGAPI] = eventAnalysis->findKClosestRec(baseKin.KchrecClosest, baseKin.trkClosest[0], baseKin.trkClosest[1], baseKin.vtakenClosest, logger);
 
@@ -867,7 +895,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						{"KaonChTimeCMMC", baseKin.kaonChTimeCMMC},
 						{"Qmiss", baseKin.Qmiss},
 						{"minv4gam", baseKin.minv4gam},
-						{"Chi2TriKinFit", baseKin.Chi2TriKinFit}};
+						{"Chi2TriKinFit", baseKin.Chi2TriKinFit},
+						{"CurvSmeared1", baseKin.CurvSmeared1},
+						{"PhivSmeared1", baseKin.PhivSmeared1},
+						{"CotvSmeared1", baseKin.CotvSmeared1},
+						{"CurvSmeared2", baseKin.CurvSmeared2},
+						{"PhivSmeared2", baseKin.PhivSmeared2},
+						{"CotvSmeared2", baseKin.CotvSmeared2}};
 
 					// Tablice
 					std::map<std::string, std::vector<Int_t>> intArrays = {
