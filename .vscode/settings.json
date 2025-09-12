@@ -75,6 +75,7 @@
     "four_pi.C": "cpp",
     "correction_factor.C": "cpp",
     "conferenceCuts.C": "cpp",
-    "conferenceNew.C": "cpp"
+    "conferenceNew.C": "cpp",
+    "init_analysis_old.C": "cpp"
   }
 }

@@ -538,7 +538,7 @@ namespace KLOE
   }
 
   template <typename F, typename T>
-  Int_t ChargedVtxRec<F, T>::KaonMomFromBoost(F *pKaon, F *pboost, F *pKaonBoost)
+  Int_t ChargedVtxRec<F, T>::KaonMomFromBoost(F *pKaon, F *pboost, F *pKaonBoost) const
   {
     std::string
         name = "";
@@ -634,7 +634,7 @@ namespace KLOE
     return 0;
   }
   template <typename F, typename T>
-  Int_t ChargedVtxRec<F, T>::KaonMomFromBoost(std::vector<F> &pKaon, F *pboost, std::vector<F> &pKaonBoost)
+  Int_t ChargedVtxRec<F, T>::KaonMomFromBoost(std::vector<F> &pKaon, F *pboost, std::vector<F> &pKaonBoost) const
   {
     std::string
         name = "";
@@ -731,7 +731,7 @@ namespace KLOE
   }
 
   template <typename F, typename T>
-  Int_t ChargedVtxRec<F, T>::IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, F *int_point)
+  Int_t ChargedVtxRec<F, T>::IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, F *int_point) const
   {
     std::string
         name = "";
@@ -767,7 +767,7 @@ namespace KLOE
   }
 
   template <typename F, typename T>
-  Int_t ChargedVtxRec<F, T>::IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, std::vector<F> &int_point)
+  Int_t ChargedVtxRec<F, T>::IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, std::vector<F> &int_point) const
   {
     std::string
         name = "";

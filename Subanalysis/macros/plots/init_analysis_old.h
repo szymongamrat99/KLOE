@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Sep 12 01:30:47 2025 by ROOT version 6.24/07
+// Wed Aug 20 23:54:54 2025 by ROOT version 6.24/07
 // from TChain h1/
 //////////////////////////////////////////////////////////
 
@@ -48,10 +48,6 @@ public :
    TTreeReaderValue<Float_t> By = {fReader, "By"};
    TTreeReaderValue<Float_t> Bz = {fReader, "Bz"};
    TTreeReaderValue<Float_t> Chi2TriKinFit = {fReader, "Chi2TriKinFit"};
-   TTreeReaderValue<Float_t> CotvSmeared1 = {fReader, "CotvSmeared1"};
-   TTreeReaderValue<Float_t> CotvSmeared2 = {fReader, "CotvSmeared2"};
-   TTreeReaderValue<Float_t> CurvSmeared1 = {fReader, "CurvSmeared1"};
-   TTreeReaderValue<Float_t> CurvSmeared2 = {fReader, "CurvSmeared2"};
    TTreeReaderValue<Float_t> KaonChTimeCM = {fReader, "KaonChTimeCM"};
    TTreeReaderValue<Float_t> KaonChTimeCMMC = {fReader, "KaonChTimeCMMC"};
    TTreeReaderValue<Float_t> KaonChTimeLAB = {fReader, "KaonChTimeLAB"};
@@ -60,8 +56,6 @@ public :
    TTreeReaderValue<Float_t> KaonNeTimeCMMC = {fReader, "KaonNeTimeCMMC"};
    TTreeReaderValue<Float_t> KaonNeTimeLAB = {fReader, "KaonNeTimeLAB"};
    TTreeReaderValue<Float_t> KaonNeTimeLABMC = {fReader, "KaonNeTimeLABMC"};
-   TTreeReaderValue<Float_t> PhivSmeared1 = {fReader, "PhivSmeared1"};
-   TTreeReaderValue<Float_t> PhivSmeared2 = {fReader, "PhivSmeared2"};
    TTreeReaderValue<Float_t> Qmiss = {fReader, "Qmiss"};
    TTreeReaderValue<Float_t> T0step1 = {fReader, "T0step1"};
    TTreeReaderValue<Float_t> minv4gam = {fReader, "minv4gam"};
@@ -76,9 +70,7 @@ public :
    TTreeReaderArray<int> vtakenClosest = {fReader, "vtakenClosest"};
    TTreeReaderArray<int> vtxmc = {fReader, "vtxmc"};
    TTreeReaderArray<float> Cotv = {fReader, "Cotv"};
-   TTreeReaderArray<float> CotvMC = {fReader, "CotvMC"};
    TTreeReaderArray<float> Curv = {fReader, "Curv"};
-   TTreeReaderArray<float> CurvMC = {fReader, "CurvMC"};
    TTreeReaderArray<float> Enecl = {fReader, "Enecl"};
    TTreeReaderArray<float> Kchboost = {fReader, "Kchboost"};
    TTreeReaderArray<float> KchboostKL = {fReader, "KchboostKL"};
@@ -92,7 +84,6 @@ public :
    TTreeReaderArray<float> Knemc = {fReader, "Knemc"};
    TTreeReaderArray<float> KnetriKinFit = {fReader, "KnetriKinFit"};
    TTreeReaderArray<float> Phiv = {fReader, "Phiv"};
-   TTreeReaderArray<float> PhivMC = {fReader, "PhivMC"};
    TTreeReaderArray<float> Tcl = {fReader, "Tcl"};
    TTreeReaderArray<float> Xcl = {fReader, "Xcl"};
    TTreeReaderArray<float> Ycl = {fReader, "Ycl"};

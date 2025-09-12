@@ -38,7 +38,8 @@ namespace ErrorHandling
     NOT_ENOUGH_NEUTRAL_CLUSTERS = 300, /*!< Not enough neutral clusters */
     NOT_ENOUGH_CHARGED_TRACKS = 301,   /*!< Not enough charged tracks for analysis*/
     CHARGED_KAON_MASS_PRE = 302,           /*!< Did not pass charged kaon ivariant mass in preselection*/
-    TRILATERATION_KIN_FIT = 303,           
+    TRILATERATION_KIN_FIT = 303,
+    TRIANGLE_REC = 304,           
 
 
     NOT_RECOGNIZED = 666, /*!< Unexpected exception*/
@@ -126,6 +127,8 @@ namespace ErrorHandling
         return "Did not pass charged kaon ivariant mass in preselection.";
       case ErrorCodes::TRILATERATION_KIN_FIT:
         return "Did not pass the trilateration kin fit.";
+      case ErrorCodes::TRIANGLE_REC:
+        return "Did not pass the triangle reconstruction.";
 
       // Not recognized logs
       case ErrorCodes::NOT_RECOGNIZED:

@@ -163,7 +163,7 @@ bool StatisticalCutter::PassAllCuts() {
 }
 
 void StatisticalCutter::UpdateStats(int mctruth) {
-    if (mctruth == signalMctruth_)
+    if (mctruth == signalMctruth_ || mctruth == 0 || mctruth == -1)
         totalSignal_++;
     else
         totalBackground_++;

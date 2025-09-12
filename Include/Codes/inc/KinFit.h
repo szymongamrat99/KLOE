@@ -13,7 +13,7 @@
 
 namespace KLOE
 {
-  class KinFit : protected pm00
+  class KinFit : public pm00
   {
   public:
     /*Specific virtual functions for constraints*/

@@ -4,7 +4,6 @@
 // from the ROOT class TSelector. For more information on the TSelector
 // framework see $ROOTSYS/README/README.SELECTOR or the ROOT User Manual.
 
-
 // The following methods are defined in this file:
 //    Begin():        called every time a loop on the tree starts,
 //                    a convenient place to create your histograms.
@@ -23,7 +22,6 @@
 // root> T->Process("init_analysis.C","some options")
 // root> T->Process("init_analysis.C+")
 //
-
 
 #include "init_analysis.h"
 #include <TH2.h>
@@ -45,7 +43,7 @@ HistManager::Hist2DConfig TimeNeutral2dConfig;
 
 void init_analysis::Begin(TTree * /*tree*/)
 {
-      // The Begin() function is called at the start of the query.
+   // The Begin() function is called at the start of the query.
    // When running with PROOF Begin() is only called on the client.
    // The tree argument is deprecated (on PROOF 0 is passed).
 
@@ -57,11 +55,8 @@ void init_analysis::Begin(TTree * /*tree*/)
 
    cutter = new StatisticalCutter(cutFileName, 1, KLOE::HypothesisCode::SIGNAL);
    HistManager::FitConstraints constraints(7);
-   constraints.lowerBounds = {0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0.0};
-   constraints.upperBounds = {0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 1.0};
-   constraints.initialValues = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-   constraints.fitRangeMin = 480.0;
-   constraints.fitRangeMax = 520.0;
+   constraints.lowerBounds = {0.2, 0.0, 0.2, 0.2, 0.2, 0.0, 0.2};
+   constraints.upperBounds = {1.0, 0.1, 1.0, 1.0, 1.0, 0.1, 1.0};
 
    cutter->RegisterVariableGetter("InvMassKch", [&]()
                                   { return Kchrec[5]; });
@@ -80,9 +75,9 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKchConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
    invMassKchConfig.ytitle = "Counts/2";
    invMassKchConfig.bins = 100;
-   invMassKchConfig.xmin = 480;
-   invMassKchConfig.xmax = 520;
-   invMassKchConfig.logy = false;
+   invMassKchConfig.xmin = 400;
+   invMassKchConfig.xmax = 600;
+   invMassKchConfig.logy = true;
    invMassKchConfig.showStats = false;
 
    invMassKchMCConfig.name = "invMassKchMC";
@@ -91,7 +86,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKchMCConfig.bins = 100;
    invMassKchMCConfig.xmin = -100;
    invMassKchMCConfig.xmax = 100;
-   invMassKchMCConfig.logy = false;
+   invMassKchMCConfig.logy = true;
    invMassKchMCConfig.showStats = false;
 
    invMassKneConfig.name = "invMassKne";
@@ -100,7 +95,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKneConfig.bins = 100;
    invMassKneConfig.xmin = 0;
    invMassKneConfig.xmax = 1000;
-   invMassKneConfig.logy = false;
+   invMassKneConfig.logy = true;
    invMassKneConfig.showStats = false;
 
    invMassKneMCConfig.name = "invMassKneMC";
@@ -109,7 +104,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKneMCConfig.bins = 100;
    invMassKneMCConfig.xmin = -100;
    invMassKneMCConfig.xmax = 100;
-   invMassKneMCConfig.logy = false;
+   invMassKneMCConfig.logy = true;
    invMassKneMCConfig.showStats = false;
 
    timeDiffConfig.name = "timeDiff";
@@ -136,7 +131,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    chi2TriKinFitConfig.bins = 50;
    chi2TriKinFitConfig.xmin = -10;
    chi2TriKinFitConfig.xmax = 100;
-   chi2TriKinFitConfig.logy = false;
+   chi2TriKinFitConfig.logy = true;
    chi2TriKinFitConfig.showStats = false;
 
    TimeNeutral2dConfig.name = "TimeNeutral2d";
@@ -159,14 +154,6 @@ void init_analysis::Begin(TTree * /*tree*/)
    histMgr->CreateHistSet1D("timeDiffMC", timeDiffMCConfig);
    histMgr->CreateHistSet1D("chi2TriKinFit", chi2TriKinFitConfig);
    histMgr->CreateHistSet2D("TimeNeutral2d", TimeNeutral2dConfig);
-
-   histMgr->SetFitConstraints("invMassKch", constraints);
-   histMgr->SetFitConstraints("invMassKne", constraints);
-   histMgr->SetFitConstraints("timeDiff", constraints);
-   histMgr->SetFitConstraints("invMassKchMC", constraints);
-   histMgr->SetFitConstraints("invMassKneMC", constraints);
-   histMgr->SetFitConstraints("timeDiffMC", constraints);
-   histMgr->SetFitConstraints("chi2TriKinFit", constraints);
 }
 
 void init_analysis::SlaveBegin(TTree * /*tree*/)
@@ -176,7 +163,6 @@ void init_analysis::SlaveBegin(TTree * /*tree*/)
    // The tree argument is deprecated (on PROOF 0 is passed).
 
    TString option = GetOption();
-
 }
 
 Bool_t init_analysis::Process(Long64_t entry)
@@ -201,12 +187,14 @@ Bool_t init_analysis::Process(Long64_t entry)
 
    Float_t weight = 1.0;
 
+   std::cout << "Processing entry: " << entry << "\r" << std::flush;
+
    if (1)
    {
       if (*mcflag == 1)
       {
-         // if (*mctruth == 1)
-            // weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
+         if (*mctruth == 1)
+            weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
          histMgr->Fill1D("invMassKch", *mctruth, Kchrec[5], weight);
          histMgr->Fill1D("invMassKne", *mctruth, *minv4gam, weight);
@@ -224,10 +212,14 @@ Bool_t init_analysis::Process(Long64_t entry)
          histMgr->FillData1D("invMassKne", *minv4gam, weight);
          histMgr->FillData1D("timeDiff", *KaonChTimeCM - *KaonNeTimeCM, weight);
          histMgr->FillData1D("chi2TriKinFit", *Chi2TriKinFit, weight);
+
+         histMgr->FillData1D("invMassKchMC", Kchmc[5] - Kchrec[5], weight);
+         histMgr->FillData1D("invMassKneMC", Knemc[5] - *minv4gam, weight);
+         histMgr->FillData1D("timeDiffMC", (*KaonChTimeCMMC - *KaonNeTimeCMMC) - (*KaonChTimeCM - *KaonNeTimeCM), weight);
       }
    }
 
-   if (*mcflag == 1 && *mctruth != -1)
+   if (*mcflag == 1)
       cutter->UpdateStats(*mctruth);
 
    return kTRUE;
@@ -238,7 +230,6 @@ void init_analysis::SlaveTerminate()
    // The SlaveTerminate() function is called after all entries or objects
    // have been processed. When running with PROOF SlaveTerminate() is called
    // on each slave server.
-
 }
 
 void init_analysis::Terminate()
@@ -247,7 +238,7 @@ void init_analysis::Terminate()
    // a query. It always runs on the client, it can be used to present
    // the results graphically or save the results to file.
 
-   histMgr->SetNormalizationType(HistManager::NormalizationType::FRACTION_FIT); // Ustaw proste skalowanie --- IGNORE ---
+   histMgr->SetNormalizationType(HistManager::NormalizationType::SIMPLE_SCALE); // Ustaw proste skalowanie --- IGNORE ---
 
    // 1D histogramy z danymi
    histMgr->DrawSet1D("invMassKch", "HIST", true);
@@ -260,8 +251,6 @@ void init_analysis::Terminate()
    histMgr->DrawSet1D("invMassKchMC", "HIST", true);
    histMgr->DrawSet1D("invMassKneMC", "HIST", true);
    histMgr->DrawSet1D("timeDiffMC", "HIST", true);
-
-   
 
    // histMgr->SaveToRoot("analysis_results.root");
 
@@ -285,5 +274,4 @@ void init_analysis::Terminate()
    }
 
    delete histMgr;
-
 }

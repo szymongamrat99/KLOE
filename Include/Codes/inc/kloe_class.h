@@ -170,13 +170,13 @@ namespace KLOE
          * @brief Method to get a current timestamp.
          * @returns The std::string with the current timestamp in the format: yyyy-MM-dd_HHmm
          */
-        std::string getCurrentTimestamp();
+        std::string getCurrentTimestamp() const;
 
         /**
          * @brief Method to get a current datestamp.
          * @returns The std::string with the current timestamp in the format: yyyy-MM-dd
          */
-        std::string getCurrentDate();
+        std::string getCurrentDate() const;
 
         /**
          * @brief Method to count the repeating elements in one table.
@@ -227,7 +227,7 @@ namespace KLOE
          * - ErrorHandling::ErrorCodes::DELTA_LT_ZERO
          * - ErrorHandling::ErrorCodes::DENOM_EQ_ZERO
          */
-        Int_t neu_triangle(Float_t *TrcSumFinal, Float_t *vtxSigmaFinal, Float_t Clu5Vec[4][5], Float_t *ip, Float_t *Phi4Mom, Float_t *Kne4Mom, Float_t *Kne4Vec, Float_t *trc);
+        Int_t neu_triangle(Float_t *TrcSumFinal, Float_t *vtxSigmaFinal, Float_t Clu5Vec[4][5], Float_t *ip, Float_t *Phi4Mom, Float_t *Kne4Mom, Float_t *Kne4Vec, Float_t *trc) const;
 
         /**
          * @brief Reconstruction of neutral vertex using the triangle method
@@ -249,8 +249,10 @@ namespace KLOE
          * - ErrorHandling::ErrorCodes::DELTA_LT_ZERO
          * - ErrorHandling::ErrorCodes::DENOM_EQ_ZERO
          */
-        Int_t neu_triangle(std::vector<TLorentzVector> *Clu4Mom, std::vector<TLorentzVector> *Clu4Vec, Float_t *ip, TLorentzVector *Phi4Mom, TLorentzVector *Kne4Mom, TLorentzVector *Kne4Vec, Float_t *trc, Float_t *TrcSumFinal, Float_t *vtxSigmaFinal);
+        Int_t neu_triangle(std::vector<TLorentzVector> *Clu4Mom, std::vector<TLorentzVector> *Clu4Vec, Float_t *ip, TLorentzVector *Phi4Mom, TLorentzVector *Kne4Mom, TLorentzVector *Kne4Vec, Float_t *trc, Float_t *TrcSumFinal, Float_t *vtxSigmaFinal) const;
         /// @overload
+
+        static ErrorHandling::ErrorCodes triangleReconstruction(std::vector<Int_t> g4taken_kinfit, std::vector<Float_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Float_t> bhabha_mom, std::vector<Float_t> Kchboost, std::vector<Float_t> ip, std::vector<Float_t> &Knetriangle, std::vector<Float_t> gammatriangle[4], Float_t &minv4gam, std::vector<Float_t> &trcfinal, ErrorHandling::ErrorLogs &logger);
 
         /**
          * @brief Method to initialize a TChain with the list of files. Defined per branch, which files (Prod2ntu, Prod2root, Old analysis) are to be taken into account.

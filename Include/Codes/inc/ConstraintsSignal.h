@@ -3,6 +3,8 @@
 
 #include <KinFit.h>
 
+#include <ErrorLogs.h>
+
 /*List of variables (order is the following)*/
 /*
   For 4 gamma decay, without charged decay:
@@ -57,7 +59,7 @@ namespace KLOE
    * @class ConstraintsSignal
    * @brief Auxiliary class with the constraints for \omega\pi^{0} fitting
    */
-  class ConstraintsSignal : public KinFit, public ChargedVtxRec<Float_t, Int_t>
+  class ConstraintsSignal : public KinFit, public ChargedVtxRec<Float_t, Int_t>, public pm00
   {
   private:
     /**
@@ -94,8 +96,17 @@ namespace KLOE
         _chosen4MomComponent, /*!< Component of a 4-momentum to choose from FourMomConsvLAB*/
         _chosenPhoton;        /*!< Index of a photon to choose from PhotonPathConsvLAB*/
 
+    std::vector<Int_t> 
+          _g4taken,
+          _neuclulist; /*!< Vector of indices of clusters associated to gammas*/
+
+    // ErrorHandling::ErrorLogs *_logger; /*!< Logger object for error handling*/
+
     public:
       /* Specific physical Constraints for Signal-pi0 hypothesis */
+
+      // ConstraintsSignal::ConstraintsSignal() : _logger(new ErrorHandling::ErrorLogs("logs.log"))
+      // {};
 
       /**
        * @brief A method used to pair the photons in an event. Needed to get omega and neutral pions' parameters.
