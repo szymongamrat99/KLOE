@@ -425,7 +425,8 @@ struct BaseKinematics
         trcfinal,
         CurvMC,
         PhivMC,
-        CotvMC;
+        CotvMC,
+        pullsTriKinFit;
 
     TLorentzVector
         phi4Mom;

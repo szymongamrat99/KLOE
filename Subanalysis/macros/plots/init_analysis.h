@@ -127,6 +127,7 @@ public :
    TTreeReaderArray<float> trk2KLmc = {fReader, "trk2KLmc"};
    TTreeReaderArray<float> trk2KS = {fReader, "trk2KS"};
    TTreeReaderArray<float> trk2KSmc = {fReader, "trk2KSmc"};
+   TTreeReaderArray<float> pullsTriKinFit = {fReader, "pullsTriKinFit"};
    TTreeReaderArray<float> xv = {fReader, "xv"};
    TTreeReaderArray<float> xvmc = {fReader, "xvmc"};
    TTreeReaderArray<float> yv = {fReader, "yv"};

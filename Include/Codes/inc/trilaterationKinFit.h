@@ -74,6 +74,7 @@ namespace KLOE
 				_g4takentri_kinfit,
 				_selected;
 
+
 		ConfigManager
 				&_config = ConfigManager::getInstance();
 
@@ -100,7 +101,7 @@ namespace KLOE
 			_bhabha_vtx = bhabha_vtx;
 		}
 
-		void GetResults(Int_t &bunchnum, std::vector<Float_t> &iptri_kinfit, std::vector<Int_t> &g4takentri_kinfit, std::vector<Float_t> gamma_mom_final[4], std::vector<Float_t> &fourKnetri_kinfit, std::vector<Float_t> &neu_vtx_min, Float_t &Chi2TriKinFit)
+		void GetResults(Int_t &bunchnum, std::vector<Float_t> &iptri_kinfit, std::vector<Int_t> &g4takentri_kinfit, std::vector<Float_t> gamma_mom_final[4], std::vector<Float_t> &fourKnetri_kinfit, std::vector<Float_t> &neu_vtx_min, Float_t &Chi2TriKinFit, std::vector<Float_t> &pulls)
 		{
 			bunchnum = _bunchnum;
 			iptri_kinfit = _iptri_kinfit;
@@ -110,6 +111,11 @@ namespace KLOE
 			fourKnetri_kinfit = _fourKnetri_kinfit;
 			neu_vtx_min = _neu_vtx_min;
 			Chi2TriKinFit = _Chi2TriKinFit;
+
+			for (Int_t i = 0; i < _X_min.GetNrows(); i++)
+			{
+				pulls.push_back((_X_init_min[i] - _X_min[i]) / sqrt(_V_init[i][i] - _V_min[i][i]));
+			}
 		}
 
 		ErrorHandling::ErrorCodes Reconstruct();

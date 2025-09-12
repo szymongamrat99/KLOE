@@ -4,7 +4,6 @@
 // from the ROOT class TSelector. For more information on the TSelector
 // framework see $ROOTSYS/README/README.SELECTOR or the ROOT User Manual.
 
-
 // The following methods are defined in this file:
 //    Begin():        called every time a loop on the tree starts,
 //                    a convenient place to create your histograms.
@@ -24,7 +23,6 @@
 // root> T->Process("init_analysis.C+")
 //
 
-
 #include "init_analysis.h"
 #include <TH2.h>
 #include <TStyle.h>
@@ -41,11 +39,12 @@ HistManager::HistConfig invMassKchMCConfig;
 HistManager::HistConfig timeDiffConfig;
 HistManager::HistConfig timeDiffMCConfig;
 HistManager::HistConfig chi2TriKinFitConfig;
+HistManager::HistConfig pullsTriKinFitConfig;
 HistManager::Hist2DConfig TimeNeutral2dConfig;
 
 void init_analysis::Begin(TTree * /*tree*/)
 {
-      // The Begin() function is called at the start of the query.
+   // The Begin() function is called at the start of the query.
    // When running with PROOF Begin() is only called on the client.
    // The tree argument is deprecated (on PROOF 0 is passed).
 
@@ -133,11 +132,20 @@ void init_analysis::Begin(TTree * /*tree*/)
    chi2TriKinFitConfig.name = "chi2TriKinFit";
    chi2TriKinFitConfig.xtitle = "#DeltaT [#tau_{S}]";
    chi2TriKinFitConfig.ytitle = "Counts/2";
-   chi2TriKinFitConfig.bins = 50;
-   chi2TriKinFitConfig.xmin = -10;
+   chi2TriKinFitConfig.bins = 21;
+   chi2TriKinFitConfig.xmin = 0;
    chi2TriKinFitConfig.xmax = 100;
    chi2TriKinFitConfig.logy = false;
    chi2TriKinFitConfig.showStats = false;
+
+   pullsTriKinFitConfig.name = "pullsTriKinFit";
+   pullsTriKinFitConfig.xtitle = "Pull value [-]";
+   pullsTriKinFitConfig.ytitle = "Counts";
+   pullsTriKinFitConfig.bins = 50;
+   pullsTriKinFitConfig.xmin = -2;
+   pullsTriKinFitConfig.xmax = 2;
+   pullsTriKinFitConfig.logy = false;
+   pullsTriKinFitConfig.showStats = false;
 
    TimeNeutral2dConfig.name = "TimeNeutral2d";
    TimeNeutral2dConfig.xtitle = "t^{MC}_{neu} [#tau_{S}]";
@@ -158,6 +166,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    histMgr->CreateHistSet1D("invMassKneMC", invMassKneMCConfig);
    histMgr->CreateHistSet1D("timeDiffMC", timeDiffMCConfig);
    histMgr->CreateHistSet1D("chi2TriKinFit", chi2TriKinFitConfig);
+   histMgr->CreateHistSet1D("pullsTriKinFit", pullsTriKinFitConfig);
    histMgr->CreateHistSet2D("TimeNeutral2d", TimeNeutral2dConfig);
 
    histMgr->SetFitConstraints("invMassKch", constraints);
@@ -176,7 +185,6 @@ void init_analysis::SlaveBegin(TTree * /*tree*/)
    // The tree argument is deprecated (on PROOF 0 is passed).
 
    TString option = GetOption();
-
 }
 
 Bool_t init_analysis::Process(Long64_t entry)
@@ -206,12 +214,13 @@ Bool_t init_analysis::Process(Long64_t entry)
       if (*mcflag == 1)
       {
          // if (*mctruth == 1)
-            // weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
+         // weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
          histMgr->Fill1D("invMassKch", *mctruth, Kchrec[5], weight);
          histMgr->Fill1D("invMassKne", *mctruth, *minv4gam, weight);
          histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeCM - *KaonNeTimeCM, weight);
          histMgr->Fill1D("chi2TriKinFit", *mctruth, *Chi2TriKinFit, weight);
+         histMgr->Fill1D("pullsTriKinFit", *mctruth, pullsTriKinFit[1], weight);
 
          histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - Kchrec[5], weight);
          histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - *minv4gam, weight);
@@ -238,7 +247,6 @@ void init_analysis::SlaveTerminate()
    // The SlaveTerminate() function is called after all entries or objects
    // have been processed. When running with PROOF SlaveTerminate() is called
    // on each slave server.
-
 }
 
 void init_analysis::Terminate()
@@ -254,6 +262,7 @@ void init_analysis::Terminate()
    histMgr->DrawSet1D("invMassKne", "HIST", true);
    histMgr->DrawSet1D("timeDiff", "HIST", true);
    histMgr->DrawSet1D("chi2TriKinFit", "HIST", true);
+   histMgr->DrawSet1D("pullsTriKinFit", "HIST", true);
 
    histMgr->DrawSet2D("TimeNeutral2d", "COLZ", true);
 
@@ -261,14 +270,13 @@ void init_analysis::Terminate()
    histMgr->DrawSet1D("invMassKneMC", "HIST", true);
    histMgr->DrawSet1D("timeDiffMC", "HIST", true);
 
-   
-
    // histMgr->SaveToRoot("analysis_results.root");
 
    histMgr->SaveSet("invMassKch", "invMassKch");
    histMgr->SaveSet("invMassKne", "invMassKne");
    histMgr->SaveSet("timeDiff", "timeDiff");
    histMgr->SaveSet("chi2TriKinFit", "chi2TriKinFit");
+   histMgr->SaveSet("pullsTriKinFit", "pullsTriKinFit");
 
    histMgr->SaveSet("TimeNeutral2d", "TimeNeutral2d");
 
@@ -285,5 +293,4 @@ void init_analysis::Terminate()
    }
 
    delete histMgr;
-
 }

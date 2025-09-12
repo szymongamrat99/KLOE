@@ -96,6 +96,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   _err_flag = 0;
 
+  Double_t CHISQRTOT = 0.;
+
   for (Int_t i = 0; i < _loopcount; i++)
   {
     try
@@ -112,34 +114,33 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
             _D(l, m) = 0;
         }
       }
-      _D_T.Transpose(_D);
+      _D_T = _D_T.Transpose(_D);
 
       _Aux = (_D * _V * _D_T);
 
-      _Aux.Invert(&_det);
+      _Aux = _Aux.Invert(&_det);
 
       if (_det == 0)
         throw ErrorHandling::ErrorCodes::DET_ZERO;
       else if (TMath::IsNaN(_det))
         throw ErrorHandling::ErrorCodes::NAN_VAL;
 
-      _L = (_Aux * (_D * (_X_init - _X) + _C));
+      // Rozwijam wokół _X a nie _X_init
+      _L = (_Aux * (_D * (_X - _X) + _C));
 
       _CORR = _V * _D_T * _L;
 
-      _X_final = _X_init - _CORR;
+      _X = _X - _CORR;
 
       _V_final = _V - _V * _D_T * _Aux * _D * _V;
 
-      _CHISQR = Dot((_X_final - _X_init), _V_invert * (_X_final - _X_init));
+      _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
 
-      // // Break the loop, when improvement gets too small
-      // if (abs(_CHISQR - _CHISQRTMP) < _CHISQRSTEP)
-      //   break;
-      // // -----------------------------------------------
 
-      _X = _X_final;
-      _X_init_aux = _X_init;
+      for(Int_t j = 0; j < _N_free + _N_const; j++)
+      {
+        _V(j,j) = _V_final(j,j);
+      }
       _L_aux = _L;
       _C_aux = _C;
       _FUNVALTMP = _FUNVAL;
