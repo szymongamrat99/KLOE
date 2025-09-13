@@ -94,7 +94,7 @@
         "cutDescription": "K->pi0pi0 decay invariant mass.",
         "cutId": "InvMassKne",
         "cutType": "T",
-        "cutValue": 76,
+        "cutValue": 300,
         "cutCondition": "<="
       },
       {
@@ -102,7 +102,7 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKch",
         "cutType": "T",
-        "cutValue": 1.2,
+        "cutValue": 300,
         "cutCondition": "<="
       },
       {
@@ -110,7 +110,7 @@
         "cutDescription": "Missing energy in event.",
         "cutId": "Qmiss",
         "cutType": "O",
-        "cutValue": 3.75,
+        "cutValue": 300,
         "cutCondition": "<="
       }
     ]

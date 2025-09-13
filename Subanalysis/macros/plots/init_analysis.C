@@ -117,7 +117,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    timeDiffConfig.bins = 200;
    timeDiffConfig.xmin = -200;
    timeDiffConfig.xmax = 200;
-   timeDiffConfig.logy = true;
+   timeDiffConfig.logy = false;
    timeDiffConfig.showStats = false;
 
    timeDiffMCConfig.name = "timeDiffMC";
@@ -126,13 +126,13 @@ void init_analysis::Begin(TTree * /*tree*/)
    timeDiffMCConfig.bins = 20;
    timeDiffMCConfig.xmin = -20;
    timeDiffMCConfig.xmax = 20;
-   timeDiffMCConfig.logy = true;
+   timeDiffMCConfig.logy = false;
    timeDiffMCConfig.showStats = false;
 
    chi2TriKinFitConfig.name = "chi2TriKinFit";
    chi2TriKinFitConfig.xtitle = "#DeltaT [#tau_{S}]";
    chi2TriKinFitConfig.ytitle = "Counts/2";
-   chi2TriKinFitConfig.bins = 21;
+   chi2TriKinFitConfig.bins = 300;
    chi2TriKinFitConfig.xmin = 0;
    chi2TriKinFitConfig.xmax = 100;
    chi2TriKinFitConfig.logy = false;
@@ -142,10 +142,10 @@ void init_analysis::Begin(TTree * /*tree*/)
    pullsTriKinFitConfig.xtitle = "Pull value [-]";
    pullsTriKinFitConfig.ytitle = "Counts";
    pullsTriKinFitConfig.bins = 50;
-   pullsTriKinFitConfig.xmin = -2;
-   pullsTriKinFitConfig.xmax = 2;
+   pullsTriKinFitConfig.xmin = -10;
+   pullsTriKinFitConfig.xmax = 10;
    pullsTriKinFitConfig.logy = false;
-   pullsTriKinFitConfig.showStats = false;
+   pullsTriKinFitConfig.showStats = true;
 
    TimeNeutral2dConfig.name = "TimeNeutral2d";
    TimeNeutral2dConfig.xtitle = "t^{MC}_{neu} [#tau_{S}]";
@@ -209,9 +209,9 @@ Bool_t init_analysis::Process(Long64_t entry)
 
    Float_t weight = 1.0;
 
-   if (1)
+   if (*Chi2TriKinFit < 20.)
    {
-      if (*mcflag == 1)
+      if (*mcflag == 1 && *mctruth == 1)
       {
          // if (*mctruth == 1)
          // weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
@@ -220,7 +220,7 @@ Bool_t init_analysis::Process(Long64_t entry)
          histMgr->Fill1D("invMassKne", *mctruth, *minv4gam, weight);
          histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeCM - *KaonNeTimeCM, weight);
          histMgr->Fill1D("chi2TriKinFit", *mctruth, *Chi2TriKinFit, weight);
-         histMgr->Fill1D("pullsTriKinFit", *mctruth, pullsTriKinFit[1], weight);
+         histMgr->Fill1D("pullsTriKinFit", *mctruth, pullsTriKinFit[21], weight);
 
          histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - Kchrec[5], weight);
          histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - *minv4gam, weight);
