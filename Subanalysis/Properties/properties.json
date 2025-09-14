@@ -4,7 +4,7 @@
         "analysisCode": "SIGNAL",
         "covMatrixType": "MIXED",
         "initialAnalysisExec": {
-            "MC": false,
+            "MC": true,
             "flag": true,
             "parts": {
                 "covMatrixInitialAnalysisExec": false,
