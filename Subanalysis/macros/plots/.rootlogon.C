@@ -39,7 +39,7 @@
   gStyle->SetTitleFont(62, "Y");
   gStyle->SetTitleFont(62, "Z");
 
-  gStyle->SetHistLineWidth(3);
+  gStyle->SetHistLineWidth(2);
   gStyle->SetTitle("");
 
   cout << "Units: cm, ns, tau_{S}, MeV/c^{2}, MeV/c, MeV" << endl;
@@ -56,4 +56,6 @@
 
   const Float_t mK0 = 497.611; // MeV/c^{2}
   const Float_t mPhi = 1019.455; // MeV/c^{2}
+
+  const Float_t tau_S = 0.087;
 }

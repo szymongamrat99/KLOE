@@ -42,6 +42,12 @@ HistManager::HistConfig chi2TriKinFitConfig;
 HistManager::HistConfig pullsTriKinFitConfig;
 HistManager::Hist2DConfig TimeNeutral2dConfig;
 
+// Konfiguracje array histogramów
+HistManager::ArrayConfig momentumArrayConfig;
+HistManager::ArrayConfig momentumNeutralArrayConfig;
+HistManager::ArrayConfig pullsArrayConfig;
+HistManager::ArrayConfig neuVtxArrayConfig;
+
 void init_analysis::Begin(TTree * /*tree*/)
 {
    // The Begin() function is called at the start of the query.
@@ -159,6 +165,80 @@ void init_analysis::Begin(TTree * /*tree*/)
    TimeNeutral2dConfig.logy = false;
    TimeNeutral2dConfig.showStats = false;
 
+   // Konfiguracja array histogramów dla składowych pędu Kchrec
+   HistManager::HistConfig momentumConfig;
+   momentumConfig.bins = 50;
+   momentumConfig.xmin = -10;
+   momentumConfig.xmax = 10;
+   momentumConfig.xtitle = "p [MeV/c]";
+   momentumConfig.ytitle = "Counts";
+   momentumConfig.logy = false;
+   momentumConfig.showStats = false;
+
+   momentumArrayConfig.baseName = "KchrecMomentum";
+   momentumArrayConfig.baseTitle = "K_{ch} Reconstructed Momentum Components";
+   momentumArrayConfig.arraySize = 4; // px, py, pz, E
+   momentumArrayConfig.varNames = {"px", "py", "pz", "E"};
+   momentumArrayConfig.varTitles = {"p_{x}", "p_{y}", "p_{z}", "E"};
+   momentumArrayConfig.commonConfig = momentumConfig;
+   momentumArrayConfig.commonConfig.xtitle = "p [MeV/c]"; // Ogólny tytuł dla px,py,pz
+
+   // Konfiguracja array histogramów dla składowych pędu Kchrec
+   HistManager::HistConfig momentumNeutralConfig;
+   momentumNeutralConfig.bins = 50;
+   momentumNeutralConfig.xmin = -100;
+   momentumNeutralConfig.xmax = 100;
+   momentumNeutralConfig.xtitle = "p [MeV/c]";
+   momentumNeutralConfig.ytitle = "Counts";
+   momentumNeutralConfig.logy = false;
+   momentumNeutralConfig.showStats = false;
+
+   momentumNeutralArrayConfig.baseName = "KnerecMomentum";
+   momentumNeutralArrayConfig.baseTitle = "K_{ne} Reconstructed Momentum Components";
+   momentumNeutralArrayConfig.arraySize = 4; // px, py, pz, E
+   momentumNeutralArrayConfig.varNames = {"px", "py", "pz", "E"};
+   momentumNeutralArrayConfig.varTitles = {"p_{x}", "p_{y}", "p_{z}", "E"};
+   momentumNeutralArrayConfig.commonConfig = momentumNeutralConfig;
+   momentumNeutralArrayConfig.commonConfig.xtitle = "p [MeV/c]"; // Ogólny tytuł dla px,py,pz
+
+   // Konfiguracja array histogramów dla składowych pędu Kchrec
+   HistManager::HistConfig neuVtxConfig;
+   neuVtxConfig.bins = 50;
+   neuVtxConfig.xmin = -1;
+   neuVtxConfig.xmax = 1;
+   neuVtxConfig.xtitle = "x [MeV/c]";
+   neuVtxConfig.ytitle = "Counts";
+   neuVtxConfig.logy = false;
+   neuVtxConfig.showStats = false;
+
+   neuVtxArrayConfig.baseName = "NeuVtx";
+   neuVtxArrayConfig.baseTitle = "Neutral vertex resolution";
+   neuVtxArrayConfig.arraySize = 4; // px, py, pz, E
+   neuVtxArrayConfig.varNames = {"x", "y", "z", "t"};
+   neuVtxArrayConfig.varTitles = {"x", "y", "z", "t"};
+   neuVtxArrayConfig.commonConfig = neuVtxConfig;
+   neuVtxArrayConfig.commonConfig.xtitle = "x [cm]"; // Ogólny tytuł dla px,py,pz
+   
+   // Specjalna konfiguracja dla energii
+   // momentumArrayConfig.commonConfig.xmax = 1000; // E ma większy zakres
+
+   // Konfiguracja array histogramów dla pullsTriKinFit
+   HistManager::HistConfig pullArrayConfig;
+   pullArrayConfig.bins = 50;
+   pullArrayConfig.xmin = -10;
+   pullArrayConfig.xmax = 10;
+   pullArrayConfig.xtitle = "Pull value [-]";
+   pullArrayConfig.ytitle = "Counts";
+   pullArrayConfig.logy = false;
+   pullArrayConfig.showStats = false;
+
+   pullsArrayConfig.baseName = "PullsTriKinFit";
+   pullsArrayConfig.baseTitle = "Trilateration Kinematic Fit Pulls";
+   pullsArrayConfig.arraySize = 24; // Assuming 5 pull values
+   pullsArrayConfig.varNames = {"pull0", "pull1", "pull2", "pull3", "pull4"};
+   pullsArrayConfig.varTitles = {"Pull_{0}", "Pull_{1}", "Pull_{2}", "Pull_{3}", "Pull_{4}"};
+   pullsArrayConfig.commonConfig = pullArrayConfig;
+
    histMgr->CreateHistSet1D("invMassKch", invMassKchConfig);
    histMgr->CreateHistSet1D("invMassKne", invMassKneConfig);
    histMgr->CreateHistSet1D("timeDiff", timeDiffConfig);
@@ -168,6 +248,12 @@ void init_analysis::Begin(TTree * /*tree*/)
    histMgr->CreateHistSet1D("chi2TriKinFit", chi2TriKinFitConfig);
    histMgr->CreateHistSet1D("pullsTriKinFit", pullsTriKinFitConfig);
    histMgr->CreateHistSet2D("TimeNeutral2d", TimeNeutral2dConfig);
+
+   // Stwórz array histogramy
+   histMgr->CreateHistArray1D(momentumArrayConfig);
+   histMgr->CreateHistArray1D(momentumNeutralArrayConfig);
+   histMgr->CreateHistArray1D(neuVtxArrayConfig);
+   histMgr->CreateHistArray1D(pullsArrayConfig);
 
    histMgr->SetFitConstraints("invMassKch", constraints);
    histMgr->SetFitConstraints("invMassKne", constraints);
@@ -224,6 +310,29 @@ Bool_t init_analysis::Process(Long64_t entry)
          histMgr->Fill1D("chi2TriKinFit", *mctruth, TMath::Prob(*Chi2TriKinFit, 5), weight);
          histMgr->Fill1D("pullsTriKinFit", *mctruth, pullsTriKinFit[4], weight);
 
+         // Wypełnij array histogramy dla składowych pędu Kchrec
+         std::vector<Double_t> momentum = {Kchboost[0] - Kchmc[0], Kchboost[1] - Kchmc[1], Kchboost[2] - Kchmc[2], Kchboost[3] - Kchmc[3]};
+         histMgr->FillArrayAll1D("KchrecMomentum", *mctruth, momentum, weight);
+
+         // Wypełnij array histogramy dla składowych pędu Kchrec
+         // momentum = {KneTriangle[0] - Knemc[0], KneTriangle[1] - Knemc[1], KneTriangle[2] - Knemc[2], KneTriangle[3] - Knemc[3]};
+         momentum = {KnetriKinFit[0] - Knemc[0], KnetriKinFit[1] - Knemc[1], KnetriKinFit[2] - Knemc[2], KnetriKinFit[3] - Knemc[3]};
+         histMgr->FillArrayAll1D("KnerecMomentum", *mctruth, momentum, weight);
+
+         // Wypełnij array histogramy dla składowych neu vtx
+         // momentum = {KneTriangle[0] - Knemc[0], KneTriangle[1] - Knemc[1], KneTriangle[2] - Knemc[2], KneTriangle[3] - Knemc[3]};
+         momentum = {KnetriKinFit[6] - Knemc[6], KnetriKinFit[7] - Knemc[7], KnetriKinFit[8] - Knemc[8], KnetriKinFit[9] - *KaonNeTimeLAB * tau_S};
+         histMgr->FillArrayAll1D("NeuVtx", *mctruth, momentum, weight);
+
+         // Wypełnij array histogramy dla pulls (wszystkie 5 składowych)
+         std::vector<Double_t> pulls = {pullsTriKinFit[0], pullsTriKinFit[1], pullsTriKinFit[2], 
+                                       pullsTriKinFit[3], pullsTriKinFit[4], pullsTriKinFit[5], pullsTriKinFit[6], pullsTriKinFit[7], 
+                                       pullsTriKinFit[8], pullsTriKinFit[9], pullsTriKinFit[10], pullsTriKinFit[11], pullsTriKinFit[12], 
+                                       pullsTriKinFit[13], pullsTriKinFit[14], pullsTriKinFit[15], pullsTriKinFit[16], pullsTriKinFit[17], 
+                                       pullsTriKinFit[18], pullsTriKinFit[19], pullsTriKinFit[20], pullsTriKinFit[21], pullsTriKinFit[22],
+                                    pullsTriKinFit[23]};
+         histMgr->FillArrayAll1D("PullsTriKinFit", *mctruth, pulls, weight);
+
          histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - Kchrec[5], weight);
          histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - *minv4gam, weight);
          histMgr->Fill1D("timeDiffMC", *mctruth, (*KaonChTimeCMMC - *KaonNeTimeCMMC) - (*KaonChTimeCM - *KaonNeTimeCM), weight);
@@ -235,6 +344,15 @@ Bool_t init_analysis::Process(Long64_t entry)
          histMgr->FillData1D("invMassKne", *minv4gam, weight);
          histMgr->FillData1D("timeDiff", *KaonChTimeCM - *KaonNeTimeCM, weight);
          histMgr->FillData1D("chi2TriKinFit", *Chi2TriKinFit, weight);
+
+         // Wypełnij array histogramy dla danych - składowe pędu Kchrec
+         std::vector<Double_t> momentumData = {Kchboost[0] - Kchmc[0], Kchboost[1] - Kchmc[1], Kchboost[2] - Kchmc[2], Kchboost[3] - Kchmc[3]};
+         histMgr->FillArrayAllData1D("KchrecMomentum", momentumData, weight);
+
+         // Wypełnij array histogramy dla danych - pulls (jeśli dostępne dla danych)
+         std::vector<Double_t> pullsData = {pullsTriKinFit[0], pullsTriKinFit[1], pullsTriKinFit[2], 
+                                           pullsTriKinFit[3], pullsTriKinFit[4]};
+         histMgr->FillArrayAllData1D("PullsTriKinFit", pullsData, weight);
       }
    }
 
@@ -272,6 +390,12 @@ void init_analysis::Terminate()
    histMgr->DrawSet1D("invMassKneMC", "HIST", true);
    histMgr->DrawSet1D("timeDiffMC", "HIST", true);
 
+   // Rysuj array histogramy
+   histMgr->DrawArray1D("KchrecMomentum", true); // z danymi
+   histMgr->DrawArray1D("KnerecMomentum", true); // z danymi
+   histMgr->DrawArray1D("NeuVtx", true); // z danymi
+   histMgr->DrawArray1D("PullsTriKinFit", true); // z danymi
+
    // histMgr->SaveToRoot("analysis_results.root");
 
    histMgr->SaveSet("invMassKch", "invMassKch");
@@ -285,6 +409,12 @@ void init_analysis::Terminate()
    histMgr->SaveSet("invMassKchMC", "invMassKchMC");
    histMgr->SaveSet("invMassKneMC", "invMassKneMC");
    histMgr->SaveSet("timeDiffMC", "timeDiffMC");
+
+   // Zapisz array histogramy
+   histMgr->ExportSet("KchrecMomentum", "KchrecMomentum", HistManager::ImageFormat::SVG);
+   histMgr->ExportSet("KnerecMomentum", "KnerecMomentum", HistManager::ImageFormat::SVG);
+   histMgr->ExportSet("NeuVtx", "NeuVtx", HistManager::ImageFormat::SVG);
+   histMgr->ExportSet("PullsTriKinFit", "PullsTriKinFit", HistManager::ImageFormat::SVG);
 
    // Wyniki
    for (size_t i = 0; i < cutter->GetCuts().size(); ++i)

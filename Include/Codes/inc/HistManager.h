@@ -150,6 +150,24 @@ public:
         FitResult() : chi2(0), ndf(0), status(-1), converged(false) {}
     };
 
+    /**
+     * @struct ArrayConfig
+     * @brief Konfiguracja dla zestawów histogramów typu array (np. składowe pędu, pulls[i])
+     */
+    struct ArrayConfig {
+        TString baseName;               ///< Bazowa nazwa zestawu (np. "momentum", "pulls")
+        TString baseTitle;              ///< Bazowy tytuł (np. "Momentum components", "Pull values")
+        Int_t arraySize;                ///< Rozmiar tablicy/wektora
+        std::vector<TString> varNames;  ///< Nazwy zmiennych (opcjonalne, np. {"px", "py", "pz", "E"})
+        std::vector<TString> varTitles; ///< Tytuły zmiennych (opcjonalne, np. {"p_{x}", "p_{y}", "p_{z}", "E"})
+        HistConfig commonConfig;        ///< Wspólna konfiguracja dla wszystkich histogramów w zestawie
+        
+        ArrayConfig() : arraySize(0) {}
+        
+        ArrayConfig(const TString& name, const TString& title, Int_t size, const HistConfig& config) 
+            : baseName(name), baseTitle(title), arraySize(size), commonConfig(config) {}
+    };
+
     enum class ImageFormat { PNG, SVG, PDF };
 
     /**
@@ -180,6 +198,76 @@ public:
     // Wypełnianie histogramów z danymi eksperymentalnymi
     void FillData1D(const TString& setName, Double_t value, Double_t weight = 1.0);
     void FillData2D(const TString& setName, Double_t x, Double_t y, Double_t weight = 1.0);
+
+    // ===== METODY ARRAY HISTOGRAMÓW =====
+    
+    /**
+     * @brief Tworzy zestaw histogramów 1D dla zmiennych typu array (np. pulls[10], momentum[4])
+     * @param config Konfiguracja zestawu array
+     * @return true jeśli sukces
+     */
+    Bool_t CreateHistArray1D(const ArrayConfig& config);
+    
+    /**
+     * @brief Wypełnia histogram z zestawu array dla MC
+     * @param baseName Bazowa nazwa zestawu
+     * @param index Indeks histogramu w zestawie (0-based)
+     * @param mctruth Numer kanału MC (1-N)
+     * @param value Wartość do wypełnienia
+     * @param weight Waga zdarzenia (domyślnie 1.0)
+     * @return true jeśli sukces
+     */
+    Bool_t FillArray1D(const TString& baseName, Int_t index, Int_t mctruth, Double_t value, Double_t weight = 1.0);
+    
+    /**
+     * @brief Wypełnia histogram z zestawu array dla danych eksperymentalnych
+     * @param baseName Bazowa nazwa zestawu
+     * @param index Indeks histogramu w zestawie (0-based)
+     * @param value Wartość do wypełnienia
+     * @param weight Waga zdarzenia (domyślnie 1.0)
+     * @return true jeśli sukces
+     */
+    Bool_t FillArrayData1D(const TString& baseName, Int_t index, Double_t value, Double_t weight = 1.0);
+    
+    /**
+     * @brief Wypełnia wszystkie histogramy w zestawie array jednym wywołaniem (MC)
+     * @param baseName Bazowa nazwa zestawu
+     * @param mctruth Numer kanału MC (1-N)
+     * @param values Wektor wartości do wypełnienia (rozmiar musi odpowiadać arraySize)
+     * @param weight Waga zdarzenia (domyślnie 1.0)
+     * @return true jeśli sukces
+     */
+    Bool_t FillArrayAll1D(const TString& baseName, Int_t mctruth, const std::vector<Double_t>& values, Double_t weight = 1.0);
+    
+    /**
+     * @brief Wypełnia wszystkie histogramy w zestawie array jednym wywołaniem (dane)
+     * @param baseName Bazowa nazwa zestawu
+     * @param values Wektor wartości do wypełnienia (rozmiar musi odpowiadać arraySize)
+     * @param weight Waga zdarzenia (domyślnie 1.0)
+     * @return true jeśli sukces
+     */
+    Bool_t FillArrayAllData1D(const TString& baseName, const std::vector<Double_t>& values, Double_t weight = 1.0);
+    
+    /**
+     * @brief Rysuje wszystkie histogramy z zestawu array na jednej kanwie
+     * @param baseName Bazowa nazwa zestawu
+     * @param drawData Czy rysować dane eksperymentalne
+     * @param canvasName Nazwa kanwy (domyślnie auto-generowana)
+     * @param nCols Liczba kolumn w podziale kanwy (auto = -1)
+     * @param nRows Liczba wierszy w podziale kanwy (auto = -1)
+     * @return Wskaźnik na utworzoną kanwę
+     */
+    TCanvas* DrawArray1D(const TString& baseName, Bool_t drawData = false, const TString& canvasName = "", 
+                         Int_t nCols = -1, Int_t nRows = -1);
+    
+    /**
+     * @brief Pobiera histogram z zestawu array
+     * @param baseName Bazowa nazwa zestawu
+     * @param index Indeks histogramu (0-based)
+     * @param mctruth Numer kanału MC (1-N) lub -1 dla danych, 0 dla sumy MC
+     * @return Wskaźnik na histogram lub nullptr
+     */
+    TH1D* GetArrayHist1D(const TString& baseName, Int_t index, Int_t mctruth = -1);
 
     // Rysowanie histogramów
     void DrawSet1D(const TString& setName, const TString& drawOpt = "", Bool_t drawData = false);
@@ -288,6 +376,11 @@ private:
     std::map<TString, HistConfig> fConfigs1D;           ///< Konfiguracje 1D
     std::map<TString, Hist2DConfig> fConfigs2D;         ///< Konfiguracje 2D
     
+    // Array histogramy
+    std::map<TString, std::vector<std::vector<TH1D*>>> fArrayHists1D; ///< Array histogramy 1D [baseName][index][mctruth+1]
+    std::map<TString, std::vector<TH1D*>> fArrayData1D;               ///< Array histogramy danych [baseName][index]
+    std::map<TString, ArrayConfig> fArrayConfigs;                     ///< Konfiguracje array histogramów
+    
     // FractionFit related
     std::map<TString, FitConstraints> fFitConstraints;  ///< Ograniczenia fitu dla każdego zestawu
     std::map<TString, FitResult> fFitResults;           ///< Wyniki fitów dla każdego zestawu
@@ -298,6 +391,20 @@ private:
     Double_t CalculateYRange(const std::vector<TH1*>& hists, const TString& setName, Bool_t logy);
     void CleanupSet(const TString& setName);
     TLegend* CreateLegend(const std::vector<TH1*>& hists, const TH1* dataHist = nullptr);
+    
+    /**
+     * @brief Oblicza optymalne rozmiary kanwy dla N paneli
+     * @param nPanels Liczba paneli
+     * @param nCols Kolumny (wejście/wyjście)
+     * @param nRows Wiersze (wejście/wyjście)  
+     */
+    void CalculateCanvasLayout(Int_t nPanels, Int_t& nCols, Int_t& nRows);
+    
+    /**
+     * @brief Czyści zestaw array histogramów
+     * @param baseName Bazowa nazwa zestawu
+     */
+    void CleanupArraySet(const TString& baseName);
     
     /**
      * @brief Wykonuje FractionFit z daną konfiguracją

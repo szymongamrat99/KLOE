@@ -46,6 +46,15 @@ HistManager::~HistManager() {
     for(const auto& setName : setsToClean) {
         CleanupSet(setName);
     }
+    
+    // Cleanup array histograms
+    std::vector<TString> arrayToClean;
+    for(const auto& pair : fArrayHists1D) {
+        arrayToClean.push_back(pair.first);
+    }
+    for(const auto& baseName : arrayToClean) {
+        CleanupArraySet(baseName);
+    }
 }
 
 void HistManager::CreateHistSet1D(const TString& setName, const HistConfig& config) {
@@ -341,7 +350,7 @@ void HistManager::DrawSet2D(const TString& setName, const TString& drawOpt, Bool
     for(Int_t i = 0; i < fChannNum; ++i) {
         TCanvas* canvas = new TCanvas(Form("c_%s_%d", setName.Data(), i+1),
                                     Form("%s (Channel %d)", setName.Data(), i+1),
-                                    800, 600);
+                                    790, 790);
         canvas->SetLeftMargin(0.15);
         canvas->SetBottomMargin(0.15);
         canvas->SetRightMargin(0.15); // For z-axis color scale
@@ -882,4 +891,342 @@ void HistManager::ApplySimpleScaling(const std::vector<TH1*>& mcHists, TH1* sumH
     
     // Przeskaluj sumę MC
     sumHist->Scale(scaleFactor);
+}
+
+// ===== IMPLEMENTACJA METOD ARRAY HISTOGRAMÓW =====
+
+Bool_t HistManager::CreateHistArray1D(const ArrayConfig& config) {
+    if(config.arraySize <= 0) {
+        std::cerr << "ERROR: Invalid array size: " << config.arraySize << std::endl;
+        return false;
+    }
+    
+    // Sprawdź czy array już istnieje i usuń go
+    if(fArrayHists1D.find(config.baseName) != fArrayHists1D.end()) {
+        CleanupArraySet(config.baseName);
+    }
+    
+    // Stwórz strukturę [index][mctruth+1] gdzie mctruth+1: 0=suma MC, 1-N=kanały MC  
+    std::vector<std::vector<TH1D*>> arraySet(config.arraySize);
+    std::vector<TH1D*> dataSet(config.arraySize);
+    
+    for(Int_t index = 0; index < config.arraySize; ++index) {
+        // Określ nazwę i tytuł dla tego indeksu
+        TString varName = config.baseName + Form("[%d]", index);
+        TString varTitle = config.baseTitle + Form(" [%d]", index);
+        
+        // Użyj custom names/titles jeśli dostępne
+        if(index < static_cast<Int_t>(config.varNames.size())) {
+            varName = config.varNames[index];
+        }
+        if(index < static_cast<Int_t>(config.varTitles.size())) {
+            varTitle = config.varTitles[index];
+        }
+        
+        // Stwórz histogramy dla tego indeksu (suma MC + wszystkie kanały MC)
+        std::vector<TH1D*> indexHists(fChannNum + 1); // +1 dla sumy MC (index 0)
+        
+        // Histogram sumy MC (index 0)
+        TString sumHistName = Form("%s_sum_%d", config.baseName.Data(), index);
+        indexHists[0] = new TH1D(sumHistName, varTitle, 
+                                config.commonConfig.bins, 
+                                config.commonConfig.xmin, 
+                                config.commonConfig.xmax);
+        indexHists[0]->GetXaxis()->SetTitle(config.commonConfig.xtitle);
+        indexHists[0]->GetYaxis()->SetTitle(config.commonConfig.ytitle);
+        ConfigureHistogram(indexHists[0], fSumColor, config.commonConfig.showStats);
+        
+        // Histogramy MC (indeksy 1 do fChannNum)
+        for(Int_t ch = 0; ch < fChannNum; ++ch) {
+            TString mcHistName = Form("%s_mc%d_%d", config.baseName.Data(), ch+1, index);
+            indexHists[ch + 1] = new TH1D(mcHistName, varTitle,
+                                         config.commonConfig.bins,
+                                         config.commonConfig.xmin,
+                                         config.commonConfig.xmax);
+            indexHists[ch + 1]->GetXaxis()->SetTitle(config.commonConfig.xtitle);
+            indexHists[ch + 1]->GetYaxis()->SetTitle(config.commonConfig.ytitle);
+            ConfigureHistogram(indexHists[ch + 1], fChannColors[ch], config.commonConfig.showStats);
+        }
+        
+        arraySet[index] = indexHists;
+        
+        // Histogram danych
+        TString dataHistName = Form("%s_data_%d", config.baseName.Data(), index);
+        dataSet[index] = new TH1D(dataHistName, varTitle, 
+                                 config.commonConfig.bins, 
+                                 config.commonConfig.xmin, 
+                                 config.commonConfig.xmax);
+        dataSet[index]->GetXaxis()->SetTitle(config.commonConfig.xtitle);
+        dataSet[index]->GetYaxis()->SetTitle(config.commonConfig.ytitle);
+        dataSet[index]->SetMarkerStyle(fDataStyle);
+        dataSet[index]->SetMarkerColor(fDataColor);
+        dataSet[index]->SetLineColor(fDataColor);
+        dataSet[index]->SetStats(config.commonConfig.showStats);
+    }
+    
+    fArrayHists1D[config.baseName] = arraySet;
+    fArrayData1D[config.baseName] = dataSet;
+    fArrayConfigs[config.baseName] = config;
+    
+    return true;
+}
+
+Bool_t HistManager::FillArray1D(const TString& baseName, Int_t index, Int_t mctruth, Double_t value, Double_t weight) {
+    auto it = fArrayHists1D.find(baseName);
+    if(it == fArrayHists1D.end()) {
+        std::cerr << "ERROR: Array histogram set '" << baseName << "' not found!" << std::endl;
+        return false;
+    }
+    
+    if(index < 0 || index >= static_cast<Int_t>(it->second.size())) {
+        std::cerr << "ERROR: Array index " << index << " out of range [0," << it->second.size()-1 << "]!" << std::endl;
+        return false;
+    }
+    
+    if(mctruth < 1 || mctruth > fChannNum) {
+        return false; // Invalid mctruth, silently ignore
+    }
+    
+    // Wypełnij sumę MC (index 0)
+    it->second[index][0]->Fill(value, weight);
+    // Wypełnij konkretny kanał MC (index mctruth)
+    it->second[index][mctruth]->Fill(value, weight);
+    
+    return true;
+}
+
+Bool_t HistManager::FillArrayData1D(const TString& baseName, Int_t index, Double_t value, Double_t weight) {
+    auto it = fArrayData1D.find(baseName);
+    if(it == fArrayData1D.end()) {
+        std::cerr << "ERROR: Array data histogram set '" << baseName << "' not found!" << std::endl;
+        return false;
+    }
+    
+    if(index < 0 || index >= static_cast<Int_t>(it->second.size())) {
+        std::cerr << "ERROR: Array index " << index << " out of range [0," << it->second.size()-1 << "]!" << std::endl;
+        return false;
+    }
+    
+    it->second[index]->Fill(value, weight);
+    return true;
+}
+
+Bool_t HistManager::FillArrayAll1D(const TString& baseName, Int_t mctruth, const std::vector<Double_t>& values, Double_t weight) {
+    auto it = fArrayHists1D.find(baseName);
+    if(it == fArrayHists1D.end()) {
+        std::cerr << "ERROR: Array histogram set '" << baseName << "' not found!" << std::endl;
+        return false;
+    }
+    
+    if(static_cast<Int_t>(values.size()) != static_cast<Int_t>(it->second.size())) {
+        std::cerr << "ERROR: Values vector size (" << values.size() << ") doesn't match array size (" << it->second.size() << ")!" << std::endl;
+        return false;
+    }
+    
+    for(Int_t index = 0; index < static_cast<Int_t>(values.size()); ++index) {
+        FillArray1D(baseName, index, mctruth, values[index], weight);
+    }
+    
+    return true;
+}
+
+Bool_t HistManager::FillArrayAllData1D(const TString& baseName, const std::vector<Double_t>& values, Double_t weight) {
+    auto it = fArrayData1D.find(baseName);
+    if(it == fArrayData1D.end()) {
+        std::cerr << "ERROR: Array data histogram set '" << baseName << "' not found!" << std::endl;
+        return false;
+    }
+    
+    if(static_cast<Int_t>(values.size()) != static_cast<Int_t>(it->second.size())) {
+        std::cerr << "ERROR: Values vector size (" << values.size() << ") doesn't match array size (" << it->second.size() << ")!" << std::endl;
+        return false;
+    }
+    
+    for(Int_t index = 0; index < static_cast<Int_t>(values.size()); ++index) {
+        FillArrayData1D(baseName, index, values[index], weight);
+    }
+    
+    return true;
+}
+
+TCanvas* HistManager::DrawArray1D(const TString& baseName, Bool_t drawData, const TString& canvasName, 
+                                  Int_t nCols, Int_t nRows) {
+    auto it = fArrayHists1D.find(baseName);
+    if(it == fArrayHists1D.end()) {
+        std::cerr << "ERROR: Array histogram set '" << baseName << "' not found!" << std::endl;
+        return nullptr;
+    }
+    
+    Int_t nPanels = it->second.size();
+    if(nPanels == 0) {
+        std::cerr << "ERROR: Empty array histogram set!" << std::endl;
+        return nullptr;
+    }
+    
+    // Oblicz layout kanwy
+    CalculateCanvasLayout(nPanels, nCols, nRows);
+    
+    // Stwórz kanwę
+    TString finalCanvasName = canvasName.IsNull() ? Form("c_%s_array", baseName.Data()) : canvasName;
+    TCanvas* canvas = new TCanvas(finalCanvasName, baseName + " Array", 
+                                 200 * nCols, 150 * nRows);
+    canvas->Divide(nCols, nRows);
+    
+    // Pobierz konfigurację dla log scale
+    auto configIt = fArrayConfigs.find(baseName);
+    Bool_t logY = (configIt != fArrayConfigs.end()) ? configIt->second.commonConfig.logy : false;
+    
+    // Rysuj każdy panel
+    for(Int_t index = 0; index < nPanels; ++index) {
+        canvas->cd(index + 1);
+        
+        if(logY) {
+            gPad->SetLogy();
+        }
+        
+        // Znajdź maksimum dla skalowania Y
+        Double_t maxY = 0;
+        for(auto* hist : it->second[index]) {
+            if(hist && hist->GetEntries() > 0) {
+                maxY = TMath::Max(maxY, hist->GetMaximum());
+            }
+        }
+        
+        // Sprawdź maksimum danych jeśli rysujemy
+        if(drawData) {
+            auto dataIt = fArrayData1D.find(baseName);
+            if(dataIt != fArrayData1D.end() && dataIt->second[index] && dataIt->second[index]->GetEntries() > 0) {
+                maxY = TMath::Max(maxY, dataIt->second[index]->GetMaximum());
+            }
+        }
+        
+        maxY = logY ? maxY * 5 : maxY * 1.1;
+        
+        bool first = true;
+        
+        // Rysuj histogramy MC (indeksy 1 do fChannNum)
+        for(Int_t ch = 1; ch <= fChannNum; ++ch) {
+            TH1D* mcHist = it->second[index][ch];
+            if(mcHist && mcHist->GetEntries() > 0) {
+                mcHist->GetYaxis()->SetRangeUser(logY ? 0.1 : 0, maxY);
+                mcHist->Draw(first ? "HIST" : "HIST SAME");
+                first = false;
+            }
+        }
+        
+        // Rysuj sumę MC (index 0)
+        TH1D* sumHist = it->second[index][0];
+        if(sumHist && sumHist->GetEntries() > 0) {
+            sumHist->GetYaxis()->SetRangeUser(logY ? 0.1 : 0, maxY);
+            sumHist->Draw(first ? "HIST" : "HIST SAME");
+            first = false;
+        }
+        
+        // Rysuj dane na końcu
+        if(drawData) {
+            auto dataIt = fArrayData1D.find(baseName);
+            if(dataIt != fArrayData1D.end()) {
+                TH1D* dataHist = dataIt->second[index];
+                if(dataHist && dataHist->GetEntries() > 0) {
+                    if(first) {
+                        dataHist->GetYaxis()->SetRangeUser(logY ? 0.1 : 0, maxY);
+                        dataHist->Draw("PE1");
+                    } else {
+                        dataHist->Draw("PE1 SAME");
+                    }
+                }
+            }
+        }
+        
+        // Dodaj tytuł panelu
+        if(configIt != fArrayConfigs.end() && 
+           index < static_cast<Int_t>(configIt->second.varTitles.size())) {
+            gPad->SetTitle(configIt->second.varTitles[index]);
+        } else {
+            gPad->SetTitle(Form("%s[%d]", baseName.Data(), index));
+        }
+    }
+    
+    // Zapisz kanwę
+    if(fCanvases.find(baseName) == fCanvases.end()) {
+        fCanvases[baseName] = std::vector<TCanvas*>();
+    }
+    fCanvases[baseName].push_back(canvas);
+    
+    return canvas;
+}
+
+TH1D* HistManager::GetArrayHist1D(const TString& baseName, Int_t index, Int_t mctruth) {
+    if(mctruth == -1) {
+        // Dane
+        auto dataIt = fArrayData1D.find(baseName);
+        if(dataIt == fArrayData1D.end() || index < 0 || index >= static_cast<Int_t>(dataIt->second.size())) {
+            return nullptr;
+        }
+        return dataIt->second[index];
+    } else {
+        // MC
+        auto it = fArrayHists1D.find(baseName);
+        if(it == fArrayHists1D.end() || index < 0 || index >= static_cast<Int_t>(it->second.size())) {
+            return nullptr;
+        }
+        
+        // mctruth: 0=suma MC, 1-N=kanały MC
+        if(mctruth < 0 || mctruth > fChannNum) {
+            return nullptr;
+        }
+        
+        return it->second[index][mctruth];
+    }
+}
+
+void HistManager::CalculateCanvasLayout(Int_t nPanels, Int_t& nCols, Int_t& nRows) {
+    if(nCols > 0 && nRows > 0) {
+        return; // Użytkownik podał wymiary
+    }
+    
+    if(nPanels <= 1) {
+        nCols = nRows = 1;
+    } else if(nPanels <= 2) {
+        nCols = 2; nRows = 1;
+    } else if(nPanels <= 4) {
+        nCols = nRows = 2;
+    } else if(nPanels <= 6) {
+        nCols = 3; nRows = 2;
+    } else if(nPanels <= 9) {
+        nCols = nRows = 3;
+    } else if(nPanels <= 12) {
+        nCols = 4; nRows = 3;
+    } else if(nPanels <= 16) {
+        nCols = nRows = 4;
+    } else {
+        // Dla większej liczby paneli, oblicz optymalny rozkład
+        nCols = static_cast<Int_t>(TMath::Ceil(TMath::Sqrt(nPanels)));
+        nRows = static_cast<Int_t>(TMath::Ceil(static_cast<Double_t>(nPanels) / nCols));
+    }
+}
+
+void HistManager::CleanupArraySet(const TString& baseName) {
+    // Cleanup MC histograms
+    auto itMC = fArrayHists1D.find(baseName);
+    if(itMC != fArrayHists1D.end()) {
+        for(auto& indexVec : itMC->second) {
+            for(auto* hist : indexVec) {
+                delete hist;
+            }
+        }
+        fArrayHists1D.erase(itMC);
+    }
+    
+    // Cleanup data histograms  
+    auto itData = fArrayData1D.find(baseName);
+    if(itData != fArrayData1D.end()) {
+        for(auto* hist : itData->second) {
+            delete hist;
+        }
+        fArrayData1D.erase(itData);
+    }
+    
+    // Remove config
+    fArrayConfigs.erase(baseName);
 }
