@@ -2,6 +2,7 @@
 #include <TMath.h>
 #include <TStyle.h>
 #include <Math/MinimizerOptions.h>
+#include <TPaletteAxis.h>
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>
@@ -368,37 +369,161 @@ void HistManager::DrawSet2D(const TString& setName, const TString& drawOpt, Bool
 
     std::vector<TCanvas*> canvases;
     
-    // Najpierw rysuj histogram sumy MC (indeks 0)
-    TString sumCanvasName = Form("c_%s_sum", setName.Data());
-    TString sumCanvasTitle = Form("%s - MC Sum", configIt->second.title.Data());
-    
-    TCanvas* sumCanvas = new TCanvas(sumCanvasName, sumCanvasTitle, 800, 600);
-    sumCanvas->SetLeftMargin(0.12);
-    sumCanvas->SetBottomMargin(0.12);
-    sumCanvas->SetRightMargin(0.15); // Miejsce dla palety kolorów
-    sumCanvas->SetTopMargin(0.1);
-
-    if(histIt->second[0] && histIt->second[0]->GetEntries() > 0) {
-        histIt->second[0]->Draw(drawOpt);
-        
-        TPaveText* sumInfo = new TPaveText(0.15, 0.85, 0.45, 0.95, "NDC");
-        sumInfo->SetFillColor(kOrange-10);
-        sumInfo->SetBorderSize(1);
-        sumInfo->AddText("MC Sum");
-        sumInfo->AddText(Form("Entries: %.0f", histIt->second[0]->GetEntries()));
-        sumInfo->Draw();
-    } else {
-        histIt->second[0]->Draw(drawOpt);
-        
-        TPaveText* emptyInfo = new TPaveText(0.3, 0.4, 0.7, 0.6, "NDC");
-        emptyInfo->SetFillColor(kYellow-10);
-        emptyInfo->SetBorderSize(1);
-        emptyInfo->AddText("Empty MC Sum");
-        emptyInfo->Draw();
+    // Stwórz canvas z MC Sum i danymi obok siebie (jeśli dane są dostępne)
+    Bool_t hasData = false;
+    auto dataIt = fData2D.find(setName);
+    if(drawData && dataIt != fData2D.end() && dataIt->second) {
+        hasData = true;
     }
     
-    sumCanvas->Update();
-    canvases.push_back(sumCanvas);
+    if(hasData) {
+        // Canvas z MC Sum i danymi obok siebie
+        TString summaryCanvasName = Form("c_%s_summary", setName.Data());
+        TString summaryCanvasTitle = Form("%s - MC Sum & Data", configIt->second.title.Data());
+        
+        TCanvas* summaryCanvas = new TCanvas(summaryCanvasName, summaryCanvasTitle, 1600, 600);
+        summaryCanvas->Divide(2, 1);
+        
+        // Panel 1: MC Sum
+        summaryCanvas->cd(1);
+        gPad->SetLeftMargin(0.15);
+        gPad->SetBottomMargin(0.15);
+        gPad->SetRightMargin(0.18);
+        gPad->SetTopMargin(0.12);
+        
+        if(histIt->second[0] && histIt->second[0]->GetEntries() > 0) {
+            histIt->second[0]->Draw(drawOpt);
+            
+            // Aktualizuj pad aby uzyskać dostęp do primitives
+            gPad->Update();
+            
+            // Znajdź i dostosuj pozycję color bar (palette)
+            TPaletteAxis* palette = (TPaletteAxis*)histIt->second[0]->GetListOfFunctions()->FindObject("palette");
+            if(palette) {
+                palette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+                palette->SetX2NDC(0.88);  // Prawa krawędź color bar
+                palette->SetY1NDC(0.15);  // Dolna krawędź = dolna oś X
+                palette->SetY2NDC(0.88);  // Górna krawędź = górna oś X
+            }
+            
+            TPaveText* sumInfo = new TPaveText(0.02, 0.85, 0.35, 0.98, "NDC");
+            sumInfo->SetFillColor(kOrange-10);
+            sumInfo->SetBorderSize(1);
+            sumInfo->AddText("MC Sum (All Channels)");
+            sumInfo->AddText(Form("mctruth: All (1-%d)", fChannNum));
+            sumInfo->AddText(Form("Entries: %.0f", histIt->second[0]->GetEntries()));
+            sumInfo->Draw();
+        } else {
+            histIt->second[0]->Draw(drawOpt);
+            
+            // Aktualizuj pad aby uzyskać dostęp do primitives
+            gPad->Update();
+            
+            // Znajdź i dostosuj pozycję color bar (palette) nawet dla pustego histogramu
+            TPaletteAxis* palette = (TPaletteAxis*)histIt->second[0]->GetListOfFunctions()->FindObject("palette");
+            if(palette) {
+                palette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+                palette->SetX2NDC(0.88);  // Prawa krawędź color bar
+                palette->SetY1NDC(0.15);  // Dolna krawędź = dolna oś X
+                palette->SetY2NDC(0.88);  // Górna krawędź = górna oś X
+            }
+            
+            TPaveText* emptyInfo = new TPaveText(0.3, 0.4, 0.7, 0.6, "NDC");
+            emptyInfo->SetFillColor(kYellow-10);
+            emptyInfo->SetBorderSize(1);
+            emptyInfo->AddText("Empty MC Sum");
+            emptyInfo->Draw();
+        }
+        
+        // Panel 2: Data
+        summaryCanvas->cd(2);
+        gPad->SetLeftMargin(0.15);
+        gPad->SetBottomMargin(0.15);
+        gPad->SetRightMargin(0.18);
+        gPad->SetTopMargin(0.12);
+        
+        dataIt->second->Draw(drawOpt);
+        
+        // Aktualizuj pad aby uzyskać dostęp do primitives
+        gPad->Update();
+        
+        // Znajdź i dostosuj pozycję color bar (palette) dla danych
+        TPaletteAxis* dataPalette = (TPaletteAxis*)dataIt->second->GetListOfFunctions()->FindObject("palette");
+        if(dataPalette) {
+            dataPalette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+            dataPalette->SetX2NDC(0.88);  // Prawa krawędź color bar
+            dataPalette->SetY1NDC(0.15);  // Dolna krawędź = dolna oś X
+            dataPalette->SetY2NDC(0.88);  // Górna krawędź = górna oś X
+        }
+        
+        TPaveText* dataInfo = new TPaveText(0.02, 0.85, 0.35, 0.98, "NDC");
+        dataInfo->SetFillColor(kCyan-10);
+        dataInfo->SetBorderSize(1);
+        dataInfo->AddText("Experimental Data");
+        dataInfo->AddText("mctruth: Real Data");
+        dataInfo->AddText(Form("Entries: %.0f", dataIt->second->GetEntries()));
+        dataInfo->Draw();
+        
+        summaryCanvas->Update();
+        canvases.push_back(summaryCanvas);
+    } else {
+        // Tylko MC Sum jeśli brak danych
+        TString sumCanvasName = Form("c_%s_sum", setName.Data());
+        TString sumCanvasTitle = Form("%s - MC Sum", configIt->second.title.Data());
+        
+        TCanvas* sumCanvas = new TCanvas(sumCanvasName, sumCanvasTitle, 800, 600);
+        sumCanvas->SetLeftMargin(0.12);
+        sumCanvas->SetBottomMargin(0.12);
+        sumCanvas->SetRightMargin(0.15);
+        sumCanvas->SetTopMargin(0.1);
+
+        if(histIt->second[0] && histIt->second[0]->GetEntries() > 0) {
+            histIt->second[0]->Draw(drawOpt);
+            
+            // Aktualizuj pad aby uzyskać dostęp do primitives
+            gPad->Update();
+            
+            // Znajdź i dostosuj pozycję color bar (palette)
+            TPaletteAxis* palette = (TPaletteAxis*)histIt->second[0]->GetListOfFunctions()->FindObject("palette");
+            if(palette) {
+                palette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+                palette->SetX2NDC(0.88);  // Prawa krawędź color bar
+                palette->SetY1NDC(0.12);  // Dolna krawędź = dolna oś X
+                palette->SetY2NDC(0.90);  // Górna krawędź = górna oś X
+            }
+            
+            TPaveText* sumInfo = new TPaveText(0.02, 0.85, 0.35, 0.98, "NDC");
+            sumInfo->SetFillColor(kOrange-10);
+            sumInfo->SetBorderSize(1);
+            sumInfo->AddText("MC Sum (All Channels)");
+            sumInfo->AddText(Form("mctruth: All (1-%d)", fChannNum));
+            sumInfo->AddText(Form("Entries: %.0f", histIt->second[0]->GetEntries()));
+            sumInfo->Draw();
+        } else {
+            histIt->second[0]->Draw(drawOpt);
+            
+            // Aktualizuj pad aby uzyskać dostęp do primitives
+            gPad->Update();
+            
+            // Znajdź i dostosuj pozycję color bar (palette) nawet dla pustego histogramu
+            TPaletteAxis* palette = (TPaletteAxis*)histIt->second[0]->GetListOfFunctions()->FindObject("palette");
+            if(palette) {
+                palette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+                palette->SetX2NDC(0.88);  // Prawa krawędź color bar
+                palette->SetY1NDC(0.12);  // Dolna krawędź = dolna oś X
+                palette->SetY2NDC(0.90);  // Górna krawędź = górna oś X
+            }
+            
+            TPaveText* emptyInfo = new TPaveText(0.3, 0.4, 0.7, 0.6, "NDC");
+            emptyInfo->SetFillColor(kYellow-10);
+            emptyInfo->SetBorderSize(1);
+            emptyInfo->AddText("Empty MC Sum");
+            emptyInfo->Draw();
+        }
+        
+        sumCanvas->Update();
+        canvases.push_back(sumCanvas);
+    }
     
     // Rysuj histogramy dla każdego kanału MC (indeksy 1 do fChannNum)
     for(Int_t i = 0; i < fChannNum; ++i) {
@@ -406,29 +531,55 @@ void HistManager::DrawSet2D(const TString& setName, const TString& drawOpt, Bool
         TString canvasTitle = Form("%s - %s", configIt->second.title.Data(), fChannelNames[i].Data());
         
         TCanvas* canvas = new TCanvas(canvasName, canvasTitle, 800, 600);
-        canvas->SetLeftMargin(0.12);
-        canvas->SetBottomMargin(0.12);
-        canvas->SetRightMargin(0.15); // Miejsce dla palety kolorów
-        canvas->SetTopMargin(0.1);
+        canvas->SetLeftMargin(0.15);
+        canvas->SetBottomMargin(0.15);
+        canvas->SetRightMargin(0.18);
+        canvas->SetTopMargin(0.12);
 
         // Rysuj histogram MC (indeks i+1 przez histogram sumy na indeksie 0)
         if(histIt->second[i+1] && histIt->second[i+1]->GetEntries() > 0) {
             histIt->second[i+1]->Draw(drawOpt);
             
-            TPaveText* channelInfo = new TPaveText(0.15, 0.85, 0.45, 0.95, "NDC");
+            // Aktualizuj pad aby uzyskać dostęp do primitives
+            gPad->Update();
+            
+            // Znajdź i dostosuj pozycję color bar (palette)
+            TPaletteAxis* palette = (TPaletteAxis*)histIt->second[i+1]->GetListOfFunctions()->FindObject("palette");
+            if(palette) {
+                palette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+                palette->SetX2NDC(0.88);  // Prawa krawędź color bar
+                palette->SetY1NDC(0.15);  // Dolna krawędź = dolna oś X
+                palette->SetY2NDC(0.88);  // Górna krawędź = górna oś X
+            }
+            
+            TPaveText* channelInfo = new TPaveText(0.02, 0.85, 0.35, 0.98, "NDC");
             channelInfo->SetFillColor(kWhite);
             channelInfo->SetBorderSize(1);
             channelInfo->AddText(Form("Channel: %s", fChannelNames[i].Data()));
+            channelInfo->AddText(Form("mctruth: %d", i+1));
             channelInfo->AddText(Form("Entries: %.0f", histIt->second[i+1]->GetEntries()));
             channelInfo->Draw();
         } else {
             histIt->second[i+1]->Draw(drawOpt);
+            
+            // Aktualizuj pad aby uzyskać dostęp do primitives
+            gPad->Update();
+            
+            // Znajdź i dostosuj pozycję color bar (palette) nawet dla pustego histogramu
+            TPaletteAxis* palette = (TPaletteAxis*)histIt->second[i+1]->GetListOfFunctions()->FindObject("palette");
+            if(palette) {
+                palette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+                palette->SetX2NDC(0.88);  // Prawa krawędź color bar
+                palette->SetY1NDC(0.15);  // Dolna krawędź = dolna oś X
+                palette->SetY2NDC(0.88);  // Górna krawędź = górna oś X
+            }
             
             TPaveText* emptyInfo = new TPaveText(0.3, 0.4, 0.7, 0.6, "NDC");
             emptyInfo->SetFillColor(kYellow-10);
             emptyInfo->SetBorderSize(1);
             emptyInfo->AddText("Empty Histogram");
             emptyInfo->AddText(Form("Channel: %s", fChannelNames[i].Data()));
+            emptyInfo->AddText(Form("mctruth: %d", i+1));
             emptyInfo->Draw();
         }
         
@@ -436,35 +587,10 @@ void HistManager::DrawSet2D(const TString& setName, const TString& drawOpt, Bool
         canvases.push_back(canvas);
     }
     
-    // Rysuj histogram danych jeśli dostępny i wymagany
-    if(drawData) {
-        auto dataIt = fData2D.find(setName);
-        if(dataIt != fData2D.end() && dataIt->second) {
-            TString canvasName = Form("c_%s_data", setName.Data());
-            TString canvasTitle = Form("%s - Data", configIt->second.title.Data());
-            
-            TCanvas* dataCanvas = new TCanvas(canvasName, canvasTitle, 800, 600);
-            dataCanvas->SetLeftMargin(0.12);
-            dataCanvas->SetBottomMargin(0.12);
-            dataCanvas->SetRightMargin(0.15); // Miejsce dla palety kolorów
-            dataCanvas->SetTopMargin(0.1);
-            
-            dataIt->second->Draw(drawOpt);
-            
-            TPaveText* dataInfo = new TPaveText(0.15, 0.85, 0.45, 0.95, "NDC");
-            dataInfo->SetFillColor(kCyan-10);
-            dataInfo->SetBorderSize(1);
-            dataInfo->AddText("Experimental Data");
-            dataInfo->AddText(Form("Entries: %.0f", dataIt->second->GetEntries()));
-            dataInfo->Draw();
-            
-            dataCanvas->Update();
-            canvases.push_back(dataCanvas);
-        }
-    }
-    
-    // Stwórz canvas porównawczy ze wszystkimi kanałami (włącznie z sumą MC)
+    // Stwórz canvas porównawczy ze wszystkimi kanałami (włącznie z sumą MC i danymi)
     Int_t totalHists = fChannNum + 1; // +1 dla sumy MC
+    if(hasData) totalHists += 1; // +1 dla danych
+    
     Int_t nCols, nRows;
     
     if(totalHists <= 4) {
@@ -481,38 +607,154 @@ void HistManager::DrawSet2D(const TString& setName, const TString& drawOpt, Bool
     TString compareCanvasTitle = Form("%s - All Histograms", configIt->second.title.Data());
     
     TCanvas* compareCanvas = new TCanvas(compareCanvasName, compareCanvasTitle, 
-                                       250 * nCols, 200 * nRows);
+                                       200 * nCols, 160 * nRows);
     compareCanvas->Divide(nCols, nRows);
     
+    Int_t padIndex = 1;
+    
     // Panel 1: Suma MC
-    compareCanvas->cd(1);
-    gPad->SetLeftMargin(0.1);
-    gPad->SetBottomMargin(0.1);
-    gPad->SetRightMargin(0.12);
-    gPad->SetTopMargin(0.1);
+    compareCanvas->cd(padIndex++);
+    gPad->SetLeftMargin(0.15);
+    gPad->SetBottomMargin(0.15);
+    gPad->SetRightMargin(0.18);
+    gPad->SetTopMargin(0.15);
     
     if(histIt->second[0] && histIt->second[0]->GetEntries() > 0) {
         histIt->second[0]->Draw("COLZ");
-        gPad->SetTitle("MC Sum");
+        
+        // Aktualizuj pad aby uzyskać dostęp do primitives
+        gPad->Update();
+        
+        // Znajdź i dostosuj pozycję color bar (palette)
+        TPaletteAxis* palette = (TPaletteAxis*)histIt->second[0]->GetListOfFunctions()->FindObject("palette");
+        if(palette) {
+            palette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+            palette->SetX2NDC(0.88);  // Prawa krawędź color bar
+            palette->SetY1NDC(0.15);  // Dolna krawędź = dolna oś X
+            palette->SetY2NDC(0.85);  // Górna krawędź = górna oś X
+        }
+        
+        // Dodaj tekst z informacją o MC Sum - wycentrowany względem górnej osi X
+        TPaveText* sumLabel = new TPaveText(0.3, 0.88, 0.7, 0.96, "NDC");
+        sumLabel->SetFillColor(kOrange-10);
+        sumLabel->SetBorderSize(1);
+        sumLabel->SetTextSize(0.06);
+        sumLabel->AddText("MC Sum");
+        sumLabel->Draw();
     } else {
         histIt->second[0]->Draw("COLZ");
-        gPad->SetTitle("MC Sum (empty)");
+        
+        // Aktualizuj pad aby uzyskać dostęp do primitives
+        gPad->Update();
+        
+        // Znajdź i dostosuj pozycję color bar (palette) nawet dla pustego histogramu
+        TPaletteAxis* palette = (TPaletteAxis*)histIt->second[0]->GetListOfFunctions()->FindObject("palette");
+        if(palette) {
+            palette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+            palette->SetX2NDC(0.88);  // Prawa krawędź color bar
+            palette->SetY1NDC(0.15);  // Dolna krawędź = dolna oś X
+            palette->SetY2NDC(0.85);  // Górna krawędź = górna oś X
+        }
+        
+        // Dodaj tekst z informacją o MC Sum nawet gdy pusty - wycentrowany względem górnej osi X
+        TPaveText* sumLabel = new TPaveText(0.3, 0.88, 0.7, 0.96, "NDC");
+        sumLabel->SetFillColor(kOrange-10);
+        sumLabel->SetBorderSize(1);
+        sumLabel->SetTextSize(0.06);
+        sumLabel->AddText("MC Sum");
+        sumLabel->Draw();
     }
     
-    // Panele 2 do N+1: Kanały MC
+    // Panel dla danych (jeśli dostępne)
+    if(hasData) {
+        compareCanvas->cd(padIndex++);
+        gPad->SetLeftMargin(0.15);
+        gPad->SetBottomMargin(0.15);
+        gPad->SetRightMargin(0.18);
+        gPad->SetTopMargin(0.15);
+        
+        dataIt->second->Draw("COLZ");
+        
+        // Aktualizuj pad aby uzyskać dostęp do primitives
+        gPad->Update();
+        
+        // Znajdź i dostosuj pozycję color bar (palette) dla danych
+        TPaletteAxis* dataPalette = (TPaletteAxis*)dataIt->second->GetListOfFunctions()->FindObject("palette");
+        if(dataPalette) {
+            dataPalette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+            dataPalette->SetX2NDC(0.88);  // Prawa krawędź color bar
+            dataPalette->SetY1NDC(0.15);  // Dolna krawędź = dolna oś X
+            dataPalette->SetY2NDC(0.85);  // Górna krawędź = górna oś X
+        }
+        
+        TPaveText* dataLabel = new TPaveText(0.3, 0.88, 0.7, 0.96, "NDC");
+        dataLabel->SetFillColor(kCyan-10);
+        dataLabel->SetBorderSize(1);
+        dataLabel->SetTextSize(0.06);
+        dataLabel->AddText("Data");
+        dataLabel->Draw();
+    }
+    
+    // Panele dla kanałów MC
     for(Int_t i = 0; i < fChannNum; ++i) {
-        compareCanvas->cd(i + 2); // +2 bo panel 1 to suma MC
-        gPad->SetLeftMargin(0.1);
-        gPad->SetBottomMargin(0.1);
-        gPad->SetRightMargin(0.12);
-        gPad->SetTopMargin(0.1);
+        compareCanvas->cd(padIndex++);
+        gPad->SetLeftMargin(0.15);
+        gPad->SetBottomMargin(0.15);
+        gPad->SetRightMargin(0.18);
+        gPad->SetTopMargin(0.15);
         
         if(histIt->second[i+1] && histIt->second[i+1]->GetEntries() > 0) {
             histIt->second[i+1]->Draw("COLZ");
-            gPad->SetTitle(fChannelNames[i]);
+            
+            // Aktualizuj pad aby uzyskać dostęp do primitives
+            gPad->Update();
+            
+            // Znajdź i dostosuj pozycję color bar (palette)
+            TPaletteAxis* palette = (TPaletteAxis*)histIt->second[i+1]->GetListOfFunctions()->FindObject("palette");
+            if(palette) {
+                palette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+                palette->SetX2NDC(0.88);  // Prawa krawędź color bar
+                palette->SetY1NDC(0.15);  // Dolna krawędź = dolna oś X
+                palette->SetY2NDC(0.85);  // Górna krawędź = górna oś X
+            }
+            
+            // Dodaj tekst z informacją o kanale MC - wycentrowany względem górnej osi X
+            TPaveText* channelLabel = new TPaveText(0.3, 0.88, 0.7, 0.96, "NDC");
+            channelLabel->SetFillColor(kWhite);
+            channelLabel->SetBorderSize(1);
+            channelLabel->SetTextSize(0.06);
+            if(i < static_cast<Int_t>(fChannelNames.size()) && !fChannelNames[i].IsNull()) {
+                channelLabel->AddText(fChannelNames[i]);
+            } else {
+                channelLabel->AddText(Form("Channel %d", i+1));
+            }
+            channelLabel->Draw();
         } else {
             histIt->second[i+1]->Draw("COLZ");
-            gPad->SetTitle(Form("%s (empty)", fChannelNames[i].Data()));
+            
+            // Aktualizuj pad aby uzyskać dostęp do primitives
+            gPad->Update();
+            
+            // Znajdź i dostosuj pozycję color bar (palette) nawet dla pustego histogramu
+            TPaletteAxis* palette = (TPaletteAxis*)histIt->second[i+1]->GetListOfFunctions()->FindObject("palette");
+            if(palette) {
+                palette->SetX1NDC(0.83);  // Lewa krawędź color bar - obok prawej osi Y
+                palette->SetX2NDC(0.88);  // Prawa krawędź color bar
+                palette->SetY1NDC(0.15);  // Dolna krawędź = dolna oś X
+                palette->SetY2NDC(0.85);  // Górna krawędź = górna oś X
+            }
+            
+            // Dodaj tekst z informacją o kanale MC nawet dla pustego histogramu - wycentrowany względem górnej osi X
+            TPaveText* channelLabel = new TPaveText(0.3, 0.88, 0.7, 0.96, "NDC");
+            channelLabel->SetFillColor(kWhite);
+            channelLabel->SetBorderSize(1);
+            channelLabel->SetTextSize(0.06);
+            if(i < static_cast<Int_t>(fChannelNames.size()) && !fChannelNames[i].IsNull()) {
+                channelLabel->AddText(fChannelNames[i]);
+            } else {
+                channelLabel->AddText(Form("Channel %d", i+1));
+            }
+            channelLabel->Draw();
         }
     }
     
