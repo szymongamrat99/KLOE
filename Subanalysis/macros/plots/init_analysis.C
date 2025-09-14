@@ -120,9 +120,9 @@ void init_analysis::Begin(TTree * /*tree*/)
    timeDiffConfig.name = "timeDiff";
    timeDiffConfig.xtitle = "#DeltaT [#tau_{S}]";
    timeDiffConfig.ytitle = "Counts/2";
-   timeDiffConfig.bins = 25;
-   timeDiffConfig.xmin = -100;
-   timeDiffConfig.xmax = 100;
+   timeDiffConfig.bins = 11;
+   timeDiffConfig.xmin = -50;
+   timeDiffConfig.xmax = 50;
    timeDiffConfig.logy = true;
    timeDiffConfig.showStats = false;
 
@@ -370,12 +370,12 @@ Bool_t init_analysis::Process(Long64_t entry)
 
    Bool_t photonEneLimit = gammaMomTriKinFit1[3] > 20. && gammaMomTriKinFit2[3] > 20. && gammaMomTriKinFit3[3] > 20. && gammaMomTriKinFit4[3] > 20.;
 
-   if (cutter->PassAllCuts())
+   if (1)
    {
       if (*mcflag == 1)
       {
-         // if (*mctruth == 1)
-         //    weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
+         if (*mctruth == 1)
+            weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
          Float_t minv4gam_tri = sqrt(pow(KnetriKinFit[3], 2) - pow(KnetriKinFit[0], 2) - pow(KnetriKinFit[1], 2) - pow(KnetriKinFit[2], 2));
 
@@ -385,8 +385,8 @@ Bool_t init_analysis::Process(Long64_t entry)
 
 
          histMgr->Fill1D("invMassKch", *mctruth, Kchrec[5], weight);
-         histMgr->Fill1D("invMassKne", *mctruth, minv4gam_tri, weight);
-         histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeCM - *KaonNeTimeCM, weight);
+         histMgr->Fill1D("invMassKne", *mctruth, *minv4gam, weight);
+         histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeLAB - *KaonNeTimeLAB, weight);
          histMgr->Fill1D("chi2TriKinFit", *mctruth, *Chi2TriKinFit, weight);
          histMgr->Fill1D("trcFinal", *mctruth, trcSum, weight);
 
@@ -420,7 +420,7 @@ Bool_t init_analysis::Process(Long64_t entry)
          histMgr->Fill2D("TimeNeutral2d", *mctruth, *KaonNeTimeCMMC, *KaonNeTimeCM, weight);
       }
 
-      if (*mcflag == 0 || *mctruth == 0)
+      if (*mcflag == 0)
       {
          histMgr->FillData1D("invMassKch", Kchrec[5], weight);
          histMgr->FillData1D("invMassKne", *minv4gam, weight);
@@ -438,7 +438,7 @@ Bool_t init_analysis::Process(Long64_t entry)
       }
    }
 
-   if (*mcflag == 1)
+   if (*mcflag == 1 && *mctruth != -1)
       cutter->UpdateStats(*mctruth);
 
    return kTRUE;
@@ -456,6 +456,25 @@ void init_analysis::Terminate()
    // The Terminate() function is the last function to be called during
    // a query. It always runs on the client, it can be used to present
    // the results graphically or save the results to file.
+
+   // 1D histogramy z danymi
+   histMgr->ScaleChannelByEntries("invMassKch", 1);
+   histMgr->ScaleChannelByEntries("invMassKne", 1);
+   histMgr->ScaleChannelByEntries("timeDiff", 1);
+   histMgr->ScaleChannelByEntries("chi2TriKinFit", 1);
+   histMgr->ScaleChannelByEntries("trcFinal", 1);
+
+   histMgr->ScaleChannel2DByEntries("TimeNeutral2d", 1);
+
+   histMgr->ScaleChannelByEntries("invMassKchMC", 1);
+   histMgr->ScaleChannelByEntries("invMassKneMC", 1);
+   histMgr->ScaleChannelByEntries("timeDiffMC", 1);
+
+   // // Rysuj array histogramy
+   // histMgr->ScaleArrayChannelByEntries("KchrecMomentum", 1); // z danymi
+   // histMgr->ScaleArrayChannelByEntries("KnerecMomentum", 1); // z danymi
+   // histMgr->ScaleArrayChannelByEntries("NeuVtx", 1);         // z danymi
+   // histMgr->ScaleArrayChannelByEntries("PullsTriKinFit", 1); // z danymi
 
    histMgr->SetNormalizationType(HistManager::NormalizationType::SIMPLE_SCALE); // Ustaw proste skalowanie --- IGNORE ---
 

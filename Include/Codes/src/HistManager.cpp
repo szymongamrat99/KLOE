@@ -646,6 +646,150 @@ void HistManager::ConfigureHistogram(TH1* hist, Int_t color, Bool_t showStats) {
     gStyle->SetLabelFont(62, "XYZ");       // Use Times New Roman for axis labels
 }
 
+Double_t HistManager::ScaleChannelByEntries(const TString& setName, Int_t mctruth) {
+    // Sprawdź poprawność parametrów
+    if(mctruth < 1 || mctruth > fChannNum) {
+        std::cerr << "ERROR in ScaleChannelByEntries: Invalid mctruth " << mctruth 
+                  << " (valid range: 1-" << fChannNum << ")" << std::endl;
+        return -1.0;
+    }
+    
+    // Znajdź zestaw histogramów 1D
+    auto histIt = fHists1D.find(setName);
+    if(histIt == fHists1D.end()) {
+        std::cerr << "ERROR in ScaleChannelByEntries: Histogram set not found: " 
+                  << setName.Data() << std::endl;
+        return -1.0;
+    }
+    
+    // Sprawdź czy histogram kanału istnieje (indeks mctruth, bo indeks 0 to suma MC)
+    if(mctruth >= static_cast<Int_t>(histIt->second.size())) {
+        std::cerr << "ERROR in ScaleChannelByEntries: Channel histogram index out of range" << std::endl;
+        return -1.0;
+    }
+    
+    TH1* channelHist = histIt->second[mctruth];
+    if(!channelHist) {
+        std::cerr << "ERROR in ScaleChannelByEntries: Channel histogram is null" << std::endl;
+        return -1.0;
+    }
+    
+    // Pobierz liczbę zliczeń i obecną całkę
+    Double_t entries = channelHist->GetEntries();
+    Double_t integral = channelHist->Integral();
+    
+    if(entries <= 0) {
+        std::cout << "WARNING in ScaleChannelByEntries: Channel " << mctruth 
+                  << " in set " << setName.Data() << " has no entries. No scaling applied." << std::endl;
+        return 0.0;
+    }
+    
+    if(integral <= 0) {
+        std::cout << "WARNING in ScaleChannelByEntries: Channel " << mctruth 
+                  << " in set " << setName.Data() << " has zero integral. No scaling applied." << std::endl;
+        return 0.0;
+    }
+    
+    // Oblicz czynnik skalujący aby całka = entries
+    Double_t scaleFactor = entries / integral;
+    
+    // Stwórz kopię histogramu przed skalowaniem do aktualizacji sumy
+    TH1* oldChannelHist = (TH1*)channelHist->Clone("temp_for_sum_update");
+    
+    // Przeskaluj histogram kanału
+    channelHist->Scale(scaleFactor);
+    
+    // Zaktualizuj histogram sumy MC (indeks 0)
+    TH1* sumHist = histIt->second[0];
+    if(sumHist) {
+        // Odejmij stary wkład ze sumy
+        sumHist->Add(oldChannelHist, -1.0);
+        
+        // Dodaj nowy przeskalowany wkład do sumy
+        sumHist->Add(channelHist, 1.0);
+    }
+    
+    delete oldChannelHist;
+    
+    std::cout << "INFO: Channel " << mctruth << " in set " << setName.Data() 
+              << " normalized: integral " << integral << " -> " << entries 
+              << " (scale factor = " << scaleFactor << ")" << std::endl;
+    
+    return scaleFactor;
+}
+
+Double_t HistManager::ScaleChannel2DByEntries(const TString& setName, Int_t mctruth) {
+    // Sprawdź poprawność parametrów
+    if(mctruth < 1 || mctruth > fChannNum) {
+        std::cerr << "ERROR in ScaleChannel2DByEntries: Invalid mctruth " << mctruth 
+                  << " (valid range: 1-" << fChannNum << ")" << std::endl;
+        return -1.0;
+    }
+    
+    // Znajdź zestaw histogramów 2D
+    auto histIt = fHists2D.find(setName);
+    if(histIt == fHists2D.end()) {
+        std::cerr << "ERROR in ScaleChannel2DByEntries: Histogram set not found: " 
+                  << setName.Data() << std::endl;
+        return -1.0;
+    }
+    
+    // Sprawdź czy histogram kanału istnieje (indeks mctruth, bo indeks 0 to suma MC)
+    if(mctruth >= static_cast<Int_t>(histIt->second.size())) {
+        std::cerr << "ERROR in ScaleChannel2DByEntries: Channel histogram index out of range" << std::endl;
+        return -1.0;
+    }
+    
+    TH2* channelHist = histIt->second[mctruth];
+    if(!channelHist) {
+        std::cerr << "ERROR in ScaleChannel2DByEntries: Channel histogram is null" << std::endl;
+        return -1.0;
+    }
+    
+    // Pobierz liczbę zliczeń i obecną całkę
+    Double_t entries = channelHist->GetEntries();
+    Double_t integral = channelHist->Integral();
+    
+    if(entries <= 0) {
+        std::cout << "WARNING in ScaleChannel2DByEntries: Channel " << mctruth 
+                  << " in set " << setName.Data() << " has no entries. No scaling applied." << std::endl;
+        return 0.0;
+    }
+    
+    if(integral <= 0) {
+        std::cout << "WARNING in ScaleChannel2DByEntries: Channel " << mctruth 
+                  << " in set " << setName.Data() << " has zero integral. No scaling applied." << std::endl;
+        return 0.0;
+    }
+    
+    // Oblicz czynnik skalujący aby całka = entries
+    Double_t scaleFactor = entries / integral;
+    
+    // Stwórz kopię histogramu przed skalowaniem do aktualizacji sumy
+    TH2* oldChannelHist = (TH2*)channelHist->Clone("temp_for_sum_update_2d");
+    
+    // Przeskaluj histogram kanału
+    channelHist->Scale(scaleFactor);
+    
+    // Zaktualizuj histogram sumy MC (indeks 0)
+    TH2* sumHist = histIt->second[0];
+    if(sumHist) {
+        // Odejmij stary wkład ze sumy
+        sumHist->Add(oldChannelHist, -1.0);
+        
+        // Dodaj nowy przeskalowany wkład do sumy
+        sumHist->Add(channelHist, 1.0);
+    }
+    
+    delete oldChannelHist;
+    
+    std::cout << "INFO: 2D Channel " << mctruth << " in set " << setName.Data() 
+              << " normalized: integral " << integral << " -> " << entries 
+              << " (scale factor = " << scaleFactor << ")" << std::endl;
+    
+    return scaleFactor;
+}
+
 Double_t HistManager::CalculateYRange(const std::vector<TH1*>& hists, const TString& setName, Bool_t logy) {
     Double_t maxY = 0;
     for(auto hist : hists) {
@@ -1386,4 +1530,86 @@ void HistManager::CleanupArraySet(const TString& baseName) {
     
     // Remove config
     fArrayConfigs.erase(baseName);
+}
+
+Double_t HistManager::ScaleArrayChannelByEntries(const TString& baseName, Int_t index, Int_t mctruth) {
+    // Sprawdź poprawność parametrów
+    if(mctruth < 1 || mctruth > fChannNum) {
+        std::cerr << "ERROR in ScaleArrayChannelByEntries: Invalid mctruth " << mctruth 
+                  << " (valid range: 1-" << fChannNum << ")" << std::endl;
+        return -1.0;
+    }
+    
+    // Znajdź zestaw array histogramów
+    auto histIt = fArrayHists1D.find(baseName);
+    if(histIt == fArrayHists1D.end()) {
+        std::cerr << "ERROR in ScaleArrayChannelByEntries: Array histogram set not found: " 
+                  << baseName.Data() << std::endl;
+        return -1.0;
+    }
+    
+    // Sprawdź poprawność indeksu
+    if(index < 0 || index >= static_cast<Int_t>(histIt->second.size())) {
+        std::cerr << "ERROR in ScaleArrayChannelByEntries: Invalid index " << index 
+                  << " (valid range: 0-" << (histIt->second.size()-1) << ")" << std::endl;
+        return -1.0;
+    }
+    
+    // Sprawdź czy histogram kanału istnieje
+    if(mctruth >= static_cast<Int_t>(histIt->second[index].size())) {
+        std::cerr << "ERROR in ScaleArrayChannelByEntries: Channel histogram index out of range" << std::endl;
+        return -1.0;
+    }
+    
+    TH1D* channelHist = histIt->second[index][mctruth];
+    if(!channelHist) {
+        std::cerr << "ERROR in ScaleArrayChannelByEntries: Channel histogram is null" << std::endl;
+        return -1.0;
+    }
+    
+    // Pobierz liczbę zliczeń i obecną całkę
+    Double_t entries = channelHist->GetEntries();
+    Double_t integral = channelHist->Integral();
+    
+    if(entries <= 0) {
+        std::cout << "WARNING in ScaleArrayChannelByEntries: Channel " << mctruth 
+                  << " at index " << index << " in array " << baseName.Data() 
+                  << " has no entries. No scaling applied." << std::endl;
+        return 0.0;
+    }
+    
+    if(integral <= 0) {
+        std::cout << "WARNING in ScaleArrayChannelByEntries: Channel " << mctruth 
+                  << " at index " << index << " in array " << baseName.Data() 
+                  << " has zero integral. No scaling applied." << std::endl;
+        return 0.0;
+    }
+    
+    // Oblicz czynnik skalujący aby całka = entries
+    Double_t scaleFactor = entries / integral;
+    
+    // Stwórz kopię histogramu przed skalowaniem do aktualizacji sumy
+    TH1D* oldChannelHist = (TH1D*)channelHist->Clone("temp_for_array_sum_update");
+    
+    // Przeskaluj histogram kanału
+    channelHist->Scale(scaleFactor);
+    
+    // Zaktualizuj histogram sumy MC (indeks 0)
+    TH1D* sumHist = histIt->second[index][0];
+    if(sumHist) {
+        // Odejmij stary wkład ze sumy
+        sumHist->Add(oldChannelHist, -1.0);
+        
+        // Dodaj nowy przeskalowany wkład do sumy
+        sumHist->Add(channelHist, 1.0);
+    }
+    
+    delete oldChannelHist;
+    
+    std::cout << "INFO: Array channel " << mctruth << " at index " << index 
+              << " in array " << baseName.Data() 
+              << " normalized: integral " << integral << " -> " << entries 
+              << " (scale factor = " << scaleFactor << ")" << std::endl;
+    
+    return scaleFactor;
 }

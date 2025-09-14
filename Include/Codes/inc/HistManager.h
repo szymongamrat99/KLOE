@@ -362,10 +362,36 @@ public:
      * @return Wskaźnik na histogram lub nullptr
      */
     TH1D* GetArrayHist1D(const TString& baseName, Int_t index, Int_t mctruth = -1);
+    
+    /**
+     * @brief Normalizuje histogram kanału w array tak, aby jego całka była równa GetEntries
+     * @param baseName Bazowa nazwa zestawu array
+     * @param index Indeks histogramu (0-based)
+     * @param mctruth Numer kanału MC do znormalizowania (1-N)
+     * @return Czynnik skalowania użyty do normalizacji, lub -1 w przypadku błędu
+     */
+    Double_t ScaleArrayChannelByEntries(const TString& baseName, Int_t index, Int_t mctruth);
 
     // Rysowanie histogramów
     void DrawSet1D(const TString& setName, const TString& drawOpt = "", Bool_t drawData = false);
     void DrawSet2D(const TString& setName, const TString& drawOpt = "COLZ", Bool_t drawData = false);
+
+    // Skalowanie histogramów
+    /**
+     * @brief Normalizuje histogram danego kanału MC tak, aby jego całka była równa GetEntries
+     * @param setName Nazwa zestawu histogramów
+     * @param mctruth Numer kanału MC do znormalizowania (1-N)
+     * @return Czynnik skalowania użyty do normalizacji, lub -1 w przypadku błędu
+     */
+    Double_t ScaleChannelByEntries(const TString& setName, Int_t mctruth);
+    
+    /**
+     * @brief Normalizuje histogram 2D danego kanału MC tak, aby jego całka była równa GetEntries
+     * @param setName Nazwa zestawu histogramów 2D
+     * @param mctruth Numer kanału MC do znormalizowania (1-N)
+     * @return Czynnik skalowania użyty do normalizacji, lub -1 w przypadku błędu
+     */
+    Double_t ScaleChannel2DByEntries(const TString& setName, Int_t mctruth);
 
     // Zapisywanie
     void SaveSet(const TString& setName, const TString& filePattern);

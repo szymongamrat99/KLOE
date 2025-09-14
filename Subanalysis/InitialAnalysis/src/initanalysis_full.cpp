@@ -129,7 +129,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		PmissKL = 0,
 		EmissKS = 0,
 		EmissKL = 0,
-		pKTwoBody = 0;
+		pKTwoBody = 0,
+		TrcSum = 0;
 
 	Float_t Emiss = 0., Pmiss = 0., MissMom[3] = {};
 
@@ -181,6 +182,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 									  { return baseKin.Kchrecnew[5]; });
 		cutter.RegisterCentralValueGetter("InvMassKch", [&]()
 										  { return mK0; });
+
+		cutter.RegisterVariableGetter("TrcSum", [&]()
+									  { return TrcSum; });
 
 		cutter.RegisterVariableGetter("Qmiss", [&]()
 									  { return sqrt(pow(Pmiss, 2) + pow(Emiss, 2)); });
@@ -684,7 +688,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
 					ErrorHandling::ErrorCodes codeTri = ErrorHandling::ErrorCodes::CHARGED_KAON_MASS_PRE;
 
-					if (cutter.PassCut(0) && cutter.PassCut(1))
+					if (cutter.PassCut(1) && cutter.PassCut(2))
 					{
 
 						std::vector<Float_t> cluster[5];
@@ -745,6 +749,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 								logger.getErrLog(errorCode, "", mctruth);
 								noError = false;
 
+								TrcSum = -999.;
+
 								if (mctruth == 1)
 								{
 									passed = true;
@@ -757,6 +763,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 								baseKin.gammaMomTriangle2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
 								baseKin.gammaMomTriangle3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
 								baseKin.gammaMomTriangle4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
+
+								TrcSum = baseKin.trcfinal[0] + baseKin.trcfinal[1] + baseKin.trcfinal[2] + baseKin.trcfinal[3];
 
 								// Go to Kaon CM frame to get the proper time
 
@@ -774,9 +782,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 									KaonPathTriangleLAB = sqrt(pow(baseKin.KneTriangle[6] - baseKin.ipnew[0], 2) +
 															   pow(baseKin.KneTriangle[7] - baseKin.ipnew[1], 2) +
 															   pow(baseKin.KneTriangle[8] - baseKin.ipnew[2], 2)),
-									// KaonPathTriangleLAB = sqrt(pow(baseKin.KnetriKinFit[6] - baseKin.ipTriKinFit[0], 2) +
-									// 						   pow(baseKin.KnetriKinFit[7] - baseKin.ipTriKinFit[1], 2) +
-									// 						   pow(baseKin.KnetriKinFit[8] - baseKin.ipTriKinFit[2], 2)),
 									KaonVelocityTriangleLAB = kaonMomTriangleLAB.Mag();
 
 								baseKin.kaonNeTimeLAB = KaonPathTriangleLAB / KaonVelocityTriangleLAB;
@@ -785,11 +790,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 									Kaon4VecTriangleLAB = {baseKin.KneTriangle[6] - baseKin.ipnew[0], // cm
 														   baseKin.KneTriangle[7] - baseKin.ipnew[1], // cm
 														   baseKin.KneTriangle[8] - baseKin.ipnew[2], // cm
-														   baseKin.kaonNeTimeLAB},					  // cm
-									// Kaon4VecTriangleLAB = {baseKin.KnetriKinFit[6] - baseKin.ipTriKinFit[0], // cm
-									// 					   baseKin.KnetriKinFit[7] - baseKin.ipTriKinFit[1], // cm
-									// 					   baseKin.KnetriKinFit[8] - baseKin.ipTriKinFit[2], // cm
-									// 					   baseKin.kaonNeTimeLAB},							 // cm
+														   baseKin.kaonNeTimeLAB},					  // cm						 // cm
 									Kaon4VecKaonTriangleCM = {0., 0., 0., 0.};
 
 								Obj.lorentz_transf(kaonMomTriangleLAB, Kaon4VecTriangleLAB, Kaon4VecKaonTriangleCM);
