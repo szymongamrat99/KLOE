@@ -140,7 +140,6 @@ namespace KLOE
 						for (Int_t k = 0; k < 4; k++)
 						{
 							cond_clus[k] =
-								_cluster[3][_NeuClusters[_ind_gam[k]] - 1] > 0 &&
 								_cluster[0][_NeuClusters[_ind_gam[k]] - 1] != 0 &&
 								_cluster[1][_NeuClusters[_ind_gam[k]] - 1] != 0 &&
 								_cluster[2][_NeuClusters[_ind_gam[k]] - 1] != 0;
@@ -276,15 +275,14 @@ namespace KLOE
 													_S.sol[1][3] < _X(13) &&
 													_S.sol[1][3] < _X(18);
 
-								clusterEnergy = _X(4) > 0. &&
-												_X(9) > 0. &&
-												_X(14) > 0. &&
-												_X(19) > 0.;
+								clusterEnergy = _X(4) > MIN_CLU_ENE &&
+												_X(9) > MIN_CLU_ENE &&
+												_X(14) > MIN_CLU_ENE &&
+												_X(19) > MIN_CLU_ENE;
 
 								for (Int_t k = 0; k < 4; k++)
 								{
 									cond_clus[k] =
-										_X(5 * k + 3) > 0 &&
 										_X(5 * k) != 0 &&
 										_X(5 * k + 1) != 0 &&
 										_X(5 * k + 2) != 0;

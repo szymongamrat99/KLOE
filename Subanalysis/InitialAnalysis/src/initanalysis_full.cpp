@@ -429,7 +429,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		{
 			// Correction of cluster times based on T0
 			baseKin.TclCorr.assign(clusterProps.tcl.begin(), clusterProps.tcl.end());
-			Obj.CorrectClusterTime(*clusterProps.t0step1, baseKin.TclCorr);
+			// Obj.CorrectClusterTime(*clusterProps.t0step1, baseKin.TclCorr);
 
 			// Construction of the charged rec class object
 			Float_t bhabha_vtx[3] = {*bhabhaProps.x, *bhabhaProps.y, *bhabhaProps.z};

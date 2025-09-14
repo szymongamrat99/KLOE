@@ -58,4 +58,5 @@
   const Float_t mPhi = 1019.455; // MeV/c^{2}
 
   const Float_t tau_S = 0.087;
+  const Float_t cVel = 30; // cm/ns
 }

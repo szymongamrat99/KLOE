@@ -20,14 +20,14 @@ ErrorHandling::ErrorCodes TriangleRec(std::vector<Int_t> g4taken_kinfit, std::ve
   ind_gam[2] = g4taken_kinfit[2];
   ind_gam[3] = g4taken_kinfit[3];
 
-  cond_ene = cluster[4][Asscl[ind_gam[0]] - 1] > MIN_CLU_ENE && cluster[4][Asscl[ind_gam[1]] - 1] > MIN_CLU_ENE &&
-             cluster[4][Asscl[ind_gam[2]] - 1] > MIN_CLU_ENE && cluster[4][Asscl[ind_gam[3]] - 1] > MIN_CLU_ENE;
+  cond_ene = cluster[4][Asscl[ind_gam[0]] - 1] > 0 && cluster[4][Asscl[ind_gam[1]] - 1] > 0 &&
+             cluster[4][Asscl[ind_gam[2]] - 1] > 0 && cluster[4][Asscl[ind_gam[3]] - 1] > 0;
 
-  cond_clus[0] = cluster[3][Asscl[ind_gam[0]] - 1] > 0 && cluster[0][Asscl[ind_gam[0]] - 1] != 0 && cluster[1][Asscl[ind_gam[0]] - 1] != 0 && cluster[2][Asscl[ind_gam[0]] - 1] != 0;
-  cond_clus[1] = cluster[3][Asscl[ind_gam[1]] - 1] > 0 && cluster[0][Asscl[ind_gam[1]] - 1] != 0 && cluster[1][Asscl[ind_gam[1]] - 1] != 0 && cluster[2][Asscl[ind_gam[1]] - 1] != 0;
-  cond_clus[2] = cluster[3][Asscl[ind_gam[2]] - 1] > 0 && cluster[0][Asscl[ind_gam[2]] - 1] != 0 && cluster[1][Asscl[ind_gam[2]] - 1] != 0 && cluster[2][Asscl[ind_gam[2]] - 1] != 0;
-  cond_clus[3] = cluster[3][Asscl[ind_gam[3]] - 1] > 0 && cluster[0][Asscl[ind_gam[3]] - 1] != 0 && cluster[1][Asscl[ind_gam[3]] - 1] != 0 && cluster[2][Asscl[ind_gam[3]] - 1] != 0;
-
+  cond_clus[0] = cluster[0][Asscl[ind_gam[0]] - 1] != 0 && cluster[1][Asscl[ind_gam[0]] - 1] != 0 && cluster[2][Asscl[ind_gam[0]] - 1] != 0;
+  cond_clus[1] = cluster[0][Asscl[ind_gam[1]] - 1] != 0 && cluster[1][Asscl[ind_gam[1]] - 1] != 0 && cluster[2][Asscl[ind_gam[1]] - 1] != 0;
+  cond_clus[2] = cluster[0][Asscl[ind_gam[2]] - 1] != 0 && cluster[1][Asscl[ind_gam[2]] - 1] != 0 && cluster[2][Asscl[ind_gam[2]] - 1] != 0;
+  cond_clus[3] = cluster[0][Asscl[ind_gam[3]] - 1] != 0 && cluster[1][Asscl[ind_gam[3]] - 1] != 0 && cluster[2][Asscl[ind_gam[3]] - 1] != 0;
+  
   if (cond_ene == true && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3])
   {
     for (Int_t k = 0; k < 4; k++)

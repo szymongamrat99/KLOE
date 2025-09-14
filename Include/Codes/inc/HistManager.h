@@ -162,10 +162,104 @@ public:
         std::vector<TString> varTitles; ///< Tytuły zmiennych (opcjonalne, np. {"p_{x}", "p_{y}", "p_{z}", "E"})
         HistConfig commonConfig;        ///< Wspólna konfiguracja dla wszystkich histogramów w zestawie
         
+        // Indywidualne konfiguracje dla każdego sub-histogramu (opcjonalne)
+        std::vector<Int_t> individualBins;      ///< Liczba binów dla każdego sub-histogramu
+        std::vector<Double_t> individualXmin;   ///< Minimalne wartości X dla każdego sub-histogramu  
+        std::vector<Double_t> individualXmax;   ///< Maksymalne wartości X dla każdego sub-histogramu
+        std::vector<TString> individualXtitle;  ///< Tytuły osi X dla każdego sub-histogramu
+        std::vector<TString> individualYtitle;  ///< Tytuły osi Y dla każdego sub-histogramu
+        
         ArrayConfig() : arraySize(0) {}
         
         ArrayConfig(const TString& name, const TString& title, Int_t size, const HistConfig& config) 
             : baseName(name), baseTitle(title), arraySize(size), commonConfig(config) {}
+            
+        /**
+         * @brief Ustawia indywidualne parametry binowania dla sub-histogramu
+         * @param index Indeks sub-histogramu (0-based)
+         * @param bins Liczba binów
+         * @param xmin Minimalna wartość X
+         * @param xmax Maksymalna wartość X
+         */
+        void SetIndividualBinning(Int_t index, Int_t bins, Double_t xmin, Double_t xmax) {
+            if(index < 0) return;
+            
+            // Rozszerz wektory jeśli potrzeba
+            if(index >= static_cast<Int_t>(individualBins.size())) {
+                individualBins.resize(index + 1, commonConfig.bins);
+                individualXmin.resize(index + 1, commonConfig.xmin);
+                individualXmax.resize(index + 1, commonConfig.xmax);
+            }
+            
+            individualBins[index] = bins;
+            individualXmin[index] = xmin;
+            individualXmax[index] = xmax;
+        }
+        
+        /**
+         * @brief Ustawia indywidualne tytuły osi dla sub-histogramu
+         * @param index Indeks sub-histogramu (0-based)
+         * @param xtitle Tytuł osi X
+         * @param ytitle Tytuł osi Y (opcjonalny)
+         */
+        void SetIndividualAxisTitles(Int_t index, const TString& xtitle, const TString& ytitle = "") {
+            if(index < 0) return;
+            
+            // Rozszerz wektory jeśli potrzeba
+            if(index >= static_cast<Int_t>(individualXtitle.size())) {
+                individualXtitle.resize(index + 1, commonConfig.xtitle);
+            }
+            if(index >= static_cast<Int_t>(individualYtitle.size())) {
+                individualYtitle.resize(index + 1, commonConfig.ytitle);
+            }
+            
+            individualXtitle[index] = xtitle;
+            if(!ytitle.IsNull()) {
+                individualYtitle[index] = ytitle;
+            }
+            // Jeśli ytitle jest puste, pozostaw dotychczasową wartość (domyślną lub wcześniej ustawioną)
+        }
+        
+        /**
+         * @brief Pobiera konfigurację binowania dla danego indeksu
+         * @param index Indeks sub-histogramu
+         * @param bins Wyjście: liczba binów
+         * @param xmin Wyjście: minimalna wartość X
+         * @param xmax Wyjście: maksymalna wartość X
+         */
+        void GetBinning(Int_t index, Int_t& bins, Double_t& xmin, Double_t& xmax) const {
+            if(index >= 0 && index < static_cast<Int_t>(individualBins.size())) {
+                bins = individualBins[index];
+                xmin = individualXmin[index];
+                xmax = individualXmax[index];
+            } else {
+                bins = commonConfig.bins;
+                xmin = commonConfig.xmin;
+                xmax = commonConfig.xmax;
+            }
+        }
+        
+        /**
+         * @brief Pobiera tytuły osi dla danego indeksu
+         * @param index Indeks sub-histogramu
+         * @param xtitle Wyjście: tytuł osi X
+         * @param ytitle Wyjście: tytuł osi Y
+         */
+        void GetAxisTitles(Int_t index, TString& xtitle, TString& ytitle) const {
+            // Pobierz tytuł X
+            if(index >= 0 && index < static_cast<Int_t>(individualXtitle.size())) {
+                xtitle = individualXtitle[index];
+            } else {
+                xtitle = commonConfig.xtitle;
+            }
+            
+            // Pobierz tytuł Y (może mieć inny rozmiar niż X titles)
+            if(index >= 0 && index < static_cast<Int_t>(individualYtitle.size())) {
+                ytitle = individualYtitle[index];
+            } else {
+                ytitle = commonConfig.ytitle;
+            }
+        }
     };
 
     enum class ImageFormat { PNG, SVG, PDF };

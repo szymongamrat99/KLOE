@@ -923,28 +923,29 @@ Bool_t HistManager::CreateHistArray1D(const ArrayConfig& config) {
             varTitle = config.varTitles[index];
         }
         
+        // Pobierz parametry binowania i tytuły osi dla danego indeksu
+        Int_t bins;
+        Double_t xmin, xmax;
+        TString xtitle, ytitle;
+        config.GetBinning(index, bins, xmin, xmax);
+        config.GetAxisTitles(index, xtitle, ytitle);
+        
         // Stwórz histogramy dla tego indeksu (suma MC + wszystkie kanały MC)
         std::vector<TH1D*> indexHists(fChannNum + 1); // +1 dla sumy MC (index 0)
         
         // Histogram sumy MC (index 0)
         TString sumHistName = Form("%s_sum_%d", config.baseName.Data(), index);
-        indexHists[0] = new TH1D(sumHistName, varTitle, 
-                                config.commonConfig.bins, 
-                                config.commonConfig.xmin, 
-                                config.commonConfig.xmax);
-        indexHists[0]->GetXaxis()->SetTitle(config.commonConfig.xtitle);
-        indexHists[0]->GetYaxis()->SetTitle(config.commonConfig.ytitle);
+        indexHists[0] = new TH1D(sumHistName, varTitle, bins, xmin, xmax);
+        indexHists[0]->GetXaxis()->SetTitle(xtitle);
+        indexHists[0]->GetYaxis()->SetTitle(ytitle);
         ConfigureHistogram(indexHists[0], fSumColor, config.commonConfig.showStats);
         
         // Histogramy MC (indeksy 1 do fChannNum)
         for(Int_t ch = 0; ch < fChannNum; ++ch) {
             TString mcHistName = Form("%s_mc%d_%d", config.baseName.Data(), ch+1, index);
-            indexHists[ch + 1] = new TH1D(mcHistName, varTitle,
-                                         config.commonConfig.bins,
-                                         config.commonConfig.xmin,
-                                         config.commonConfig.xmax);
-            indexHists[ch + 1]->GetXaxis()->SetTitle(config.commonConfig.xtitle);
-            indexHists[ch + 1]->GetYaxis()->SetTitle(config.commonConfig.ytitle);
+            indexHists[ch + 1] = new TH1D(mcHistName, varTitle, bins, xmin, xmax);
+            indexHists[ch + 1]->GetXaxis()->SetTitle(xtitle);
+            indexHists[ch + 1]->GetYaxis()->SetTitle(ytitle);
             ConfigureHistogram(indexHists[ch + 1], fChannColors[ch], config.commonConfig.showStats);
         }
         
@@ -952,12 +953,9 @@ Bool_t HistManager::CreateHistArray1D(const ArrayConfig& config) {
         
         // Histogram danych
         TString dataHistName = Form("%s_data_%d", config.baseName.Data(), index);
-        dataSet[index] = new TH1D(dataHistName, varTitle, 
-                                 config.commonConfig.bins, 
-                                 config.commonConfig.xmin, 
-                                 config.commonConfig.xmax);
-        dataSet[index]->GetXaxis()->SetTitle(config.commonConfig.xtitle);
-        dataSet[index]->GetYaxis()->SetTitle(config.commonConfig.ytitle);
+        dataSet[index] = new TH1D(dataHistName, varTitle, bins, xmin, xmax);
+        dataSet[index]->GetXaxis()->SetTitle(xtitle);
+        dataSet[index]->GetYaxis()->SetTitle(ytitle);
         dataSet[index]->SetMarkerStyle(fDataStyle);
         dataSet[index]->SetMarkerColor(fDataColor);
         dataSet[index]->SetLineColor(fDataColor);
