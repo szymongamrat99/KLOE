@@ -88,7 +88,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKchConfig.xmin = 480;
    invMassKchConfig.xmax = 520;
    invMassKchConfig.logy = true;
-   invMassKchConfig.showStats = true;
+   invMassKchConfig.showStats = false;
 
    invMassKchMCConfig.name = "invMassKchMC";
    invMassKchMCConfig.xtitle = "m^{inv,MC}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
@@ -97,7 +97,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKchMCConfig.xmin = -100;
    invMassKchMCConfig.xmax = 100;
    invMassKchMCConfig.logy = true;
-   invMassKchMCConfig.showStats = true;
+   invMassKchMCConfig.showStats = false;
 
    invMassKneConfig.name = "invMassKne";
    invMassKneConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{0}#pi^{0}} [MeV/c^{2}]";
@@ -106,7 +106,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKneConfig.xmin = 0;
    invMassKneConfig.xmax = 1000;
    invMassKneConfig.logy = true;
-   invMassKneConfig.showStats = true;
+   invMassKneConfig.showStats = false;
 
    invMassKneMCConfig.name = "invMassKneMC";
    invMassKneMCConfig.xtitle = "m^{inv,MC}_{K#rightarrow#pi^{0}#pi^{0}} [MeV/c^{2}]";
@@ -115,7 +115,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKneMCConfig.xmin = -100;
    invMassKneMCConfig.xmax = 100;
    invMassKneMCConfig.logy = true;
-   invMassKneMCConfig.showStats = true;
+   invMassKneMCConfig.showStats = false;
 
    timeDiffConfig.name = "timeDiff";
    timeDiffConfig.xtitle = "#DeltaT [#tau_{S}]";
@@ -124,7 +124,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    timeDiffConfig.xmin = -100;
    timeDiffConfig.xmax = 100;
    timeDiffConfig.logy = true;
-   timeDiffConfig.showStats = true;
+   timeDiffConfig.showStats = false;
 
    timeDiffMCConfig.name = "timeDiffMC";
    timeDiffMCConfig.xtitle = "#DeltaT [#tau_{S}]";
@@ -133,7 +133,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    timeDiffMCConfig.xmin = -20;
    timeDiffMCConfig.xmax = 20;
    timeDiffMCConfig.logy = true;
-   timeDiffMCConfig.showStats = true;
+   timeDiffMCConfig.showStats = false;
 
    chi2TriKinFitConfig.name = "chi2TriKinFit";
    chi2TriKinFitConfig.xtitle = "#DeltaT [#tau_{S}]";
@@ -142,7 +142,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    chi2TriKinFitConfig.xmin = -10;
    chi2TriKinFitConfig.xmax = 50;
    chi2TriKinFitConfig.logy = true;
-   chi2TriKinFitConfig.showStats = true;
+   chi2TriKinFitConfig.showStats = false;
 
    trcFinalConfig.name = "trcFinal";
    trcFinalConfig.xtitle = "Trc sum [ns]";
@@ -151,19 +151,19 @@ void init_analysis::Begin(TTree * /*tree*/)
    trcFinalConfig.xmin = -50;
    trcFinalConfig.xmax = 10;
    trcFinalConfig.logy = true;
-   trcFinalConfig.showStats = true;
+   trcFinalConfig.showStats = false;
 
    TimeNeutral2dConfig.name = "TimeNeutral2d";
    TimeNeutral2dConfig.xtitle = "t^{MC}_{neu} [#tau_{S}]";
    TimeNeutral2dConfig.ytitle = "t^{rec}_{neu} [#tau_{S}]";
    TimeNeutral2dConfig.bins = 50;
    TimeNeutral2dConfig.xmin = -10;
-   TimeNeutral2dConfig.xmax = 100;
+   TimeNeutral2dConfig.xmax = 400;
    TimeNeutral2dConfig.binsy = 50;
    TimeNeutral2dConfig.ymin = -10;
-   TimeNeutral2dConfig.ymax = 100;
+   TimeNeutral2dConfig.ymax = 400;
    TimeNeutral2dConfig.logy = true;
-   TimeNeutral2dConfig.showStats = true;
+   TimeNeutral2dConfig.showStats = false;
 
    // Konfiguracja array histogramów dla składowych pędu Kchrec
    HistManager::HistConfig momentumConfig;
@@ -173,7 +173,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    momentumConfig.xtitle = "p [MeV/c]";
    momentumConfig.ytitle = "Counts";
    momentumConfig.logy = true;
-   momentumConfig.showStats = true;
+   momentumConfig.showStats = false;
 
    momentumArrayConfig.baseName = "KchrecMomentum";
    momentumArrayConfig.baseTitle = "K_{ch} Reconstructed Momentum Components";
@@ -207,7 +207,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    momentumNeutralConfig.xtitle = "p [MeV/c]";
    momentumNeutralConfig.ytitle = "Counts";
    momentumNeutralConfig.logy = true;
-   momentumNeutralConfig.showStats = true;
+   momentumNeutralConfig.showStats = false;
 
    momentumNeutralArrayConfig.baseName = "KnerecMomentum";
    momentumNeutralArrayConfig.baseTitle = "K_{ne} Reconstructed Momentum Components";
@@ -370,12 +370,12 @@ Bool_t init_analysis::Process(Long64_t entry)
 
    Bool_t photonEneLimit = gammaMomTriKinFit1[3] > 20. && gammaMomTriKinFit2[3] > 20. && gammaMomTriKinFit3[3] > 20. && gammaMomTriKinFit4[3] > 20.;
 
-   if (1)
+   if (cutter->PassAllCuts())
    {
       if (*mcflag == 1)
       {
-         if (*mctruth == 1)
-            weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
+         // if (*mctruth == 1)
+         //    weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
          Float_t minv4gam_tri = sqrt(pow(KnetriKinFit[3], 2) - pow(KnetriKinFit[0], 2) - pow(KnetriKinFit[1], 2) - pow(KnetriKinFit[2], 2));
 
@@ -416,6 +416,8 @@ Bool_t init_analysis::Process(Long64_t entry)
          histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - Kchrec[5], weight);
          histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - *minv4gam, weight);
          histMgr->Fill1D("timeDiffMC", *mctruth, (*KaonChTimeCMMC - *KaonNeTimeCMMC) - (*KaonChTimeCM - *KaonNeTimeCM), weight);
+
+         histMgr->Fill2D("TimeNeutral2d", *mctruth, *KaonNeTimeCMMC, *KaonNeTimeCM, weight);
       }
 
       if (*mcflag == 0 || *mctruth == 0)
@@ -484,8 +486,6 @@ void init_analysis::Terminate()
    histMgr->SaveSet("chi2TriKinFit", "chi2TriKinFit");
    histMgr->SaveSet("trcFinal", "trcFinal");
 
-   histMgr->SaveSet("TimeNeutral2d", "TimeNeutral2d");
-
    histMgr->SaveSet("invMassKchMC", "invMassKchMC");
    histMgr->SaveSet("invMassKneMC", "invMassKneMC");
    histMgr->SaveSet("timeDiffMC", "timeDiffMC");
@@ -495,6 +495,7 @@ void init_analysis::Terminate()
    histMgr->ExportSet("KnerecMomentum", "KnerecMomentum", HistManager::ImageFormat::SVG);
    histMgr->ExportSet("NeuVtx", "NeuVtx", HistManager::ImageFormat::SVG);
    histMgr->ExportSet("PullsTriKinFit", "PullsTriKinFit", HistManager::ImageFormat::SVG);
+   histMgr->ExportSet("TimeNeutral2d", "TimeNeutral2d", HistManager::ImageFormat::SVG);
 
    // Wyniki
    for (size_t i = 0; i < cutter->GetCuts().size(); ++i)

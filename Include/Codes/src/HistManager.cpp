@@ -94,6 +94,18 @@ void HistManager::CreateHistSet2D(const TString& setName, const Hist2DConfig& co
     }
 
     std::vector<TH2*> hists;
+    
+    // Tworzenie histogramu sumy jako pierwszy element wektora (konsystentnie z 1D)
+    TString sumHistName = Form("%s_sum", config.name.Data());
+    TH2D* sumHist = new TH2D(sumHistName, config.title,
+                            config.bins, config.xmin, config.xmax,
+                            config.binsy, config.ymin, config.ymax);
+    sumHist->GetXaxis()->SetTitle(config.xtitle);
+    sumHist->GetYaxis()->SetTitle(config.ytitle);
+    ConfigureHistogram(sumHist, fSumColor, config.showStats);
+    hists.push_back(sumHist);
+    
+    // Tworzenie histogramów dla poszczególnych kanałów
     for(Int_t i = 0; i < fChannNum; ++i) {
         TString histName = Form("%s_%d", config.name.Data(), i+1);
         TH2D* hist = new TH2D(histName, config.title,
@@ -136,7 +148,10 @@ void HistManager::Fill2D(const TString& setName, Int_t mctruth, Double_t x, Doub
         throw std::runtime_error("Histogram set not found: " + std::string(setName.Data()));
     }
 
-    it->second[mctruth-1]->Fill(x, y, weight);
+    // Fill suma MC (indeks 0) - konsystentnie z Fill1D
+    it->second[0]->Fill(x, y, weight);
+    // Fill pojedyncza składowa (przesunięte o 1 przez sumę)
+    it->second[mctruth]->Fill(x, y, weight);
 }
 
 void HistManager::FillData1D(const TString& setName, Double_t value, Double_t weight) {
@@ -346,19 +361,163 @@ void HistManager::DrawSet2D(const TString& setName, const TString& drawOpt, Bool
         throw std::runtime_error("Histogram set not found: " + std::string(setName.Data()));
     }
 
-    std::vector<TCanvas*> canvases;
-    for(Int_t i = 0; i < fChannNum; ++i) {
-        TCanvas* canvas = new TCanvas(Form("c_%s_%d", setName.Data(), i+1),
-                                    Form("%s (Channel %d)", setName.Data(), i+1),
-                                    790, 790);
-        canvas->SetLeftMargin(0.15);
-        canvas->SetBottomMargin(0.15);
-        canvas->SetRightMargin(0.15); // For z-axis color scale
+    auto configIt = fConfigs2D.find(setName);
+    if(configIt == fConfigs2D.end()) {
+        throw std::runtime_error("Configuration not found for set: " + std::string(setName.Data()));
+    }
 
-        histIt->second[i]->Draw(drawOpt);
+    std::vector<TCanvas*> canvases;
+    
+    // Najpierw rysuj histogram sumy MC (indeks 0)
+    TString sumCanvasName = Form("c_%s_sum", setName.Data());
+    TString sumCanvasTitle = Form("%s - MC Sum", configIt->second.title.Data());
+    
+    TCanvas* sumCanvas = new TCanvas(sumCanvasName, sumCanvasTitle, 800, 600);
+    sumCanvas->SetLeftMargin(0.12);
+    sumCanvas->SetBottomMargin(0.12);
+    sumCanvas->SetRightMargin(0.15); // Miejsce dla palety kolorów
+    sumCanvas->SetTopMargin(0.1);
+
+    if(histIt->second[0] && histIt->second[0]->GetEntries() > 0) {
+        histIt->second[0]->Draw(drawOpt);
+        
+        TPaveText* sumInfo = new TPaveText(0.15, 0.85, 0.45, 0.95, "NDC");
+        sumInfo->SetFillColor(kOrange-10);
+        sumInfo->SetBorderSize(1);
+        sumInfo->AddText("MC Sum");
+        sumInfo->AddText(Form("Entries: %.0f", histIt->second[0]->GetEntries()));
+        sumInfo->Draw();
+    } else {
+        histIt->second[0]->Draw(drawOpt);
+        
+        TPaveText* emptyInfo = new TPaveText(0.3, 0.4, 0.7, 0.6, "NDC");
+        emptyInfo->SetFillColor(kYellow-10);
+        emptyInfo->SetBorderSize(1);
+        emptyInfo->AddText("Empty MC Sum");
+        emptyInfo->Draw();
+    }
+    
+    sumCanvas->Update();
+    canvases.push_back(sumCanvas);
+    
+    // Rysuj histogramy dla każdego kanału MC (indeksy 1 do fChannNum)
+    for(Int_t i = 0; i < fChannNum; ++i) {
+        TString canvasName = Form("c_%s_ch%d", setName.Data(), i+1);
+        TString canvasTitle = Form("%s - %s", configIt->second.title.Data(), fChannelNames[i].Data());
+        
+        TCanvas* canvas = new TCanvas(canvasName, canvasTitle, 800, 600);
+        canvas->SetLeftMargin(0.12);
+        canvas->SetBottomMargin(0.12);
+        canvas->SetRightMargin(0.15); // Miejsce dla palety kolorów
+        canvas->SetTopMargin(0.1);
+
+        // Rysuj histogram MC (indeks i+1 przez histogram sumy na indeksie 0)
+        if(histIt->second[i+1] && histIt->second[i+1]->GetEntries() > 0) {
+            histIt->second[i+1]->Draw(drawOpt);
+            
+            TPaveText* channelInfo = new TPaveText(0.15, 0.85, 0.45, 0.95, "NDC");
+            channelInfo->SetFillColor(kWhite);
+            channelInfo->SetBorderSize(1);
+            channelInfo->AddText(Form("Channel: %s", fChannelNames[i].Data()));
+            channelInfo->AddText(Form("Entries: %.0f", histIt->second[i+1]->GetEntries()));
+            channelInfo->Draw();
+        } else {
+            histIt->second[i+1]->Draw(drawOpt);
+            
+            TPaveText* emptyInfo = new TPaveText(0.3, 0.4, 0.7, 0.6, "NDC");
+            emptyInfo->SetFillColor(kYellow-10);
+            emptyInfo->SetBorderSize(1);
+            emptyInfo->AddText("Empty Histogram");
+            emptyInfo->AddText(Form("Channel: %s", fChannelNames[i].Data()));
+            emptyInfo->Draw();
+        }
+        
         canvas->Update();
         canvases.push_back(canvas);
     }
+    
+    // Rysuj histogram danych jeśli dostępny i wymagany
+    if(drawData) {
+        auto dataIt = fData2D.find(setName);
+        if(dataIt != fData2D.end() && dataIt->second) {
+            TString canvasName = Form("c_%s_data", setName.Data());
+            TString canvasTitle = Form("%s - Data", configIt->second.title.Data());
+            
+            TCanvas* dataCanvas = new TCanvas(canvasName, canvasTitle, 800, 600);
+            dataCanvas->SetLeftMargin(0.12);
+            dataCanvas->SetBottomMargin(0.12);
+            dataCanvas->SetRightMargin(0.15); // Miejsce dla palety kolorów
+            dataCanvas->SetTopMargin(0.1);
+            
+            dataIt->second->Draw(drawOpt);
+            
+            TPaveText* dataInfo = new TPaveText(0.15, 0.85, 0.45, 0.95, "NDC");
+            dataInfo->SetFillColor(kCyan-10);
+            dataInfo->SetBorderSize(1);
+            dataInfo->AddText("Experimental Data");
+            dataInfo->AddText(Form("Entries: %.0f", dataIt->second->GetEntries()));
+            dataInfo->Draw();
+            
+            dataCanvas->Update();
+            canvases.push_back(dataCanvas);
+        }
+    }
+    
+    // Stwórz canvas porównawczy ze wszystkimi kanałami (włącznie z sumą MC)
+    Int_t totalHists = fChannNum + 1; // +1 dla sumy MC
+    Int_t nCols, nRows;
+    
+    if(totalHists <= 4) {
+        nCols = 2; nRows = 2;
+    } else if(totalHists <= 6) {
+        nCols = 3; nRows = 2;
+    } else if(totalHists <= 9) {
+        nCols = 3; nRows = 3;
+    } else {
+        nCols = 4; nRows = TMath::Ceil(static_cast<Double_t>(totalHists) / 4.0);
+    }
+    
+    TString compareCanvasName = Form("c_%s_compare", setName.Data());
+    TString compareCanvasTitle = Form("%s - All Histograms", configIt->second.title.Data());
+    
+    TCanvas* compareCanvas = new TCanvas(compareCanvasName, compareCanvasTitle, 
+                                       250 * nCols, 200 * nRows);
+    compareCanvas->Divide(nCols, nRows);
+    
+    // Panel 1: Suma MC
+    compareCanvas->cd(1);
+    gPad->SetLeftMargin(0.1);
+    gPad->SetBottomMargin(0.1);
+    gPad->SetRightMargin(0.12);
+    gPad->SetTopMargin(0.1);
+    
+    if(histIt->second[0] && histIt->second[0]->GetEntries() > 0) {
+        histIt->second[0]->Draw("COLZ");
+        gPad->SetTitle("MC Sum");
+    } else {
+        histIt->second[0]->Draw("COLZ");
+        gPad->SetTitle("MC Sum (empty)");
+    }
+    
+    // Panele 2 do N+1: Kanały MC
+    for(Int_t i = 0; i < fChannNum; ++i) {
+        compareCanvas->cd(i + 2); // +2 bo panel 1 to suma MC
+        gPad->SetLeftMargin(0.1);
+        gPad->SetBottomMargin(0.1);
+        gPad->SetRightMargin(0.12);
+        gPad->SetTopMargin(0.1);
+        
+        if(histIt->second[i+1] && histIt->second[i+1]->GetEntries() > 0) {
+            histIt->second[i+1]->Draw("COLZ");
+            gPad->SetTitle(fChannelNames[i]);
+        } else {
+            histIt->second[i+1]->Draw("COLZ");
+            gPad->SetTitle(Form("%s (empty)", fChannelNames[i].Data()));
+        }
+    }
+    
+    compareCanvas->Update();
+    canvases.push_back(compareCanvas);
 
     fCanvases[setName] = canvases;
 }
