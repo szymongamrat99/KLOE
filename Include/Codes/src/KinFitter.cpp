@@ -130,13 +130,13 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _CORR = _V * _D_T * _L;
 
-      _X = _X - _CORR;
+      _X_final = _X - _CORR;
 
       _V_final = _V - _V * _D_T * _Aux * _D * _V;
 
-      _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
+      _CHISQR = Dot((_X_final - _X_init), _V_invert * (_X_final - _X_init));
 
-
+      _X = _X_final;
       for(Int_t j = 0; j < _N_free + _N_const; j++)
       {
         _V(j,j) = _V_final(j,j);

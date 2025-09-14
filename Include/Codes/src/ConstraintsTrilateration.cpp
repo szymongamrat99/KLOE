@@ -127,6 +127,7 @@ namespace KLOE
                              pow(kaon_mom[0], 2) -
                              pow(kaon_mom[1], 2) -
                              pow(kaon_mom[2], 2));
+                             
 
         value[i] = inv_mass_kaon - mK0;
       }

@@ -94,7 +94,7 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKch",
         "cutType": "T",
-        "cutValue": 5000,
+        "cutValue": 50,
         "cutCondition": "<="
       },
       {
@@ -102,7 +102,7 @@
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "Qmiss",
         "cutType": "O",
-        "cutValue": 10000,
+        "cutValue": 100,
         "cutCondition": "<="
       },
       {
@@ -110,7 +110,7 @@
         "cutDescription": "K->pi0pi0 decay invariant mass.",
         "cutId": "InvMassKne",
         "cutType": "T",
-        "cutValue": 20000,
+        "cutValue": 200,
         "cutCondition": "<="
       }
     ]

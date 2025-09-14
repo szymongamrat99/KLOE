@@ -10,14 +10,14 @@ namespace KLOE
 	TrilaterationReconstructionKinFit::TrilaterationReconstructionKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, Int_t jmin, Int_t jmax, ErrorHandling::ErrorLogs &logger) : KinFitter("Trilateration", N_free, N_const, M, 0, loopcount, chiSqrStep, logger), _jmin(jmin), _jmax(jmax)
 	{
 		_V.ResizeTo(N_free + N_const, N_free + N_const),
-				_D.ResizeTo(M, N_free + N_const),
-				_D_T.ResizeTo(N_free + N_const, M),
-				_V_final.ResizeTo(N_free + N_const, N_free + N_const),
-				_V_aux.ResizeTo(N_free + N_const, N_free + N_const),
-				_V_min.ResizeTo(N_free + N_const, N_free + N_const),
-				_Aux.ResizeTo(M, M),
-				_V_invert.ResizeTo(N_free, N_free),
-				_V_init.ResizeTo(N_free + N_const, N_free + N_const);
+			_D.ResizeTo(M, N_free + N_const),
+			_D_T.ResizeTo(N_free + N_const, M),
+			_V_final.ResizeTo(N_free + N_const, N_free + N_const),
+			_V_aux.ResizeTo(N_free + N_const, N_free + N_const),
+			_V_min.ResizeTo(N_free + N_const, N_free + N_const),
+			_Aux.ResizeTo(M, M),
+			_V_invert.ResizeTo(N_free, N_free),
+			_V_init.ResizeTo(N_free + N_const, N_free + N_const);
 
 		_X.ResizeTo(N_free + N_const);
 		_C.ResizeTo(M);
@@ -54,10 +54,10 @@ namespace KLOE
 			_g4takentri_kinfit.resize(4);
 
 			KinFitter::ConstraintSet({"EnergyConsvCM",
-																"MinvConsv",
-																"NeutralXPathConsvLAB",
-																"NeutralYPathConsvLAB",
-																"NeutralZPathConsvLAB"});
+									  "MinvConsv",
+									  "NeutralXPathConsvLAB",
+									  "NeutralYPathConsvLAB",
+									  "NeutralZPathConsvLAB"});
 		}
 		else if (_recMode == TrilaterationCode::THREE_PI0)
 		{
@@ -81,10 +81,29 @@ namespace KLOE
 
 	ErrorHandling::ErrorCodes TrilaterationReconstructionKinFit::Reconstruct()
 	{
-		volatile Float_t
-				CHISQRTMP = 999.,
-				FUNVALTMP = 999999.,
-				Tcorr;
+		Float_t
+			CHISQRTMP = 999.,
+			FUNVALTMP = 999999.,
+			Tcorr = 0;
+
+		Float_t value_tmp[2] = {999999., 999999.};
+
+		Bool_t
+			clusterEnergy = false,
+			cond_clus[4] = {false, false, false, false},
+			cond_time_clus[2] = {false, false};
+
+		Float_t
+			gamma_mom_tmp[4][8] = {},
+			fourKnetri_tmp[2][10] = {},
+			kaon_vel_tmp[2] = {},
+			y_axis[3] = {},
+			ip_tmp[2][3] = {};
+
+		Float_t distance[4] = {0.};
+
+		Float_t neu_vtx[2][4] = {};
+		Float_t dist_tmp[2] = {0.};
 
 		_CHISQRMIN = 999999.;
 		_isConverged = 0;
@@ -99,18 +118,13 @@ namespace KLOE
 						_ind_gam[2] = j3;
 						_ind_gam[3] = j4;
 
-						volatile Bool_t
-								clusterEnergy = false,
-								cond_clus[4] = {false, false, false, false},
-								cond_time_clus[2] = {false, false};
-
 						for (Int_t k = 0; k < 4; k++)
 						{
 							_R.SetClu(k, _cluster[0][_NeuClusters[_ind_gam[k]] - 1],
-												_cluster[1][_NeuClusters[_ind_gam[k]] - 1],
-												_cluster[2][_NeuClusters[_ind_gam[k]] - 1],
-												_cluster[3][_NeuClusters[_ind_gam[k]] - 1],
-												_cluster[4][_NeuClusters[_ind_gam[k]] - 1]);
+									  _cluster[1][_NeuClusters[_ind_gam[k]] - 1],
+									  _cluster[2][_NeuClusters[_ind_gam[k]] - 1],
+									  _cluster[3][_NeuClusters[_ind_gam[k]] - 1],
+									  _cluster[4][_NeuClusters[_ind_gam[k]] - 1]);
 
 							_R.SetClu(4, 0., 0., 0., 0., 0.);
 							_R.SetClu(5, 0., 0., 0., 0., 0.);
@@ -119,23 +133,23 @@ namespace KLOE
 						_S = _R.MySolve(_selected.data());
 
 						clusterEnergy = _cluster[4][_NeuClusters[_ind_gam[0]] - 1] > MIN_CLU_ENE &&
-														_cluster[4][_NeuClusters[_ind_gam[1]] - 1] > MIN_CLU_ENE &&
-														_cluster[4][_NeuClusters[_ind_gam[2]] - 1] > MIN_CLU_ENE &&
-														_cluster[4][_NeuClusters[_ind_gam[3]] - 1] > MIN_CLU_ENE;
+										_cluster[4][_NeuClusters[_ind_gam[1]] - 1] > MIN_CLU_ENE &&
+										_cluster[4][_NeuClusters[_ind_gam[2]] - 1] > MIN_CLU_ENE &&
+										_cluster[4][_NeuClusters[_ind_gam[3]] - 1] > MIN_CLU_ENE;
 
 						for (Int_t k = 0; k < 4; k++)
 						{
 							cond_clus[k] =
-									_cluster[3][_NeuClusters[_ind_gam[k]] - 1] > 0 &&
-									_cluster[0][_NeuClusters[_ind_gam[k]] - 1] != 0 &&
-									_cluster[1][_NeuClusters[_ind_gam[k]] - 1] != 0 &&
-									_cluster[2][_NeuClusters[_ind_gam[k]] - 1] != 0;
+								_cluster[3][_NeuClusters[_ind_gam[k]] - 1] > 0 &&
+								_cluster[0][_NeuClusters[_ind_gam[k]] - 1] != 0 &&
+								_cluster[1][_NeuClusters[_ind_gam[k]] - 1] != 0 &&
+								_cluster[2][_NeuClusters[_ind_gam[k]] - 1] != 0;
 
 							if (k < 2)
 								cond_time_clus[k] = _S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[0]] - 1] &&
-																		_S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[1]] - 1] &&
-																		_S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[2]] - 1] &&
-																		_S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[3]] - 1];
+													_S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[1]] - 1] &&
+													_S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[2]] - 1] &&
+													_S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[3]] - 1];
 						}
 
 						Bool_t cond_tot = cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
@@ -167,13 +181,6 @@ namespace KLOE
 								}
 							}
 
-							Float_t
-									gamma_mom_tmp[4][4],
-									fourKnetri_tmp[2][4],
-									kaon_vel_tmp[2],
-									y_axis[3],
-									ip_tmp[2][3];
-
 							for (Int_t k1 = _jmin; k1 <= _jmax; k1++)
 							{
 								KinFitter::ParameterInitialization(_Param.data(), _Errors.data());
@@ -187,22 +194,16 @@ namespace KLOE
 								for (Int_t k = 0; k < 4; k++)
 								{
 									_R.SetClu(k, _X[k * 5],
-														_X[k * 5 + 1],
-														_X[k * 5 + 2],
-														_X[k * 5 + 3],
-														_X[k * 5 + 4]);
+											  _X[k * 5 + 1],
+											  _X[k * 5 + 2],
+											  _X[k * 5 + 3],
+											  _X[k * 5 + 4]);
 
 									_R.SetClu(4, 0., 0., 0., 0., 0.);
 									_R.SetClu(5, 0., 0., 0., 0., 0.);
 								}
 
 								_S = _R.MySolve(_selected.data());
-
-								Float_t distance[4] = {0.};
-
-								Float_t neu_vtx[2][4];
-								Float_t value[2] = {999999., 999999.};
-								Float_t dist_tmp[2] = {0.};
 
 								for (Int_t k = 0; k < 2; k++)
 								{
@@ -219,7 +220,14 @@ namespace KLOE
 
 									for (Int_t l = 0; l < 4; l++)
 									{
-										neutral_mom(_X[l * 5], _X[l * 5 + 1], _X[l * 5 + 2], _X[l * 5 + 4], neu_vtx[k], gamma_mom_tmp[l]);
+										distance[l] = sqrt(pow(_X[l * 5] - neu_vtx[k][0], 2) +
+														   pow(_X[l * 5 + 1] - neu_vtx[k][1], 2) +
+														   pow(_X[l * 5 + 2] - neu_vtx[k][2], 2));
+
+										gamma_mom_tmp[l][0] = _X[l * 5 + 4] * ((_X[l * 5] - neu_vtx[k][0]) / distance[k]);
+										gamma_mom_tmp[l][1] = _X[l * 5 + 4] * ((_X[l * 5 + 1] - neu_vtx[k][1]) / distance[k]);
+										gamma_mom_tmp[l][2] = _X[l * 5 + 4] * ((_X[l * 5 + 2] - neu_vtx[k][2]) / distance[k]);
+										gamma_mom_tmp[l][3] = _X[l * 5 + 4];
 
 										gamma_mom_tmp[l][4] = _X[l * 5];
 										gamma_mom_tmp[l][5] = _X[l * 5 + 1];
@@ -233,7 +241,7 @@ namespace KLOE
 									fourKnetri_tmp[k][3] = gamma_mom_tmp[0][3] + gamma_mom_tmp[1][3] + gamma_mom_tmp[2][3] + gamma_mom_tmp[3][3];
 
 									fourKnetri_tmp[k][4] = sqrt(pow(fourKnetri_tmp[k][0], 2) + pow(fourKnetri_tmp[k][1], 2) + pow(fourKnetri_tmp[k][2], 2));
-									fourKnetri_tmp[k][5] = sqrt(pow(fourKnetri_tmp[k][3], 2) - pow(fourKnetri_tmp[k][4], 2));
+									fourKnetri_tmp[k][5] = sqrt(pow(fourKnetri_tmp[k][3], 2) - pow(fourKnetri_tmp[k][0], 2) - pow(fourKnetri_tmp[k][1], 2) - pow(fourKnetri_tmp[k][2], 2));
 
 									kaon_vel_tmp[k] = cVel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
 
@@ -249,28 +257,44 @@ namespace KLOE
 										ip_tmp[k][2] = _bhabha_vtx[2];
 
 									dist_tmp[k] = sqrt(pow(neu_vtx[k][0] - ip_tmp[k][0], 2) +
-																		 pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
-																		 pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
+													   pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
+													   pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
 
-									value[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - mK0, 2));
+									value_tmp[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - mK0, 2));
 
-									if (TMath::IsNaN(value[k]))
-										value[k] = 999999.;
+									if (TMath::IsNaN(value_tmp[k]))
+										value_tmp[k] = 999999.;
 								}
 
 								cond_time_clus[0] = _S.sol[0][3] < _X(3) &&
-																		_S.sol[0][3] < _X(8) &&
-																		_S.sol[0][3] < _X(13) &&
-																		_S.sol[0][3] < _X(18);
+													_S.sol[0][3] < _X(8) &&
+													_S.sol[0][3] < _X(13) &&
+													_S.sol[0][3] < _X(18);
 
 								cond_time_clus[1] = _S.sol[1][3] < _X(3) &&
-																		_S.sol[1][3] < _X(8) &&
-																		_S.sol[1][3] < _X(13) &&
-																		_S.sol[1][3] < _X(18);
+													_S.sol[1][3] < _X(8) &&
+													_S.sol[1][3] < _X(13) &&
+													_S.sol[1][3] < _X(18);
 
-								if (abs(CHISQRTMP) < abs(_CHISQRMIN))
+								clusterEnergy = _X(4) > 0. &&
+												_X(9) > 0. &&
+												_X(14) > 0. &&
+												_X(19) > 0.;
+
+								for (Int_t k = 0; k < 4; k++)
 								{
-									if (cond_time_clus[0] && value[0] < value[1])
+									cond_clus[k] =
+										_X(5 * k + 3) > 0 &&
+										_X(5 * k) != 0 &&
+										_X(5 * k + 1) != 0 &&
+										_X(5 * k + 2) != 0;
+								}
+
+								cond_tot = clusterEnergy && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3];
+
+								if (CHISQRTMP < _CHISQRMIN && cond_tot)
+								{
+									if (cond_time_clus[0] && value_tmp[0] < value_tmp[1])
 									{
 										_isConverged = 1;
 										_FUNVALMIN = FUNVALTMP;
@@ -292,8 +316,8 @@ namespace KLOE
 										for (Int_t l = 0; l < 4; l++)
 										{
 											distance[l] = sqrt(pow(_X[l * 5] - neu_vtx[0][0], 2) +
-																				 pow(_X[l * 5 + 1] - neu_vtx[0][1], 2) +
-																				 pow(_X[l * 5 + 2] - neu_vtx[0][2], 2));
+															   pow(_X[l * 5 + 1] - neu_vtx[0][1], 2) +
+															   pow(_X[l * 5 + 2] - neu_vtx[0][2], 2));
 
 											_gamma_mom_final[l][0] = _X[l * 5 + 4] * ((_X[l * 5] - neu_vtx[0][0]) / distance[l]);
 											_gamma_mom_final[l][1] = _X[l * 5 + 4] * ((_X[l * 5 + 1] - neu_vtx[0][1]) / distance[l]);
@@ -322,7 +346,7 @@ namespace KLOE
 
 										_bunchnum = k1;
 									}
-									else if (cond_time_clus[1] && value[1] < value[0])
+									else if (cond_time_clus[1] && value_tmp[1] < value_tmp[0])
 									{
 										_isConverged = 1;
 										_FUNVALMIN = FUNVALTMP;
@@ -345,8 +369,8 @@ namespace KLOE
 										for (Int_t l = 0; l < 4; l++)
 										{
 											distance[l] = sqrt(pow(_X[l * 5] - neu_vtx[1][0], 2) +
-																				 pow(_X[l * 5 + 1] - neu_vtx[1][1], 2) +
-																				 pow(_X[l * 5 + 2] - neu_vtx[1][2], 2));
+															   pow(_X[l * 5 + 1] - neu_vtx[1][1], 2) +
+															   pow(_X[l * 5 + 2] - neu_vtx[1][2], 2));
 
 											_gamma_mom_final[l][0] = _X[l * 5 + 4] * ((_X[l * 5] - neu_vtx[1][0]) / distance[l]);
 											_gamma_mom_final[l][1] = _X[l * 5 + 4] * ((_X[l * 5 + 1] - neu_vtx[1][1]) / distance[l]);
@@ -416,8 +440,10 @@ namespace KLOE
 						}
 					}
 
-		if (_isConverged)
+		if (_isConverged == 1)
+		{
 			return ErrorHandling::ErrorCodes::NO_ERROR;
+		}
 		else
 		{
 			_neu_vtx_min[0] = 0.;

@@ -774,6 +774,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 									KaonPathTriangleLAB = sqrt(pow(baseKin.KneTriangle[6] - baseKin.ipnew[0], 2) +
 															   pow(baseKin.KneTriangle[7] - baseKin.ipnew[1], 2) +
 															   pow(baseKin.KneTriangle[8] - baseKin.ipnew[2], 2)),
+									// KaonPathTriangleLAB = sqrt(pow(baseKin.KnetriKinFit[6] - baseKin.ipTriKinFit[0], 2) +
+									// 						   pow(baseKin.KnetriKinFit[7] - baseKin.ipTriKinFit[1], 2) +
+									// 						   pow(baseKin.KnetriKinFit[8] - baseKin.ipTriKinFit[2], 2)),
 									KaonVelocityTriangleLAB = kaonMomTriangleLAB.Mag();
 
 								baseKin.kaonNeTimeLAB = KaonPathTriangleLAB / KaonVelocityTriangleLAB;
@@ -783,6 +786,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 														   baseKin.KneTriangle[7] - baseKin.ipnew[1], // cm
 														   baseKin.KneTriangle[8] - baseKin.ipnew[2], // cm
 														   baseKin.kaonNeTimeLAB},					  // cm
+									// Kaon4VecTriangleLAB = {baseKin.KnetriKinFit[6] - baseKin.ipTriKinFit[0], // cm
+									// 					   baseKin.KnetriKinFit[7] - baseKin.ipTriKinFit[1], // cm
+									// 					   baseKin.KnetriKinFit[8] - baseKin.ipTriKinFit[2], // cm
+									// 					   baseKin.kaonNeTimeLAB},							 // cm
 									Kaon4VecKaonTriangleCM = {0., 0., 0., 0.};
 
 								Obj.lorentz_transf(kaonMomTriangleLAB, Kaon4VecTriangleLAB, Kaon4VecKaonTriangleCM);
