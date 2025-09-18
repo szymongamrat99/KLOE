@@ -21,13 +21,189 @@
 #include <ErrorLogs.h>
 #include <neutral_mom.h>
 #include <MainMenu.h>
+#include <const.h>
 
 /**
  * @brief KLOE namespace
  */
 namespace KLOE
 {
-    
+    struct chargedParticle
+    {
+        chargedParticle() : fourMom(4, 0.),
+                            fourPos(4, 0.),
+                            trackParams(3, 0.),
+                            lorentzFourMom(0., 0., 0., 0.),
+                            lorentzFourPos(0., 0., 0., 0.) {};
+
+        std::vector<Float_t> fourMom; /*!< 4-momentum of the charged particle */
+        std::vector<Float_t> fourPos; /*!< 4-momentum of the charged particle */
+
+        std::vector<Float_t> trackParams; /*!< Track parameters of the charged particle */
+
+        TLorentzVector lorentzFourMom; /*!< 4-momentum of the charged particle */
+        TLorentzVector lorentzFourPos; /*!< 4-momentum of the charged particle */
+
+        void SetLorentzVectors()
+        {
+            lorentzFourMom.SetPxPyPzE(fourMom[0], fourMom[1], fourMom[2], fourMom[3]);
+            lorentzFourPos.SetXYZT(fourPos[0], fourPos[1], fourPos[2], fourPos[3]);
+        };
+    };
+
+    struct neutralParticle
+    {
+        neutralParticle() : fourMom(4, 0.),
+                            fourPos(4, 0.),
+                            total(8, 0.),
+                            clusterParams(5, 0.),
+                            lorentzFourMom(0., 0., 0., 0.),
+                            lorentzFourPos(0., 0., 0., 0.) {};
+
+        std::vector<Float_t> fourMom; /*!< 4-momentum of the neutral particle */
+        std::vector<Float_t> fourPos; /*!< 4-momentum of the neutral particle */
+        std::vector<Float_t> total;   /*!< Total vector of the neutral particle */
+
+        std::vector<Float_t> clusterParams; /*!< Track parameters of the neutral particle */
+
+        Float_t path = 0;         /*!< Path of the neutral particle */
+        Float_t timeOfFlight = 0; /*!< Time of the neutral particle */
+
+        TLorentzVector lorentzFourMom; /*!< 4-momentum of the neutral particle */
+        TLorentzVector lorentzFourPos; /*!< 4-momentum of the neutral particle */
+
+        void calculatePath(Float_t *neuVtx)
+        {
+            path = sqrt(pow(fourPos[0] - neuVtx[0], 2) + pow(fourPos[1] - neuVtx[1], 2) + pow(fourPos[2] - neuVtx[2], 2)); // cm
+        };
+
+        void calculateTimeOfFlightPhoton()
+        {
+            timeOfFlight = path / cVel;
+        }
+
+        void SetTotalVectorPhoton()
+        {
+            total[0] = fourMom[0];
+            total[1] = fourMom[1];
+            total[2] = fourMom[2];
+            total[3] = fourMom[3];
+            total[4] = clusterParams[0];
+            total[5] = clusterParams[1];
+            total[6] = clusterParams[2];
+            total[7] = clusterParams[3];
+        };
+
+        void SetLorentzVectors()
+        {
+            lorentzFourMom.SetPxPyPzE(fourMom[0], fourMom[1], fourMom[2], fourMom[3]);
+            lorentzFourPos.SetXYZT(fourPos[0], fourPos[1], fourPos[2], fourPos[3]);
+        };
+    };
+
+    struct kaonNeutral
+    {
+        kaonNeutral() : fourMom(4, 0.),
+                        fourPos(4, 0.),
+                        vtxPos(3, 0.),
+                        total(10, 0.),
+                        lorentzFourMom(0., 0., 0., 0.),
+                        lorentzFourPos(0., 0., 0., 0.) {};
+
+        std::vector<Float_t> fourMom; /*!< 4-momentum of the charged particle */
+        std::vector<Float_t> fourPos; /*!< 4-momentum of the charged particle */
+        std::vector<Float_t> vtxPos;  /*!< 4-momentum of the charged particle */
+        std::vector<Float_t> total;   /*!< 9-vector of the charged particle */
+
+        Float_t totalMomentum = 0; /*!< Total momentum of the kaon */
+        Float_t beta = 0;          /*!< Beta of the kaon */
+        Float_t gamma = 0;         /*!< Gamma of the kaon */
+        Float_t mass = 0;          /*!< Mass of the kaon */
+        Float_t path = 0;          /*!< Path of the kaon */
+        Float_t lifetimeLAB = 0;   /*!< Lifetime of the kaon in LAB*/
+        Float_t lifetimeCM = 0;    /*!< Lifetime of the kaon in CM*/
+
+        TLorentzVector lorentzFourMom; /*!< 4-momentum of the charged particle */
+        TLorentzVector lorentzFourPos; /*!< 4-momentum of the charged particle */
+
+        void calculatePath(Float_t *ip)
+        {
+            path = sqrt(pow(fourPos[0] - ip[0], 2) + pow(fourPos[1] - ip[1], 2) + pow(fourPos[2] - ip[2], 2)); // cm
+        };
+
+        void calculateBeta()
+        {
+            if (totalMomentum == 0)
+                calculateTotalMomentum();
+
+            beta = totalMomentum / fourMom[3];
+        };
+
+        void calculateTotalMomentum()
+        {
+            totalMomentum = sqrt(pow(fourMom[0], 2) + pow(fourMom[1], 2) + pow(fourMom[2], 2));
+        }
+
+        void calculateLifetimeLAB()
+        {
+            if (beta == 0)
+                calculateBeta();
+
+            lifetimeLAB = path / (beta * cVel);
+        };
+
+        void SetTotalVector()
+        {
+            total[0] = fourMom[0];
+            total[1] = fourMom[1];
+            total[2] = fourMom[2];
+            total[3] = fourMom[3];
+            total[4] = sqrt(pow(fourMom[0], 2) + pow(fourMom[1], 2) + pow(fourMom[2], 2));
+            total[5] = sqrt(pow(fourMom[3], 2) - pow(total[4], 2));
+            total[6] = fourPos[0];
+            total[7] = fourPos[1];
+            total[8] = fourPos[2];
+
+            calculateLifetimeLAB();
+            total[9] = lifetimeLAB;
+        };
+
+        void SetPositionAndMomentumFromTotal()
+        {
+            fourMom[0] = total[0];
+            fourMom[1] = total[1];
+            fourMom[2] = total[2];
+            fourMom[3] = total[3];
+            fourPos[0] = total[6];
+            fourPos[1] = total[7];
+            fourPos[2] = total[8];
+            fourPos[3] = total[9];
+        };
+
+        void SetLorentzVectors()
+        {
+            lorentzFourMom.SetPxPyPzE(fourMom[0], fourMom[1], fourMom[2], fourMom[3]);
+            lorentzFourPos.SetXYZT(fourPos[0], fourPos[1], fourPos[2], fourPos[3]);
+        };
+
+        void CalculateDerivedQuantities()
+        {
+            totalMomentum = lorentzFourMom.P();
+            beta = totalMomentum / lorentzFourMom.E();
+            gamma = 1. / sqrt(1. - beta * beta);
+            mass = lorentzFourMom.M();
+        };
+    };
+
+    struct phiMeson
+    {
+        phiMeson() : fourMom(4, 0.),
+                     vtxPos(3, 0.) {};
+
+        std::vector<Float_t> fourMom; /*!< 4-momentum of the charged particle */
+        std::vector<Float_t> vtxPos;  /*!< 3-momentum of the charged particle */
+    };
+
     /**
      * @class General pm00 class for KLOE analysis. Includes most fundamental functions like timestamp, datestamp, array clearing functions, etc.
      * @author @szymongamrat99
@@ -73,6 +249,29 @@ namespace KLOE
 
         TVector3
             boost; /*!< boost vector between the frames*/
+
+        std::vector<chargedParticle>
+            pionCh;
+
+        std::vector<neutralParticle>
+            photon;
+
+        kaonNeutral
+            Kchrec,    /*!< Charged kaon reconstructed from pions*/
+            Kchboost,  /*!< Charged kaon fixed with lorentz boost*/
+            Knerec,    /*!< Neutral kaon reconstructed from Photons*/
+            Knereclor; /*!< Neutral kaon reconstructed with Kchboost*/
+
+        phiMeson
+            phi; /*!< Phi meson */
+
+        std::vector<Float_t>
+            bhabha_mom,
+            trackParameters,
+            ip;
+
+        std::vector<std::vector<Float_t>>
+            cluster;
 
         std::vector<TH1 *> frac, frac_data;
         TH1 *data, *mc_sum, *data_sub, *mc_sub;
@@ -254,6 +453,8 @@ namespace KLOE
 
         static ErrorHandling::ErrorCodes triangleReconstruction(std::vector<Int_t> g4taken_kinfit, std::vector<Float_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Float_t> bhabha_mom, std::vector<Float_t> Kchboost, std::vector<Float_t> ip, std::vector<Float_t> &Knetriangle, std::vector<Float_t> gammatriangle[4], Float_t &minv4gam, std::vector<Float_t> &trcfinal, ErrorHandling::ErrorLogs &logger);
 
+        ErrorHandling::ErrorCodes triangleReconstruction(std::vector<neutralParticle> &photon, phiMeson phi, kaonNeutral Kchboost, Float_t *ip, kaonNeutral &Knetriangle);
+
         /**
          * @brief Method to initialize a TChain with the list of files. Defined per branch, which files (Prod2ntu, Prod2root, Old analysis) are to be taken into account.
          * @param chain_init address to the externally initialized TChain object
@@ -359,8 +560,7 @@ namespace KLOE
         {
             static const std::map<std::string, TrilaterationCode> enumMap = {
                 {"TWO_PI0", TrilaterationCode::TWO_PI0},
-                {"THREE_PI0", TrilaterationCode::THREE_PI0}
-            };
+                {"THREE_PI0", TrilaterationCode::THREE_PI0}};
 
             auto it = enumMap.find(str);
             if (it != enumMap.end())
@@ -374,7 +574,6 @@ namespace KLOE
         };
 
         void CorrectClusterTime(Float_t T0, std::vector<Float_t> &cluTimeCorrected);
-        
     };
 }
 

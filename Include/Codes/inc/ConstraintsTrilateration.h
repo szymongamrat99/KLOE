@@ -64,21 +64,27 @@ namespace KLOE
     Double_t NeutralPathConsvLAB(Double_t *x, Double_t *p) override;
 
     // Fictitious overriders
-    Double_t FourMomConsvLAB(Double_t *x, Double_t *p) const override {return 0;};
-    Double_t PhotonPathConsvLAB(Double_t *x, Double_t *p) const override {return 0;};
-    Double_t PxConsvLAB(Double_t *x, Double_t *p) override {return 0;};
-    Double_t PyConsvLAB(Double_t *x, Double_t *p) override {return 0;};
-    Double_t PzConsvLAB(Double_t *x, Double_t *p) override {return 0;};
-    Double_t EnergyConsvLAB(Double_t *x, Double_t *p) override {return 0;};
-    Double_t Photon1PathConsvLAB(Double_t *x, Double_t *p) override {return 0;};
-    Double_t Photon2PathConsvLAB(Double_t *x, Double_t *p) override {return 0;};
-    Double_t Photon3PathConsvLAB(Double_t *x, Double_t *p) override {return 0;};
-    Double_t Photon4PathConsvLAB(Double_t *x, Double_t *p) override {return 0;};
+    Double_t FourMomConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t PhotonPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t PxConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t PyConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t PzConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t EnergyConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t Photon1PathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t Photon2PathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t Photon3PathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t Photon4PathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t MinvConsvChKaon(Double_t *x, Double_t *p) override { return 0; };
+    Double_t MinvConsvNeuKaon(Double_t *x, Double_t *p) override { return 0; };
+
+    void SetParameters(Float_t *p) override {};
+    void ResetParameters() override {};
+    void IntermediateReconstruction() override {};
 
     Int_t
         _chosenComponent,
         _selected[4] = {1, 2, 3, 4};
-    Bool_t 
+    Bool_t
         _cond_detector = kFALSE;
 
   public:

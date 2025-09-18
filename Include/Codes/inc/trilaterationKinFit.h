@@ -11,7 +11,7 @@
 
 namespace KLOE
 {
-	class TrilaterationReconstructionKinFit : public KinFitter, protected ChargedVtxRec<>
+	class TrilaterationReconstructionKinFit : public KinFitter
 	{
 	private:
 		TVectorD
@@ -80,6 +80,9 @@ namespace KLOE
 
 		TrilaterationCode
 				_recMode;
+
+		ChargedVtxRec<Float_t, Int_t>
+				_chargedVtxRec;
 
 		Reconstructor
 				_R;

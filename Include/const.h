@@ -264,7 +264,12 @@ struct BaseKinematics
                        CotvSmeared1(0.0),
                        CurvSmeared2(0.0),
                        PhivSmeared2(0.0),
-                       CotvSmeared2(0.0)
+                       CotvSmeared2(0.0),
+                       KchrecFit(10, 0),
+                       KchboostFit(10, 0),
+                       ipFit(3, 0),
+                       KnerecFit(10, 0),
+                       KnereclorFit(10, 0)
     {};
 
     Float_t
@@ -327,7 +332,8 @@ struct BaseKinematics
         CotvSmeared1,
         CurvSmeared2,
         PhivSmeared2,
-        CotvSmeared2;
+        CotvSmeared2,
+        Chi2SignalKinFit;
 
     UChar_t
         mctruth,
@@ -426,7 +432,18 @@ struct BaseKinematics
         CurvMC,
         PhivMC,
         CotvMC,
-        pullsTriKinFit;
+        pullsTriKinFit,
+        trkFit[2],
+        KchrecFit,
+        KchboostFit,
+        ipFit,
+        photonFit[4],
+        KnerecFit,
+        KnereclorFit,
+        ParamSignal,
+        ErrorsSignal,
+        ParamSignalFit,
+        ErrorsSignalFit;
 
     TLorentzVector
         phi4Mom;

@@ -11,6 +11,9 @@
 #include <TObjArray.h>
 #include <TPaveText.h>
 #include <TMath.h>
+#include <TF1.h>
+#include <TLatex.h>
+#include "triple_gaus.h"
 #include <vector>
 #include <map>
 
@@ -262,6 +265,113 @@ public:
         }
     };
 
+    /**
+     * @struct FitParams3Gauss
+     * @brief Struktura przechowująca parametry i wyniki fitowania Triple Gaussian
+     */
+    struct FitParams3Gauss {
+        // Parametry Triple Gaussian: 9 parametrów (A1,μ1,σ1, A2,μ2,σ2, A3,μ3,σ3)
+        std::vector<Double_t> initialParams;       ///< Wartości początkowe parametrów [9]
+        std::vector<Double_t> lowerBounds;         ///< Dolne granice parametrów [9]
+        std::vector<Double_t> upperBounds;         ///< Górne granice parametrów [9]
+        std::vector<TString> paramNames;           ///< Nazwy parametrów
+        
+        // Wyniki fitu
+        std::vector<Double_t> fittedParams;        ///< Wyniki fitu [9]
+        std::vector<Double_t> paramErrors;         ///< Błędy parametrów [9]
+        Double_t chi2;                             ///< Chi-kwadrat
+        Int_t ndf;                                 ///< Liczba stopni swobody
+        Int_t status;                              ///< Status fitu
+        Bool_t converged;                          ///< Czy fit się zbiegł
+        
+        // Obliczone wartości kombinowane (z metod triple_gaus)
+        Double_t combinedMean;                     ///< Średnia kombinowana
+        Double_t combinedMeanErr;                  ///< Błąd średniej kombinowanej
+        Double_t combinedStdDev;                   ///< Odchylenie standardowe kombinowane
+        Double_t combinedStdDevErr;                ///< Błąd odchylenia standardowego
+        
+        // Zakres fitu
+        Double_t fitRangeMin;                      ///< Dolna granica zakresu fitu
+        Double_t fitRangeMax;                      ///< Górna granica zakresu fitu
+        
+        TF1* fitFunction;                          ///< Wskaźnik na funkcję fitu
+        
+        FitParams3Gauss() {
+            InitializeDefaults();
+        }
+        
+        ~FitParams3Gauss() {
+            if(fitFunction) {
+                delete fitFunction;
+                fitFunction = nullptr;
+            }
+        }
+        
+        /**
+         * @brief Inicjalizuje domyślne wartości parametrów
+         */
+        void InitializeDefaults() {
+            // Nazwy parametrów
+            paramNames = {"A1", "μ1", "σ1", "A2", "μ2", "σ2", "A3", "μ3", "σ3"};
+            
+            // Domyślne wartości początkowe (będą aktualizowane na podstawie histogramu)
+            initialParams.assign(9, 0.0);
+            
+            // Domyślne granice (będą aktualizowane na podstawie histogramu)
+            lowerBounds.assign(9, 0.0);
+            upperBounds.assign(9, 1000.0);
+            
+            // Inicjalizuj wyniki
+            fittedParams.assign(9, 0.0);
+            paramErrors.assign(9, 0.0);
+            chi2 = 0.0;
+            ndf = 0;
+            status = -1;
+            converged = false;
+            
+            combinedMean = 0.0;
+            combinedMeanErr = 0.0;
+            combinedStdDev = 0.0;
+            combinedStdDevErr = 0.0;
+            
+            fitRangeMin = -999;
+            fitRangeMax = -999;
+            fitFunction = nullptr;
+        }
+        
+        /**
+         * @brief Ustawia wartości początkowe parametrów
+         * @param params Wektor 9 parametrów [A1,μ1,σ1, A2,μ2,σ2, A3,μ3,σ3]
+         */
+        void SetInitialParams(const std::vector<Double_t>& params) {
+            if(params.size() == 9) {
+                initialParams = params;
+            }
+        }
+        
+        /**
+         * @brief Ustawia granice parametrów
+         * @param lower Dolne granice [9]
+         * @param upper Górne granice [9]
+         */
+        void SetParamBounds(const std::vector<Double_t>& lower, const std::vector<Double_t>& upper) {
+            if(lower.size() == 9 && upper.size() == 9) {
+                lowerBounds = lower;
+                upperBounds = upper;
+            }
+        }
+        
+        /**
+         * @brief Ustawia zakres fitu
+         * @param xmin Dolna granica
+         * @param xmax Górna granica
+         */
+        void SetFitRange(Double_t xmin, Double_t xmax) {
+            fitRangeMin = xmin;
+            fitRangeMax = xmax;
+        }
+    };
+
     enum class ImageFormat { PNG, SVG, PDF };
 
     /**
@@ -275,8 +385,8 @@ public:
      */
     HistManager(Int_t channNum, const Color_t* channColors, 
                 const std::vector<TString>& channelNames = std::vector<TString>(),
-                Int_t dataStyle = kFullCircle, Int_t dataColor = kBlack,
-                Int_t sumColor = kOrange);
+                Int_t dataStyle = kFullCircle, Int_t dataColor = kBlack, 
+                Float_t dataSize = 1.0, Int_t sumColor = kOrange);
 
     /// Destruktor
     ~HistManager();
@@ -372,9 +482,48 @@ public:
      */
     Double_t ScaleArrayChannelByEntries(const TString& baseName, Int_t index, Int_t mctruth);
 
+    /**
+     * @brief Skaluje wszystkie histogramy MC w array tak, aby ich suma miała tę samą całkę co dane
+     * @param baseName Bazowa nazwa array histogramów  
+     * @param index Indeks histogramu w array (0-based)
+     * @return Czynnik skalowania użyty do normalizacji, lub -1 w przypadku błędu
+     */
+    Double_t PerformArraySimpleScaling(const TString& baseName, Int_t index);
+
     // Rysowanie histogramów
     void DrawSet1D(const TString& setName, const TString& drawOpt = "", Bool_t drawData = false);
     void DrawSet2D(const TString& setName, const TString& drawOpt = "COLZ", Bool_t drawData = false);
+    
+    /**
+     * @brief Rysuje histogram 1D z opcjonalnym fitem Triple Gaussian
+     * @param setName Nazwa zestawu histogramów
+     * @param mctruth Kanał do narysowania (0=suma MC, 1-N=kanały, -1=dane)
+     * @param drawOpt Opcje rysowania histogramu
+     * @param performFit Czy wykonać fit Triple Gaussian
+     * @param fitParams Parametry fitu (jeśli nullptr, użyje domyślnych)
+     * @param drawData Czy dodatkowo narysować dane
+     * @return Wskaźnik na canvas lub nullptr
+     */
+    TCanvas* DrawHistogram1DWithFit(const TString& setName, Int_t mctruth, 
+                                   const TString& drawOpt = "HIST",
+                                   Bool_t performFit = true,
+                                   FitParams3Gauss* fitParams = nullptr,
+                                   Bool_t drawData = false);
+    
+    /**
+     * @brief Rysuje histogram z array z opcjonalnym fitem Triple Gaussian
+     * @param baseName Bazowa nazwa zestawu array
+     * @param index Indeks histogramu w zestawie
+     * @param mctruth Kanał do narysowania (0=suma MC, 1-N=kanały, -1=dane)
+     * @param drawOpt Opcje rysowania histogramu
+     * @param performFit Czy wykonać fit Triple Gaussian
+     * @param fitParams Parametry fitu (jeśli nullptr, użyje domyślnych)
+     * @return Wskaźnik na canvas lub nullptr
+     */
+    TCanvas* DrawArrayHistogramWithFit(const TString& baseName, Int_t index, Int_t mctruth,
+                                     const TString& drawOpt = "HIST", 
+                                     Bool_t performFit = true,
+                                     FitParams3Gauss* fitParams = nullptr);
 
     // Skalowanie histogramów
     /**
@@ -392,6 +541,93 @@ public:
      * @return Czynnik skalowania użyty do normalizacji, lub -1 w przypadku błędu
      */
     Double_t ScaleChannel2DByEntries(const TString& setName, Int_t mctruth);
+
+    // ==================== TRIPLE GAUSSIAN FITTING ====================
+    
+    /**
+     * @brief Przygotowuje domyślne parametry dla fitu Triple Gaussian na podstawie histogramu
+     * @param hist Histogram do analizy
+     * @param params Struktura parametrów do wypełnienia
+     * @return true jeśli sukces
+     */
+    Bool_t PrepareDefaultTripleGaussParams(TH1* hist, FitParams3Gauss& params);
+    
+    /**
+     * @brief Wykonuje fit Triple Gaussian dla histogramu z zestawu 1D
+     * @param setName Nazwa zestawu histogramów
+     * @param mctruth Numer kanału MC (1-N), 0 dla sumy MC, -1 dla danych
+     * @param params Parametry fitu
+     * @return true jeśli fit się udał
+     */
+    Bool_t FitTripleGauss1D(const TString& setName, Int_t mctruth, FitParams3Gauss& params);
+    
+    /**
+     * @brief Wykonuje fit Triple Gaussian dla histogramu z array
+     * @param baseName Bazowa nazwa zestawu array
+     * @param index Indeks histogramu w zestawie (0-based)
+     * @param mctruth Numer kanału MC (1-N), 0 dla sumy MC, -1 dla danych
+     * @param params Parametry fitu
+     * @return true jeśli fit się udał
+     */
+    Bool_t FitTripleGaussArray1D(const TString& baseName, Int_t index, Int_t mctruth, FitParams3Gauss& params);
+    
+    /**
+     * @brief Rysuje wyniki fitu Triple Gaussian na histogramie
+     * @param hist Histogram na którym rysować
+     * @param params Parametry z wynikami fitu
+     * @param drawComponents Czy rysować poszczególne komponenty Gaussa
+     */
+    void DrawTripleGaussFit(TH1* hist, const FitParams3Gauss& params, Bool_t drawComponents = false);
+    
+    /**
+     * @brief Rysuje poszczególne komponenty Triple Gaussian (pomocnicza dla użytkowników)
+     * @param hist Histogram na którym rysować komponenty
+     * @param params Parametry fitu z wynikami
+     */
+    void DrawTripleGaussComponents(TH1* hist, const FitParams3Gauss& params);
+    
+    /**
+     * @brief Wyświetla wyniki fitu Triple Gaussian na terminalu i na canvie
+     * @param params Parametry z wynikami fitu
+     * @param hist Histogram dla kontekstu wyświetlania
+     * @param addToCanvas Czy dodać tekst do aktualnego canvasu
+     */
+    void DisplayTripleGaussResults(const FitParams3Gauss& params, const TH1* hist, Bool_t addToCanvas = true);
+    
+    /**
+     * @brief Pobiera histogram do fitowania Triple Gaussian
+     * @param setName Nazwa zestawu lub baseName dla array
+     * @param mctruth Numer kanału MC lub -1 dla danych
+     * @param arrayIndex Indeks array (-1 jeśli nie array)
+     * @return Wskaźnik na histogram lub nullptr
+     */
+    TH1* GetHistogramForTripleGaussFit(const TString& setName, Int_t mctruth, Int_t arrayIndex = -1);
+    
+    /**
+     * @brief Pobiera wyniki fitu Triple Gaussian dla zestawu 1D
+     * @param setName Nazwa zestawu
+     * @param mctruth Numer kanału MC
+     * @return Wskaźnik na wyniki fitu lub nullptr jeśli nie znaleziono
+     */
+    const FitParams3Gauss* GetTripleGaussResults1D(const TString& setName, Int_t mctruth);
+    
+    /**
+     * @brief Pobiera wyniki fitu Triple Gaussian dla array
+     * @param baseName Bazowa nazwa zestawu array
+     * @param index Indeks histogramu
+     * @param mctruth Numer kanału MC
+     * @return Wskaźnik na wyniki fitu lub nullptr jeśli nie znaleziono
+     */
+    const FitParams3Gauss* GetTripleGaussResultsArray(const TString& baseName, Int_t index, Int_t mctruth);
+    
+    /**
+     * @brief Sprawdza czy istnieją wyniki fitu Triple Gaussian
+     * @param setName Nazwa zestawu
+     * @param mctruth Numer kanału MC
+     * @param arrayIndex Indeks array (-1 jeśli nie array)
+     * @return true jeśli wyniki istnieją
+     */
+    Bool_t HasTripleGaussResults(const TString& setName, Int_t mctruth, Int_t arrayIndex = -1);
 
     // Zapisywanie
     void SaveSet(const TString& setName, const TString& filePattern);
@@ -483,6 +719,7 @@ private:
     std::vector<TString> fChannelNames;                 ///< Nazwy kanałów MC
     Int_t fDataStyle;                                   ///< Styl markera dla danych
     Int_t fDataColor;                                   ///< Kolor danych
+    Float_t fDataSize;                                  ///< Rozmiar markera dla danych
     Int_t fSumColor;                                    ///< Kolor sumy MC
     Bool_t fUseFractionFitter{false};                   ///< Czy używać FractionFit
     NormalizationType fNormalizationType{NormalizationType::NONE}; ///< Typ normalizacji
@@ -505,6 +742,10 @@ private:
     std::map<TString, FitConstraints> fFitConstraints;  ///< Ograniczenia fitu dla każdego zestawu
     std::map<TString, FitResult> fFitResults;           ///< Wyniki fitów dla każdego zestawu
     FitResult fLastFitResult;                           ///< Wyniki ostatniego fitu
+    
+    // Triple Gaussian fitting related
+    std::map<TString, FitParams3Gauss> f3GaussFitResults;    ///< Wyniki fitów Triple Gaussian dla zestawów 1D [setName_mctruth]
+    std::map<TString, FitParams3Gauss> f3GaussArrayResults;  ///< Wyniki fitów Triple Gaussian dla array [baseName_index_mctruth]
 
     // Metody pomocnicze
     void ConfigureHistogram(TH1* hist, Int_t color, Bool_t showStats);
@@ -562,4 +803,29 @@ private:
      */
     Int_t EnsureFitStability(TFractionFitter* fitter, const FitConstraints& constraints, 
                             Int_t maxRetries = 3);
+    
+    // ==================== TRIPLE GAUSSIAN PRIVATE HELPERS ====================
+    
+    /**
+     * @brief Wykonuje właściwy fit Triple Gaussian na histogramie
+     * @param hist Histogram do fitowania
+     * @param params Parametry fitu (wejście/wyjście)
+     * @return true jeśli fit się udał
+     */
+    Bool_t DoTripleGaussFit(TH1* hist, FitParams3Gauss& params);
+    
+    /**
+     * @brief Oblicza wartości kombinowane z wyników fitu
+     * @param params Parametry z wynikami fitu (do aktualizacji)
+     */
+    void CalculateCombinedValues(FitParams3Gauss& params);
+    
+    /**
+     * @brief Generuje klucz do przechowywania wyników fitu
+     * @param setName Nazwa zestawu
+     * @param mctruth Numer kanału MC
+     * @param arrayIndex Indeks array (-1 jeśli nie array)
+     * @return Klucz string
+     */
+    TString GenerateTripleGaussKey(const TString& setName, Int_t mctruth, Int_t arrayIndex = -1);
 };

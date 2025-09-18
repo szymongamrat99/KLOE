@@ -21,6 +21,7 @@
 #include <ConfigManager.h>
 
 #include <trilaterationKinFit.h>
+#include <signalKinFit.h>
 
 #include "../../Neutrec/inc/trilateration.hpp"
 
@@ -212,10 +213,18 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		N_free = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["freeVars"],
 		range = Int_t(jmax - jmin) + 1;
 
+	const Short_t
+		loopcountSignal = (Short_t)properties["variables"]["KinFit"]["Signal"]["loopCount"],
+		MSignal = (Short_t)properties["variables"]["KinFit"]["Signal"]["numOfConstraints"],
+		N_constSignal = (Short_t)properties["variables"]["KinFit"]["Signal"]["fixedVars"],
+		N_freeSignal = (Short_t)properties["variables"]["KinFit"]["Signal"]["freeVars"];
+
 	const Double_t
-		chiSqrStep = (Double_t)properties["variables"]["KinFit"]["Trilateration"]["chiSqrStep"];
+		chiSqrStep = (Double_t)properties["variables"]["KinFit"]["Trilateration"]["chiSqrStep"],
+		chiSqrStepSignal = (Double_t)properties["variables"]["KinFit"]["Signal"]["chiSqrStep"];
 
 	KLOE::TrilaterationReconstructionKinFit trilatKinFitObj(N_free, N_const, M, loopcount, chiSqrStep, jmin, jmax, logger);
+	KLOE::SignalKinFit signalKinFitObj(N_freeSignal, N_constSignal, MSignal, loopcountSignal, chiSqrStepSignal, logger);
 
 	while (reader.Next())
 	{
@@ -293,6 +302,20 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			baseKin.trkClosest[i].resize(4);
 			baseKin.trksmeared[i].resize(4);
 		}
+
+		baseKin.ParamSignalFit.resize(N_freeSignal + N_constSignal);
+		baseKin.ErrorsSignalFit.resize(N_freeSignal + N_constSignal);
+
+		for (Int_t i = 0; i < 4; i++)
+			baseKin.photonFit[i].resize(8);
+
+		baseKin.ipFit.resize(3);
+		baseKin.KchrecFit.resize(10);
+		baseKin.KchboostFit.resize(10);
+		baseKin.KnerecFit.resize(10);
+		baseKin.KnereclorFit.resize(10);
+		for (Int_t i = 0; i < 2; i++)
+			baseKin.trkFit[i].resize(4);
 
 		baseKin.CurvMC.clear();
 		baseKin.PhivMC.clear();
@@ -798,22 +821,95 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 								baseKin.kaonNeTimeCM = Kaon4VecKaonTriangleCM.T() / (cVel * tau_S_nonCPT);
 								baseKin.kaonNeTimeLAB = baseKin.kaonNeTimeLAB / (cVel * tau_S_nonCPT);
 
-								baseKin.cuts.clear();
-								baseKin.cuts.resize(cutter.GetCuts().size());
+								// Signal Global Kinematic Fit
 
-								for (Int_t iter = 0; iter < cutter.GetCuts().size(); iter++)
-									if (cutter.PassCut(iter))
-										baseKin.cuts[iter] = 1;
-									else if (!cutter.PassCut(iter))
+								std::vector<Float_t>
+									trackParameters[2],
+									trackParametersErr[2],
+									clusterChosen[4],
+									chargedVtx,
+									chargedVtxErr;
+
+								trackParameters[0].push_back(baseKin.CurvSmeared1);
+								trackParameters[0].push_back(baseKin.PhivSmeared1);
+								trackParameters[0].push_back(baseKin.CotvSmeared1);
+								trackParameters[1].push_back(baseKin.CurvSmeared2);
+								trackParameters[1].push_back(baseKin.PhivSmeared2);
+								trackParameters[1].push_back(baseKin.CotvSmeared2);
+
+								trackParametersErr[0].push_back(5.0);
+								trackParametersErr[0].push_back(2.0);
+								trackParametersErr[0].push_back(1.0);
+								trackParametersErr[1].push_back(5.0);
+								trackParametersErr[1].push_back(2.0);
+								trackParametersErr[1].push_back(1.0);
+
+								for (Int_t k = 0; k < 4; k++)
+								{
+									clusterChosen[k].push_back(clusterProps.xcl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
+									clusterChosen[k].push_back(clusterProps.ycl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
+									clusterChosen[k].push_back(clusterProps.zcl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
+									clusterChosen[k].push_back(baseKin.TclCorr[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
+									clusterChosen[k].push_back(clusterProps.enecl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
+								}
+
+								for (Int_t k = 6; k < 9; k++)
+								{
+									chargedVtx.push_back(baseKin.Kchboostnew[k]);
+								}
+
+								chargedVtxErr.push_back(1.5);
+								chargedVtxErr.push_back(1.5);
+								chargedVtxErr.push_back(1.5);
+
+								signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, bhabha_vtx);
+								errorCode = signalKinFitObj.Reconstruct();
+								signalKinFitObj.GetResults(baseKin.ParamSignal,
+														   baseKin.ErrorsSignal,
+														   baseKin.ParamSignalFit,
+														   baseKin.ErrorsSignalFit,
+														   baseKin.trkFit,
+														   baseKin.KchrecFit,
+														   baseKin.KchboostFit,
+														   baseKin.ipFit,
+														   baseKin.photonFit,
+														   baseKin.KnerecFit,
+														   baseKin.KnereclorFit,
+														   baseKin.Chi2SignalKinFit);
+
+								if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+								{
+									logger.getErrLog(errorCode, "", mctruth);
+									noError = false;
+
+									TrcSum = -999.;
+
+									if (mctruth == 1)
 									{
-										baseKin.cuts[iter] = 0;
-
-										if (mctruth == 1)
-										{
-											passed = true;
-											mctruth = 0;
-										}
+										passed = true;
+										mctruth = -1;
 									}
+								}
+								else
+								{
+
+									baseKin.cuts.clear();
+									baseKin.cuts.resize(cutter.GetCuts().size());
+
+									for (Int_t iter = 0; iter < cutter.GetCuts().size(); iter++)
+										if (cutter.PassCut(iter))
+											baseKin.cuts[iter] = 1;
+										else if (!cutter.PassCut(iter))
+										{
+											baseKin.cuts[iter] = 0;
+
+											if (mctruth == 1)
+											{
+												passed = true;
+												mctruth = 0;
+											}
+										}
+								}
 							}
 						}
 					}
@@ -955,7 +1051,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						{"CotvSmeared1", baseKin.CotvSmeared1},
 						{"CurvSmeared2", baseKin.CurvSmeared2},
 						{"PhivSmeared2", baseKin.PhivSmeared2},
-						{"CotvSmeared2", baseKin.CotvSmeared2}};
+						{"CotvSmeared2", baseKin.CotvSmeared2},
+						{"Chi2SignalKinFit", baseKin.Chi2SignalKinFit},
+						{"TrcSum", TrcSum}};
 
 					// Tablice
 					std::map<std::string, std::vector<Int_t>> intArrays = {
@@ -1029,7 +1127,18 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						{"PhivMC", baseKin.PhivMC},
 						{"CurvMC", baseKin.CurvMC},
 						{"CotvMC", baseKin.CotvMC},
-						{"pullsTriKinFit", baseKin.pullsTriKinFit}};
+						{"pullsTriKinFit", baseKin.pullsTriKinFit},
+						{"trk1Fit", baseKin.trkFit[0]},
+						{"trk2Fit", baseKin.trkFit[1]},
+						{"KchrecFit", baseKin.KchrecFit},
+						{"KchboostFit", baseKin.KchboostFit},
+						{"ipFit", baseKin.ipFit},
+						{"photonFit1", baseKin.photonFit[0]},
+						{"photonFit2", baseKin.photonFit[1]},
+						{"photonFit3", baseKin.photonFit[2]},
+						{"photonFit4", baseKin.photonFit[3]},
+						{"KnerecFit", baseKin.KnerecFit},
+						{"KnereclorFit", baseKin.KnereclorFit}};
 
 					writer.Fill(intVars, floatVars, intArrays, floatArrays);
 

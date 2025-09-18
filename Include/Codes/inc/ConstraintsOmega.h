@@ -64,7 +64,7 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t FourMomConsvLAB(Double_t *x, Double_t *p) const override;
+    Double_t FourMomConsvLAB(Double_t *x, Double_t *p) override;
 
     /**
      * @brief Photon path conservation general method
@@ -72,13 +72,15 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t PhotonPathConsvLAB(Double_t *x, Double_t *p) const override;
+    Double_t PhotonPathConsvLAB(Double_t *x, Double_t *p) override;
 
     // Fictitious overriders
     /** Fictitious overrider of virtual method - do not use*/
     Double_t EnergyConsvCM(Double_t *x, Double_t *p) override { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
     Double_t MinvConsv(Double_t *x, Double_t *p) override { return 0; };
+    Double_t MinvConsvChKaon(Double_t *x, Double_t *p) override { return 0; };
+    Double_t MinvConsvNeuKaon(Double_t *x, Double_t *p) override { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
     Double_t NeutralPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
@@ -87,6 +89,10 @@ namespace KLOE
     Double_t NeutralYPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
     Double_t NeutralZPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+
+    void SetParameters(Float_t *p) override { };
+    void ResetParameters() override { };
+    void IntermediateReconstruction() override { };
 
     Int_t
         _chosen4MomComponent, /*!< Component of a 4-momentum to choose from FourMomConsvLAB*/

@@ -110,7 +110,7 @@
         "cutDescription": "Missing energy in event.",
         "cutId": "Qmiss",
         "cutType": "O",
-        "cutValue": 10,
+        "cutValue": 3.2,
         "cutCondition": "<="
       }
     ]

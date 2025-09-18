@@ -905,6 +905,80 @@ namespace KLOE
 
         return ErrorHandling::ErrorCodes::NO_ERROR;
     }
+
+    ErrorHandling::ErrorCodes pm00::triangleReconstruction(std::vector<neutralParticle> &photon, phiMeson phi, kaonNeutral Kchboost, Float_t *ip, kaonNeutral &Knetriangle)
+    {
+        Bool_t cond_ene;
+        Bool_t cond_clus[4];
+        Float_t Clu5Vec[4][5];
+
+        Int_t done = 0;
+
+        cond_ene = photon[0].clusterParams[4] > MIN_CLU_ENE && photon[1].clusterParams[4] > MIN_CLU_ENE &&
+                   photon[2].clusterParams[4] > MIN_CLU_ENE && photon[3].clusterParams[4] > MIN_CLU_ENE;
+
+        cond_clus[0] = photon[0].clusterParams[0] != 0 && photon[0].clusterParams[1] != 0 && photon[0].clusterParams[2] != 0;
+        cond_clus[1] = photon[1].clusterParams[0] != 0 && photon[1].clusterParams[1] != 0 && photon[1].clusterParams[2] != 0;
+        cond_clus[2] = photon[2].clusterParams[0] != 0 && photon[2].clusterParams[1] != 0 && photon[2].clusterParams[2] != 0;
+        cond_clus[3] = photon[3].clusterParams[0] != 0 && photon[3].clusterParams[1] != 0 && photon[3].clusterParams[2] != 0;
+
+        if (cond_ene && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3])
+        {
+            for (Int_t k = 0; k < 4; k++)
+            {
+                Clu5Vec[k][0] = photon[k].clusterParams[0];
+                Clu5Vec[k][1] = photon[k].clusterParams[1];
+                Clu5Vec[k][2] = photon[k].clusterParams[2];
+                Clu5Vec[k][3] = photon[k].clusterParams[3];
+                Clu5Vec[k][4] = photon[k].clusterParams[4];
+            }
+
+            //! Using the charged part of the decay
+
+            Float_t Knerec[9] = {};
+
+            Knerec[0] = phi.fourMom[0] - Kchboost.fourMom[0];
+            Knerec[1] = phi.fourMom[1] - Kchboost.fourMom[1];
+            Knerec[2] = phi.fourMom[2] - Kchboost.fourMom[2];
+            Knerec[3] = phi.fourMom[3] - Kchboost.fourMom[3];
+
+            //!
+
+            Float_t TrcSum = 0., vtxSigma = 0., vtxSigmaMin = 1.e6, TrcSumMin = 1.e6, trcsum = 0.;
+
+            Float_t neu_vtx[4], trc[4];
+
+            neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip, phi.fourMom.data(), Knerec, neu_vtx, trc);
+
+            if (sqrt(pow(vtxSigma, 2) + pow(TrcSum, 2)) < sqrt(pow(vtxSigmaMin, 2) + pow(TrcSumMin, 2)))
+            {
+                vtxSigmaMin = vtxSigma;
+                TrcSumMin = TrcSum;
+
+                trcsum = TrcSumMin;
+
+                done = 1;
+
+                for (Int_t l = 0; l < 4; l++)
+                {
+                    Knetriangle.fourMom[l] = Knerec[l];
+
+                    Knetriangle.fourPos[l] = neu_vtx[l];
+
+                    neutral_mom(photon[l].clusterParams[0], photon[l].clusterParams[1], photon[l].clusterParams[2], photon[l].clusterParams[4], neu_vtx, photon[l].fourMom.data());
+                }
+
+                Knetriangle.SetTotalVector();
+            }
+        }
+
+        if (done == 0)
+        {
+            return ErrorHandling::ErrorCodes::TRIANGLE_REC;
+        }
+
+        return ErrorHandling::ErrorCodes::NO_ERROR;
+    }
 }
 
 void KLOE::pm00::trilaterationReconstruction(TVectorD X, Double_t neuVtx[2][4], Bool_t neuVtxErr[2])

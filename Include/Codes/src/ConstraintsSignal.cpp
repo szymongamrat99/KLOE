@@ -1,121 +1,199 @@
 #include <ConstraintsSignal.h>
 
-#include "trilateration.hpp"
-
 using namespace KLOE;
 
-Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p) const
+void ConstraintsSignal::ResetParameters()
 {
-  // Local variables
-  Float_t
-      gamma_mom[4][4], // Photon momentum in LAB: Px, Py, Pz, E 
-      Curv[2],
-      Phiv[2],
-      Cotv[2],
-      trk[2][4],
-      bhabha_vtx[3],
-      neu_vtx[3]; // Charged Kaons' momentum in LAB: Px, Py, Pz, E
+  // Setting parameters from the array p to the member variables
+  // of the base classes to be used in the constraint calculations.
+  if (bhabha_mom.size() != 4) {
+        bhabha_mom.clear();
+        bhabha_mom.resize(4);
+    }
+    
+    if (trackParameters.size() != 6) {
+        trackParameters.clear();
+        trackParameters.resize(6);
+    }
+    
+    if (cluster.size() != 4) {
+        for (Int_t i = 0; i < cluster.size(); i++)
+            cluster[i].clear();
+        cluster.clear();
+        cluster.resize(4);
+    }
+    
+    for (Int_t i = 0; i < cluster.size(); i++) {
+        if (cluster[i].size() != 5) {
+            cluster[i].clear();
+            cluster[i].resize(5);
+        }
+    }
 
-  std::vector<Float_t> 
-            cluster[4],  // Cluster in LAB: Xcl, Ycl, Zcl, TclOld, EneCl
-            bhabha_mom(4), // Phi momentum average per run in LAB: Px, Py, Pz, Sqrt(S)
-            Kchrec(9),
-            Kchboost(9),
-            ip(3);
+    if (pionCh.size() != 2) {
+        pionCh.clear();
+        pionCh.resize(2);
+    }
+    
+    if (photon.size() != 4) {
+        photon.clear();
+        photon.resize(4);
+    }
 
+    if (ip.size() != 3) {
+        ip.clear();
+        ip.resize(3);
+    }
+}
+
+void ConstraintsSignal::SetParameters(Float_t *p)
+{
+  // Setting parameters from the array p to the member variables
+  // of the base classes to be used in the constraint calculations.
+  ResetParameters();
 
   for (Int_t i = 0; i < 2; i++)
   {
-    Curv[i] = p[i * 3];
-    Phiv[i] = p[i * 3 + 1];
-    Cotv[i] = p[i * 3 + 2];
+    pionCh[i].trackParams[0] = p[i * 3];
+    pionCh[i].trackParams[1] = p[i * 3 + 1];
+    pionCh[i].trackParams[2] = p[i * 3 + 2];
   }
 
   for (Int_t i = 0; i < 4; i++)
   {
-    cluster[i].resize(5);
-
     for (Int_t j = 0; j < 5; j++)
-      cluster[i][j] = p[6 + i * 5 + j];
-
-    bhabha_mom[i] = p[27 + i];
+      photon[i].clusterParams[j] = p[6 + i * 5 + j];
   }
 
-  bhabha_vtx[0] = p[31];
-  bhabha_vtx[1] = p[32];
-  bhabha_vtx[2] = p[33];
+  for (Int_t i = 0; i < 3; i++)
+    Kchrec.fourPos[i] = p[26 + i];
 
-  this->charged_mom(Curv[0], Phiv[0], Cotv[0], trk[0], 1);
-  this->charged_mom(Curv[1], Phiv[1], Cotv[1], trk[1], 1);
+  for (Int_t i = 0; i < 4; i++)
+  {
+    phi.fourMom[i] = p[29 + i];
 
-  Kchrec[0] = trk[0][0] + trk[1][0];
-  Kchrec[1] = trk[0][1] + trk[1][1];
-  Kchrec[2] = trk[0][2] + trk[1][2];
-  Kchrec[3] = trk[0][3] + trk[1][3];
+    if (i < 3)
+      phi.vtxPos[i] = p[33 + i];
+  }
+}
 
-  this->KaonMomFromBoost(Kchrec, bhabha_mom.data(), Kchboost);
+void ConstraintsSignal::IntermediateReconstruction()
+{
+  // Intermediate reconstruction to be done after setting the parameters
+  // and before calculating the constraints.
 
-  Float_t X_line[3] = {Kchboost[6],
-                       Kchboost[7],
-                       Kchboost[8]}, // Vertex laying on the line
-      mom[3] = {Kchboost[0],
-              Kchboost[1],
-              Kchboost[2]}, // Direction of the line
-      xB[3] = {bhabha_vtx[0],
-               bhabha_vtx[1],
-               bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
+  for (Int_t i = 0; i < 2; i++)
+    charged_mom(pionCh[i].trackParams[0], pionCh[i].trackParams[1], pionCh[i].trackParams[2], pionCh[i].fourMom.data(), 1);
+
+  // Setting four momentum for kaon charged
+  for (Int_t i = 0; i < 4; i++)
+    Kchrec.fourMom[i] = pionCh[0].fourMom[i] + pionCh[1].fourMom[i];
+
+  // Setting total vector for kaon charged reconstructed from pions
+  Kchrec.SetLorentzVectors();
+  Kchrec.SetTotalVector();
+
+  KaonMomFromBoost(Kchrec.total.data(), phi.fourMom.data(), Kchboost.total.data());
+  Kchboost.SetPositionAndMomentumFromTotal();
+  Kchboost.SetLorentzVectors();
+
+  Float_t X_line[3] = {Kchboost.fourPos[0],
+                       Kchboost.fourPos[1],
+                       Kchboost.fourPos[2]}, // Vertex laying on the line
+      mom[3] = {Kchboost.fourMom[0],
+                Kchboost.fourMom[1],
+                Kchboost.fourMom[2]}, // Direction of the line
+      xB[3] = {phi.vtxPos[0],
+               phi.vtxPos[1],
+               phi.vtxPos[2]}, // Bhabha vertex - laying on the plane
       plane_perp[3] = {0.,
-                       bhabha_mom[1],
+                       phi.fourMom[1],
                        0.}; // Vector perpendicular to the plane from Bhabha momentum
 
   // Corrected IP event by event
-  this->IPBoostCorr(X_line, mom, xB, plane_perp, ip);
+  IPBoostCorr(X_line, mom, xB, plane_perp, ip.data());
 
-  ip[0] = bhabha_vtx[0];
-  ip[1] = bhabha_vtx[1];
-  if(abs(ip[2] - bhabha_vtx[2]) > 2.0)
-    ip[2] = bhabha_vtx[2];
+  ip[0] = phi.vtxPos[0];
+  ip[1] = phi.vtxPos[1];
+  if (abs(ip[2] - phi.vtxPos[2]) > 2.0)
+    ip[2] = phi.vtxPos[2];
 
-  std::vector<Float_t> 
-                Knetriangle, 
-                gammatriangle[4],
-                trcfinal;
-  Float_t minv4gam;
+  Kchrec.calculatePath(ip.data());
+  Kchrec.SetTotalVector();
 
-  // this->triangleReconstruction(_g4taken, cluster, _neuclulist, bhabha_mom, Kchboost, ip, Knetriangle, gammatriangle, minv4gam, trcfinal, *_logger);
+  Kchboost.calculatePath(ip.data());
+  Kchboost.SetTotalVector();
 
-  // Reconstruction of neutral momentum for the photons
+  triangleReconstruction(photon, phi, Kchboost, ip.data(), Knereclor);
+
+  Knereclor.calculatePath(ip.data());
+  Knereclor.SetTotalVector();
+
   for (Int_t i = 0; i < 4; i++)
   {
-    neutral_mom(cluster[i][0], cluster[i][1], cluster[i][2], cluster[i][4], neu_vtx, gamma_mom[i]);
+    photon[i].calculatePath(Knereclor.fourPos.data());
+    photon[i].calculateTimeOfFlightPhoton();
+    photon[i].SetTotalVectorPhoton();
   }
 
-  return (bhabha_mom[_chosen4MomComponent] -
-          Kchrec[_chosen4MomComponent] -
-          gamma_mom[0][_chosen4MomComponent] -
-          gamma_mom[1][_chosen4MomComponent] -
-          gamma_mom[2][_chosen4MomComponent] -
-          gamma_mom[3][_chosen4MomComponent]);
+  Knerec.fourMom[0] = photon[0].fourMom[0] + photon[1].fourMom[0] + photon[2].fourMom[0] + photon[3].fourMom[0];
+  Knerec.fourMom[1] = photon[0].fourMom[1] + photon[1].fourMom[1] + photon[2].fourMom[1] + photon[3].fourMom[1];
+  Knerec.fourMom[2] = photon[0].fourMom[2] + photon[1].fourMom[2] + photon[2].fourMom[2] + photon[3].fourMom[2];
+  Knerec.fourMom[3] = photon[0].fourMom[3] + photon[1].fourMom[3] + photon[2].fourMom[3] + photon[3].fourMom[3];
+
+  Knerec.fourPos[0] = Knereclor.fourPos[0];
+  Knerec.fourPos[1] = Knereclor.fourPos[1];
+  Knerec.fourPos[2] = Knereclor.fourPos[2];
+  Knerec.fourPos[3] = Knereclor.fourPos[3];
+
+  Knerec.calculatePath(ip.data());
+  Knerec.SetTotalVector();
 }
 
-Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p) const
+Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p)
 {
-  Double_t
-      cluster[4],   // Cluster in LAB: Xcl, Ycl, Zcl, TclOld, EneCl
-      neu_vtx[3],   // Derived neutral vertex: Xneu, Yneu, Zneu
-      R_gamma = 0.; // Path of Photon from the neutral vtx
+  Float_t p4[36];
 
-  for (Int_t i = 0; i < 4; i++)
-  {
-    cluster[i] = p[_chosenPhoton * 5 + i];
+  for (Int_t i = 0; i < 36; i++)
+    p4[i] = p[i];
 
-    if (i < 3)
-      neu_vtx[i] = p[20 + i];
-  }
+  SetParameters(p4);
+  IntermediateReconstruction();
 
-  R_gamma = sqrt(pow(cluster[0] - neu_vtx[0], 2) +
-                 pow(cluster[1] - neu_vtx[1], 2) +
-                 pow(cluster[2] - neu_vtx[2], 2));
+  return (phi.fourMom[_chosen4MomComponent] -
+          Kchboost.fourMom[_chosen4MomComponent] -
+          photon[0].fourMom[_chosen4MomComponent] -
+          photon[1].fourMom[_chosen4MomComponent] -
+          photon[2].fourMom[_chosen4MomComponent] -
+          photon[3].fourMom[_chosen4MomComponent]);
+}
 
-  return cVel * cluster[3] - R_gamma;
+Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
+{
+  Float_t p4[36];
+
+  for (Int_t i = 0; i < 36; i++)
+    p4[i] = p[i];
+
+  SetParameters(p4);
+  IntermediateReconstruction();
+
+  return photon[_chosenPhoton].clusterParams[3] - Knereclor.lifetimeLAB - photon[_chosenPhoton].timeOfFlight;
+}
+
+Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)
+{
+  Float_t p4[36];
+
+  for (Int_t i = 0; i < 36; i++)
+    p4[i] = p[i];
+
+  SetParameters(p4);
+  IntermediateReconstruction();
+
+  std::map<std::string, Float_t> minvModes = {
+      {"neutral", Knerec.total[5]},
+      {"charged", Kchrec.total[5]}};
+
+  return minvModes[_minvMode] - mK0; // MeV/c^2
 }

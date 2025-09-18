@@ -11,7 +11,7 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
   if (_mode == "Omega")
     _baseObj = new ConstraintsOmega();
   else if (_mode == "SignalGlobal")
-    _baseObj = new ConstraintsOmega();
+    _baseObj = new ConstraintsSignal();
   else if (_mode == "Trilateration")
     _baseObj = new ConstraintsTrilateration();
 };
@@ -21,11 +21,10 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
   if (_mode == "Omega")
     _baseObj = new ConstraintsOmega();
   else if (_mode == "SignalGlobal")
-    _baseObj = new ConstraintsOmega();
+    _baseObj = new ConstraintsSignal();
   else if (_mode == "Trilateration")
     _baseObj = new ConstraintsTrilateration();
 };
-
 
 Int_t KinFitter::ParameterInitialization(Float_t *Params, Float_t *Errors)
 {
@@ -100,6 +99,19 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   for (Int_t i = 0; i < _loopcount; i++)
   {
+    if ("SignalGlobal" == _mode)
+    {
+      Float_t *pAux = new Float_t[_N_free + _N_const];
+
+      for (Int_t k = 0; k < _X.GetNrows(); k++)
+      {
+        pAux[k] = _X(k);
+      }
+
+      _baseObj->SetParameters(pAux);
+      _baseObj->IntermediateReconstruction();
+    }
+
     try
     {
       for (Int_t l = 0; l < _M; l++)
@@ -114,6 +126,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
             _D(l, m) = 0;
         }
       }
+
       _D_T = _D_T.Transpose(_D);
 
       _Aux = (_D * _V * _D_T);
@@ -125,7 +138,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       else if (TMath::IsNaN(_det))
         throw ErrorHandling::ErrorCodes::NAN_VAL;
 
-      // Rozwijam wokół _X a nie _X_init
+      // Rozwijam wokół _X a nie _X
       _L = (_Aux * (_D * (_X - _X) + _C));
 
       _CORR = _V * _D_T * _L;
@@ -137,9 +150,9 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       _CHISQR = Dot((_X_final - _X_init), _V_invert * (_X_final - _X_init));
 
       _X = _X_final;
-      for(Int_t j = 0; j < _N_free + _N_const; j++)
+      for (Int_t j = 0; j < _N_free + _N_const; j++)
       {
-        _V(j,j) = _V_final(j,j);
+        _V(j, j) = _V_final(j, j);
       }
       _L_aux = _L;
       _C_aux = _C;
@@ -160,6 +173,19 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       //_logger.getErrLog(err, "iteration no. " + std::to_string(i));
       break;
     }
+  }
+
+  if ("SignalGlobal" == _mode)
+  {
+    Float_t *pAux = new Float_t[_N_free + _N_const];
+
+    for (Int_t k = 0; k < _N_free + _N_const; k++)
+    {
+      pAux[k] = _X(k);
+    }
+
+    _baseObj->SetParameters(pAux);
+    _baseObj->IntermediateReconstruction();
   }
 
   return _CHISQRTMP;
@@ -214,6 +240,28 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
   V_init = _V_init;
   C = _C_aux;
   L = _L_aux;
+}
+
+void KinFitter::GetResults(TVectorD &X, TMatrixD &V, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit)
+{
+  X = _X;
+  V = _V;
+
+  for (Int_t i = 0; i < 2; i++)
+  {
+    trkFit[i] = _baseObj->pionCh[i].fourMom;
+  }
+
+  KchrecFit = _baseObj->Kchrec.total;
+  KchboostFit = _baseObj->Kchboost.total;
+
+  ipFit = _baseObj->ip;
+
+  for (Int_t i = 0; i < 4; i++)
+    photonFit[i] = _baseObj->photon[i].total;
+
+  KnerecFit = _baseObj->Knerec.total;
+  KnereclorFit = _baseObj->Knereclor.total;
 }
 
 // void KinFitter::PhotonPairing(std::vector<NeuPart> _Photons)

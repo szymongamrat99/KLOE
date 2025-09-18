@@ -3,14 +3,15 @@
 #include <TStyle.h>
 #include <Math/MinimizerOptions.h>
 #include <TPaletteAxis.h>
+#include <TFitResult.h>
 #include <algorithm>
 #include <stdexcept>
 #include <iostream>
 
 HistManager::HistManager(Int_t channNum, const Color_t* channColors, 
                                  const std::vector<TString>& channelNames,
-                                 Int_t dataStyle, Int_t dataColor, Int_t sumColor) 
-    : fChannNum(channNum), fDataStyle(dataStyle), fDataColor(dataColor), fSumColor(sumColor) {
+                                 Int_t dataStyle, Int_t dataColor, Float_t dataSize,Int_t sumColor) 
+    : fChannNum(channNum), fDataStyle(dataStyle), fDataColor(dataColor), fDataSize(dataSize), fSumColor(sumColor) {
     
     for(Int_t i = 0; i < channNum; ++i) {
         fChannColors.push_back(channColors[i]);
@@ -245,6 +246,16 @@ void HistManager::DrawSet1D(const TString& setName, const TString& drawOpt, Bool
     histIt->second[0]->GetYaxis()->SetRangeUser(configIt->second.logy ? 0.1 : 0, maxY);
     histIt->second[0]->Draw("HIST SAME");
 
+    // Check for Triple Gaussian fit results and draw them if available
+    for(size_t i = 0; i < histIt->second.size(); ++i) {
+        Int_t mctruth = (i == 0) ? 0 : static_cast<Int_t>(i);  // 0 for sum, i for channel
+        TString key = GenerateTripleGaussKey(setName, mctruth, -1);
+        auto fitIt = f3GaussFitResults.find(key);
+        if(fitIt != f3GaussFitResults.end() && fitIt->second.converged) {
+            DrawTripleGaussFit(histIt->second[i], fitIt->second, false);
+        }
+    }
+
     // Draw data if requested and available
     if(drawData) {
         auto dataIt = fData1D.find(setName);
@@ -330,6 +341,7 @@ void HistManager::DrawSet1D(const TString& setName, const TString& drawOpt, Bool
             }
             
             dataIt->second->SetMarkerStyle(fDataStyle);
+            dataIt->second->SetMarkerSize(fDataSize);
             dataIt->second->SetMarkerColor(fDataColor);
             dataIt->second->SetLineColor(fDataColor);
             // Upewnij się, że dane mają poprawny zakres Y (może być zaktualizowany po normalizacji)
@@ -1502,6 +1514,7 @@ Bool_t HistManager::CreateHistArray1D(const ArrayConfig& config) {
         dataSet[index]->GetXaxis()->SetTitle(xtitle);
         dataSet[index]->GetYaxis()->SetTitle(ytitle);
         dataSet[index]->SetMarkerStyle(fDataStyle);
+        dataSet[index]->SetMarkerSize(fDataSize);
         dataSet[index]->SetMarkerColor(fDataColor);
         dataSet[index]->SetLineColor(fDataColor);
         dataSet[index]->SetStats(config.commonConfig.showStats);
@@ -1645,6 +1658,36 @@ TCanvas* HistManager::DrawArray1D(const TString& baseName, Bool_t drawData, cons
         
         maxY = logY ? maxY * 5 : maxY * 1.1;
         
+        // Wykonaj simple scaling jeśli włączone i dane są dostępne
+        if(drawData && fNormalizationType == NormalizationType::SIMPLE_SCALE) {
+            try {
+                Double_t scaleFactor = PerformArraySimpleScaling(baseName, index);
+                
+                if(scaleFactor > 0) {
+                    // Po skalowaniu, ponownie oblicz zakres Y
+                    Double_t newMaxY = 0;
+                    for(auto* hist : it->second[index]) {
+                        if(hist && hist->GetEntries() > 0) {
+                            newMaxY = TMath::Max(newMaxY, hist->GetMaximum());
+                        }
+                    }
+                    
+                    // Sprawdź maksimum danych ponownie
+                    auto dataIt = fArrayData1D.find(baseName);
+                    if(dataIt != fArrayData1D.end() && dataIt->second[index] && dataIt->second[index]->GetEntries() > 0) {
+                        newMaxY = TMath::Max(newMaxY, dataIt->second[index]->GetMaximum());
+                    }
+                    
+                    maxY = logY ? newMaxY * 5 : newMaxY * 1.1;
+                    
+                    std::cout << "Simple scaling applied to array " << baseName.Data() 
+                              << "[" << index << "] with factor " << scaleFactor << std::endl;
+                }
+            } catch(const std::exception& e) {
+                std::cerr << "Error during Array Simple Scaling: " << e.what() << std::endl;
+            }
+        }
+        
         bool first = true;
         
         // Rysuj histogramy MC (indeksy 1 do fChannNum)
@@ -1677,6 +1720,33 @@ TCanvas* HistManager::DrawArray1D(const TString& baseName, Bool_t drawData, cons
                     } else {
                         dataHist->Draw("PE1 SAME");
                     }
+                }
+            }
+        }
+
+        // Check for Triple Gaussian fit results and draw them if available
+        // Check MC histograms (mctruth 1 to fChannNum)
+        for(Int_t ch = 1; ch <= fChannNum; ++ch) {
+            TString key = GenerateTripleGaussKey(baseName, ch, index);
+            auto fitIt = f3GaussFitResults.find(key);
+            if(fitIt != f3GaussFitResults.end() && fitIt->second.converged) {
+                DrawTripleGaussFit(it->second[index][ch], fitIt->second, false);
+            }
+        }
+        // Check sum MC (mctruth 0)
+        TString keySumMC = GenerateTripleGaussKey(baseName, 0, index);
+        auto fitItSumMC = f3GaussFitResults.find(keySumMC);
+        if(fitItSumMC != f3GaussFitResults.end() && fitItSumMC->second.converged) {
+            DrawTripleGaussFit(it->second[index][0], fitItSumMC->second, false);
+        }
+        // Check data histogram (mctruth -1)
+        if(drawData) {
+            TString keyData = GenerateTripleGaussKey(baseName, -1, index);
+            auto fitItData = f3GaussFitResults.find(keyData);
+            if(fitItData != f3GaussFitResults.end() && fitItData->second.converged) {
+                auto dataIt = fArrayData1D.find(baseName);
+                if(dataIt != fArrayData1D.end()) {
+                    DrawTripleGaussFit(dataIt->second[index], fitItData->second, false);
                 }
             }
         }
@@ -1854,4 +1924,618 @@ Double_t HistManager::ScaleArrayChannelByEntries(const TString& baseName, Int_t 
               << " (scale factor = " << scaleFactor << ")" << std::endl;
     
     return scaleFactor;
+}
+
+Double_t HistManager::PerformArraySimpleScaling(const TString& baseName, Int_t index) {
+    // Znajdź zestaw array histogramów MC
+    auto histIt = fArrayHists1D.find(baseName);
+    if(histIt == fArrayHists1D.end()) {
+        std::cerr << "ERROR: Array histogram set not found: " << baseName.Data() << std::endl;
+        return -1.0;
+    }
+    
+    // Sprawdź poprawność indeksu
+    if(index < 0 || index >= static_cast<Int_t>(histIt->second.size())) {
+        std::cerr << "ERROR: Invalid index " << index << " for array " << baseName.Data() 
+                  << " (size: " << histIt->second.size() << ")" << std::endl;
+        return -1.0;
+    }
+    
+    // Znajdź histogram danych dla tego indeksu
+    auto dataIt = fArrayData1D.find(baseName);
+    if(dataIt == fArrayData1D.end()) {
+        std::cerr << "ERROR: No data histogram array found for set: " << baseName.Data() << std::endl;
+        return -1.0;
+    }
+    
+    if(index >= static_cast<Int_t>(dataIt->second.size()) || !dataIt->second[index]) {
+        std::cerr << "ERROR: No data histogram found at index " << index << " for set: " << baseName.Data() << std::endl;
+        return -1.0;
+    }
+    
+    // Pobierz liczbę zdarzeń w danych i w sumie MC
+    Double_t dataEntries = dataIt->second[index]->Integral();
+    Double_t mcSumEntries = histIt->second[index][0]->Integral(); // Indeks 0 to suma MC
+    
+    if(mcSumEntries <= 0) {
+        std::cerr << "WARNING: MC sum histogram is empty for array " << baseName.Data() 
+                  << " at index " << index << std::endl;
+        return -1.0;
+    }
+    
+    // Oblicz czynnik skalujący
+    Double_t scaleFactor = dataEntries / mcSumEntries;
+    
+    // Przygotuj wektor histogramów MC (bez sumy - indeks 0)
+    std::vector<TH1*> mcHists;
+    for(Int_t ch = 1; ch <= fChannNum; ++ch) {
+        if(ch < static_cast<Int_t>(histIt->second[index].size()) && histIt->second[index][ch]) {
+            mcHists.push_back(histIt->second[index][ch]);
+        }
+    }
+    
+    // Zastosuj skalowanie używając istniejącej funkcji
+    ApplySimpleScaling(mcHists, histIt->second[index][0], scaleFactor);
+    
+    std::cout << "Array simple scaling applied to " << baseName.Data() << "[" << index << "]"
+              << ": scale factor = " << scaleFactor 
+              << " (Data: " << dataEntries << ", MC: " << mcSumEntries << ")" << std::endl;
+    
+    return scaleFactor;
+}
+
+// ==================== TRIPLE GAUSSIAN FITTING IMPLEMENTATION ====================
+
+Bool_t HistManager::PrepareDefaultTripleGaussParams(TH1* hist, FitParams3Gauss& params) {
+    if(!hist || hist->GetEntries() == 0) {
+        std::cerr << "ERROR: Cannot prepare parameters for null or empty histogram" << std::endl;
+        return false;
+    }
+    
+    // Reinicjalizuj parametry
+    params.InitializeDefaults();
+    
+    // Pobierz podstawowe właściwości histogramu
+    Double_t xmin = hist->GetXaxis()->GetXmin();
+    Double_t xmax = hist->GetXaxis()->GetXmax();
+    Double_t range = xmax - xmin;
+    
+    Double_t mean = hist->GetMean();
+    Double_t rms = hist->GetRMS();
+    Double_t integral = hist->Integral();
+    Double_t maxValue = hist->GetMaximum();
+    
+    // Ustawienia początkowe dla trzech składowych Gaussa
+    // Składowa 1: główny pik (najwyższa)
+    params.initialParams[0] = integral * 0.6;  // A1 - 60% całkowitej amplitudy
+    params.initialParams[1] = mean;             // μ1 - średnia histogramu
+    params.initialParams[2] = rms * 0.8;       // σ1 - nieco mniejsza od RMS
+    
+    // Składowa 2: lewa strona
+    params.initialParams[3] = integral * 0.25; // A2 - 25% amplitudy
+    params.initialParams[4] = mean - rms * 0.7; // μ2 - przesunięta w lewo
+    params.initialParams[5] = rms * 1.2;       // σ2 - szersza
+    
+    // Składowa 3: prawa strona
+    params.initialParams[6] = integral * 0.15; // A3 - 15% amplitudy
+    params.initialParams[7] = mean + rms * 0.7; // μ3 - przesunięta w prawo
+    params.initialParams[8] = rms * 1.5;       // σ3 - najszersza
+    
+    // Ustawienia granic parametrów
+    for(Int_t i = 0; i < 3; ++i) {
+        Int_t idx = i * 3;
+        // Amplitudy - od 0 do 2x całkowita wartość
+        params.lowerBounds[idx] = 0.0;
+        params.upperBounds[idx] = integral * 2.0;
+        
+        // Średnie - w zakresie histogramu +/- 20%
+        params.lowerBounds[idx + 1] = xmin - range * 0.2;
+        params.upperBounds[idx + 1] = xmax + range * 0.2;
+        
+        // Szerokości - od bardzo małej do całego zakresu
+        params.lowerBounds[idx + 2] = range * 0.01;
+        params.upperBounds[idx + 2] = range;
+    }
+    
+    // Ustaw domyślny zakres fitu na cały histogram
+    params.SetFitRange(xmin, xmax);
+    
+    std::cout << "INFO: Default Triple Gaussian parameters prepared:" << std::endl;
+    std::cout << "  Histogram: mean=" << mean << ", RMS=" << rms << ", integral=" << integral << std::endl;
+    std::cout << "  Component 1: A=" << params.initialParams[0] << ", μ=" << params.initialParams[1] << ", σ=" << params.initialParams[2] << std::endl;
+    std::cout << "  Component 2: A=" << params.initialParams[3] << ", μ=" << params.initialParams[4] << ", σ=" << params.initialParams[5] << std::endl;
+    std::cout << "  Component 3: A=" << params.initialParams[6] << ", μ=" << params.initialParams[7] << ", σ=" << params.initialParams[8] << std::endl;
+    
+    return true;
+}
+
+Bool_t HistManager::FitTripleGauss1D(const TString& setName, Int_t mctruth, FitParams3Gauss& params) {
+    TH1* hist = GetHistogramForTripleGaussFit(setName, mctruth, -1);
+    if(!hist) {
+        std::cerr << "ERROR: Cannot find histogram for Triple Gaussian fit: " << setName.Data() 
+                  << ", mctruth=" << mctruth << std::endl;
+        return false;
+    }
+    
+    // Wykonaj fit
+    if(!DoTripleGaussFit(hist, params)) {
+        return false;
+    }
+    
+    // Przechowaj wyniki
+    TString key = GenerateTripleGaussKey(setName, mctruth, -1);
+    f3GaussFitResults[key] = params;
+    
+    std::cout << "INFO: Triple Gaussian fit completed for " << setName.Data() << ", mctruth=" << mctruth << std::endl;
+    return true;
+}
+
+Bool_t HistManager::FitTripleGaussArray1D(const TString& baseName, Int_t index, Int_t mctruth, FitParams3Gauss& params) {
+    TH1* hist = GetHistogramForTripleGaussFit(baseName, mctruth, index);
+    if(!hist) {
+        std::cerr << "ERROR: Cannot find array histogram for Triple Gaussian fit: " << baseName.Data() 
+                  << ", index=" << index << ", mctruth=" << mctruth << std::endl;
+        return false;
+    }
+    
+    // Wykonaj fit
+    if(!DoTripleGaussFit(hist, params)) {
+        return false;
+    }
+    
+    // Przechowaj wyniki
+    TString key = GenerateTripleGaussKey(baseName, mctruth, index);
+    f3GaussArrayResults[key] = params;
+    
+    std::cout << "INFO: Triple Gaussian fit completed for array " << baseName.Data() 
+              << ", index=" << index << ", mctruth=" << mctruth << std::endl;
+    return true;
+}
+
+TH1* HistManager::GetHistogramForTripleGaussFit(const TString& setName, Int_t mctruth, Int_t arrayIndex) {
+    if(arrayIndex >= 0) {
+        // Array histogram
+        auto arrayIt = fArrayHists1D.find(setName);
+        if(arrayIt == fArrayHists1D.end()) {
+            return nullptr;
+        }
+        
+        if(arrayIndex >= static_cast<Int_t>(arrayIt->second.size())) {
+            return nullptr;
+        }
+        
+        if(mctruth == -1) {
+            // Data histogram
+            auto dataIt = fArrayData1D.find(setName);
+            if(dataIt == fArrayData1D.end() || arrayIndex >= static_cast<Int_t>(dataIt->second.size())) {
+                return nullptr;
+            }
+            return dataIt->second[arrayIndex];
+        } else if(mctruth >= 0 && mctruth <= fChannNum) {
+            // MC histogram (0 = suma, 1-N = kanały)
+            if(mctruth >= static_cast<Int_t>(arrayIt->second[arrayIndex].size())) {
+                return nullptr;
+            }
+            return arrayIt->second[arrayIndex][mctruth];
+        }
+    } else {
+        // Regular set histogram
+        if(mctruth == -1) {
+            // Data histogram
+            auto dataIt = fData1D.find(setName);
+            if(dataIt == fData1D.end()) {
+                return nullptr;
+            }
+            return dataIt->second;
+        } else if(mctruth >= 0 && mctruth <= fChannNum) {
+            // MC histogram (0 = suma, 1-N = kanały)
+            auto histIt = fHists1D.find(setName);
+            if(histIt == fHists1D.end() || mctruth >= static_cast<Int_t>(histIt->second.size())) {
+                return nullptr;
+            }
+            return histIt->second[mctruth];
+        }
+    }
+    
+    return nullptr;
+}
+
+Bool_t HistManager::DoTripleGaussFit(TH1* hist, FitParams3Gauss& params) {
+    if(!hist || hist->GetEntries() == 0) {
+        std::cerr << "ERROR: Cannot fit null or empty histogram" << std::endl;
+        return false;
+    }
+    
+    // Przygotuj funkcję fitu
+    Double_t fitRangeMin = params.fitRangeMin;
+    Double_t fitRangeMax = params.fitRangeMax;
+    
+    if(fitRangeMin <= -999 || fitRangeMax <= -999) {
+        fitRangeMin = hist->GetXaxis()->GetXmin();
+        fitRangeMax = hist->GetXaxis()->GetXmax();
+        params.SetFitRange(fitRangeMin, fitRangeMax);
+    }
+    
+    // Stwórz funkcję TF1 używającą triple_gaus
+    TString funcName = Form("triple_gaus_%p_%ld", (void*)hist, (long)time(nullptr));
+    TF1* fitFunc = new TF1(funcName, triple_gaus, fitRangeMin, fitRangeMax, 9);
+    
+    // Ustaw nazwy i początkowe wartości parametrów
+    for(Int_t i = 0; i < 9; ++i) {
+        fitFunc->SetParName(i, params.paramNames[i]);
+        fitFunc->SetParameter(i, params.initialParams[i]);
+        fitFunc->SetParLimits(i, params.lowerBounds[i], params.upperBounds[i]);
+    }
+    
+    // Wykonaj fit
+    Int_t fitStatus = hist->Fit(fitFunc, "RBQ"); // R=range, B=bounds, Q=quiet (bez S)
+    
+    // Sprawdź wyniki na podstawie statusu fitu i jakości funkcji
+    params.converged = (fitStatus == 0 && fitFunc->GetChisquare() > 0);
+    params.status = fitStatus;
+    
+    if(params.converged) {
+        // Pobierz wyniki fitu
+        for(Int_t i = 0; i < 9; ++i) {
+            params.fittedParams[i] = fitFunc->GetParameter(i);
+            params.paramErrors[i] = fitFunc->GetParError(i);
+        }
+        
+        params.chi2 = fitFunc->GetChisquare();
+        params.ndf = fitFunc->GetNDF();
+        
+        // Oblicz wartości kombinowane
+        CalculateCombinedValues(params);
+        
+        // Przechowaj funkcję
+        params.fitFunction = (TF1*)fitFunc->Clone();
+        
+        std::cout << "INFO: Triple Gaussian fit successful. Chi2/NDF = " 
+                  << params.chi2 << "/" << params.ndf << " = " << (params.ndf > 0 ? params.chi2/params.ndf : 0) 
+                  << std::endl;
+    } else {
+        std::cerr << "WARNING: Triple Gaussian fit failed or did not converge (status = " 
+                  << fitStatus << ")" << std::endl;
+    }
+    
+    delete fitFunc; // Usuwamy oryginalną funkcję, kopia jest przechowana w params
+    return params.converged;
+}
+
+void HistManager::CalculateCombinedValues(FitParams3Gauss& params) {
+    if(!params.converged) {
+        return;
+    }
+    
+    // Użyj funkcji z triple_gaus.h do obliczenia wartości kombinowanych
+    params.combinedMean = comb_mean(params.fittedParams.data(), params.paramErrors.data());
+    params.combinedMeanErr = comb_mean_err(params.fittedParams.data(), params.paramErrors.data());
+    params.combinedStdDev = comb_std_dev(params.fittedParams.data(), params.paramErrors.data());
+    params.combinedStdDevErr = comb_std_dev_err(params.fittedParams.data(), params.paramErrors.data());
+}
+
+TString HistManager::GenerateTripleGaussKey(const TString& setName, Int_t mctruth, Int_t arrayIndex) {
+    if(arrayIndex >= 0) {
+        return Form("%s_%d_%d", setName.Data(), arrayIndex, mctruth);
+    } else {
+        return Form("%s_%d", setName.Data(), mctruth);
+    }
+}
+
+void HistManager::DrawTripleGaussFit(TH1* hist, const FitParams3Gauss& params, Bool_t drawComponents) {
+    if(!hist || !params.converged || !params.fitFunction) {
+        std::cerr << "ERROR: Cannot draw fit - histogram or fit results invalid" << std::endl;
+        return;
+    }
+    
+    // Narysuj główną funkcję fitu (przerywaną czarną linią)
+    params.fitFunction->SetLineColor(kBlack);
+    params.fitFunction->SetLineStyle(2); // przerywana linia
+    params.fitFunction->SetLineWidth(2);
+    params.fitFunction->Draw("SAME");
+    
+    if(drawComponents) {
+        DrawTripleGaussComponents(hist, params);
+    }
+}
+
+void HistManager::DrawTripleGaussComponents(TH1* hist, const FitParams3Gauss& params) {
+    if(!hist || !params.converged) {
+        std::cerr << "ERROR: Cannot draw components - histogram or fit results invalid" << std::endl;
+        return;
+    }
+    
+    // Narysuj poszczególne komponenty Gaussa
+    Double_t xmin = params.fitRangeMin;
+    Double_t xmax = params.fitRangeMax;
+    
+    // Komponent 1 (główny) - czerwona linia punktowa
+    TF1* comp1 = new TF1(Form("comp1_%p", (void*)hist), single_gaus, xmin, xmax, 3);
+    comp1->SetParameters(params.fittedParams[0], params.fittedParams[1], params.fittedParams[2]);
+    comp1->SetLineColor(kRed);
+    comp1->SetLineStyle(3); // punktowa
+    comp1->SetLineWidth(1);
+    comp1->Draw("SAME");
+    
+    // Komponent 2 - niebieska linia punktowa
+    TF1* comp2 = new TF1(Form("comp2_%p", (void*)hist), single_gaus, xmin, xmax, 3);
+    comp2->SetParameters(params.fittedParams[3], params.fittedParams[4], params.fittedParams[5]);
+    comp2->SetLineColor(kBlue);
+    comp2->SetLineStyle(3);
+    comp2->SetLineWidth(1);
+    comp2->Draw("SAME");
+    
+    // Komponent 3 - zielona linia punktowa
+    TF1* comp3 = new TF1(Form("comp3_%p", (void*)hist), single_gaus, xmin, xmax, 3);
+    comp3->SetParameters(params.fittedParams[6], params.fittedParams[7], params.fittedParams[8]);
+    comp3->SetLineColor(kGreen);
+    comp3->SetLineStyle(3);
+    comp3->SetLineWidth(1);
+    comp3->Draw("SAME");
+}
+
+void HistManager::DisplayTripleGaussResults(const FitParams3Gauss& params, const TH1* hist, Bool_t addToCanvas) {
+    if(!params.converged) {
+        std::cout << "WARNING: Triple Gaussian fit did not converge" << std::endl;
+        return;
+    }
+    
+    // Wypisz wyniki na terminalu
+    std::cout << "================== TRIPLE GAUSSIAN FIT RESULTS ==================" << std::endl;
+    std::cout << "Histogram: " << (hist ? hist->GetName() : "Unknown") << std::endl;
+    std::cout << "Fit Status: " << params.status << " (0 = success)" << std::endl;
+    std::cout << "Chi2/NDF: " << params.chi2 << "/" << params.ndf;
+    if(params.ndf > 0) {
+        std::cout << " = " << params.chi2/params.ndf;
+    }
+    std::cout << std::endl;
+    std::cout << "Fit Range: [" << params.fitRangeMin << ", " << params.fitRangeMax << "]" << std::endl;
+    std::cout << std::endl;
+    
+    // Wypisz parametry poszczególnych komponentów
+    for(Int_t i = 0; i < 3; ++i) {
+        Int_t idx = i * 3;
+        std::cout << "Component " << (i+1) << ":" << std::endl;
+        std::cout << "  Amplitude: " << params.fittedParams[idx] << " ± " << params.paramErrors[idx] << std::endl;
+        std::cout << "  Mean:      " << params.fittedParams[idx+1] << " ± " << params.paramErrors[idx+1] << std::endl;
+        std::cout << "  Sigma:     " << params.fittedParams[idx+2] << " ± " << params.paramErrors[idx+2] << std::endl;
+        std::cout << std::endl;
+    }
+    
+    // Wypisz wartości kombinowane
+    std::cout << "Combined Values (using triple_gaus functions):" << std::endl;
+    std::cout << "  Combined Mean:   " << params.combinedMean << " ± " << params.combinedMeanErr << std::endl;
+    std::cout << "  Combined Sigma:  " << params.combinedStdDev << " ± " << params.combinedStdDevErr << std::endl;
+    std::cout << "=========================================================" << std::endl;
+    
+    if(addToCanvas && gPad) {
+        // Dodaj tekst z wynikami na canvas
+        Double_t textX = 0.02;
+        Double_t textY = 0.98;
+        Double_t lineHeight = 0.05;
+        
+        // Główne wyniki
+        TLatex* latex = new TLatex();
+        latex->SetNDC();
+        latex->SetTextSize(0.025);
+        latex->SetTextFont(42);
+        
+        latex->DrawLatex(textX, textY, Form("Triple Gaussian Fit"));
+        textY -= lineHeight;
+        
+        latex->DrawLatex(textX, textY, Form("#chi^{2}/NDF = %.1f/%d = %.2f", 
+                                           params.chi2, params.ndf, 
+                                           params.ndf > 0 ? params.chi2/params.ndf : 0));
+        textY -= lineHeight;
+        
+        latex->DrawLatex(textX, textY, Form("Combined Mean: %.3f #pm %.3f", 
+                                           params.combinedMean, params.combinedMeanErr));
+        textY -= lineHeight;
+        
+        latex->DrawLatex(textX, textY, Form("Combined #sigma: %.3f #pm %.3f", 
+                                           params.combinedStdDev, params.combinedStdDevErr));
+        textY -= lineHeight;
+        
+        // Poszczególne komponenty (w skrócie)
+        latex->SetTextSize(0.02);
+        for(Int_t i = 0; i < 3; ++i) {
+            Int_t idx = i * 3;
+            latex->DrawLatex(textX, textY, 
+                           Form("G%d: A=%.1f, #mu=%.2f, #sigma=%.2f", 
+                                i+1, params.fittedParams[idx], 
+                                params.fittedParams[idx+1], 
+                                params.fittedParams[idx+2]));
+            textY -= lineHeight * 0.8;
+        }
+        
+        gPad->Update();
+    }
+}
+
+TCanvas* HistManager::DrawHistogram1DWithFit(const TString& setName, Int_t mctruth, 
+                                            const TString& drawOpt,
+                                            Bool_t performFit,
+                                            FitParams3Gauss* fitParams,
+                                            Bool_t drawData) {
+    // Znajdź histogram
+    TH1* hist = GetHistogramForTripleGaussFit(setName, mctruth, -1);
+    if(!hist) {
+        std::cerr << "ERROR: Cannot find histogram " << setName.Data() << ", mctruth=" << mctruth << std::endl;
+        return nullptr;
+    }
+    
+    // Stwórz canvas
+    TString canvasName = Form("c_%s_mc%d_fit", setName.Data(), mctruth);
+    TString canvasTitle = Form("%s - MC %d with Triple Gaussian Fit", setName.Data(), mctruth);
+    if(mctruth == -1) {
+        canvasName = Form("c_%s_data_fit", setName.Data());
+        canvasTitle = Form("%s - Data with Triple Gaussian Fit", setName.Data());
+    } else if(mctruth == 0) {
+        canvasName = Form("c_%s_sum_fit", setName.Data());
+        canvasTitle = Form("%s - MC Sum with Triple Gaussian Fit", setName.Data());
+    }
+    
+    TCanvas* canvas = new TCanvas(canvasName, canvasTitle, 800, 600);
+    canvas->SetLeftMargin(0.15);
+    canvas->SetBottomMargin(0.15);
+    canvas->SetRightMargin(0.35); // Więcej miejsca na tekst wyników
+    canvas->SetTopMargin(0.10);
+    
+    // Narysuj histogram
+    hist->Draw(drawOpt);
+    
+    // Narysuj dane jeśli wymagane
+    if(drawData && mctruth != -1) {
+        auto dataIt = fData1D.find(setName);
+        if(dataIt != fData1D.end()) {
+            dataIt->second->SetMarkerStyle(fDataStyle);
+            dataIt->second->SetMarkerSize(fDataSize);
+            dataIt->second->SetMarkerColor(fDataColor);
+            dataIt->second->SetLineColor(fDataColor);
+            dataIt->second->Draw("PE SAME");
+        }
+    }
+    
+    // Wykonaj fit jeśli wymagany
+    if(performFit) {
+        FitParams3Gauss localParams;
+        FitParams3Gauss* paramsToUse = &localParams;
+        
+        if(fitParams) {
+            paramsToUse = fitParams;
+        } else {
+            // Przygotuj domyślne parametry
+            if(!PrepareDefaultTripleGaussParams(hist, localParams)) {
+                std::cerr << "ERROR: Cannot prepare default fit parameters" << std::endl;
+                return canvas;
+            }
+        }
+        
+        // Wykonaj fit
+        Bool_t fitSuccess = false;
+        if(FitTripleGauss1D(setName, mctruth, *paramsToUse)) {
+            fitSuccess = true;
+            // Narysuj wyniki fitu
+            DrawTripleGaussFit(hist, *paramsToUse, false);
+            
+            // Wyświetl wyniki
+            DisplayTripleGaussResults(*paramsToUse, hist, true);
+        }
+        
+        if(!fitSuccess) {
+            std::cerr << "WARNING: Triple Gaussian fit failed" << std::endl;
+        }
+    }
+    
+    canvas->Update();
+    
+    // Zapisz canvas w mapie dla możliwości eksportu
+    if(fCanvases.find(setName) == fCanvases.end()) {
+        fCanvases[setName] = std::vector<TCanvas*>();
+    }
+    fCanvases[setName].push_back(canvas);
+    
+    return canvas;
+}
+
+TCanvas* HistManager::DrawArrayHistogramWithFit(const TString& baseName, Int_t index, Int_t mctruth,
+                                               const TString& drawOpt, 
+                                               Bool_t performFit,
+                                               FitParams3Gauss* fitParams) {
+    // Znajdź histogram
+    TH1* hist = GetHistogramForTripleGaussFit(baseName, mctruth, index);
+    if(!hist) {
+        std::cerr << "ERROR: Cannot find array histogram " << baseName.Data() 
+                  << ", index=" << index << ", mctruth=" << mctruth << std::endl;
+        return nullptr;
+    }
+    
+    // Stwórz canvas
+    TString canvasName = Form("c_%s_%d_mc%d_fit", baseName.Data(), index, mctruth);
+    TString canvasTitle = Form("%s[%d] - MC %d with Triple Gaussian Fit", baseName.Data(), index, mctruth);
+    if(mctruth == -1) {
+        canvasName = Form("c_%s_%d_data_fit", baseName.Data(), index);
+        canvasTitle = Form("%s[%d] - Data with Triple Gaussian Fit", baseName.Data(), index);
+    } else if(mctruth == 0) {
+        canvasName = Form("c_%s_%d_sum_fit", baseName.Data(), index);
+        canvasTitle = Form("%s[%d] - MC Sum with Triple Gaussian Fit", baseName.Data(), index);
+    }
+    
+    TCanvas* canvas = new TCanvas(canvasName, canvasTitle, 800, 600);
+    canvas->SetLeftMargin(0.15);
+    canvas->SetBottomMargin(0.15);
+    canvas->SetRightMargin(0.35); // Więcej miejsca na tekst wyników
+    canvas->SetTopMargin(0.10);
+    
+    // Narysuj histogram
+    hist->Draw(drawOpt);
+    
+    // Wykonaj fit jeśli wymagany
+    if(performFit) {
+        FitParams3Gauss localParams;
+        FitParams3Gauss* paramsToUse = &localParams;
+        
+        if(fitParams) {
+            paramsToUse = fitParams;
+        } else {
+            // Przygotuj domyślne parametry
+            if(!PrepareDefaultTripleGaussParams(hist, localParams)) {
+                std::cerr << "ERROR: Cannot prepare default fit parameters" << std::endl;
+                return canvas;
+            }
+        }
+        
+        // Wykonaj fit
+        Bool_t fitSuccess = false;
+        if(FitTripleGaussArray1D(baseName, index, mctruth, *paramsToUse)) {
+            fitSuccess = true;
+            // Narysuj wyniki fitu
+            DrawTripleGaussFit(hist, *paramsToUse, false);
+            
+            // Wyświetl wyniki
+            DisplayTripleGaussResults(*paramsToUse, hist, true);
+        }
+        
+        if(!fitSuccess) {
+            std::cerr << "WARNING: Triple Gaussian fit failed" << std::endl;
+        }
+    }
+    
+    canvas->Update();
+    
+    // Zapisz canvas w mapie dla możliwości eksportu
+    if(fCanvases.find(baseName) == fCanvases.end()) {
+        fCanvases[baseName] = std::vector<TCanvas*>();
+    }
+    fCanvases[baseName].push_back(canvas);
+    
+    return canvas;
+}
+
+// ==================== TRIPLE GAUSSIAN UTILITY METHODS ====================
+
+const HistManager::FitParams3Gauss* HistManager::GetTripleGaussResults1D(const TString& setName, Int_t mctruth) {
+    TString key = GenerateTripleGaussKey(setName, mctruth, -1);
+    auto it = f3GaussFitResults.find(key);
+    if(it != f3GaussFitResults.end()) {
+        return &(it->second);
+    }
+    return nullptr;
+}
+
+const HistManager::FitParams3Gauss* HistManager::GetTripleGaussResultsArray(const TString& baseName, Int_t index, Int_t mctruth) {
+    TString key = GenerateTripleGaussKey(baseName, mctruth, index);
+    auto it = f3GaussArrayResults.find(key);
+    if(it != f3GaussArrayResults.end()) {
+        return &(it->second);
+    }
+    return nullptr;
+}
+
+Bool_t HistManager::HasTripleGaussResults(const TString& setName, Int_t mctruth, Int_t arrayIndex) {
+    if(arrayIndex >= 0) {
+        return GetTripleGaussResultsArray(setName, arrayIndex, mctruth) != nullptr;
+    } else {
+        return GetTripleGaussResults1D(setName, mctruth) != nullptr;
+    }
 }

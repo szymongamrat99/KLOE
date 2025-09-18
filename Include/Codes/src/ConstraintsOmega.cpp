@@ -2,7 +2,7 @@
 
 using namespace KLOE;
 
-Double_t ConstraintsOmega::FourMomConsvLAB(Double_t *x, Double_t *p) const
+Double_t ConstraintsOmega::FourMomConsvLAB(Double_t *x, Double_t *p)
 {
   // Local variables
   Double_t
@@ -35,7 +35,7 @@ Double_t ConstraintsOmega::FourMomConsvLAB(Double_t *x, Double_t *p) const
           gamma_mom[3][_chosen4MomComponent]);
 }
 
-Double_t ConstraintsOmega::PhotonPathConsvLAB(Double_t *x, Double_t *p) const
+Double_t ConstraintsOmega::PhotonPathConsvLAB(Double_t *x, Double_t *p)
 {
   Double_t
       cluster[4],   // Cluster in LAB: Xcl, Ycl, Zcl, TclOld, EneCl

@@ -22,7 +22,7 @@
 
 namespace KLOE
 {
-  class KinFitter : public ConstraintsOmega, public ConstraintsTrilateration
+  class KinFitter
   {
   private:
     Double_t
@@ -84,6 +84,8 @@ namespace KLOE
             {"photon4pathlab", &KinFit::Photon4PathConsvLAB},
             {"energyconsvcm", &KinFit::EnergyConsvCM},
             {"minvconsv", &KinFit::MinvConsv},
+            {"minvconsvneutralkaon", &KinFit::MinvConsvNeuKaon},
+            {"minvconsvchargedkaon", &KinFit::MinvConsvChKaon},
             {"neutralxpathconsvlab", &KinFit::NeutralXPathConsvLAB},
             {"neutralypathconsvlab", &KinFit::NeutralYPathConsvLAB},
             {"neutralzpathconsvlab", &KinFit::NeutralZPathConsvLAB}};
@@ -129,6 +131,8 @@ namespace KLOE
     Double_t FitFunction(Double_t bunchCorr = 0);
 
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, TVectorD &C, TVectorD &L);
+    void GetResults(TVectorD &X, TMatrixD &V, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit);
+
 
     Double_t EnergyCalc(Double_t *p, Double_t mass);
     Double_t EnergyCalc(TLorentzVector p, Double_t mass);

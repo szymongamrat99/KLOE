@@ -9,6 +9,7 @@ add_library(LibRec SHARED
             src/ConfigWatcher.cpp
             src/ConstraintsOmega.cpp
             src/ConstraintsTrilateration.cpp
+            src/ConstraintsSignal.cpp
             src/CustomGraph.cpp
             src/cylinder_intersection.cpp
             src/DoubleRatio.cpp
@@ -37,6 +38,7 @@ add_library(LibRec SHARED
             src/KaonMassReconstructor.cpp
             src/ConfigManager.cpp
             src/trilaterationKinFit.cpp
+            src/signalKinFit.cpp
             )
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.

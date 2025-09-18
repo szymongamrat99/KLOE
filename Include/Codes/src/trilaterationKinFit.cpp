@@ -36,7 +36,7 @@ namespace KLOE
 		_Param.resize(N_free + N_const);
 		_Errors.resize(N_free + N_const);
 
-		_recMode = StringToTrilaterationCode(_config.getProperty<std::string>("flags.trilaterationReconstructionMode"));
+		_recMode = pm00::StringToTrilaterationCode(_config.getProperty<std::string>("flags.trilaterationReconstructionMode"));
 
 		if (_recMode == TrilaterationCode::TWO_PI0)
 		{
@@ -248,7 +248,7 @@ namespace KLOE
 									y_axis[1] = _X[21];
 									y_axis[2] = 0.;
 
-									ChargedVtxRec::IPBoostCorr(_bhabha_vtx.data(), y_axis, neu_vtx[k], fourKnetri_tmp[k], ip_tmp[k]);
+									_chargedVtxRec.IPBoostCorr(_bhabha_vtx.data(), y_axis, neu_vtx[k], fourKnetri_tmp[k], ip_tmp[k]);
 
 									ip_tmp[k][0] = _bhabha_vtx[0];
 									ip_tmp[k][1] = _bhabha_vtx[1];

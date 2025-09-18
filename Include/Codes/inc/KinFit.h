@@ -13,13 +13,13 @@
 
 namespace KLOE
 {
-  class KinFit : public pm00
+  class KinFit : public virtual pm00
   {
   public:
     /*Specific virtual functions for constraints*/
 
     // Four momentum conservation in LAB
-    virtual Double_t FourMomConsvLAB(Double_t *, Double_t *) const = 0;
+    virtual Double_t FourMomConsvLAB(Double_t *, Double_t *) = 0;
     virtual Double_t EnergyConsvLAB(Double_t *, Double_t *) = 0;
     virtual Double_t PxConsvLAB(Double_t *, Double_t *) = 0;
     virtual Double_t PyConsvLAB(Double_t *, Double_t *) = 0;
@@ -30,9 +30,11 @@ namespace KLOE
 
     // Conservation of invariant mass
     virtual Double_t MinvConsv(Double_t *, Double_t *) = 0;
+    virtual Double_t MinvConsvNeuKaon(Double_t *, Double_t *) = 0;
+    virtual Double_t MinvConsvChKaon(Double_t *, Double_t *) = 0;
 
     // Gamma path of flight from IP Conservation
-    virtual Double_t PhotonPathConsvLAB(Double_t *, Double_t *) const = 0;
+    virtual Double_t PhotonPathConsvLAB(Double_t *, Double_t *) = 0;
     virtual Double_t Photon1PathConsvLAB(Double_t *, Double_t *) = 0;
     virtual Double_t Photon2PathConsvLAB(Double_t *, Double_t *) = 0;
     virtual Double_t Photon3PathConsvLAB(Double_t *, Double_t *) = 0;
@@ -43,6 +45,10 @@ namespace KLOE
     virtual Double_t NeutralXPathConsvLAB(Double_t *, Double_t *) = 0;
     virtual Double_t NeutralYPathConsvLAB(Double_t *, Double_t *) = 0;
     virtual Double_t NeutralZPathConsvLAB(Double_t *, Double_t *) = 0;
+
+    virtual void SetParameters(Float_t *) = 0;
+    virtual void ResetParameters() = 0;
+    virtual void IntermediateReconstruction() = 0;
 
     virtual ~KinFit() = default;
   };
