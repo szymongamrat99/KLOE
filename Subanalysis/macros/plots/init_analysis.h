@@ -65,6 +65,8 @@ public :
    TTreeReaderValue<Float_t> Qmiss = {fReader, "Qmiss"};
    TTreeReaderValue<Float_t> T0step1 = {fReader, "T0step1"};
    TTreeReaderValue<Float_t> minv4gam = {fReader, "minv4gam"};
+   // TTreeReaderValue<Float_t> Chi2SignalKinFit = {fReader, "Chi2SignalKinFit"};
+   // TTreeReaderValue<Float_t> TrcSum = {fReader, "TrcSum"};
    TTreeReaderArray<int> Asscl = {fReader, "Asscl"};
    TTreeReaderArray<int> cutsApplied = {fReader, "cutsApplied"};
    TTreeReaderArray<int> eclstream = {fReader, "eclstream"};
@@ -134,6 +136,17 @@ public :
    TTreeReaderArray<float> yvmc = {fReader, "yvmc"};
    TTreeReaderArray<float> zv = {fReader, "zv"};
    TTreeReaderArray<float> zvmc = {fReader, "zvmc"};
+   // TTreeReaderArray<float> trk1Fit = {fReader, "trk1Fit"};
+   // TTreeReaderArray<float> trk2Fit = {fReader, "trk2Fit"};
+   // TTreeReaderArray<float> KchrecFit = {fReader, "KchrecFit"};
+   // TTreeReaderArray<float> KchboostFit = {fReader, "KchboostFit"};
+   // TTreeReaderArray<float> ipFit = {fReader, "ipFit"};
+   // TTreeReaderArray<float> photonFit1 = {fReader, "photonFit1"};
+   // TTreeReaderArray<float> photonFit2 = {fReader, "photonFit2"};
+   // TTreeReaderArray<float> photonFit3 = {fReader, "photonFit3"};
+   // TTreeReaderArray<float> photonFit4 = {fReader, "photonFit4"};
+   // TTreeReaderArray<float> KnerecFit = {fReader, "KnerecFit"};
+   // TTreeReaderArray<float> KnereclorFit = {fReader, "KnereclorFit"};
 
 
    init_analysis(TTree * /*tree*/ =0) { }
