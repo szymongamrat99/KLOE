@@ -98,7 +98,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		dirname = (std::string)initialanalysis_dir + (std::string)root_files_dir,
 		dated_folder = Obj.CreateDatedFolder(dirname);
 
-	SplitFileWriter writer(baseFilenames[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024 * 0.1, false, dated_folder);
+	SplitFileWriter writer(baseFilenames[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024 * 0.01, false, dated_folder);
 
 	Int_t mcflag = 0, mctruth = 0, NCLMIN = 4; // Assuming NCLMIN is 4, adjust as needed;
 	std::vector<Int_t> neuclulist;
@@ -184,6 +184,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		cutter.RegisterCentralValueGetter("InvMassKch", [&]()
 										  { return mK0; });
 
+		cutter.RegisterVariableGetter("Chi2Signal", [&]()
+									  { return baseKin.Chi2SignalKinFit; });
+
 		cutter.RegisterVariableGetter("TrcSum", [&]()
 									  { return TrcSum; });
 
@@ -235,6 +238,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		Bool_t noError = true;
 		Bool_t cutCombined = false, passed = false;
 
+		baseKin.Chi2SignalKinFit = 999999.;
+
 		// Initial values of mcflag and mctruth
 		mcflag = 0;
 		mctruth = 0;
@@ -260,6 +265,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		baseKin.ipnew.clear();
 
 		baseKin.pullsTriKinFit.clear();
+		baseKin.pullsSignalFit.clear();
 
 		for (Int_t i = 0; i < 2; i++)
 		{
@@ -293,6 +299,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 		baseKin.ipnew.resize(3);
 
 		baseKin.pullsTriKinFit.resize(0);
+		baseKin.pullsSignalFit.resize(0);
 
 		for (Int_t i = 0; i < 2; i++)
 		{
@@ -497,6 +504,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 			{
 				baseKin.PhivSmeared2 = -baseKin.PhivSmeared2;
 			}
+
+			// Unsmeared versions of vtx variables
+
+			baseKin.Curv1 = chVtxProps.Curv[baseKin.vtaken[1]];
+			baseKin.Phiv1 = chVtxProps.Phiv[baseKin.vtaken[1]];
+			baseKin.Cotv1 = chVtxProps.Cotv[baseKin.vtaken[1]];
+
+			baseKin.Curv2 = chVtxProps.Curv[baseKin.vtaken[2]];
+			baseKin.Phiv2 = chVtxProps.Phiv[baseKin.vtaken[2]];
+			baseKin.Cotv2 = chVtxProps.Cotv[baseKin.vtaken[2]];
 
 			// VTX CLOSEST TO BHABHA IP - FOR OMEGAPI
 			hypoMap[KLOE::HypothesisCode::OMEGAPI] = eventAnalysis->findKClosestRec(baseKin.KchrecClosest, baseKin.trkClosest[0], baseKin.trkClosest[1], baseKin.vtakenClosest, logger);
@@ -711,7 +728,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
 					ErrorHandling::ErrorCodes codeTri = ErrorHandling::ErrorCodes::CHARGED_KAON_MASS_PRE;
 
-					if (cutter.PassCut(1) && cutter.PassCut(2))
+					if (cutter.PassCut(2) && cutter.PassCut(3))
 					{
 
 						std::vector<Float_t> cluster[5];
@@ -875,7 +892,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 														   baseKin.photonFit,
 														   baseKin.KnerecFit,
 														   baseKin.KnereclorFit,
-														   baseKin.Chi2SignalKinFit);
+														   baseKin.Chi2SignalKinFit,
+														   baseKin.pullsSignalFit);
 
 								if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
 								{
@@ -1053,7 +1071,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						{"PhivSmeared2", baseKin.PhivSmeared2},
 						{"CotvSmeared2", baseKin.CotvSmeared2},
 						{"Chi2SignalKinFit", baseKin.Chi2SignalKinFit},
-						{"TrcSum", TrcSum}};
+						{"TrcSum", TrcSum},
+						{"Curv1", baseKin.Curv1},
+						{"Phiv1", baseKin.Phiv1},
+						{"Cotv1", baseKin.Cotv1},
+						{"Curv2", baseKin.Curv2},
+						{"Phiv2", baseKin.Phiv2},
+						{"Cotv2", baseKin.Cotv2}};
 
 					// Tablice
 					std::map<std::string, std::vector<Int_t>> intArrays = {
@@ -1138,7 +1162,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						{"photonFit3", baseKin.photonFit[2]},
 						{"photonFit4", baseKin.photonFit[3]},
 						{"KnerecFit", baseKin.KnerecFit},
-						{"KnereclorFit", baseKin.KnereclorFit}};
+						{"KnereclorFit", baseKin.KnereclorFit},
+						{"pullsSignalFit", baseKin.pullsSignalFit}};
 
 					writer.Fill(intVars, floatVars, intArrays, floatArrays);
 

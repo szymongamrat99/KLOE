@@ -98,18 +98,8 @@ namespace KLOE
 			_bhabha_vtx = bhabha_vtx;
 		}
 
-		void GetResults(std::vector<Float_t> &Param, std::vector<Float_t> &Errors, std::vector<Float_t> &ParamFit, std::vector<Float_t> &ErrorsFit, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit, Float_t &Chi2SignalKinFit)
+		void GetResults(std::vector<Float_t> &Param, std::vector<Float_t> &Errors, std::vector<Float_t> &ParamFit, std::vector<Float_t> &ErrorsFit, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit, Float_t &Chi2SignalKinFit, std::vector<Float_t> &pulls)
 		{
-			// Param.resize(_N_free);
-			// Errors.resize(_N_free);
-			// Param.assign(_Param.begin(), _Param.begin() + _N_free);
-			// Errors.assign(_Errors.begin(), _Errors.begin() + _N_free);
-
-			// ParamFit.resize(_N_free);
-			// ErrorsFit.resize(_N_free);
-			// ParamFit.assign(&_X_final.GetMatrixArray()[0], &_X_final.GetMatrixArray()[0] + _N_free);
-			// ErrorsFit.assign(&_V_final.GetMatrixArray()[0], &_X_final.GetMatrixArray()[0] + _N_free);
-
 			for (Int_t i = 0; i < 2; i++)
 				trkFit[i] = _trkFit[i];
 
@@ -125,6 +115,11 @@ namespace KLOE
 			KnerecFit = _KnerecFit;
 
 			Chi2SignalKinFit = _CHISQRMIN;
+
+			for (Int_t i = 0; i < _X_min.GetNrows() - 3; i++)
+			{
+				pulls.push_back((_X_init_min[i] - _X_min[i]) / sqrt(_V_init[i][i] - _V_min[i][i]));
+			}
 		}
 
 		ErrorHandling::ErrorCodes Reconstruct();

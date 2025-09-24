@@ -95,6 +95,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   _err_flag = 0;
 
+  _err_code = ErrorHandling::ErrorCodes::NO_ERROR;
+
   Double_t CHISQRTOT = 0.;
 
   for (Int_t i = 0; i < _loopcount; i++)
@@ -154,6 +156,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       {
         _V(j, j) = _V_final(j, j);
       }
+
       _L_aux = _L;
       _C_aux = _C;
       _FUNVALTMP = _FUNVAL;
@@ -170,6 +173,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
     }
     catch (ErrorHandling::ErrorCodes err)
     {
+      // _err_code = err;
       //_logger.getErrLog(err, "iteration no. " + std::to_string(i));
       break;
     }
@@ -186,6 +190,11 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
     _baseObj->SetParameters(pAux);
     _baseObj->IntermediateReconstruction();
+
+    _X_min = _X;
+    _V_min = _V;
+    _X_init_min = _X_init;
+    _V_init = _V_init;
   }
 
   return _CHISQRTMP;
@@ -242,10 +251,12 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
   L = _L_aux;
 }
 
-void KinFitter::GetResults(TVectorD &X, TMatrixD &V, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit)
+void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit)
 {
   X = _X;
   V = _V;
+  X_init = _X_init;
+  V_init = _V_init;
 
   for (Int_t i = 0; i < 2; i++)
   {

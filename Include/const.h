@@ -333,7 +333,13 @@ struct BaseKinematics
         CurvSmeared2,
         PhivSmeared2,
         CotvSmeared2,
-        Chi2SignalKinFit;
+        Chi2SignalKinFit,
+        Curv1,
+        Phiv1,
+        Cotv1,
+        Curv2,
+        Phiv2,
+        Cotv2;
 
     UChar_t
         mctruth,
@@ -443,7 +449,8 @@ struct BaseKinematics
         ParamSignal,
         ErrorsSignal,
         ParamSignalFit,
-        ErrorsSignalFit;
+        ErrorsSignalFit,
+        pullsSignalFit;
 
     TLorentzVector
         phi4Mom;

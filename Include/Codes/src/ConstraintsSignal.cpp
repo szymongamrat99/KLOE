@@ -113,11 +113,6 @@ void ConstraintsSignal::IntermediateReconstruction()
   // Corrected IP event by event
   IPBoostCorr(X_line, mom, xB, plane_perp, ip.data());
 
-  ip[0] = phi.vtxPos[0];
-  ip[1] = phi.vtxPos[1];
-  if (abs(ip[2] - phi.vtxPos[2]) > 2.0)
-    ip[2] = phi.vtxPos[2];
-
   Kchrec.calculatePath(ip.data());
   Kchrec.SetTotalVector();
 
@@ -131,6 +126,10 @@ void ConstraintsSignal::IntermediateReconstruction()
 
   for (Int_t i = 0; i < 4; i++)
   {
+    photon[i].fourPos[0] = photon[i].clusterParams[0];
+    photon[i].fourPos[1] = photon[i].clusterParams[1];
+    photon[i].fourPos[2] = photon[i].clusterParams[2];
+    photon[i].fourPos[3] = photon[i].clusterParams[3];
     photon[i].calculatePath(Knereclor.fourPos.data());
     photon[i].calculateTimeOfFlightPhoton();
     photon[i].SetTotalVectorPhoton();
@@ -178,7 +177,7 @@ Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
   SetParameters(p4);
   IntermediateReconstruction();
 
-  return photon[_chosenPhoton].clusterParams[3] - Knereclor.lifetimeLAB - photon[_chosenPhoton].timeOfFlight;
+  return photon[_chosenPhoton].fourPos[3] - Knereclor.lifetimeLAB - photon[_chosenPhoton].timeOfFlight;
 }
 
 Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)

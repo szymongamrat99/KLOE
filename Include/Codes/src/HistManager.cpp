@@ -1056,7 +1056,7 @@ Double_t HistManager::CalculateYRange(const std::vector<TH1*>& hists, const TStr
         maxY = TMath::Max(maxY, dataIt->second->GetMaximum());
     }
 
-    return logy ? maxY * 5 : maxY * 1.1;
+    return logy ? maxY * 10 : maxY * 1.4;
 }
 
 void HistManager::CleanupSet(const TString& setName) {
@@ -2537,5 +2537,39 @@ Bool_t HistManager::HasTripleGaussResults(const TString& setName, Int_t mctruth,
         return GetTripleGaussResultsArray(setName, arrayIndex, mctruth) != nullptr;
     } else {
         return GetTripleGaussResults1D(setName, mctruth) != nullptr;
+    }
+}
+
+// Implementacje metod kontroli rozmiaru markerów danych
+void HistManager::SetDataMarkerSize(Float_t size) {
+    fDataSize = size;
+    // Opcjonalnie można od razu zaktualizować istniejące histogramy
+    UpdateExistingDataHistograms(); // Odkomentować jeśli potrzeba automatycznej aktualizacji
+}
+
+void HistManager::UpdateExistingDataHistograms() {
+    // Aktualizuj histogramy 1D
+    for(auto& pair : fData1D) {
+        TH1* hist = pair.second;
+        if(hist) {
+            hist->SetMarkerSize(fDataSize);
+        }
+    }
+    
+    // Aktualizuj histogramy Array1D
+    for(auto& setPair : fArrayData1D) {
+        for(auto& hist : setPair.second) {
+            if(hist) {
+                hist->SetMarkerSize(fDataSize);
+            }
+        }
+    }
+    
+    // Aktualizuj histogramy 2D (jeśli mają markery)
+    for(auto& pair : fData2D) {
+        TH2* hist = pair.second;
+        if(hist) {
+            hist->SetMarkerSize(fDataSize);
+        }
     }
 }

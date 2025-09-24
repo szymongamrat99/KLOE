@@ -138,7 +138,7 @@ namespace KLOE
 
 				for (Int_t i = 0; i < 3; i++)
 				{
-					_Param[_offset + i] = _bhabha_mom[i];
+					_Param[_offset + i] = _bhabha_vtx[i];
 					_Errors[_offset + i] = 0.;
 				}
 
@@ -156,9 +156,9 @@ namespace KLOE
 
 			_CHISQRMIN = KinFitter::FitFunction();
 
-			KinFitter::GetResults(_X, _V, _trkFit, _KchrecFit, _KchboostFit, _ipFit, _photonFit, _KnerecFit, _KnereclorFit);
+			KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit, _KchrecFit, _KchboostFit, _ipFit, _photonFit, _KnerecFit, _KnereclorFit);
 
-			if (_CHISQRMIN < 10E3)
+			if (1)
 				_isConverged = 1;
 			else
 				_isConverged = 0;

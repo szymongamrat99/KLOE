@@ -712,6 +712,25 @@ public:
      * @return true jeśli fit był wykonywany
      */
     Bool_t HasFitResult(const TString& setName) const;
+    
+    // Metody kontroli rozmiaru markerów danych
+    /**
+     * @brief Ustawia rozmiar markera dla danych eksperymentalnych
+     * @param size Rozmiar markera (wartość Float_t)
+     */
+    void SetDataMarkerSize(Float_t size);
+    
+    /**
+     * @brief Pobiera aktualny rozmiar markera dla danych
+     * @return Rozmiar markera danych
+     */
+    Float_t GetDataMarkerSize() const { return fDataSize; }
+    
+    /**
+     * @brief Aktualizuje rozmiar markerów w istniejących histogramach danych
+     * Przydatne do natychmiastowego zastosowania nowego rozmiaru bez ponownego tworzenia histogramów
+     */
+    void UpdateExistingDataHistograms();
 
 private:
     Int_t fChannNum;                                    ///< Liczba kanałów MC

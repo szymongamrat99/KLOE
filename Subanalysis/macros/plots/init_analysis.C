@@ -93,124 +93,124 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKchConfig.bins = 100;
    invMassKchConfig.xmin = 480;
    invMassKchConfig.xmax = 520;
-   invMassKchConfig.logy = false;
+   invMassKchConfig.logy = true;
    invMassKchConfig.showStats = false;
 
    invMassKchMCConfig.name = "invMassKchMC";
-   invMassKchMCConfig.xtitle = "m^{inv,MC}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
-   invMassKchMCConfig.ytitle = "Counts/2";
+   invMassKchMCConfig.xtitle = "m^{inv,MC}_{K#rightarrow#pi^{+}#pi^{-}} - m_{K_{0}} [MeV/c^{2}]";
+   invMassKchMCConfig.ytitle = "Counts";
    invMassKchMCConfig.bins = 100;
    invMassKchMCConfig.xmin = -100;
    invMassKchMCConfig.xmax = 100;
-   invMassKchMCConfig.logy = false;
+   invMassKchMCConfig.logy = true;
    invMassKchMCConfig.showStats = false;
 
    invMassKneConfig.name = "invMassKne";
    invMassKneConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{0}#pi^{0}} [MeV/c^{2}]";
-   invMassKneConfig.ytitle = "Counts/10";
+   invMassKneConfig.ytitle = "Counts";
    invMassKneConfig.bins = 100;
    invMassKneConfig.xmin = 0;
    invMassKneConfig.xmax = 1000;
-   invMassKneConfig.logy = false;
+   invMassKneConfig.logy = true;
    invMassKneConfig.showStats = false;
 
    invMassKneMCConfig.name = "invMassKneMC";
-   invMassKneMCConfig.xtitle = "m^{inv,MC}_{K#rightarrow#pi^{0}#pi^{0}} [MeV/c^{2}]";
-   invMassKneMCConfig.ytitle = "Counts/10";
+   invMassKneMCConfig.xtitle = "m^{inv,MC}_{K#rightarrow#pi^{0}#pi^{0}} - m_{K_{0}} [MeV/c^{2}]";
+   invMassKneMCConfig.ytitle = "Counts";
    invMassKneMCConfig.bins = 100;
-   invMassKneMCConfig.xmin = -100;
-   invMassKneMCConfig.xmax = 100;
-   invMassKneMCConfig.logy = false;
+   invMassKneMCConfig.xmin = -300;
+   invMassKneMCConfig.xmax = 300;
+   invMassKneMCConfig.logy = true;
    invMassKneMCConfig.showStats = false;
 
    timeDiffConfig.name = "timeDiff";
-   timeDiffConfig.xtitle = "#DeltaT [#tau_{S}]";
-   timeDiffConfig.ytitle = "Counts/2";
+   timeDiffConfig.xtitle = "#DeltaT^{MC,rec} [#tau_{S}]";
+   timeDiffConfig.ytitle = "Counts";
    timeDiffConfig.bins = 300;
    timeDiffConfig.xmin = -300;
    timeDiffConfig.xmax = 300;
-   timeDiffConfig.logy = false;
+   timeDiffConfig.logy = true;
    timeDiffConfig.showStats = false;
 
    timeDiffMCConfig.name = "timeDiffMC";
-   timeDiffMCConfig.xtitle = "#DeltaT [#tau_{S}]";
-   timeDiffMCConfig.ytitle = "Counts/2";
+   timeDiffMCConfig.xtitle = "#DeltaT^{MC,rec} - #DeltaT^{MC,gen} [#tau_{S}]";
+   timeDiffMCConfig.ytitle = "Counts";
    timeDiffMCConfig.bins = 200;
    timeDiffMCConfig.xmin = -100;
    timeDiffMCConfig.xmax = 100;
-   timeDiffMCConfig.logy = false;
+   timeDiffMCConfig.logy = true;
    timeDiffMCConfig.showStats = false;
 
    chi2TriKinFitConfig.name = "chi2TriKinFit";
-   chi2TriKinFitConfig.xtitle = "#DeltaT [#tau_{S}]";
-   chi2TriKinFitConfig.ytitle = "Counts/2";
+   chi2TriKinFitConfig.xtitle = "#chi^{2}_{tri} [-]";
+   chi2TriKinFitConfig.ytitle = "Counts";
    chi2TriKinFitConfig.bins = 50;
    chi2TriKinFitConfig.xmin = -10;
    chi2TriKinFitConfig.xmax = 50;
-   chi2TriKinFitConfig.logy = false;
+   chi2TriKinFitConfig.logy = true;
    chi2TriKinFitConfig.showStats = false;
 
    trcFinalConfig.name = "trcFinal";
    trcFinalConfig.xtitle = "Trc sum [ns]";
    trcFinalConfig.ytitle = "Counts";
    trcFinalConfig.bins = 50;
-   trcFinalConfig.xmin = -50;
-   trcFinalConfig.xmax = 10;
-   trcFinalConfig.logy = false;
+   trcFinalConfig.xmin = -10;
+   trcFinalConfig.xmax = 5;
+   trcFinalConfig.logy = true;
    trcFinalConfig.showStats = false;
 
    curvMCConfig.name = "curvMC";
-   curvMCConfig.xtitle = "Curv [cm^{-1}]";
+   curvMCConfig.xtitle = "Curv^{MC,rec} - Curv^{MC,gen} [cm^{-1}]";
    curvMCConfig.ytitle = "Counts";
    curvMCConfig.bins = 50;
    curvMCConfig.xmin = -50;
    curvMCConfig.xmax = 10;
-   curvMCConfig.logy = false;
+   curvMCConfig.logy = true;
    curvMCConfig.showStats = false;
 
    phivMCConfig.name = "phivMC";
-   phivMCConfig.xtitle = "Phiv [rad]";
+   phivMCConfig.xtitle = "Phiv^{MC,rec} - Phiv^{MC,gen} [rad]";
    phivMCConfig.ytitle = "Counts";
    phivMCConfig.bins = 40;
-   phivMCConfig.xmin = -2*M_PI;
-   phivMCConfig.xmax = 2*M_PI;
-   phivMCConfig.logy = false;
+   phivMCConfig.xmin = -2 * M_PI;
+   phivMCConfig.xmax = 2 * M_PI;
+   phivMCConfig.logy = true;
    phivMCConfig.showStats = false;
 
    cotvMCConfig.name = "cotvMC";
-   cotvMCConfig.xtitle = "Cotv [-]";
+   cotvMCConfig.xtitle = "Cotv^{MC,rec} - Cotv^{MC,gen} [-]";
    cotvMCConfig.ytitle = "Counts";
    cotvMCConfig.bins = 50;
    cotvMCConfig.xmin = -10;
    cotvMCConfig.xmax = 10;
-   cotvMCConfig.logy = false;
+   cotvMCConfig.logy = true;
    cotvMCConfig.showStats = false;
 
    xchMCConfig.name = "xchMC";
-   xchMCConfig.xtitle = "xch [cm]";
+   xchMCConfig.xtitle = "x^{MC,rec}_{ch} - x^{MC,gen}_{ch} [cm]";
    xchMCConfig.ytitle = "Counts";
    xchMCConfig.bins = 50;
    xchMCConfig.xmin = -10;
    xchMCConfig.xmax = 10;
-   xchMCConfig.logy = false;
+   xchMCConfig.logy = true;
    xchMCConfig.showStats = false;
 
    ychMCConfig.name = "ychMC";
-   ychMCConfig.xtitle = "ych [cm]";
+   ychMCConfig.xtitle = "y^{MC,rec}_{ch} - y^{MC,gen}_{ch} [cm]";
    ychMCConfig.ytitle = "Counts";
    ychMCConfig.bins = 50;
    ychMCConfig.xmin = -10;
    ychMCConfig.xmax = 10;
-   ychMCConfig.logy = false;
+   ychMCConfig.logy = true;
    ychMCConfig.showStats = false;
 
    zchMCConfig.name = "zchMC";
-   zchMCConfig.xtitle = "zch [cm]";
+   zchMCConfig.xtitle = "z^{MC,rec}_{ch} - z^{MC,gen}_{ch} [cm]";
    zchMCConfig.ytitle = "Counts";
    zchMCConfig.bins = 50;
-   zchMCConfig.xmin = -10;
-   zchMCConfig.xmax = 10;
-   zchMCConfig.logy = false;
+   zchMCConfig.xmin = -4;
+   zchMCConfig.xmax = 4;
+   zchMCConfig.logy = true;
    zchMCConfig.showStats = false;
 
    TimeNeutral2dConfig.name = "TimeNeutral2d";
@@ -222,7 +222,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    TimeNeutral2dConfig.binsy = 50;
    TimeNeutral2dConfig.ymin = -10;
    TimeNeutral2dConfig.ymax = 400;
-   TimeNeutral2dConfig.logy = false;
+   TimeNeutral2dConfig.logy = true;
    TimeNeutral2dConfig.showStats = false;
 
    // Konfiguracja array histogramów dla składowych pędu Kchrec
@@ -232,7 +232,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    momentumConfig.xmax = 10;
    momentumConfig.xtitle = "p [MeV/c]";
    momentumConfig.ytitle = "Counts";
-   momentumConfig.logy = false;
+   momentumConfig.logy = true;
    momentumConfig.showStats = false;
 
    momentumArrayConfig.baseName = "KchrecMomentum";
@@ -266,7 +266,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    momentumNeutralConfig.xmax = 100;
    momentumNeutralConfig.xtitle = "p [MeV/c]";
    momentumNeutralConfig.ytitle = "Counts";
-   momentumNeutralConfig.logy = false;
+   momentumNeutralConfig.logy = true;
    momentumNeutralConfig.showStats = false;
 
    momentumNeutralArrayConfig.baseName = "KnerecMomentum";
@@ -300,7 +300,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    neuVtxConfig.xmax = 1;
    neuVtxConfig.xtitle = "x [MeV/c]";
    neuVtxConfig.ytitle = "Counts";
-   neuVtxConfig.logy = false;
+   neuVtxConfig.logy = true;
    neuVtxConfig.showStats = false;
 
    neuVtxArrayConfig.baseName = "NeuVtx";
@@ -337,7 +337,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    pullArrayConfig.xmax = 10;
    pullArrayConfig.xtitle = "Pull value [-]";
    pullArrayConfig.ytitle = "Counts";
-   pullArrayConfig.logy = false;
+   pullArrayConfig.logy = true;
    pullArrayConfig.showStats = false;
 
    pullsArrayConfig.baseName = "PullsTriKinFit";
@@ -347,26 +347,62 @@ void init_analysis::Begin(TTree * /*tree*/)
    pullsArrayConfig.varTitles = {"Pull_{0}", "Pull_{1}", "Pull_{2}", "Pull_{3}", "Pull_{4}"};
    pullsArrayConfig.commonConfig = pullArrayConfig;
 
+   for (Int_t k = 0; k < 4; k++)
+   {
+      pullsArrayConfig.SetIndividualBinning(k * 5, 50, -10, 10);
+      pullsArrayConfig.SetIndividualBinning(k * 5 + 1, 50, -10, 10);
+      pullsArrayConfig.SetIndividualBinning(k * 5 + 2, 50, -10, 10);
+      pullsArrayConfig.SetIndividualBinning(k * 5 + 3, 50, -10, 10);
+      pullsArrayConfig.SetIndividualBinning(k * 5 + 4, 50, -10, 10);
+      pullsArrayConfig.SetIndividualAxisTitles(k * 5, Form("Cluster %d Pull_{x_{cl}}", k), "Counts");
+      pullsArrayConfig.SetIndividualAxisTitles(k * 5 + 1, Form("Cluster %d Pull_{y_{cl}}", k), "Counts");
+      pullsArrayConfig.SetIndividualAxisTitles(k * 5 + 2, Form("Cluster %d Pull_{z_{cl}}", k), "Counts");
+      pullsArrayConfig.SetIndividualAxisTitles(k * 5 + 3, Form("Cluster %d Pull_{T_{cl}}", k), "Counts");
+      pullsArrayConfig.SetIndividualAxisTitles(k * 5 + 4, Form("Cluster %d Pull_{E_{cl}}", k), "Counts");
+   }
+
+   pullsArrayConfig.SetIndividualBinning(20, 50, -10, 10);
+   pullsArrayConfig.SetIndividualBinning(21, 50, -10, 10);
+   pullsArrayConfig.SetIndividualBinning(22, 50, -10, 10);
+   pullsArrayConfig.SetIndividualBinning(23, 50, -10, 10);
+   pullsArrayConfig.SetIndividualAxisTitles(20, "Pull_{p^{#phi}_{x}}", "Counts");
+   pullsArrayConfig.SetIndividualAxisTitles(21, "Pull_{p^{#phi}_{y}}", "Counts");
+   pullsArrayConfig.SetIndividualAxisTitles(22, "Pull_{p^{#phi}_{z}}", "Counts");
+   pullsArrayConfig.SetIndividualAxisTitles(23, "Pull_{E^{#phi}}", "Counts");
+
    // NOWE: Indywidualne konfiguracje dla wybranych pulls
    // Możemy ustawić różne zakresy dla różnych typów pulls
    // Pull 0,1 - pozycja vertex: może mieć większą rozpiętość
    pullsArrayConfig.SetIndividualBinning(0, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(0, "Cluster 1 Pull_{x}", "Events");
-
+   pullsArrayConfig.SetIndividualAxisTitles(0, "Cluster 1 Pull_{x}", "Counts");
    pullsArrayConfig.SetIndividualBinning(1, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(1, "Cluster 1 Pull_{y}", "Events");
-
+   pullsArrayConfig.SetIndividualAxisTitles(1, "Cluster 1 Pull_{y}", "Counts");
    // Pull 2,3 - pęd: standardowy zakres
    pullsArrayConfig.SetIndividualBinning(2, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(2, "Cluster 1 Pull_{z}", "Events");
-
+   pullsArrayConfig.SetIndividualAxisTitles(2, "Cluster 1 Pull_{z}", "Counts");
    // Pull 4 - energia: może być bardziej precyzyjny
    pullsArrayConfig.SetIndividualBinning(4, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(4, "Cluster 1 Time Pull", "Events");
-
+   pullsArrayConfig.SetIndividualAxisTitles(4, "Cluster 1 Time Pull", "Counts");
    // Pull 5 - energia: może być bardziej precyzyjny
    pullsArrayConfig.SetIndividualBinning(5, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(5, "Cluster 1 Energy Pull", "Events");
+   pullsArrayConfig.SetIndividualAxisTitles(5, "Cluster 1 Energy Pull", "Counts");
+   pullsArrayConfig.SetIndividualBinning(6, 50, -3, 3);
+   pullsArrayConfig.SetIndividualAxisTitles(6, "Cluster 2 Pull_{x}", "Counts");
+
+   pullsArrayConfig.SetIndividualBinning(7, 50, -3, 3);
+   pullsArrayConfig.SetIndividualAxisTitles(7, "Cluster 2 Pull_{y}", "Counts");
+
+   // Pull 2,3 - pęd: standardowy zakres
+   pullsArrayConfig.SetIndividualBinning(8, 50, -3, 3);
+   pullsArrayConfig.SetIndividualAxisTitles(8, "Cluster 2 Pull_{z}", "Counts");
+
+   // Pull 4 - energia: może być bardziej precyzyjny
+   pullsArrayConfig.SetIndividualBinning(9, 50, -3, 3);
+   pullsArrayConfig.SetIndividualAxisTitles(9, "Cluster 2 Time Pull", "Counts");
+
+   // Pull 5 - energia: może być bardziej precyzyjny
+   pullsArrayConfig.SetIndividualBinning(10, 50, -3, 3);
+   pullsArrayConfig.SetIndividualAxisTitles(10, "Cluster 2 Energy Pull", "Events");
 
    // Reszta pulls (5-23) będzie używać commonConfig
 
@@ -434,13 +470,12 @@ Bool_t init_analysis::Process(Long64_t entry)
 
    if (*mctruth == 1)
       weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
-   
 
    Float_t trcSum = trcfinal[0] + trcfinal[1] + trcfinal[2] + trcfinal[3];
 
    Bool_t photonEneLimit = gammaMomTriKinFit1[3] > 20. && gammaMomTriKinFit2[3] > 20. && gammaMomTriKinFit3[3] > 20. && gammaMomTriKinFit4[3] > 20.;
 
-   if (cutter->PassAllCuts())
+   if (1)
    {
       if (*mcflag == 1)
       {
@@ -451,8 +486,8 @@ Bool_t init_analysis::Process(Long64_t entry)
                  timeOfFlight = (distance / velocity) / (tau_S);
 
          histMgr->Fill1D("invMassKch", *mctruth, Kchrec[5], weight);
-         histMgr->Fill1D("invMassKne", *mctruth, KneTriangle[5], weight);
-         histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeCM - *KaonNeTimeCM , weight);
+         histMgr->Fill1D("invMassKne", *mctruth, *minv4gam, weight);
+         histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeCM - *KaonNeTimeCM, weight);
          histMgr->Fill1D("chi2TriKinFit", *mctruth, *Chi2TriKinFit, weight);
          histMgr->Fill1D("trcFinal", *mctruth, trcSum, weight);
 
@@ -460,22 +495,25 @@ Bool_t init_analysis::Process(Long64_t entry)
          histMgr->Fill1D("ychMC", *mctruth, Kchboost[7] - Kchmc[7], weight);
          histMgr->Fill1D("zchMC", *mctruth, Kchboost[8] - Kchmc[8], weight);
 
-         // Float_t
-         //    testcharged00 = sqrt(pow(abs(*CurvSmeared1) - abs(CurvMC[0]),2) + pow(abs(*PhivSmeared1) - abs(PhivMC[0]),2) + pow(abs(*CotvSmeared1) - abs(CotvMC[0]),2)),
-         //    testcharged11 = sqrt(pow(abs(*CurvSmeared2) - abs(CurvMC[0]),2) + pow(abs(*PhivSmeared2) - abs(PhivMC[0]),2) + pow(abs(*CotvSmeared2) - abs(CotvMC[0]),2));
+         if (*mctruth == 1)
+         {
+            Float_t
+                testcharged00 = sqrt(pow(abs(*CurvSmeared1) - abs(CurvMC[0]), 2) + pow(abs(*PhivSmeared1) - abs(PhivMC[0]), 2) + pow(abs(*CotvSmeared1) - abs(CotvMC[0]), 2)),
+                testcharged11 = sqrt(pow(abs(*CurvSmeared2) - abs(CurvMC[0]), 2) + pow(abs(*PhivSmeared2) - abs(PhivMC[0]), 2) + pow(abs(*CotvSmeared2) - abs(CotvMC[0]), 2));
 
-         // if (testcharged00 < testcharged11)
-         // {
-         //    histMgr->Fill1D("curvMC", *mctruth, abs(*CurvSmeared1) - abs(CurvMC[0]), weight);
-         //    histMgr->Fill1D("phivMC", *mctruth, abs(*PhivSmeared1) - abs(PhivMC[0]), weight);
-         //    histMgr->Fill1D("cotvMC", *mctruth, abs(*CotvSmeared1) - abs(CotvMC[0]), weight);
-         // }
-         // else
-         // {
-         //    histMgr->Fill1D("curvMC", *mctruth, abs(*CurvSmeared1) - abs(CurvMC[1]), weight);
-         //    histMgr->Fill1D("phivMC", *mctruth, abs(*PhivSmeared1) - abs(PhivMC[1]), weight);
-         //    histMgr->Fill1D("cotvMC", *mctruth, abs(*CotvSmeared1) - abs(CotvMC[1]), weight);
-         // }
+            if (testcharged00 < testcharged11)
+            {
+               histMgr->Fill1D("curvMC", *mctruth, abs(*CurvSmeared1) - abs(CurvMC[0]), weight);
+               histMgr->Fill1D("phivMC", *mctruth, abs(*PhivSmeared1) - abs(PhivMC[0]), weight);
+               histMgr->Fill1D("cotvMC", *mctruth, abs(*CotvSmeared1) - abs(CotvMC[0]), weight);
+            }
+            else
+            {
+               histMgr->Fill1D("curvMC", *mctruth, abs(*CurvSmeared1) - abs(CurvMC[1]), weight);
+               histMgr->Fill1D("phivMC", *mctruth, abs(*PhivSmeared1) - abs(PhivMC[1]), weight);
+               histMgr->Fill1D("cotvMC", *mctruth, abs(*CotvSmeared1) - abs(CotvMC[1]), weight);
+            }
+         }
 
          // Wypełnij array histogramy dla składowych pędu Kchrec
          std::vector<Double_t> momentum = {Kchboost[0], Kchboost[1], Kchboost[2], Kchboost[3]};
@@ -501,7 +539,7 @@ Bool_t init_analysis::Process(Long64_t entry)
          histMgr->FillArrayAll1D("PullsTriKinFit", *mctruth, pulls, weight);
 
          histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - Kchrec[5], weight);
-         histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - KneTriangle[5], weight);
+         histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - *minv4gam, weight);
          histMgr->Fill1D("timeDiffMC", *mctruth, (*KaonChTimeCMMC - *KaonNeTimeCMMC) - (*KaonChTimeCM - *KaonNeTimeCM), weight);
 
          histMgr->Fill2D("TimeNeutral2d", *mctruth, *KaonNeTimeCMMC, *KaonNeTimeCM, weight);
@@ -516,11 +554,11 @@ Bool_t init_analysis::Process(Long64_t entry)
 
          // Wypełnij array histogramy dla danych - pulls (jeśli dostępne dla danych)
          std::vector<Double_t> pullsData = {pullsTriKinFit[0], pullsTriKinFit[1], pullsTriKinFit[2],
-                                        pullsTriKinFit[3], pullsTriKinFit[4], pullsTriKinFit[5], pullsTriKinFit[6], pullsTriKinFit[7],
-                                        pullsTriKinFit[8], pullsTriKinFit[9], pullsTriKinFit[10], pullsTriKinFit[11], pullsTriKinFit[12],
-                                        pullsTriKinFit[13], pullsTriKinFit[14], pullsTriKinFit[15], pullsTriKinFit[16], pullsTriKinFit[17],
-                                        pullsTriKinFit[18], pullsTriKinFit[19], pullsTriKinFit[20], pullsTriKinFit[21], pullsTriKinFit[22],
-                                        pullsTriKinFit[23]};
+                                            pullsTriKinFit[3], pullsTriKinFit[4], pullsTriKinFit[5], pullsTriKinFit[6], pullsTriKinFit[7],
+                                            pullsTriKinFit[8], pullsTriKinFit[9], pullsTriKinFit[10], pullsTriKinFit[11], pullsTriKinFit[12],
+                                            pullsTriKinFit[13], pullsTriKinFit[14], pullsTriKinFit[15], pullsTriKinFit[16], pullsTriKinFit[17],
+                                            pullsTriKinFit[18], pullsTriKinFit[19], pullsTriKinFit[20], pullsTriKinFit[21], pullsTriKinFit[22],
+                                            pullsTriKinFit[23]};
          histMgr->FillArrayAllData1D("PullsTriKinFit", pullsData, weight);
 
          // Wypełnij array histogramy dla składowych pędu Kchrec
@@ -584,7 +622,6 @@ void init_analysis::Terminate()
 
    histMgr->SetNormalizationType(HistManager::NormalizationType::SIMPLE_SCALE); // Ustaw proste skalowanie --- IGNORE ---
 
-
    // 1D histogramy z danymi
    histMgr->DrawSet1D("invMassKch", "HIST", true);
    histMgr->DrawSet1D("invMassKne", "HIST", true);
@@ -607,9 +644,9 @@ void init_analysis::Terminate()
    histMgr->DrawSet1D("timeDiffMC", "HIST", true);
 
    // Rysuj array histogramy
-   histMgr->DrawArray1D("KchrecMomentum", true);                                         // z danymi
-   histMgr->DrawArray1D("KnerecMomentum", true);                                         // z danymi
-   histMgr->DrawArray1D("NeuVtx", true);                                                 // z danymi
+   histMgr->DrawArray1D("KchrecMomentum", true); // z danymi
+   histMgr->DrawArray1D("KnerecMomentum", true); // z danymi
+   histMgr->DrawArray1D("NeuVtx", true);         // z danymi
    histMgr->DrawArray1D("PullsTriKinFit", true); // z danymi
 
    // histMgr->SaveToRoot("analysis_results.root");
