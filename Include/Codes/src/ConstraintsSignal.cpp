@@ -81,7 +81,6 @@ void ConstraintsSignal::IntermediateReconstruction()
 {
   // Intermediate reconstruction to be done after setting the parameters
   // and before calculating the constraints.
-
   for (Int_t i = 0; i < 2; i++)
     charged_mom(pionCh[i].trackParams[0], pionCh[i].trackParams[1], pionCh[i].trackParams[2], pionCh[i].fourMom.data(), 1);
 
@@ -113,6 +112,14 @@ void ConstraintsSignal::IntermediateReconstruction()
   // Corrected IP event by event
   IPBoostCorr(X_line, mom, xB, plane_perp, ip.data());
 
+  ip[0] = phi.vtxPos[0];
+  ip[1] = phi.vtxPos[1];
+  // ip[2] is fitted
+  if (abs(ip[2] - phi.vtxPos[2]) > 2.)
+    ip[2] = phi.vtxPos[2];
+
+  std::cout << "IP after correction: " << ip[0] << " " << ip[1] << " " << ip[2] << std::endl;
+
   Kchrec.calculatePath(ip.data());
   Kchrec.SetTotalVector();
 
@@ -126,6 +133,9 @@ void ConstraintsSignal::IntermediateReconstruction()
 
   for (Int_t i = 0; i < 4; i++)
   {
+    if(photon[i].clusterParams[4] < 0)
+        photon[i].clusterParams[4] = 0.;
+
     photon[i].fourPos[0] = photon[i].clusterParams[0];
     photon[i].fourPos[1] = photon[i].clusterParams[1];
     photon[i].fourPos[2] = photon[i].clusterParams[2];

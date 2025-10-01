@@ -656,140 +656,125 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 				}
 				else if (hypoCode == KLOE::HypothesisCode::SIGNAL)
 				{
-					// -----------------------------------------------------------------------
-					// Boost of the charged part of the decay
-					Float_t
-						phiMom[4] = {*bhabhaProps.px, *bhabhaProps.py, *bhabhaProps.pz, *bhabhaProps.energy};
-
-					BoostMethodObj.KaonMomFromBoost(baseKin.Kchrecnew, phiMom, baseKin.Kchboostnew);
-
-					Float_t X_line[3] = {baseKin.Kchboostnew[6],
-										 baseKin.Kchboostnew[7],
-										 baseKin.Kchboostnew[8]}, // Vertex laying on the line
-						p[3] = {baseKin.Kchboostnew[0],
-								baseKin.Kchboostnew[1],
-								baseKin.Kchboostnew[2]}, // Direction of the line
-						xB[3] = {baseKin.bhabha_vtx[0],
-								 baseKin.bhabha_vtx[1],
-								 baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
-						plane_perp[3] = {0.,
-										 baseKin.phi_mom[1],
-										 0.}; // Vector perpendicular to the plane from Bhabha momentum
-
-					// Corrected IP event by event
-					eventAnalysis->IPBoostCorr(X_line, p, xB, plane_perp, baseKin.ip);
-
-					baseKin.ip[0] = baseKin.bhabha_vtx[0];
-					baseKin.ip[1] = baseKin.bhabha_vtx[1];
-					// z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
-					if (abs(baseKin.ip[2] - baseKin.bhabha_vtx[2]) > 2.0)
-						baseKin.ip[2] = baseKin.bhabha_vtx[2];
-
-					// Go to Kaon CM frame to get the proper time
-					TVector3
-						kaonMomLAB = {-baseKin.Kchboostnew[0] / baseKin.Kchboostnew[3],
-									  -baseKin.Kchboostnew[1] / baseKin.Kchboostnew[3],
-									  -baseKin.Kchboostnew[2] / baseKin.Kchboostnew[3]};
-
-					Double_t
-						KaonPathLAB = sqrt(pow(baseKin.Kchboostnew[6] - baseKin.ipnew[0], 2) +
-										   pow(baseKin.Kchboostnew[7] - baseKin.ipnew[1], 2) +
-										   pow(baseKin.Kchboostnew[8] - baseKin.ipnew[2], 2)),
-						KaonVelocityLAB = kaonMomLAB.Mag();
-
-					baseKin.kaonChTimeLAB = KaonPathLAB / KaonVelocityLAB;
-
-					TLorentzVector
-						Kaon4VecLAB = {baseKin.Kchboostnew[6] - baseKin.ipnew[0], // cm
-									   baseKin.Kchboostnew[7] - baseKin.ipnew[1], // cm
-									   baseKin.Kchboostnew[8] - baseKin.ipnew[2], // cm
-									   baseKin.kaonChTimeLAB},					  // cm
-						Kaon4VecKaonCM = {0., 0., 0., 0.};
-
-					Obj.lorentz_transf(kaonMomLAB, Kaon4VecLAB, Kaon4VecKaonCM);
-
-					baseKin.kaonChTimeCM = Kaon4VecKaonCM.T() / (cVel * tau_S_nonCPT);
-					baseKin.kaonChTimeLAB = baseKin.kaonChTimeLAB / (cVel * tau_S_nonCPT);
-					// ----------------------------------------------------------------------
-
-					// Application of the cuts
-					// 1. Invariant mass of the charged kaon
-					// 2. Missing energy Qmiss
-
-					for (Int_t comp = 0; comp < 3; comp++)
+					if (mctruth == 1)
 					{
-						MissMom[comp] = baseKin.Kchboostnew[comp] - baseKin.Kchrecnew[comp];
-					}
+						// -----------------------------------------------------------------------
+						// Boost of the charged part of the decay
+						Float_t
+							phiMom[4] = {*bhabhaProps.px, *bhabhaProps.py, *bhabhaProps.pz, *bhabhaProps.energy};
 
-					Pmiss = sqrt(pow(MissMom[0], 2) + pow(MissMom[1], 2) + pow(MissMom[2], 2));
-					Emiss = baseKin.Kchboostnew[3] - baseKin.Kchrecnew[3];
+						BoostMethodObj.KaonMomFromBoost(baseKin.Kchrecnew, phiMom, baseKin.Kchboostnew);
 
-					baseKin.Qmiss = sqrt(pow(Emiss, 2) + pow(Pmiss, 2));
+						Float_t X_line[3] = {baseKin.Kchboostnew[6],
+											 baseKin.Kchboostnew[7],
+											 baseKin.Kchboostnew[8]}, // Vertex laying on the line
+							p[3] = {baseKin.Kchboostnew[0],
+									baseKin.Kchboostnew[1],
+									baseKin.Kchboostnew[2]}, // Direction of the line
+							xB[3] = {baseKin.bhabha_vtx[0],
+									 baseKin.bhabha_vtx[1],
+									 baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
+							plane_perp[3] = {0.,
+											 baseKin.phi_mom[1],
+											 0.}; // Vector perpendicular to the plane from Bhabha momentum
 
-					ErrorHandling::ErrorCodes codeTri = ErrorHandling::ErrorCodes::CHARGED_KAON_MASS_PRE;
+						// Corrected IP event by event
+						eventAnalysis->IPBoostCorr(X_line, p, xB, plane_perp, baseKin.ip);
 
-					if (cutter.PassCut(2) && cutter.PassCut(3))
-					{
+						baseKin.ip[0] = baseKin.bhabha_vtx[0];
+						baseKin.ip[1] = baseKin.bhabha_vtx[1];
+						// z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
+						if (abs(baseKin.ip[2] - baseKin.bhabha_vtx[2]) > 2.0)
+							baseKin.ip[2] = baseKin.bhabha_vtx[2];
 
-						std::vector<Float_t> cluster[5];
+						// Go to Kaon CM frame to get the proper time
+						TVector3
+							kaonMomLAB = {-baseKin.Kchboostnew[0] / baseKin.Kchboostnew[3],
+										  -baseKin.Kchboostnew[1] / baseKin.Kchboostnew[3],
+										  -baseKin.Kchboostnew[2] / baseKin.Kchboostnew[3]};
 
-						cluster[0].assign(clusterProps.xcl.begin(), clusterProps.xcl.end());
-						cluster[1].assign(clusterProps.ycl.begin(), clusterProps.ycl.end());
-						cluster[2].assign(clusterProps.zcl.begin(), clusterProps.zcl.end());
-						cluster[3].assign(baseKin.TclCorr.begin(), baseKin.TclCorr.end());
-						cluster[4].assign(clusterProps.enecl.begin(), clusterProps.enecl.end());
+						Double_t
+							KaonPathLAB = sqrt(pow(baseKin.Kchboostnew[6] - baseKin.ipnew[0], 2) +
+											   pow(baseKin.Kchboostnew[7] - baseKin.ipnew[1], 2) +
+											   pow(baseKin.Kchboostnew[8] - baseKin.ipnew[2], 2)),
+							KaonVelocityLAB = kaonMomLAB.Mag();
 
-						std::vector<Float_t>
-							bhabha_mom_err = {*bhabhaProps.pxerr,
-											  *bhabhaProps.pyerr,
-											  *bhabhaProps.pzerr,
-											  *bhabhaProps.energyerr},
-							bhabha_mom = {*bhabhaProps.px,
-										  *bhabhaProps.py,
-										  *bhabhaProps.pz,
-										  *bhabhaProps.energy},
-							bhabha_vtx = {*bhabhaProps.x,
-										  *bhabhaProps.y,
-										  *bhabhaProps.z},
-							gamma_mom_final[4];
+						baseKin.kaonChTimeLAB = KaonPathLAB / KaonVelocityLAB;
 
-						gamma_mom_final[0].resize(8);
-						gamma_mom_final[1].resize(8);
-						gamma_mom_final[2].resize(8);
-						gamma_mom_final[3].resize(8);
+						TLorentzVector
+							Kaon4VecLAB = {baseKin.Kchboostnew[6] - baseKin.ipnew[0], // cm
+										   baseKin.Kchboostnew[7] - baseKin.ipnew[1], // cm
+										   baseKin.Kchboostnew[8] - baseKin.ipnew[2], // cm
+										   baseKin.kaonChTimeLAB},					  // cm
+							Kaon4VecKaonCM = {0., 0., 0., 0.};
 
-						// Trilateration Kin Fit + Results
+						Obj.lorentz_transf(kaonMomLAB, Kaon4VecLAB, Kaon4VecKaonCM);
 
-						trilatKinFitObj.SetParameters(cluster, neuclulist, bhabha_mom, bhabha_mom_err, bhabha_vtx);
-						errorCode = trilatKinFitObj.Reconstruct();
-						trilatKinFitObj.GetResults(baseKin.bunchnum, baseKin.ipTriKinFit, baseKin.g4takenTriKinFit, gamma_mom_final, baseKin.KnetriKinFit, baseKin.neuVtxTriKinFit, baseKin.Chi2TriKinFit, baseKin.pullsTriKinFit);
+						baseKin.kaonChTimeCM = Kaon4VecKaonCM.T() / (cVel * tau_S_nonCPT);
+						baseKin.kaonChTimeLAB = baseKin.kaonChTimeLAB / (cVel * tau_S_nonCPT);
+						// ----------------------------------------------------------------------
 
-						baseKin.gammaMomTriKinFit1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
-						baseKin.gammaMomTriKinFit2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
-						baseKin.gammaMomTriKinFit3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
-						baseKin.gammaMomTriKinFit4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
+						// Application of the cuts
+						// 1. Invariant mass of the charged kaon
+						// 2. Missing energy Qmiss
 
-						if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+						for (Int_t comp = 0; comp < 3; comp++)
 						{
-							logger.getErrLog(errorCode, "", mctruth);
-							noError = false;
-
-							if (mctruth == 1)
-							{
-								passed = true;
-								mctruth = -1;
-							}
+							MissMom[comp] = baseKin.Kchboostnew[comp] - baseKin.Kchrecnew[comp];
 						}
-						else
+
+						Pmiss = sqrt(pow(MissMom[0], 2) + pow(MissMom[1], 2) + pow(MissMom[2], 2));
+						Emiss = baseKin.Kchboostnew[3] - baseKin.Kchrecnew[3];
+
+						baseKin.Qmiss = sqrt(pow(Emiss, 2) + pow(Pmiss, 2));
+
+						ErrorHandling::ErrorCodes codeTri = ErrorHandling::ErrorCodes::CHARGED_KAON_MASS_PRE;
+
+						if (cutter.PassCut(2) && cutter.PassCut(3))
 						{
-							errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.KneTriangle, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
+
+							std::vector<Float_t> cluster[5];
+
+							cluster[0].assign(clusterProps.xcl.begin(), clusterProps.xcl.end());
+							cluster[1].assign(clusterProps.ycl.begin(), clusterProps.ycl.end());
+							cluster[2].assign(clusterProps.zcl.begin(), clusterProps.zcl.end());
+							cluster[3].assign(baseKin.TclCorr.begin(), baseKin.TclCorr.end());
+							cluster[4].assign(clusterProps.enecl.begin(), clusterProps.enecl.end());
+
+							std::vector<Float_t>
+								bhabha_mom_err = {*bhabhaProps.pxerr,
+												  *bhabhaProps.pyerr,
+												  *bhabhaProps.pzerr,
+												  *bhabhaProps.energyerr},
+								bhabha_mom = {*bhabhaProps.px,
+											  *bhabhaProps.py,
+											  *bhabhaProps.pz,
+											  *bhabhaProps.energy},
+								bhabha_vtx = {*bhabhaProps.x,
+											  *bhabhaProps.y,
+											  *bhabhaProps.z},
+								gamma_mom_final[4];
+
+							gamma_mom_final[0].resize(8);
+							gamma_mom_final[1].resize(8);
+							gamma_mom_final[2].resize(8);
+							gamma_mom_final[3].resize(8);
+
+							// Trilateration Kin Fit + Results
+
+							trilatKinFitObj.SetParameters(cluster, neuclulist, bhabha_mom, bhabha_mom_err, bhabha_vtx);
+							errorCode = trilatKinFitObj.Reconstruct();
+							trilatKinFitObj.GetResults(baseKin.bunchnum, baseKin.ipTriKinFit, baseKin.g4takenTriKinFit, gamma_mom_final, baseKin.KnetriKinFit, baseKin.neuVtxTriKinFit, baseKin.Chi2TriKinFit, baseKin.pullsTriKinFit);
+
+							baseKin.gammaMomTriKinFit1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
+							baseKin.gammaMomTriKinFit2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
+							baseKin.gammaMomTriKinFit3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
+							baseKin.gammaMomTriKinFit4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
 
 							if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
 							{
 								logger.getErrLog(errorCode, "", mctruth);
 								noError = false;
-
-								TrcSum = -999.;
 
 								if (mctruth == 1)
 								{
@@ -799,101 +784,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 							}
 							else
 							{
-								baseKin.gammaMomTriangle1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
-								baseKin.gammaMomTriangle2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
-								baseKin.gammaMomTriangle3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
-								baseKin.gammaMomTriangle4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
-
-								TrcSum = baseKin.trcfinal[0] + baseKin.trcfinal[1] + baseKin.trcfinal[2] + baseKin.trcfinal[3];
-
-								// Go to Kaon CM frame to get the proper time
-
-								std::vector<Float_t> Knereclor = {bhabha_mom[0] - baseKin.Kchboostnew[0],
-																  bhabha_mom[1] - baseKin.Kchboostnew[1],
-																  bhabha_mom[2] - baseKin.Kchboostnew[2],
-																  bhabha_mom[3] - baseKin.Kchboostnew[3]};
-
-								TVector3
-									kaonMomTriangleLAB = {-Knereclor[0] / Knereclor[3],
-														  -Knereclor[1] / Knereclor[3],
-														  -Knereclor[2] / Knereclor[3]};
-
-								Double_t
-									KaonPathTriangleLAB = sqrt(pow(baseKin.KneTriangle[6] - baseKin.ipnew[0], 2) +
-															   pow(baseKin.KneTriangle[7] - baseKin.ipnew[1], 2) +
-															   pow(baseKin.KneTriangle[8] - baseKin.ipnew[2], 2)),
-									KaonVelocityTriangleLAB = kaonMomTriangleLAB.Mag();
-
-								baseKin.kaonNeTimeLAB = KaonPathTriangleLAB / KaonVelocityTriangleLAB;
-
-								TLorentzVector
-									Kaon4VecTriangleLAB = {baseKin.KneTriangle[6] - baseKin.ipnew[0], // cm
-														   baseKin.KneTriangle[7] - baseKin.ipnew[1], // cm
-														   baseKin.KneTriangle[8] - baseKin.ipnew[2], // cm
-														   baseKin.kaonNeTimeLAB},					  // cm						 // cm
-									Kaon4VecKaonTriangleCM = {0., 0., 0., 0.};
-
-								Obj.lorentz_transf(kaonMomTriangleLAB, Kaon4VecTriangleLAB, Kaon4VecKaonTriangleCM);
-
-								baseKin.kaonNeTimeCM = Kaon4VecKaonTriangleCM.T() / (cVel * tau_S_nonCPT);
-								baseKin.kaonNeTimeLAB = baseKin.kaonNeTimeLAB / (cVel * tau_S_nonCPT);
-
-								// Signal Global Kinematic Fit
-
-								std::vector<Float_t>
-									trackParameters[2],
-									trackParametersErr[2],
-									clusterChosen[4],
-									chargedVtx,
-									chargedVtxErr;
-
-								trackParameters[0].push_back(baseKin.CurvSmeared1);
-								trackParameters[0].push_back(baseKin.PhivSmeared1);
-								trackParameters[0].push_back(baseKin.CotvSmeared1);
-								trackParameters[1].push_back(baseKin.CurvSmeared2);
-								trackParameters[1].push_back(baseKin.PhivSmeared2);
-								trackParameters[1].push_back(baseKin.CotvSmeared2);
-
-								trackParametersErr[0].push_back(5.0);
-								trackParametersErr[0].push_back(2.0);
-								trackParametersErr[0].push_back(1.0);
-								trackParametersErr[1].push_back(5.0);
-								trackParametersErr[1].push_back(2.0);
-								trackParametersErr[1].push_back(1.0);
-
-								for (Int_t k = 0; k < 4; k++)
-								{
-									clusterChosen[k].push_back(clusterProps.xcl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
-									clusterChosen[k].push_back(clusterProps.ycl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
-									clusterChosen[k].push_back(clusterProps.zcl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
-									clusterChosen[k].push_back(baseKin.TclCorr[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
-									clusterChosen[k].push_back(clusterProps.enecl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
-								}
-
-								for (Int_t k = 6; k < 9; k++)
-								{
-									chargedVtx.push_back(baseKin.Kchboostnew[k]);
-								}
-
-								chargedVtxErr.push_back(1.5);
-								chargedVtxErr.push_back(1.5);
-								chargedVtxErr.push_back(1.5);
-
-								signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, bhabha_vtx);
-								errorCode = signalKinFitObj.Reconstruct();
-								signalKinFitObj.GetResults(baseKin.ParamSignal,
-														   baseKin.ErrorsSignal,
-														   baseKin.ParamSignalFit,
-														   baseKin.ErrorsSignalFit,
-														   baseKin.trkFit,
-														   baseKin.KchrecFit,
-														   baseKin.KchboostFit,
-														   baseKin.ipFit,
-														   baseKin.photonFit,
-														   baseKin.KnerecFit,
-														   baseKin.KnereclorFit,
-														   baseKin.Chi2SignalKinFit,
-														   baseKin.pullsSignalFit);
+								errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.KneTriangle, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
 
 								if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
 								{
@@ -910,29 +801,146 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 								}
 								else
 								{
+									baseKin.gammaMomTriangle1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
+									baseKin.gammaMomTriangle2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
+									baseKin.gammaMomTriangle3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
+									baseKin.gammaMomTriangle4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
 
-									baseKin.cuts.clear();
-									baseKin.cuts.resize(cutter.GetCuts().size());
+									TrcSum = baseKin.trcfinal[0] + baseKin.trcfinal[1] + baseKin.trcfinal[2] + baseKin.trcfinal[3];
 
-									for (Int_t iter = 0; iter < cutter.GetCuts().size(); iter++)
-										if (cutter.PassCut(iter))
-											baseKin.cuts[iter] = 1;
-										else if (!cutter.PassCut(iter))
+									// Go to Kaon CM frame to get the proper time
+
+									std::vector<Float_t> Knereclor = {bhabha_mom[0] - baseKin.Kchboostnew[0],
+																	  bhabha_mom[1] - baseKin.Kchboostnew[1],
+																	  bhabha_mom[2] - baseKin.Kchboostnew[2],
+																	  bhabha_mom[3] - baseKin.Kchboostnew[3]};
+
+									TVector3
+										kaonMomTriangleLAB = {-Knereclor[0] / Knereclor[3],
+															  -Knereclor[1] / Knereclor[3],
+															  -Knereclor[2] / Knereclor[3]};
+
+									Double_t
+										KaonPathTriangleLAB = sqrt(pow(baseKin.KneTriangle[6] - baseKin.ipnew[0], 2) +
+																   pow(baseKin.KneTriangle[7] - baseKin.ipnew[1], 2) +
+																   pow(baseKin.KneTriangle[8] - baseKin.ipnew[2], 2)),
+										KaonVelocityTriangleLAB = kaonMomTriangleLAB.Mag();
+
+									baseKin.kaonNeTimeLAB = KaonPathTriangleLAB / KaonVelocityTriangleLAB;
+
+									TLorentzVector
+										Kaon4VecTriangleLAB = {baseKin.KneTriangle[6] - baseKin.ipnew[0], // cm
+															   baseKin.KneTriangle[7] - baseKin.ipnew[1], // cm
+															   baseKin.KneTriangle[8] - baseKin.ipnew[2], // cm
+															   baseKin.kaonNeTimeLAB},					  // cm						 // cm
+										Kaon4VecKaonTriangleCM = {0., 0., 0., 0.};
+
+									Obj.lorentz_transf(kaonMomTriangleLAB, Kaon4VecTriangleLAB, Kaon4VecKaonTriangleCM);
+
+									baseKin.kaonNeTimeCM = Kaon4VecKaonTriangleCM.T() / (cVel * tau_S_nonCPT);
+									baseKin.kaonNeTimeLAB = baseKin.kaonNeTimeLAB / (cVel * tau_S_nonCPT);
+
+									// Signal Global Kinematic Fit
+
+									std::vector<Float_t>
+										trackParameters[2],
+										trackParametersErr[2],
+										clusterChosen[4],
+										chargedVtx,
+										chargedVtxErr;
+
+									trackParameters[0].push_back(baseKin.CurvSmeared1);
+									trackParameters[0].push_back(baseKin.PhivSmeared1);
+									trackParameters[0].push_back(baseKin.CotvSmeared1);
+									trackParameters[1].push_back(baseKin.CurvSmeared2);
+									trackParameters[1].push_back(baseKin.PhivSmeared2);
+									trackParameters[1].push_back(baseKin.CotvSmeared2);
+
+									trackParametersErr[0].push_back(1.578);
+									trackParametersErr[0].push_back(1.308);
+									trackParametersErr[0].push_back(0.413);
+									trackParametersErr[1].push_back(1.578);
+									trackParametersErr[1].push_back(1.308);
+									trackParametersErr[1].push_back(0.413);
+
+									for (Int_t k = 0; k < 4; k++)
+									{
+										clusterChosen[k].push_back(clusterProps.xcl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
+										clusterChosen[k].push_back(clusterProps.ycl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
+										clusterChosen[k].push_back(clusterProps.zcl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
+										clusterChosen[k].push_back(baseKin.TclCorr[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
+										clusterChosen[k].push_back(clusterProps.enecl[neuclulist[baseKin.g4takenTriKinFit[k]] - 1]);
+									}
+
+									for (Int_t k = 6; k < 9; k++)
+									{
+										chargedVtx.push_back(baseKin.Kchboostnew[k]);
+									}
+
+									chargedVtxErr.push_back(0.547);
+									chargedVtxErr.push_back(0.515);
+									chargedVtxErr.push_back(0.344);
+
+									signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, bhabha_vtx);
+									errorCode = signalKinFitObj.Reconstruct();
+									signalKinFitObj.GetResults(baseKin.ParamSignal,
+															   baseKin.ErrorsSignal,
+															   baseKin.ParamSignalFit,
+															   baseKin.ErrorsSignalFit,
+															   baseKin.trkFit,
+															   baseKin.KchrecFit,
+															   baseKin.KchboostFit,
+															   baseKin.ipFit,
+															   baseKin.photonFit,
+															   baseKin.KnerecFit,
+															   baseKin.KnereclorFit,
+															   baseKin.Chi2SignalKinFit,
+															   baseKin.pullsSignalFit);
+
+									if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+									{
+										logger.getErrLog(errorCode, "", mctruth);
+										noError = false;
+
+										TrcSum = -999.;
+
+										if (mctruth == 1)
 										{
-											baseKin.cuts[iter] = 0;
-
-											if (mctruth == 1)
-											{
-												passed = true;
-												mctruth = 0;
-											}
+											passed = true;
+											mctruth = -1;
 										}
+									}
+									else
+									{
+
+										baseKin.cuts.clear();
+										baseKin.cuts.resize(cutter.GetCuts().size());
+
+										for (Int_t iter = 0; iter < cutter.GetCuts().size(); iter++)
+											if (cutter.PassCut(iter))
+												baseKin.cuts[iter] = 1;
+											else if (!cutter.PassCut(iter))
+											{
+												baseKin.cuts[iter] = 0;
+
+												if (mctruth == 1)
+												{
+													passed = true;
+													mctruth = 0;
+												}
+											}
+									}
 								}
 							}
 						}
-					}
 
-					cutter.UpdateStats(mctruth);
+						cutter.UpdateStats(mctruth);
+					}
+					else
+					{
+						noError = false;
+						passed = false;
+					}
 				}
 
 				if ((cutter.PassAllCuts() && noError) || passed)

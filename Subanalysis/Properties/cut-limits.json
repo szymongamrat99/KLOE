@@ -94,7 +94,7 @@
         "cutDescription": "Chi2 of the kinematic fit for the signal hypothesis.",
         "cutId": "Chi2Signal",
         "cutType": "O",
-        "cutValue": 1000,
+        "cutValue": 10000000,
         "cutCondition": "<="
       },
       {

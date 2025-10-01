@@ -2573,3 +2573,99 @@ void HistManager::UpdateExistingDataHistograms() {
         }
     }
 }
+
+// ==================== DOSTĘP DO HISTOGRAMÓW ====================
+
+TH1* HistManager::GetHistogram1D(const TString& setName, Int_t mctruth) {
+    if(mctruth == -1) {
+        // Dane
+        auto dataIt = fData1D.find(setName);
+        if(dataIt != fData1D.end()) {
+            return dataIt->second;
+        }
+        return nullptr;
+    }
+    
+    // MC histogramy
+    auto histIt = fHists1D.find(setName);
+    if(histIt == fHists1D.end()) {
+        return nullptr;
+    }
+    
+    // mctruth: 0=suma, 1-N=kanały
+    if(mctruth < 0 || mctruth > fChannNum) {
+        return nullptr;
+    }
+    
+    if(mctruth >= static_cast<Int_t>(histIt->second.size())) {
+        return nullptr;
+    }
+    
+    return histIt->second[mctruth];
+}
+
+TH2* HistManager::GetHistogram2D(const TString& setName, Int_t mctruth) {
+    if(mctruth < 1 || mctruth > fChannNum) {
+        return nullptr;
+    }
+    
+    auto histIt = fHists2D.find(setName);
+    if(histIt == fHists2D.end()) {
+        return nullptr;
+    }
+    
+    // Dla 2D: mctruth 1-N odpowiada indeksom 0-(N-1)
+    Int_t index = mctruth - 1;
+    if(index >= static_cast<Int_t>(histIt->second.size())) {
+        return nullptr;
+    }
+    
+    return histIt->second[index];
+}
+
+TH1* HistManager::GetDataHistogram1D(const TString& setName) {
+    return GetHistogram1D(setName, -1);
+}
+
+TH2* HistManager::GetDataHistogram2D(const TString& setName) {
+    auto dataIt = fData2D.find(setName);
+    if(dataIt != fData2D.end()) {
+        return dataIt->second;
+    }
+    return nullptr;
+}
+
+std::vector<TH1*> HistManager::GetAllHistograms1D(const TString& setName) {
+    auto histIt = fHists1D.find(setName);
+    if(histIt != fHists1D.end()) {
+        return histIt->second;
+    }
+    return std::vector<TH1*>();
+}
+
+std::vector<TH2*> HistManager::GetAllHistograms2D(const TString& setName) {
+    auto histIt = fHists2D.find(setName);
+    if(histIt != fHists2D.end()) {
+        return histIt->second;
+    }
+    return std::vector<TH2*>();
+}
+
+Bool_t HistManager::HasHistogramSet1D(const TString& setName) const {
+    return fHists1D.find(setName) != fHists1D.end();
+}
+
+Bool_t HistManager::HasHistogramSet2D(const TString& setName) const {
+    return fHists2D.find(setName) != fHists2D.end();
+}
+
+Bool_t HistManager::IsLogScale(const TString& setName) const {
+    // Sprawdź w mapie konfiguracji 1D
+    auto configIt = fConfigs1D.find(setName);
+    if(configIt != fConfigs1D.end()) {
+        return configIt->second.logy;
+    }
+    
+    // Jeśli nie znaleziono, zwróć false (skala liniowa)
+    return false;
+}

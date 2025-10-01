@@ -79,6 +79,7 @@
     "init_analysis_old.C": "cpp",
     "example_individual_array_config.C": "cpp",
     "test_array_config.C": "cpp",
-    "test_full_array.C": "cpp"
+    "test_full_array.C": "cpp",
+    "test_triple_gauss_fitter.C": "cpp"
   }
 }

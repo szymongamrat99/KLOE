@@ -731,6 +731,73 @@ public:
      * Przydatne do natychmiastowego zastosowania nowego rozmiaru bez ponownego tworzenia histogramów
      */
     void UpdateExistingDataHistograms();
+    
+    // ==================== DOSTĘP DO HISTOGRAMÓW ====================
+    
+    /**
+     * @brief Pobiera histogram z zestawu 1D dla konkretnego kanału MC
+     * @param setName Nazwa zestawu histogramów
+     * @param mctruth Numer kanału MC (0=suma, 1-N=kanały, -1=dane)
+     * @return Wskaźnik na histogram lub nullptr jeśli nie znaleziono
+     */
+    TH1* GetHistogram1D(const TString& setName, Int_t mctruth);
+    
+    /**
+     * @brief Pobiera histogram 2D z zestawu dla konkretnego kanału MC
+     * @param setName Nazwa zestawu histogramów
+     * @param mctruth Numer kanału MC (1-N, brak sumy dla 2D)
+     * @return Wskaźnik na histogram 2D lub nullptr jeśli nie znaleziono
+     */
+    TH2* GetHistogram2D(const TString& setName, Int_t mctruth);
+    
+    /**
+     * @brief Pobiera histogram danych 1D
+     * @param setName Nazwa zestawu histogramów
+     * @return Wskaźnik na histogram danych lub nullptr jeśli nie znaleziono
+     */
+    TH1* GetDataHistogram1D(const TString& setName);
+    
+    /**
+     * @brief Pobiera histogram danych 2D
+     * @param setName Nazwa zestawu histogramów
+     * @return Wskaźnik na histogram danych 2D lub nullptr jeśli nie znaleziono
+     */
+    TH2* GetDataHistogram2D(const TString& setName);
+    
+    /**
+     * @brief Pobiera wszystkie histogramy MC z zestawu 1D
+     * @param setName Nazwa zestawu
+     * @return Wektor histogramów [0]=suma, [1-N]=kanały, pusty jeśli nie znaleziono
+     */
+    std::vector<TH1*> GetAllHistograms1D(const TString& setName);
+    
+    /**
+     * @brief Pobiera wszystkie histogramy MC z zestawu 2D
+     * @param setName Nazwa zestawu
+     * @return Wektor histogramów [0-N]=kanały, pusty jeśli nie znaleziono
+     */
+    std::vector<TH2*> GetAllHistograms2D(const TString& setName);
+    
+    /**
+     * @brief Sprawdza czy zestaw histogramów 1D istnieje
+     * @param setName Nazwa zestawu
+     * @return true jeśli istnieje
+     */
+    Bool_t HasHistogramSet1D(const TString& setName) const;
+    
+    /**
+     * @brief Sprawdza czy zestaw histogramów 2D istnieje
+     * @param setName Nazwa zestawu
+     * @return true jeśli istnieje
+     */
+    Bool_t HasHistogramSet2D(const TString& setName) const;
+    
+    /**
+     * @brief Sprawdza czy histogram ma ustawioną skalę logarytmiczną
+     * @param setName Nazwa zestawu histogramów
+     * @return true jeśli histogram ma skalę logarytmiczną
+     */
+    Bool_t IsLogScale(const TString& setName) const;
 
 private:
     Int_t fChannNum;                                    ///< Liczba kanałów MC
@@ -751,6 +818,7 @@ private:
     std::map<TString, std::vector<TCanvas*>> fCanvases; ///< Canvasy
     std::map<TString, HistConfig> fConfigs1D;           ///< Konfiguracje 1D
     std::map<TString, Hist2DConfig> fConfigs2D;         ///< Konfiguracje 2D
+    
     
     // Array histogramy
     std::map<TString, std::vector<std::vector<TH1D*>>> fArrayHists1D; ///< Array histogramy 1D [baseName][index][mctruth+1]

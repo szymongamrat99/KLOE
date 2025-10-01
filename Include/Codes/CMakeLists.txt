@@ -35,6 +35,7 @@ add_library(LibRec SHARED
             src/FileManager.cpp
             src/StatisticalCutter.cpp
             src/HistManager.cpp
+            src/TripleGaussFitter.cpp
             src/KaonMassReconstructor.cpp
             src/ConfigManager.cpp
             src/trilaterationKinFit.cpp

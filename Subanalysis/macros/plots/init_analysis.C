@@ -27,11 +27,13 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include <HistManager.h>
+#include <TripleGaussFitter.h>
 #include <interf_function.h>
 #include <StatisticalCutter.h>
 
 HistManager *histMgr;
 StatisticalCutter *cutter;
+KLOE::TripleGaussFitter *gaussFitter;
 HistManager::HistConfig invMassKneConfig;
 HistManager::HistConfig invMassKneMCConfig;
 HistManager::HistConfig invMassKchConfig;
@@ -43,9 +45,13 @@ HistManager::HistConfig trcFinalConfig;
 HistManager::HistConfig curvMCConfig;
 HistManager::HistConfig phivMCConfig;
 HistManager::HistConfig cotvMCConfig;
+HistManager::HistConfig curvNotSmearedMCConfig;
+HistManager::HistConfig phivNotSmearedMCConfig;
+HistManager::HistConfig cotvNotSmearedMCConfig;
 HistManager::HistConfig xchMCConfig;
 HistManager::HistConfig ychMCConfig;
 HistManager::HistConfig zchMCConfig;
+HistManager::HistConfig qmissConfig;
 HistManager::Hist2DConfig TimeNeutral2dConfig;
 
 // Konfiguracje array histogramów
@@ -53,6 +59,7 @@ HistManager::ArrayConfig momentumArrayConfig;
 HistManager::ArrayConfig momentumNeutralArrayConfig;
 HistManager::ArrayConfig pullsArrayConfig;
 HistManager::ArrayConfig neuVtxArrayConfig;
+HistManager::ArrayConfig ipMCConfig;
 
 void init_analysis::Begin(TTree * /*tree*/)
 {
@@ -63,6 +70,12 @@ void init_analysis::Begin(TTree * /*tree*/)
    TString option = GetOption();
 
    histMgr = new HistManager(channNum, channColor, channNames, kFullCircle, kBlack, 0.0, kOrange);
+
+   // Inicjalizacja Triple Gauss Fitter
+   gaussFitter = new KLOE::TripleGaussFitter();
+   gaussFitter->SetVerbose(true);
+   gaussFitter->SetComponentColors(kRed, kBlue, kGreen, kMagenta);
+   gaussFitter->SetLineWidths(2, 1);
 
    std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
 
@@ -93,7 +106,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKchConfig.bins = 100;
    invMassKchConfig.xmin = 480;
    invMassKchConfig.xmax = 520;
-   invMassKchConfig.logy = true;
+   invMassKchConfig.logy = false;
    invMassKchConfig.showStats = false;
 
    invMassKchMCConfig.name = "invMassKchMC";
@@ -102,7 +115,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKchMCConfig.bins = 100;
    invMassKchMCConfig.xmin = -100;
    invMassKchMCConfig.xmax = 100;
-   invMassKchMCConfig.logy = true;
+   invMassKchMCConfig.logy = false;
    invMassKchMCConfig.showStats = false;
 
    invMassKneConfig.name = "invMassKne";
@@ -111,7 +124,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKneConfig.bins = 100;
    invMassKneConfig.xmin = 0;
    invMassKneConfig.xmax = 1000;
-   invMassKneConfig.logy = true;
+   invMassKneConfig.logy = false;
    invMassKneConfig.showStats = false;
 
    invMassKneMCConfig.name = "invMassKneMC";
@@ -120,16 +133,16 @@ void init_analysis::Begin(TTree * /*tree*/)
    invMassKneMCConfig.bins = 100;
    invMassKneMCConfig.xmin = -300;
    invMassKneMCConfig.xmax = 300;
-   invMassKneMCConfig.logy = true;
+   invMassKneMCConfig.logy = false;
    invMassKneMCConfig.showStats = false;
 
    timeDiffConfig.name = "timeDiff";
    timeDiffConfig.xtitle = "#DeltaT^{MC,rec} [#tau_{S}]";
    timeDiffConfig.ytitle = "Counts";
-   timeDiffConfig.bins = 300;
-   timeDiffConfig.xmin = -300;
-   timeDiffConfig.xmax = 300;
-   timeDiffConfig.logy = true;
+   timeDiffConfig.bins = 100;
+   timeDiffConfig.xmin = -100;
+   timeDiffConfig.xmax = 100;
+   timeDiffConfig.logy = false;
    timeDiffConfig.showStats = false;
 
    timeDiffMCConfig.name = "timeDiffMC";
@@ -138,16 +151,16 @@ void init_analysis::Begin(TTree * /*tree*/)
    timeDiffMCConfig.bins = 200;
    timeDiffMCConfig.xmin = -100;
    timeDiffMCConfig.xmax = 100;
-   timeDiffMCConfig.logy = true;
+   timeDiffMCConfig.logy = false;
    timeDiffMCConfig.showStats = false;
 
    chi2TriKinFitConfig.name = "chi2TriKinFit";
-   chi2TriKinFitConfig.xtitle = "#chi^{2}_{tri} [-]";
+   chi2TriKinFitConfig.xtitle = "#chi^{2}_{sig} [-]";
    chi2TriKinFitConfig.ytitle = "Counts";
    chi2TriKinFitConfig.bins = 50;
    chi2TriKinFitConfig.xmin = -10;
-   chi2TriKinFitConfig.xmax = 50;
-   chi2TriKinFitConfig.logy = true;
+   chi2TriKinFitConfig.xmax = 100;
+   chi2TriKinFitConfig.logy = false;
    chi2TriKinFitConfig.showStats = false;
 
    trcFinalConfig.name = "trcFinal";
@@ -156,7 +169,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    trcFinalConfig.bins = 50;
    trcFinalConfig.xmin = -10;
    trcFinalConfig.xmax = 5;
-   trcFinalConfig.logy = true;
+   trcFinalConfig.logy = false;
    trcFinalConfig.showStats = false;
 
    curvMCConfig.name = "curvMC";
@@ -164,8 +177,8 @@ void init_analysis::Begin(TTree * /*tree*/)
    curvMCConfig.ytitle = "Counts";
    curvMCConfig.bins = 50;
    curvMCConfig.xmin = -50;
-   curvMCConfig.xmax = 10;
-   curvMCConfig.logy = true;
+   curvMCConfig.xmax = 50;
+   curvMCConfig.logy = false;
    curvMCConfig.showStats = false;
 
    phivMCConfig.name = "phivMC";
@@ -174,7 +187,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    phivMCConfig.bins = 40;
    phivMCConfig.xmin = -2 * M_PI;
    phivMCConfig.xmax = 2 * M_PI;
-   phivMCConfig.logy = true;
+   phivMCConfig.logy = false;
    phivMCConfig.showStats = false;
 
    cotvMCConfig.name = "cotvMC";
@@ -183,8 +196,35 @@ void init_analysis::Begin(TTree * /*tree*/)
    cotvMCConfig.bins = 50;
    cotvMCConfig.xmin = -10;
    cotvMCConfig.xmax = 10;
-   cotvMCConfig.logy = true;
+   cotvMCConfig.logy = false;
    cotvMCConfig.showStats = false;
+
+   curvNotSmearedMCConfig.name = "curvNotSmearedMC";
+   curvNotSmearedMCConfig.xtitle = "Curv^{MC,rec} - Curv^{MC,gen} [cm^{-1}]";
+   curvNotSmearedMCConfig.ytitle = "Counts";
+   curvNotSmearedMCConfig.bins = 50;
+   curvNotSmearedMCConfig.xmin = -50;
+   curvNotSmearedMCConfig.xmax = 50;
+   curvNotSmearedMCConfig.logy = false;
+   curvNotSmearedMCConfig.showStats = false;
+
+   phivNotSmearedMCConfig.name = "phivNotSmearedMC";
+   phivNotSmearedMCConfig.xtitle = "Phiv^{MC,rec} - Phiv^{MC,gen} [rad]";
+   phivNotSmearedMCConfig.ytitle = "Counts";
+   phivNotSmearedMCConfig.bins = 40;
+   phivNotSmearedMCConfig.xmin = -2 * M_PI;
+   phivNotSmearedMCConfig.xmax = 2 * M_PI;
+   phivNotSmearedMCConfig.logy = false;
+   phivNotSmearedMCConfig.showStats = false;
+
+   cotvNotSmearedMCConfig.name = "cotvNotSmearedMC";
+   cotvNotSmearedMCConfig.xtitle = "Cotv^{MC,rec} - Cotv^{MC,gen} [-]";
+   cotvNotSmearedMCConfig.ytitle = "Counts";
+   cotvNotSmearedMCConfig.bins = 50;
+   cotvNotSmearedMCConfig.xmin = -10;
+   cotvNotSmearedMCConfig.xmax = 10;
+   cotvNotSmearedMCConfig.logy = false;
+   cotvNotSmearedMCConfig.showStats = false;
 
    xchMCConfig.name = "xchMC";
    xchMCConfig.xtitle = "x^{MC,rec}_{ch} - x^{MC,gen}_{ch} [cm]";
@@ -192,7 +232,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    xchMCConfig.bins = 50;
    xchMCConfig.xmin = -10;
    xchMCConfig.xmax = 10;
-   xchMCConfig.logy = true;
+   xchMCConfig.logy = false;
    xchMCConfig.showStats = false;
 
    ychMCConfig.name = "ychMC";
@@ -201,7 +241,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    ychMCConfig.bins = 50;
    ychMCConfig.xmin = -10;
    ychMCConfig.xmax = 10;
-   ychMCConfig.logy = true;
+   ychMCConfig.logy = false;
    ychMCConfig.showStats = false;
 
    zchMCConfig.name = "zchMC";
@@ -210,8 +250,17 @@ void init_analysis::Begin(TTree * /*tree*/)
    zchMCConfig.bins = 50;
    zchMCConfig.xmin = -4;
    zchMCConfig.xmax = 4;
-   zchMCConfig.logy = true;
+   zchMCConfig.logy = false;
    zchMCConfig.showStats = false;
+
+   qmissConfig.name = "qmiss";
+   qmissConfig.xtitle = "Q_{miss} [MeV]";
+   qmissConfig.ytitle = "Counts";
+   qmissConfig.bins = 50;
+   qmissConfig.xmin = -1;
+   qmissConfig.xmax = 150;
+   qmissConfig.logy = false;
+   qmissConfig.showStats = false;
 
    TimeNeutral2dConfig.name = "TimeNeutral2d";
    TimeNeutral2dConfig.xtitle = "t^{MC}_{neu} [#tau_{S}]";
@@ -222,7 +271,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    TimeNeutral2dConfig.binsy = 50;
    TimeNeutral2dConfig.ymin = -10;
    TimeNeutral2dConfig.ymax = 400;
-   TimeNeutral2dConfig.logy = true;
+   TimeNeutral2dConfig.logy = false;
    TimeNeutral2dConfig.showStats = false;
 
    // Konfiguracja array histogramów dla składowych pędu Kchrec
@@ -232,7 +281,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    momentumConfig.xmax = 10;
    momentumConfig.xtitle = "p [MeV/c]";
    momentumConfig.ytitle = "Counts";
-   momentumConfig.logy = true;
+   momentumConfig.logy = false;
    momentumConfig.showStats = false;
 
    momentumArrayConfig.baseName = "KchrecMomentum";
@@ -266,7 +315,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    momentumNeutralConfig.xmax = 100;
    momentumNeutralConfig.xtitle = "p [MeV/c]";
    momentumNeutralConfig.ytitle = "Counts";
-   momentumNeutralConfig.logy = true;
+   momentumNeutralConfig.logy = false;
    momentumNeutralConfig.showStats = false;
 
    momentumNeutralArrayConfig.baseName = "KnerecMomentum";
@@ -300,7 +349,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    neuVtxConfig.xmax = 1;
    neuVtxConfig.xtitle = "x [MeV/c]";
    neuVtxConfig.ytitle = "Counts";
-   neuVtxConfig.logy = true;
+   neuVtxConfig.logy = false;
    neuVtxConfig.showStats = false;
 
    neuVtxArrayConfig.baseName = "NeuVtx";
@@ -337,7 +386,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    pullArrayConfig.xmax = 10;
    pullArrayConfig.xtitle = "Pull value [-]";
    pullArrayConfig.ytitle = "Counts";
-   pullArrayConfig.logy = true;
+   pullArrayConfig.logy = false;
    pullArrayConfig.showStats = false;
 
    pullsArrayConfig.baseName = "PullsTriKinFit";
@@ -370,41 +419,35 @@ void init_analysis::Begin(TTree * /*tree*/)
    pullsArrayConfig.SetIndividualAxisTitles(22, "Pull_{p^{#phi}_{z}}", "Counts");
    pullsArrayConfig.SetIndividualAxisTitles(23, "Pull_{E^{#phi}}", "Counts");
 
-   // NOWE: Indywidualne konfiguracje dla wybranych pulls
-   // Możemy ustawić różne zakresy dla różnych typów pulls
-   // Pull 0,1 - pozycja vertex: może mieć większą rozpiętość
-   pullsArrayConfig.SetIndividualBinning(0, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(0, "Cluster 1 Pull_{x}", "Counts");
-   pullsArrayConfig.SetIndividualBinning(1, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(1, "Cluster 1 Pull_{y}", "Counts");
-   // Pull 2,3 - pęd: standardowy zakres
-   pullsArrayConfig.SetIndividualBinning(2, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(2, "Cluster 1 Pull_{z}", "Counts");
-   // Pull 4 - energia: może być bardziej precyzyjny
-   pullsArrayConfig.SetIndividualBinning(4, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(4, "Cluster 1 Time Pull", "Counts");
-   // Pull 5 - energia: może być bardziej precyzyjny
-   pullsArrayConfig.SetIndividualBinning(5, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(5, "Cluster 1 Energy Pull", "Counts");
-   pullsArrayConfig.SetIndividualBinning(6, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(6, "Cluster 2 Pull_{x}", "Counts");
+   // Konfiguracja array histogramów dla składowych pędu Kchrec
+   HistManager::HistConfig ipGenMCConfig;
+   ipGenMCConfig.bins = 50;
+   ipGenMCConfig.xmin = -10;
+   ipGenMCConfig.xmax = 10;
+   ipGenMCConfig.xtitle = "ip [cm]";
+   ipGenMCConfig.ytitle = "Counts";
+   ipGenMCConfig.logy = false;
+   ipGenMCConfig.showStats = false;
 
-   pullsArrayConfig.SetIndividualBinning(7, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(7, "Cluster 2 Pull_{y}", "Counts");
+   ipMCConfig.baseName = "ipMC";
+   ipMCConfig.baseTitle = "K_{ch} Reconstructed Momentum Components";
+   ipMCConfig.arraySize = 3; // x, y, z, E
+   ipMCConfig.varNames = {"x", "y", "z"};
+   ipMCConfig.varTitles = {"x", "y", "z"};
+   ipMCConfig.commonConfig = ipGenMCConfig;
+   ipMCConfig.commonConfig.xtitle = "ip [MeV/c]"; // Ogólny tytuł dla px,py,pz
 
-   // Pull 2,3 - pęd: standardowy zakres
-   pullsArrayConfig.SetIndividualBinning(8, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(8, "Cluster 2 Pull_{z}", "Counts");
+   // NOWE : Indywidualne konfiguracje dla każdej składowej pędu
+   // px, py: standardowy zakres pędu poprzecznego
+   ipMCConfig.SetIndividualBinning(0, 20, -10, 10); // px
+   ipMCConfig.SetIndividualAxisTitles(0, "x [cm]", "Events");
 
-   // Pull 4 - energia: może być bardziej precyzyjny
-   pullsArrayConfig.SetIndividualBinning(9, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(9, "Cluster 2 Time Pull", "Counts");
+   ipMCConfig.SetIndividualBinning(1, 20, -10, 10); // py
+   ipMCConfig.SetIndividualAxisTitles(1, "y [cm]", "Events");
 
-   // Pull 5 - energia: może być bardziej precyzyjny
-   pullsArrayConfig.SetIndividualBinning(10, 50, -3, 3);
-   pullsArrayConfig.SetIndividualAxisTitles(10, "Cluster 2 Energy Pull", "Events");
-
-   // Reszta pulls (5-23) będzie używać commonConfig
+   // pz: szerszy zakres dla pędu podłużnego (kaony lecą głównie do przodu)
+   ipMCConfig.SetIndividualBinning(2, 20, -10, 10); // pz
+   ipMCConfig.SetIndividualAxisTitles(2, "z [cm]", "Events");
 
    histMgr->CreateHistSet1D("invMassKch", invMassKchConfig);
    histMgr->CreateHistSet1D("invMassKne", invMassKneConfig);
@@ -417,9 +460,13 @@ void init_analysis::Begin(TTree * /*tree*/)
    histMgr->CreateHistSet1D("curvMC", curvMCConfig);
    histMgr->CreateHistSet1D("phivMC", phivMCConfig);
    histMgr->CreateHistSet1D("cotvMC", cotvMCConfig);
+   histMgr->CreateHistSet1D("curvNotSmearedMC", curvNotSmearedMCConfig);
+   histMgr->CreateHistSet1D("phivNotSmearedMC", phivNotSmearedMCConfig);
+   histMgr->CreateHistSet1D("cotvNotSmearedMC", cotvNotSmearedMCConfig);
    histMgr->CreateHistSet1D("xchMC", xchMCConfig);
    histMgr->CreateHistSet1D("ychMC", ychMCConfig);
    histMgr->CreateHistSet1D("zchMC", zchMCConfig);
+   histMgr->CreateHistSet1D("qmiss", qmissConfig);
    histMgr->CreateHistSet2D("TimeNeutral2d", TimeNeutral2dConfig);
 
    // Stwórz array histogramy
@@ -427,6 +474,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    histMgr->CreateHistArray1D(momentumNeutralArrayConfig);
    histMgr->CreateHistArray1D(neuVtxArrayConfig);
    histMgr->CreateHistArray1D(pullsArrayConfig);
+   histMgr->CreateHistArray1D(ipMCConfig);
 
    histMgr->SetFitConstraints("invMassKch", constraints);
    histMgr->SetFitConstraints("invMassKne", constraints);
@@ -473,33 +521,38 @@ Bool_t init_analysis::Process(Long64_t entry)
 
    Float_t trcSum = trcfinal[0] + trcfinal[1] + trcfinal[2] + trcfinal[3];
 
-   Bool_t photonEneLimit = gammaMomTriKinFit1[3] > 20. && gammaMomTriKinFit2[3] > 20. && gammaMomTriKinFit3[3] > 20. && gammaMomTriKinFit4[3] > 20.;
+   Bool_t photonEneLimit = photonFit1[3] > 20. && photonFit2[3] > 20. && photonFit3[3] > 20. && photonFit4[3] > 20.;
 
-   if (1)
+   if (photonEneLimit)
    {
       if (*mcflag == 1)
       {
-         Float_t minv4gam_tri = sqrt(pow(KnetriKinFit[3], 2) - pow(KnetriKinFit[0], 2) - pow(KnetriKinFit[1], 2) - pow(KnetriKinFit[2], 2));
+         Float_t minv4gam_tri = sqrt(pow(KnereclorFit[3], 2) - pow(KnereclorFit[0], 2) - pow(KnereclorFit[1], 2) - pow(KnereclorFit[2], 2));
 
          Float_t distance = sqrt(pow(KneTriangle[6] - ip[0], 2) + pow(KneTriangle[7] - ip[1], 2) + pow(KneTriangle[8] - ip[2], 2)),
                  velocity = cVel * sqrt(pow(KneTriangle[0], 2) + pow(KneTriangle[1], 2) + pow(KneTriangle[2], 2)) / KneTriangle[3],
                  timeOfFlight = (distance / velocity) / (tau_S);
 
-         histMgr->Fill1D("invMassKch", *mctruth, Kchrec[5], weight);
-         histMgr->Fill1D("invMassKne", *mctruth, *minv4gam, weight);
-         histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeCM - *KaonNeTimeCM, weight);
-         histMgr->Fill1D("chi2TriKinFit", *mctruth, *Chi2TriKinFit, weight);
+         histMgr->Fill1D("invMassKch", *mctruth, KchrecFit[5], weight);
+         histMgr->Fill1D("invMassKne", *mctruth, KnerecFit[5], weight);
+         histMgr->Fill1D("timeDiff", *mctruth, *KaonChTimeLAB - *KaonNeTimeLAB, weight);
+         histMgr->Fill1D("chi2TriKinFit", *mctruth, *Chi2SignalKinFit, weight);
          histMgr->Fill1D("trcFinal", *mctruth, trcSum, weight);
-
-         histMgr->Fill1D("xchMC", *mctruth, Kchboost[6] - Kchmc[6], weight);
-         histMgr->Fill1D("ychMC", *mctruth, Kchboost[7] - Kchmc[7], weight);
-         histMgr->Fill1D("zchMC", *mctruth, Kchboost[8] - Kchmc[8], weight);
+         histMgr->Fill1D("qmiss", *mctruth, *Qmiss, weight);
 
          if (*mctruth == 1)
          {
+            histMgr->Fill1D("xchMC", *mctruth, KchboostFit[6] - Kchmc[6], weight);
+            histMgr->Fill1D("ychMC", *mctruth, KchboostFit[7] - Kchmc[7], weight);
+            histMgr->Fill1D("zchMC", *mctruth, KchboostFit[8] - Kchmc[8], weight);
+
             Float_t
                 testcharged00 = sqrt(pow(abs(*CurvSmeared1) - abs(CurvMC[0]), 2) + pow(abs(*PhivSmeared1) - abs(PhivMC[0]), 2) + pow(abs(*CotvSmeared1) - abs(CotvMC[0]), 2)),
                 testcharged11 = sqrt(pow(abs(*CurvSmeared2) - abs(CurvMC[0]), 2) + pow(abs(*PhivSmeared2) - abs(PhivMC[0]), 2) + pow(abs(*CotvSmeared2) - abs(CotvMC[0]), 2));
+
+            // Float_t
+            //     testchargednotsmeared00 = sqrt(pow(abs(Curv[vtaken[1] - 1]) - abs(CurvMC[0]), 2) + pow(abs(Phiv[vtaken[1] - 1]) - abs(PhivMC[0]), 2) + pow(abs(Cotv[vtaken[1] - 1]) - abs(CotvMC[0]), 2)),
+            //     testchargednotsmeared11 = sqrt(pow(abs(Curv[vtaken[2] - 1]) - abs(CurvMC[0]), 2) + pow(abs(Phiv[vtaken[2] - 1]) - abs(PhivMC[0]), 2) + pow(abs(Cotv[vtaken[2] - 1]) - abs(CotvMC[0]), 2));
 
             if (testcharged00 < testcharged11)
             {
@@ -513,20 +566,33 @@ Bool_t init_analysis::Process(Long64_t entry)
                histMgr->Fill1D("phivMC", *mctruth, abs(*PhivSmeared1) - abs(PhivMC[1]), weight);
                histMgr->Fill1D("cotvMC", *mctruth, abs(*CotvSmeared1) - abs(CotvMC[1]), weight);
             }
+
+            // if (testchargednotsmeared00 < testchargednotsmeared11)
+            // {
+            //    histMgr->Fill1D("curvNotSmearedMC", *mctruth, abs(Curv[vtaken[1] - 1]) - abs(CurvMC[0]), weight);
+            //    histMgr->Fill1D("phivNotSmearedMC", *mctruth, abs(Phiv[vtaken[1] - 1]) - abs(PhivMC[0]), weight);
+            //    histMgr->Fill1D("cotvNotSmearedMC", *mctruth, abs(Cotv[vtaken[1] - 1]) - abs(CotvMC[0]), weight);
+            // }
+            // else
+            // {
+            //    histMgr->Fill1D("curvNotSmearedMC", *mctruth, abs(Curv[vtaken[1] - 1]) - abs(CurvMC[1]), weight);
+            //    histMgr->Fill1D("phivNotSmearedMC", *mctruth, abs(Phiv[vtaken[1] - 1]) - abs(PhivMC[1]), weight);
+            //    histMgr->Fill1D("cotvNotSmearedMC", *mctruth, abs(Cotv[vtaken[1] - 1]) - abs(CotvMC[1]), weight);
+            // }
          }
 
          // Wypełnij array histogramy dla składowych pędu Kchrec
-         std::vector<Double_t> momentum = {Kchboost[0], Kchboost[1], Kchboost[2], Kchboost[3]};
+         std::vector<Double_t> momentum = {KchboostFit[0] - Kchmc[0], KchboostFit[1] - Kchmc[1], KchboostFit[2] - Kchmc[2], KchboostFit[3] - Kchmc[3]};
          histMgr->FillArrayAll1D("KchrecMomentum", *mctruth, momentum, weight);
 
          // Wypełnij array histogramy dla składowych pędu Kchrec
          // momentum = {KneTriangle[0] - Knemc[0], KneTriangle[1] - Knemc[1], KneTriangle[2] - Knemc[2], KneTriangle[3] - Knemc[3]};
-         momentum = {KnetriKinFit[0], KnetriKinFit[1], KnetriKinFit[2], KnetriKinFit[3]};
+         momentum = {KnereclorFit[0] - Knemc[0], KnereclorFit[1] - Knemc[1], KnereclorFit[2] - Knemc[2], KnereclorFit[3] - Knemc[3]};
          histMgr->FillArrayAll1D("KnerecMomentum", *mctruth, momentum, weight);
 
          // Wypełnij array histogramy dla składowych neu vtx
          // momentum = {KneTriangle[0] - Knemc[0], KneTriangle[1] - Knemc[1], KneTriangle[2] - Knemc[2], KneTriangle[3] - Knemc[3]};
-         momentum = {KnetriKinFit[6], KnetriKinFit[7], KnetriKinFit[8], *KaonNeTimeCM};
+         momentum = {KnereclorFit[6], KnereclorFit[7], KnereclorFit[8], KnereclorFit[9]};
          histMgr->FillArrayAll1D("NeuVtx", *mctruth, momentum, weight);
 
          // // // Wypełnij array histogramy dla pulls (wszystkie 5 składowych)
@@ -538,11 +604,14 @@ Bool_t init_analysis::Process(Long64_t entry)
                                         pullsTriKinFit[23]};
          histMgr->FillArrayAll1D("PullsTriKinFit", *mctruth, pulls, weight);
 
-         histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - Kchrec[5], weight);
-         histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - *minv4gam, weight);
-         histMgr->Fill1D("timeDiffMC", *mctruth, (*KaonChTimeCMMC - *KaonNeTimeCMMC) - (*KaonChTimeCM - *KaonNeTimeCM), weight);
+         std::vector<Double_t> ipMCDiff = {ipFit[0] - ipmc[0], ipFit[1] - ipmc[1], ipFit[2] - ipmc[2]};
+         histMgr->FillArrayAll1D("ipMC", *mctruth, ipMCDiff, weight);
 
-         histMgr->Fill2D("TimeNeutral2d", *mctruth, *KaonNeTimeCMMC, *KaonNeTimeCM, weight);
+         histMgr->Fill1D("invMassKchMC", *mctruth, Kchmc[5] - KchrecFit[5], weight);
+         histMgr->Fill1D("invMassKneMC", *mctruth, Knemc[5] - KnerecFit[5], weight);
+         histMgr->Fill1D("timeDiffMC", *mctruth, (*KaonChTimeLABMC - *KaonNeTimeLABMC) - (*KaonChTimeLAB - *KaonNeTimeLAB), weight);
+
+         histMgr->Fill2D("TimeNeutral2d", *mctruth, *KaonNeTimeLABMC, *KaonNeTimeLAB, weight);
       }
 
       if (*mcflag == 0)
@@ -551,6 +620,8 @@ Bool_t init_analysis::Process(Long64_t entry)
          histMgr->FillData1D("invMassKne", *minv4gam, weight);
          histMgr->FillData1D("timeDiff", *KaonChTimeCM - *KaonNeTimeCM, weight);
          histMgr->FillData1D("chi2TriKinFit", *Chi2TriKinFit, weight);
+         histMgr->FillData1D("trcFinal", trcSum, weight);
+         histMgr->FillData1D("qmiss", *Qmiss, weight);
 
          // Wypełnij array histogramy dla danych - pulls (jeśli dostępne dla danych)
          std::vector<Double_t> pullsData = {pullsTriKinFit[0], pullsTriKinFit[1], pullsTriKinFit[2],
@@ -562,17 +633,17 @@ Bool_t init_analysis::Process(Long64_t entry)
          histMgr->FillArrayAllData1D("PullsTriKinFit", pullsData, weight);
 
          // Wypełnij array histogramy dla składowych pędu Kchrec
-         std::vector<Double_t> momentum = {Kchboost[0], Kchboost[1], Kchboost[2], Kchboost[3]};
+         std::vector<Double_t> momentum = {KchboostFit[0], KchboostFit[1], KchboostFit[2], KchboostFit[3]};
          histMgr->FillArrayAllData1D("KchrecMomentum", momentum, weight);
 
          // Wypełnij array histogramy dla składowych pędu Kchrec
          // momentum = {KneTriangle[0] - Knemc[0], KneTriangle[1] - Knemc[1], KneTriangle[2] - Knemc[2], KneTriangle[3] - Knemc[3]};
-         momentum = {KnetriKinFit[0], KnetriKinFit[1], KnetriKinFit[2], KnetriKinFit[3]};
+         momentum = {KnereclorFit[0], KnereclorFit[1], KnereclorFit[2], KnereclorFit[3]};
          histMgr->FillArrayAllData1D("KnerecMomentum", momentum, weight);
 
          // Wypełnij array histogramy dla składowych neu vtx
          // momentum = {KneTriangle[0] - Knemc[0], KneTriangle[1] - Knemc[1], KneTriangle[2] - Knemc[2], KneTriangle[3] - Knemc[3]};
-         momentum = {KnetriKinFit[6], KnetriKinFit[7], KnetriKinFit[8], *KaonNeTimeCM};
+         momentum = {KnereclorFit[6], KnereclorFit[7], KnereclorFit[8], *KaonNeTimeCM};
          histMgr->FillArrayAllData1D("NeuVtx", momentum, weight);
       }
    }
@@ -604,9 +675,14 @@ void init_analysis::Terminate()
    histMgr->ScaleChannelByEntries("curvMC", 1);
    histMgr->ScaleChannelByEntries("phivMC", 1);
    histMgr->ScaleChannelByEntries("cotvMC", 1);
+   histMgr->ScaleChannelByEntries("curvNotSmearedMC", 1);
+   histMgr->ScaleChannelByEntries("phivNotSmearedMC", 1);
+   histMgr->ScaleChannelByEntries("cotvNotSmearedMC", 1);
    histMgr->ScaleChannelByEntries("xchMC", 1);
    histMgr->ScaleChannelByEntries("ychMC", 1);
    histMgr->ScaleChannelByEntries("zchMC", 1);
+   histMgr->ScaleChannelByEntries("trcFinal", 1);
+   histMgr->ScaleChannelByEntries("qmiss", 1);
 
    histMgr->ScaleChannel2DByEntries("TimeNeutral2d", 1);
 
@@ -633,6 +709,10 @@ void init_analysis::Terminate()
    histMgr->DrawSet1D("phivMC", "HIST", true);
    histMgr->DrawSet1D("cotvMC", "HIST", true);
 
+   histMgr->DrawSet1D("curvNotSmearedMC", "HIST", true);
+   histMgr->DrawSet1D("phivNotSmearedMC", "HIST", true);
+   histMgr->DrawSet1D("cotvNotSmearedMC", "HIST", true);
+
    histMgr->DrawSet1D("xchMC", "HIST", true);
    histMgr->DrawSet1D("ychMC", "HIST", true);
    histMgr->DrawSet1D("zchMC", "HIST", true);
@@ -643,11 +723,14 @@ void init_analysis::Terminate()
    histMgr->DrawSet1D("invMassKneMC", "HIST", true);
    histMgr->DrawSet1D("timeDiffMC", "HIST", true);
 
+   histMgr->DrawSet1D("qmiss", "HIST", true);
+
    // Rysuj array histogramy
    histMgr->DrawArray1D("KchrecMomentum", true); // z danymi
    histMgr->DrawArray1D("KnerecMomentum", true); // z danymi
    histMgr->DrawArray1D("NeuVtx", true);         // z danymi
    histMgr->DrawArray1D("PullsTriKinFit", true); // z danymi
+   histMgr->DrawArray1D("ipMC", true);           // z danymi
 
    // histMgr->SaveToRoot("analysis_results.root");
 
@@ -657,13 +740,15 @@ void init_analysis::Terminate()
    histMgr->SaveSet("chi2TriKinFit", "chi2TriKinFit");
    histMgr->SaveSet("trcFinal", "trcFinal");
 
-   histMgr->SaveSet("curvMC", "curvMC");
-   histMgr->SaveSet("phivMC", "phivMC");
-   histMgr->SaveSet("cotvMC", "cotvMC");
+   histMgr->SaveSet("curvNotSmearedMC", "curvNotSmearedMC");
+   histMgr->SaveSet("phivNotSmearedMC", "phivNotSmearedMC");
+   histMgr->SaveSet("cotvNotSmearedMC", "cotvNotSmearedMC");
 
    histMgr->SaveSet("xchMC", "xchMC");
    histMgr->SaveSet("ychMC", "ychMC");
    histMgr->SaveSet("zchMC", "zchMC");
+
+   histMgr->SaveSet("qmiss", "qmiss");
 
    histMgr->SaveSet("invMassKchMC", "invMassKchMC");
    histMgr->SaveSet("invMassKneMC", "invMassKneMC");
@@ -675,6 +760,7 @@ void init_analysis::Terminate()
    histMgr->ExportSet("NeuVtx", "NeuVtx", HistManager::ImageFormat::SVG);
    histMgr->ExportSet("PullsTriKinFit", "PullsTriKinFit", HistManager::ImageFormat::SVG);
    histMgr->ExportSet("TimeNeutral2d", "TimeNeutral2d", HistManager::ImageFormat::SVG);
+   histMgr->ExportSet("ipMC", "ipMC", HistManager::ImageFormat::SVG);
 
    // Wyniki
    for (size_t i = 0; i < cutter->GetCuts().size(); ++i)
@@ -684,5 +770,109 @@ void init_analysis::Terminate()
                 << " S/B=" << cutter->GetSignalToBackground(i) << " +- " << cutter->GetSignalToBackgroundError(i) << "\n";
    }
 
+   // ==================== TRIPLE GAUSSIAN FITTING ====================
+   std::cout << "\n==================== TRIPLE GAUSSIAN FITTING ====================" << std::endl;
+
+   // Lista histogramów do fitowania z Triple Gaussian
+   std::vector<TString> histsToFit = {"phivMC", "curvMC", "cotvMC", "xchMC", "ychMC", "zchMC", "invMassKchMC", "invMassKneMC", "timeDiffMC"};
+
+   for (const TString &histName : histsToFit)
+   {
+      std::cout << "\n--- Fitting " << histName.Data() << " ---" << std::endl;
+
+      // Fituj sumę MC (mctruth = 0)
+      TH1 *sumHist = histMgr->GetHistogram1D(histName, 0);
+      if (sumHist && sumHist->GetEntries() > 100)
+      {
+         std::cout << "Fitting Sum MC for " << histName.Data()
+                   << " (entries: " << sumHist->GetEntries() << ")" << std::endl;
+
+         if (gaussFitter->FitHistogram(sumHist, Form("%s Sum MC", histName.Data())))
+         {
+            gaussFitter->PrintSummary();
+
+            // Zapisz wyniki fitu
+            TCanvas *canvas = gaussFitter->DrawFit(Form("c_%s_sum_fit", histName.Data()),
+                                                   Form("Triple Gaussian Fit - %s Sum", histName.Data()),
+                                                   1000, 700, true, true);
+            if (canvas)
+            {
+               canvas->SaveAs(Form("img/%s_sum_triple_gauss_fit.png", histName.Data()));
+               canvas->SaveAs(Form("img/%s_sum_triple_gauss_fit.svg", histName.Data()));
+               std::cout << "  Fit plots saved to img/" << histName.Data() << "_sum_triple_gauss_fit.*" << std::endl;
+            }
+         }
+         else
+         {
+            std::cout << "  Triple Gaussian fit failed for " << histName.Data() << " sum" << std::endl;
+         }
+      }
+
+      // Fituj poszczególne kanały MC (mctruth = 1, 2, 3, ...)
+      for (Int_t ch = 1; ch <= 3; ++ch)
+      { // Załóżmy 3 kanały MC
+         TH1 *channelHist = histMgr->GetHistogram1D(histName, ch);
+         if (channelHist && channelHist->GetEntries() > 50)
+         {
+            std::cout << "Fitting Channel " << ch << " for " << histName.Data()
+                      << " (entries: " << channelHist->GetEntries() << ")" << std::endl;
+
+            if (gaussFitter->FitHistogram(channelHist, Form("%s Channel %d", histName.Data(), ch)))
+            {
+               std::cout << "  Channel " << ch << ": " << gaussFitter->GetSummaryText().Data() << std::endl;
+
+               // Opcjonalnie: zapisz fit dla każdego kanału
+               if (channelHist->GetEntries() > 200)
+               { // Tylko dla kanałów z dużą statystyką
+                  TCanvas *chCanvas = gaussFitter->DrawFit(Form("c_%s_ch%d_fit", histName.Data(), ch),
+                                                           Form("Triple Gaussian Fit - %s Ch%d", histName.Data(), ch),
+                                                           800, 600, true, true);
+                  if (chCanvas)
+                  {
+                     chCanvas->SaveAs(Form("img/%s_ch%d_triple_gauss_fit.png", histName.Data(), ch));
+                     std::cout << "    Fit plot saved to img/" << histName.Data() << "_ch" << ch << "_triple_gauss_fit.png" << std::endl;
+                  }
+               }
+            }
+            else
+            {
+               std::cout << "  Triple Gaussian fit failed for " << histName.Data() << " channel " << ch << std::endl;
+            }
+         }
+      }
+
+      // Fituj dane (mctruth = -1)
+      TH1 *dataHist = histMgr->GetDataHistogram1D(histName);
+      if (dataHist && dataHist->GetEntries() > 100)
+      {
+         std::cout << "Fitting Data for " << histName.Data()
+                   << " (entries: " << dataHist->GetEntries() << ")" << std::endl;
+
+         if (gaussFitter->FitHistogram(dataHist, Form("%s Data", histName.Data())))
+         {
+            gaussFitter->PrintSummary();
+
+            // Zapisz wyniki fitu danych
+            TCanvas *dataCanvas = gaussFitter->DrawFit(Form("c_%s_data_fit", histName.Data()),
+                                                       Form("Triple Gaussian Fit - %s Data", histName.Data()),
+                                                       1000, 700, true, true);
+            if (dataCanvas)
+            {
+               dataCanvas->SaveAs(Form("img/%s_data_triple_gauss_fit.png", histName.Data()));
+               dataCanvas->SaveAs(Form("img/%s_data_triple_gauss_fit.svg", histName.Data()));
+               std::cout << "  Data fit plots saved to img/" << histName.Data() << "_data_triple_gauss_fit.*" << std::endl;
+            }
+         }
+         else
+         {
+            std::cout << "  Triple Gaussian fit failed for " << histName.Data() << " data" << std::endl;
+         }
+      }
+   }
+
+   std::cout << "\n==================== TRIPLE GAUSSIAN FITTING COMPLETED ====================" << std::endl;
+   std::cout << "Wszystkie ploty z fitami Triple Gaussian zostały zapisane w folderze img/" << std::endl;
+
    delete histMgr;
+   delete gaussFitter;
 }
