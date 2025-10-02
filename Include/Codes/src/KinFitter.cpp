@@ -149,7 +149,32 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _V_final = _V - _V * _D_T * _Aux * _D * _V;
 
+      for (Int_t j = 0; j < _N_free + _N_const; j++)
+        if (abs(_CORR(j)) > 7. * sqrt(_V(j, j)) /*|| abs(_X_final(j) - _X_init(j)) > 7. * sqrt(_V_init(j, j))*/)
+        {
+          if (_mode == "SignalGlobal")
+          {
+            std::cout << "Warning: large correction in iteration no. " << i << " for parameter no. " << j << ", value: " << _X_final(j) << " +/- " << sqrt(_V_final(j, j)) << std::endl;
+            std::cout << "Previous value: " << _X(j) << " +/- " << sqrt(_V(j, j)) << std::endl;
+          }
+
+          _V_final(j, j) = _V(j, j);
+          _X_final(j) = _X(j);
+        }
+
+      if (_mode == "SignalGlobal")
+      {
+        // Adjust cyclical variables (phi angles)
+        _X_final(1) = AdjustCyclicalVar(_X_final(1), _X(1));
+        _X_final(4) = AdjustCyclicalVar(_X_final(4), _X(4));
+      }
+
       _CHISQR = Dot((_X_final - _X_init), _V_invert * (_X_final - _X_init));
+
+      if (abs(_CHISQR - _CHISQRTMP) < _CHISQRSTEP && _CHISQR < _CHISQRTMP)
+      {
+        break;
+      }
 
       _X = _X_final;
       for (Int_t j = 0; j < _N_free + _N_const; j++)
@@ -157,6 +182,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
         _V(j, j) = _V_final(j, j);
       }
 
+      // _V = _V_final;
       _L_aux = _L;
       _C_aux = _C;
       _FUNVALTMP = _FUNVAL;
@@ -273,6 +299,17 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
 
   KnerecFit = _baseObj->Knerec.total;
   KnereclorFit = _baseObj->Knereclor.total;
+}
+
+Double_t KinFitter::AdjustCyclicalVar(Double_t angleCorrected, Double_t angleOriginal)
+{
+  Double_t diff = angleCorrected - angleOriginal;
+
+  Long64_t n = round(diff / M_PI);
+
+  Double_t angleAdjusted = angleCorrected + n * M_PI;
+
+  return angleAdjusted;
 }
 
 // void KinFitter::PhotonPairing(std::vector<NeuPart> _Photons)

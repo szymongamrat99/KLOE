@@ -856,12 +856,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 									trackParameters[1].push_back(baseKin.PhivSmeared2);
 									trackParameters[1].push_back(baseKin.CotvSmeared2);
 
-									trackParametersErr[0].push_back(1.578);
-									trackParametersErr[0].push_back(1.308);
-									trackParametersErr[0].push_back(0.413);
-									trackParametersErr[1].push_back(1.578);
-									trackParametersErr[1].push_back(1.308);
-									trackParametersErr[1].push_back(0.413);
+									trackParametersErr[0].push_back(0.178);
+									trackParametersErr[0].push_back(0.108);
+									trackParametersErr[0].push_back(0.113);
+									trackParametersErr[1].push_back(0.178);
+									trackParametersErr[1].push_back(0.108);
+									trackParametersErr[1].push_back(0.113);
 
 									for (Int_t k = 0; k < 4; k++)
 									{
@@ -877,9 +877,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 										chargedVtx.push_back(baseKin.Kchboostnew[k]);
 									}
 
-									chargedVtxErr.push_back(0.547);
-									chargedVtxErr.push_back(0.515);
-									chargedVtxErr.push_back(0.344);
+									chargedVtxErr.push_back(0.147);
+									chargedVtxErr.push_back(0.115);
+									chargedVtxErr.push_back(0.244);
 
 									signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, bhabha_vtx);
 									errorCode = signalKinFitObj.Reconstruct();
@@ -896,7 +896,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 															   baseKin.KnereclorFit,
 															   baseKin.Chi2SignalKinFit,
 															   baseKin.pullsSignalFit);
-
+									
+									
 									if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
 									{
 										logger.getErrLog(errorCode, "", mctruth);
@@ -1171,7 +1172,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 						{"photonFit4", baseKin.photonFit[3]},
 						{"KnerecFit", baseKin.KnerecFit},
 						{"KnereclorFit", baseKin.KnereclorFit},
-						{"pullsSignalFit", baseKin.pullsSignalFit}};
+						{"pullsSignalFit", baseKin.pullsSignalFit},
+						{"ParamSignal", baseKin.ParamSignal},
+						{"ErrorsSignal", baseKin.ErrorsSignal},
+						{"ParamSignalFit", baseKin.ParamSignalFit},
+						{"ErrorsSignalFit", baseKin.ErrorsSignalFit}};
 
 					writer.Fill(intVars, floatVars, intArrays, floatArrays);
 

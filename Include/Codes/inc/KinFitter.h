@@ -118,6 +118,8 @@ namespace KLOE
     std::string
         _mode;
 
+    Double_t AdjustCyclicalVar(Double_t angleCorrected, Double_t angleOriginal);
+
   public:
     KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger);
 

@@ -57,6 +57,8 @@ void ConstraintsSignal::SetParameters(Float_t *p)
     pionCh[i].trackParams[0] = p[i * 3];
     pionCh[i].trackParams[1] = p[i * 3 + 1];
     pionCh[i].trackParams[2] = p[i * 3 + 2];
+
+    
   }
 
   for (Int_t i = 0; i < 4; i++)
@@ -117,8 +119,6 @@ void ConstraintsSignal::IntermediateReconstruction()
   // ip[2] is fitted
   if (abs(ip[2] - phi.vtxPos[2]) > 2.)
     ip[2] = phi.vtxPos[2];
-
-  std::cout << "IP after correction: " << ip[0] << " " << ip[1] << " " << ip[2] << std::endl;
 
   Kchrec.calculatePath(ip.data());
   Kchrec.SetTotalVector();

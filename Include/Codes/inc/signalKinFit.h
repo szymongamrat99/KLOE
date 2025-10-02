@@ -100,6 +100,17 @@ namespace KLOE
 
 		void GetResults(std::vector<Float_t> &Param, std::vector<Float_t> &Errors, std::vector<Float_t> &ParamFit, std::vector<Float_t> &ErrorsFit, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit, Float_t &Chi2SignalKinFit, std::vector<Float_t> &pulls)
 		{
+			Param = _Param;
+			Errors = _Errors;
+			ParamFit.resize(_X_min.GetNrows());
+			ErrorsFit.resize(_X_min.GetNrows());
+
+			for (Int_t i = 0; i < _X_min.GetNrows(); i++)
+			{
+				ParamFit[i] = _X_min[i];
+				ErrorsFit[i] = sqrt(_V_min[i][i]);
+			}
+
 			for (Int_t i = 0; i < 2; i++)
 				trkFit[i] = _trkFit[i];
 
