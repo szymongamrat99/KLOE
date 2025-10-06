@@ -154,6 +154,12 @@ public :
    TTreeReaderArray<float> yvmc = {fReader, "yvmc"};
    TTreeReaderArray<float> zv = {fReader, "zv"};
    TTreeReaderArray<float> zvmc = {fReader, "zvmc"};
+   TTreeReaderArray<float> ParamSignal = {fReader, "ParamSignal"};
+   TTreeReaderArray<float> ErrorsSignal = {fReader, "ErrorsSignal"};
+   TTreeReaderArray<float> ParamSignalFit = {fReader, "ParamSignalFit"};
+   TTreeReaderArray<float> ErrorsSignalFit = {fReader, "ErrorsSignalFit"};
+   TTreeReaderArray<float> pi01 = {fReader, "pi01"};
+   TTreeReaderArray<float> pi02 = {fReader, "pi02"};
 
 
    MC_fit_comparison(TTree * /*tree*/ =0) { }

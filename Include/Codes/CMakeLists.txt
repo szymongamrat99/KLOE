@@ -10,6 +10,7 @@ add_library(LibRec SHARED
             src/ConstraintsOmega.cpp
             src/ConstraintsTrilateration.cpp
             src/ConstraintsSignal.cpp
+            src/ConstraintsTest.cpp
             src/CustomGraph.cpp
             src/cylinder_intersection.cpp
             src/DoubleRatio.cpp

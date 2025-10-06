@@ -1,5 +1,5 @@
-#ifndef CONSTRAINTSSIGNAL_H
-#define CONSTRAINTSSIGNAL_H
+#ifndef CONSTRAINTSTEST_H
+#define CONSTRAINTSTEST_H
 
 #include <KinFit.h>
 
@@ -56,10 +56,10 @@
 namespace KLOE
 {
   /**
-   * @class ConstraintsSignal
+   * @class ConstraintsTest
    * @brief Auxiliary class with the constraints for \omega\pi^{0} fitting
    */
-  class ConstraintsSignal : public KinFit, public ChargedVtxRec<Float_t, Int_t>
+  class ConstraintsTest : public KinFit, public ChargedVtxRec<Float_t, Int_t>
   {
   private:
     /**
@@ -111,7 +111,7 @@ namespace KLOE
     void IntermediateReconstruction() override;
 
   public:
-    /* Specific physical Constraints for Signal-pi0 hypothesis */
+    /* Specific physical Constraints for Test-pi0 hypothesis */
 
     /**
      * @brief A method used to pair the photons in an event. Needed to get omega and neutral pions' parameters.

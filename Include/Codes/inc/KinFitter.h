@@ -19,6 +19,7 @@
 #include <ConstraintsOmega.h>
 #include <ConstraintsTrilateration.h>
 #include <ConstraintsSignal.h>
+#include <ConstraintsTest.h>
 
 namespace KLOE
 {
@@ -35,22 +36,29 @@ namespace KLOE
 
     TMatrixD
         _V,
+        _V_real,
         _D,
         _D_T,
+        _D_real,
+        _D_T_real,
         _V_T,
         _V_final,
         _V_aux,
         _V_min,
         _Aux,
+        _Aux_real,
         _V_invert,
         _V_init;
 
     TVectorD
         _X,
+        _X_real,
         _C,
         _X_final,
+        _X_final_real,
         _L,
         _CORR,
+        _CORR_real,
         _X_init,
         _X_min,
         _C_min,
@@ -137,9 +145,13 @@ namespace KLOE
 
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, TVectorD &C, TVectorD &L);
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit);
+    void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init);
 
 
     Double_t EnergyCalc(Double_t *p, Double_t mass);
+
+    Double_t DerivativeCalc(Int_t i, Int_t j);
+
     Double_t EnergyCalc(TLorentzVector p, Double_t mass);
 
     ErrorHandling::ErrorCodes GetErrorCode() { return _err_code; }

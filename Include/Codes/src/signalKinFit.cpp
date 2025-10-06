@@ -47,16 +47,16 @@ namespace KLOE
 		for (Int_t i = 0; i < 2; i++)
 			_trkFit[i].resize(4);
 
-		KinFitter::ConstraintSet({"EnergyConsvLAB",
-								  "PxConsvLAB",
+		KinFitter::ConstraintSet({"PxConsvLAB",
 								  "PyConsvLAB",
 								  "PzConsvLAB",
+								  "EnergyConsvLAB",
 								  "MinvConsvNeutralKaon",
-								  "MinvConsvChargedKaon",
 								  "Photon1PathLAB",
 								  "Photon2PathLAB",
 								  "Photon3PathLAB",
-								  "Photon4PathLAB"});
+								  "Photon4PathLAB",
+								  "MinvConsvChargedKaon"});
 
 		gErrorIgnoreLevel = 6001;
 	}
@@ -93,18 +93,7 @@ namespace KLOE
 		{
 			try
 			{
-				for (Int_t i = 0; i < 2; i++)
-				{
-					_Param[i * 3] = _trackParameters[i][0];
-					_Param[i * 3 + 1] = _trackParameters[i][1];
-					_Param[i * 3 + 2] = _trackParameters[i][2];
-
-					_Errors[i * 3] = _trackParametersErr[i][0];
-					_Errors[i * 3 + 1] = _trackParametersErr[i][1];
-					_Errors[i * 3 + 2] = _trackParametersErr[i][2];
-				}
-
-				_offset = 6;
+				_offset = 0;
 
 				for (Int_t i = 0; i < 4; i++)
 				{
@@ -118,12 +107,25 @@ namespace KLOE
 					_Errors[_offset + i * 5 + 4] = clu_ene_error(_Param[_offset + i * 5 + 4]);																					// MeV
 				}
 
-				_offset = 26;
+				_offset = 20;
 
 				for (Int_t i = 0; i < 3; i++)
 				{
 					_Param[_offset + i] = _chargedVtx[i];
 					_Errors[_offset + i] = _chargedVtxErr[i];
+				}
+
+				_offset = 23;
+
+				for (Int_t i = 0; i < 2; i++)
+				{
+					_Param[_offset + i * 3] = _trackParameters[i][0];
+					_Param[_offset + i * 3 + 1] = _trackParameters[i][1];
+					_Param[_offset + i * 3 + 2] = _trackParameters[i][2];
+
+					_Errors[_offset + i * 3] = _trackParametersErr[i][0];
+					_Errors[_offset + i * 3 + 1] = _trackParametersErr[i][1];
+					_Errors[_offset + i * 3 + 2] = _trackParametersErr[i][2];
 				}
 
 				_offset = 29;
@@ -157,6 +159,8 @@ namespace KLOE
 			_CHISQRMIN = KinFitter::FitFunction();
 
 			KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit, _KchrecFit, _KchboostFit, _ipFit, _photonFit, _KnerecFit, _KnereclorFit);
+
+
 
 			if (1)
 				_isConverged = 1;

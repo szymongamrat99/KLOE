@@ -46,7 +46,7 @@ namespace KLOE
     virtual Double_t NeutralYPathConsvLAB(Double_t *, Double_t *) = 0;
     virtual Double_t NeutralZPathConsvLAB(Double_t *, Double_t *) = 0;
 
-    virtual void SetParameters(Float_t *) = 0;
+    virtual void SetParameters(Double_t *) = 0;
     virtual void ResetParameters() = 0;
     virtual void IntermediateReconstruction() = 0;
 

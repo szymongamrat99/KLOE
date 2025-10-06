@@ -117,6 +117,8 @@ namespace KLOE
 			KchrecFit = _KchrecFit;
 			KchboostFit = _KchboostFit;
 
+			// std::cout << _KchrecFit[0] << " " << _KchrecFit[1] << " " << _KchrecFit[2] << " " << _KchrecFit[3] << std::endl;
+
 			ipFit = _ipFit;
 
 			for (Int_t i = 0; i < 4; i++)

@@ -6,69 +6,73 @@ void ConstraintsSignal::ResetParameters()
 {
   // Setting parameters from the array p to the member variables
   // of the base classes to be used in the constraint calculations.
-  if (bhabha_mom.size() != 4) {
-        bhabha_mom.clear();
-        bhabha_mom.resize(4);
-    }
-    
-    if (trackParameters.size() != 6) {
-        trackParameters.clear();
-        trackParameters.resize(6);
-    }
-    
-    if (cluster.size() != 4) {
-        for (Int_t i = 0; i < cluster.size(); i++)
-            cluster[i].clear();
-        cluster.clear();
-        cluster.resize(4);
-    }
-    
-    for (Int_t i = 0; i < cluster.size(); i++) {
-        if (cluster[i].size() != 5) {
-            cluster[i].clear();
-            cluster[i].resize(5);
-        }
-    }
+  if (bhabha_mom.size() != 4)
+  {
+    bhabha_mom.clear();
+    bhabha_mom.resize(4);
+  }
 
-    if (pionCh.size() != 2) {
-        pionCh.clear();
-        pionCh.resize(2);
-    }
-    
-    if (photon.size() != 4) {
-        photon.clear();
-        photon.resize(4);
-    }
+  if (cluster.size() != 4)
+  {
+    for (Int_t i = 0; i < cluster.size(); i++)
+      cluster[i].clear();
+    cluster.clear();
+    cluster.resize(4);
+  }
 
-    if (ip.size() != 3) {
-        ip.clear();
-        ip.resize(3);
+  for (Int_t i = 0; i < cluster.size(); i++)
+  {
+    if (cluster[i].size() != 5)
+    {
+      cluster[i].clear();
+      cluster[i].resize(5);
     }
+  }
+
+  if (pionCh.size() != 2)
+  {
+    pionCh.clear();
+    pionCh.resize(2);
+  }
+
+  if (photon.size() != 4)
+  {
+    photon.clear();
+    photon.resize(4);
+  }
+
+  if (ip.size() != 3)
+  {
+    ip.clear();
+    ip.resize(3);
+  }
 }
 
-void ConstraintsSignal::SetParameters(Float_t *p)
+void ConstraintsSignal::SetParameters(Double_t *p)
 {
   // Setting parameters from the array p to the member variables
   // of the base classes to be used in the constraint calculations.
   ResetParameters();
 
-  for (Int_t i = 0; i < 2; i++)
-  {
-    pionCh[i].trackParams[0] = p[i * 3];
-    pionCh[i].trackParams[1] = p[i * 3 + 1];
-    pionCh[i].trackParams[2] = p[i * 3 + 2];
-
-    
-  }
 
   for (Int_t i = 0; i < 4; i++)
   {
     for (Int_t j = 0; j < 5; j++)
-      photon[i].clusterParams[j] = p[6 + i * 5 + j];
+    {
+      photon[i].clusterParams[j] = p[i * 5 + j];
+    }
+
   }
 
   for (Int_t i = 0; i < 3; i++)
-    Kchrec.fourPos[i] = p[26 + i];
+    Kchrec.fourPos[i] = p[20 + i];
+
+  for (Int_t i = 0; i < 2; i++)
+  {
+    pionCh[i].trackParams[0] = p[23 + i * 3];
+    pionCh[i].trackParams[1] = p[23 + i * 3 + 1];
+    pionCh[i].trackParams[2] = p[23 + i * 3 + 2];
+  }
 
   for (Int_t i = 0; i < 4; i++)
   {
@@ -84,7 +88,14 @@ void ConstraintsSignal::IntermediateReconstruction()
   // Intermediate reconstruction to be done after setting the parameters
   // and before calculating the constraints.
   for (Int_t i = 0; i < 2; i++)
+  {
+    // pionCh[i].fourMom[0] = cos(pionCh[i].trackParams[1]) / abs(pionCh[i].trackParams[0]) * 1000.;
+    // pionCh[i].fourMom[1] = sin(pionCh[i].trackParams[1]) / abs(pionCh[i].trackParams[0]) * 1000.;
+    // pionCh[i].fourMom[2] = pionCh[i].trackParams[2] / abs(pionCh[i].trackParams[0]) * 1000.;
+    // pionCh[i].fourMom[3] = sqrt(pow(pionCh[i].fourMom[0], 2) + pow(pionCh[i].fourMom[1], 2) + pow(pionCh[i].fourMom[2], 2) + pow(mPiCh, 2));
+    
     charged_mom(pionCh[i].trackParams[0], pionCh[i].trackParams[1], pionCh[i].trackParams[2], pionCh[i].fourMom.data(), 1);
+  }
 
   // Setting four momentum for kaon charged
   for (Int_t i = 0; i < 4; i++)
@@ -114,11 +125,11 @@ void ConstraintsSignal::IntermediateReconstruction()
   // Corrected IP event by event
   IPBoostCorr(X_line, mom, xB, plane_perp, ip.data());
 
-  ip[0] = phi.vtxPos[0];
-  ip[1] = phi.vtxPos[1];
-  // ip[2] is fitted
-  if (abs(ip[2] - phi.vtxPos[2]) > 2.)
-    ip[2] = phi.vtxPos[2];
+  // ip[0] = phi.vtxPos[0];
+  // ip[1] = phi.vtxPos[1];
+  // // ip[2] is fitted
+  // if (abs(ip[2] - phi.vtxPos[2]) > 2.)
+  //   ip[2] = phi.vtxPos[2];
 
   Kchrec.calculatePath(ip.data());
   Kchrec.SetTotalVector();
@@ -133,8 +144,8 @@ void ConstraintsSignal::IntermediateReconstruction()
 
   for (Int_t i = 0; i < 4; i++)
   {
-    if(photon[i].clusterParams[4] < 0)
-        photon[i].clusterParams[4] = 0.;
+    if (photon[i].clusterParams[4] < 0)
+      photon[i].clusterParams[4] = 0.;
 
     photon[i].fourPos[0] = photon[i].clusterParams[0];
     photon[i].fourPos[1] = photon[i].clusterParams[1];
@@ -161,16 +172,12 @@ void ConstraintsSignal::IntermediateReconstruction()
 
 Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p)
 {
-  Float_t p4[36];
-
-  for (Int_t i = 0; i < 36; i++)
-    p4[i] = p[i];
-
-  SetParameters(p4);
+  SetParameters(p);
   IntermediateReconstruction();
 
   return (phi.fourMom[_chosen4MomComponent] -
-          Kchboost.fourMom[_chosen4MomComponent] -
+          pionCh[0].fourMom[_chosen4MomComponent] -
+          pionCh[1].fourMom[_chosen4MomComponent] -
           photon[0].fourMom[_chosen4MomComponent] -
           photon[1].fourMom[_chosen4MomComponent] -
           photon[2].fourMom[_chosen4MomComponent] -
@@ -179,25 +186,17 @@ Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p)
 
 Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
 {
-  Float_t p4[36];
-
-  for (Int_t i = 0; i < 36; i++)
-    p4[i] = p[i];
-
-  SetParameters(p4);
+  SetParameters(p);
   IntermediateReconstruction();
+
+  // std::cout << "Photon " << _chosenPhoton + 1 << " path: " << photon[_chosenPhoton].fourPos[3] << ", lifetime: " << Knereclor.lifetimeLAB << ", time of flight: " << photon[_chosenPhoton].timeOfFlight << std::endl;
 
   return photon[_chosenPhoton].fourPos[3] - Knereclor.lifetimeLAB - photon[_chosenPhoton].timeOfFlight;
 }
 
 Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)
 {
-  Float_t p4[36];
-
-  for (Int_t i = 0; i < 36; i++)
-    p4[i] = p[i];
-
-  SetParameters(p4);
+  SetParameters(p);
   IntermediateReconstruction();
 
   std::map<std::string, Float_t> minvModes = {

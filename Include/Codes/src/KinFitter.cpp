@@ -14,6 +14,14 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
     _baseObj = new ConstraintsSignal();
   else if (_mode == "Trilateration")
     _baseObj = new ConstraintsTrilateration();
+  else if (_mode == "Test")
+    _baseObj = new ConstraintsTest();
+
+  _D_real.ResizeTo(M, N_free);
+  _D_T_real.ResizeTo(N_free, M);
+
+  _CORR_real.ResizeTo(N_free);
+  _Aux_real.ResizeTo(M, M);
 };
 
 KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Int_t jmin, Int_t jmax, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger) : _N_free(N_free), _N_const(N_const), _M(M), _M_act(M_active), _CHISQRSTEP(chisqrstep), _loopcount(loopcount), _jmin(jmin), _jmax(jmax), _logger(logger), _mode(mode), _V(N_free + N_const, N_free + N_const), _V_T(N_free + N_const, N_free + N_const), _V_init(N_free + N_const, N_free + N_const), _V_invert(N_free + N_const, N_free + N_const), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _Aux(M, M), _C(M), _L(M), _CORR(N_free + N_const), _X(N_free + N_const), _X_init(N_free + N_const), _X_final(N_free + N_const), _X_init_aux(N_free + N_const), _C_aux(M), _L_aux(M)
@@ -24,6 +32,14 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
     _baseObj = new ConstraintsSignal();
   else if (_mode == "Trilateration")
     _baseObj = new ConstraintsTrilateration();
+  else if (_mode == "Test")
+    _baseObj = new ConstraintsTest();
+
+  _D_real.ResizeTo(M, N_free);
+  _D_T_real.ResizeTo(N_free, M);
+
+  _Aux_real.ResizeTo(M, M);
+  _CORR_real.ResizeTo(N_free);
 };
 
 Int_t KinFitter::ParameterInitialization(Float_t *Params, Float_t *Errors)
@@ -101,21 +117,15 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   for (Int_t i = 0; i < _loopcount; i++)
   {
-    if ("SignalGlobal" == _mode)
-    {
-      Float_t *pAux = new Float_t[_N_free + _N_const];
-
-      for (Int_t k = 0; k < _X.GetNrows(); k++)
-      {
-        pAux[k] = _X(k);
-      }
-
-      _baseObj->SetParameters(pAux);
-      _baseObj->IntermediateReconstruction();
-    }
 
     try
     {
+      // if (_mode == "SignalGlobal")
+      // {
+      //   _baseObj->SetParameters(_X.GetMatrixArray());
+      //   _baseObj->IntermediateReconstruction();
+      // }
+
       for (Int_t l = 0; l < _M; l++)
       {
         _C(l) = _constraints[l]->EvalPar(0, _X.GetMatrixArray());
@@ -123,7 +133,9 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
         {
           _constraints[l]->SetParameters(_X.GetMatrixArray());
           if (m < _N_free)
-            _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.0001);
+          {
+            _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.001 * sqrt(_V_init(m, m)));
+          }
           else
             _D(l, m) = 0;
         }
@@ -135,67 +147,36 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _Aux = _Aux.Invert(&_det);
 
+      if (_mode == "SignalGlobal")
+      {
+      }
+
       if (_det == 0)
         throw ErrorHandling::ErrorCodes::DET_ZERO;
       else if (TMath::IsNaN(_det))
         throw ErrorHandling::ErrorCodes::NAN_VAL;
 
-      // Rozwijam wokół _X a nie _X
-      _L = (_Aux * (_D * (_X - _X) + _C));
+      _L = (_Aux * _C);
 
       _CORR = _V * _D_T * _L;
 
-      _X_final = _X - _CORR;
+      _X = _X - _CORR;
 
       _V_final = _V - _V * _D_T * _Aux * _D * _V;
 
-      for (Int_t j = 0; j < _N_free + _N_const; j++)
-        if (abs(_CORR(j)) > 7. * sqrt(_V(j, j)) /*|| abs(_X_final(j) - _X_init(j)) > 7. * sqrt(_V_init(j, j))*/)
-        {
-          if (_mode == "SignalGlobal")
-          {
-            std::cout << "Warning: large correction in iteration no. " << i << " for parameter no. " << j << ", value: " << _X_final(j) << " +/- " << sqrt(_V_final(j, j)) << std::endl;
-            std::cout << "Previous value: " << _X(j) << " +/- " << sqrt(_V(j, j)) << std::endl;
-          }
+      _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
 
-          _V_final(j, j) = _V(j, j);
-          _X_final(j) = _X(j);
-        }
-
-      if (_mode == "SignalGlobal")
-      {
-        // Adjust cyclical variables (phi angles)
-        _X_final(1) = AdjustCyclicalVar(_X_final(1), _X(1));
-        _X_final(4) = AdjustCyclicalVar(_X_final(4), _X(4));
-      }
-
-      _CHISQR = Dot((_X_final - _X_init), _V_invert * (_X_final - _X_init));
-
-      if (abs(_CHISQR - _CHISQRTMP) < _CHISQRSTEP && _CHISQR < _CHISQRTMP)
-      {
-        break;
-      }
-
-      _X = _X_final;
-      for (Int_t j = 0; j < _N_free + _N_const; j++)
-      {
-        _V(j, j) = _V_final(j, j);
-      }
-
-      // _V = _V_final;
       _L_aux = _L;
       _C_aux = _C;
       _FUNVALTMP = _FUNVAL;
       _CHISQRTMP = _CHISQR;
 
+      _Aux.Zero();
       _C.Zero();
+      _L.Zero();
       _D.Zero();
       _D_T.Zero();
-      _Aux.Zero();
-      _V_final.Zero();
-      _X_final.Zero();
       _CORR.Zero();
-      _L.Zero();
     }
     catch (ErrorHandling::ErrorCodes err)
     {
@@ -207,21 +188,21 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   if ("SignalGlobal" == _mode)
   {
-    Float_t *pAux = new Float_t[_N_free + _N_const];
+    // _baseObj->SetParameters(_X.GetMatrixArray());
+    // _baseObj->IntermediateReconstruction();
 
-    for (Int_t k = 0; k < _N_free + _N_const; k++)
-    {
-      pAux[k] = _X(k);
-    }
+    // _X_min = _X;
+    // _V_min = _V_final;
+    // _X_init_min = _X_init;
+    // _V_init = _V_init;
 
-    _baseObj->SetParameters(pAux);
-    _baseObj->IntermediateReconstruction();
+    // _X_init.Print();
+    // _X.Print();
 
-    _X_min = _X;
-    _V_min = _V;
-    _X_init_min = _X_init;
-    _V_init = _V_init;
+    // _V_init.Print();
   }
+
+  _V = _V_final;
 
   return _CHISQRTMP;
 };
@@ -301,6 +282,14 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
   KnereclorFit = _baseObj->Knereclor.total;
 }
 
+void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init)
+{
+  X = _X;
+  V = _V;
+  X_init = _X_init;
+  V_init = _V_init;
+}
+
 Double_t KinFitter::AdjustCyclicalVar(Double_t angleCorrected, Double_t angleOriginal)
 {
   Double_t diff = angleCorrected - angleOriginal;
@@ -311,6 +300,50 @@ Double_t KinFitter::AdjustCyclicalVar(Double_t angleCorrected, Double_t angleOri
 
   return angleAdjusted;
 }
+
+Double_t KinFitter::DerivativeCalc(Int_t i, Int_t j)
+{
+  Double_t derivative = 0., pplus = 0., pminus = 0.;
+  Double_t step = 0.;
+
+  Double_t derivativeAux = 0.;
+
+  TVectorD X_aux_plus = _X,
+           X_aux_minus = _X;
+  TMatrixD V_aux = _V;
+
+  if (V_aux(j, j) == 0)
+  {
+    derivative = 999.;
+  }
+  else
+  {
+    step = 0.01 * sqrt(V_aux(j, j));
+
+    Int_t L = 0;
+
+    while (abs(derivativeAux - derivative) > 0.001 * abs(derivative) || L < 1)
+    {
+      derivativeAux = derivative;
+
+      X_aux_plus[j] = _X[j] + step;
+      X_aux_minus[j] = _X[j] - step;
+
+      Double_t f_plus = _constraints[i]->EvalPar(0, X_aux_plus.GetMatrixArray());
+      Double_t f_minus = _constraints[i]->EvalPar(0, X_aux_minus.GetMatrixArray());
+
+      derivative = (f_plus - f_minus) / (2 * step);
+
+      if (derivative == 0)
+        break;
+
+      step = step / 2.;
+      L++;
+    }
+  }
+
+  return derivativeAux;
+};
 
 // void KinFitter::PhotonPairing(std::vector<NeuPart> _Photons)
 // {

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Sep 12 01:30:47 2025 by ROOT version 6.24/07
+// Sun Oct  5 21:26:56 2025 by ROOT version 6.24/07
 // from TChain h1/
 //////////////////////////////////////////////////////////
 
@@ -47,9 +47,14 @@ public :
    TTreeReaderValue<Float_t> Bx = {fReader, "Bx"};
    TTreeReaderValue<Float_t> By = {fReader, "By"};
    TTreeReaderValue<Float_t> Bz = {fReader, "Bz"};
+   TTreeReaderValue<Float_t> Chi2SignalKinFit = {fReader, "Chi2SignalKinFit"};
    TTreeReaderValue<Float_t> Chi2TriKinFit = {fReader, "Chi2TriKinFit"};
+   TTreeReaderValue<Float_t> Cotv1 = {fReader, "Cotv1"};
+   TTreeReaderValue<Float_t> Cotv2 = {fReader, "Cotv2"};
    TTreeReaderValue<Float_t> CotvSmeared1 = {fReader, "CotvSmeared1"};
    TTreeReaderValue<Float_t> CotvSmeared2 = {fReader, "CotvSmeared2"};
+   TTreeReaderValue<Float_t> Curv1 = {fReader, "Curv1"};
+   TTreeReaderValue<Float_t> Curv2 = {fReader, "Curv2"};
    TTreeReaderValue<Float_t> CurvSmeared1 = {fReader, "CurvSmeared1"};
    TTreeReaderValue<Float_t> CurvSmeared2 = {fReader, "CurvSmeared2"};
    TTreeReaderValue<Float_t> KaonChTimeCM = {fReader, "KaonChTimeCM"};
@@ -60,13 +65,14 @@ public :
    TTreeReaderValue<Float_t> KaonNeTimeCMMC = {fReader, "KaonNeTimeCMMC"};
    TTreeReaderValue<Float_t> KaonNeTimeLAB = {fReader, "KaonNeTimeLAB"};
    TTreeReaderValue<Float_t> KaonNeTimeLABMC = {fReader, "KaonNeTimeLABMC"};
+   TTreeReaderValue<Float_t> Phiv1 = {fReader, "Phiv1"};
+   TTreeReaderValue<Float_t> Phiv2 = {fReader, "Phiv2"};
    TTreeReaderValue<Float_t> PhivSmeared1 = {fReader, "PhivSmeared1"};
    TTreeReaderValue<Float_t> PhivSmeared2 = {fReader, "PhivSmeared2"};
    TTreeReaderValue<Float_t> Qmiss = {fReader, "Qmiss"};
    TTreeReaderValue<Float_t> T0step1 = {fReader, "T0step1"};
-   TTreeReaderValue<Float_t> minv4gam = {fReader, "minv4gam"};
-   TTreeReaderValue<Float_t> Chi2SignalKinFit = {fReader, "Chi2SignalKinFit"};
    TTreeReaderValue<Float_t> TrcSum = {fReader, "TrcSum"};
+   TTreeReaderValue<Float_t> minv4gam = {fReader, "minv4gam"};
    TTreeReaderArray<int> Asscl = {fReader, "Asscl"};
    TTreeReaderArray<int> cutsApplied = {fReader, "cutsApplied"};
    TTreeReaderArray<int> eclstream = {fReader, "eclstream"};
@@ -82,17 +88,25 @@ public :
    TTreeReaderArray<float> Curv = {fReader, "Curv"};
    TTreeReaderArray<float> CurvMC = {fReader, "CurvMC"};
    TTreeReaderArray<float> Enecl = {fReader, "Enecl"};
+   TTreeReaderArray<float> ErrorsSignal = {fReader, "ErrorsSignal"};
+   TTreeReaderArray<float> ErrorsSignalFit = {fReader, "ErrorsSignalFit"};
    TTreeReaderArray<float> Kchboost = {fReader, "Kchboost"};
+   TTreeReaderArray<float> KchboostFit = {fReader, "KchboostFit"};
    TTreeReaderArray<float> KchboostKL = {fReader, "KchboostKL"};
    TTreeReaderArray<float> KchboostKS = {fReader, "KchboostKS"};
    TTreeReaderArray<float> Kchmc = {fReader, "Kchmc"};
    TTreeReaderArray<float> Kchrec = {fReader, "Kchrec"};
    TTreeReaderArray<float> KchrecClosest = {fReader, "KchrecClosest"};
+   TTreeReaderArray<float> KchrecFit = {fReader, "KchrecFit"};
    TTreeReaderArray<float> KchrecKL = {fReader, "KchrecKL"};
    TTreeReaderArray<float> KchrecKS = {fReader, "KchrecKS"};
    TTreeReaderArray<float> KneTriangle = {fReader, "KneTriangle"};
    TTreeReaderArray<float> Knemc = {fReader, "Knemc"};
+   TTreeReaderArray<float> KnerecFit = {fReader, "KnerecFit"};
+   TTreeReaderArray<float> KnereclorFit = {fReader, "KnereclorFit"};
    TTreeReaderArray<float> KnetriKinFit = {fReader, "KnetriKinFit"};
+   TTreeReaderArray<float> ParamSignal = {fReader, "ParamSignal"};
+   TTreeReaderArray<float> ParamSignalFit = {fReader, "ParamSignalFit"};
    TTreeReaderArray<float> Phiv = {fReader, "Phiv"};
    TTreeReaderArray<float> PhivMC = {fReader, "PhivMC"};
    TTreeReaderArray<float> Tcl = {fReader, "Tcl"};
@@ -108,46 +122,42 @@ public :
    TTreeReaderArray<float> gammaMomTriangle3 = {fReader, "gammaMomTriangle3"};
    TTreeReaderArray<float> gammaMomTriangle4 = {fReader, "gammaMomTriangle4"};
    TTreeReaderArray<float> ip = {fReader, "ip"};
+   TTreeReaderArray<float> ipFit = {fReader, "ipFit"};
    TTreeReaderArray<float> ipKL = {fReader, "ipKL"};
    TTreeReaderArray<float> ipKS = {fReader, "ipKS"};
    TTreeReaderArray<float> ipTriKinFit = {fReader, "ipTriKinFit"};
    TTreeReaderArray<float> ipmc = {fReader, "ipmc"};
    TTreeReaderArray<float> neuVtxTriKinFit = {fReader, "neuVtxTriKinFit"};
+   TTreeReaderArray<float> photonFit1 = {fReader, "photonFit1"};
+   TTreeReaderArray<float> photonFit2 = {fReader, "photonFit2"};
+   TTreeReaderArray<float> photonFit3 = {fReader, "photonFit3"};
+   TTreeReaderArray<float> photonFit4 = {fReader, "photonFit4"};
+   TTreeReaderArray<float> pullsSignalFit = {fReader, "pullsSignalFit"};
+   TTreeReaderArray<float> pullsTriKinFit = {fReader, "pullsTriKinFit"};
    TTreeReaderArray<float> pxmc = {fReader, "pxmc"};
    TTreeReaderArray<float> pymc = {fReader, "pymc"};
    TTreeReaderArray<float> pzmc = {fReader, "pzmc"};
    TTreeReaderArray<float> trcfinal = {fReader, "trcfinal"};
    TTreeReaderArray<float> trk1 = {fReader, "trk1"};
    TTreeReaderArray<float> trk1Closest = {fReader, "trk1Closest"};
+   TTreeReaderArray<float> trk1Fit = {fReader, "trk1Fit"};
    TTreeReaderArray<float> trk1KL = {fReader, "trk1KL"};
    TTreeReaderArray<float> trk1KLmc = {fReader, "trk1KLmc"};
    TTreeReaderArray<float> trk1KS = {fReader, "trk1KS"};
    TTreeReaderArray<float> trk1KSmc = {fReader, "trk1KSmc"};
    TTreeReaderArray<float> trk2 = {fReader, "trk2"};
    TTreeReaderArray<float> trk2Closest = {fReader, "trk2Closest"};
+   TTreeReaderArray<float> trk2Fit = {fReader, "trk2Fit"};
    TTreeReaderArray<float> trk2KL = {fReader, "trk2KL"};
    TTreeReaderArray<float> trk2KLmc = {fReader, "trk2KLmc"};
    TTreeReaderArray<float> trk2KS = {fReader, "trk2KS"};
    TTreeReaderArray<float> trk2KSmc = {fReader, "trk2KSmc"};
-   TTreeReaderArray<float> pullsTriKinFit = {fReader, "pullsTriKinFit"};
-   TTreeReaderArray<float> pullsSignalFit = {fReader, "pullsSignalFit"};
    TTreeReaderArray<float> xv = {fReader, "xv"};
    TTreeReaderArray<float> xvmc = {fReader, "xvmc"};
    TTreeReaderArray<float> yv = {fReader, "yv"};
    TTreeReaderArray<float> yvmc = {fReader, "yvmc"};
    TTreeReaderArray<float> zv = {fReader, "zv"};
    TTreeReaderArray<float> zvmc = {fReader, "zvmc"};
-   TTreeReaderArray<float> trk1Fit = {fReader, "trk1Fit"};
-   TTreeReaderArray<float> trk2Fit = {fReader, "trk2Fit"};
-   TTreeReaderArray<float> KchrecFit = {fReader, "KchrecFit"};
-   TTreeReaderArray<float> KchboostFit = {fReader, "KchboostFit"};
-   TTreeReaderArray<float> ipFit = {fReader, "ipFit"};
-   TTreeReaderArray<float> photonFit1 = {fReader, "photonFit1"};
-   TTreeReaderArray<float> photonFit2 = {fReader, "photonFit2"};
-   TTreeReaderArray<float> photonFit3 = {fReader, "photonFit3"};
-   TTreeReaderArray<float> photonFit4 = {fReader, "photonFit4"};
-   TTreeReaderArray<float> KnerecFit = {fReader, "KnerecFit"};
-   TTreeReaderArray<float> KnereclorFit = {fReader, "KnereclorFit"};
 
 
    init_analysis(TTree * /*tree*/ =0) { }

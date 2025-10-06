@@ -574,6 +574,8 @@ namespace KLOE
         };
 
         void CorrectClusterTime(Float_t T0, std::vector<Float_t> &cluTimeCorrected);
+
+        void PhotonPairingToPi0(std::vector<Float_t> *photon, Int_t numOfPhotons, std::vector<Int_t> &bestPairingIndex);
     };
 }
 

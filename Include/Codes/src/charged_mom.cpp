@@ -251,7 +251,7 @@ namespace KLOE
 
                   trk1[3] = sqrt(pow(trk1[0], 2) + pow(trk1[1], 2) + pow(trk1[2], 2) + pow(mPiCh, 2));
                   trk2[3] = sqrt(pow(trk2[0], 2) + pow(trk2[1], 2) + pow(trk2[2], 2) + pow(mPiCh, 2));
-                  
+
                   found = true;
                 }
               }

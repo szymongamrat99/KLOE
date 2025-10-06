@@ -90,7 +90,7 @@ namespace KLOE
     /** Fictitious overrider of virtual method - do not use*/
     Double_t NeutralZPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
 
-    void SetParameters(Float_t *p) override { };
+    void SetParameters(Double_t *p) override { };
     void ResetParameters() override { };
     void IntermediateReconstruction() override { };
 
