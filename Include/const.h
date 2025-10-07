@@ -270,8 +270,10 @@ struct BaseKinematics
                        ipFit(3, 0),
                        KnerecFit(10, 0),
                        KnereclorFit(10, 0),
-                       pi01(5, 0.0),
-                       pi02(5, 0.0)
+                       pi01(6, 0.0),
+                       pi02(6, 0.0),
+                       pi01Fit(6, 0.0),
+                       pi02Fit(6, 0.0)
     {};
 
     Float_t
@@ -454,7 +456,9 @@ struct BaseKinematics
         ErrorsSignalFit,
         pullsSignalFit,
         pi01,
-        pi02;
+        pi02,
+        pi01Fit,
+        pi02Fit;
 
     TLorentzVector
         phi4Mom;

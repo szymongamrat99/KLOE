@@ -41,6 +41,7 @@ add_library(LibRec SHARED
             src/ConfigManager.cpp
             src/trilaterationKinFit.cpp
             src/signalKinFit.cpp
+            src/NeutralReconstruction.cpp
             )
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.

@@ -33,6 +33,8 @@ namespace ErrorHandling
     DET_ZERO = 202,      /*!< Matrix determinant equal to zero*/
     NAN_VAL = 203,       /*!< NaN value in return*/
     CHI_SQR_STEP = 204,  /*!< Step of minimization too small*/
+    INVALID_PHOTON_NUMBER = 205, /*!< Invalid number of photons for neutral reconstruction*/
+    FOUR_MOM_NOT_FILLED = 206, /*!< Four momentum of a particle not filled*/
 
     // Physics-related errors
     NOT_ENOUGH_NEUTRAL_CLUSTERS = 300, /*!< Not enough neutral clusters */
@@ -118,6 +120,10 @@ namespace ErrorHandling
         return "Value is NaN!";
       case ErrorCodes::CHI_SQR_STEP:
         return "Chi-squared step less than threshold!";
+      case ErrorCodes::INVALID_PHOTON_NUMBER:
+        return "Invalid number of photons for neutral reconstruction.";
+      case ErrorCodes::FOUR_MOM_NOT_FILLED:
+        return "Four momentum of a particle not filled.";
 
       // Physics-related logs
       case ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS:
