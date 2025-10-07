@@ -21,6 +21,8 @@
 #include <ConfigManager.h>
 #include <NeutralReconstruction.h>
 
+#include <DataAccessWrapper.h>
+
 #include <trilaterationKinFit.h>
 #include <signalKinFit.h>
 
@@ -33,11 +35,21 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 {
   ConfigManager &config = ConfigManager::getInstance();
 
-  TTreeReader reader(&chain);
-  GeneralEventProperties generalProps(reader);
-  ClusterProperties clusterProps(reader);
-  ChargedVertexProperties chVtxProps(reader);
-  BhabhaIP bhabhaProps(reader);
+  // TTreeReader reader(&chain);
+  // GeneralEventProperties generalProps(reader);
+  // ClusterProperties clusterProps(reader);
+  // ChargedVertexProperties chVtxProps(reader);
+  // BhabhaIP bhabhaProps(reader);
+
+  // --------------- DataAccessWrapper initialization ----------------
+
+  KLOE::DataAccessWrapper dataAccess(chain);
+  
+  // Inicjalizacja wrapper'a
+  if (!dataAccess.Initialize()) {
+    std::cerr << "ERROR: Failed to initialize DataAccessWrapper" << std::endl;
+    return 1;
+  }
 
   std::map<Int_t, Int_t> totEventsPerMctruth = {
       {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}};
@@ -121,7 +133,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   UInt_t mctruth_num[8] = {0, 0, 0, 0, 0, 0, 0, 0}; // Array to hold mctruth values
 
   // Progress bar
-  boost::progress_display show_progress(reader.GetEntries());
+  boost::progress_display show_progress(dataAccess.GetEntries());
   // ---------------------------------------------------
 
   ErrorHandling::ErrorCodes errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
@@ -143,10 +155,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   Int_t mode = 1; // Model for pi+pi-
 
-  GeneralEventPropertiesMC *eventProps;
+  // GeneralEventPropertiesMC *eventProps;
 
-  if (MonteCarloInitAnalysis)
-    eventProps = new GeneralEventPropertiesMC(reader);
+  // if (MonteCarloInitAnalysis)
+  //   eventProps = new GeneralEventPropertiesMC(reader);
 
   Float_t
       KchrecKSMom = 0,
@@ -258,7 +270,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   KLOE::TrilaterationReconstructionKinFit trilatKinFitObj(N_free, N_const, M, loopcount, chiSqrStep, jmin, jmax, logger);
   KLOE::SignalKinFit signalKinFitObj(N_freeSignal, N_constSignal, MSignal, loopcountSignal, chiSqrStepSignal, logger);
 
-  while (reader.Next())
+  while (dataAccess.Next())
   {
     // Here you would process each entry in the tree.
     // For example, you can read values from the tree and perform calculations.
@@ -367,29 +379,29 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       mcflag = 1;
 
       genVarClassifier.classifyChannel(
-          *eventProps->ntmc,
-          *eventProps->nvtxmc,
-          &eventProps->pidmc[0],
-          &eventProps->vtxmc[0],
-          &eventProps->mother[0],
+          dataAccess.GetNTMC(),
+          dataAccess.GetNVtxMC(),
+          dataAccess.GetPidMC().data(),
+          dataAccess.GetVtxMC().data(),
+          dataAccess.GetMother().data(),
           mcflag, // Assuming mcflag is 1 for MC events
           mctruth);
 
       MctruthCounter(mctruth, mctruth_num);
       // -------------------------------------------------------------------
 
-      genVarClassifier.genVars(*eventProps->ntmc,
-                               *eventProps->nvtxmc,
-                               *clusterProps.nclu,
-                               &eventProps->pidmc[0],
-                               &eventProps->vtxmc[0],
-                               &eventProps->mother[0],
-                               &eventProps->xvmc[0],
-                               &eventProps->yvmc[0],
-                               &eventProps->zvmc[0],
-                               &eventProps->pxmc[0],
-                               &eventProps->pymc[0],
-                               &eventProps->pzmc[0],
+      genVarClassifier.genVars(dataAccess.GetNTMC(),
+                               dataAccess.GetNVtxMC(),
+                               dataAccess.GetNClu(),
+                               dataAccess.GetPidMC().data(),
+                               dataAccess.GetVtxMC().data(),
+                               dataAccess.GetMother().data(),
+                               dataAccess.GetXvMC().data(),
+                               dataAccess.GetYvMC().data(),
+                               dataAccess.GetZvMC().data(),
+                               dataAccess.GetPxMC().data(),
+                               dataAccess.GetPyMC().data(),
+                               dataAccess.GetPzMC().data(),
                                mcflag,
                                mctruth,
                                baseKin.ipmc,

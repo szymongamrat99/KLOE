@@ -42,6 +42,8 @@ add_library(LibRec SHARED
             src/trilaterationKinFit.cpp
             src/signalKinFit.cpp
             src/NeutralReconstruction.cpp
+            src/VariableConfig.cpp
+            src/DataAccessWrapper.cpp
             )
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
