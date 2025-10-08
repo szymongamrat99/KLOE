@@ -149,10 +149,10 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   if (*mctruth == 1)
   {
     // Fill histograms for reconstructed variables
-    histsReconstructed["px_Kch"]->Fill(Kchrec[0] - Kchmc[0]);
-    histsReconstructed["py_Kch"]->Fill(Kchrec[1] - Kchmc[1]);
-    histsReconstructed["pz_Kch"]->Fill(Kchrec[2] - Kchmc[2]);
-    histsReconstructed["Energy_Kch"]->Fill(Kchrec[3] - Kchmc[3]);
+    histsReconstructed["px_Kch"]->Fill(Kchboost[0] - Kchmc[0]);
+    histsReconstructed["py_Kch"]->Fill(Kchboost[1] - Kchmc[1]);
+    histsReconstructed["pz_Kch"]->Fill(Kchboost[2] - Kchmc[2]);
+    histsReconstructed["Energy_Kch"]->Fill(Kchboost[3] - Kchmc[3]);
     histsReconstructed["mass_Kch"]->Fill(Kchrec[5] - mK0);
 
     histsReconstructed["px_Kne"]->Fill(KneTriangle[0] - Knemc[0]);
@@ -201,11 +201,11 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     }
 
     // Fitted signal variables
-    histsFittedSignal["px_Kch"]->Fill(Kchboost[0] - Kchmc[0]);
-    histsFittedSignal["py_Kch"]->Fill(Kchboost[1] - Kchmc[1]);
-    histsFittedSignal["pz_Kch"]->Fill(Kchboost[2] - Kchmc[2]);
-    histsFittedSignal["Energy_Kch"]->Fill(Kchboost[3] - Kchmc[3]);
-    histsFittedSignal["mass_Kch"]->Fill(Kchboost[5] - mK0);
+    histsFittedSignal["px_Kch"]->Fill(KchboostFit[0] - Kchmc[0]);
+    histsFittedSignal["py_Kch"]->Fill(KchboostFit[1] - Kchmc[1]);
+    histsFittedSignal["pz_Kch"]->Fill(KchboostFit[2] - Kchmc[2]);
+    histsFittedSignal["Energy_Kch"]->Fill(KchboostFit[3] - Kchmc[3]);
+    histsFittedSignal["mass_Kch"]->Fill(KchrecFit[5] - mK0);
 
     histsFittedSignal["px_Kne"]->Fill(KnerecFit[0] - Knemc[0]);
     histsFittedSignal["py_Kne"]->Fill(KnerecFit[1] - Knemc[1]);
