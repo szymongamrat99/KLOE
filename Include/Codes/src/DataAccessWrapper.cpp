@@ -81,6 +81,11 @@ Bool_t DataAccessWrapper::Next()
   // Sprawdź czy zmienił się plik i zaktualizuj wersję
   UpdateCurrentFileVersion();
 
+  std::cout << "DEBUG: Accessing entry " << fCurrentEntry << " (File version: "
+            << (fCurrentFileVersion == FileVersion::V1 ? "v1" : fCurrentFileVersion == FileVersion::V2 ? "v2"
+                                                                                                     : "unknown")
+            << ")" << GetCurrentFileName()  << std::endl;
+
   // Pobierz dane w zależności od wersji pliku
   if (fCurrentFileVersion == FileVersion::V2)
   {
