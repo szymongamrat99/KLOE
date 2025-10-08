@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 
     std::string
         DataPath = "",
-        runRegexPattern = R"(.*_(\d{5})_v2\.root$)";
+        runRegexPattern = R"(.*_(\d{5})_v1\.root$)";
 
     std::vector<std::string> DataPathList(std::begin(filePaths["MC"]["path"][2]), std::end(filePaths["MC"]["path"][2]));
 

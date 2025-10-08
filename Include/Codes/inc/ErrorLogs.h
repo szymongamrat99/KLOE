@@ -42,7 +42,8 @@ namespace ErrorHandling
     CHARGED_KAON_MASS_PRE = 302,           /*!< Did not pass charged kaon ivariant mass in preselection*/
     TRILATERATION_KIN_FIT = 303,
     TRIANGLE_REC = 304,
-    SIGNAL_KIN_FIT = 305,           
+    SIGNAL_KIN_FIT = 305,
+    NO_CHARGED_VTX_OR_TRACKS = 306,           
 
 
     NOT_RECOGNIZED = 666, /*!< Unexpected exception*/
@@ -138,6 +139,8 @@ namespace ErrorHandling
         return "Did not pass the triangle reconstruction.";
       case ErrorCodes::SIGNAL_KIN_FIT:
         return "Did not pass the signal global kin fit.";
+      case ErrorCodes::NO_CHARGED_VTX_OR_TRACKS:
+        return "No charged vertices or tracks available for analysis.";
 
       // Not recognized logs
       case ErrorCodes::NOT_RECOGNIZED:

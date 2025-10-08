@@ -4,9 +4,9 @@
 void GeneratedVariables::classifyChannel(
 	Int_t ntmc,
 	Int_t nvtxmc,
-	Int_t *pidmcOld,
-	Int_t *vtxmcOld,
-	Int_t *motherOld,
+	const Int_t *pidmcOld,
+	const Int_t *vtxmcOld,
+	const Int_t *motherOld,
 	UInt_t mcflag,
 	Int_t &mctruth_int)
 {
@@ -207,15 +207,15 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 	Int_t ntmc,
 	Int_t nvtxmc,
 	Int_t nclu,
-	Int_t *pidmc,
-	Int_t *vtxmc,
-	Int_t *mother,
-	Float_t *xvmc,
-	Float_t *yvmc,
-	Float_t *zvmc,
-	Float_t *pxmc,
-	Float_t *pymc,
-	Float_t *pzmc,
+	const Int_t *pidmc,
+	const Int_t *vtxmc,
+	const Int_t *mother,
+	const Float_t *xvmc,
+	const Float_t *yvmc,
+	const Float_t *zvmc,
+	const Float_t *pxmc,
+	const Float_t *pymc,
+	const Float_t *pzmc,
 	Int_t mcflag,
 	Int_t mctruth,
 	std::vector<Float_t> &ipmc,
@@ -294,7 +294,7 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 
 	return ErrorHandling::ErrorCodes::NO_ERROR;
 }
-void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, Int_t *mother, Int_t *vtxmc, Int_t *pidmc, std::vector<std::vector<Float_t>> &pgammaMC, Int_t &count, Float_t *pxmc, Float_t *pymc, Float_t *pzmc, Float_t neu_vtx[3], std::vector<Float_t> &Knemc, std::vector<Float_t> &region, KLOE::CylinderIntersection &CylIndObj, std::vector<Float_t> &cluster, std::vector<Float_t> &ipmc)
+void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, const Int_t *mother, const Int_t *vtxmc, const Int_t *pidmc, std::vector<std::vector<Float_t>> &pgammaMC, Int_t &count, const Float_t *pxmc, const Float_t *pymc, const Float_t *pzmc, Float_t neu_vtx[3], std::vector<Float_t> &Knemc, std::vector<Float_t> &region, KLOE::CylinderIntersection &CylIndObj, std::vector<Float_t> &cluster, std::vector<Float_t> &ipmc)
 {
 	for (Int_t j = 0; j < ntmc; j++)
 	{
@@ -374,7 +374,7 @@ void GeneratedVariables::GeneratedClusterFinder(Int_t nclu, Int_t ind_gam[4], co
 				}
 }
 
-void GeneratedVariables::twoTracksFinder(Int_t ntmc, Int_t *mother, Int_t *vtxmc, Int_t *pidmc, std::vector<Float_t> &Knemc, Float_t Kl[9], std::vector<Float_t> &Kchmc, Float_t Ks[9], std::vector<std::vector<Float_t>> &trkMC, Float_t *pxmc, Float_t *pymc, Float_t *pzmc, Int_t mctruth, std::vector<Float_t> &CurvMC, std::vector<Float_t> &PhivMC, std::vector<Float_t> &CotvMC)
+void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const Int_t *vtxmc, const Int_t *pidmc, std::vector<Float_t> &Knemc, Float_t Kl[9], std::vector<Float_t> &Kchmc, Float_t Ks[9], std::vector<std::vector<Float_t>> &trkMC, const Float_t *pxmc, const Float_t *pymc, const Float_t *pzmc, Int_t mctruth, std::vector<Float_t> &CurvMC, std::vector<Float_t> &PhivMC, std::vector<Float_t> &CotvMC)
 {
 	for (Int_t j = 0; j < ntmc; j++)
 	{
@@ -441,7 +441,7 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, Int_t *mother, Int_t *vtxmc
 		}
 	}
 }
-void GeneratedVariables::KSLGenerated(Int_t nvtxmc, Int_t *mother, Float_t Kl[9], Float_t *xvmc, Float_t *yvmc, Float_t *zvmc, Float_t Ks[9], Int_t ntmc, Int_t *pidmc, Float_t *pxmc, Float_t *pymc, Float_t *pzmc)
+void GeneratedVariables::KSLGenerated(Int_t nvtxmc, const Int_t *mother, Float_t Kl[9], const Float_t *xvmc, const Float_t *yvmc, const Float_t *zvmc, Float_t Ks[9], Int_t ntmc, const Int_t *pidmc, const Float_t *pxmc, const Float_t *pymc, const Float_t *pzmc)
 {
 	for (Int_t j = 0; j < nvtxmc; j++)
 	{
@@ -491,7 +491,7 @@ void GeneratedVariables::KSLGenerated(Int_t nvtxmc, Int_t *mother, Float_t Kl[9]
 		}
 	}
 }
-void GeneratedVariables::IPGenerated(Int_t nvtxmc, Int_t *mother, std::vector<Float_t> &ipmc, Float_t *xvmc, Float_t *yvmc, Float_t *zvmc)
+void GeneratedVariables::IPGenerated(Int_t nvtxmc, const Int_t *mother, std::vector<Float_t> &ipmc, const Float_t *xvmc, const Float_t *yvmc, const Float_t *zvmc)
 {
 	for (Int_t j = 0; j < nvtxmc; j++)
 	{

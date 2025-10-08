@@ -248,16 +248,16 @@ namespace KLOE
         if (runNum < minRun || runNum > maxRun)
           continue;
 
-        // Priorytet dla v2.root
+        // Priorytet dla v2.root i v1.root
         if (fname.find("_v2.root") != std::string::npos)
         {
           runFiles[runNum] = it->path().string();
         }
-        // } else {
-        //     // Dodaj tylko jeśli nie ma już v2 dla tego runu
-        //     if (runFiles.count(runNum) == 0)
-        //         runFiles[runNum] = it->path().string();
-        // }
+        else {
+            // Dodaj tylko jeśli nie ma już v2 dla tego runu
+            if (runFiles.count(runNum) == 0)
+                runFiles[runNum] = it->path().string();
+        }
       }
     }
 
@@ -293,10 +293,10 @@ namespace KLOE
         {
           runFiles[runNum] = filePath;
         }
-        // } else {
-        //     if (runFiles.count(runNum) == 0)
-        //         runFiles[runNum] = filePath;
-        // }
+        else {
+            if (runFiles.count(runNum) == 0)
+                runFiles[runNum] = filePath;
+        }
       }
     }
 

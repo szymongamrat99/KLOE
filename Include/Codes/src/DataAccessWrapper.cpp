@@ -11,447 +11,596 @@ using namespace KLOE;
 // Definicja static const zmiennej
 const Int_t DataAccessWrapper::kMaxArraySize;
 
-DataAccessWrapper::DataAccessWrapper(TChain& chain) : fChain(chain) {
-    // Inicjalizacja map dla v1 arrays
-    for (const auto& key : fVariableConfig.GetAllKeys()) {
-        const auto* info = fVariableConfig.GetVariableInfo(key);
-        if (info && info->isArray) {
-            if (info->type == "Int_t") {
-                fIntArrays_v1[key].resize(kMaxArraySize, 0);
-            } else if (info->type == "Float_t") {
-                fFloatArrays_v1[key].resize(kMaxArraySize, 0.0f);
-            } else if (info->type == "UInt_t") {
-                fUIntArrays_v1[key].resize(kMaxArraySize, 0);
-            }
+DataAccessWrapper::DataAccessWrapper(TChain &chain) : fChain(chain)
+{
+  // Inicjalizacja map dla v1 arrays
+  for (const auto &key : fVariableConfig.GetAllKeys())
+  {
+    const auto *info = fVariableConfig.GetVariableInfo(key);
+    if (info && info->isArray)
+    {
+      if (info->type == "Int_t")
+      {
+        fIntArrays_v1[key].resize(kMaxArraySize, 0);
+      }
+      else if (info->type == "Float_t")
+      {
+        fFloatArrays_v1[key].resize(kMaxArraySize, 0.0f);
+      }
+      else if (info->type == "UInt_t")
+      {
+        fUIntArrays_v1[key].resize(kMaxArraySize, 0);
+      }
+    }
+  }
+}
+
+DataAccessWrapper::~DataAccessWrapper()
+{
+  // Cleanup jest automatyczny dzięki unique_ptr i std::map
+}
+
+Bool_t DataAccessWrapper::Initialize()
+{
+  if (fChain.GetEntries() == 0)
+  {
+    std::cerr << "ERROR: DataAccessWrapper - Chain is empty!" << std::endl;
+    return false;
+  }
+
+  // Mapuj wersje plików
+  MapFileVersions();
+
+  // Inicjalizuj oba systemy dostępu
+  Bool_t readerOK = InitializeTreeReader();
+  Bool_t branchOK = InitializeBranchAddress();
+
+  if (!readerOK || !branchOK)
+  {
+    std::cerr << "ERROR: DataAccessWrapper - Failed to initialize data access systems" << std::endl;
+    return false;
+  }
+
+  fCurrentEntry = -1;
+
+  std::cout << "INFO: DataAccessWrapper initialized successfully" << std::endl;
+  PrintFileTypeStats();
+
+  return true;
+}
+
+Bool_t DataAccessWrapper::Next()
+{
+  if (fCurrentEntry + 1 >= fChain.GetEntries())
+  {
+    return false; // Koniec danych
+  }
+
+  fCurrentEntry++;
+
+  // Sprawdź czy zmienił się plik i zaktualizuj wersję
+  UpdateCurrentFileVersion();
+
+  // Pobierz dane w zależności od wersji pliku
+  if (fCurrentFileVersion == FileVersion::V2)
+  {
+    if (!fReader->Next())
+    {
+      std::cerr << "ERROR: TTreeReader::Next() failed for entry " << fCurrentEntry << std::endl;
+      return false;
+    }
+    fV2Events++;
+  }
+  else if (fCurrentFileVersion == FileVersion::V1)
+  {
+    if (fChain.GetEntry(fCurrentEntry) < 0)
+    {
+      std::cerr << "ERROR: TChain::GetEntry() failed for entry " << fCurrentEntry << std::endl;
+      return false;
+    }
+    fV1Events++;
+  }
+  else
+  {
+    std::cerr << "ERROR: Unknown file version for entry " << fCurrentEntry << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+DataAccessWrapper::FileVersion DataAccessWrapper::DetermineFileVersion(const TString &filename)
+{
+  if (filename.Contains("_v2.root"))
+  {
+    return FileVersion::V2;
+  }
+  else if (filename.Contains("_v1.root") || filename.EndsWith(".root"))
+  {
+    // Zakładamy, że pliki bez oznaczenia wersji to v1
+    return FileVersion::V1;
+  }
+  return FileVersion::UNKNOWN;
+}
+
+void DataAccessWrapper::MapFileVersions()
+{
+  TObjArray *fileList = fChain.GetListOfFiles();
+
+  for (Int_t i = 0; i < fileList->GetEntries(); ++i)
+  {
+    TChainElement *element = (TChainElement *)fileList->At(i);
+    TString filename = element->GetTitle();
+
+    FileVersion version = DetermineFileVersion(filename);
+    fFileVersionMap[filename] = version;
+
+    std::cout << "INFO: File " << filename << " -> Version "
+              << (version == FileVersion::V1 ? "v1" : version == FileVersion::V2 ? "v2"
+                                                                                 : "unknown")
+              << std::endl;
+  }
+}
+
+Bool_t DataAccessWrapper::InitializeTreeReader()
+{
+  try
+  {
+    fReader = std::make_unique<TTreeReader>(&fChain);
+
+    // Inicjalizuj wszystkie zmienne skalarne i tablice dla v2
+    for (const auto &key : fVariableConfig.GetAllKeys())
+    {
+      const auto *info = fVariableConfig.GetVariableInfo(key);
+      if (!info)
+        continue;
+
+      TString branchName = info->nameV2;
+
+      if (info->isArray)
+      {
+        // Tablice
+        if (info->type == "Int_t")
+        {
+          fIntArrays_v2[key] = std::make_unique<TTreeReaderArray<Int_t>>(*fReader, branchName.Data());
         }
+        else if (info->type == "Float_t")
+        {
+          fFloatArrays_v2[key] = std::make_unique<TTreeReaderArray<Float_t>>(*fReader, branchName.Data());
+        }
+        else if (info->type == "UInt_t")
+        {
+          fUIntArrays_v2[key] = std::make_unique<TTreeReaderArray<UInt_t>>(*fReader, branchName.Data());
+        }
+      }
+      else
+      {
+        // Zmienne skalarne
+        if (info->type == "Int_t")
+        {
+          fIntValues_v2[key] = std::make_unique<TTreeReaderValue<Int_t>>(*fReader, branchName.Data());
+        }
+        else if (info->type == "Float_t")
+        {
+          fFloatValues_v2[key] = std::make_unique<TTreeReaderValue<Float_t>>(*fReader, branchName.Data());
+        }
+        else if (info->type == "UInt_t")
+        {
+          fUIntValues_v2[key] = std::make_unique<TTreeReaderValue<UInt_t>>(*fReader, branchName.Data());
+        }
+      }
     }
-}
 
-DataAccessWrapper::~DataAccessWrapper() {
-    // Cleanup jest automatyczny dzięki unique_ptr i std::map
-}
-
-Bool_t DataAccessWrapper::Initialize() {
-    if (fChain.GetEntries() == 0) {
-        std::cerr << "ERROR: DataAccessWrapper - Chain is empty!" << std::endl;
-        return false;
-    }
-    
-    // Mapuj wersje plików
-    MapFileVersions();
-    
-    // Inicjalizuj oba systemy dostępu
-    Bool_t readerOK = InitializeTreeReader();
-    Bool_t branchOK = InitializeBranchAddress();
-    
-    if (!readerOK || !branchOK) {
-        std::cerr << "ERROR: DataAccessWrapper - Failed to initialize data access systems" << std::endl;
-        return false;
-    }
-    
-    fCurrentEntry = -1;
-    
-    std::cout << "INFO: DataAccessWrapper initialized successfully" << std::endl;
-    PrintFileTypeStats();
-    
     return true;
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << "ERROR: Failed to initialize TTreeReader: " << e.what() << std::endl;
+    return false;
+  }
 }
 
-Bool_t DataAccessWrapper::Next() {
-    if (fCurrentEntry + 1 >= fChain.GetEntries()) {
-        return false; // Koniec danych
-    }
-    
-    fCurrentEntry++;
-    
-    // Sprawdź czy zmienił się plik i zaktualizuj wersję
-    UpdateCurrentFileVersion();
-    
-    // Pobierz dane w zależności od wersji pliku
-    if (fCurrentFileVersion == FileVersion::V2) {
-        if (!fReader->Next()) {
-            std::cerr << "ERROR: TTreeReader::Next() failed for entry " << fCurrentEntry << std::endl;
-            return false;
+Bool_t DataAccessWrapper::InitializeBranchAddress()
+{
+  try
+  {
+    // Inicjalizuj wszystkie zmienne dla v1
+    for (const auto &key : fVariableConfig.GetAllKeys())
+    {
+      const auto *info = fVariableConfig.GetVariableInfo(key);
+      if (!info)
+        continue;
+
+      TString branchName = info->nameV1;
+
+      if (info->isArray)
+      {
+        // Tablice - ustaw branch address na C arrays
+        if (info->type == "Int_t")
+        {
+          fChain.SetBranchAddress(branchName.Data(), fIntArrays_v1[key].data());
         }
-        fV2Events++;
-    } else if (fCurrentFileVersion == FileVersion::V1) {
-        if (fChain.GetEntry(fCurrentEntry) < 0) {
-            std::cerr << "ERROR: TChain::GetEntry() failed for entry " << fCurrentEntry << std::endl;
-            return false;
+        else if (info->type == "Float_t")
+        {
+          fChain.SetBranchAddress(branchName.Data(), fFloatArrays_v1[key].data());
         }
-        fV1Events++;
-    } else {
-        std::cerr << "ERROR: Unknown file version for entry " << fCurrentEntry << std::endl;
-        return false;
+        else if (info->type == "UInt_t")
+        {
+          fChain.SetBranchAddress(branchName.Data(), fUIntArrays_v1[key].data());
+        }
+      }
+      else
+      {
+        // Zmienne skalarne
+        if (info->type == "Int_t")
+        {
+          fIntValues_v1[key] = 0;
+          fChain.SetBranchAddress(branchName.Data(), &fIntValues_v1[key]);
+        }
+        else if (info->type == "Float_t")
+        {
+          fFloatValues_v1[key] = 0.0f;
+          fChain.SetBranchAddress(branchName.Data(), &fFloatValues_v1[key]);
+        }
+        else if (info->type == "UInt_t")
+        {
+          fUIntValues_v1[key] = 0;
+          fChain.SetBranchAddress(branchName.Data(), &fUIntValues_v1[key]);
+        }
+      }
     }
-    
+
     return true;
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << "ERROR: Failed to initialize SetBranchAddress: " << e.what() << std::endl;
+    return false;
+  }
 }
 
-DataAccessWrapper::FileVersion DataAccessWrapper::DetermineFileVersion(const TString& filename) {
-    if (filename.Contains("_v2.root")) {
-        return FileVersion::V2;
-    } else if (filename.Contains("_v1.root") || filename.EndsWith(".root")) {
-        // Zakładamy, że pliki bez oznaczenia wersji to v1
-        return FileVersion::V1;
+TString DataAccessWrapper::GetCurrentFileName() const
+{
+  if (fCurrentEntry < 0)
+    return "";
+
+  TFile *currentFile = fChain.GetFile();
+  if (!currentFile)
+    return "";
+
+  return currentFile->GetName();
+}
+
+void DataAccessWrapper::UpdateCurrentFileVersion()
+{
+  TString currentFile = GetCurrentFileName();
+  auto it = fFileVersionMap.find(currentFile);
+
+  if (it != fFileVersionMap.end())
+  {
+    fCurrentFileVersion = it->second;
+  }
+  else
+  {
+    fCurrentFileVersion = DetermineFileVersion(currentFile);
+    fFileVersionMap[currentFile] = fCurrentFileVersion;
+  }
+}
+
+void DataAccessWrapper::PrintFileTypeStats() const
+{
+  std::cout << "\n=== DataAccessWrapper File Type Statistics ===" << std::endl;
+  std::cout << "Total files in chain: " << fFileVersionMap.size() << std::endl;
+
+  Int_t v1Count = 0, v2Count = 0, unknownCount = 0;
+  for (const auto &pair : fFileVersionMap)
+  {
+    switch (pair.second)
+    {
+    case FileVersion::V1:
+      v1Count++;
+      break;
+    case FileVersion::V2:
+      v2Count++;
+      break;
+    default:
+      unknownCount++;
+      break;
     }
-    return FileVersion::UNKNOWN;
-}
+  }
 
-void DataAccessWrapper::MapFileVersions() {
-    TObjArray* fileList = fChain.GetListOfFiles();
-    
-    for (Int_t i = 0; i < fileList->GetEntries(); ++i) {
-        TChainElement* element = (TChainElement*)fileList->At(i);
-        TString filename = element->GetTitle();
-        
-        FileVersion version = DetermineFileVersion(filename);
-        fFileVersionMap[filename] = version;
-        
-        std::cout << "INFO: File " << filename << " -> Version " 
-                  << (version == FileVersion::V1 ? "v1" : 
-                     version == FileVersion::V2 ? "v2" : "unknown") << std::endl;
-    }
-}
-
-Bool_t DataAccessWrapper::InitializeTreeReader() {
-    try {
-        fReader = std::make_unique<TTreeReader>(&fChain);
-        
-        // Inicjalizuj wszystkie zmienne skalarne i tablice dla v2
-        for (const auto& key : fVariableConfig.GetAllKeys()) {
-            const auto* info = fVariableConfig.GetVariableInfo(key);
-            if (!info) continue;
-            
-            TString branchName = info->nameV2;
-            
-            if (info->isArray) {
-                // Tablice
-                if (info->type == "Int_t") {
-                    fIntArrays_v2[key] = std::make_unique<TTreeReaderArray<Int_t>>(*fReader, branchName.Data());
-                } else if (info->type == "Float_t") {
-                    fFloatArrays_v2[key] = std::make_unique<TTreeReaderArray<Float_t>>(*fReader, branchName.Data());
-                } else if (info->type == "UInt_t") {
-                    fUIntArrays_v2[key] = std::make_unique<TTreeReaderArray<UInt_t>>(*fReader, branchName.Data());
-                }
-            } else {
-                // Zmienne skalarne
-                if (info->type == "Int_t") {
-                    fIntValues_v2[key] = std::make_unique<TTreeReaderValue<Int_t>>(*fReader, branchName.Data());
-                } else if (info->type == "Float_t") {
-                    fFloatValues_v2[key] = std::make_unique<TTreeReaderValue<Float_t>>(*fReader, branchName.Data());
-                } else if (info->type == "UInt_t") {
-                    fUIntValues_v2[key] = std::make_unique<TTreeReaderValue<UInt_t>>(*fReader, branchName.Data());
-                }
-            }
-        }
-        
-        return true;
-    } catch (const std::exception& e) {
-        std::cerr << "ERROR: Failed to initialize TTreeReader: " << e.what() << std::endl;
-        return false;
-    }
-}
-
-Bool_t DataAccessWrapper::InitializeBranchAddress() {
-    try {
-        // Inicjalizuj wszystkie zmienne dla v1
-        for (const auto& key : fVariableConfig.GetAllKeys()) {
-            const auto* info = fVariableConfig.GetVariableInfo(key);
-            if (!info) continue;
-            
-            TString branchName = info->nameV1;
-            
-            if (info->isArray) {
-                // Tablice - ustaw branch address na C arrays
-                if (info->type == "Int_t") {
-                    fChain.SetBranchAddress(branchName.Data(), fIntArrays_v1[key].data());
-                } else if (info->type == "Float_t") {
-                    fChain.SetBranchAddress(branchName.Data(), fFloatArrays_v1[key].data());
-                } else if (info->type == "UInt_t") {
-                    fChain.SetBranchAddress(branchName.Data(), fUIntArrays_v1[key].data());
-                }
-            } else {
-                // Zmienne skalarne
-                if (info->type == "Int_t") {
-                    fIntValues_v1[key] = 0;
-                    fChain.SetBranchAddress(branchName.Data(), &fIntValues_v1[key]);
-                } else if (info->type == "Float_t") {
-                    fFloatValues_v1[key] = 0.0f;
-                    fChain.SetBranchAddress(branchName.Data(), &fFloatValues_v1[key]);
-                } else if (info->type == "UInt_t") {
-                    fUIntValues_v1[key] = 0;
-                    fChain.SetBranchAddress(branchName.Data(), &fUIntValues_v1[key]);
-                }
-            }
-        }
-        
-        return true;
-    } catch (const std::exception& e) {
-        std::cerr << "ERROR: Failed to initialize SetBranchAddress: " << e.what() << std::endl;
-        return false;
-    }
-}
-
-TString DataAccessWrapper::GetCurrentFileName() const {
-    if (fCurrentEntry < 0) return "";
-    
-    TFile* currentFile = fChain.GetFile();
-    if (!currentFile) return "";
-    
-    return currentFile->GetName();
-}
-
-void DataAccessWrapper::UpdateCurrentFileVersion() {
-    TString currentFile = GetCurrentFileName();
-    auto it = fFileVersionMap.find(currentFile);
-    
-    if (it != fFileVersionMap.end()) {
-        fCurrentFileVersion = it->second;
-    } else {
-        fCurrentFileVersion = DetermineFileVersion(currentFile);
-        fFileVersionMap[currentFile] = fCurrentFileVersion;
-    }
-}
-
-void DataAccessWrapper::PrintFileTypeStats() const {
-    std::cout << "\n=== DataAccessWrapper File Type Statistics ===" << std::endl;
-    std::cout << "Total files in chain: " << fFileVersionMap.size() << std::endl;
-    
-    Int_t v1Count = 0, v2Count = 0, unknownCount = 0;
-    for (const auto& pair : fFileVersionMap) {
-        switch (pair.second) {
-            case FileVersion::V1: v1Count++; break;
-            case FileVersion::V2: v2Count++; break;
-            default: unknownCount++; break;
-        }
-    }
-    
-    std::cout << "v1.root files: " << v1Count << std::endl;
-    std::cout << "v2.root files: " << v2Count << std::endl;
-    std::cout << "Unknown files: " << unknownCount << std::endl;
-    std::cout << "Events processed - v1: " << fV1Events << ", v2: " << fV2Events << std::endl;
-    std::cout << "================================================" << std::endl;
+  std::cout << "v1.root files: " << v1Count << std::endl;
+  std::cout << "v2.root files: " << v2Count << std::endl;
+  std::cout << "Unknown files: " << unknownCount << std::endl;
+  std::cout << "Events processed - v1: " << fV1Events << ", v2: " << fV2Events << std::endl;
+  std::cout << "================================================" << std::endl;
 }
 
 // ==================== TEMPLATE IMPLEMENTATIONS ====================
 
 // Template specializations for ArrayConverter - C++14 compatible (musi być przed ArrayValueGetter)
-namespace {
-    template<typename T>
-    struct ArrayConverter {
-        static const std::vector<T>& Convert(const DataAccessWrapper* wrapper, const TString& key, Int_t size) {
-            static std::vector<T> empty;
-            return empty; // Default implementation
+namespace
+{
+  template <typename T>
+  struct ArrayConverter
+  {
+    static const std::vector<T> &Convert(const DataAccessWrapper *wrapper, const TString &key, Int_t size)
+    {
+      static std::vector<T> empty;
+      return empty; // Default implementation
+    }
+  };
+
+  template <>
+  struct ArrayConverter<Int_t>
+  {
+    static const std::vector<Int_t> &Convert(const DataAccessWrapper *wrapper, const TString &key, Int_t size)
+    {
+      size = std::min(size, wrapper->kMaxArraySize);
+      auto &cache = wrapper->fIntVectorCache[key];
+      auto it = wrapper->fIntArrays_v1.find(key);
+      if (it != wrapper->fIntArrays_v1.end())
+      {
+        cache.clear();
+        cache.reserve(size);
+        for (Int_t i = 0; i < size; ++i)
+        {
+          cache.push_back(it->second[i]);
         }
-    };
-    
-    template<>
-    struct ArrayConverter<Int_t> {
-        static const std::vector<Int_t>& Convert(const DataAccessWrapper* wrapper, const TString& key, Int_t size) {
-            size = std::min(size, wrapper->kMaxArraySize);
-            auto& cache = wrapper->fIntVectorCache[key];
-            auto it = wrapper->fIntArrays_v1.find(key);
-            if (it != wrapper->fIntArrays_v1.end()) {
-                cache.clear();
-                cache.reserve(size);
-                for (Int_t i = 0; i < size; ++i) {
-                    cache.push_back(it->second[i]);
-                }
-            }
-            return cache;
+      }
+      return cache;
+    }
+  };
+
+  template <>
+  struct ArrayConverter<Float_t>
+  {
+    static const std::vector<Float_t> &Convert(const DataAccessWrapper *wrapper, const TString &key, Int_t size)
+    {
+      size = std::min(size, wrapper->kMaxArraySize);
+      auto &cache = wrapper->fFloatVectorCache[key];
+      auto it = wrapper->fFloatArrays_v1.find(key);
+      if (it != wrapper->fFloatArrays_v1.end())
+      {
+        cache.clear();
+        cache.reserve(size);
+        for (Int_t i = 0; i < size; ++i)
+        {
+          cache.push_back(it->second[i]);
         }
-    };
-    
-    template<>
-    struct ArrayConverter<Float_t> {
-        static const std::vector<Float_t>& Convert(const DataAccessWrapper* wrapper, const TString& key, Int_t size) {
-            size = std::min(size, wrapper->kMaxArraySize);
-            auto& cache = wrapper->fFloatVectorCache[key];
-            auto it = wrapper->fFloatArrays_v1.find(key);
-            if (it != wrapper->fFloatArrays_v1.end()) {
-                cache.clear();
-                cache.reserve(size);
-                for (Int_t i = 0; i < size; ++i) {
-                    cache.push_back(it->second[i]);
-                }
-            }
-            return cache;
+
+      }
+      return cache;
+    }
+  };
+
+  template <>
+  struct ArrayConverter<UInt_t>
+  {
+    static const std::vector<UInt_t> &Convert(const DataAccessWrapper *wrapper, const TString &key, Int_t size)
+    {
+      size = std::min(size, wrapper->kMaxArraySize);
+      auto &cache = wrapper->fUIntVectorCache[key];
+      auto it = wrapper->fUIntArrays_v1.find(key);
+      if (it != wrapper->fUIntArrays_v1.end())
+      {
+        cache.clear();
+        cache.reserve(size);
+        for (Int_t i = 0; i < size; ++i)
+        {
+          cache.push_back(it->second[i]);
         }
-    };
-    
-    template<>
-    struct ArrayConverter<UInt_t> {
-        static const std::vector<UInt_t>& Convert(const DataAccessWrapper* wrapper, const TString& key, Int_t size) {
-            size = std::min(size, wrapper->kMaxArraySize);
-            auto& cache = wrapper->fUIntVectorCache[key];
-            auto it = wrapper->fUIntArrays_v1.find(key);
-            if (it != wrapper->fUIntArrays_v1.end()) {
-                cache.clear();
-                cache.reserve(size);
-                for (Int_t i = 0; i < size; ++i) {
-                    cache.push_back(it->second[i]);
-                }
-            }
-            return cache;
-        }
-    };
+      }
+      return cache;
+    }
+  };
 }
 
 // Template specializations for GetScalarValue - C++14 compatible
-namespace {
-    template<typename T>
-    struct ScalarValueGetter {
-        static T Get(const DataAccessWrapper* wrapper, const TString& key) {
-            return T{}; // Default implementation
+namespace
+{
+  template <typename T>
+  struct ScalarValueGetter
+  {
+    static T Get(const DataAccessWrapper *wrapper, const TString &key)
+    {
+      return T{}; // Default implementation
+    }
+  };
+
+  template <>
+  struct ScalarValueGetter<Int_t>
+  {
+    static Int_t Get(const DataAccessWrapper *wrapper, const TString &key)
+    {
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      {
+        auto it = wrapper->fIntValues_v2.find(key);
+        if (it != wrapper->fIntValues_v2.end())
+        {
+          return **it->second;
         }
-    };
-    
-    template<>
-    struct ScalarValueGetter<Int_t> {
-        static Int_t Get(const DataAccessWrapper* wrapper, const TString& key) {
-            if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2) {
-                auto it = wrapper->fIntValues_v2.find(key);
-                if (it != wrapper->fIntValues_v2.end()) {
-                    return **it->second;
-                }
-            } else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1) {
-                auto it = wrapper->fIntValues_v1.find(key);
-                if (it != wrapper->fIntValues_v1.end()) {
-                    return it->second;
-                }
-            }
-            return Int_t{};
+      }
+      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      {
+        auto it = wrapper->fIntValues_v1.find(key);
+        if (it != wrapper->fIntValues_v1.end())
+        {
+          return it->second;
         }
-    };
-    
-    template<>
-    struct ScalarValueGetter<Float_t> {
-        static Float_t Get(const DataAccessWrapper* wrapper, const TString& key) {
-            if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2) {
-                auto it = wrapper->fFloatValues_v2.find(key);
-                if (it != wrapper->fFloatValues_v2.end()) {
-                    return **it->second;
-                }
-            } else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1) {
-                auto it = wrapper->fFloatValues_v1.find(key);
-                if (it != wrapper->fFloatValues_v1.end()) {
-                    return it->second;
-                }
-            }
-            return Float_t{};
+      }
+      return Int_t{};
+    }
+  };
+
+  template <>
+  struct ScalarValueGetter<Float_t>
+  {
+    static Float_t Get(const DataAccessWrapper *wrapper, const TString &key)
+    {
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      {
+        auto it = wrapper->fFloatValues_v2.find(key);
+        if (it != wrapper->fFloatValues_v2.end())
+        {
+          return **it->second;
         }
-    };
-    
-    template<>
-    struct ScalarValueGetter<UInt_t> {
-        static UInt_t Get(const DataAccessWrapper* wrapper, const TString& key) {
-            if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2) {
-                auto it = wrapper->fUIntValues_v2.find(key);
-                if (it != wrapper->fUIntValues_v2.end()) {
-                    return **it->second;
-                }
-            } else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1) {
-                auto it = wrapper->fUIntValues_v1.find(key);
-                if (it != wrapper->fUIntValues_v1.end()) {
-                    return it->second;
-                }
-            }
-            return UInt_t{};
+      }
+      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      {
+        auto it = wrapper->fFloatValues_v1.find(key);
+        if (it != wrapper->fFloatValues_v1.end())
+        {
+          return it->second;
         }
-    };
+      }
+      return Float_t{};
+    }
+  };
+
+  template <>
+  struct ScalarValueGetter<UInt_t>
+  {
+    static UInt_t Get(const DataAccessWrapper *wrapper, const TString &key)
+    {
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      {
+        auto it = wrapper->fUIntValues_v2.find(key);
+        if (it != wrapper->fUIntValues_v2.end())
+        {
+          return **it->second;
+        }
+      }
+      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      {
+        auto it = wrapper->fUIntValues_v1.find(key);
+        if (it != wrapper->fUIntValues_v1.end())
+        {
+          return it->second;
+        }
+      }
+      return UInt_t{};
+    }
+  };
 }
 
-template<typename T>
-T DataAccessWrapper::GetScalarValue(const TString& key) const {
-    return ScalarValueGetter<T>::Get(this, key);
+template <typename T>
+T DataAccessWrapper::GetScalarValue(const TString &key) const
+{
+  return ScalarValueGetter<T>::Get(this, key);
 }
 
 // Template specializations for GetArrayValue - C++14 compatible
-namespace {
-    template<typename T>
-    struct ArrayValueGetter {
-        static const std::vector<T>& Get(const DataAccessWrapper* wrapper, const TString& key) {
-            static std::vector<T> empty;
-            return empty; // Default implementation
+namespace
+{
+  template <typename T>
+  struct ArrayValueGetter
+  {
+    static const std::vector<T> &Get(const DataAccessWrapper *wrapper, const TString &key)
+    {
+      static std::vector<T> empty;
+      return empty; // Default implementation
+    }
+  };
+
+  template <>
+  struct ArrayValueGetter<Int_t>
+  {
+    static const std::vector<Int_t> &Get(const DataAccessWrapper *wrapper, const TString &key)
+    {
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      {
+        auto it = wrapper->fIntArrays_v2.find(key);
+        if (it != wrapper->fIntArrays_v2.end())
+        {
+          auto &cache = wrapper->fIntVectorCache[key];
+          cache.assign(it->second->begin(), it->second->end());
+          return cache;
         }
-    };
-    
-    template<>
-    struct ArrayValueGetter<Int_t> {
-        static const std::vector<Int_t>& Get(const DataAccessWrapper* wrapper, const TString& key) {
-            if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2) {
-                auto it = wrapper->fIntArrays_v2.find(key);
-                if (it != wrapper->fIntArrays_v2.end()) {
-                    auto& cache = wrapper->fIntVectorCache[key];
-                    cache.assign(it->second->begin(), it->second->end());
-                    return cache;
-                }
-            } else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1) {
-                const auto* info = wrapper->fVariableConfig.GetVariableInfo(key);
-                if (info && info->sizeVariable.Length() > 0) {
-                    Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
-                    return ArrayConverter<Int_t>::Convert(wrapper, key, size);
-                }
-            }
-            static std::vector<Int_t> empty;
-            return empty;
+      }
+      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      {
+        const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
+        if (info && info->sizeVariable.Length() > 0)
+        {
+          Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
+          return ArrayConverter<Int_t>::Convert(wrapper, key, size);
         }
-    };
-    
-    template<>
-    struct ArrayValueGetter<Float_t> {
-        static const std::vector<Float_t>& Get(const DataAccessWrapper* wrapper, const TString& key) {
-            if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2) {
-                auto it = wrapper->fFloatArrays_v2.find(key);
-                if (it != wrapper->fFloatArrays_v2.end()) {
-                    auto& cache = wrapper->fFloatVectorCache[key];
-                    cache.assign(it->second->begin(), it->second->end());
-                    return cache;
-                }
-            } else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1) {
-                const auto* info = wrapper->fVariableConfig.GetVariableInfo(key);
-                if (info && info->sizeVariable.Length() > 0) {
-                    Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
-                    return ArrayConverter<Float_t>::Convert(wrapper, key, size);
-                }
-            }
-            static std::vector<Float_t> empty;
-            return empty;
+      }
+      static std::vector<Int_t> empty;
+      return empty;
+    }
+  };
+
+  template <>
+  struct ArrayValueGetter<Float_t>
+  {
+    static const std::vector<Float_t> &Get(const DataAccessWrapper *wrapper, const TString &key)
+    {
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      {
+        auto it = wrapper->fFloatArrays_v2.find(key);
+        if (it != wrapper->fFloatArrays_v2.end())
+        {
+          auto &cache = wrapper->fFloatVectorCache[key];
+          cache.assign(it->second->begin(), it->second->end());
+          return cache;
         }
-    };
-    
-    template<>
-    struct ArrayValueGetter<UInt_t> {
-        static const std::vector<UInt_t>& Get(const DataAccessWrapper* wrapper, const TString& key) {
-            if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2) {
-                auto it = wrapper->fUIntArrays_v2.find(key);
-                if (it != wrapper->fUIntArrays_v2.end()) {
-                    auto& cache = wrapper->fUIntVectorCache[key];
-                    cache.assign(it->second->begin(), it->second->end());
-                    return cache;
-                }
-            } else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1) {
-                const auto* info = wrapper->fVariableConfig.GetVariableInfo(key);
-                if (info && info->sizeVariable.Length() > 0) {
-                    Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
-                    return ArrayConverter<UInt_t>::Convert(wrapper, key, size);
-                }
-            }
-            static std::vector<UInt_t> empty;
-            return empty;
+      }
+      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      {
+        const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
+        if (info && info->sizeVariable.Length() > 0)
+        {
+          Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
+          return ArrayConverter<Float_t>::Convert(wrapper, key, size);
         }
-    };
+      }
+      static std::vector<Float_t> empty;
+      return empty;
+    }
+  };
+
+  template <>
+  struct ArrayValueGetter<UInt_t>
+  {
+    static const std::vector<UInt_t> &Get(const DataAccessWrapper *wrapper, const TString &key)
+    {
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      {
+        auto it = wrapper->fUIntArrays_v2.find(key);
+        if (it != wrapper->fUIntArrays_v2.end())
+        {
+          auto &cache = wrapper->fUIntVectorCache[key];
+          cache.assign(it->second->begin(), it->second->end());
+          return cache;
+        }
+      }
+      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      {
+        const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
+        if (info && info->sizeVariable.Length() > 0)
+        {
+          Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
+          return ArrayConverter<UInt_t>::Convert(wrapper, key, size);
+        }
+      }
+      static std::vector<UInt_t> empty;
+      return empty;
+    }
+  };
 }
 
-template<typename T>
-const std::vector<T>& DataAccessWrapper::GetArrayValue(const TString& key) const {
-    return ArrayValueGetter<T>::Get(this, key);
+template <typename T>
+const std::vector<T> &DataAccessWrapper::GetArrayValue(const TString &key) const
+{
+  return ArrayValueGetter<T>::Get(this, key);
 }
 
-template<typename T>
-const std::vector<T>& DataAccessWrapper::ConvertArrayToVector(const TString& key, Int_t size) const {
-    return ArrayConverter<T>::Convert(this, key, size);
+template <typename T>
+const std::vector<T> &DataAccessWrapper::ConvertArrayToVector(const TString &key, Int_t size) const
+{
+  return ArrayConverter<T>::Convert(this, key, size);
 }
 
 // ==================== PUBLIC GETTERS ====================
@@ -488,30 +637,30 @@ Float_t DataAccessWrapper::GetBRoots() const { return GetScalarValue<Float_t>("b
 Float_t DataAccessWrapper::GetBRootsErr() const { return GetScalarValue<Float_t>("brootserr"); }
 
 // Tablice Int_t
-const std::vector<Int_t>& DataAccessWrapper::GetEclStream() const { return GetArrayValue<Int_t>("eclstream"); }
-const std::vector<Int_t>& DataAccessWrapper::GetAssCl() const { return GetArrayValue<Int_t>("asscl"); }
-const std::vector<Int_t>& DataAccessWrapper::GetIv() const { return GetArrayValue<Int_t>("iv"); }
+const std::vector<Int_t> &DataAccessWrapper::GetEclStream() const { return GetArrayValue<Int_t>("eclstream"); }
+const std::vector<Int_t> &DataAccessWrapper::GetAssCl() const { return GetArrayValue<Int_t>("asscl"); }
+const std::vector<Int_t> &DataAccessWrapper::GetIv() const { return GetArrayValue<Int_t>("iv"); }
 
 // Tablice UInt_t
-const std::vector<Int_t>& DataAccessWrapper::GetVtxMC() const { return GetArrayValue<Int_t>("vtxmc"); }
-const std::vector<Int_t>& DataAccessWrapper::GetPidMC() const { return GetArrayValue<Int_t>("pidmc"); }
-const std::vector<Int_t>& DataAccessWrapper::GetMother() const { return GetArrayValue<Int_t>("mother"); }
+const std::vector<Int_t> &DataAccessWrapper::GetVtxMC() const { return GetArrayValue<Int_t>("vtxmc"); }
+const std::vector<Int_t> &DataAccessWrapper::GetPidMC() const { return GetArrayValue<Int_t>("pidmc"); }
+const std::vector<Int_t> &DataAccessWrapper::GetMother() const { return GetArrayValue<Int_t>("mother"); }
 
 // Tablice Float_t
-const std::vector<Float_t>& DataAccessWrapper::GetXCl() const { return GetArrayValue<Float_t>("xcl"); }
-const std::vector<Float_t>& DataAccessWrapper::GetYCl() const { return GetArrayValue<Float_t>("ycl"); }
-const std::vector<Float_t>& DataAccessWrapper::GetZCl() const { return GetArrayValue<Float_t>("zcl"); }
-const std::vector<Float_t>& DataAccessWrapper::GetTCl() const { return GetArrayValue<Float_t>("tcl"); }
-const std::vector<Float_t>& DataAccessWrapper::GetEneCl() const { return GetArrayValue<Float_t>("enecl"); }
-const std::vector<Float_t>& DataAccessWrapper::GetCurv() const { return GetArrayValue<Float_t>("curv"); }
-const std::vector<Float_t>& DataAccessWrapper::GetPhiv() const { return GetArrayValue<Float_t>("phiv"); }
-const std::vector<Float_t>& DataAccessWrapper::GetCotv() const { return GetArrayValue<Float_t>("cotv"); }
-const std::vector<Float_t>& DataAccessWrapper::GetXv() const { return GetArrayValue<Float_t>("xv"); }
-const std::vector<Float_t>& DataAccessWrapper::GetYv() const { return GetArrayValue<Float_t>("yv"); }
-const std::vector<Float_t>& DataAccessWrapper::GetZv() const { return GetArrayValue<Float_t>("zv"); }
-const std::vector<Float_t>& DataAccessWrapper::GetXvMC() const { return GetArrayValue<Float_t>("xvmc"); }
-const std::vector<Float_t>& DataAccessWrapper::GetYvMC() const { return GetArrayValue<Float_t>("yvmc"); }
-const std::vector<Float_t>& DataAccessWrapper::GetZvMC() const { return GetArrayValue<Float_t>("zvmc"); }
-const std::vector<Float_t>& DataAccessWrapper::GetPxMC() const { return GetArrayValue<Float_t>("pxmc"); }
-const std::vector<Float_t>& DataAccessWrapper::GetPyMC() const { return GetArrayValue<Float_t>("pymc"); }
-const std::vector<Float_t>& DataAccessWrapper::GetPzMC() const { return GetArrayValue<Float_t>("pzmc"); }
+const std::vector<Float_t> &DataAccessWrapper::GetXCl() const { return GetArrayValue<Float_t>("xcl"); }
+const std::vector<Float_t> &DataAccessWrapper::GetYCl() const { return GetArrayValue<Float_t>("ycl"); }
+const std::vector<Float_t> &DataAccessWrapper::GetZCl() const { return GetArrayValue<Float_t>("zcl"); }
+const std::vector<Float_t> &DataAccessWrapper::GetTCl() const { return GetArrayValue<Float_t>("tcl"); }
+const std::vector<Float_t> &DataAccessWrapper::GetEneCl() const { return GetArrayValue<Float_t>("enecl"); }
+const std::vector<Float_t> &DataAccessWrapper::GetCurv() const { return GetArrayValue<Float_t>("curv"); }
+const std::vector<Float_t> &DataAccessWrapper::GetPhiv() const { return GetArrayValue<Float_t>("phiv"); }
+const std::vector<Float_t> &DataAccessWrapper::GetCotv() const { return GetArrayValue<Float_t>("cotv"); }
+const std::vector<Float_t> &DataAccessWrapper::GetXv() const { return GetArrayValue<Float_t>("xv"); }
+const std::vector<Float_t> &DataAccessWrapper::GetYv() const { return GetArrayValue<Float_t>("yv"); }
+const std::vector<Float_t> &DataAccessWrapper::GetZv() const { return GetArrayValue<Float_t>("zv"); }
+const std::vector<Float_t> &DataAccessWrapper::GetXvMC() const { return GetArrayValue<Float_t>("xvmc"); }
+const std::vector<Float_t> &DataAccessWrapper::GetYvMC() const { return GetArrayValue<Float_t>("yvmc"); }
+const std::vector<Float_t> &DataAccessWrapper::GetZvMC() const { return GetArrayValue<Float_t>("zvmc"); }
+const std::vector<Float_t> &DataAccessWrapper::GetPxMC() const { return GetArrayValue<Float_t>("pxmc"); }
+const std::vector<Float_t> &DataAccessWrapper::GetPyMC() const { return GetArrayValue<Float_t>("pymc"); }
+const std::vector<Float_t> &DataAccessWrapper::GetPzMC() const { return GetArrayValue<Float_t>("pzmc"); }
