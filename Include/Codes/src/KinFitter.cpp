@@ -120,11 +120,21 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
     try
     {
-      // if (_mode == "SignalGlobal")
-      // {
-      //   _baseObj->SetParameters(_X.GetMatrixArray());
-      //   _baseObj->IntermediateReconstruction();
-      // }
+      if (_mode == "SignalGlobal")
+      {
+        if(_X(4) < 0)
+          _X(4) = MIN_CLU_ENE;
+        if(_X(9) < 0)
+          _X(9) = MIN_CLU_ENE;
+        if(_X(14) < 0)
+          _X(14) = MIN_CLU_ENE;
+        if(_X(19) < 0)
+          _X(19) = MIN_CLU_ENE;
+
+        _baseObj->SetParameters(_X.GetMatrixArray());
+        _baseObj->IntermediateReconstruction();
+        
+      }
 
       for (Int_t l = 0; l < _M; l++)
       {
@@ -147,10 +157,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _Aux = _Aux.Invert(&_det);
 
-      if (_mode == "SignalGlobal")
-      {
-      }
-
       if (_det == 0)
         throw ErrorHandling::ErrorCodes::DET_ZERO;
       else if (TMath::IsNaN(_det))
@@ -166,6 +172,9 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
 
+      if(_CHISQR - _CHISQRTMP < _CHISQRSTEP && _CHISQR - _CHISQRTMP > 0)
+        break;
+        
       _L_aux = _L;
       _C_aux = _C;
       _FUNVALTMP = _FUNVAL;

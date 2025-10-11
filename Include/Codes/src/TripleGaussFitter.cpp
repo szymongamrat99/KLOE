@@ -355,7 +355,7 @@ std::vector<TF1*> TripleGaussFitter::CreateComponentFunctions() {
 }
 
 TPaveText* TripleGaussFitter::CreateStatsBox() {
-    TPaveText* stats = new TPaveText(0.72, 0.4, 0.98, 0.9, "NDC");
+    TPaveText* stats = new TPaveText(0.6, 0.4, 0.9, 0.9, "NDC");
     stats->SetFillColor(kWhite);
     stats->SetBorderSize(1);
     stats->SetTextAlign(12);
@@ -363,10 +363,10 @@ TPaveText* TripleGaussFitter::CreateStatsBox() {
     
     stats->AddText("Triple Gaussian Fit");
     stats->AddText("");
-    stats->AddText(Form("#chi^{2}/NDF = %.2f/%d", fLastResult.chi2, fLastResult.ndf));
-    stats->AddText(Form("= %.3f", GetChi2NDF()));
-    stats->AddText(Form("Prob = %.4f", fLastResult.probability));
-    stats->AddText("");
+    // stats->AddText(Form("#chi^{2}/NDF = %.2f/%d", fLastResult.chi2, fLastResult.ndf));
+    // stats->AddText(Form("= %.3f", GetChi2NDF()));
+    // stats->AddText(Form("Prob = %.4f", fLastResult.probability));
+    // stats->AddText("");
     stats->AddText("Combined Results:");
     stats->AddText(Form("#mu = %.3f #pm %.3f", fLastResult.combinedMean, fLastResult.combinedMeanErr));
     stats->AddText(Form("#sigma = %.3f #pm %.3f", fLastResult.combinedSigma, fLastResult.combinedSigmaErr));

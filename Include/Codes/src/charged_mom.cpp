@@ -89,7 +89,7 @@ namespace KLOE
 
                 Float_t KchrecSmeared[9], KchboostSmeared[9], energyPion[2];
 
-                if (mcflag == 1)
+                if (0)
                 {
                   momVecMC[0] = mom_vec1Tmp[0];
                   momVecMC[1] = mom_vec1Tmp[1];

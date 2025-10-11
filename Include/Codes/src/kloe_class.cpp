@@ -914,8 +914,8 @@ namespace KLOE
 
 		Int_t done = 0;
 
-		cond_ene = photon[0].clusterParams[4] > MIN_CLU_ENE && photon[1].clusterParams[4] > MIN_CLU_ENE &&
-							 photon[2].clusterParams[4] > MIN_CLU_ENE && photon[3].clusterParams[4] > MIN_CLU_ENE;
+		cond_ene = photon[0].clusterParams[4] >= MIN_CLU_ENE && photon[1].clusterParams[4] >= MIN_CLU_ENE &&
+							 photon[2].clusterParams[4] >= MIN_CLU_ENE && photon[3].clusterParams[4] >= MIN_CLU_ENE;
 
 		cond_clus[0] = photon[0].clusterParams[0] != 0 && photon[0].clusterParams[1] != 0 && photon[0].clusterParams[2] != 0;
 		cond_clus[1] = photon[1].clusterParams[0] != 0 && photon[1].clusterParams[1] != 0 && photon[1].clusterParams[2] != 0;

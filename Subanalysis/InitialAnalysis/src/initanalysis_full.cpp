@@ -959,12 +959,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                     trackParameters[1].push_back(baseKin.PhivSmeared2);
                     trackParameters[1].push_back(baseKin.CotvSmeared2);
 
-                    trackParametersErr[0].push_back(0.025);
-                    trackParametersErr[0].push_back(0.0078);
-                    trackParametersErr[0].push_back(0.0076);
-                    trackParametersErr[1].push_back(0.020);
+                    trackParametersErr[0].push_back(0.021);
+                    trackParametersErr[0].push_back(0.006);
+                    trackParametersErr[0].push_back(0.005);
                     trackParametersErr[1].push_back(0.022);
-                    trackParametersErr[1].push_back(0.0045);
+                    trackParametersErr[1].push_back(0.006);
+                    trackParametersErr[1].push_back(0.006);
 
                     for (Int_t k = 0; k < 4; k++)
                     {
@@ -980,9 +980,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                       chargedVtx.push_back(baseKin.Kchboostnew[k]);
                     }
 
-                    chargedVtxErr.push_back(0.271);
-                    chargedVtxErr.push_back(0.301);
-                    chargedVtxErr.push_back(0.212);
+                    chargedVtxErr.push_back(0.267);
+                    chargedVtxErr.push_back(0.267);
+                    chargedVtxErr.push_back(0.210);
 
                     signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, bhabha_vtx);
                     errorCode = signalKinFitObj.Reconstruct();
@@ -999,7 +999,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                                baseKin.KnereclorFit,
                                                baseKin.Chi2SignalKinFit,
                                                baseKin.pullsSignalFit);
-
+                    
                     // Pairing of photons to pions and pion reconstruction
 
                     for (Int_t i = 0; i < nPhotons; i++)

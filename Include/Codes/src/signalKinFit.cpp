@@ -52,11 +52,11 @@ namespace KLOE
 								  "PzConsvLAB",
 								  "EnergyConsvLAB",
 								  "MinvConsvNeutralKaon",
+                  "MinvConsvChargedKaon",
 								  "Photon1PathLAB",
 								  "Photon2PathLAB",
 								  "Photon3PathLAB",
-								  "Photon4PathLAB",
-								  "MinvConsvChargedKaon"});
+								  "Photon4PathLAB"});
 
 		gErrorIgnoreLevel = 6001;
 	}
