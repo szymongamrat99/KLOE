@@ -79,36 +79,54 @@ Bool_t DataAccessWrapper::Next()
   fCurrentEntry++;
 
   // Sprawdź czy zmienił się plik i zaktualizuj wersję
+  FileVersion previousVersion = fCurrentFileVersion;
+  TString previousFile = GetCurrentFileName();
+  
+  // NAJPIERW załaduj entry do chain'a
+  Int_t bytesRead = fChain.GetEntry(fCurrentEntry);
+  if (bytesRead <= 0) {
+    std::cerr << "ERROR: Failed to read entry " << fCurrentEntry << " from TChain" << std::endl;
+    return false;
+  }
+  
   UpdateCurrentFileVersion();
+  TString currentFile = GetCurrentFileName();
 
-  std::cout << "DEBUG: Accessing entry " << fCurrentEntry << " (File version: "
-            << (fCurrentFileVersion == FileVersion::V1 ? "v1" : fCurrentFileVersion == FileVersion::V2 ? "v2"
-                                                                                                     : "unknown")
-            << ")" << GetCurrentFileName()  << std::endl;
+  // Sprawdź czy zmienił się plik lub wersja
+  Bool_t fileChanged = (previousFile != currentFile);
+  Bool_t versionChanged = (previousVersion != fCurrentFileVersion);
+  
+  if (fileChanged || versionChanged) {
+    // std::cout << "INFO: File/Version change detected at entry " << fCurrentEntry << std::endl;
+    // std::cout << "  Previous: " << previousFile.Data() << " (" 
+    //           << (previousVersion == FileVersion::V1 ? "v1" : previousVersion == FileVersion::V2 ? "v2" : "unknown") << ")" << std::endl;
+    // std::cout << "  Current: " << currentFile.Data() << " (" 
+    //           << (fCurrentFileVersion == FileVersion::V1 ? "v1" : fCurrentFileVersion == FileVersion::V2 ? "v2" : "unknown") << ")" << std::endl;
+    
+    // REINICJALIZUJ TTreeReader dla nowych plików v2
+    if (fCurrentFileVersion == FileVersion::V2) {
+      // std::cout << "INFO: Reinitializing TTreeReader for v2 file..." << std::endl;
+      if (!ReinitializeTreeReader()) {
+        std::cerr << "ERROR: Failed to reinitialize TTreeReader for entry " << fCurrentEntry << std::endl;
+        return false;
+      }
+      // Ustaw TTreeReader na aktualny entry
+      fReader->SetEntry(fCurrentEntry);
+    }
+  }
 
-  // Pobierz dane w zależności od wersji pliku
-  if (fCurrentFileVersion == FileVersion::V2)
-  {
-    if (!fReader->Next())
-    {
-      std::cerr << "ERROR: TTreeReader::Next() failed for entry " << fCurrentEntry << std::endl;
+  // Dla plików v2, synchronizuj TTreeReader z aktualnym entry
+  if (fCurrentFileVersion == FileVersion::V2) {
+    fReader->SetEntry(fCurrentEntry);
+    if (fReader->GetEntryStatus() != TTreeReader::kEntryValid) {
+      std::cerr << "ERROR: TTreeReader entry " << fCurrentEntry << " is not valid. Status: " 
+                << fReader->GetEntryStatus() << std::endl;
       return false;
     }
     fV2Events++;
   }
-  else if (fCurrentFileVersion == FileVersion::V1)
-  {
-    if (fChain.GetEntry(fCurrentEntry) < 0)
-    {
-      std::cerr << "ERROR: TChain::GetEntry() failed for entry " << fCurrentEntry << std::endl;
-      return false;
-    }
+  else if (fCurrentFileVersion == FileVersion::V1) {
     fV1Events++;
-  }
-  else
-  {
-    std::cerr << "ERROR: Unknown file version for entry " << fCurrentEntry << std::endl;
-    return false;
   }
 
   return true;
@@ -201,6 +219,81 @@ Bool_t DataAccessWrapper::InitializeTreeReader()
   catch (const std::exception &e)
   {
     std::cerr << "ERROR: Failed to initialize TTreeReader: " << e.what() << std::endl;
+    return false;
+  }
+}
+
+Bool_t DataAccessWrapper::ReinitializeTreeReader()
+{
+  try
+  {
+    // Wyczyść stare readery
+    fIntValues_v2.clear();
+    fFloatValues_v2.clear();
+    fUIntValues_v2.clear();
+    fIntArrays_v2.clear();
+    fFloatArrays_v2.clear();
+    fUIntArrays_v2.clear();
+    
+    // Stwórz nowy reader dla aktualnego pliku
+    fReader.reset();
+    fReader = std::make_unique<TTreeReader>(&fChain);
+
+    // Reinicjalizuj wszystkie zmienne skalarne i tablice dla v2
+    for (const auto &key : fVariableConfig.GetAllKeys())
+    {
+      const auto *info = fVariableConfig.GetVariableInfo(key);
+      if (!info)
+        continue;
+
+      TString branchName = info->nameV2;
+
+      try {
+        if (info->isArray)
+        {
+          // Tablice
+          if (info->type == "Int_t")
+          {
+            fIntArrays_v2[key] = std::make_unique<TTreeReaderArray<Int_t>>(*fReader, branchName.Data());
+          }
+          else if (info->type == "Float_t")
+          {
+            fFloatArrays_v2[key] = std::make_unique<TTreeReaderArray<Float_t>>(*fReader, branchName.Data());
+          }
+          else if (info->type == "UInt_t")
+          {
+            fUIntArrays_v2[key] = std::make_unique<TTreeReaderArray<UInt_t>>(*fReader, branchName.Data());
+          }
+        }
+        else
+        {
+          // Zmienne skalarne
+          if (info->type == "Int_t")
+          {
+            fIntValues_v2[key] = std::make_unique<TTreeReaderValue<Int_t>>(*fReader, branchName.Data());
+          }
+          else if (info->type == "Float_t")
+          {
+            fFloatValues_v2[key] = std::make_unique<TTreeReaderValue<Float_t>>(*fReader, branchName.Data());
+          }
+          else if (info->type == "UInt_t")
+          {
+            fUIntValues_v2[key] = std::make_unique<TTreeReaderValue<UInt_t>>(*fReader, branchName.Data());
+          }
+        }
+      } catch (const std::exception& e) {
+        std::cerr << "WARNING: Failed to reinitialize branch " << branchName.Data() 
+                  << " for key " << key.Data() << ": " << e.what() << std::endl;
+        // Kontynuuj z następnym branch'em
+      }
+    }
+
+    // std::cout << "INFO: TTreeReader successfully reinitialized" << std::endl;
+    return true;
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << "ERROR: Failed to reinitialize TTreeReader: " << e.what() << std::endl;
     return false;
   }
 }

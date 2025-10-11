@@ -54,7 +54,6 @@ void ConstraintsSignal::SetParameters(Double_t *p)
   // of the base classes to be used in the constraint calculations.
   ResetParameters();
 
-
   for (Int_t i = 0; i < 4; i++)
   {
     for (Int_t j = 0; j < 5; j++)
@@ -62,7 +61,10 @@ void ConstraintsSignal::SetParameters(Double_t *p)
       photon[i].clusterParams[j] = p[i * 5 + j];
     }
 
+    // std::cout << "Photon " << i << " Xcl: " << photon[i].clusterParams[0] << " Ycl: " << photon[i].clusterParams[1] << " Zcl: " << photon[i].clusterParams[2] << " Tcl: " << photon[i].clusterParams[3] << " Ecl: " << photon[i].clusterParams[4] << std::endl;
   }
+
+  // std::cout << std::endl;
 
   for (Int_t i = 0; i < 3; i++)
     Kchrec.fourPos[i] = p[20 + i];
@@ -89,11 +91,6 @@ void ConstraintsSignal::IntermediateReconstruction()
   // and before calculating the constraints.
   for (Int_t i = 0; i < 2; i++)
   {
-    // pionCh[i].fourMom[0] = cos(pionCh[i].trackParams[1]) / abs(pionCh[i].trackParams[0]) * 1000.;
-    // pionCh[i].fourMom[1] = sin(pionCh[i].trackParams[1]) / abs(pionCh[i].trackParams[0]) * 1000.;
-    // pionCh[i].fourMom[2] = pionCh[i].trackParams[2] / abs(pionCh[i].trackParams[0]) * 1000.;
-    // pionCh[i].fourMom[3] = sqrt(pow(pionCh[i].fourMom[0], 2) + pow(pionCh[i].fourMom[1], 2) + pow(pionCh[i].fourMom[2], 2) + pow(mPiCh, 2));
-    
     charged_mom(pionCh[i].trackParams[0], pionCh[i].trackParams[1], pionCh[i].trackParams[2], pionCh[i].fourMom.data(), 1);
   }
 
@@ -125,11 +122,11 @@ void ConstraintsSignal::IntermediateReconstruction()
   // Corrected IP event by event
   IPBoostCorr(X_line, mom, xB, plane_perp, ip.data());
 
-  // ip[0] = phi.vtxPos[0];
-  // ip[1] = phi.vtxPos[1];
-  // // ip[2] is fitted
-  // if (abs(ip[2] - phi.vtxPos[2]) > 2.)
-  //   ip[2] = phi.vtxPos[2];
+  ip[0] = phi.vtxPos[0];
+  ip[1] = phi.vtxPos[1];
+  // ip[2] is fitted
+  if (abs(ip[2] - phi.vtxPos[2]) > 2.)
+    ip[2] = phi.vtxPos[2];
 
   Kchrec.calculatePath(ip.data());
   Kchrec.SetTotalVector();
@@ -144,14 +141,16 @@ void ConstraintsSignal::IntermediateReconstruction()
 
   for (Int_t i = 0; i < 4; i++)
   {
-    if (photon[i].clusterParams[4] < 0)
-      photon[i].clusterParams[4] = 0.;
-
     photon[i].fourPos[0] = photon[i].clusterParams[0];
     photon[i].fourPos[1] = photon[i].clusterParams[1];
     photon[i].fourPos[2] = photon[i].clusterParams[2];
     photon[i].fourPos[3] = photon[i].clusterParams[3];
-    photon[i].calculatePath(Knereclor.fourPos.data());
+    // photon[i].calculatePath(Knereclor.fourPos.data());
+
+    photon[i].path = sqrt(pow(photon[i].fourPos[0] - Knereclor.fourPos[0], 2) +
+                            pow(photon[i].fourPos[1] - Knereclor.fourPos[1], 2) +
+                            pow(photon[i].fourPos[2] - Knereclor.fourPos[2], 2)); // cm
+
     photon[i].calculateTimeOfFlightPhoton();
     photon[i].SetTotalVectorPhoton();
   }
@@ -166,8 +165,19 @@ void ConstraintsSignal::IntermediateReconstruction()
   Knerec.fourPos[2] = Knereclor.fourPos[2];
   Knerec.fourPos[3] = Knereclor.fourPos[3];
 
-  Knerec.calculatePath(ip.data());
+  Knerec.path = sqrt(pow(Knerec.fourPos[0] - ip[0], 2) +
+                       pow(Knerec.fourPos[1] - ip[1], 2) +
+                       pow(Knerec.fourPos[2] - ip[2], 2)); // cm
+
+  // Knerec.calculatePath(ip.data());
   Knerec.SetTotalVector();
+
+  // std::cout << "Photon1. TClu: " << photon[0].fourPos[3] << " TKne: " << Knerec.fourPos[3] << " TOF: " << photon[0].timeOfFlight << std::endl;
+  // std::cout << "Photon2. TClu: " << photon[1].fourPos[3] << " TKne: " << Knerec.fourPos[3] << " TOF: " << photon[1].timeOfFlight << std::endl;
+  // std::cout << "Photon3. TClu: " << photon[2].fourPos[3] << " TKne: " << Knerec.fourPos[3] << " TOF: " << photon[2].timeOfFlight << std::endl;
+  // std::cout << "Photon4. TClu: " << photon[3].fourPos[3] << " TKne: " << Knerec.fourPos[3] << " TOF: " << photon[3].timeOfFlight << std::endl;
+
+  // std::cout << std::endl;
 }
 
 Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p)
@@ -189,9 +199,7 @@ Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
   SetParameters(p);
   IntermediateReconstruction();
 
-  // std::cout << "Photon " << _chosenPhoton + 1 << " path: " << photon[_chosenPhoton].fourPos[3] << ", lifetime: " << Knereclor.lifetimeLAB << ", time of flight: " << photon[_chosenPhoton].timeOfFlight << std::endl;
-
-  return photon[_chosenPhoton].fourPos[3] - Knereclor.lifetimeLAB - photon[_chosenPhoton].timeOfFlight;
+  return  Knerec.lifetimeLAB + photon[_chosenPhoton].timeOfFlight - photon[_chosenPhoton].fourPos[3];
 }
 
 Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)

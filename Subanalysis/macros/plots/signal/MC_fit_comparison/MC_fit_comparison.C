@@ -28,6 +28,15 @@
 #include <TH2.h>
 #include <TCanvas.h>
 #include <TStyle.h>
+#include <TMath.h>
+#include <TF1.h>
+#include <TripleGaussFitter.h>
+#include <triple_gaus.h>
+#include <TPaveText.h>
+#include <TLegend.h>
+
+#include <TFitResult.h>
+#include <TFitResultPtr.h>
 
 std::vector<TString> histList = {"px_Pi1", "py_Pi1", "pz_Pi1", "Energy_Pi1",
                                  "px_Pi2", "py_Pi2", "pz_Pi2", "Energy_Pi2",
@@ -38,7 +47,60 @@ std::vector<TString> histList = {"px_Pi1", "py_Pi1", "pz_Pi1", "Energy_Pi1",
                                  "chi2_trilaterationKinFit", "curv1", "phiv1", "cotv1",
                                  "curv2", "phiv2", "cotv2", "vtxNeu_x", "vtxNeu_y", "vtxNeu_z",
                                  "vtxNeu_x_Fit", "vtxNeu_y_Fit", "vtxNeu_z_Fit",
-                                 "mass_pi01", "mass_pi02"}; // List of histograms to be created
+                                 "mass_pi01", "mass_pi02",
+                                 "time_neutral_MC", "prob_signal", "delta_t",
+                                 "combined_mass_pi0",
+                                 "pull1", "pull2", "pull3", "pull4", "pull5"}; // List of histograms to be created
+
+std::map<TString, std::vector<TString>> histTitles = {
+    {"px_Pi1", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
+    {"py_Pi1", {"p_{y} - p_{y}^{MC} [MeV/c]"}},
+    {"pz_Pi1", {"p_{z} - p_{z}^{MC} [MeV/c]"}},
+    {"Energy_Pi1", {"E - E^{MC} [MeV]"}},
+    {"px_Pi2", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
+    {"py_Pi2", {"p_{y} - p_{y}^{MC} [MeV/c]"}},
+    {"pz_Pi2", {"p_{z} - p_{z}^{MC} [MeV/c]"}},
+    {"Energy_Pi2", {"E - E^{MC} [MeV]"}},
+    {"px_Kch", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
+    {"py_Kch", {"p_{y} - p_{y}^{MC} [MeV/c]"}},
+    {"pz_Kch", {"p_{z} - p_{z}^{MC} [MeV/c]"}},
+    {"Energy_Kch", {"E - E^{MC} [MeV]"}},
+    {"px_Kne", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
+    {"py_Kne", {"p_{y} - p_{y}^{MC} [MeV/c]"}},
+    {"pz_Kne", {"p_{z} - p_{z}^{MC} [MeV/c]"}},
+    {"Energy_Kne", {"E - E^{MC} [MeV]"}},
+    {"px_phi", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
+    {"py_phi", {"p_{y} - p_{y}^{MC} [MeV/c]"}},
+    {"pz_phi", {"p_{z} - p_{z}^{MC} [MeV/c]"}},
+    {"Energy_phi", {"E - E^{MC} [MeV]"}},
+    {"mass_Kch", {"m_{#pi^{+}#pi^{-}} - m_{K^{0}} [MeV]"}},
+    {"mass_Kne", {"m^{inv}_{4#gamma} - m_{K^{0}} [MeV]"}},
+    {"mass_phi", {"m^{inv}_{#phi} - m_{#phi} [MeV]"}},
+    {"chi2_signalKinFit", {"#chi^{2} of signal kinematic fit"}},
+    {"chi2_trilaterationKinFit", {"#chi^{2} of trilateration kinematic fit"}},
+    {"curv1", {"Curvature_{1} - Curvature_{1}^{MC} [1/cm]"}},
+    {"phiv1", {"#phi_{1} - #phi_{1}^{MC} [rad]"}},
+    {"cotv1", {"cot(#theta_{1}) - cot(#theta_{1}^{MC})"}},
+    {"curv2", {"Curvature_{2} - Curvature_{2}^{MC} [1/cm]"}},
+    {"phiv2", {"#phi_{2} - #phi_{2}^{MC} [rad]"}},
+    {"cotv2", {"cot(#theta_{2}) - cot(#theta_{2}^{MC})"}},
+    {"vtxNeu_x", {"x_{neu} - x_{neu}^{MC} [cm]"}},
+    {"vtxNeu_y", {"y_{neu} - y_{neu}^{MC} [cm]"}},
+    {"vtxNeu_z", {"z_{neu} - z_{neu}^{MC} [cm]"}},
+    {"vtxNeu_x_Fit", {"x_{neu} - x_{neu}^{MC} [cm]"}},
+    {"vtxNeu_y_Fit", {"y_{neu} - y_{neu}^{MC} [cm]"}},
+    {"vtxNeu_z_Fit", {"z_{neu} - z_{neu}^{MC} [cm]"}},
+    {"mass_pi01", {"m_{#gamma#gamma} - m_{#pi^{0}} [MeV]"}},
+    {"mass_pi02", {"m_{#gamma#gamma} - m_{#pi^{0}} [MeV]"}},
+    {"time_neutral_MC", {"#sum_{i} T_{cl,i} - t_{K_{ne}} - t_{#gamma,i} [ns]"}},
+    {"prob_signal", {"Probability of signal"}},
+    {"delta_t", {"#Deltat - #Deltat^{MC} [#tau_{S}]"}},
+    {"combined_mass_pi0", {"#sqrt{(m_{#gamma#gamma,1} - m_{#pi^{0}})^2 + (m_{#gamma#gamma,2} - m_{#pi^{0}})^2} [MeV/c^{2}]"}},
+    {"pull1", {"Pull_{1} [MeV]"}},
+    {"pull2", {"Pull_{2} [MeV]"}},
+    {"pull3", {"Pull_{3} [MeV]"}},
+    {"pull4", {"Pull_{4} [MeV]"}},
+    {"pull5", {"Pull_{5} [MeV]"}}};
 
 std::map<TString, std::vector<Double_t>>
     histLimits = {{"px_Pi1", {-200, 200}},
@@ -62,7 +124,7 @@ std::map<TString, std::vector<Double_t>>
                   {"pz_phi", {-250, 250}},
                   {"Energy_phi", {-20, 20}},
                   {"mass_Kch", {-20, 20}},
-                  {"mass_Kne", {-20, 20}},
+                  {"mass_Kne", {-200, 200}},
                   {"mass_phi", {-20, 20}},
                   {"chi2_signalKinFit", {0, 50}},
                   {"chi2_trilaterationKinFit", {0, 50}},
@@ -79,13 +141,24 @@ std::map<TString, std::vector<Double_t>>
                   {"vtxNeu_y_Fit", {-10, 10}},
                   {"vtxNeu_z_Fit", {-10, 10}},
                   {"mass_pi01", {-100, 100}},
-                  {"mass_pi02", {-100, 100}}}; // Histogram limits
+                  {"mass_pi02", {-100, 100}},
+                  {"time_neutral_MC", {-5, 2}},
+                  {"prob_signal", {0, 1}},
+                  {"delta_t", {-10, 10}},
+                  {"combined_mass_pi0", {-100, 100}},
+                  {"pull1", {-5, 5}},
+                  {"pull2", {-5, 5}},
+                  {"pull3", {-5, 5}},
+                  {"pull4", {-5, 5}},
+                  {"pull5", {-5, 5}}}; // Histogram limits
 
 std::map<TString, TCanvas *> canvas;
 
 std::map<TString, TH1 *>
     histsReconstructed,
     histsFittedSignal;
+
+KLOE::TripleGaussFitter *fitter;
 
 void MC_fit_comparison::Begin(TTree * /*tree*/)
 {
@@ -95,7 +168,7 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
 
   TString option = GetOption();
 
-  std::cout << option << std::endl;
+  fitter = new KLOE::TripleGaussFitter();
 
   // Create canvases
   for (const auto &histName : histList)
@@ -146,19 +219,65 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
   fReader.SetLocalEntry(entry);
 
-  if (*mctruth == 1)
+  if (*mctruth == 1 && *Chi2SignalKinFit / 6. < 3.)
   {
+    Float_t Kchrecnew[4];
+
+    Kchrecnew[0] = gammaMomTriangle1[0] + gammaMomTriangle2[0] +
+                   gammaMomTriangle3[0] + gammaMomTriangle4[0];
+    Kchrecnew[1] = gammaMomTriangle1[1] + gammaMomTriangle2[1] +
+                   gammaMomTriangle3[1] + gammaMomTriangle4[1];
+    Kchrecnew[2] = gammaMomTriangle1[2] + gammaMomTriangle2[2] +
+                   gammaMomTriangle3[2] + gammaMomTriangle4[2];
+    Kchrecnew[3] = gammaMomTriangle1[3] + gammaMomTriangle2[3] +
+                   gammaMomTriangle3[3] + gammaMomTriangle4[3];
+
+    Float_t vKch = cVel * sqrt(pow(KchboostFit[0], 2) + pow(KchboostFit[1], 2) + pow(KchboostFit[2], 2)) / KchboostFit[3],
+            pathKch = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
+                           pow(KchboostFit[7] - ipFit[1], 2) +
+                           pow(KchboostFit[8] - ipFit[2], 2)),
+            tKch = pathKch / (vKch * 0.0895),
+            vKne = cVel * sqrt(pow(Knemc[0], 2) + pow(Knemc[1], 2) + pow(Knemc[2], 2)) / Knemc[3],
+            pathKne = sqrt(pow(Knemc[6] - ipmc[0], 2) +
+                           pow(Knemc[7] - ipmc[1], 2) +
+                           pow(Knemc[8] - ipmc[2], 2)),
+            tKne = pathKne / (vKne * 0.0895);
+
+    Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - mPi0, 2) +
+                                      pow(pi02Fit[5] - mPi0, 2)),
+            combinedMassPi0 = sqrt(pow(pi01[5] - mPi0, 2) +
+                                   pow(pi02[5] - mPi0, 2));
+
+    Float_t photon1path = sqrt(pow(ParamSignalFit[0] - KnerecFit[6], 2) +
+                               pow(ParamSignalFit[1] - KnerecFit[7], 2) +
+                               pow(ParamSignalFit[2] - KnerecFit[8], 2)),
+            photon2path = sqrt(pow(ParamSignalFit[5] - KnerecFit[6], 2) +
+                               pow(ParamSignalFit[6] - KnerecFit[7], 2) +
+                               pow(ParamSignalFit[7] - KnerecFit[8], 2)),
+            photon3path = sqrt(pow(ParamSignalFit[10] - KnerecFit[6], 2) +
+                               pow(ParamSignalFit[11] - KnerecFit[7], 2) +
+                               pow(ParamSignalFit[12] - KnerecFit[8], 2)),
+            photon4path = sqrt(pow(ParamSignalFit[15] - KnerecFit[6], 2) +
+                               pow(ParamSignalFit[16] - KnerecFit[7], 2) +
+                               pow(ParamSignalFit[17] - KnerecFit[8], 2));
+
+    Float_t trc1Fit = ParamSignalFit[3] - photon1path / cVel - tKne * 0.0895,
+            trc2Fit = ParamSignalFit[8] - photon2path / cVel - tKne * 0.0895,
+            trc3Fit = ParamSignalFit[13] - photon3path / cVel - tKne * 0.0895,
+            trc4Fit = ParamSignalFit[18] - photon4path / cVel - tKne * 0.0895,
+            TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
+
     // Fill histograms for reconstructed variables
-    histsReconstructed["px_Kch"]->Fill(Kchboost[0] - Kchmc[0]);
-    histsReconstructed["py_Kch"]->Fill(Kchboost[1] - Kchmc[1]);
-    histsReconstructed["pz_Kch"]->Fill(Kchboost[2] - Kchmc[2]);
-    histsReconstructed["Energy_Kch"]->Fill(Kchboost[3] - Kchmc[3]);
+    histsReconstructed["px_Kch"]->Fill(Kchrec[0] - Kchmc[0]);
+    histsReconstructed["py_Kch"]->Fill(Kchrec[1] - Kchmc[1]);
+    histsReconstructed["pz_Kch"]->Fill(Kchrec[2] - Kchmc[2]);
+    histsReconstructed["Energy_Kch"]->Fill(Kchrec[3] - Kchmc[3]);
     histsReconstructed["mass_Kch"]->Fill(Kchrec[5] - mK0);
 
-    histsReconstructed["px_Kne"]->Fill(KneTriangle[0] - Knemc[0]);
-    histsReconstructed["py_Kne"]->Fill(KneTriangle[1] - Knemc[1]);
-    histsReconstructed["pz_Kne"]->Fill(KneTriangle[2] - Knemc[2]);
-    histsReconstructed["Energy_Kne"]->Fill(KneTriangle[3] - Knemc[3]);
+    histsReconstructed["px_Kne"]->Fill(Kchrecnew[0] - Knemc[0]);
+    histsReconstructed["py_Kne"]->Fill(Kchrecnew[1] - Knemc[1]);
+    histsReconstructed["pz_Kne"]->Fill(Kchrecnew[2] - Knemc[2]);
+    histsReconstructed["Energy_Kne"]->Fill(Kchrecnew[3] - Knemc[3]);
     histsReconstructed["mass_Kne"]->Fill(*minv4gam - mK0);
 
     histsReconstructed["mass_pi01"]->Fill(pi01[5] - mPi0);
@@ -168,9 +287,15 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["vtxNeu_y"]->Fill(Kchrec[7] - Kchmc[7]);
     histsReconstructed["vtxNeu_z"]->Fill(Kchrec[8] - Kchmc[8]);
 
-    histsReconstructed["vtxNeu_x_Fit"]->Fill(Kchrec[6] - Kchmc[6]);
-    histsReconstructed["vtxNeu_y_Fit"]->Fill(Kchrec[7] - Kchmc[7]);
-    histsReconstructed["vtxNeu_z_Fit"]->Fill(Kchrec[8] - Kchmc[8]);
+    histsReconstructed["vtxNeu_x_Fit"]->Fill(KneTriangle[6] - Knemc[6]);
+    histsReconstructed["vtxNeu_y_Fit"]->Fill(KneTriangle[7] - Knemc[7]);
+    histsReconstructed["vtxNeu_z_Fit"]->Fill(KneTriangle[8] - Knemc[8]);
+
+    histsReconstructed["time_neutral_MC"]->Fill(*TrcSum);
+
+    histsReconstructed["delta_t"]->Fill(*KaonNeTimeLAB - *KaonNeTimeLABMC);
+
+    histsReconstructed["combined_mass_pi0"]->Fill(combinedMassPi0);
 
     Double_t error1 = sqrt(pow(*CurvSmeared1 - CurvMC[0], 2) +
                            pow(*PhivSmeared1 - PhivMC[0], 2) +
@@ -201,10 +326,10 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     }
 
     // Fitted signal variables
-    histsFittedSignal["px_Kch"]->Fill(KchboostFit[0] - Kchmc[0]);
-    histsFittedSignal["py_Kch"]->Fill(KchboostFit[1] - Kchmc[1]);
-    histsFittedSignal["pz_Kch"]->Fill(KchboostFit[2] - Kchmc[2]);
-    histsFittedSignal["Energy_Kch"]->Fill(KchboostFit[3] - Kchmc[3]);
+    histsFittedSignal["px_Kch"]->Fill(KchrecFit[0] - Kchmc[0]);
+    histsFittedSignal["py_Kch"]->Fill(KchrecFit[1] - Kchmc[1]);
+    histsFittedSignal["pz_Kch"]->Fill(KchrecFit[2] - Kchmc[2]);
+    histsFittedSignal["Energy_Kch"]->Fill(KchrecFit[3] - Kchmc[3]);
     histsFittedSignal["mass_Kch"]->Fill(KchrecFit[5] - mK0);
 
     histsFittedSignal["px_Kne"]->Fill(KnerecFit[0] - Knemc[0]);
@@ -218,10 +343,23 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsFittedSignal["chi2_signalKinFit"]->Fill(*Chi2SignalKinFit);
     histsFittedSignal["chi2_trilaterationKinFit"]->Fill(*Chi2TriKinFit);
+    histsFittedSignal["prob_signal"]->Fill(TMath::Prob(*Chi2SignalKinFit, 5));
 
-    histsFittedSignal["vtxNeu_x_Fit"]->Fill(KchrecFit[6] - Kchmc[6]);
-    histsFittedSignal["vtxNeu_y_Fit"]->Fill(KchrecFit[7] - Kchmc[7]);
-    histsFittedSignal["vtxNeu_z_Fit"]->Fill(KchrecFit[8] - Kchmc[8]);
+    histsFittedSignal["vtxNeu_x_Fit"]->Fill(KnerecFit[6] - Knemc[6]);
+    histsFittedSignal["vtxNeu_y_Fit"]->Fill(KnerecFit[7] - Knemc[7]);
+    histsFittedSignal["vtxNeu_z_Fit"]->Fill(KnerecFit[8] - Knemc[8]);
+
+    histsFittedSignal["delta_t"]->Fill(tKch - *KaonChTimeLABMC);
+
+    histsFittedSignal["combined_mass_pi0"]->Fill(combinedMassPi0Fit);
+
+    histsFittedSignal["pull1"]->Fill(pullsSignalFit[0]);
+    histsFittedSignal["pull2"]->Fill(pullsSignalFit[1]);
+    histsFittedSignal["pull3"]->Fill(pullsSignalFit[2]);
+    histsFittedSignal["pull4"]->Fill(pullsSignalFit[3]);
+    histsFittedSignal["pull5"]->Fill(pullsSignalFit[4]);
+
+    histsFittedSignal["time_neutral_MC"]->Fill(TrcSumFit);
   }
 
   return kTRUE;
@@ -240,24 +378,55 @@ void MC_fit_comparison::Terminate()
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
 
+  gStyle->SetOptStat(0);
+  gStyle->SetOptFit(0);
+
   for (const auto &histName : histList)
   {
     canvas[histName]->cd();
+    canvas[histName]->SetLogy(0);
+
+    histsReconstructed[histName]->SetTitle("");
+
     histsReconstructed[histName]->GetYaxis()->SetRangeUser(0, std::max(histsReconstructed[histName]->GetMaximum(), histsFittedSignal[histName]->GetMaximum()) * 1.2);
     histsReconstructed[histName]->SetLineColor(kBlue);
 
-    if (histName == "curv1" || histName == "phiv1" || histName == "cotv1" ||
-        histName == "curv2" || histName == "phiv2" || histName == "cotv2" ||
-        histName == "vtxNeu_x" || histName == "vtxNeu_y" || histName == "vtxNeu_z")
-    {
+    Bool_t fitcond = histName == "curv1" || histName == "phiv1" || histName == "cotv1" ||
+                     histName == "curv2" || histName == "phiv2" || histName == "cotv2" ||
+                     histName == "vtxNeu_x" || histName == "vtxNeu_y" || histName == "vtxNeu_z";
 
-      histsReconstructed[histName]->Fit("gaus");
+    if (fitcond)
+    {
+      fitter->FitHistogram(histsReconstructed[histName]);
+      KLOE::TripleGaussFitter::FitResult result = fitter->GetLastResults();
     }
 
-    histsReconstructed[histName]->Draw();
+    histsReconstructed[histName]->GetXaxis()->SetTitle(histTitles[histName][0]);
+    histsReconstructed[histName]->Draw("HIST");
     histsFittedSignal[histName]->SetLineColor(kRed);
     histsFittedSignal[histName]->Draw("HIST SAME");
-    canvas[histName]->BuildLegend();
+
+    // DODAJ WŁASNĄ LEGENDĘ W LEWYM GÓRNYM ROGU:
+    TLegend *legend = new TLegend(0.15, 0.75, 0.4, 0.9, "", "NDC");
+
+    if(!fitcond)
+    {
+      legend->AddEntry(histsReconstructed[histName], "Reconstructed", "l");
+      legend->AddEntry(histsFittedSignal[histName], "Fitted Signal", "l");
+    }
+    else
+    {
+      legend->AddEntry(histsReconstructed[histName], "Reconstructed", "l");
+      legend->AddEntry(histsFittedSignal[histName], "3x Gauss", "l");
+      fitter->DrawFitOnCurrentPad();
+    }
+
+    legend->SetBorderSize(1);
+    legend->SetFillColor(kWhite);
+    legend->SetFillStyle(1001);
+    legend->SetTextSize(0.03);
+    legend->Draw();
+    
     canvas[histName]->Update();
 
     canvas[histName]->SaveAs(Form("img/%s_comparison.png", histName.Data()));

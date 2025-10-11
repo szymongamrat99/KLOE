@@ -229,6 +229,12 @@ private:    // ==================== METODY POMOCNICZE ====================
     Bool_t InitializeTreeReader();
     
     /**
+     * @brief Reinicjalizuje TTreeReader przy zmianie pliku
+     * @return true jeśli sukces
+     */
+    Bool_t ReinitializeTreeReader();
+    
+    /**
      * @brief Inicjalizuje SetBranchAddress dla plików v1
      * @return true jeśli sukces
      */
