@@ -43,7 +43,8 @@ namespace ErrorHandling
     TRILATERATION_KIN_FIT = 303,
     TRIANGLE_REC = 304,
     SIGNAL_KIN_FIT = 305,
-    NO_CHARGED_VTX_OR_TRACKS = 306,           
+    NO_CHARGED_VTX_OR_TRACKS = 306,
+    OMEGA_KIN_FIT = 307,           
 
 
     NOT_RECOGNIZED = 666, /*!< Unexpected exception*/
@@ -141,6 +142,8 @@ namespace ErrorHandling
         return "Did not pass the signal global kin fit.";
       case ErrorCodes::NO_CHARGED_VTX_OR_TRACKS:
         return "No charged vertices or tracks available for analysis.";
+      case ErrorCodes::OMEGA_KIN_FIT:
+        return "Did not pass the omega kin fit.";
 
       // Not recognized logs
       case ErrorCodes::NOT_RECOGNIZED:

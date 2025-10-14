@@ -131,6 +131,15 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
         if(_X(19) < 0)
           _X(19) = MIN_CLU_ENE;
 
+        if(_X(3) < 0)
+          _X(3) = 0.;
+        if(_X(8) < 0)
+          _X(8) = 0.;
+        if(_X(13) < 0)
+          _X(13) = 0.;
+        if(_X(18) < 0)
+          _X(18) = 0.;
+
         _baseObj->SetParameters(_X.GetMatrixArray());
         _baseObj->IntermediateReconstruction();
         

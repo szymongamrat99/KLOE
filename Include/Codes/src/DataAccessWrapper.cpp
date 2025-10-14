@@ -707,6 +707,7 @@ const std::vector<T> &DataAccessWrapper::ConvertArrayToVector(const TString &key
 Int_t DataAccessWrapper::GetNRun() const { return GetScalarValue<Int_t>("nrun"); }
 Int_t DataAccessWrapper::GetNEv() const { return GetScalarValue<Int_t>("nev"); }
 Int_t DataAccessWrapper::GetNClu() const { return GetScalarValue<Int_t>("nclu"); }
+Int_t DataAccessWrapper::GetNCluMC() const { return GetScalarValue<Int_t>("nclumc"); }
 Int_t DataAccessWrapper::GetNTCl() const { return GetScalarValue<Int_t>("ntcl"); }
 Int_t DataAccessWrapper::GetNV() const { return GetScalarValue<Int_t>("nv"); }
 Int_t DataAccessWrapper::GetNTV() const { return GetScalarValue<Int_t>("ntv"); }
@@ -739,10 +740,15 @@ const std::vector<Int_t> &DataAccessWrapper::GetEclStream() const { return GetAr
 const std::vector<Int_t> &DataAccessWrapper::GetAssCl() const { return GetArrayValue<Int_t>("asscl"); }
 const std::vector<Int_t> &DataAccessWrapper::GetIv() const { return GetArrayValue<Int_t>("iv"); }
 
-// Tablice UInt_t
+// Tablice Int_t
 const std::vector<Int_t> &DataAccessWrapper::GetVtxMC() const { return GetArrayValue<Int_t>("vtxmc"); }
 const std::vector<Int_t> &DataAccessWrapper::GetPidMC() const { return GetArrayValue<Int_t>("pidmc"); }
 const std::vector<Int_t> &DataAccessWrapper::GetMother() const { return GetArrayValue<Int_t>("mother"); }
+const std::vector<Int_t> &DataAccessWrapper::GetKine() const { return GetArrayValue<Int_t>("kine"); }
+const std::vector<Int_t> &DataAccessWrapper::GetKinMom() const { return GetArrayValue<Int_t>("kinmom"); }
+const std::vector<Int_t> &DataAccessWrapper::GetPNum1() const { return GetArrayValue<Int_t>("pnum1"); }
+const std::vector<Int_t> &DataAccessWrapper::GetPNum2() const { return GetArrayValue<Int_t>("pnum2"); }
+const std::vector<Int_t> &DataAccessWrapper::GetPNum3() const { return GetArrayValue<Int_t>("pnum3"); }
 
 // Tablice Float_t
 const std::vector<Float_t> &DataAccessWrapper::GetXCl() const { return GetArrayValue<Float_t>("xcl"); }

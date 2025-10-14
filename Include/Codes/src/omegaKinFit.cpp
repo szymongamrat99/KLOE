@@ -3,11 +3,11 @@
 #include <uncertainties.h>
 #include <reconstructor.h>
 
-#include <signalKinFit.h>
+#include <omegaKinFit.h>
 
 namespace KLOE
 {
-	SignalKinFit::SignalKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger) : KinFitter("SignalGlobal", N_free, N_const, M, 0, loopcount, chiSqrStep, logger)
+	OmegaKinFit::OmegaKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger) : KinFitter("Omega", N_free, N_const, M, 0, loopcount, chiSqrStep, logger)
 	{
 		_V.ResizeTo(N_free + N_const, N_free + N_const);
 		_D.ResizeTo(M, N_free + N_const);
@@ -47,25 +47,24 @@ namespace KLOE
 		for (Int_t i = 0; i < 2; i++)
 			_trkFit[i].resize(4);
 
-		KinFitter::ConstraintSet({"PxConsvLAB",
-								  "PyConsvLAB",
-								  "PzConsvLAB",
-								  "EnergyConsvLAB",
-								  "MinvConsvNeutralKaon",
-                  "MinvConsvChargedKaon",
-								  "Photon1PathLAB",
-								  "Photon2PathLAB",
-								  "Photon3PathLAB",
-								  "Photon4PathLAB"});
+		std::vector<std::string> ConstSet = {
+			"EnergyConsvLAB",
+			"PxConsvLAB",
+			"PyConsvLAB",
+			"PzConsvLAB",
+			"Photon1PathLAB",
+			"Photon2PathLAB",
+			"Photon3PathLAB",
+			"Photon4PathLAB"};
 
 		gErrorIgnoreLevel = 6001;
 	}
 
-	SignalKinFit::~SignalKinFit()
+	OmegaKinFit::~OmegaKinFit()
 	{
 	}
 
-	ErrorHandling::ErrorCodes SignalKinFit::Reconstruct()
+	ErrorHandling::ErrorCodes OmegaKinFit::Reconstruct()
 	{
 		_CHISQRMIN = 999999.;
 		_isConverged = 0;
@@ -103,8 +102,8 @@ namespace KLOE
 					_Errors[_offset + i * 5] = clu_x_error(_Param[_offset + i * 5], _Param[_offset + i * 5 + 1], _Param[_offset + i * 5 + 2], _Param[_offset + i * 5 + 4]);		// cm
 					_Errors[_offset + i * 5 + 1] = clu_y_error(_Param[_offset + i * 5], _Param[_offset + i * 5 + 1], _Param[_offset + i * 5 + 2], _Param[_offset + i * 5 + 4]); // cm
 					_Errors[_offset + i * 5 + 2] = clu_z_error(_Param[_offset + i * 5], _Param[_offset + i * 5 + 1], _Param[_offset + i * 5 + 2], _Param[_offset + i * 5 + 4]); // cm
-					_Errors[_offset + i * 5 + 3] = clu_time_error(_Param[_offset + i * 5 + 4]);																					// ns
-					_Errors[_offset + i * 5 + 4] = clu_ene_error(_Param[_offset + i * 5 + 4]);																					// MeV
+					_Errors[_offset + i * 5 + 3] = clu_time_error(_Param[_offset + i * 5 + 4]);	// ns
+					_Errors[_offset + i * 5 + 4] = clu_ene_error(_Param[_offset + i * 5 + 4]);	// MeV
 				}
 
 				_offset = 20;
@@ -156,7 +155,7 @@ namespace KLOE
 				_offset = _Param.size();
 
 				if (_offset != _N_free + _N_const)
-					throw ErrorHandling::ErrorCodes::SIGNAL_KIN_FIT;
+					throw ErrorHandling::ErrorCodes::OMEGA_KIN_FIT;
 			}
 			catch (ErrorHandling::ErrorCodes &err)
 			{
@@ -168,7 +167,6 @@ namespace KLOE
 			_CHISQRMIN = KinFitter::FitFunction();
 
 			KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit, _KchrecFit, _KchboostFit, _ipFit, _photonFit, _KnerecFit, _KnereclorFit);
-
 
 
 			if (1)
@@ -184,6 +182,6 @@ namespace KLOE
 		if (_isConverged)
 			return ErrorHandling::ErrorCodes::NO_ERROR;
 		else
-			return ErrorHandling::ErrorCodes::SIGNAL_KIN_FIT;
+			return ErrorHandling::ErrorCodes::OMEGA_KIN_FIT;
 	}
 }

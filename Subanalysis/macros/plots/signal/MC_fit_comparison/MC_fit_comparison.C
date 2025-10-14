@@ -50,7 +50,7 @@ std::vector<TString> histList = {"px_Pi1", "py_Pi1", "pz_Pi1", "Energy_Pi1",
                                  "mass_pi01", "mass_pi02",
                                  "time_neutral_MC", "prob_signal", "delta_t",
                                  "combined_mass_pi0",
-                                 "pull1", "pull2", "pull3", "pull4", "pull5"}; // List of histograms to be created
+                                 "pull1", "pull2", "pull3", "pull4", "pull5", "phi_vtx_x", "phi_vtx_y", "phi_vtx_z", "vKne"}; // List of histograms to be created
 
 std::map<TString, std::vector<TString>> histTitles = {
     {"px_Pi1", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
@@ -100,7 +100,11 @@ std::map<TString, std::vector<TString>> histTitles = {
     {"pull2", {"Pull_{2} [MeV]"}},
     {"pull3", {"Pull_{3} [MeV]"}},
     {"pull4", {"Pull_{4} [MeV]"}},
-    {"pull5", {"Pull_{5} [MeV]"}}};
+    {"pull5", {"Pull_{5} [MeV]"}},
+    {"phi_vtx_x", {"#phi_{vtx,x} - #phi_{vtx,x}^{MC} [cm]"}},
+    {"phi_vtx_y", {"#phi_{vtx,y} - #phi_{vtx,y}^{MC} [cm]"}},
+    {"phi_vtx_z", {"#phi_{vtx,z} - #phi_{vtx,z}^{MC} [cm]"}},
+    {"vKne", {"v_{K_{ne}} - v_{K_{ne}}^{MC} [cm/ns]"}}};
 
 std::map<TString, std::vector<Double_t>>
     histLimits = {{"px_Pi1", {-200, 200}},
@@ -144,13 +148,17 @@ std::map<TString, std::vector<Double_t>>
                   {"mass_pi02", {-100, 100}},
                   {"time_neutral_MC", {-5, 2}},
                   {"prob_signal", {0, 1}},
-                  {"delta_t", {-10, 10}},
+                  {"delta_t", {-20, 20}},
                   {"combined_mass_pi0", {-100, 100}},
                   {"pull1", {-5, 5}},
                   {"pull2", {-5, 5}},
                   {"pull3", {-5, 5}},
                   {"pull4", {-5, 5}},
-                  {"pull5", {-5, 5}}}; // Histogram limits
+                  {"pull5", {-5, 5}},
+                  {"phi_vtx_x", {-1, 1}},
+                  {"phi_vtx_y", {-0.2, 0.2}},
+                  {"phi_vtx_z", {-10, 10}},
+                  {"vKne", {-2, 2}}};
 
 std::map<TString, TCanvas *> canvas;
 
@@ -183,10 +191,10 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
 
     histsReconstructed[histName] = new TH1F(Form("h_reconstructed_%s", histName.Data()),
                                             Form("Reconstructed %s; %s; Counts", histName.Data(), histName.Data()),
-                                            100, histLimits[histName][0], histLimits[histName][1]);
+                                            30, histLimits[histName][0], histLimits[histName][1]);
     histsFittedSignal[histName] = new TH1F(Form("h_fittedSignal_%s", histName.Data()),
                                            Form("Fitted Signal %s; %s; Counts", histName.Data(), histName.Data()),
-                                           100, histLimits[histName][0], histLimits[histName][1]);
+                                           30, histLimits[histName][0], histLimits[histName][1]);
   }
 }
 
@@ -219,53 +227,66 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
   fReader.SetLocalEntry(entry);
 
-  if (*mctruth == 1 && *Chi2SignalKinFit / 6. < 3.)
+  Float_t Knerec[9];
+
+  Knerec[0] = gammaMomTriangle1[0] + gammaMomTriangle2[0] +
+              gammaMomTriangle3[0] + gammaMomTriangle4[0];
+  Knerec[1] = gammaMomTriangle1[1] + gammaMomTriangle2[1] +
+              gammaMomTriangle3[1] + gammaMomTriangle4[1];
+  Knerec[2] = gammaMomTriangle1[2] + gammaMomTriangle2[2] +
+              gammaMomTriangle3[2] + gammaMomTriangle4[2];
+  Knerec[3] = gammaMomTriangle1[3] + gammaMomTriangle2[3] +
+              gammaMomTriangle3[3] + gammaMomTriangle4[3];
+
+  Knerec[4] = sqrt(pow(Knerec[0], 2) + pow(Knerec[1], 2) + pow(Knerec[2], 2));
+
+  Float_t vKchFit = cVel * KchboostFit[4] / KchboostFit[3],
+          pathKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
+                            pow(KchboostFit[7] - ipFit[1], 2) +
+                            pow(KchboostFit[8] - ipFit[2], 2)),
+          tKchFit = pathKchFit / (vKchFit * 0.0895),
+          vKneFit = cVel * KnereclorFit[4] / KnereclorFit[3],
+          pathKneFit = sqrt(pow(ParamSignalFit[33] - ipFit[0], 2) +
+                            pow(ParamSignalFit[34] - ipFit[1], 2) +
+                            pow(ParamSignalFit[35] - ipFit[2], 2)),
+          tKneFit = pathKneFit / (vKneFit * 0.0895),
+          vKneMC = cVel * Knemc[4] / Knemc[3],
+          vKne = cVel * Knerec[4] / Knerec[3],
+          pathKne = sqrt(pow(KneTriangle[6] - ip[0], 2) +
+                         pow(KneTriangle[7] - ip[1], 2) +
+                         pow(KneTriangle[8] - ip[2], 2)),
+          tKne = pathKne / (vKne * 0.0895);
+
+  Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - mPi0, 2) +
+                                    pow(pi02Fit[5] - mPi0, 2)),
+          combinedMassPi0 = sqrt(pow(pi01[5] - mPi0, 2) +
+                                 pow(pi02[5] - mPi0, 2));
+
+  Float_t photon1path = sqrt(pow(ParamSignalFit[0] - KnerecFit[6], 2) +
+                             pow(ParamSignalFit[1] - KnerecFit[7], 2) +
+                             pow(ParamSignalFit[2] - KnerecFit[8], 2)),
+          photon2path = sqrt(pow(ParamSignalFit[5] - KnerecFit[6], 2) +
+                             pow(ParamSignalFit[6] - KnerecFit[7], 2) +
+                             pow(ParamSignalFit[7] - KnerecFit[8], 2)),
+          photon3path = sqrt(pow(ParamSignalFit[10] - KnerecFit[6], 2) +
+                             pow(ParamSignalFit[11] - KnerecFit[7], 2) +
+                             pow(ParamSignalFit[12] - KnerecFit[8], 2)),
+          photon4path = sqrt(pow(ParamSignalFit[15] - KnerecFit[6], 2) +
+                             pow(ParamSignalFit[16] - KnerecFit[7], 2) +
+                             pow(ParamSignalFit[17] - KnerecFit[8], 2));
+
+  Float_t trc1Fit = ParamSignalFit[3] - photon1path / cVel - tKneFit * 0.0895,
+          trc2Fit = ParamSignalFit[8] - photon2path / cVel - tKneFit * 0.0895,
+          trc3Fit = ParamSignalFit[13] - photon3path / cVel - tKneFit * 0.0895,
+          trc4Fit = ParamSignalFit[18] - photon4path / cVel - tKneFit * 0.0895,
+          TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
+
+  Float_t deltaTfit = tKchFit - tKneFit,
+          deltaT = *KaonChTimeLAB - tKne,
+          deltaTMC = *KaonChTimeLABMC - *KaonNeTimeLABMC;
+
+  if (*mctruth == 1 && *Chi2SignalKinFit < 40. && combinedMassPi0Fit < 10. && abs(*minv4gam - mK0) < 80.)
   {
-    Float_t Kchrecnew[4];
-
-    Kchrecnew[0] = gammaMomTriangle1[0] + gammaMomTriangle2[0] +
-                   gammaMomTriangle3[0] + gammaMomTriangle4[0];
-    Kchrecnew[1] = gammaMomTriangle1[1] + gammaMomTriangle2[1] +
-                   gammaMomTriangle3[1] + gammaMomTriangle4[1];
-    Kchrecnew[2] = gammaMomTriangle1[2] + gammaMomTriangle2[2] +
-                   gammaMomTriangle3[2] + gammaMomTriangle4[2];
-    Kchrecnew[3] = gammaMomTriangle1[3] + gammaMomTriangle2[3] +
-                   gammaMomTriangle3[3] + gammaMomTriangle4[3];
-
-    Float_t vKch = cVel * sqrt(pow(KchboostFit[0], 2) + pow(KchboostFit[1], 2) + pow(KchboostFit[2], 2)) / KchboostFit[3],
-            pathKch = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
-                           pow(KchboostFit[7] - ipFit[1], 2) +
-                           pow(KchboostFit[8] - ipFit[2], 2)),
-            tKch = pathKch / (vKch * 0.0895),
-            vKne = cVel * sqrt(pow(Knemc[0], 2) + pow(Knemc[1], 2) + pow(Knemc[2], 2)) / Knemc[3],
-            pathKne = sqrt(pow(Knemc[6] - ipmc[0], 2) +
-                           pow(Knemc[7] - ipmc[1], 2) +
-                           pow(Knemc[8] - ipmc[2], 2)),
-            tKne = pathKne / (vKne * 0.0895);
-
-    Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - mPi0, 2) +
-                                      pow(pi02Fit[5] - mPi0, 2)),
-            combinedMassPi0 = sqrt(pow(pi01[5] - mPi0, 2) +
-                                   pow(pi02[5] - mPi0, 2));
-
-    Float_t photon1path = sqrt(pow(ParamSignalFit[0] - KnerecFit[6], 2) +
-                               pow(ParamSignalFit[1] - KnerecFit[7], 2) +
-                               pow(ParamSignalFit[2] - KnerecFit[8], 2)),
-            photon2path = sqrt(pow(ParamSignalFit[5] - KnerecFit[6], 2) +
-                               pow(ParamSignalFit[6] - KnerecFit[7], 2) +
-                               pow(ParamSignalFit[7] - KnerecFit[8], 2)),
-            photon3path = sqrt(pow(ParamSignalFit[10] - KnerecFit[6], 2) +
-                               pow(ParamSignalFit[11] - KnerecFit[7], 2) +
-                               pow(ParamSignalFit[12] - KnerecFit[8], 2)),
-            photon4path = sqrt(pow(ParamSignalFit[15] - KnerecFit[6], 2) +
-                               pow(ParamSignalFit[16] - KnerecFit[7], 2) +
-                               pow(ParamSignalFit[17] - KnerecFit[8], 2));
-
-    Float_t trc1Fit = ParamSignalFit[3] - photon1path / cVel - tKne * 0.0895,
-            trc2Fit = ParamSignalFit[8] - photon2path / cVel - tKne * 0.0895,
-            trc3Fit = ParamSignalFit[13] - photon3path / cVel - tKne * 0.0895,
-            trc4Fit = ParamSignalFit[18] - photon4path / cVel - tKne * 0.0895,
-            TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
     // Fill histograms for reconstructed variables
     histsReconstructed["px_Kch"]->Fill(Kchrec[0] - Kchmc[0]);
@@ -274,26 +295,32 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["Energy_Kch"]->Fill(Kchrec[3] - Kchmc[3]);
     histsReconstructed["mass_Kch"]->Fill(Kchrec[5] - mK0);
 
-    histsReconstructed["px_Kne"]->Fill(Kchrecnew[0] - Knemc[0]);
-    histsReconstructed["py_Kne"]->Fill(Kchrecnew[1] - Knemc[1]);
-    histsReconstructed["pz_Kne"]->Fill(Kchrecnew[2] - Knemc[2]);
-    histsReconstructed["Energy_Kne"]->Fill(Kchrecnew[3] - Knemc[3]);
+    histsReconstructed["px_Kne"]->Fill(Knerec[0] - Knemc[0]);
+    histsReconstructed["py_Kne"]->Fill(Knerec[1] - Knemc[1]);
+    histsReconstructed["pz_Kne"]->Fill(Knerec[2] - Knemc[2]);
+    histsReconstructed["Energy_Kne"]->Fill(Knerec[3] - Knemc[3]);
     histsReconstructed["mass_Kne"]->Fill(*minv4gam - mK0);
 
     histsReconstructed["mass_pi01"]->Fill(pi01[5] - mPi0);
     histsReconstructed["mass_pi02"]->Fill(pi02[5] - mPi0);
 
-    histsReconstructed["vtxNeu_x"]->Fill(Kchrec[6] - Kchmc[6]);
-    histsReconstructed["vtxNeu_y"]->Fill(Kchrec[7] - Kchmc[7]);
-    histsReconstructed["vtxNeu_z"]->Fill(Kchrec[8] - Kchmc[8]);
+    histsReconstructed["vtxNeu_x"]->Fill(KneTriangle[6] - Knemc[6]);
+    histsReconstructed["vtxNeu_y"]->Fill(KneTriangle[7] - Knemc[7]);
+    histsReconstructed["vtxNeu_z"]->Fill(KneTriangle[8] - Knemc[8]);
+
+    histsReconstructed["phi_vtx_x"]->Fill(*Bx - ipmc[0]);
+    histsReconstructed["phi_vtx_y"]->Fill(*By - ipmc[1]);
+    histsReconstructed["phi_vtx_z"]->Fill(*Bz - ipmc[2]);
 
     histsReconstructed["vtxNeu_x_Fit"]->Fill(KneTriangle[6] - Knemc[6]);
     histsReconstructed["vtxNeu_y_Fit"]->Fill(KneTriangle[7] - Knemc[7]);
     histsReconstructed["vtxNeu_z_Fit"]->Fill(KneTriangle[8] - Knemc[8]);
 
+    histsReconstructed["vKne"]->Fill(vKne - vKneMC);
+
     histsReconstructed["time_neutral_MC"]->Fill(*TrcSum);
 
-    histsReconstructed["delta_t"]->Fill(*KaonNeTimeLAB - *KaonNeTimeLABMC);
+    histsReconstructed["delta_t"]->Fill(deltaT - deltaTMC);
 
     histsReconstructed["combined_mass_pi0"]->Fill(combinedMassPi0);
 
@@ -343,13 +370,19 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsFittedSignal["chi2_signalKinFit"]->Fill(*Chi2SignalKinFit);
     histsFittedSignal["chi2_trilaterationKinFit"]->Fill(*Chi2TriKinFit);
-    histsFittedSignal["prob_signal"]->Fill(TMath::Prob(*Chi2SignalKinFit, 5));
+    histsFittedSignal["prob_signal"]->Fill(TMath::Prob(*Chi2SignalKinFit, 10));
 
-    histsFittedSignal["vtxNeu_x_Fit"]->Fill(KnerecFit[6] - Knemc[6]);
-    histsFittedSignal["vtxNeu_y_Fit"]->Fill(KnerecFit[7] - Knemc[7]);
-    histsFittedSignal["vtxNeu_z_Fit"]->Fill(KnerecFit[8] - Knemc[8]);
+    histsFittedSignal["vtxNeu_x_Fit"]->Fill(ParamSignalFit[33] - Knemc[6]);
+    histsFittedSignal["vtxNeu_y_Fit"]->Fill(ParamSignalFit[34] - Knemc[7]);
+    histsFittedSignal["vtxNeu_z_Fit"]->Fill(ParamSignalFit[35] - Knemc[8]);
 
-    histsFittedSignal["delta_t"]->Fill(tKch - *KaonChTimeLABMC);
+    histsFittedSignal["phi_vtx_x"]->Fill(ipFit[0] - ipmc[0]);
+    histsFittedSignal["phi_vtx_y"]->Fill(ipFit[1] - ipmc[1]);
+    histsFittedSignal["phi_vtx_z"]->Fill(ipFit[2] - ipmc[2]);
+
+    histsFittedSignal["vKne"]->Fill(vKneFit - vKneMC);
+
+    histsFittedSignal["delta_t"]->Fill(deltaTfit - deltaTMC);
 
     histsFittedSignal["combined_mass_pi0"]->Fill(combinedMassPi0Fit);
 
@@ -393,23 +426,30 @@ void MC_fit_comparison::Terminate()
 
     Bool_t fitcond = histName == "curv1" || histName == "phiv1" || histName == "cotv1" ||
                      histName == "curv2" || histName == "phiv2" || histName == "cotv2" ||
-                     histName == "vtxNeu_x" || histName == "vtxNeu_y" || histName == "vtxNeu_z";
+                     histName == "vtxNeu_x" || histName == "vtxNeu_y" || histName == "vtxNeu_z" || histName == "delta_t";
+
+    Bool_t fitcondGaus = histName == "phi_vtx_x" || histName == "phi_vtx_y" || histName == "phi_vtx_z";
 
     if (fitcond)
     {
-      fitter->FitHistogram(histsReconstructed[histName]);
+      fitter->FitHistogram(histsFittedSignal[histName]);
       KLOE::TripleGaussFitter::FitResult result = fitter->GetLastResults();
     }
 
+    if (fitcondGaus)
+    {
+      histsFittedSignal[histName]->Fit("gaus");
+    }
+
     histsReconstructed[histName]->GetXaxis()->SetTitle(histTitles[histName][0]);
-    histsReconstructed[histName]->Draw("HIST");
+    histsReconstructed[histName]->Draw();
     histsFittedSignal[histName]->SetLineColor(kRed);
-    histsFittedSignal[histName]->Draw("HIST SAME");
+    histsFittedSignal[histName]->Draw("SAME");
 
     // DODAJ WŁASNĄ LEGENDĘ W LEWYM GÓRNYM ROGU:
     TLegend *legend = new TLegend(0.15, 0.75, 0.4, 0.9, "", "NDC");
 
-    if(!fitcond)
+    if (!fitcond)
     {
       legend->AddEntry(histsReconstructed[histName], "Reconstructed", "l");
       legend->AddEntry(histsFittedSignal[histName], "Fitted Signal", "l");
@@ -426,7 +466,7 @@ void MC_fit_comparison::Terminate()
     legend->SetFillStyle(1001);
     legend->SetTextSize(0.03);
     legend->Draw();
-    
+
     canvas[histName]->Update();
 
     canvas[histName]->SaveAs(Form("img/%s_comparison.png", histName.Data()));
