@@ -540,9 +540,22 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       {
         // Correction of cluster times based on T0
         baseKin.TclCorr.assign(dataAccess.GetTCl().begin(), dataAccess.GetTCl().end());
-        // Obj.CorrectClusterTime(*clusterProps.t0step1, baseKin.TclCorr);
 
-        if (dataAccess.GetNV() >= 1 && dataAccess.GetNTV() >= 1)
+        std::vector<Int_t> ivTmp(dataAccess.GetIv().begin(), dataAccess.GetIv().end());
+        std::map<Int_t, Int_t> mapTmp = Obj.CountRepeatingElements(ivTmp);
+
+        // Sprawdź czy jest przynajmniej jedna dwójka
+        bool hasTwo = false;
+        for (const auto &pair : mapTmp)
+        {
+          if (pair.second == 2)
+          {
+            hasTwo = true;
+            break;
+          }
+        }
+
+        if (hasTwo)
         {
           if (eventAnalysis != nullptr)
           {
@@ -841,6 +854,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                 errorCode = trilatKinFitObj.Reconstruct();
                 trilatKinFitObj.GetResults(baseKin.bunchnum, baseKin.ipTriKinFit, baseKin.g4takenTriKinFit, gamma_mom_final, baseKin.KnetriKinFit, baseKin.neuVtxTriKinFit, baseKin.Chi2TriKinFit, baseKin.pullsTriKinFit);
 
+                std::vector<Int_t> goodCluster;
+
+                genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g4takenTriKinFit, dataAccess.GetPNum1(), dataAccess.GetNTMC(), dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), goodCluster);
+
                 baseKin.gammaMomTriKinFit1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
                 baseKin.gammaMomTriKinFit2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
                 baseKin.gammaMomTriKinFit3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
@@ -950,7 +967,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                         trackParametersErr[2],
                         clusterChosen[4],
                         chargedVtx,
-                        chargedVtxErr;
+                        chargedVtxErr,
+                        neuVtx,
+                        neuVtxErr,
+                        bhabhaVtxErr;
 
                     trackParameters[0].push_back(baseKin.CurvSmeared1);
                     trackParameters[0].push_back(baseKin.PhivSmeared1);
@@ -984,7 +1004,20 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                     chargedVtxErr.push_back(0.267);
                     chargedVtxErr.push_back(0.210);
 
-                    signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, bhabha_vtx);
+                    for (Int_t k = 6; k < 9; k++)
+                    {
+                      neuVtx.push_back(baseKin.KneTriangle[k]);
+                    }
+
+                    neuVtxErr.push_back(0.493);
+                    neuVtxErr.push_back(0.476);
+                    neuVtxErr.push_back(0.944);
+
+                    bhabhaVtxErr.push_back(0.056);
+                    bhabhaVtxErr.push_back(0.002);
+                    bhabhaVtxErr.push_back(1.137);
+
+                    signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, neuVtx, neuVtxErr, bhabha_vtx, bhabhaVtxErr);
                     errorCode = signalKinFitObj.Reconstruct();
                     signalKinFitObj.GetResults(baseKin.ParamSignal,
                                                baseKin.ErrorsSignal,
@@ -999,7 +1032,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                                baseKin.KnereclorFit,
                                                baseKin.Chi2SignalKinFit,
                                                baseKin.pullsSignalFit);
-                    
+
                     // Pairing of photons to pions and pion reconstruction
 
                     for (Int_t i = 0; i < nPhotons; i++)

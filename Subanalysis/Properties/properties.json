@@ -15,7 +15,7 @@
         "trilaterationReconstructionMode": "TWO_PI0"
     },
     "lastScript": "Initial analysis",
-    "lastUpdate": "2025-10-10",
+    "lastUpdate": "2025-10-14",
     "momSmearing": {
         "bootstrapMeanCovMatrix": {
             "_typename": "TMatrixT<double>",
@@ -688,10 +688,10 @@
             },
             "Signal": {
                 "chiSqrStep": 0.001,
-                "fixedVars": 3,
-                "freeVars": 33,
-                "loopCount": 30,
-                "numOfConstraints": 6,
+                "fixedVars": 0,
+                "freeVars": 39,
+                "loopCount": 100,
+                "numOfConstraints": 10,
                 "range": null
             },
             "Trilateration": {

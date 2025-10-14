@@ -158,7 +158,7 @@ namespace KLOE
   ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKchRec(T mcflag, Bool_t smearingFlag, TMatrixT<Double_t> covMatrix, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger)
   {
     F mom_vec1Tmp[4], mom_vec2Tmp[4], KchTmp[9];
-    std::vector<Int_t> ivTmp(_iv, _iv + MaxNumTrkV);
+    std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     vtaken.clear();
     vtaken.resize(3);
@@ -278,6 +278,12 @@ namespace KLOE
     _dist = 999.;
     bool found = false;
     Bool_t distFlag = false;
+
+    if (_nv == 0 || _ntv == 0)
+    {
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      return err;
+    }
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2));
@@ -354,6 +360,12 @@ namespace KLOE
     _dist = 999.;
     bool found = false;
     Bool_t distFlag = false;
+
+    if (_nv == 0 || _ntv == 0)
+    {
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      return err;
+    }
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2));
@@ -426,6 +438,12 @@ namespace KLOE
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     pm00::Clear1DArray(3, vtaken);
     bool found = false;
+
+    if (_nv == 0 || _ntv == 0)
+    {
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      return err;
+    }
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2) + pow(_zv[i] - _IP[2], 2));
@@ -486,6 +504,12 @@ namespace KLOE
     vtaken.clear();
     vtaken.resize(3);
     bool found = false;
+
+    if (_nv == 0 || _ntv == 0)
+    {
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      return err;
+    }
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2) + pow(_zv[i] - _IP[2], 2));

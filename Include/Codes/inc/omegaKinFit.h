@@ -12,7 +12,7 @@
 
 namespace KLOE
 {
-  class SignalKinFit : public KinFitter, protected ChargedVtxRec<>
+  class OmegaKinFit : public KinFitter, protected ChargedVtxRec<>
   {
   private:
     TVectorD
@@ -78,8 +78,8 @@ namespace KLOE
         &_config = ConfigManager::getInstance();
 
   public:
-    SignalKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger);
-    ~SignalKinFit();
+    OmegaKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger);
+    ~OmegaKinFit();
 
     void SetParameters(const std::vector<Float_t> trackParameters[2], const std::vector<Float_t> trackParametersErr[2], const std::vector<Float_t> cluster[4], const std::vector<Float_t> chargedVtx, const std::vector<Float_t> chargedVtxErr, const std::vector<Float_t> bhabha_mom, const std::vector<Float_t> bhabha_mom_err, const std::vector<Float_t> neuVtx, const std::vector<Float_t> neuVtxErr, const std::vector<Float_t> bhabha_vtx, const std::vector<Float_t> bhabhaVtxErr)
     {

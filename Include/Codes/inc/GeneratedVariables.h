@@ -79,6 +79,8 @@ public:
 			std::vector<Float_t> &CotvMC,
       std::vector<Int_t> &good_clus_ind,
       std::vector<std::vector<Float_t>> cluster_rec);
+
+      void MCvsReconstructedClustersComparator(const std::vector<Int_t> neuclulist, const std::vector<Int_t> gtaken, const std::vector<Int_t> Pnum1, const Int_t ntmc, const std::vector<Int_t> mother, const std::vector<Int_t> vtxmc, const std::vector<Int_t> pidmc, const std::vector<Int_t> kine, const std::vector<Int_t> kinmom, std::vector<Int_t> &goodCluster);
 };
 
 #endif // GENERATED_VARIABLES_H

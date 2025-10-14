@@ -82,6 +82,7 @@
     "test_full_array.C": "cpp",
     "test_triple_gauss_fitter.C": "cpp",
     "MC_fit_comparison.C": "cpp",
-    "histos1.C": "cpp"
+    "histos1.C": "cpp",
+    "signal_vs_bcg.C": "cpp"
   }
 }
