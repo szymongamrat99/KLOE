@@ -122,27 +122,26 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
     {
       if (_mode == "SignalGlobal")
       {
-        if(_X(4) < 0)
+        if (_X(4) < 0)
           _X(4) = MIN_CLU_ENE;
-        if(_X(9) < 0)
+        if (_X(9) < 0)
           _X(9) = MIN_CLU_ENE;
-        if(_X(14) < 0)
+        if (_X(14) < 0)
           _X(14) = MIN_CLU_ENE;
-        if(_X(19) < 0)
+        if (_X(19) < 0)
           _X(19) = MIN_CLU_ENE;
 
-        if(_X(3) < 0)
-          _X(3) = 0.;
-        if(_X(8) < 0)
-          _X(8) = 0.;
-        if(_X(13) < 0)
-          _X(13) = 0.;
-        if(_X(18) < 0)
-          _X(18) = 0.;
+        // if(_X(3) < 0)
+        //   _X(3) = 0.;
+        // if(_X(8) < 0)
+        //   _X(8) = 0.;
+        // if(_X(13) < 0)
+        //   _X(13) = 0.;
+        // if(_X(18) < 0)
+        //   _X(18) = 0.;
 
         _baseObj->SetParameters(_X.GetMatrixArray());
         _baseObj->IntermediateReconstruction();
-        
       }
 
       for (Int_t l = 0; l < _M; l++)
@@ -153,7 +152,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
           _constraints[l]->SetParameters(_X.GetMatrixArray());
           if (m < _N_free)
           {
-            _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.001 * sqrt(_V_init(m, m)));
+            _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
           }
           else
             _D(l, m) = 0;
@@ -181,9 +180,9 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
 
-      if(_CHISQR - _CHISQRTMP < _CHISQRSTEP && _CHISQR - _CHISQRTMP > 0)
+      if (_CHISQR - _CHISQRTMP < _CHISQRSTEP && _CHISQR - _CHISQRTMP > 0)
         break;
-        
+
       _L_aux = _L;
       _C_aux = _C;
       _FUNVALTMP = _FUNVAL;
@@ -199,26 +198,13 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
     catch (ErrorHandling::ErrorCodes err)
     {
       // _err_code = err;
-      //_logger.getErrLog(err, "iteration no. " + std::to_string(i));
+      // _logger.getErrLog(err, "iteration no. " + std::to_string(i));
       break;
     }
   }
 
-  if ("SignalGlobal" == _mode)
-  {
-    // _baseObj->SetParameters(_X.GetMatrixArray());
-    // _baseObj->IntermediateReconstruction();
-
-    // _X_min = _X;
-    // _V_min = _V_final;
-    // _X_init_min = _X_init;
-    // _V_init = _V_init;
-
-    // _X_init.Print();
-    // _X.Print();
-
-    // _V_init.Print();
-  }
+  _baseObj->SetParameters(_X.GetMatrixArray());
+  _baseObj->IntermediateReconstruction();
 
   _V = _V_final;
 

@@ -126,11 +126,13 @@ namespace KLOE
 
       ipFit = _ipFit;
 
-      for (Int_t i = 0; i < 4; i++)
-        photonFit[i] = _photonFit[i];
-
       KnereclorFit = _KnereclorFit;
       KnerecFit = _KnerecFit;
+
+      for (Int_t i = 0; i < 4; i++)
+      {
+        photonFit[i] = _photonFit[i];
+      }
 
       Chi2SignalKinFit = _CHISQRMIN;
 

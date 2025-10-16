@@ -189,8 +189,7 @@ namespace KLOE
 
     void calculateBeta()
     {
-      if (totalMomentum == 0)
-        calculateTotalMomentum();
+      calculateTotalMomentum();
 
       beta = totalMomentum / fourMom[3];
     };
@@ -202,8 +201,7 @@ namespace KLOE
 
     void calculateLifetimeLAB()
     {
-      if (beta == 0)
-        calculateBeta();
+      calculateBeta();
 
       lifetimeLAB = path / (beta * cVel);
     };
@@ -222,6 +220,7 @@ namespace KLOE
 
       calculateLifetimeLAB();
       total[9] = lifetimeLAB;
+      fourPos[3] = lifetimeLAB;
     };
 
     void SetPositionAndMomentumFromTotal()
@@ -260,6 +259,14 @@ namespace KLOE
     std::vector<Float_t> vtxPos;  /*!< 3-momentum of the charged particle */
   };
 
+  struct KaonProperTimes {
+    Double_t kaon1TimeLAB;
+    Double_t kaon1TimeCM;
+    Double_t kaon2TimeLAB;
+    Double_t kaon2TimeCM;
+    Double_t deltaTimeLAB;
+    Double_t deltaTimeCM;
+};
   /**
    * @class General pm00 class for KLOE analysis. Includes most fundamental functions like timestamp, datestamp, array clearing functions, etc.
    * @author @szymongamrat99
@@ -632,6 +639,39 @@ namespace KLOE
     void CorrectClusterTime(Float_t T0, std::vector<Float_t> &cluTimeCorrected);
 
     void PhotonPairingToPi0(std::vector<Float_t> *photon, Int_t numOfPhotons, std::vector<Int_t> &bestPairingIndex);
+
+    /**
+     * @brief Oblicza czasy własne kaonów i ich różnice
+     * @param kaon1Mom Wektor pędu pierwszego kaona [px, py, pz, E]
+     * @param kaon1Pos Wektor położenia pierwszego kaona [x, y, z]
+     * @param kaon2Mom Wektor pędu drugiego kaona [px, py, pz, E]
+     * @param kaon2Pos Wektor położenia drugiego kaona [x, y, z]
+     * @param phiMom Wektor pędu układu phi [px, py, pz, E]
+     * @param ipPos Wektor położenia IP [x, y, z]
+     * @return Struktura z czasami własnymi w układzie LAB i CM oraz różnicami
+     */
+    KaonProperTimes CalculateKaonProperTimes(const std::vector<Float_t> &kaon1Mom,
+                                             const std::vector<Float_t> &kaon1Pos,
+                                             const std::vector<Float_t> &kaon2Mom,
+                                             const std::vector<Float_t> &kaon2Pos,
+                                             const std::vector<Float_t> &phiMom,
+                                             const std::vector<Float_t> &ipPos);
+
+    /**
+     * @brief Oblicza czas własny pojedynczego kaona
+     * @param kaonMom Wektor pędu kaona [px, py, pz, E]
+     * @param kaonPos Wektor położenia kaona [x, y, z]
+     * @param phiMom Wektor pędu układu phi [px, py, pz, E]
+     * @param ipPos Wektor położenia IP [x, y, z]
+     * @param timeLAB Referencja na czas w układzie LAB (wyjście)
+     * @param timeCM Referencja na czas w układzie CM (wyjście)
+     */
+    void CalculateSingleKaonTime(const std::vector<Float_t> &kaonMom,
+                                 const std::vector<Float_t> &kaonPos,
+                                 const std::vector<Float_t> &phiMom,
+                                 const std::vector<Float_t> &ipPos,
+                                 Double_t &timeLAB,
+                                 Double_t &timeCM);
   };
 }
 

@@ -197,7 +197,13 @@ ErrorHandling::ErrorCodes GeneratedVariables::FindNeutralCluster(
   }
   if (neucluind < NCLMIN)
   {
-    auto err = ErrorHandling::ErrorCodes::NOT_ENOUGH_NEUTRAL_CLUSTERS;
+    auto err = ErrorHandling::ErrorCodes::NOT_RECOGNIZED;
+
+    if (NCLMIN == 4)
+      err = ErrorHandling::ErrorCodes::LESS_THAN_FOUR_NEUTRAL_CLUSTERS;
+    else if (NCLMIN == 6)
+      err = ErrorHandling::ErrorCodes::LESS_THAN_SIX_NEUTRAL_CLUSTERS;
+
     return err;
   }
   return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -441,7 +447,7 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
       trkMC.push_back(auxiliaryVec);
 
       CurvMC.push_back(1000. / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2)));
-      PhivMC.push_back(acos(pxmc[j] / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2))));
+      PhivMC.push_back(atan2(pymc[j], pxmc[j]));
       CotvMC.push_back(pzmc[j] / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2)));
 
       if (pidmc[j] == 9)
@@ -461,7 +467,7 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
       trkMC.push_back(auxiliaryVec);
 
       CurvMC.push_back(1000. / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2)));
-      PhivMC.push_back(acos(pxmc[j] / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2))));
+      PhivMC.push_back(atan2(pymc[j], pxmc[j]));
       CotvMC.push_back(pzmc[j] / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2)));
 
       if (pidmc[j] == 9)

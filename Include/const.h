@@ -376,7 +376,8 @@ struct BaseKinematics
         eclfilfo,
         eclfilfoword,
         ntcl,
-        bunchnum;
+        bunchnum,
+        errorCode;
 
     std::vector<Float_t>
         Kchrecnew,
@@ -477,7 +478,8 @@ struct BaseKinematics
         goodClusIndex,
         errors,
         cuts,
-        g4takenTriKinFit;
+        g4takenTriKinFit,
+        goodClustersTriKinFit;
 
     /**
      * @brief Clear all data members of BaseKinematics (scalars to zero, vectors cleared/resized).

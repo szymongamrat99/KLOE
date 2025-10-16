@@ -45,6 +45,11 @@ namespace KLOE
     std::vector<Int_t> ivTmp(_iv, _iv + MaxNumTrkV);
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     pm00::Clear1DArray(3, vtaken);
+
+    vtaken[0] = -1;
+    vtaken[1] = -1;
+    vtaken[2] = -1;
+
     bool found = false;
 
     // Initialization of momentum smearing
@@ -69,7 +74,7 @@ namespace KLOE
 
     if (_nv == 0 || _ntv == 0)
     {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
       return err;
     }
 
@@ -82,7 +87,7 @@ namespace KLOE
           {
             if (_iv[j1] - 1 == i && _iv[j2] - 1 == i)
             {
-              if (pm00::signum(_CurV[j1]) != pm00::signum(_CurV[j2]))
+              if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
                 ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
                 ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
@@ -148,7 +153,7 @@ namespace KLOE
     }
     if (!found)
     {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -162,6 +167,11 @@ namespace KLOE
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     vtaken.clear();
     vtaken.resize(3);
+
+    vtaken[0] = -1;
+    vtaken[1] = -1;
+    vtaken[2] = -1;
+
     bool found = false;
 
     // Initialization of momentum smearing
@@ -176,12 +186,6 @@ namespace KLOE
     KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
     // -------------------------------------------------------------
 
-    if (_nv == 0 || _ntv == 0)
-    {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
-      return err;
-    }
-
     for (Int_t i = 0; i < _nv; i++)
     {
       if (mapTmp[_iv[i]] == 2)
@@ -191,7 +195,7 @@ namespace KLOE
           {
             if (_iv[j1] - 1 == i && _iv[j2] - 1 == i)
             {
-              if (pm00::signum(_CurV[j1]) != pm00::signum(_CurV[j2]))
+              if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
                 ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
                 ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
@@ -261,7 +265,7 @@ namespace KLOE
     }
     if (!found)
     {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -275,15 +279,13 @@ namespace KLOE
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     pm00::Clear1DArray(3, vtaken);
     vtaken[0] = -1;
+    vtaken[1] = -1;
+    vtaken[2] = -1;
     _dist = 999.;
     bool found = false;
     Bool_t distFlag = false;
 
-    if (_nv == 0 || _ntv == 0)
-    {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
-      return err;
-    }
+    
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2));
@@ -309,7 +311,7 @@ namespace KLOE
           {
             if (_iv[j1] - 1 == i && _iv[j2] - 1 == i)
             {
-              if (pm00::signum(_CurV[j1]) != pm00::signum(_CurV[j2]))
+              if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
                 ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
                 ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
@@ -342,7 +344,7 @@ namespace KLOE
     }
     if (!found)
     {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -357,15 +359,13 @@ namespace KLOE
     vtaken.clear();
     vtaken.resize(3);
     vtaken[0] = -1;
+    vtaken[1] = -1;
+    vtaken[2] = -1;
     _dist = 999.;
     bool found = false;
     Bool_t distFlag = false;
 
-    if (_nv == 0 || _ntv == 0)
-    {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
-      return err;
-    }
+
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2));
@@ -391,7 +391,7 @@ namespace KLOE
           {
             if (_iv[j1] - 1 == i && _iv[j2] - 1 == i)
             {
-              if (pm00::signum(_CurV[j1]) != pm00::signum(_CurV[j2]))
+              if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
                 ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
                 ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
@@ -424,7 +424,7 @@ namespace KLOE
     }
     if (!found)
     {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -437,13 +437,11 @@ namespace KLOE
     std::vector<Int_t> ivTmp(_iv, _iv + MaxNumTrkV);
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     pm00::Clear1DArray(3, vtaken);
+    vtaken[0] = -1;
+    vtaken[1] = -1;
+    vtaken[2] = -1;
     bool found = false;
 
-    if (_nv == 0 || _ntv == 0)
-    {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
-      return err;
-    }
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2) + pow(_zv[i] - _IP[2], 2));
@@ -455,7 +453,7 @@ namespace KLOE
           {
             if (_iv[j1] - 1 == i && _iv[j2] - 1 == i)
             {
-              if (pm00::signum(_CurV[j1]) != pm00::signum(_CurV[j2]))
+              if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
                 ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
                 ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
@@ -489,7 +487,7 @@ namespace KLOE
     }
     if (!found)
     {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -503,13 +501,12 @@ namespace KLOE
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     vtaken.clear();
     vtaken.resize(3);
+    vtaken[0] = -1;
+    vtaken[1] = -1;
+    vtaken[2] = -1;
+
     bool found = false;
 
-    if (_nv == 0 || _ntv == 0)
-    {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
-      return err;
-    }
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2) + pow(_zv[i] - _IP[2], 2));
@@ -521,7 +518,7 @@ namespace KLOE
           {
             if (_iv[j1] - 1 == i && _iv[j2] - 1 == i)
             {
-              if (pm00::signum(_CurV[j1]) != pm00::signum(_CurV[j2]))
+              if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
                 ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
                 ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
@@ -555,7 +552,7 @@ namespace KLOE
     }
     if (!found)
     {
-      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS;
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;

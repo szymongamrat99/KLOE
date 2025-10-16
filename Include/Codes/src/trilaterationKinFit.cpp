@@ -132,10 +132,10 @@ namespace KLOE
 
 						_S = _R.MySolve(_selected.data());
 
-						clusterEnergy = _cluster[4][_NeuClusters[_ind_gam[0]] - 1] > MIN_CLU_ENE &&
-										_cluster[4][_NeuClusters[_ind_gam[1]] - 1] > MIN_CLU_ENE &&
-										_cluster[4][_NeuClusters[_ind_gam[2]] - 1] > MIN_CLU_ENE &&
-										_cluster[4][_NeuClusters[_ind_gam[3]] - 1] > MIN_CLU_ENE;
+						clusterEnergy = 1;//_cluster[4][_NeuClusters[_ind_gam[0]] - 1] > MIN_CLU_ENE &&
+										// _cluster[4][_NeuClusters[_ind_gam[1]] - 1] > MIN_CLU_ENE &&
+										// _cluster[4][_NeuClusters[_ind_gam[2]] - 1] > MIN_CLU_ENE &&
+										// _cluster[4][_NeuClusters[_ind_gam[3]] - 1] > MIN_CLU_ENE;
 
 						for (Int_t k = 0; k < 4; k++)
 						{
@@ -145,10 +145,10 @@ namespace KLOE
 								_cluster[2][_NeuClusters[_ind_gam[k]] - 1] != 0;
 
 							if (k < 2)
-								cond_time_clus[k] = _S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[0]] - 1] &&
-													_S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[1]] - 1] &&
-													_S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[2]] - 1] &&
-													_S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[3]] - 1];
+								cond_time_clus[k] = 1;//_S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[0]] - 1] &&
+													// _S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[1]] - 1] &&
+													// _S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[2]] - 1] &&
+													// _S.sol[k][3] < _cluster[3][_NeuClusters[_ind_gam[3]] - 1];
 						}
 
 						Bool_t cond_tot = cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
@@ -275,10 +275,10 @@ namespace KLOE
 													_S.sol[1][3] < _X(13) &&
 													_S.sol[1][3] < _X(18);
 
-								clusterEnergy = _X(4) > MIN_CLU_ENE &&
-												_X(9) > MIN_CLU_ENE &&
-												_X(14) > MIN_CLU_ENE &&
-												_X(19) > MIN_CLU_ENE;
+								clusterEnergy = 1;//_X(4) > MIN_CLU_ENE &&
+												// _X(9) > MIN_CLU_ENE &&
+												// _X(14) > MIN_CLU_ENE &&
+												// _X(19) > MIN_CLU_ENE;
 
 								for (Int_t k = 0; k < 4; k++)
 								{
@@ -292,7 +292,7 @@ namespace KLOE
 
 								if (CHISQRTMP < _CHISQRMIN && cond_tot)
 								{
-									if (cond_time_clus[0] && value_tmp[0] < value_tmp[1])
+									if ((cond_time_clus[0] && value_tmp[0] < value_tmp[1]))
 									{
 										_isConverged = 1;
 										_FUNVALMIN = FUNVALTMP;
@@ -397,42 +397,43 @@ namespace KLOE
 
 										_bunchnum = k1;
 									}
-									else if (_isConverged == 0)
-									{
-										_neu_vtx_min[0] = 0.;
-										_neu_vtx_min[1] = 999;
-										_neu_vtx_min[2] = 999;
-										_neu_vtx_min[3] = 999;
+                  
+									// else if (_isConverged == 0)
+									// {
+									// 	_neu_vtx_min[0] = 0.;
+									// 	_neu_vtx_min[1] = 999;
+									// 	_neu_vtx_min[2] = 999;
+									// 	_neu_vtx_min[3] = 999;
 
-										for (Int_t l = 0; l < 4; l++)
-										{
-											_gamma_mom_final[l][0] = 999.;
-											_gamma_mom_final[l][1] = 999.;
-											_gamma_mom_final[l][2] = 999.;
-											_gamma_mom_final[l][3] = 999.;
-											_gamma_mom_final[l][4] = 999.;
-											_gamma_mom_final[l][5] = 999.;
-											_gamma_mom_final[l][6] = 999.;
-											_gamma_mom_final[l][7] = 999.;
-										}
+									// 	for (Int_t l = 0; l < 4; l++)
+									// 	{
+									// 		_gamma_mom_final[l][0] = 999.;
+									// 		_gamma_mom_final[l][1] = 999.;
+									// 		_gamma_mom_final[l][2] = 999.;
+									// 		_gamma_mom_final[l][3] = 999.;
+									// 		_gamma_mom_final[l][4] = 999.;
+									// 		_gamma_mom_final[l][5] = 999.;
+									// 		_gamma_mom_final[l][6] = 999.;
+									// 		_gamma_mom_final[l][7] = 999.;
+									// 	}
 
-										_fourKnetri_kinfit[0] = 999.;
-										_fourKnetri_kinfit[1] = 999.;
-										_fourKnetri_kinfit[2] = 999.;
-										_fourKnetri_kinfit[3] = 999.;
-										_fourKnetri_kinfit[4] = 999.;
-										_fourKnetri_kinfit[5] = 999.;
-										_fourKnetri_kinfit[6] = 999.;
-										_fourKnetri_kinfit[7] = 999.;
-										_fourKnetri_kinfit[8] = 999.;
-										_fourKnetri_kinfit[9] = 999.;
+									// 	_fourKnetri_kinfit[0] = 999.;
+									// 	_fourKnetri_kinfit[1] = 999.;
+									// 	_fourKnetri_kinfit[2] = 999.;
+									// 	_fourKnetri_kinfit[3] = 999.;
+									// 	_fourKnetri_kinfit[4] = 999.;
+									// 	_fourKnetri_kinfit[5] = 999.;
+									// 	_fourKnetri_kinfit[6] = 999.;
+									// 	_fourKnetri_kinfit[7] = 999.;
+									// 	_fourKnetri_kinfit[8] = 999.;
+									// 	_fourKnetri_kinfit[9] = 999.;
 
-										_iptri_kinfit[0] = 999.;
-										_iptri_kinfit[1] = 999.;
-										_iptri_kinfit[2] = 999.;
+									// 	_iptri_kinfit[0] = 999.;
+									// 	_iptri_kinfit[1] = 999.;
+									// 	_iptri_kinfit[2] = 999.;
 
-										_bunchnum = 999;
-									}
+									// 	_bunchnum = 999;
+									// }
 								}
 							}
 						}

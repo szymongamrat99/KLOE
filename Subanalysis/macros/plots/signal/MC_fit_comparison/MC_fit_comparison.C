@@ -50,7 +50,8 @@ std::vector<TString> histList = {"px_Pi1", "py_Pi1", "pz_Pi1", "Energy_Pi1",
                                  "mass_pi01", "mass_pi02",
                                  "time_neutral_MC", "prob_signal", "delta_t",
                                  "combined_mass_pi0",
-                                 "pull1", "pull2", "pull3", "pull4", "pull5", "phi_vtx_x", "phi_vtx_y", "phi_vtx_z", "vKne"}; // List of histograms to be created
+                                 "pull1", "pull2", "pull3", "pull4", "pull5", "phi_vtx_x", "phi_vtx_y", "phi_vtx_z", "vKne",
+                                 "goodClusNumTriKinFit"}; // List of histograms to be created
 
 std::map<TString, std::vector<TString>> histTitles = {
     {"px_Pi1", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
@@ -104,7 +105,8 @@ std::map<TString, std::vector<TString>> histTitles = {
     {"phi_vtx_x", {"#phi_{vtx,x} - #phi_{vtx,x}^{MC} [cm]"}},
     {"phi_vtx_y", {"#phi_{vtx,y} - #phi_{vtx,y}^{MC} [cm]"}},
     {"phi_vtx_z", {"#phi_{vtx,z} - #phi_{vtx,z}^{MC} [cm]"}},
-    {"vKne", {"v_{K_{ne}} - v_{K_{ne}}^{MC} [cm/ns]"}}};
+    {"vKne", {"v_{K_{ne}} - v_{K_{ne}}^{MC} [cm/ns]"}},
+    {"goodClusNumTriKinFit", {"Number of good clusters used in trilateration kinematic fit"}}};
 
 std::map<TString, std::vector<Double_t>>
     histLimits = {{"px_Pi1", {-200, 200}},
@@ -158,7 +160,8 @@ std::map<TString, std::vector<Double_t>>
                   {"phi_vtx_x", {-1, 1}},
                   {"phi_vtx_y", {-0.2, 0.2}},
                   {"phi_vtx_z", {-10, 10}},
-                  {"vKne", {-2, 2}}};
+                  {"vKne", {-2, 2}},
+                  {"goodClusNumTriKinFit", {-1, 6}}};
 
 std::map<TString, TCanvas *> canvas;
 
@@ -207,6 +210,9 @@ void MC_fit_comparison::SlaveBegin(TTree * /*tree*/)
   TString option = GetOption();
 }
 
+Int_t numberOfAllGood = 0,
+      numberOfAtLeastOneBad = 0;
+
 Bool_t MC_fit_comparison::Process(Long64_t entry)
 {
   // The Process() function is called for each entry in the tree (or possibly
@@ -244,12 +250,12 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
           pathKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
                             pow(KchboostFit[7] - ipFit[1], 2) +
                             pow(KchboostFit[8] - ipFit[2], 2)),
-          tKchFit = pathKchFit / (vKchFit * 0.0895),
+          tKchFit = KchboostFit[9] / (0.0895),
           vKneFit = cVel * KnereclorFit[4] / KnereclorFit[3],
-          pathKneFit = sqrt(pow(ParamSignalFit[33] - ipFit[0], 2) +
-                            pow(ParamSignalFit[34] - ipFit[1], 2) +
-                            pow(ParamSignalFit[35] - ipFit[2], 2)),
-          tKneFit = pathKneFit / (vKneFit * 0.0895),
+          pathKneFit = sqrt(pow(KnereclorFit[6] - ipFit[0], 2) +
+                            pow(KnereclorFit[7] - ipFit[1], 2) +
+                            pow(KnereclorFit[8] - ipFit[2], 2)),
+          tKneFit = KnereclorFit[9] / (0.0895),
           vKneMC = cVel * Knemc[4] / Knemc[3],
           vKne = cVel * Knerec[4] / Knerec[3],
           pathKne = sqrt(pow(KneTriangle[6] - ip[0], 2) +
@@ -262,31 +268,39 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
           combinedMassPi0 = sqrt(pow(pi01[5] - mPi0, 2) +
                                  pow(pi02[5] - mPi0, 2));
 
-  Float_t photon1path = sqrt(pow(ParamSignalFit[0] - KnerecFit[6], 2) +
-                             pow(ParamSignalFit[1] - KnerecFit[7], 2) +
-                             pow(ParamSignalFit[2] - KnerecFit[8], 2)),
-          photon2path = sqrt(pow(ParamSignalFit[5] - KnerecFit[6], 2) +
-                             pow(ParamSignalFit[6] - KnerecFit[7], 2) +
-                             pow(ParamSignalFit[7] - KnerecFit[8], 2)),
-          photon3path = sqrt(pow(ParamSignalFit[10] - KnerecFit[6], 2) +
-                             pow(ParamSignalFit[11] - KnerecFit[7], 2) +
-                             pow(ParamSignalFit[12] - KnerecFit[8], 2)),
-          photon4path = sqrt(pow(ParamSignalFit[15] - KnerecFit[6], 2) +
-                             pow(ParamSignalFit[16] - KnerecFit[7], 2) +
-                             pow(ParamSignalFit[17] - KnerecFit[8], 2));
+  Float_t photon1path = sqrt(pow(photonFit1[4] - KnerecFit[6], 2) +
+                             pow(photonFit1[5] - KnerecFit[7], 2) +
+                             pow(photonFit1[6] - KnerecFit[8], 2)),
+          photon2path = sqrt(pow(photonFit2[4] - KnerecFit[6], 2) +
+                             pow(photonFit2[5] - KnerecFit[7], 2) +
+                             pow(photonFit2[6] - KnerecFit[8], 2)),
+          photon3path = sqrt(pow(photonFit3[4] - KnerecFit[6], 2) +
+                             pow(photonFit3[5] - KnerecFit[7], 2) +
+                             pow(photonFit3[6] - KnerecFit[8], 2)),
+          photon4path = sqrt(pow(photonFit4[4] - KnerecFit[6], 2) +
+                             pow(photonFit4[5] - KnerecFit[7], 2) +
+                             pow(photonFit4[6] - KnerecFit[8], 2));
 
-  Float_t trc1Fit = ParamSignalFit[3] - photon1path / cVel - tKneFit * 0.0895,
-          trc2Fit = ParamSignalFit[8] - photon2path / cVel - tKneFit * 0.0895,
-          trc3Fit = ParamSignalFit[13] - photon3path / cVel - tKneFit * 0.0895,
-          trc4Fit = ParamSignalFit[18] - photon4path / cVel - tKneFit * 0.0895,
+  Float_t trc1Fit = photonFit1[7] - photon1path / cVel - KnereclorFit[9],
+          trc2Fit = photonFit2[7] - photon2path / cVel - KnereclorFit[9],
+          trc3Fit = photonFit3[7] - photon3path / cVel - KnereclorFit[9],
+          trc4Fit = photonFit4[7] - photon4path / cVel - KnereclorFit[9],
           TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
   Float_t deltaTfit = tKchFit - tKneFit,
-          deltaT = *KaonChTimeLAB - tKne,
+          deltaT = *KaonChTimeLAB - *KaonNeTimeLAB,
           deltaTMC = *KaonChTimeLABMC - *KaonNeTimeLABMC;
 
-  if (*mctruth == 1 && *Chi2SignalKinFit < 40. && combinedMassPi0Fit < 10. && abs(*minv4gam - mK0) < 80.)
+  Float_t deltaPhi = *PhivSmeared1 - *PhivSmeared2;
+
+  if (*mctruth == 1)
   {
+    std::cout << deltaTMC << " " << deltaT << " " << deltaTfit << std::endl;
+
+    if (*goodClustersTriKinFitSize < 4)
+      numberOfAtLeastOneBad++;
+    if (*goodClustersTriKinFitSize >= 4)
+      numberOfAllGood++;
 
     // Fill histograms for reconstructed variables
     histsReconstructed["px_Kch"]->Fill(Kchrec[0] - Kchmc[0]);
@@ -323,6 +337,8 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["delta_t"]->Fill(deltaT - deltaTMC);
 
     histsReconstructed["combined_mass_pi0"]->Fill(combinedMassPi0);
+
+    // Decide which reconstructed track corresponds to which MC particle
 
     Double_t error1 = sqrt(pow(*CurvSmeared1 - CurvMC[0], 2) +
                            pow(*PhivSmeared1 - PhivMC[0], 2) +
@@ -393,6 +409,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsFittedSignal["pull5"]->Fill(pullsSignalFit[4]);
 
     histsFittedSignal["time_neutral_MC"]->Fill(TrcSumFit);
+
+    histsFittedSignal["goodClusNumTriKinFit"]->Fill(*goodClustersTriKinFitSize);
+
   }
 
   return kTRUE;
@@ -471,4 +490,8 @@ void MC_fit_comparison::Terminate()
 
     canvas[histName]->SaveAs(Form("img/%s_comparison.png", histName.Data()));
   }
+
+  std::cout << "How many reconstructed events had all good clusters? " << numberOfAllGood << std::endl;
+  std::cout << "How many reconstructed events had at least one bad cluster? " << numberOfAtLeastOneBad << std::endl;
+  std::cout << "Percentage of fully good events: " << (Float_t)numberOfAllGood / (numberOfAllGood + numberOfAtLeastOneBad) * 100 << " %" << std::endl;
 }

@@ -8,7 +8,6 @@
 
 #include <TString.h>
 
-
 /**
  * @namespace ErrorHandling
  * @brief Subspace for Error Handling methods
@@ -28,24 +27,25 @@ namespace ErrorHandling
     TREE_NOT_EXIST = 104, /*!< TTree does not exist*/
     NULL_POINTER = 105,   /*!< Null Pointer Exception*/
 
-    DELTA_LT_ZERO = 200, /*!< Negative delta of a quadratic equation*/
-    DENOM_EQ_ZERO = 201, /*!< Denominator of a fraction equal to zero*/
-    DET_ZERO = 202,      /*!< Matrix determinant equal to zero*/
-    NAN_VAL = 203,       /*!< NaN value in return*/
-    CHI_SQR_STEP = 204,  /*!< Step of minimization too small*/
+    DELTA_LT_ZERO = 200,         /*!< Negative delta of a quadratic equation*/
+    DENOM_EQ_ZERO = 201,         /*!< Denominator of a fraction equal to zero*/
+    DET_ZERO = 202,              /*!< Matrix determinant equal to zero*/
+    NAN_VAL = 203,               /*!< NaN value in return*/
+    CHI_SQR_STEP = 204,          /*!< Step of minimization too small*/
     INVALID_PHOTON_NUMBER = 205, /*!< Invalid number of photons for neutral reconstruction*/
-    FOUR_MOM_NOT_FILLED = 206, /*!< Four momentum of a particle not filled*/
+    FOUR_MOM_NOT_FILLED = 206,   /*!< Four momentum of a particle not filled*/
 
     // Physics-related errors
-    NOT_ENOUGH_NEUTRAL_CLUSTERS = 300, /*!< Not enough neutral clusters */
-    NOT_ENOUGH_CHARGED_TRACKS = 301,   /*!< Not enough charged tracks for analysis*/
-    CHARGED_KAON_MASS_PRE = 302,           /*!< Did not pass charged kaon ivariant mass in preselection*/
-    TRILATERATION_KIN_FIT = 303,
-    TRIANGLE_REC = 304,
-    SIGNAL_KIN_FIT = 305,
-    NO_CHARGED_VTX_OR_TRACKS = 306,
-    OMEGA_KIN_FIT = 307,           
-
+    NO_VTX_WITH_TWO_TRACKS = 300,          /*!< No charged vertices or tracks available for analysis*/
+    LESS_THAN_FOUR_NEUTRAL_CLUSTERS = 301, /*!< Less than four neutral clusters available for analysis*/
+    LESS_THAN_SIX_NEUTRAL_CLUSTERS = 302,  /*!< Less than six neutral clusters available for analysis*/
+    NO_VTX_WITH_OPPOSITE_TRACKS = 303,     /*!< Not enough charged tracks for analysis*/
+    NO_TWO_VTX_WITH_TWO_TRACKS = 304,      /*!< No charged vertices or tracks available for analysis*/
+    CHARGED_KAON_MASS_PRE = 305,           /*!< Did not pass charged kaon invariant mass in preselection*/
+    TRILATERATION_KIN_FIT = 306,           /*!< Did not pass the trilateration kin fit*/
+    TRIANGLE_REC = 307,                    /*!< Did not pass the triangle reconstruction*/
+    SIGNAL_KIN_FIT = 308,                  /*!< Did not pass the signal kin fit*/
+    OMEGA_KIN_FIT = 309,                   /*!< Did not pass the omega kin fit*/
 
     NOT_RECOGNIZED = 666, /*!< Unexpected exception*/
 
@@ -128,10 +128,12 @@ namespace ErrorHandling
         return "Four momentum of a particle not filled.";
 
       // Physics-related logs
-      case ErrorCodes::NOT_ENOUGH_CHARGED_TRACKS:
-        return "Not enough charged vertices.";
-      case ErrorCodes::NOT_ENOUGH_NEUTRAL_CLUSTERS:
-        return "Not enough neutral clusters.";
+      case ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS:
+        return "No vertices with two opposite tracks available for analysis.";
+      case ErrorCodes::LESS_THAN_FOUR_NEUTRAL_CLUSTERS:
+        return "Less than four neutral clusters available for analysis.";
+      case ErrorCodes::LESS_THAN_SIX_NEUTRAL_CLUSTERS:
+        return "Less than six neutral clusters available for analysis.";
       case ErrorCodes::CHARGED_KAON_MASS_PRE:
         return "Did not pass charged kaon ivariant mass in preselection.";
       case ErrorCodes::TRILATERATION_KIN_FIT:
@@ -140,8 +142,10 @@ namespace ErrorHandling
         return "Did not pass the triangle reconstruction.";
       case ErrorCodes::SIGNAL_KIN_FIT:
         return "Did not pass the signal global kin fit.";
-      case ErrorCodes::NO_CHARGED_VTX_OR_TRACKS:
-        return "No charged vertices or tracks available for analysis.";
+      case ErrorCodes::NO_VTX_WITH_TWO_TRACKS:
+        return "No vertices with two tracks available for analysis.";
+      case ErrorCodes::NO_TWO_VTX_WITH_TWO_TRACKS:
+        return "No two vertices with two tracks available for analysis.";
       case ErrorCodes::OMEGA_KIN_FIT:
         return "Did not pass the omega kin fit.";
 
@@ -282,7 +286,8 @@ namespace ErrorHandling
      */
     void printPhysicsErrorStatsPerMctruth(bool printToScreen = false)
     {
-      if (!_logFile.is_open()) return;
+      if (!_logFile.is_open())
+        return;
       _logFile << "Physics-related error statistics per mctruth:\n";
       for (const auto &mctruth_pair : _physicsErrCountPerMctruth)
       {

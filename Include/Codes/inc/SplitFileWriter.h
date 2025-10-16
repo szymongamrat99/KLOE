@@ -12,6 +12,7 @@
 #include <TSystem.h>
 #include <TDirectory.h>
 #include <TRandom.h>
+#include <kloe_class.h>
 
 class SplitFileWriter
 {
@@ -47,9 +48,9 @@ private:
   Int_t _start;
 
   // Zmienne do zapisania
-  std::map<std::string, Int_t> _intVars;         // Zmienne Int_t
-  std::map<std::string, Float_t> _floatVars;     // Zmienne Float_t
-  std::map<std::string, std::vector<Int_t>> _intArrays;     // Zmienne Int_t
+  std::map<std::string, Int_t> _intVars;                    // Zmienne Int_t
+  std::map<std::string, Float_t> _floatVars;                // Zmienne Float_t
+  std::map<std::string, std::vector<Int_t>> _intArrays;     // Tablice Int_t
   std::map<std::string, std::vector<Float_t>> _floatArrays; // Tablice Float_t
 
 };
