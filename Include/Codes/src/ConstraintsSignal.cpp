@@ -156,8 +156,8 @@ void ConstraintsSignal::IntermediateReconstruction()
     photon[i].fourPos[1] = photon[i].clusterParams[1];
     photon[i].fourPos[2] = photon[i].clusterParams[2];
     photon[i].fourPos[3] = photon[i].clusterParams[3];
-    photon[i].calculatePath(Knereclor.fourPos.data());
 
+    photon[i].calculatePath(Knereclor.fourPos.data());
     photon[i].calculateTimeOfFlightPhoton();
     photon[i].SetTotalVectorPhoton();
   }
@@ -174,8 +174,6 @@ void ConstraintsSignal::IntermediateReconstruction()
 
   Knerec.calculatePath(ip.data());
   Knerec.SetTotalVector();
-  Knerec.calculateLifetimeLAB();
-
 }
 
 Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p)
@@ -197,7 +195,7 @@ Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
   SetParameters(p);
   IntermediateReconstruction();
 
-  return  photon[_chosenPhoton].fourPos[3] - Knereclor.lifetimeLAB - photon[_chosenPhoton].timeOfFlight;
+  return photon[_chosenPhoton].fourPos[3] - Knerec.lifetimeLAB - photon[_chosenPhoton].timeOfFlight;
 }
 
 Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)

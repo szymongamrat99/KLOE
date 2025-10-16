@@ -126,8 +126,8 @@ void VariableConfig::InitializeDefaultMappings()
   AddVariable("tcl", VariableInfo("TCl", "TCl", "Float_t", true, "nclu"));
   AddVariable("enecl", VariableInfo("EneCl", "EneCl", "Float_t", true, "nclu"));
   AddVariable("pnum1", VariableInfo("PNum1", "PNum1", "Int_t", true, "nclumc"));
-  // AddVariable("pnum2", VariableInfo("PNum2", "PNum2", "Int_t", true, "nclumc"));
-  // AddVariable("pnum3", VariableInfo("PNum3", "PNum3", "Int_t", true, "nclumc"));
+  AddVariable("pnum2", VariableInfo("PNum2", "PNum2", "Int_t", true, "nclumc"));
+  AddVariable("pnum3", VariableInfo("PNum3", "PNum3", "Int_t", true, "nclumc"));
 
   // Tablice Float_t - tracki
   AddVariable("curv", VariableInfo("CurV", "CurV", "Float_t", true, "ntv"));

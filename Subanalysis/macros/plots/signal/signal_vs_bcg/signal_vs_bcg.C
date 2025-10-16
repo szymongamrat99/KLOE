@@ -185,7 +185,7 @@ std::map<TString, std::vector<Double_t>>
                   {"mass_pi02", {-100, 100}},
                   {"time_neutral_MC", {-5, 2}},
                   {"prob_signal", {0, 1}},
-                  {"delta_t", {-20, 20}},
+                  {"delta_t", {-100, 100}},
                   {"combined_mass_pi0", {-100, 100}},
                   {"pull1", {-5, 5}},
                   {"pull2", {-5, 5}},
@@ -216,7 +216,7 @@ TH1 *deltaTSignalTot;
 
 KLOE::TripleGaussFitter *fitter;
 
-Int_t nbins = 81;
+Int_t nbins = 21;
 
 void signal_vs_bcg::Begin(TTree * /*tree*/)
 {
@@ -296,12 +296,12 @@ Bool_t signal_vs_bcg::Process(Long64_t entry)
           pathKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
                             pow(KchboostFit[7] - ipFit[1], 2) +
                             pow(KchboostFit[8] - ipFit[2], 2)),
-          tKchFit = pathKchFit / (vKchFit * 0.0895),
+          tKchFit = KchboostFit[9] / 0.0895,
           vKneFit = cVel * KnereclorFit[4] / KnereclorFit[3],
-          pathKneFit = sqrt(pow(ParamSignalFit[33] - ipFit[0], 2) +
-                            pow(ParamSignalFit[34] - ipFit[1], 2) +
-                            pow(ParamSignalFit[35] - ipFit[2], 2)),
-          tKneFit = pathKneFit / (vKneFit * 0.0895),
+          pathKneFit = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
+                            pow(KnerecFit[7] - ipFit[1], 2) +
+                            pow(KnerecFit[8] - ipFit[2], 2)),
+          tKneFit = KnerecFit[9] / 0.0895,
           vKneMC = cVel * Knemc[4] / Knemc[3],
           vKne = cVel * Knerec[4] / Knerec[3],
           pathKne = sqrt(pow(KneTriangle[6] - ip[0], 2) +
@@ -309,23 +309,23 @@ Bool_t signal_vs_bcg::Process(Long64_t entry)
                          pow(KneTriangle[8] - ip[2], 2)),
           tKne = pathKne / (vKne * 0.0895);
 
-  Float_t photon1path = sqrt(pow(ParamSignalFit[0] - KnerecFit[6], 2) +
-                             pow(ParamSignalFit[1] - KnerecFit[7], 2) +
-                             pow(ParamSignalFit[2] - KnerecFit[8], 2)),
-          photon2path = sqrt(pow(ParamSignalFit[5] - KnerecFit[6], 2) +
-                             pow(ParamSignalFit[6] - KnerecFit[7], 2) +
-                             pow(ParamSignalFit[7] - KnerecFit[8], 2)),
-          photon3path = sqrt(pow(ParamSignalFit[10] - KnerecFit[6], 2) +
-                             pow(ParamSignalFit[11] - KnerecFit[7], 2) +
-                             pow(ParamSignalFit[12] - KnerecFit[8], 2)),
-          photon4path = sqrt(pow(ParamSignalFit[15] - KnerecFit[6], 2) +
-                             pow(ParamSignalFit[16] - KnerecFit[7], 2) +
-                             pow(ParamSignalFit[17] - KnerecFit[8], 2));
+  Float_t photon1path = sqrt(pow(photonFit1[4] - KnerecFit[6], 2) +
+                             pow(photonFit1[5] - KnerecFit[7], 2) +
+                             pow(photonFit1[6] - KnerecFit[8], 2)),
+          photon2path = sqrt(pow(photonFit2[4] - KnerecFit[6], 2) +
+                             pow(photonFit2[5] - KnerecFit[7], 2) +
+                             pow(photonFit2[6] - KnerecFit[8], 2)),
+          photon3path = sqrt(pow(photonFit3[4] - KnerecFit[6], 2) +
+                             pow(photonFit3[5] - KnerecFit[7], 2) +
+                             pow(photonFit3[6] - KnerecFit[8], 2)),
+          photon4path = sqrt(pow(photonFit4[4] - KnerecFit[6], 2) +
+                             pow(photonFit4[5] - KnerecFit[7], 2) +
+                             pow(photonFit4[6] - KnerecFit[8], 2));
 
-  Float_t trc1Fit = ParamSignalFit[3] - photon1path / cVel - tKneFit * 0.0895,
-          trc2Fit = ParamSignalFit[8] - photon2path / cVel - tKneFit * 0.0895,
-          trc3Fit = ParamSignalFit[13] - photon3path / cVel - tKneFit * 0.0895,
-          trc4Fit = ParamSignalFit[18] - photon4path / cVel - tKneFit * 0.0895,
+  Float_t trc1Fit = photonFit1[7] - photon1path / cVel - KnerecFit[9],
+          trc2Fit = photonFit2[7] - photon2path / cVel - KnerecFit[9],
+          trc3Fit = photonFit3[7] - photon3path / cVel - KnerecFit[9],
+          trc4Fit = photonFit4[7] - photon4path / cVel - KnerecFit[9],
           TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
   Float_t deltaTfit = tKchFit - tKneFit,
@@ -374,16 +374,13 @@ Bool_t signal_vs_bcg::Process(Long64_t entry)
   Float_t weight = 1.0;
 
   if (*mctruth == 1)
-    // weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
+    weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
-  if ((*mctruth == 1 || *mctruth == 0 || *mctruth == -1) && *mcflag == 1)
+  if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1)
     signal_tot++;
 
   if (*mctruth == 1)
     deltaTSignalTot->Fill(tKchFit - tKneFit, weight);
-
-  // if (*mctruth == 5 && *mcflag == 1)
-  //   signal_tot++;
 
   TVector3 z_axis(0., 0., 1.),
       gamma1(gammaMomTriangle1[0], gammaMomTriangle1[1], gammaMomTriangle1[2]),
@@ -405,8 +402,35 @@ Bool_t signal_vs_bcg::Process(Long64_t entry)
                      thetaGamma3 > angleLower && thetaGamma3 < angleUpper &&
                      thetaGamma4 > angleLower && thetaGamma4 < angleUpper;
 
-  if (*mctruth > 0 /*&& *Chi2SignalKinFit < 30. && abs(Kchrec[5] - mK0) < 1.2 && abs(*minv4gam - mK0) < 90. && combinedMassPi0Fit < 12. && *Qmiss < 3.75*/)
+  Float_t deltaPhi = *PhivSmeared1 - *PhivSmeared2,
+          deltaPhiMC,
+          deltaPhiFit = ParamSignalFit[24] - ParamSignalFit[27];
+
+  Double_t error1 = sqrt(pow(abs(*CurvSmeared1) - abs(CurvMC[0]), 2) +
+                         pow(abs(*PhivSmeared1) - abs(PhivMC[0]), 2) +
+                         pow(abs(*CotvSmeared1) - abs(CotvMC[0]), 2)),
+           error2 = sqrt(pow(abs(*CurvSmeared1) - abs(CurvMC[1]), 2) +
+                         pow(abs(*PhivSmeared1) - abs(PhivMC[1]), 2) +
+                         pow(abs(*CotvSmeared1) - abs(CotvMC[1]), 2));
+
+  if (error1 < error2)
   {
+    Double_t phi1MCCorr = PhivMC[0], phi2MCCorr = PhivMC[1];
+
+    deltaPhiMC = phi1MCCorr - phi2MCCorr;
+  }
+  else
+  {
+    Double_t phi1MCCorr = PhivMC[0], phi2MCCorr = PhivMC[1];
+
+    deltaPhiMC = phi1MCCorr - phi2MCCorr;
+  }
+
+  if (*mctruth >= 0 /*&& *goodClustersTriKinFitSize < 1 && abs(deltaPhiFit - 3.1415) > 2 * 0.14 && *Chi2SignalKinFit > 220000. && abs(Kchrec[5] - mK0) < 1.2 && abs(*minv4gam - mK0) < 90. && combinedMassPi0Fit < 12. && *Qmiss < 3.75*/)
+  {
+
+      std::cout << KchrecFit[9] / 0.0895 << " " << KnerecFit[9] / 0.0895 << " " << KchrecFit[9] / 0.0895 - KnerecFit[9] / 0.0895 <<  std::endl;
+
     if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1)
       signal_num++;
 
@@ -455,11 +479,11 @@ Bool_t signal_vs_bcg::Process(Long64_t entry)
 
       histsFittedSignal["Qmiss"][channelTypes[*mctruth]]->Fill(*Qmiss, weight);
 
-      histsFittedSignal["delta_t"][channelTypes[*mctruth]]->Fill(tKchFit - tKneFit, weight);
+      histsFittedSignal["delta_t"][channelTypes[*mctruth]]->Fill(deltaTfit, weight);
 
       histsFittedSignal["deltaPhiv"][channelTypes[*mctruth]]->Fill(*PhivSmeared1 - *PhivSmeared2, weight);
 
-      histsFittedSignal["deltaPhivFit"][channelTypes[*mctruth]]->Fill(ParamSignalFit[24] - ParamSignalFit[27], weight);
+      histsFittedSignal["deltaPhivFit"][channelTypes[*mctruth]]->Fill(deltaPhiFit, weight);
 
       histsFittedSignal["nev"][channelTypes[*mctruth]]->Fill(*nev, weight);
       histsFittedSignal["nrun"][channelTypes[*mctruth]]->Fill(*nrun, weight);
@@ -544,8 +568,6 @@ void signal_vs_bcg::Terminate()
 
   deltaTSignalTot->Scale(deltaTSignalTot->GetEntries() / deltaTSignalTot->Integral());
 
-  std::cout << histsFittedSignal["delta_t"]["Signal"]->Integral() << " " << deltaTSignalTot->Integral() << std::endl;
-
   TEfficiency *efficiency = new TEfficiency(*histsFittedSignal["delta_t"]["Signal"], *deltaTSignalTot);
 
   efficiency->SetStatisticOption(TEfficiency::kBUniform);
@@ -623,6 +645,7 @@ void signal_vs_bcg::Terminate()
   tot_events = signal_num + bkg_tot;
 
   std::cout << "Signal events: " << signal_num << std::endl;
+  std::cout << "Signal total events: " << signal_tot << std::endl;
   std::cout << "Background events: " << bkg_tot << std::endl;
 
   std::cout << "Efficiency signal: " << 100 * signal_num / (Float_t)signal_tot << " % (" << signal_num << "/" << signal_tot << ")" << std::endl;

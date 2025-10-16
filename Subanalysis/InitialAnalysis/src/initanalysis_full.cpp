@@ -175,6 +175,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   Float_t Emiss = 0., Pmiss = 0., MissMom[3] = {};
 
   std::vector<KLOE::neutralParticle> photons(nPhotons), pions(nPions);
+  KLOE::kaonNeutral Knerec, Knereclor;
   KLOE::neutralParticle omega;
   std::vector<KLOE::chargedParticle> chargedPions(2);
 
@@ -301,6 +302,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     baseKin.KchboostKL.clear();
     baseKin.Kchboostsmeared.clear();
     baseKin.Kchboostnew.clear();
+    baseKin.KchboostFit.clear();
+    baseKin.KchrecFit.clear();
+    baseKin.KnerecFit.clear();
+    baseKin.KnereclorFit.clear();
 
     baseKin.ipKS.clear();
     baseKin.ipKL.clear();
@@ -544,18 +549,46 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         std::vector<Int_t> ivTmp(dataAccess.GetIv().begin(), dataAccess.GetIv().end());
         std::map<Int_t, Int_t> mapTmp = Obj.CountRepeatingElements(ivTmp);
 
-        // Sprawdź czy jest przynajmniej jedna dwójka
-        bool hasTwo = false;
+        // Sprawdź czy jest przynajmniej jeden wierzchołek z dwoma dołączonymi śladami
+        bool hasOne = false;
         for (const auto &pair : mapTmp)
         {
           if (pair.second == 2)
           {
-            hasTwo = true;
+            hasOne = true;
             break;
           }
         }
 
-        if (hasTwo)
+        // Sprawdź czy są przynajmniej dwa wierzchołki z dwoma dołączonymi śladami
+        bool hasTwo = false;
+        Int_t countTmp = 0;
+        for (const auto &pair : mapTmp)
+        {
+          if (pair.second == 2)
+          {
+            if (countTmp == 1)
+            {
+              hasTwo = true;
+              break;
+            }
+            countTmp++;
+          }
+        }
+
+        if (!hasOne)
+        {
+          errorCode = ErrorHandling::ErrorCodes::NO_VTX_WITH_TWO_TRACKS;
+          logger.getErrLog(errorCode, "", mctruth);
+          noError = false;
+
+          if (mctruth == 1)
+          {
+            passed = true;
+            mctruth = -1;
+          }
+        }
+        else
         {
           if (eventAnalysis != nullptr)
           {
@@ -569,34 +602,27 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           std::map<KLOE::HypothesisCode, ErrorHandling::ErrorCodes> hypoMap;
 
           // KMASS HYPOTHESIS - FOR SIGNAL
-          hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+          hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 0, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
 
-          baseKin.CurvSmeared1 = 1000. / sqrt(pow(baseKin.trknew[0][0], 2) + pow(baseKin.trknew[0][1], 2));
-          baseKin.PhivSmeared1 = acos(baseKin.trknew[0][0] / sqrt(pow(baseKin.trknew[0][0], 2) + pow(baseKin.trknew[0][1], 2)));
-          baseKin.CotvSmeared1 = baseKin.trknew[0][2] / sqrt(pow(baseKin.trknew[0][0], 2) + pow(baseKin.trknew[0][1], 2));
+          Double_t pT1 = sqrt(pow(baseKin.trknew[0][0], 2) + pow(baseKin.trknew[0][1], 2)),
+                   pT2 = sqrt(pow(baseKin.trknew[1][0], 2) + pow(baseKin.trknew[1][1], 2));
 
-          baseKin.CurvSmeared2 = 1000. / sqrt(pow(baseKin.trknew[1][0], 2) + pow(baseKin.trknew[1][1], 2));
-          baseKin.PhivSmeared2 = acos(baseKin.trknew[1][0] / sqrt(pow(baseKin.trknew[1][0], 2) + pow(baseKin.trknew[1][1], 2)));
-          baseKin.CotvSmeared2 = baseKin.trknew[1][2] / sqrt(pow(baseKin.trknew[1][0], 2) + pow(baseKin.trknew[1][1], 2));
+          baseKin.CurvSmeared1 = 1000. / pT1;
+          baseKin.PhivSmeared1 = atan2(baseKin.trknew[0][1], baseKin.trknew[0][0]);
+          baseKin.CotvSmeared1 = baseKin.trknew[0][2] / pT1;
 
-          if (Obj.signum(dataAccess.GetCurv()[baseKin.vtaken[1]]) != Obj.signum(baseKin.CurvSmeared1))
+          baseKin.CurvSmeared2 = 1000. / pT2;
+          baseKin.PhivSmeared2 = atan2(baseKin.trknew[1][1], baseKin.trknew[1][0]);
+          baseKin.CotvSmeared2 = baseKin.trknew[1][2] / pT2;
+
+          if (std::signbit(dataAccess.GetCurv()[baseKin.vtaken[1]]) != std::signbit(baseKin.CurvSmeared1))
           {
             baseKin.CurvSmeared1 = -baseKin.CurvSmeared1;
           }
 
-          if (Obj.signum(dataAccess.GetCurv()[baseKin.vtaken[2]]) != Obj.signum(baseKin.CurvSmeared2))
+          if (std::signbit(dataAccess.GetCurv()[baseKin.vtaken[2]]) != std::signbit(baseKin.CurvSmeared2))
           {
             baseKin.CurvSmeared2 = -baseKin.CurvSmeared2;
-          }
-
-          if (Obj.signum(dataAccess.GetPhiv()[baseKin.vtaken[1]]) != Obj.signum(baseKin.PhivSmeared1))
-          {
-            baseKin.PhivSmeared1 = -baseKin.PhivSmeared1;
-          }
-
-          if (Obj.signum(dataAccess.GetPhiv()[baseKin.vtaken[2]]) != Obj.signum(baseKin.PhivSmeared2))
-          {
-            baseKin.PhivSmeared2 = -baseKin.PhivSmeared2;
           }
 
           // Unsmeared versions of vtx variables
@@ -617,9 +643,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           // VTX OF KS - FOR PIPIPIPI
           errTmp[0] = eventAnalysis->findKSLRec(16, -1, baseKin.KchrecKS, baseKin.trkKS[0], baseKin.trkKS[1], baseKin.vtakenKS, logger);
 
-          // VTX OF KL - FOR PIPIPIPI
-          errTmp[1] = eventAnalysis->findKSLRec(10, baseKin.vtakenKS[0], baseKin.KchrecKL, baseKin.trkKL[0], baseKin.trkKL[1], baseKin.vtakenKL, logger);
-          // --------------------------------------------------------------------------------
+          if (hasTwo)
+          {
+            // VTX OF KL - FOR PIPIPIPI
+            errTmp[1] = eventAnalysis->findKSLRec(10, baseKin.vtakenKS[0], baseKin.KchrecKL, baseKin.trkKL[0], baseKin.trkKL[1], baseKin.vtakenKL, logger);
+            // --------------------------------------------------------------------------------
+          }
+          else if (!hasTwo && hypoCode == KLOE::HypothesisCode::FOUR_PI)
+            errTmp[1] = ErrorHandling::ErrorCodes::NO_TWO_VTX_WITH_TWO_TRACKS;
+          else
+            errTmp[1] = ErrorHandling::ErrorCodes::NO_ERROR;
 
           if (errTmp[0] != ErrorHandling::ErrorCodes::NO_ERROR)
             hypoMap[KLOE::HypothesisCode::FOUR_PI] = errTmp[0];
@@ -816,8 +849,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
               baseKin.Qmiss = sqrt(pow(Emiss, 2) + pow(Pmiss, 2));
 
-              ErrorHandling::ErrorCodes codeTri = ErrorHandling::ErrorCodes::CHARGED_KAON_MASS_PRE;
-
               if (cutter.PassCut(2) && cutter.PassCut(3))
               {
 
@@ -854,10 +885,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                 errorCode = trilatKinFitObj.Reconstruct();
                 trilatKinFitObj.GetResults(baseKin.bunchnum, baseKin.ipTriKinFit, baseKin.g4takenTriKinFit, gamma_mom_final, baseKin.KnetriKinFit, baseKin.neuVtxTriKinFit, baseKin.Chi2TriKinFit, baseKin.pullsTriKinFit);
 
-                std::vector<Int_t> goodCluster;
-
-                genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g4takenTriKinFit, dataAccess.GetPNum1(), dataAccess.GetNTMC(), dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), goodCluster);
-
                 baseKin.gammaMomTriKinFit1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
                 baseKin.gammaMomTriKinFit2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
                 baseKin.gammaMomTriKinFit3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
@@ -876,6 +903,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                 }
                 else
                 {
+                  baseKin.goodClustersTriKinFit.clear();
+                  baseKin.goodClustersTriKinFit.shrink_to_fit();
+
+                  genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g4takenTriKinFit, dataAccess.GetPNum1(), dataAccess.GetNTMC(), dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersTriKinFit);
+
                   errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.KneTriangle, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
 
                   if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
@@ -1033,14 +1065,17 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                                baseKin.Chi2SignalKinFit,
                                                baseKin.pullsSignalFit);
 
-                    // Pairing of photons to pions and pion reconstruction
-
                     for (Int_t i = 0; i < nPhotons; i++)
                     {
                       photons[i].FillFourMom(baseKin.photonFit[i][0],
                                              baseKin.photonFit[i][1],
                                              baseKin.photonFit[i][2],
                                              baseKin.photonFit[i][3]);
+
+                      photons[i].fourPos[0] = baseKin.photonFit[i][4];
+                      photons[i].fourPos[1] = baseKin.photonFit[i][5];
+                      photons[i].fourPos[2] = baseKin.photonFit[i][6];
+                      photons[i].fourPos[3] = baseKin.photonFit[i][7];
                     }
 
                     std::vector<Int_t> bestPairingIndex;
@@ -1100,271 +1135,276 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
               cutter.UpdateStats(mctruth);
             }
-
-            if ((cutter.PassAllCuts() && noError) || passed)
-            {
-              errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
-
-              // Clone of the branches of the old tree
-              // General properties of the event
-              baseKin.nrun = dataAccess.GetNRun();
-              baseKin.nev = dataAccess.GetNEv();
-
-              baseKin.necls = dataAccess.GetNECls();
-              baseKin.eclfilfo = dataAccess.GetEclFilfo();
-              // baseKin.eclfilfoword = *generalProps.eclfilfoword;
-
-              baseKin.eclstream.assign(dataAccess.GetEclStream().begin(), dataAccess.GetEclStream().end());
-              // -------------------------------------------------------------------------------------
-              // Bhabha interaction point and momentum
-              baseKin.Bx = dataAccess.GetBx();
-              baseKin.By = dataAccess.GetBy();
-              baseKin.Bz = dataAccess.GetBz();
-              baseKin.Bsx = dataAccess.GetBxErr();
-              baseKin.Bsy = dataAccess.GetByErr();
-              baseKin.Bsz = dataAccess.GetBzErr();
-              baseKin.Bpx = dataAccess.GetBpx();
-              baseKin.Bpy = dataAccess.GetBpy();
-              baseKin.Bpz = dataAccess.GetBpz();
-              baseKin.Bpxerr = dataAccess.GetBpxErr();
-              baseKin.Bpyerr = dataAccess.GetBpyErr();
-              baseKin.Bpzerr = dataAccess.GetBpzErr();
-              baseKin.Broots = dataAccess.GetBRoots();
-              baseKin.BrootsErr = dataAccess.GetBRootsErr();
-              // -------------------------------------------------------------------------------------
-              // Cluster data
-              baseKin.nclu = dataAccess.GetNClu();
-              baseKin.ntcl = dataAccess.GetNTCl();
-              baseKin.T0step1 = dataAccess.GetT0Step1();
-              baseKin.Asscl.assign(dataAccess.GetAssCl().begin(), dataAccess.GetAssCl().end());
-              baseKin.Xcl.assign(dataAccess.GetXCl().begin(), dataAccess.GetXCl().end());
-              baseKin.Ycl.assign(dataAccess.GetYCl().begin(), dataAccess.GetYCl().end());
-              baseKin.Zcl.assign(dataAccess.GetZCl().begin(), dataAccess.GetZCl().end());
-              baseKin.Tcl.assign(baseKin.TclCorr.begin(), baseKin.TclCorr.end());
-              baseKin.Enecl.assign(dataAccess.GetEneCl().begin(), dataAccess.GetEneCl().end());
-              // -------------------------------------------------------------------------------------
-              // Charged decay data
-              baseKin.nv = dataAccess.GetNV();
-              baseKin.ntv = dataAccess.GetNTV();
-              baseKin.iv.assign(dataAccess.GetIv().begin(), dataAccess.GetIv().end());
-              baseKin.Curv.assign(dataAccess.GetCurv().begin(), dataAccess.GetCurv().end());
-              baseKin.Phiv.assign(dataAccess.GetPhiv().begin(), dataAccess.GetPhiv().end());
-              baseKin.Cotv.assign(dataAccess.GetCotv().begin(), dataAccess.GetCotv().end());
-              baseKin.xv.assign(dataAccess.GetXv().begin(), dataAccess.GetXv().end());
-              baseKin.yv.assign(dataAccess.GetYv().begin(), dataAccess.GetYv().end());
-              baseKin.zv.assign(dataAccess.GetZv().begin(), dataAccess.GetZv().end());
-              // -------------------------------------------------------------------------------------
-              // Monte carlo data
-              if (MonteCarloInitAnalysis)
-              {
-                baseKin.ntmc = dataAccess.GetNTMC();
-                baseKin.nvtxmc = dataAccess.GetNVtxMC();
-                baseKin.vtxmc.assign(dataAccess.GetVtxMC().begin(), dataAccess.GetVtxMC().end());
-                baseKin.pidmc.assign(dataAccess.GetPidMC().begin(), dataAccess.GetPidMC().end());
-                baseKin.mother.assign(dataAccess.GetMother().begin(), dataAccess.GetMother().end());
-                baseKin.xvmc.assign(dataAccess.GetXvMC().begin(), dataAccess.GetXvMC().end());
-                baseKin.yvmc.assign(dataAccess.GetYvMC().begin(), dataAccess.GetYvMC().end());
-                baseKin.zvmc.assign(dataAccess.GetZvMC().begin(), dataAccess.GetZvMC().end());
-                baseKin.pxmc.assign(dataAccess.GetPxMC().begin(), dataAccess.GetPxMC().end());
-                baseKin.pymc.assign(dataAccess.GetPyMC().begin(), dataAccess.GetPyMC().end());
-                baseKin.pzmc.assign(dataAccess.GetPzMC().begin(), dataAccess.GetPzMC().end());
-              }
-              else
-              {
-                baseKin.ntmc = 0;
-                baseKin.nvtxmc = 0;
-                baseKin.vtxmc = {};
-                baseKin.pidmc = {};
-                baseKin.mother = {};
-                baseKin.xvmc = {};
-                baseKin.yvmc = {};
-                baseKin.zvmc = {};
-                baseKin.pxmc = {};
-                baseKin.pymc = {};
-                baseKin.pzmc = {};
-                baseKin.ipmc = {};
-                baseKin.Kchmc = {};
-                baseKin.Knemc = {};
-                baseKin.trkKSmc[0] = {};
-                baseKin.trkKSmc[1] = {};
-                baseKin.trkKLmc[0] = {};
-                baseKin.trkKLmc[1] = {};
-              }
-              // -------------------------------------------------------------------------------------
-
-              // Int_t zmienne
-              std::map<std::string, Int_t> intVars = {
-                  {"nrun", baseKin.nrun},                 // Number of run
-                  {"nev", baseKin.nev},                   // Number of event
-                  {"necls", baseKin.necls},               // Number of ECL words
-                  {"Eclfilfo", baseKin.eclfilfo},         // Which filfo was used
-                  {"Eclfilfoword", baseKin.eclfilfoword}, // Filfo word
-                  {"mcflag", mcflag},                     // If event from MC of Data
-                  {"mctruth", mctruth},                   // What event type
-                  {"nclu", baseKin.nclu},
-                  {"ntcl", baseKin.ntcl},
-                  {"nv", baseKin.nv},
-                  {"ntv", baseKin.ntv},
-                  {"ntmc", baseKin.ntmc},
-                  {"nvtxmc", baseKin.nvtxmc},
-                  {"bunchnum", baseKin.bunchnum}};
-
-              // Float_t zmienne
-              std::map<std::string, Float_t> floatVars = {
-                  {"T0step1", baseKin.T0step1},
-                  {"Bx", baseKin.Bx},
-                  {"By", baseKin.By},
-                  {"Bz", baseKin.Bz},
-                  {"Bpx", baseKin.Bpx},
-                  {"Bpy", baseKin.Bpy},
-                  {"Bpz", baseKin.Bpz},
-                  {"Broots", baseKin.Broots},
-                  {"KaonChTimeLAB", baseKin.kaonChTimeLAB},
-                  {"KaonChTimeCM", baseKin.kaonChTimeCM},
-                  {"KaonNeTimeLAB", baseKin.kaonNeTimeLAB},
-                  {"KaonNeTimeCM", baseKin.kaonNeTimeCM},
-                  {"KaonNeTimeLABMC", baseKin.kaonNeTimeLABMC},
-                  {"KaonNeTimeCMMC", baseKin.kaonNeTimeCMMC},
-                  {"KaonChTimeLABMC", baseKin.kaonChTimeLABMC},
-                  {"KaonChTimeCMMC", baseKin.kaonChTimeCMMC},
-                  {"Qmiss", baseKin.Qmiss},
-                  {"minv4gam", baseKin.minv4gam},
-                  {"Chi2TriKinFit", baseKin.Chi2TriKinFit},
-                  {"CurvSmeared1", baseKin.CurvSmeared1},
-                  {"PhivSmeared1", baseKin.PhivSmeared1},
-                  {"CotvSmeared1", baseKin.CotvSmeared1},
-                  {"CurvSmeared2", baseKin.CurvSmeared2},
-                  {"PhivSmeared2", baseKin.PhivSmeared2},
-                  {"CotvSmeared2", baseKin.CotvSmeared2},
-                  {"Chi2SignalKinFit", baseKin.Chi2SignalKinFit},
-                  {"TrcSum", TrcSum},
-                  {"Curv1", baseKin.Curv1},
-                  {"Phiv1", baseKin.Phiv1},
-                  {"Cotv1", baseKin.Cotv1},
-                  {"Curv2", baseKin.Curv2},
-                  {"Phiv2", baseKin.Phiv2},
-                  {"Cotv2", baseKin.Cotv2}};
-
-              // Tablice
-              std::map<std::string, std::vector<Int_t>> intArrays = {
-                  {"eclstream", baseKin.eclstream},
-                  {"Asscl", baseKin.Asscl},
-                  {"iv", baseKin.iv},
-                  {"vtxmc", baseKin.vtxmc},
-                  {"pidmc", baseKin.pidmc},
-                  {"mother", baseKin.mother},
-                  {"vtakenClosest", baseKin.vtakenClosest},
-                  {"vtaken", baseKin.vtaken},
-                  {"cutsApplied", baseKin.cuts},
-                  {"g4takenTriKinFit", baseKin.g4takenTriKinFit}};
-
-              std::map<std::string, std::vector<Float_t>> floatArrays = {
-                  {"Xcl", baseKin.Xcl},
-                  {"Ycl", baseKin.Ycl},
-                  {"Zcl", baseKin.Zcl},
-                  {"Tcl", baseKin.Tcl},
-                  {"Enecl", baseKin.Enecl},
-                  {"Curv", baseKin.Curv},
-                  {"Phiv", baseKin.Phiv},
-                  {"Cotv", baseKin.Cotv},
-                  {"xv", baseKin.xv},
-                  {"yv", baseKin.yv},
-                  {"zv", baseKin.zv},
-                  {"xvmc", baseKin.xvmc},
-                  {"yvmc", baseKin.yvmc},
-                  {"zvmc", baseKin.zvmc},
-                  {"pxmc", baseKin.pxmc},
-                  {"pymc", baseKin.pymc},
-                  {"pzmc", baseKin.pzmc},
-                  {"KchrecClosest", baseKin.KchrecClosest},
-                  {"trk1Closest", baseKin.trkClosest[0]},
-                  {"trk2Closest", baseKin.trkClosest[1]},
-                  {"Kchrec", baseKin.Kchrecnew},
-                  {"Kchboost", baseKin.Kchboostnew},
-                  {"ip", baseKin.ipnew},
-                  {"trk1", baseKin.trknew[0]},
-                  {"trk2", baseKin.trknew[1]},
-                  {"KchrecKS", baseKin.KchrecKS},
-                  {"trk1KS", baseKin.trkKS[0]},
-                  {"trk2KS", baseKin.trkKS[1]},
-                  {"KchrecKL", baseKin.KchrecKL},
-                  {"trk1KL", baseKin.trkKL[0]},
-                  {"trk2KL", baseKin.trkKL[1]},
-                  {"KchboostKS", baseKin.KchboostKS},
-                  {"KchboostKL", baseKin.KchboostKL},
-                  {"ipKS", baseKin.ipKS},
-                  {"ipKL", baseKin.ipKL},
-                  {"ipmc", baseKin.ipmc},
-                  {"Kchmc", baseKin.Kchmc},
-                  {"Knemc", baseKin.Knemc},
-                  {"trk1KSmc", baseKin.trkKSmc[0]},
-                  {"trk2KSmc", baseKin.trkKSmc[1]},
-                  {"trk1KLmc", baseKin.trkKLmc[0]},
-                  {"trk2KLmc", baseKin.trkKLmc[1]},
-                  {"KnetriKinFit", baseKin.KnetriKinFit},
-                  {"ipTriKinFit", baseKin.ipTriKinFit},
-                  {"neuVtxTriKinFit", baseKin.neuVtxTriKinFit},
-                  {"gammaMomTriKinFit1", baseKin.gammaMomTriKinFit1},
-                  {"gammaMomTriKinFit2", baseKin.gammaMomTriKinFit2},
-                  {"gammaMomTriKinFit3", baseKin.gammaMomTriKinFit3},
-                  {"gammaMomTriKinFit4", baseKin.gammaMomTriKinFit4},
-                  {"KneTriangle", baseKin.KneTriangle},
-                  {"gammaMomTriangle1", baseKin.gammaMomTriangle1},
-                  {"gammaMomTriangle2", baseKin.gammaMomTriangle2},
-                  {"gammaMomTriangle3", baseKin.gammaMomTriangle3},
-                  {"gammaMomTriangle4", baseKin.gammaMomTriangle4},
-                  {"trcfinal", baseKin.trcfinal},
-                  {"PhivMC", baseKin.PhivMC},
-                  {"CurvMC", baseKin.CurvMC},
-                  {"CotvMC", baseKin.CotvMC},
-                  {"pullsTriKinFit", baseKin.pullsTriKinFit},
-                  {"trk1Fit", baseKin.trkFit[0]},
-                  {"trk2Fit", baseKin.trkFit[1]},
-                  {"KchrecFit", baseKin.KchrecFit},
-                  {"KchboostFit", baseKin.KchboostFit},
-                  {"ipFit", baseKin.ipFit},
-                  {"photonFit1", baseKin.photonFit[0]},
-                  {"photonFit2", baseKin.photonFit[1]},
-                  {"photonFit3", baseKin.photonFit[2]},
-                  {"photonFit4", baseKin.photonFit[3]},
-                  {"KnerecFit", baseKin.KnerecFit},
-                  {"KnereclorFit", baseKin.KnereclorFit},
-                  {"pullsSignalFit", baseKin.pullsSignalFit},
-                  {"ParamSignal", baseKin.ParamSignal},
-                  {"ErrorsSignal", baseKin.ErrorsSignal},
-                  {"ParamSignalFit", baseKin.ParamSignalFit},
-                  {"ErrorsSignalFit", baseKin.ErrorsSignalFit},
-                  {"pi01", baseKin.pi01},
-                  {"pi02", baseKin.pi02},
-                  {"pi01Fit", baseKin.pi01Fit},
-                  {"pi02Fit", baseKin.pi02Fit}};
-
-              writer.Fill(intVars, floatVars, intArrays, floatArrays);
-
-              neuclulist.clear(); // Clear the list of neutral clusters for the next event
-            }
-            else
-            {
-              errorCode = ErrorHandling::ErrorCodes::CHARGED_KAON_MASS_PRE;
-            }
           }
+        }
+      }
+
+      if ((cutter.PassAllCuts() && noError) || passed)
+      {
+
+        // Assign Int_t value for errorCode
+        baseKin.errorCode = static_cast<Int_t>(errorCode);
+
+        // if (mctruth == 1)
+        // {
+        //   std::cout << baseKin.kaonChTimeLABMC << " " << baseKin.kaonNeTimeLABMC << std::endl;
+        //   std::cout << baseKin.kaonChTimeLAB << " " << baseKin.kaonNeTimeLAB << std::endl;
+        //   std::cout << baseKin.KchboostFit[9] / 0.0895 << " " << baseKin.KnerecFit[9] / 0.0895 << std::endl;
+        // }
+
+        // Clone of the branches of the old tree
+        // General properties of the event
+        baseKin.nrun = dataAccess.GetNRun();
+        baseKin.nev = dataAccess.GetNEv();
+
+        baseKin.necls = dataAccess.GetNECls();
+        baseKin.eclfilfo = dataAccess.GetEclFilfo();
+        // baseKin.eclfilfoword = *generalProps.eclfilfoword;
+
+        baseKin.eclstream.assign(dataAccess.GetEclStream().begin(), dataAccess.GetEclStream().end());
+        // -------------------------------------------------------------------------------------
+        // Bhabha interaction point and momentum
+        baseKin.Bx = dataAccess.GetBx();
+        baseKin.By = dataAccess.GetBy();
+        baseKin.Bz = dataAccess.GetBz();
+        baseKin.Bsx = dataAccess.GetBxErr();
+        baseKin.Bsy = dataAccess.GetByErr();
+        baseKin.Bsz = dataAccess.GetBzErr();
+        baseKin.Bpx = dataAccess.GetBpx();
+        baseKin.Bpy = dataAccess.GetBpy();
+        baseKin.Bpz = dataAccess.GetBpz();
+        baseKin.Bpxerr = dataAccess.GetBpxErr();
+        baseKin.Bpyerr = dataAccess.GetBpyErr();
+        baseKin.Bpzerr = dataAccess.GetBpzErr();
+        baseKin.Broots = dataAccess.GetBRoots();
+        baseKin.BrootsErr = dataAccess.GetBRootsErr();
+        // -------------------------------------------------------------------------------------
+        // Cluster data
+        baseKin.nclu = dataAccess.GetNClu();
+        baseKin.ntcl = dataAccess.GetNTCl();
+        baseKin.T0step1 = dataAccess.GetT0Step1();
+        baseKin.Asscl.assign(dataAccess.GetAssCl().begin(), dataAccess.GetAssCl().end());
+        baseKin.Xcl.assign(dataAccess.GetXCl().begin(), dataAccess.GetXCl().end());
+        baseKin.Ycl.assign(dataAccess.GetYCl().begin(), dataAccess.GetYCl().end());
+        baseKin.Zcl.assign(dataAccess.GetZCl().begin(), dataAccess.GetZCl().end());
+        baseKin.Tcl.assign(baseKin.TclCorr.begin(), baseKin.TclCorr.end());
+        baseKin.Enecl.assign(dataAccess.GetEneCl().begin(), dataAccess.GetEneCl().end());
+        // -------------------------------------------------------------------------------------
+        // Charged decay data
+        baseKin.nv = dataAccess.GetNV();
+        baseKin.ntv = dataAccess.GetNTV();
+        baseKin.iv.assign(dataAccess.GetIv().begin(), dataAccess.GetIv().end());
+        baseKin.Curv.assign(dataAccess.GetCurv().begin(), dataAccess.GetCurv().end());
+        baseKin.Phiv.assign(dataAccess.GetPhiv().begin(), dataAccess.GetPhiv().end());
+        baseKin.Cotv.assign(dataAccess.GetCotv().begin(), dataAccess.GetCotv().end());
+        baseKin.xv.assign(dataAccess.GetXv().begin(), dataAccess.GetXv().end());
+        baseKin.yv.assign(dataAccess.GetYv().begin(), dataAccess.GetYv().end());
+        baseKin.zv.assign(dataAccess.GetZv().begin(), dataAccess.GetZv().end());
+        // -------------------------------------------------------------------------------------
+        // Monte carlo data
+        if (MonteCarloInitAnalysis)
+        {
+          baseKin.ntmc = dataAccess.GetNTMC();
+          baseKin.nvtxmc = dataAccess.GetNVtxMC();
+          baseKin.vtxmc.assign(dataAccess.GetVtxMC().begin(), dataAccess.GetVtxMC().end());
+          baseKin.pidmc.assign(dataAccess.GetPidMC().begin(), dataAccess.GetPidMC().end());
+          baseKin.mother.assign(dataAccess.GetMother().begin(), dataAccess.GetMother().end());
+          baseKin.xvmc.assign(dataAccess.GetXvMC().begin(), dataAccess.GetXvMC().end());
+          baseKin.yvmc.assign(dataAccess.GetYvMC().begin(), dataAccess.GetYvMC().end());
+          baseKin.zvmc.assign(dataAccess.GetZvMC().begin(), dataAccess.GetZvMC().end());
+          baseKin.pxmc.assign(dataAccess.GetPxMC().begin(), dataAccess.GetPxMC().end());
+          baseKin.pymc.assign(dataAccess.GetPyMC().begin(), dataAccess.GetPyMC().end());
+          baseKin.pzmc.assign(dataAccess.GetPzMC().begin(), dataAccess.GetPzMC().end());
         }
         else
         {
-          errorCode = ErrorHandling::ErrorCodes::NO_CHARGED_VTX_OR_TRACKS;
-          logger.getErrLog(errorCode, "", mctruth);
-          noError = false;
+          baseKin.ntmc = 0;
+          baseKin.nvtxmc = 0;
+          baseKin.vtxmc = {};
+          baseKin.pidmc = {};
+          baseKin.mother = {};
+          baseKin.xvmc = {};
+          baseKin.yvmc = {};
+          baseKin.zvmc = {};
+          baseKin.pxmc = {};
+          baseKin.pymc = {};
+          baseKin.pzmc = {};
+          baseKin.ipmc = {};
+          baseKin.Kchmc = {};
+          baseKin.Knemc = {};
+          baseKin.trkKSmc[0] = {};
+          baseKin.trkKSmc[1] = {};
+          baseKin.trkKLmc[0] = {};
+          baseKin.trkKLmc[1] = {};
         }
+        // -------------------------------------------------------------------------------------
 
-        // ------------------------------------------------------------------
+        // Int_t zmienne
+        std::map<std::string, Int_t> intVars = {
+            {"nrun", baseKin.nrun},                 // Number of run
+            {"nev", baseKin.nev},                   // Number of event
+            {"necls", baseKin.necls},               // Number of ECL words
+            {"Eclfilfo", baseKin.eclfilfo},         // Which filfo was used
+            {"Eclfilfoword", baseKin.eclfilfoword}, // Filfo word
+            {"mcflag", mcflag},                     // If event from MC of Data
+            {"mctruth", mctruth},                   // What event type
+            {"nclu", baseKin.nclu},
+            {"ntcl", baseKin.ntcl},
+            {"nv", baseKin.nv},
+            {"ntv", baseKin.ntv},
+            {"ntmc", baseKin.ntmc},
+            {"nvtxmc", baseKin.nvtxmc},
+            {"bunchnum", baseKin.bunchnum},
+            {"errorcode", baseKin.errorCode},
+            {"goodClustersTriKinFitSize", baseKin.goodClustersTriKinFit.size()}};
+
+        // Float_t zmienne
+        std::map<std::string, Float_t> floatVars = {
+            {"T0step1", baseKin.T0step1},
+            {"Bx", baseKin.Bx},
+            {"By", baseKin.By},
+            {"Bz", baseKin.Bz},
+            {"Bpx", baseKin.Bpx},
+            {"Bpy", baseKin.Bpy},
+            {"Bpz", baseKin.Bpz},
+            {"Broots", baseKin.Broots},
+            {"KaonChTimeLAB", baseKin.kaonChTimeLAB},
+            {"KaonChTimeCM", baseKin.kaonChTimeCM},
+            {"KaonNeTimeLAB", baseKin.kaonNeTimeLAB},
+            {"KaonNeTimeCM", baseKin.kaonNeTimeCM},
+            {"KaonNeTimeLABMC", baseKin.kaonNeTimeLABMC},
+            {"KaonNeTimeCMMC", baseKin.kaonNeTimeCMMC},
+            {"KaonChTimeLABMC", baseKin.kaonChTimeLABMC},
+            {"KaonChTimeCMMC", baseKin.kaonChTimeCMMC},
+            {"Qmiss", baseKin.Qmiss},
+            {"minv4gam", baseKin.minv4gam},
+            {"Chi2TriKinFit", baseKin.Chi2TriKinFit},
+            {"CurvSmeared1", baseKin.CurvSmeared1},
+            {"PhivSmeared1", baseKin.PhivSmeared1},
+            {"CotvSmeared1", baseKin.CotvSmeared1},
+            {"CurvSmeared2", baseKin.CurvSmeared2},
+            {"PhivSmeared2", baseKin.PhivSmeared2},
+            {"CotvSmeared2", baseKin.CotvSmeared2},
+            {"Chi2SignalKinFit", baseKin.Chi2SignalKinFit},
+            {"TrcSum", TrcSum},
+            {"Curv1", baseKin.Curv1},
+            {"Phiv1", baseKin.Phiv1},
+            {"Cotv1", baseKin.Cotv1},
+            {"Curv2", baseKin.Curv2},
+            {"Phiv2", baseKin.Phiv2},
+            {"Cotv2", baseKin.Cotv2}};
+
+        // Tablice
+        std::map<std::string, std::vector<Int_t>> intArrays = {
+            {"eclstream", baseKin.eclstream},
+            {"Asscl", baseKin.Asscl},
+            {"iv", baseKin.iv},
+            {"vtxmc", baseKin.vtxmc},
+            {"pidmc", baseKin.pidmc},
+            {"mother", baseKin.mother},
+            {"vtakenClosest", baseKin.vtakenClosest},
+            {"vtaken", baseKin.vtaken},
+            {"cutsApplied", baseKin.cuts},
+            {"g4takenTriKinFit", baseKin.g4takenTriKinFit},
+            {"goodClustersTriKinFit", baseKin.goodClustersTriKinFit}};
+
+        std::map<std::string, std::vector<Float_t>> floatArrays = {
+            {"Xcl", baseKin.Xcl},
+            {"Ycl", baseKin.Ycl},
+            {"Zcl", baseKin.Zcl},
+            {"Tcl", baseKin.Tcl},
+            {"Enecl", baseKin.Enecl},
+            {"Curv", baseKin.Curv},
+            {"Phiv", baseKin.Phiv},
+            {"Cotv", baseKin.Cotv},
+            {"xv", baseKin.xv},
+            {"yv", baseKin.yv},
+            {"zv", baseKin.zv},
+            {"xvmc", baseKin.xvmc},
+            {"yvmc", baseKin.yvmc},
+            {"zvmc", baseKin.zvmc},
+            {"pxmc", baseKin.pxmc},
+            {"pymc", baseKin.pymc},
+            {"pzmc", baseKin.pzmc},
+            {"KchrecClosest", baseKin.KchrecClosest},
+            {"trk1Closest", baseKin.trkClosest[0]},
+            {"trk2Closest", baseKin.trkClosest[1]},
+            {"Kchrec", baseKin.Kchrecnew},
+            {"Kchboost", baseKin.Kchboostnew},
+            {"ip", baseKin.ipnew},
+            {"trk1", baseKin.trknew[0]},
+            {"trk2", baseKin.trknew[1]},
+            {"KchrecKS", baseKin.KchrecKS},
+            {"trk1KS", baseKin.trkKS[0]},
+            {"trk2KS", baseKin.trkKS[1]},
+            {"KchrecKL", baseKin.KchrecKL},
+            {"trk1KL", baseKin.trkKL[0]},
+            {"trk2KL", baseKin.trkKL[1]},
+            {"KchboostKS", baseKin.KchboostKS},
+            {"KchboostKL", baseKin.KchboostKL},
+            {"ipKS", baseKin.ipKS},
+            {"ipKL", baseKin.ipKL},
+            {"ipmc", baseKin.ipmc},
+            {"Kchmc", baseKin.Kchmc},
+            {"Knemc", baseKin.Knemc},
+            {"trk1KSmc", baseKin.trkKSmc[0]},
+            {"trk2KSmc", baseKin.trkKSmc[1]},
+            {"trk1KLmc", baseKin.trkKLmc[0]},
+            {"trk2KLmc", baseKin.trkKLmc[1]},
+            {"KnetriKinFit", baseKin.KnetriKinFit},
+            {"ipTriKinFit", baseKin.ipTriKinFit},
+            {"neuVtxTriKinFit", baseKin.neuVtxTriKinFit},
+            {"gammaMomTriKinFit1", baseKin.gammaMomTriKinFit1},
+            {"gammaMomTriKinFit2", baseKin.gammaMomTriKinFit2},
+            {"gammaMomTriKinFit3", baseKin.gammaMomTriKinFit3},
+            {"gammaMomTriKinFit4", baseKin.gammaMomTriKinFit4},
+            {"KneTriangle", baseKin.KneTriangle},
+            {"gammaMomTriangle1", baseKin.gammaMomTriangle1},
+            {"gammaMomTriangle2", baseKin.gammaMomTriangle2},
+            {"gammaMomTriangle3", baseKin.gammaMomTriangle3},
+            {"gammaMomTriangle4", baseKin.gammaMomTriangle4},
+            {"trcfinal", baseKin.trcfinal},
+            {"PhivMC", baseKin.PhivMC},
+            {"CurvMC", baseKin.CurvMC},
+            {"CotvMC", baseKin.CotvMC},
+            {"pullsTriKinFit", baseKin.pullsTriKinFit},
+            {"trk1Fit", baseKin.trkFit[0]},
+            {"trk2Fit", baseKin.trkFit[1]},
+            {"KchrecFit", baseKin.KchrecFit},
+            {"KchboostFit", baseKin.KchboostFit},
+            {"ipFit", baseKin.ipFit},
+            {"photonFit1", baseKin.photonFit[0]},
+            {"photonFit2", baseKin.photonFit[1]},
+            {"photonFit3", baseKin.photonFit[2]},
+            {"photonFit4", baseKin.photonFit[3]},
+            {"KnerecFit", baseKin.KnerecFit},
+            {"KnereclorFit", baseKin.KnereclorFit},
+            {"pullsSignalFit", baseKin.pullsSignalFit},
+            {"ParamSignal", baseKin.ParamSignal},
+            {"ErrorsSignal", baseKin.ErrorsSignal},
+            {"ParamSignalFit", baseKin.ParamSignalFit},
+            {"ErrorsSignalFit", baseKin.ErrorsSignalFit},
+            {"pi01", baseKin.pi01},
+            {"pi02", baseKin.pi02},
+            {"pi01Fit", baseKin.pi01Fit},
+            {"pi02Fit", baseKin.pi02Fit}};
+
+        writer.Fill(intVars, floatVars, intArrays, floatArrays);
       }
-    }
+      else
+      {
+        errorCode = ErrorHandling::ErrorCodes::CHARGED_KAON_MASS_PRE;
+      }
 
+      // ------------------------------------------------------------------
+    }
     else
     {
       noError = false;
       passed = false;
     }
+
+    neuclulist.clear(); // Clear the list of neutral clusters for the next event
 
     ++show_progress; // Progress of the loading bar
   }

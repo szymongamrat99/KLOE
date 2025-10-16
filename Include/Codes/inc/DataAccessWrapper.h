@@ -35,8 +35,9 @@ namespace KLOE
     /**
      * @brief Konstruktor
      * @param chain Referencja do TChain
+     * @param useTTreeReader Czy używać TTreeReader dla plików v2 (domyślnie false - używa SetBranchAddress)
      */
-    explicit DataAccessWrapper(TChain &chain);
+    explicit DataAccessWrapper(TChain &chain, Bool_t useTTreeReader = false);
 
     /// Destruktor
     ~DataAccessWrapper();
@@ -132,6 +133,12 @@ namespace KLOE
     // ==================== UTILITY METHODS ====================
 
     /**
+     * @brief Sprawdza czy używa TTreeReader
+     * @return true jeśli używa TTreeReader dla v2
+     */
+    Bool_t UsesTTreeReader() const { return fUseTTreeReader; }
+
+    /**
      * @brief Sprawdza aktualną wersję pliku
      * @return Wersja aktualnie przetwarzanego pliku
      */
@@ -180,6 +187,7 @@ namespace KLOE
     VariableConfig fVariableConfig;                         ///< Konfiguracja mapowania zmiennych
     Long64_t fCurrentEntry = -1;                            ///< Aktualny numer wydarzenia
     FileVersion fCurrentFileVersion = FileVersion::UNKNOWN; ///< Wersja aktualnego pliku
+    Bool_t fUseTTreeReader = false;                         ///< Czy używać TTreeReader dla v2
 
     // Mapa nazw plików do wersji
     std::map<TString, FileVersion> fFileVersionMap;
@@ -187,8 +195,10 @@ namespace KLOE
     // Statystyki
     Long64_t fV1Events = 0; ///< Liczba wydarzeń z plików v1
     Long64_t fV2Events = 0; ///< Liczba wydarzeń z plików v2
+    Long64_t fTreeReaderEvents = 0; ///< Liczba wydarzeń przetworzonych przez TTreeReader
+    Long64_t fSetBranchEvents = 0;  ///< Liczba wydarzeń przetworzonych przez SetBranchAddress
 
-    // ==================== TREEREADER (dla v2) ====================
+    // ==================== TREEREADER (dla v2 gdy włączone) ====================
     std::unique_ptr<TTreeReader> fReader;
 
     // Mapy dla TTreeReaderValue i TTreeReaderArray
@@ -200,14 +210,14 @@ namespace KLOE
     std::map<TString, std::unique_ptr<TTreeReaderArray<Float_t>>> fFloatArrays_v2;
     std::map<TString, std::unique_ptr<TTreeReaderArray<UInt_t>>> fUIntArrays_v2;
 
-    // ==================== SETBRANCHADDRESS (dla v1) ====================
+    // ==================== SETBRANCHADDRESS (dla v1 i domyślnie v2) ====================
 
-    // Mapy dla zmiennych skalarnych v1
+    // Mapy dla zmiennych skalarnych v1 i v2
     std::map<TString, Int_t> fIntValues_v1;
     std::map<TString, Float_t> fFloatValues_v1;
     std::map<TString, UInt_t> fUIntValues_v1;
 
-    // Mapy dla tablic v1 (fixed size arrays)
+    // Mapy dla tablic v1 i v2 (fixed size arrays)
     std::map<TString, std::vector<Int_t>> fIntArrays_v1;
     std::map<TString, std::vector<Float_t>> fFloatArrays_v1;
     std::map<TString, std::vector<UInt_t>> fUIntArrays_v1;

@@ -39,6 +39,8 @@ public:
   TTreeReaderValue<Int_t> ntv = {fReader, "ntv"};
   TTreeReaderValue<Int_t> nv = {fReader, "nv"};
   TTreeReaderValue<Int_t> nvtxmc = {fReader, "nvtxmc"};
+  TTreeReaderValue<Int_t> errorcode = {fReader, "errorcode"};
+  TTreeReaderValue<Int_t> goodClustersTriKinFitSize = {fReader, "goodClustersTriKinFitSize"};
   TTreeReaderValue<Float_t> Bpx = {fReader, "Bpx"};
   TTreeReaderValue<Float_t> Bpy = {fReader, "Bpy"};
   TTreeReaderValue<Float_t> Bpz = {fReader, "Bpz"};

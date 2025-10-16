@@ -11,9 +11,10 @@ using namespace KLOE;
 // Definicja static const zmiennej
 const Int_t DataAccessWrapper::kMaxArraySize;
 
-DataAccessWrapper::DataAccessWrapper(TChain &chain) : fChain(chain)
+DataAccessWrapper::DataAccessWrapper(TChain &chain, Bool_t useTTreeReader) 
+  : fChain(chain), fUseTTreeReader(useTTreeReader)
 {
-  // Inicjalizacja map dla v1 arrays
+  // Inicjalizacja map dla v1/v2 arrays (SetBranchAddress)
   for (const auto &key : fVariableConfig.GetAllKeys())
   {
     const auto *info = fVariableConfig.GetVariableInfo(key);
@@ -51,19 +52,31 @@ Bool_t DataAccessWrapper::Initialize()
   // Mapuj wersje plików
   MapFileVersions();
 
-  // Inicjalizuj oba systemy dostępu
-  Bool_t readerOK = InitializeTreeReader();
+  // Zawsze inicjalizuj SetBranchAddress (dla v1 i domyślnie v2)
   Bool_t branchOK = InitializeBranchAddress();
-
-  if (!readerOK || !branchOK)
+  if (!branchOK)
   {
-    std::cerr << "ERROR: DataAccessWrapper - Failed to initialize data access systems" << std::endl;
+    std::cerr << "ERROR: DataAccessWrapper - Failed to initialize SetBranchAddress" << std::endl;
     return false;
+  }
+
+  // Opcjonalnie inicjalizuj TTreeReader (tylko dla v2 jeśli włączone)
+  Bool_t readerOK = true;
+  if (fUseTTreeReader)
+  {
+    readerOK = InitializeTreeReader();
+    if (!readerOK)
+    {
+      std::cerr << "ERROR: DataAccessWrapper - Failed to initialize TTreeReader" << std::endl;
+      return false;
+    }
   }
 
   fCurrentEntry = -1;
 
   std::cout << "INFO: DataAccessWrapper initialized successfully" << std::endl;
+  std::cout << "INFO: Using " << (fUseTTreeReader ? "TTreeReader" : "SetBranchAddress") 
+            << " for v2 files" << std::endl;
   PrintFileTypeStats();
 
   return true;
@@ -103,8 +116,8 @@ Bool_t DataAccessWrapper::Next()
     // std::cout << "  Current: " << currentFile.Data() << " (" 
     //           << (fCurrentFileVersion == FileVersion::V1 ? "v1" : fCurrentFileVersion == FileVersion::V2 ? "v2" : "unknown") << ")" << std::endl;
     
-    // REINICJALIZUJ TTreeReader dla nowych plików v2
-    if (fCurrentFileVersion == FileVersion::V2) {
+    // REINICJALIZUJ TTreeReader tylko jeśli używamy go dla v2
+    if (fUseTTreeReader && fCurrentFileVersion == FileVersion::V2) {
       // std::cout << "INFO: Reinitializing TTreeReader for v2 file..." << std::endl;
       if (!ReinitializeTreeReader()) {
         std::cerr << "ERROR: Failed to reinitialize TTreeReader for entry " << fCurrentEntry << std::endl;
@@ -115,18 +128,27 @@ Bool_t DataAccessWrapper::Next()
     }
   }
 
-  // Dla plików v2, synchronizuj TTreeReader z aktualnym entry
+  // Aktualizuj statystyki w zależności od używanej metody dostępu
   if (fCurrentFileVersion == FileVersion::V2) {
-    fReader->SetEntry(fCurrentEntry);
-    if (fReader->GetEntryStatus() != TTreeReader::kEntryValid) {
-      std::cerr << "ERROR: TTreeReader entry " << fCurrentEntry << " is not valid. Status: " 
-                << fReader->GetEntryStatus() << std::endl;
-      return false;
-    }
     fV2Events++;
+    if (fUseTTreeReader) {
+      // Dla TTreeReader synchronizuj entry
+      if (fReader) {
+        fReader->SetEntry(fCurrentEntry);
+        if (fReader->GetEntryStatus() != TTreeReader::kEntryValid) {
+          std::cerr << "ERROR: TTreeReader entry " << fCurrentEntry << " is not valid. Status: " 
+                    << fReader->GetEntryStatus() << std::endl;
+          return false;
+        }
+      }
+      fTreeReaderEvents++;
+    } else {
+      fSetBranchEvents++;
+    }
   }
   else if (fCurrentFileVersion == FileVersion::V1) {
     fV1Events++;
+    fSetBranchEvents++;
   }
 
   return true;
@@ -167,6 +189,11 @@ void DataAccessWrapper::MapFileVersions()
 
 Bool_t DataAccessWrapper::InitializeTreeReader()
 {
+  if (!fUseTTreeReader) {
+    std::cout << "INFO: TTreeReader disabled - using SetBranchAddress for all files" << std::endl;
+    return true; // Sukces, ale nic nie robimy
+  }
+  
   try
   {
     fReader = std::make_unique<TTreeReader>(&fChain);
@@ -225,6 +252,10 @@ Bool_t DataAccessWrapper::InitializeTreeReader()
 
 Bool_t DataAccessWrapper::ReinitializeTreeReader()
 {
+  if (!fUseTTreeReader) {
+    return true; // Sukces, ale nic nie robimy
+  }
+  
   try
   {
     // Wyczyść stare readery
@@ -302,48 +333,56 @@ Bool_t DataAccessWrapper::InitializeBranchAddress()
 {
   try
   {
-    // Inicjalizuj wszystkie zmienne dla v1
+    // Inicjalizuj wszystkie zmienne dla v1 i v2 (gdy TTreeReader wyłączony)
     for (const auto &key : fVariableConfig.GetAllKeys())
     {
       const auto *info = fVariableConfig.GetVariableInfo(key);
       if (!info)
         continue;
 
-      TString branchName = info->nameV1;
+      // Użyj nazw v1 dla plików v1, v2 dla plików v2
+      TString branchNameV1 = info->nameV1;
+      TString branchNameV2 = info->nameV2;
 
       if (info->isArray)
       {
-        // Tablice - ustaw branch address na C arrays
+        // Tablice - ustaw branch address na C arrays dla obu wersji
         if (info->type == "Int_t")
         {
-          fChain.SetBranchAddress(branchName.Data(), fIntArrays_v1[key].data());
+          fChain.SetBranchAddress(branchNameV1.Data(), fIntArrays_v1[key].data());
+          fChain.SetBranchAddress(branchNameV2.Data(), fIntArrays_v1[key].data());
         }
         else if (info->type == "Float_t")
         {
-          fChain.SetBranchAddress(branchName.Data(), fFloatArrays_v1[key].data());
+          fChain.SetBranchAddress(branchNameV1.Data(), fFloatArrays_v1[key].data());
+          fChain.SetBranchAddress(branchNameV2.Data(), fFloatArrays_v1[key].data());
         }
         else if (info->type == "UInt_t")
         {
-          fChain.SetBranchAddress(branchName.Data(), fUIntArrays_v1[key].data());
+          fChain.SetBranchAddress(branchNameV1.Data(), fUIntArrays_v1[key].data());
+          fChain.SetBranchAddress(branchNameV2.Data(), fUIntArrays_v1[key].data());
         }
       }
       else
       {
-        // Zmienne skalarne
+        // Zmienne skalarne dla obu wersji
         if (info->type == "Int_t")
         {
           fIntValues_v1[key] = 0;
-          fChain.SetBranchAddress(branchName.Data(), &fIntValues_v1[key]);
+          fChain.SetBranchAddress(branchNameV1.Data(), &fIntValues_v1[key]);
+          fChain.SetBranchAddress(branchNameV2.Data(), &fIntValues_v1[key]);
         }
         else if (info->type == "Float_t")
         {
           fFloatValues_v1[key] = 0.0f;
-          fChain.SetBranchAddress(branchName.Data(), &fFloatValues_v1[key]);
+          fChain.SetBranchAddress(branchNameV1.Data(), &fFloatValues_v1[key]);
+          fChain.SetBranchAddress(branchNameV2.Data(), &fFloatValues_v1[key]);
         }
         else if (info->type == "UInt_t")
         {
           fUIntValues_v1[key] = 0;
-          fChain.SetBranchAddress(branchName.Data(), &fUIntValues_v1[key]);
+          fChain.SetBranchAddress(branchNameV1.Data(), &fUIntValues_v1[key]);
+          fChain.SetBranchAddress(branchNameV2.Data(), &fUIntValues_v1[key]);
         }
       }
     }
@@ -387,7 +426,7 @@ void DataAccessWrapper::UpdateCurrentFileVersion()
 
 void DataAccessWrapper::PrintFileTypeStats() const
 {
-  std::cout << "\n=== DataAccessWrapper File Type Statistics ===" << std::endl;
+  std::cout << "\n=== DataAccessWrapper Statistics ===" << std::endl;
   std::cout << "Total files in chain: " << fFileVersionMap.size() << std::endl;
 
   Int_t v1Count = 0, v2Count = 0, unknownCount = 0;
@@ -411,7 +450,11 @@ void DataAccessWrapper::PrintFileTypeStats() const
   std::cout << "v2.root files: " << v2Count << std::endl;
   std::cout << "Unknown files: " << unknownCount << std::endl;
   std::cout << "Events processed - v1: " << fV1Events << ", v2: " << fV2Events << std::endl;
-  std::cout << "================================================" << std::endl;
+  std::cout << "Access method - TTreeReader: " << fTreeReaderEvents 
+            << ", SetBranchAddress: " << fSetBranchEvents << std::endl;
+  std::cout << "TTreeReader " << (fUseTTreeReader ? "ENABLED" : "DISABLED") 
+            << " for v2 files" << std::endl;
+  std::cout << "======================================" << std::endl;
 }
 
 // ==================== TEMPLATE IMPLEMENTATIONS ====================
@@ -511,22 +554,23 @@ namespace
   {
     static Int_t Get(const DataAccessWrapper *wrapper, const TString &key)
     {
-      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2 && wrapper->fUseTTreeReader)
       {
+        // Użyj TTreeReader dla v2 gdy włączony
         auto it = wrapper->fIntValues_v2.find(key);
         if (it != wrapper->fIntValues_v2.end())
         {
           return **it->second;
         }
       }
-      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      
+      // Użyj SetBranchAddress dla v1 i domyślnie v2
+      auto it = wrapper->fIntValues_v1.find(key);
+      if (it != wrapper->fIntValues_v1.end())
       {
-        auto it = wrapper->fIntValues_v1.find(key);
-        if (it != wrapper->fIntValues_v1.end())
-        {
-          return it->second;
-        }
+        return it->second;
       }
+      
       return Int_t{};
     }
   };
@@ -536,22 +580,23 @@ namespace
   {
     static Float_t Get(const DataAccessWrapper *wrapper, const TString &key)
     {
-      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2 && wrapper->fUseTTreeReader)
       {
+        // Użyj TTreeReader dla v2 gdy włączony
         auto it = wrapper->fFloatValues_v2.find(key);
         if (it != wrapper->fFloatValues_v2.end())
         {
           return **it->second;
         }
       }
-      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      
+      // Użyj SetBranchAddress dla v1 i domyślnie v2
+      auto it = wrapper->fFloatValues_v1.find(key);
+      if (it != wrapper->fFloatValues_v1.end())
       {
-        auto it = wrapper->fFloatValues_v1.find(key);
-        if (it != wrapper->fFloatValues_v1.end())
-        {
-          return it->second;
-        }
+        return it->second;
       }
+      
       return Float_t{};
     }
   };
@@ -561,22 +606,23 @@ namespace
   {
     static UInt_t Get(const DataAccessWrapper *wrapper, const TString &key)
     {
-      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2 && wrapper->fUseTTreeReader)
       {
+        // Użyj TTreeReader dla v2 gdy włączony
         auto it = wrapper->fUIntValues_v2.find(key);
         if (it != wrapper->fUIntValues_v2.end())
         {
           return **it->second;
         }
       }
-      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      
+      // Użyj SetBranchAddress dla v1 i domyślnie v2
+      auto it = wrapper->fUIntValues_v1.find(key);
+      if (it != wrapper->fUIntValues_v1.end())
       {
-        auto it = wrapper->fUIntValues_v1.find(key);
-        if (it != wrapper->fUIntValues_v1.end())
-        {
-          return it->second;
-        }
+        return it->second;
       }
+      
       return UInt_t{};
     }
   };
@@ -606,8 +652,9 @@ namespace
   {
     static const std::vector<Int_t> &Get(const DataAccessWrapper *wrapper, const TString &key)
     {
-      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2 && wrapper->fUseTTreeReader)
       {
+        // Użyj TTreeReader dla v2 gdy włączony
         auto it = wrapper->fIntArrays_v2.find(key);
         if (it != wrapper->fIntArrays_v2.end())
         {
@@ -616,15 +663,15 @@ namespace
           return cache;
         }
       }
-      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      
+      // Użyj SetBranchAddress dla v1 i domyślnie v2
+      const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
+      if (info && info->sizeVariable.Length() > 0)
       {
-        const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
-        if (info && info->sizeVariable.Length() > 0)
-        {
-          Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
-          return ArrayConverter<Int_t>::Convert(wrapper, key, size);
-        }
+        Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
+        return ArrayConverter<Int_t>::Convert(wrapper, key, size);
       }
+      
       static std::vector<Int_t> empty;
       return empty;
     }
@@ -635,8 +682,9 @@ namespace
   {
     static const std::vector<Float_t> &Get(const DataAccessWrapper *wrapper, const TString &key)
     {
-      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2 && wrapper->fUseTTreeReader)
       {
+        // Użyj TTreeReader dla v2 gdy włączony
         auto it = wrapper->fFloatArrays_v2.find(key);
         if (it != wrapper->fFloatArrays_v2.end())
         {
@@ -645,15 +693,15 @@ namespace
           return cache;
         }
       }
-      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      
+      // Użyj SetBranchAddress dla v1 i domyślnie v2
+      const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
+      if (info && info->sizeVariable.Length() > 0)
       {
-        const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
-        if (info && info->sizeVariable.Length() > 0)
-        {
-          Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
-          return ArrayConverter<Float_t>::Convert(wrapper, key, size);
-        }
+        Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
+        return ArrayConverter<Float_t>::Convert(wrapper, key, size);
       }
+      
       static std::vector<Float_t> empty;
       return empty;
     }
@@ -664,8 +712,9 @@ namespace
   {
     static const std::vector<UInt_t> &Get(const DataAccessWrapper *wrapper, const TString &key)
     {
-      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2)
+      if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V2 && wrapper->fUseTTreeReader)
       {
+        // Użyj TTreeReader dla v2 gdy włączony
         auto it = wrapper->fUIntArrays_v2.find(key);
         if (it != wrapper->fUIntArrays_v2.end())
         {
@@ -674,15 +723,15 @@ namespace
           return cache;
         }
       }
-      else if (wrapper->GetCurrentFileVersion() == DataAccessWrapper::FileVersion::V1)
+      
+      // Użyj SetBranchAddress dla v1 i domyślnie v2
+      const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
+      if (info && info->sizeVariable.Length() > 0)
       {
-        const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
-        if (info && info->sizeVariable.Length() > 0)
-        {
-          Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
-          return ArrayConverter<UInt_t>::Convert(wrapper, key, size);
-        }
+        Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
+        return ArrayConverter<UInt_t>::Convert(wrapper, key, size);
       }
+      
       static std::vector<UInt_t> empty;
       return empty;
     }
