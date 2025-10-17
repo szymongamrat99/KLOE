@@ -76,6 +76,7 @@ namespace KLOE
     Double_t Photon4PathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
     Double_t MinvConsvChKaon(Double_t *x, Double_t *p) override { return 0; };
     Double_t MinvConsvNeuKaon(Double_t *x, Double_t *p) override { return 0; };
+    Double_t MinvConsvOmega(Double_t *x, Double_t *p) override { return 0; };
 
     void SetParameters(Double_t *p) override {};
     void ResetParameters() override {};

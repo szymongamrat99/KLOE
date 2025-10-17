@@ -41,6 +41,7 @@ add_library(LibRec SHARED
             src/ConfigManager.cpp
             src/trilaterationKinFit.cpp
             src/signalKinFit.cpp
+            src/omegaKinFit.cpp
             src/NeutralReconstruction.cpp
             src/VariableConfig.cpp
             src/DataAccessWrapper.cpp

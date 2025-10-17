@@ -97,6 +97,8 @@ namespace KLOE
     Double_t NeutralYPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
     Double_t NeutralZPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    /** Fictitious overrider of virtual method - do not use*/
+    Double_t MinvConsvOmega(Double_t *x, Double_t *p) override { return 0; };
 
     Int_t
         _chosen4MomComponent, /*!< Component of a 4-momentum to choose from FourMomConsvLAB*/

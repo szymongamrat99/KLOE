@@ -69,13 +69,13 @@ ErrorHandling::ErrorCodes TriangleRec(std::vector<Int_t> g4taken_kinfit, std::ve
 
       for (Int_t l = 0; l < 4; l++)
       {
-        Knetriangle[l] = Knerec[l];
+        neutral_mom(cluster[0][Asscl[ind_gam[l]] - 1], cluster[1][Asscl[ind_gam[l]] - 1], cluster[2][Asscl[ind_gam[l]] - 1], cluster[4][Asscl[ind_gam[l]] - 1], neu_vtx, gammatriangle[l].data());
+
+        Knetriangle[l] = gammatriangle[0][l] + gammatriangle[1][l] + gammatriangle[2][l] + gammatriangle[3][l];
 
         Knetriangle[6 + l] = neu_vtx[l];
 
         trcfinal[l] = trc[l];
-
-        neutral_mom(cluster[0][Asscl[ind_gam[l]] - 1], cluster[1][Asscl[ind_gam[l]] - 1], cluster[2][Asscl[ind_gam[l]] - 1], cluster[4][Asscl[ind_gam[l]] - 1], neu_vtx, gammatriangle[l].data());
       }
 
       minv4gam = sqrt(pow(gammatriangle[0][3] + gammatriangle[1][3] + gammatriangle[2][3] + gammatriangle[3][3], 2) -

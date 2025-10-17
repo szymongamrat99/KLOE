@@ -53,21 +53,18 @@ namespace KLOE
         _trackParameters[2],
         _trackParametersErr[2],
         _cluster[4],
-        _chargedVtx,
-        _chargedVtxErr,
-        _neuVtx,
-        _neuVtxErr,
+        _omegaVtx,
+        _omegaVtxErr,
         _bhabha_mom,
         _bhabha_mom_err,
         _bhabha_vtx,
         _bhabhaVtxErr,
         _Param,
         _Errors,
-        _KchrecFit,
-        _KchboostFit,
+        _OmegaFit,
         _ipFit,
-        _KnereclorFit,
-        _KnerecFit,
+        _Pi0OmegaFit,
+        _PhiMomFit,
         _photonFit[4],
         _trkFit[2];
 
@@ -81,7 +78,7 @@ namespace KLOE
     OmegaKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger);
     ~OmegaKinFit();
 
-    void SetParameters(const std::vector<Float_t> trackParameters[2], const std::vector<Float_t> trackParametersErr[2], const std::vector<Float_t> cluster[4], const std::vector<Float_t> chargedVtx, const std::vector<Float_t> chargedVtxErr, const std::vector<Float_t> bhabha_mom, const std::vector<Float_t> bhabha_mom_err, const std::vector<Float_t> neuVtx, const std::vector<Float_t> neuVtxErr, const std::vector<Float_t> bhabha_vtx, const std::vector<Float_t> bhabhaVtxErr)
+    void SetParameters(const std::vector<Float_t> trackParameters[2], const std::vector<Float_t> trackParametersErr[2], const std::vector<Float_t> cluster[4], const std::vector<Float_t> bhabha_mom, const std::vector<Float_t> bhabha_mom_err, const std::vector<Float_t> omegaVtx, const std::vector<Float_t> omegaVtxErr, const std::vector<Float_t> bhabha_vtx, const std::vector<Float_t> bhabhaVtxErr)
     {
       for (Int_t i = 0; i < 2; i++)
       {
@@ -92,20 +89,18 @@ namespace KLOE
       for (Int_t i = 0; i < 4; i++)
         _cluster[i].assign(cluster[i].begin(), cluster[i].end());
 
-      _chargedVtx = chargedVtx;
-      _chargedVtxErr = chargedVtxErr;
 
       _bhabha_mom = bhabha_mom;
       _bhabha_mom_err = bhabha_mom_err;
 
-      _neuVtx = neuVtx;
-      _neuVtxErr = neuVtxErr;
+      _omegaVtx = omegaVtx;
+      _omegaVtxErr = omegaVtxErr;
 
       _bhabha_vtx = bhabha_vtx;
       _bhabhaVtxErr = bhabhaVtxErr;
     }
 
-    void GetResults(std::vector<Float_t> &Param, std::vector<Float_t> &Errors, std::vector<Float_t> &ParamFit, std::vector<Float_t> &ErrorsFit, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit, Float_t &Chi2SignalKinFit, std::vector<Float_t> &pulls)
+    void GetResults(std::vector<Float_t> &Param, std::vector<Float_t> &Errors, std::vector<Float_t> &ParamFit, std::vector<Float_t> &ErrorsFit, std::vector<Float_t> trkFit[2], std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &OmegaFit, std::vector<Float_t> &Pi0OmegaFit, std::vector<Float_t> &PhiMomFit, Float_t &Chi2OmegaKinFit, std::vector<Float_t> &pulls)
     {
       Param = _Param;
       Errors = _Errors;
@@ -121,20 +116,19 @@ namespace KLOE
       for (Int_t i = 0; i < 2; i++)
         trkFit[i] = _trkFit[i];
 
-      KchrecFit = _KchrecFit;
-      KchboostFit = _KchboostFit;
-
       ipFit = _ipFit;
 
       for (Int_t i = 0; i < 4; i++)
         photonFit[i] = _photonFit[i];
 
-      KnereclorFit = _KnereclorFit;
-      KnerecFit = _KnerecFit;
+      Pi0OmegaFit = _Pi0OmegaFit;
+      OmegaFit = _OmegaFit;
 
-      Chi2SignalKinFit = _CHISQRMIN;
+      PhiMomFit = _PhiMomFit;
 
-      for (Int_t i = 0; i < _X_min.GetNrows() - 3; i++)
+      Chi2OmegaKinFit = _CHISQRMIN;
+
+      for (Int_t i = 0; i < _X_min.GetNrows(); i++)
       {
         pulls.push_back((_X_init_min[i] - _X_min[i]) / sqrt(_V_init[i][i] - _V_min[i][i]));
       }

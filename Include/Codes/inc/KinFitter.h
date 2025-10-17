@@ -94,6 +94,7 @@ namespace KLOE
             {"minvconsv", &KinFit::MinvConsv},
             {"minvconsvneutralkaon", &KinFit::MinvConsvNeuKaon},
             {"minvconsvchargedkaon", &KinFit::MinvConsvChKaon},
+            {"minvconsvomega", &KinFit::MinvConsvOmega},
             {"neutralxpathconsvlab", &KinFit::NeutralXPathConsvLAB},
             {"neutralypathconsvlab", &KinFit::NeutralYPathConsvLAB},
             {"neutralzpathconsvlab", &KinFit::NeutralZPathConsvLAB}};
@@ -145,6 +146,7 @@ namespace KLOE
 
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, TVectorD &C, TVectorD &L);
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit);
+    void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> trkFit[2], std::vector<Float_t> &OmegaFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &Pi0OmegaFit, std::vector<Float_t> &PhiMomFit);
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init);
 
 

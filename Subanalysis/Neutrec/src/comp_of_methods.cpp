@@ -118,9 +118,11 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
   UChar_t errId, cutId;
 
+  Double_t Knereclor[9], Knerec[9];
+
   chain.SetBranchAddress("Kchboost", baseKin.Kchboost);
-  chain.SetBranchAddress("Knereclor", baseKin.Knereclor);
-  chain.SetBranchAddress("Knerec", baseKin.Knerec);
+  chain.SetBranchAddress("Knereclor", Knereclor);
+  chain.SetBranchAddress("Knerec", Knerec);
   chain.SetBranchAddress("Kchrec", baseKin.Kchrec);
   chain.SetBranchAddress("KchmcOld", baseKin.KchmcOld);
   chain.SetBranchAddress("KnemcOld", baseKin.KnemcOld);
@@ -602,13 +604,13 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       lengthch_rec = sqrt(pow(baseKin.Kchrec[6] - baseKin.ip[0], 2) + pow(baseKin.Kchrec[7] - baseKin.ip[1], 2) + pow(baseKin.Kchrec[8] - baseKin.ip[2], 2));
 
       lengthneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2) + pow(Knetri_kinfit[8] - ip_kinfit[2], 2));
-      lengthneu_rec = sqrt(pow(baseKin.Knereclor[6] - baseKin.ip[0], 2) + pow(baseKin.Knereclor[7] - baseKin.ip[1], 2) + pow(baseKin.Knereclor[8] - baseKin.ip[2], 2));
+      lengthneu_rec = sqrt(pow(Knereclor[6] - baseKin.ip[0], 2) + pow(Knereclor[7] - baseKin.ip[1], 2) + pow(Knereclor[8] - baseKin.ip[2], 2));
 
       //
       // Kaon transverse radius
       // Rtneu_mc = sqrt(pow(baseKin.KnemcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KnemcOld[7] - baseKin.ipmcOld[1], 2));
       Rtneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2));
-      Rtneu_rec = sqrt(pow(baseKin.Knereclor[6] - baseKin.ip[0], 2) + pow(baseKin.Knereclor[7] - baseKin.ip[1], 2));
+      Rtneu_rec = sqrt(pow(Knereclor[6] - baseKin.ip[0], 2) + pow(Knereclor[7] - baseKin.ip[1], 2));
 
       Rtch_rec = sqrt(pow(baseKin.Kchrec[6] - baseKin.ip[0], 2) + pow(baseKin.Kchrec[7] - baseKin.ip[1], 2));
       //
@@ -626,7 +628,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
         v_Kneumc = cVel * Knemc_bcg[4] / Knemc_bcg[3];
 
       v_Kneutri = cVel * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)) / Knetri_kinfit[3];
-      v_Kneurec = cVel * baseKin.Knereclor[4] / baseKin.Knereclor[3];
+      v_Kneurec = cVel * Knereclor[4] / Knereclor[3];
       //
       // Kaon flight times
       t_chrec = lengthch_rec / v_Kchrec;

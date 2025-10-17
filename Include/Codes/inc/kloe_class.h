@@ -257,6 +257,18 @@ namespace KLOE
 
     std::vector<Float_t> fourMom; /*!< 4-momentum of the charged particle */
     std::vector<Float_t> vtxPos;  /*!< 3-momentum of the charged particle */
+    std::vector<Float_t> total;   /*!< 7-vector of the charged particle */
+
+    void SetTotalVector()
+    {
+      total[0] = fourMom[0];
+      total[1] = fourMom[1];
+      total[2] = fourMom[2];
+      total[3] = fourMom[3];
+      total[4] = vtxPos[0];
+      total[5] = vtxPos[1];
+      total[6] = vtxPos[2];
+    };
   };
 
   struct KaonProperTimes {
@@ -266,7 +278,7 @@ namespace KLOE
     Double_t kaon2TimeCM;
     Double_t deltaTimeLAB;
     Double_t deltaTimeCM;
-};
+  };
   /**
    * @class General pm00 class for KLOE analysis. Includes most fundamental functions like timestamp, datestamp, array clearing functions, etc.
    * @author @szymongamrat99
@@ -317,7 +329,11 @@ namespace KLOE
         pionCh;
 
     std::vector<neutralParticle>
-        photon;
+        photon,
+        pionNe;
+
+    neutralParticle
+        omega;
 
     kaonNeutral
         Kchrec,    /*!< Charged kaon reconstructed from pions*/
@@ -654,7 +670,6 @@ namespace KLOE
                                              const std::vector<Float_t> &kaon1Pos,
                                              const std::vector<Float_t> &kaon2Mom,
                                              const std::vector<Float_t> &kaon2Pos,
-                                             const std::vector<Float_t> &phiMom,
                                              const std::vector<Float_t> &ipPos);
 
     /**
@@ -668,10 +683,24 @@ namespace KLOE
      */
     void CalculateSingleKaonTime(const std::vector<Float_t> &kaonMom,
                                  const std::vector<Float_t> &kaonPos,
-                                 const std::vector<Float_t> &phiMom,
                                  const std::vector<Float_t> &ipPos,
                                  Double_t &timeLAB,
                                  Double_t &timeCM);
+
+    // File Management Methods
+    /**
+     * @brief Tworzy linki symboliczne w folderze current dla najnowszych plików
+     * @param rootFilesDir Ścieżka do katalogu root_files
+     * @return true jeśli operacja się udała, false w przeciwnym razie
+     */
+    bool CreateCurrentLinks(const std::string &rootFilesDir = "root_files");
+
+    /**
+     * @brief Sprawdza czy string ma format daty YYYY-MM-DD
+     * @param folderName Nazwa folderu do sprawdzenia
+     * @return true jeśli nazwa ma format daty, false w przeciwnym razie
+     */
+    bool IsValidDateFormat(const std::string &folderName);
   };
 }
 

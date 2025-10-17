@@ -51,7 +51,7 @@ std::vector<TString> histList = {"px_Pi1", "py_Pi1", "pz_Pi1", "Energy_Pi1",
                                  "time_neutral_MC", "prob_signal", "delta_t",
                                  "combined_mass_pi0",
                                  "pull1", "pull2", "pull3", "pull4", "pull5", "phi_vtx_x", "phi_vtx_y", "phi_vtx_z", "vKne",
-                                 "goodClusNumTriKinFit"}; // List of histograms to be created
+                                 "goodClusNumTriKinFit", "pathKne", "pathKch"}; // List of histograms to be created
 
 std::map<TString, std::vector<TString>> histTitles = {
     {"px_Pi1", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
@@ -106,7 +106,9 @@ std::map<TString, std::vector<TString>> histTitles = {
     {"phi_vtx_y", {"#phi_{vtx,y} - #phi_{vtx,y}^{MC} [cm]"}},
     {"phi_vtx_z", {"#phi_{vtx,z} - #phi_{vtx,z}^{MC} [cm]"}},
     {"vKne", {"v_{K_{ne}} - v_{K_{ne}}^{MC} [cm/ns]"}},
-    {"goodClusNumTriKinFit", {"Number of good clusters used in trilateration kinematic fit"}}};
+    {"goodClusNumTriKinFit", {"Number of good clusters used in trilateration kinematic fit"}},
+    {"pathKne", {"Path length [cm]"}},
+    {"pathKch", {"Path length of K_{ch} [cm]"}}};
 
 std::map<TString, std::vector<Double_t>>
     histLimits = {{"px_Pi1", {-200, 200}},
@@ -150,7 +152,7 @@ std::map<TString, std::vector<Double_t>>
                   {"mass_pi02", {-100, 100}},
                   {"time_neutral_MC", {-5, 2}},
                   {"prob_signal", {0, 1}},
-                  {"delta_t", {-20, 20}},
+                  {"delta_t", {-15, 15}},
                   {"combined_mass_pi0", {-100, 100}},
                   {"pull1", {-5, 5}},
                   {"pull2", {-5, 5}},
@@ -161,7 +163,9 @@ std::map<TString, std::vector<Double_t>>
                   {"phi_vtx_y", {-0.2, 0.2}},
                   {"phi_vtx_z", {-10, 10}},
                   {"vKne", {-2, 2}},
-                  {"goodClusNumTriKinFit", {-1, 6}}};
+                  {"goodClusNumTriKinFit", {-1, 6}},
+                  {"pathKne", {0, 50.}},
+                  {"pathKch", {0, 50.}}};
 
 std::map<TString, TCanvas *> canvas;
 
@@ -194,10 +198,10 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
 
     histsReconstructed[histName] = new TH1F(Form("h_reconstructed_%s", histName.Data()),
                                             Form("Reconstructed %s; %s; Counts", histName.Data(), histName.Data()),
-                                            30, histLimits[histName][0], histLimits[histName][1]);
+                                            100, histLimits[histName][0], histLimits[histName][1]);
     histsFittedSignal[histName] = new TH1F(Form("h_fittedSignal_%s", histName.Data()),
                                            Form("Fitted Signal %s; %s; Counts", histName.Data(), histName.Data()),
-                                           30, histLimits[histName][0], histLimits[histName][1]);
+                                           100, histLimits[histName][0], histLimits[histName][1]);
   }
 }
 
@@ -281,22 +285,20 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                              pow(photonFit4[5] - KnerecFit[7], 2) +
                              pow(photonFit4[6] - KnerecFit[8], 2));
 
-  Float_t trc1Fit = photonFit1[7] - photon1path / cVel - KnereclorFit[9],
-          trc2Fit = photonFit2[7] - photon2path / cVel - KnereclorFit[9],
-          trc3Fit = photonFit3[7] - photon3path / cVel - KnereclorFit[9],
-          trc4Fit = photonFit4[7] - photon4path / cVel - KnereclorFit[9],
+  Float_t trc1Fit = photonFit1[7] - photon1path / cVel - tKneFit * 0.0895,
+          trc2Fit = photonFit2[7] - photon2path / cVel - tKneFit * 0.0895,
+          trc3Fit = photonFit3[7] - photon3path / cVel - tKneFit * 0.0895,
+          trc4Fit = photonFit4[7] - photon4path / cVel - tKneFit * 0.0895,
           TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
   Float_t deltaTfit = tKchFit - tKneFit,
-          deltaT = *KaonChTimeLAB - *KaonNeTimeLAB,
+          deltaT = *KaonChTimeLAB - tKne,
           deltaTMC = *KaonChTimeLABMC - *KaonNeTimeLABMC;
 
   Float_t deltaPhi = *PhivSmeared1 - *PhivSmeared2;
 
   if (*mctruth == 1)
   {
-    std::cout << deltaTMC << " " << deltaT << " " << deltaTfit << std::endl;
-
     if (*goodClustersTriKinFitSize < 4)
       numberOfAtLeastOneBad++;
     if (*goodClustersTriKinFitSize >= 4)
@@ -337,6 +339,8 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["delta_t"]->Fill(deltaT - deltaTMC);
 
     histsReconstructed["combined_mass_pi0"]->Fill(combinedMassPi0);
+
+    histsReconstructed["pathKne"]->Fill(pathKchFit);
 
     // Decide which reconstructed track corresponds to which MC particle
 
@@ -388,9 +392,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsFittedSignal["chi2_trilaterationKinFit"]->Fill(*Chi2TriKinFit);
     histsFittedSignal["prob_signal"]->Fill(TMath::Prob(*Chi2SignalKinFit, 10));
 
-    histsFittedSignal["vtxNeu_x_Fit"]->Fill(ParamSignalFit[33] - Knemc[6]);
-    histsFittedSignal["vtxNeu_y_Fit"]->Fill(ParamSignalFit[34] - Knemc[7]);
-    histsFittedSignal["vtxNeu_z_Fit"]->Fill(ParamSignalFit[35] - Knemc[8]);
+    histsFittedSignal["vtxNeu_x_Fit"]->Fill(KnerecFit[6] - Knemc[6]);
+    histsFittedSignal["vtxNeu_y_Fit"]->Fill(KnerecFit[7] - Knemc[7]);
+    histsFittedSignal["vtxNeu_z_Fit"]->Fill(KnerecFit[8] - Knemc[8]);
 
     histsFittedSignal["phi_vtx_x"]->Fill(ipFit[0] - ipmc[0]);
     histsFittedSignal["phi_vtx_y"]->Fill(ipFit[1] - ipmc[1]);
@@ -412,6 +416,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsFittedSignal["goodClusNumTriKinFit"]->Fill(*goodClustersTriKinFitSize);
 
+    histsFittedSignal["pathKne"]->Fill(pathKneFit);
   }
 
   return kTRUE;
@@ -461,6 +466,8 @@ void MC_fit_comparison::Terminate()
     }
 
     histsReconstructed[histName]->GetXaxis()->SetTitle(histTitles[histName][0]);
+    histsReconstructed[histName]->GetYaxis()->SetRangeUser(0.0, 1.5 * std::max(histsReconstructed[histName]->GetMaximum(), histsFittedSignal[histName]->GetMaximum()));
+
     histsReconstructed[histName]->Draw();
     histsFittedSignal[histName]->SetLineColor(kRed);
     histsFittedSignal[histName]->Draw("SAME");

@@ -32,6 +32,7 @@ namespace KLOE
     virtual Double_t MinvConsv(Double_t *, Double_t *) = 0;
     virtual Double_t MinvConsvNeuKaon(Double_t *, Double_t *) = 0;
     virtual Double_t MinvConsvChKaon(Double_t *, Double_t *) = 0;
+    virtual Double_t MinvConsvOmega(Double_t *, Double_t *) = 0;
 
     // Gamma path of flight from IP Conservation
     virtual Double_t PhotonPathConsvLAB(Double_t *, Double_t *) = 0;
