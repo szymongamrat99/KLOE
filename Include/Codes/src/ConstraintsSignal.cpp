@@ -195,7 +195,7 @@ Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
   SetParameters(p);
   IntermediateReconstruction();
 
-  return photon[_chosenPhoton].fourPos[3] - Knerec.lifetimeLAB - photon[_chosenPhoton].timeOfFlight;
+  return photon[_chosenPhoton].fourPos[3] - Knereclor.lifetimeLAB - photon[_chosenPhoton].timeOfFlight;
 }
 
 Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)

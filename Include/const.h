@@ -38,16 +38,16 @@ static json properties = json::parse(propertyFile);
 
 struct PDGids
 {
-    const TString
-        Re = "/S013EPS",
-        Im = "/S013EPI",
-        K0mass = "/S011M",
-        TauS = "/S012T",
-        TauL = "/S013T",
-        deltaM = "/S013D",
-        modEps = "/S013EP",
-        phiPM = "/S013F+-",
-        phi00 = "/S013FOO";
+  const TString
+      Re = "/S013EPS",
+      Im = "/S013EPI",
+      K0mass = "/S011M",
+      TauS = "/S012T",
+      TauL = "/S013T",
+      deltaM = "/S013D",
+      modEps = "/S013EP",
+      phiPM = "/S013F+-",
+      phi00 = "/S013FOO";
 };
 
 static std::ifstream fconst(pdgConstFilePath);
@@ -184,436 +184,561 @@ const int
 
 struct NeuPart
 {
-    TLorentzVector
-        vtxLAB,
-        MomLAB,
-        vtxPhiCM,
-        MomPhiCM,
-        vtxMotherCM,
-        MomMotherCM;
+  TLorentzVector
+      vtxLAB,
+      MomLAB,
+      vtxPhiCM,
+      MomPhiCM,
+      vtxMotherCM,
+      MomMotherCM;
 
-    Double_t
-        InvMass,
-        TotMomLAB,
-        TotMomPhiCM,
-        TotMomMotherCM;
+  Double_t
+      InvMass,
+      TotMomLAB,
+      TotMomPhiCM,
+      TotMomMotherCM;
 
-    Int_t
-        CluNum[2];
+  Int_t
+      CluNum[2];
 };
 
 struct ChPart
 {
-    TLorentzVector
-        vtxLAB,
-        MomLAB,
-        vtxPhiCM,
-        MomPhiCM,
-        vtxMotherCM,
-        MomMotherCM;
+  TLorentzVector
+      vtxLAB,
+      MomLAB,
+      vtxPhiCM,
+      MomPhiCM,
+      vtxMotherCM,
+      MomMotherCM;
 
-    Double_t
-        InvMass,
-        TotMomLAB,
-        TotMomPhiCM,
-        TotMomMotherCM;
+  Double_t
+      InvMass,
+      TotMomLAB,
+      TotMomPhiCM,
+      TotMomMotherCM;
 
-    Int_t
-        TrkNum,
-        VtxNum;
+  Int_t
+      TrkNum,
+      VtxNum;
 };
 
 struct Phi
 {
-    TLorentzVector
-        vtxLAB,
-        momentumLAB,
-        vtxPhiCM,
-        momentumPhiCM;
+  TLorentzVector
+      vtxLAB,
+      momentumLAB,
+      vtxPhiCM,
+      momentumPhiCM;
 
-    Double_t
-        InvMass,
-        TotMomentum;
+  Double_t
+      InvMass,
+      TotMomentum;
 
-    Int_t
-        TrkNum,
-        VtxNum;
+  Int_t
+      TrkNum,
+      VtxNum;
 };
 
 struct BaseKinematics
 {
-    BaseKinematics () : 
-                       ipTriKinFit(3, 0.0),
-                       KnetriKinFit(10, 0.0),
-                       neuVtxTriKinFit(4, 0.0),
-                       gammaMomTriKinFit1(8, 0.0),
-                       gammaMomTriKinFit2(8, 0.0),
-                       gammaMomTriKinFit3(8, 0.0),
-                       gammaMomTriKinFit4(8, 0.0),
-                       ipTriangle(3, 0.0),
-                       KneTriangle(10, 0.0),
-                       neuVtxTriangle(4, 0.0),
-                       gammaMomTriangle1(8, 0.0),
-                       gammaMomTriangle2(8, 0.0),
-                       gammaMomTriangle3(8, 0.0),
-                       gammaMomTriangle4(8, 0.0),
-                       g4takenTriKinFit(4, 0),
-                       trcfinal(4, 0.0),
-                       CurvSmeared1(0.0),
-                       PhivSmeared1(0.0),
-                       CotvSmeared1(0.0),
-                       CurvSmeared2(0.0),
-                       PhivSmeared2(0.0),
-                       CotvSmeared2(0.0),
-                       KchrecFit(10, 0),
-                       KchboostFit(10, 0),
-                       ipFit(3, 0),
-                       KnerecFit(10, 0),
-                       KnereclorFit(10, 0),
-                       pi01(6, 0.0),
-                       pi02(6, 0.0),
-                       pi01Fit(6, 0.0),
-                       pi02Fit(6, 0.0)
-    {};
+  BaseKinematics() : ipTriKinFit(3, 0.0),
+                     KnetriKinFit(10, 0.0),
+                     neuVtxTriKinFit(4, 0.0),
+                     gammaMomTriKinFit1(8, 0.0),
+                     gammaMomTriKinFit2(8, 0.0),
+                     gammaMomTriKinFit3(8, 0.0),
+                     gammaMomTriKinFit4(8, 0.0),
+                     ipTriangle(3, 0.0),
+                     Knerec(10, 0.0),
+                     Knereclor(10, 0.0),
+                     neuVtxTriangle(4, 0.0),
+                     gammaMomTriangle1(8, 0.0),
+                     gammaMomTriangle2(8, 0.0),
+                     gammaMomTriangle3(8, 0.0),
+                     gammaMomTriangle4(8, 0.0),
+                     g4takenTriKinFit(4, 0),
+                     trcfinal(4, 0.0),
+                     CurvSmeared1(0.0),
+                     PhivSmeared1(0.0),
+                     CotvSmeared1(0.0),
+                     CurvSmeared2(0.0),
+                     PhivSmeared2(0.0),
+                     CotvSmeared2(0.0),
+                     KchrecFit(10, 0),
+                     KchboostFit(10, 0),
+                     ipFit(3, 0),
+                     KnerecFit(10, 0),
+                     KnereclorFit(10, 0),
+                     pi01(6, 0.0),
+                     pi02(6, 0.0),
+                     pi01Fit(6, 0.0),
+                     pi02Fit(6, 0.0) {};
 
-    Float_t
-        Kchboost[9],
-        KchboostKSOld[9],
-        KchboostKLOld[9],
-        Knereclor[9],
-        Knerec[9],
-        Kchrec[9],
-        KchmcOld[9],
-        KnemcOld[9],
-        ip[3],
-        ipmcOld[3],
-        phi_mom[4],
-        Dtmc,
-        Dtrec,
-        Dtboostlor,
-        TclOld[50],
-        cluster[5][200],
-        bhabha_vtx[3],
-        T0step1,
-        Chi2,
-        minv4gam,
-        Qmiss,
-        Pgamrec[4][4],
-        omega[9],
-        trk[2][4],
-        pi0[2][6],
-        CurvOld[200],
-        PhivOld[200],
-        CotvOld[200],
-        xvOld[200],
-        yvOld[200],
-        zvOld[200],
-        Bx,
-        By,
-        Bz,
-        Bsx,
-        Bsy,
-        Bsz,
-        Bpx,
-        Bpy,
-        Bpz,
-        Bpxerr,
-        Bpyerr,
-        Bpzerr,
-        Broots,
-        BrootsErr,
-        kaonChTimeCM,
-        kaonChTimeLAB,
-        kaonNeTimeLAB,
-        kaonNeTimeCM,
-        kaonNeTimeLABMC,
-        kaonNeTimeCMMC,
-        kaonChTimeLABMC,
-        kaonChTimeCMMC,
-        Chi2TriKinFit,
-        CurvSmeared1,
-        PhivSmeared1,
-        CotvSmeared1,
-        CurvSmeared2,
-        PhivSmeared2,
-        CotvSmeared2,
-        Chi2SignalKinFit,
-        Curv1,
-        Phiv1,
-        Cotv1,
-        Curv2,
-        Phiv2,
-        Cotv2;
+  Float_t
+      Kchboost[9],
+      KchboostKSOld[9],
+      KchboostKLOld[9],
+      Kchrec[9],
+      KchmcOld[9],
+      KnemcOld[9],
+      ip[3],
+      ipmcOld[3],
+      phi_mom[4],
+      Dtmc,
+      Dtrec,
+      Dtboostlor,
+      TclOld[50],
+      cluster[5][200],
+      bhabha_vtx[3],
+      T0step1,
+      Chi2,
+      minv4gam,
+      Qmiss,
+      Pgamrec[4][4],
+      omega[9],
+      trk[2][4],
+      pi0[2][6],
+      CurvOld[200],
+      PhivOld[200],
+      CotvOld[200],
+      xvOld[200],
+      yvOld[200],
+      zvOld[200],
+      Bx,
+      By,
+      Bz,
+      Bsx,
+      Bsy,
+      Bsz,
+      Bpx,
+      Bpy,
+      Bpz,
+      Bpxerr,
+      Bpyerr,
+      Bpzerr,
+      Broots,
+      BrootsErr,
+      kaonChTimeCM,
+      kaonChTimeLAB,
+      kaonNeTimeLAB,
+      kaonNeTimeCM,
+      kaonNeTimeLABMC,
+      kaonNeTimeCMMC,
+      kaonChTimeLABMC,
+      kaonChTimeCMMC,
+      Chi2TriKinFit,
+      CurvSmeared1,
+      PhivSmeared1,
+      CotvSmeared1,
+      CurvSmeared2,
+      PhivSmeared2,
+      CotvSmeared2,
+      Chi2SignalKinFit,
+      Chi2OmegaKinFit,
+      Curv1,
+      Phiv1,
+      Cotv1,
+      Curv2,
+      Phiv2,
+      Cotv2;
 
-    UChar_t
-        mctruth,
-        mcisr,
-        g4taken[4],
-        mcflag,
-        pidmcOld[MaxNumtrkv],
-        vtxmcOld[MaxNumtrkv],
-        motherOld[MaxNumtrkv],
-        Vtx[MaxNumtrkv],
-        ncll[200],
-        VtxCh[3][MaxNumtrkv],
-        ivOld[MaxNumtrkv];
+  UChar_t
+      mctruth,
+      mcisr,
+      g4taken[4],
+      mcflag,
+      pidmcOld[MaxNumtrkv],
+      vtxmcOld[MaxNumtrkv],
+      motherOld[MaxNumtrkv],
+      Vtx[MaxNumtrkv],
+      ncll[200],
+      VtxCh[3][MaxNumtrkv],
+      ivOld[MaxNumtrkv];
 
-    Int_t
-        nevent,
-        ntmc,
-        nvtxmc,
-        nclu,
-        nv,
-        ntv,
-        mctruth_int,
-        errFlag,
-        errFlagKS,
-        errFlagKL,
-        errFlagClosest,
-        nev,
-        nrun,
-        necls,
-        eclfilfo,
-        eclfilfoword,
-        ntcl,
-        bunchnum,
-        errorCode;
+  Int_t
+      nevent,
+      ntmc,
+      nvtxmc,
+      nclu,
+      nv,
+      ntv,
+      mctruth_int,
+      errFlag,
+      errFlagKS,
+      errFlagKL,
+      errFlagClosest,
+      nev,
+      nrun,
+      necls,
+      eclfilfo,
+      eclfilfoword,
+      ntcl,
+      bunchnum,
+      errorCode;
 
-    std::vector<Float_t>
-        Kchrecnew,
-        KchrecKS,
-        KchrecKL,
-        KchrecClosest,
-        trknew[2],
-        trkKS[2],
-        trkKL[2],
-        trkClosest[2],
-        KchrecKSTwoBody,
-        KchrecKLTwoBody,
-        trkKSTwoBody[2],
-        trkKLTwoBody[2],
-        Xcl,
-        Ycl,
-        Zcl,
-        Tcl,
-        TclCorr,
-        Enecl,
-        Curv,
-        Phiv,
-        Cotv,
-        xv,
-        yv,
-        zv,
-        xvmc,
-        yvmc,
-        zvmc,
-        pxmc,
-        pymc,
-        pzmc,
-        KchboostKS,
-        KchboostKL,
-        ipKS,
-        ipKL,
-        ipmc,
-        Knemc,
-        Kchmc,
-        trkMC[2],
-        trkKSmc[2],
-        trkKLmc[2],
-        Kchrecsmeared,
-        Kchboostsmeared,
-        trksmeared[2],
-        Kchboostnew,
-        ipnew,
-        ipTriKinFit,
-        KnetriKinFit,
-        neuVtxTriKinFit,
-        gammaMomTriKinFit1,
-        gammaMomTriKinFit2,
-        gammaMomTriKinFit3,
-        gammaMomTriKinFit4,
-        ipTriangle,
-        KneTriangle,
-        neuVtxTriangle,
-        gammaMomTriangle1,
-        gammaMomTriangle2,
-        gammaMomTriangle3,
-        gammaMomTriangle4,
-        trcfinal,
-        CurvMC,
-        PhivMC,
-        CotvMC,
-        pullsTriKinFit,
-        trkFit[2],
-        KchrecFit,
-        KchboostFit,
-        ipFit,
-        photonFit[4],
-        KnerecFit,
-        KnereclorFit,
-        ParamSignal,
-        ErrorsSignal,
-        ParamSignalFit,
-        ErrorsSignalFit,
-        pullsSignalFit,
-        pi01,
-        pi02,
-        pi01Fit,
-        pi02Fit;
+  std::vector<Float_t>
+      Kchrecnew,
+      KchrecKS,
+      KchrecKL,
+      KchrecClosest,
+      trknew[2],
+      trkKS[2],
+      trkKL[2],
+      trkClosest[2],
+      KchrecKSTwoBody,
+      KchrecKLTwoBody,
+      trkKSTwoBody[2],
+      trkKLTwoBody[2],
+      Xcl,
+      Ycl,
+      Zcl,
+      Tcl,
+      TclCorr,
+      Enecl,
+      Curv,
+      Phiv,
+      Cotv,
+      xv,
+      yv,
+      zv,
+      xvmc,
+      yvmc,
+      zvmc,
+      pxmc,
+      pymc,
+      pzmc,
+      KchboostKS,
+      KchboostKL,
+      ipKS,
+      ipKL,
+      ipmc,
+      Knemc,
+      Kchmc,
+      trkMC[2],
+      trkKSmc[2],
+      trkKLmc[2],
+      Kchrecsmeared,
+      Kchboostsmeared,
+      trksmeared[2],
+      Kchboostnew,
+      ipnew,
+      ipTriKinFit,
+      KnetriKinFit,
+      neuVtxTriKinFit,
+      gammaMomTriKinFit1,
+      gammaMomTriKinFit2,
+      gammaMomTriKinFit3,
+      gammaMomTriKinFit4,
+      ipTriangle,
+      neuVtxTriangle,
+      gammaMomTriangle1,
+      gammaMomTriangle2,
+      gammaMomTriangle3,
+      gammaMomTriangle4,
+      trcfinal,
+      CurvMC,
+      PhivMC,
+      CotvMC,
+      pullsTriKinFit,
+      trkFit[2],
+      KchrecFit,
+      KchboostFit,
+      ipFit,
+      photonFit[4],
+      KnerecFit,
+      KnereclorFit,
+      ParamSignal,
+      ErrorsSignal,
+      ParamSignalFit,
+      ErrorsSignalFit,
+      pullsSignalFit,
+      ParamOmega,
+      ErrorsOmega,
+      ParamOmegaFit,
+      ErrorsOmegaFit,
+      pullsOmegaFit,
+      pi01,
+      pi02,
+      pi01Fit,
+      pi02Fit,
+      pi01OmegaFit,
+      pi02OmegaFit,
+      omegaFit,
+      phiOmegaFit,
+      trk1OmegaFit,
+      trk2OmegaFit,
+      Knerec,
+      Knereclor;
 
-    TLorentzVector
-        phi4Mom;
+  TLorentzVector
+      phi4Mom;
 
-    std::vector<Int_t>
-        vtaken,
-        vtakenKS,
-        vtakenKL,
-        vtakenClosest,
-        eclstream,
-        Asscl,
-        iv,
-        pidmc,
-        vtxmc,
-        mother,
-        goodClusIndex,
-        errors,
-        cuts,
-        g4takenTriKinFit,
-        goodClustersTriKinFit;
+  std::vector<Int_t>
+      vtaken,
+      vtakenKS,
+      vtakenKL,
+      vtakenClosest,
+      eclstream,
+      Asscl,
+      iv,
+      pidmc,
+      vtxmc,
+      mother,
+      goodClusIndex,
+      errors,
+      cuts,
+      g4takenTriKinFit,
+      goodClustersTriKinFit;
 
-    /**
-     * @brief Clear all data members of BaseKinematics (scalars to zero, vectors cleared/resized).
-     */
-    void clear() {
-        // Zero all fixed-size arrays and scalars
-        memset(Kchboost, 0, sizeof(Kchboost));
-        memset(KchboostKSOld, 0, sizeof(KchboostKSOld));
-        memset(KchboostKLOld, 0, sizeof(KchboostKLOld));
-        memset(Knereclor, 0, sizeof(Knereclor));
-        memset(Knerec, 0, sizeof(Knerec));
-        memset(Kchrec, 0, sizeof(Kchrec));
-        memset(KchmcOld, 0, sizeof(KchmcOld));
-        memset(KnemcOld, 0, sizeof(KnemcOld));
-        memset(ip, 0, sizeof(ip));
-        memset(ipmcOld, 0, sizeof(ipmcOld));
-        memset(phi_mom, 0, sizeof(phi_mom));
-        Dtmc = Dtrec = Dtboostlor = T0step1 = Chi2 = minv4gam = Qmiss = 0.0f;
-        memset(TclOld, 0, sizeof(TclOld));
-        memset(cluster, 0, sizeof(cluster));
-        memset(bhabha_vtx, 0, sizeof(bhabha_vtx));
-        memset(Pgamrec, 0, sizeof(Pgamrec));
-        memset(omega, 0, sizeof(omega));
-        memset(trk, 0, sizeof(trk));
-        memset(pi0, 0, sizeof(pi0));
-        memset(CurvOld, 0, sizeof(CurvOld));
-        memset(PhivOld, 0, sizeof(PhivOld));
-        memset(CotvOld, 0, sizeof(CotvOld));
-        memset(xvOld, 0, sizeof(xvOld));
-        memset(yvOld, 0, sizeof(yvOld));
-        memset(zvOld, 0, sizeof(zvOld));
-        mctruth = mcisr = mcflag = 0;
-        memset(g4taken, 0, sizeof(g4taken));
-        memset(pidmcOld, 0, sizeof(pidmcOld));
-        memset(vtxmcOld, 0, sizeof(vtxmcOld));
-        memset(motherOld, 0, sizeof(motherOld));
-        memset(Vtx, 0, sizeof(Vtx));
-        memset(ncll, 0, sizeof(ncll));
-        memset(VtxCh, 0, sizeof(VtxCh));
-        memset(ivOld, 0, sizeof(ivOld));
-        nevent = ntmc = nvtxmc = nclu = nv = ntv = mctruth_int = 0;
-        errFlag = errFlagKS = errFlagKL = errFlagClosest = 0;
-        // Clear all std::vectors
-        Kchrecnew.clear();
-        KchrecKS.clear();
-        KchrecKL.clear();
-        KchrecClosest.clear();
-        KchrecKLTwoBody.clear();
-        trknew[0].clear(); trknew[1].clear();
-        trkKS[0].clear(); trkKS[1].clear();
-        trkKL[0].clear(); trkKL[1].clear();
-        trkClosest[0].clear(); trkClosest[1].clear();
-        trkKLTwoBody[0].clear(); trkKLTwoBody[1].clear();
-        vtaken.clear();
-        vtakenKS.clear();
-        vtakenKL.clear();
-        vtakenClosest.clear();
-    }
+  void resize()
+  {
+    clear();
+    // Resize all std::vectors
+    Kchrecnew.resize(10, 0.0);
+    Kchboostnew.resize(10, 0.0);
+    Kchboostsmeared.resize(10, 0.0);
+    Kchrecsmeared.resize(10, 0.0);
+    ipnew.resize(3, 0.0);
+    KchrecKS.resize(10, 0.0);
+    KchrecKL.resize(10, 0.0);
+    KchrecClosest.resize(10, 0.0);
+    KchrecKSTwoBody.resize(10, 0.0);
+    KchrecKLTwoBody.resize(10, 0.0);
+    Knerec.resize(10, 0.0);
+    Knereclor.resize(10, 0.0);
+    g4takenTriKinFit.resize(4, 0);
+    goodClustersTriKinFit.resize(4, 0);
+    pi01.resize(6, 0.0);
+    pi02.resize(6, 0.0);
+    pi01Fit.resize(6, 0.0);
+    pi02Fit.resize(6, 0.0);
+    ipTriKinFit.resize(3, 0.0);
+    KnetriKinFit.resize(10, 0.0);
+    neuVtxTriKinFit.resize(4, 0.0);
+    gammaMomTriKinFit1.resize(8, 0.0);
+    gammaMomTriKinFit2.resize(8, 0.0);
+    gammaMomTriKinFit3.resize(8, 0.0);
+    gammaMomTriKinFit4.resize(8, 0.0);
+    ipTriangle.resize(3, 0.0);
+    neuVtxTriangle.resize(4, 0.0);
+    gammaMomTriangle1.resize(8, 0.0);
+    gammaMomTriangle2.resize(8, 0.0);
+    gammaMomTriangle3.resize(8, 0.0);
+    gammaMomTriangle4.resize(8, 0.0);
+    trcfinal.resize(4, 0.0);
+    pullsTriKinFit.resize(0, 0.0);
+    trkFit[0].resize(4, 0.0);
+    trkFit[1].resize(4, 0.0);
+    KchrecFit.resize(10, 0);
+    KchboostFit.resize(10, 0);
+    ipFit.resize(3, 0);
+    photonFit[0].resize(4, 0.0);
+    photonFit[1].resize(4, 0.0);
+    photonFit[2].resize(4, 0.0);
+    photonFit[3].resize(4, 0.0);
+    KnerecFit.resize(10, 0.0);
+    KnereclorFit.resize(10, 0.0);
+    ParamSignal.resize(5, 0.0);
+    ErrorsSignal.resize(5, 0.0);
+    ParamSignalFit.resize(5, 0.0);
+    ErrorsSignalFit.resize(5, 0.0);
+    pullsSignalFit.resize(0, 0.0);
+    ParamOmega.resize(5, 0.0);
+    ErrorsOmega.resize(5, 0.0);
+    ParamOmegaFit.resize(5, 0.0);
+    ErrorsOmegaFit.resize(5, 0.0);
+    pullsOmegaFit.resize(0, 0.0);
+    pi01OmegaFit.resize(6, 0.0);
+    pi02OmegaFit.resize(6, 0.0);
+    omegaFit.resize(9, 0.0);
+    phiOmegaFit.resize(4, 0.0);
+    trk1OmegaFit.resize(4, 0.0);
+    trk2OmegaFit.resize(4, 0.0);
+    // Resize trk vectors
+    trknew[0].resize(4, 0.0);
+    trknew[1].resize(4, 0.0);
+    trkKS[0].resize(4, 0.0);
+    trkKS[1].resize(4, 0.0);
+    trkKL[0].resize(4, 0.0);
+    trkKL[1].resize(4, 0.0);
+    trkClosest[0].resize(4, 0.0);
+    trkClosest[1].resize(4, 0.0);
+    trkKSTwoBody[0].resize(4, 0.0);
+    trkKSTwoBody[1].resize(4, 0.0);
+    trkKLTwoBody[0].resize(4, 0.0);
+    trkKLTwoBody[1].resize(4, 0.0);
+    trkMC[0].resize(4, 0.0);
+    trkMC[1].resize(4, 0.0);
+    trkKSmc[0].resize(4, 0.0);
+    trkKSmc[1].resize(4, 0.0);
+    trkKLmc[0].resize(4, 0.0);
+    trkKLmc[1].resize(4, 0.0);
+    trksmeared[0].resize(4, 0.0);
+    trksmeared[1].resize(4, 0.0);
+    CurvMC.resize(200, 0.0);
+    PhivMC.resize(200, 0.0);
+    CotvMC.resize(200, 0.0);
+    vtaken.resize(3, 0);
+    vtakenKS.resize(3, 0);
+    vtakenKL.resize(3, 0);
+    vtakenClosest.resize(3, 0);
+  };
+
+  /**
+   * @brief Clear all data members of BaseKinematics (scalars to zero, vectors cleared/resized).
+   */
+  void clear()
+  {
+    // Clear all std::vectors
+    Kchrecnew.clear();
+    KchrecKS.clear();
+    KchrecKL.clear();
+    KchrecClosest.clear();
+    KchrecKLTwoBody.clear();
+    KchrecKSTwoBody.clear();
+    Knerec.clear();
+    Knereclor.clear();
+    g4takenTriKinFit.clear();
+    goodClustersTriKinFit.clear();
+    pi01.clear();
+    pi02.clear();
+    pi01Fit.clear();
+    pi02Fit.clear();
+    ipTriKinFit.clear();
+    KnetriKinFit.clear();
+    neuVtxTriKinFit.clear();
+    gammaMomTriKinFit1.clear();
+    gammaMomTriKinFit2.clear();
+    gammaMomTriKinFit3.clear();
+    gammaMomTriKinFit4.clear();
+    ipTriangle.clear();
+    neuVtxTriangle.clear();
+    gammaMomTriangle1.clear();
+    gammaMomTriangle2.clear();
+    gammaMomTriangle3.clear();
+    gammaMomTriangle4.clear();
+    trcfinal.clear();
+    pullsTriKinFit.clear();
+    trkFit[0].clear();
+    trkFit[1].clear();
+    KchrecFit.clear();
+    KchboostFit.clear();
+    ipFit.clear();
+    photonFit[0].clear();
+    photonFit[1].clear();
+    photonFit[2].clear();
+    photonFit[3].clear();
+    KnerecFit.clear();
+    KnereclorFit.clear();
+    ParamSignal.clear();
+    ErrorsSignal.clear();
+    ParamSignalFit.clear();
+    ErrorsSignalFit.clear();
+    pullsSignalFit.clear();
+    ParamOmega.clear();
+    ErrorsOmega.clear();
+    ParamOmegaFit.clear();
+    ErrorsOmegaFit.clear();
+    pullsOmegaFit.clear();
+    pi01OmegaFit.clear();
+    pi02OmegaFit.clear();
+    omegaFit.clear();
+    phiOmegaFit.clear();
+    trk1OmegaFit.clear();
+    trk2OmegaFit.clear();
+    // Clear trk vectors
+    trknew[0].clear();
+    trknew[1].clear();
+    trkKS[0].clear();
+    trkKS[1].clear();
+    trkKL[0].clear();
+    trkKL[1].clear();
+    trkClosest[0].clear();
+    trkClosest[1].clear();
+    trkKLTwoBody[0].clear();
+    trkKLTwoBody[1].clear();
+    vtaken.clear();
+    vtakenKS.clear();
+    vtakenKL.clear();
+    vtakenClosest.clear();
+  }
 };
 
 struct NeutRec4
 {
-    Float_t
-        Knerec[10],
-        Photons[4][9],
-        chi2min;
-    Int_t
-        gtaken[4],
-        done;
+  Float_t
+      Knerec[10],
+      Photons[4][9],
+      chi2min;
+  Int_t
+      gtaken[4],
+      done;
 };
 
 inline void setGlobalStyle()
 {
-    // Global Style of histograms, pads, etc.
+  // Global Style of histograms, pads, etc.
 
-    gStyle->SetOptStat("iouMn");
+  gStyle->SetOptStat("iouMn");
 
-    gStyle->SetFitFormat("6.2g");
-    gStyle->SetStatFormat("6.2g");
+  gStyle->SetFitFormat("6.2g");
+  gStyle->SetStatFormat("6.2g");
 
-    gStyle->SetCanvasDefH(750);
-    gStyle->SetCanvasDefW(750);
+  gStyle->SetCanvasDefH(750);
+  gStyle->SetCanvasDefW(750);
 
-    gStyle->SetPadLeftMargin(0.15);
-    gStyle->SetPadRightMargin(0.15);
-    gStyle->SetPadBottomMargin(0.15);
+  gStyle->SetPadLeftMargin(0.15);
+  gStyle->SetPadRightMargin(0.15);
+  gStyle->SetPadBottomMargin(0.15);
 
-    gStyle->SetPadTickX(1);
-    gStyle->SetPadTickY(1);
+  gStyle->SetPadTickX(1);
+  gStyle->SetPadTickY(1);
 
-    gStyle->SetOptLogz(1);
-    gStyle->SetPalette(1);
+  gStyle->SetOptLogz(1);
+  gStyle->SetPalette(1);
 
-    gStyle->SetHistLineWidth(3);
-    gStyle->SetLineWidth(2);
+  gStyle->SetHistLineWidth(3);
+  gStyle->SetLineWidth(2);
 
-    gStyle->SetLabelSize(0.04, "X");
-    gStyle->SetLabelSize(0.04, "Y");
-    gStyle->SetLabelSize(0.04, "Z");
-    gStyle->SetLabelOffset(0.02, "X");
-    gStyle->SetLabelOffset(0.02, "Y");
-    gStyle->SetLabelOffset(0.02, "Z");
-    gStyle->SetLabelFont(62, "X");
-    gStyle->SetLabelFont(62, "Y");
-    gStyle->SetLabelFont(62, "Z");
+  gStyle->SetLabelSize(0.04, "X");
+  gStyle->SetLabelSize(0.04, "Y");
+  gStyle->SetLabelSize(0.04, "Z");
+  gStyle->SetLabelOffset(0.02, "X");
+  gStyle->SetLabelOffset(0.02, "Y");
+  gStyle->SetLabelOffset(0.02, "Z");
+  gStyle->SetLabelFont(62, "X");
+  gStyle->SetLabelFont(62, "Y");
+  gStyle->SetLabelFont(62, "Z");
 
-    gStyle->SetTitleSize(0.05, "X");
-    gStyle->SetTitleSize(0.05, "Y");
-    gStyle->SetTitleSize(0.05, "Z");
-    gStyle->SetTitleOffset(1.2, "X");
-    gStyle->SetTitleOffset(1.5, "Y");
-    gStyle->SetTitleOffset(1.2, "Z");
-    gStyle->SetTitleFont(62, "X");
-    gStyle->SetTitleFont(62, "Y");
-    gStyle->SetTitleFont(62, "Z");
+  gStyle->SetTitleSize(0.05, "X");
+  gStyle->SetTitleSize(0.05, "Y");
+  gStyle->SetTitleSize(0.05, "Z");
+  gStyle->SetTitleOffset(1.2, "X");
+  gStyle->SetTitleOffset(1.5, "Y");
+  gStyle->SetTitleOffset(1.2, "Z");
+  gStyle->SetTitleFont(62, "X");
+  gStyle->SetTitleFont(62, "Y");
+  gStyle->SetTitleFont(62, "Z");
 
-    gStyle->SetTitle("");
+  gStyle->SetTitle("");
 
-    gStyle->cd();
+  gStyle->cd();
 }
 
 inline TString elapsedTimeHMS(double totalSeconds)
 {
-    int elapsedMinutes, elapsedHours;
-    double elapsedSeconds;
-    TString elapsedHMS;
+  int elapsedMinutes, elapsedHours;
+  double elapsedSeconds;
+  TString elapsedHMS;
 
-    elapsedHours = int(totalSeconds / 3600.);
-    elapsedMinutes = int(((totalSeconds / 3600.) - elapsedHours) * 60.);
-    elapsedSeconds = ((((totalSeconds / 3600.) - elapsedHours) * 60.) - elapsedMinutes) * 60.;
+  elapsedHours = int(totalSeconds / 3600.);
+  elapsedMinutes = int(((totalSeconds / 3600.) - elapsedHours) * 60.);
+  elapsedSeconds = ((((totalSeconds / 3600.) - elapsedHours) * 60.) - elapsedMinutes) * 60.;
 
-    elapsedHMS = std::to_string(elapsedHours) + "h " + std::to_string(elapsedMinutes) + "min " + std::to_string(elapsedSeconds) + "s";
+  elapsedHMS = std::to_string(elapsedHours) + "h " + std::to_string(elapsedMinutes) + "min " + std::to_string(elapsedSeconds) + "s";
 
-    return elapsedHMS;
+  return elapsedHMS;
 };
 
 #endif

@@ -7,181 +7,139 @@
 
 namespace KLOE
 {
-	OmegaKinFit::OmegaKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger) : KinFitter("Omega", N_free, N_const, M, 0, loopcount, chiSqrStep, logger)
-	{
-		_V.ResizeTo(N_free + N_const, N_free + N_const);
-		_D.ResizeTo(M, N_free + N_const);
-		_D_T.ResizeTo(N_free + N_const, M);
-		_V_final.ResizeTo(N_free + N_const, N_free + N_const);
-		_V_aux.ResizeTo(N_free + N_const, N_free + N_const);
-		_V_min.ResizeTo(N_free + N_const, N_free + N_const);
-		_Aux.ResizeTo(M, M);
-		_V_invert.ResizeTo(N_free, N_free);
-		_V_init.ResizeTo(N_free + N_const, N_free + N_const);
+  OmegaKinFit::OmegaKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger) : KinFitter("Omega", N_free, N_const, M, 0, loopcount, chiSqrStep, logger)
+  {
+    _V.ResizeTo(N_free + N_const, N_free + N_const);
+    _D.ResizeTo(M, N_free + N_const);
+    _D_T.ResizeTo(N_free + N_const, M);
+    _V_final.ResizeTo(N_free + N_const, N_free + N_const);
+    _V_aux.ResizeTo(N_free + N_const, N_free + N_const);
+    _V_min.ResizeTo(N_free + N_const, N_free + N_const);
+    _Aux.ResizeTo(M, M);
+    _V_invert.ResizeTo(N_free, N_free);
+    _V_init.ResizeTo(N_free + N_const, N_free + N_const);
 
-		_X.ResizeTo(N_free + N_const);
-		_C.ResizeTo(M);
-		_X_final.ResizeTo(N_free + N_const);
-		_L.ResizeTo(M);
-		_CORR.ResizeTo(N_free + N_const);
-		_X_init.ResizeTo(N_free + N_const);
-		_X_min.ResizeTo(N_free + N_const);
-		_C_min.ResizeTo(M);
-		_L_min.ResizeTo(M);
-		_C_aux.ResizeTo(M);
-		_L_aux.ResizeTo(M);
-		_X_init_min.ResizeTo(N_free + N_const);
-		_X_init_aux.ResizeTo(N_free + N_const);
+    _X.ResizeTo(N_free + N_const);
+    _C.ResizeTo(M);
+    _X_final.ResizeTo(N_free + N_const);
+    _L.ResizeTo(M);
+    _CORR.ResizeTo(N_free + N_const);
+    _X_init.ResizeTo(N_free + N_const);
+    _X_min.ResizeTo(N_free + N_const);
+    _C_min.ResizeTo(M);
+    _L_min.ResizeTo(M);
+    _C_aux.ResizeTo(M);
+    _L_aux.ResizeTo(M);
+    _X_init_min.ResizeTo(N_free + N_const);
+    _X_init_aux.ResizeTo(N_free + N_const);
 
-		_Param.resize(N_free + N_const);
-		_Errors.resize(N_free + N_const);
+    _Param.resize(N_free + N_const);
+    _Errors.resize(N_free + N_const);
 
-		for (Int_t i = 0; i < 4; i++)
-			_photonFit[i].resize(8);
+    for (Int_t i = 0; i < 4; i++)
+      _photonFit[i].resize(8);
 
-		_ipFit.resize(3);
-		_KchrecFit.resize(10);
-		_KchboostFit.resize(10);
-		_KnerecFit.resize(10);
-		_KnereclorFit.resize(10);
-		for (Int_t i = 0; i < 2; i++)
-			_trkFit[i].resize(4);
+    _ipFit.resize(3);
 
-		std::vector<std::string> ConstSet = {
-			"EnergyConsvLAB",
-			"PxConsvLAB",
-			"PyConsvLAB",
-			"PzConsvLAB",
-			"Photon1PathLAB",
-			"Photon2PathLAB",
-			"Photon3PathLAB",
-			"Photon4PathLAB"};
+    _OmegaFit.resize(8);
+    _Pi0OmegaFit.resize(8);
+    _PhiMomFit.resize(7);
 
-		gErrorIgnoreLevel = 6001;
-	}
+    for (Int_t i = 0; i < 2; i++)
+      _trkFit[i].resize(4);
 
-	OmegaKinFit::~OmegaKinFit()
-	{
-	}
+    std::vector<std::string> ConstSet = {
+        "EnergyConsvLAB",
+        "PxConsvLAB",
+        "PyConsvLAB",
+        "PzConsvLAB",
+        "Photon1PathLAB",
+        "Photon2PathLAB",
+        "Photon3PathLAB",
+        "Photon4PathLAB",
+        "MinvConsvOmega"};
 
-	ErrorHandling::ErrorCodes OmegaKinFit::Reconstruct()
-	{
-		_CHISQRMIN = 999999.;
-		_isConverged = 0;
+    gErrorIgnoreLevel = 6001;
+  }
 
-		Bool_t
-			clusterEnergy = false,
-			cond_clus[4] = {false, false, false, false};
+  OmegaKinFit::~OmegaKinFit()
+  {
+  }
 
-		clusterEnergy = _cluster[0][4] > MIN_CLU_ENE &&
-						_cluster[1][4] > MIN_CLU_ENE &&
-						_cluster[2][4] > MIN_CLU_ENE &&
-						_cluster[3][4] > MIN_CLU_ENE;
+  ErrorHandling::ErrorCodes OmegaKinFit::Reconstruct()
+  {
+    _CHISQRMIN = 999999.;
+    _isConverged = 1;
 
-		for (Int_t k = 0; k < 4; k++)
-		{
-			cond_clus[k] =
-				_cluster[k][0] != 0 &&
-				_cluster[k][1] != 0 &&
-				_cluster[k][2] != 0;
-		}
+    try
+    {
+      _offset = 0;
 
-		Bool_t cond_tot = cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
+      for (Int_t i = 0; i < 4; i++)
+      {
+        for (Int_t j = 0; j < 5; j++)
+          _Param[_offset + i * 5 + j] = _cluster[i][j];
 
-		if (cond_tot)
-		{
-			try
-			{
-				_offset = 0;
+        _Errors[_offset + i * 5] = clu_x_error(_Param[_offset + i * 5], _Param[_offset + i * 5 + 1], _Param[_offset + i * 5 + 2], _Param[_offset + i * 5 + 4]);     // cm
+        _Errors[_offset + i * 5 + 1] = clu_y_error(_Param[_offset + i * 5], _Param[_offset + i * 5 + 1], _Param[_offset + i * 5 + 2], _Param[_offset + i * 5 + 4]); // cm
+        _Errors[_offset + i * 5 + 2] = clu_z_error(_Param[_offset + i * 5], _Param[_offset + i * 5 + 1], _Param[_offset + i * 5 + 2], _Param[_offset + i * 5 + 4]); // cm
+        _Errors[_offset + i * 5 + 3] = clu_time_error(_Param[_offset + i * 5 + 4]);                                                                                 // ns
+        _Errors[_offset + i * 5 + 4] = clu_ene_error(_Param[_offset + i * 5 + 4]);                                                                                  // MeV
+      }
 
-				for (Int_t i = 0; i < 4; i++)
-				{
-					for (Int_t j = 0; j < 5; j++)
-						_Param[_offset + i * 5 + j] = _cluster[i][j];
+      _offset = 20;
 
-					_Errors[_offset + i * 5] = clu_x_error(_Param[_offset + i * 5], _Param[_offset + i * 5 + 1], _Param[_offset + i * 5 + 2], _Param[_offset + i * 5 + 4]);		// cm
-					_Errors[_offset + i * 5 + 1] = clu_y_error(_Param[_offset + i * 5], _Param[_offset + i * 5 + 1], _Param[_offset + i * 5 + 2], _Param[_offset + i * 5 + 4]); // cm
-					_Errors[_offset + i * 5 + 2] = clu_z_error(_Param[_offset + i * 5], _Param[_offset + i * 5 + 1], _Param[_offset + i * 5 + 2], _Param[_offset + i * 5 + 4]); // cm
-					_Errors[_offset + i * 5 + 3] = clu_time_error(_Param[_offset + i * 5 + 4]);	// ns
-					_Errors[_offset + i * 5 + 4] = clu_ene_error(_Param[_offset + i * 5 + 4]);	// MeV
-				}
+      for (Int_t i = 0; i < 2; i++)
+      {
+        _Param[_offset + i * 3] = _trackParameters[i][0];
+        _Param[_offset + i * 3 + 1] = _trackParameters[i][1];
+        _Param[_offset + i * 3 + 2] = _trackParameters[i][2];
 
-				_offset = 20;
+        _Errors[_offset + i * 3] = _trackParametersErr[i][0];
+        _Errors[_offset + i * 3 + 1] = _trackParametersErr[i][1];
+        _Errors[_offset + i * 3 + 2] = _trackParametersErr[i][2];
+      }
 
-				for (Int_t i = 0; i < 3; i++)
-				{
-					_Param[_offset + i] = _chargedVtx[i];
-					_Errors[_offset + i] = _chargedVtxErr[i];
-				}
+      _offset = 26;
 
-				_offset = 23;
+      for (Int_t i = 0; i < 4; i++)
+      {
+        _Param[_offset + i] = _bhabha_mom[i];
+        _Errors[_offset + i] = _bhabha_mom_err[i];
+      }
 
-				for (Int_t i = 0; i < 2; i++)
-				{
-					_Param[_offset + i * 3] = _trackParameters[i][0];
-					_Param[_offset + i * 3 + 1] = _trackParameters[i][1];
-					_Param[_offset + i * 3 + 2] = _trackParameters[i][2];
+      _offset = 30;
 
-					_Errors[_offset + i * 3] = _trackParametersErr[i][0];
-					_Errors[_offset + i * 3 + 1] = _trackParametersErr[i][1];
-					_Errors[_offset + i * 3 + 2] = _trackParametersErr[i][2];
-				}
+      for (Int_t i = 0; i < 3; i++)
+      {
+        _Param[_offset + i] = _omegaVtx[i];
+        _Errors[_offset + i] = _omegaVtxErr[i];
+      }
 
-				_offset = 29;
+      _offset = 33;
 
-				for (Int_t i = 0; i < 4; i++)
-				{
-					_Param[_offset + i] = _bhabha_mom[i];
-					_Errors[_offset + i] = _bhabha_mom_err[i];
-				}
+      for (Int_t i = 0; i < 3; i++)
+      {
+        _Param[_offset + i] = _bhabha_vtx[i];
+        _Errors[_offset + i] = _bhabhaVtxErr[i];
+      }
 
-				_offset = 33;
+      _offset = _Param.size();
 
+      if (_offset != _N_free + _N_const)
+        throw ErrorHandling::ErrorCodes::OMEGA_KIN_FIT;
+    }
+    catch (ErrorHandling::ErrorCodes &err)
+    {
+      return err;
+    }
 
-				for (Int_t i = 0; i < 3; i++)
-				{
-					_Param[_offset + i] = _neuVtx[i];
-					_Errors[_offset + i] = _neuVtxErr[i];
-				}
+    KinFitter::ParameterInitialization(_Param.data(), _Errors.data());
 
-				_offset = 36;
+    _CHISQRMIN = KinFitter::FitFunction();
 
-				for (Int_t i = 0; i < 3; i++)
-				{
-					_Param[_offset + i] = _bhabha_vtx[i];
-					_Errors[_offset + i] = _bhabhaVtxErr[i];
-				}
+    KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit, _OmegaFit, _ipFit, _photonFit, _Pi0OmegaFit, _PhiMomFit);
 
-				_offset = _Param.size();
-
-				if (_offset != _N_free + _N_const)
-					throw ErrorHandling::ErrorCodes::OMEGA_KIN_FIT;
-			}
-			catch (ErrorHandling::ErrorCodes &err)
-			{
-				return err;
-			}
-
-			KinFitter::ParameterInitialization(_Param.data(), _Errors.data());
-
-			_CHISQRMIN = KinFitter::FitFunction();
-
-			KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit, _KchrecFit, _KchboostFit, _ipFit, _photonFit, _KnerecFit, _KnereclorFit);
-
-
-			if (1)
-				_isConverged = 1;
-			else
-				_isConverged = 0;
-		}
-		else
-		{
-			_isConverged = 0;
-		}
-
-		if (_isConverged)
-			return ErrorHandling::ErrorCodes::NO_ERROR;
-		else
-			return ErrorHandling::ErrorCodes::OMEGA_KIN_FIT;
-	}
+    return ErrorHandling::ErrorCodes::NO_ERROR;
+  }
 }

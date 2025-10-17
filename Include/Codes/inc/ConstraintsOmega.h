@@ -2,6 +2,7 @@
 #define CONSTRAINTSOMEGA_H
 
 #include <KinFit.h>
+#include <NeutralReconstruction.h>
 
 /*List of variables (order is the following)*/
 /*
@@ -55,7 +56,7 @@ namespace KLOE
    * @class ConstraintsOmega
    * @brief Auxiliary class with the constraints for \omega\pi^{0} fitting
    */
-  class ConstraintsOmega : public KinFit
+  class ConstraintsOmega : public KinFit, public ChargedVtxRec<Float_t, Int_t>
   {
   private:
     /**
@@ -74,11 +75,12 @@ namespace KLOE
      */
     Double_t PhotonPathConsvLAB(Double_t *x, Double_t *p) override;
 
+    Double_t MinvConsv(Double_t *x, Double_t *p) override;
+
     // Fictitious overriders
     /** Fictitious overrider of virtual method - do not use*/
     Double_t EnergyConsvCM(Double_t *x, Double_t *p) override { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
-    Double_t MinvConsv(Double_t *x, Double_t *p) override { return 0; };
     Double_t MinvConsvChKaon(Double_t *x, Double_t *p) override { return 0; };
     Double_t MinvConsvNeuKaon(Double_t *x, Double_t *p) override { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
@@ -90,113 +92,125 @@ namespace KLOE
     /** Fictitious overrider of virtual method - do not use*/
     Double_t NeutralZPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
 
-    void SetParameters(Double_t *p) override { };
-    void ResetParameters() override { };
-    void IntermediateReconstruction() override { };
-
     Int_t
         _chosen4MomComponent, /*!< Component of a 4-momentum to choose from FourMomConsvLAB*/
         _chosenPhoton;        /*!< Index of a photon to choose from PhotonPathConsvLAB*/
 
-    public:
-      /* Specific physical Constraints for Omega-pi0 hypothesis */
+    KLOE::NeutralReconstruction neutRec; /*!< Object of NeutralReconstruction class to perform intermediate reconstruction*/
 
-      /**
-       * @brief A method used to pair the photons in an event. Needed to get omega and neutral pions' parameters.
-       */
-      void PhotonPairing();
+    std::string
+        _minvMode; /*!< Mode of invariant mass conservation - omega or neutral kaon*/
 
-      // Four momentum conservation in LAB
-      /**
-       * @brief Conservation of total momentum's x-component
-       * @param x pointer to the variables table - artificial variable to use TF1
-       * @param p pointer to the parameters table - physical variables to fit
-       * @returns double precision value of a constraint
-       */
-      Double_t PxConsvLAB(Double_t * x, Double_t * p) override
-      {
-        _chosen4MomComponent = 0;
-        return FourMomConsvLAB(x, p);
-      };
-      /**
-       * @brief Conservation of total momentum's y-component
-       * @param x pointer to the variables table - artificial variable to use TF1
-       * @param p pointer to the parameters table - physical variables to fit
-       * @returns double precision value of a constraint
-       */
-      Double_t PyConsvLAB(Double_t * x, Double_t * p) override
-      {
-        _chosen4MomComponent = 1;
-        return FourMomConsvLAB(x, p);
-      };
-      /**
-       * @brief Conservation of total momentum's z-component
-       * @param x pointer to the variables table - artificial variable to use TF1
-       * @param p pointer to the parameters table - physical variables to fit
-       * @returns double precision value of a constraint
-       */
-      Double_t PzConsvLAB(Double_t * x, Double_t * p) override
-      {
-        _chosen4MomComponent = 2;
-        return FourMomConsvLAB(x, p);
-      };
-      /**
-       * @brief Conservation of total energy
-       * @param x pointer to the variables table - artificial variable to use TF1
-       * @param p pointer to the parameters table - physical variables to fit
-       * @returns double precision value of a constraint
-       */
-      Double_t EnergyConsvLAB(Double_t * x, Double_t * p) override
-      {
-        _chosen4MomComponent = 3;
-        return FourMomConsvLAB(x, p);
-      };
+  protected:
+    void SetParameters(Double_t *p) override;
+    void ResetParameters() override;
+    void IntermediateReconstruction() override;
 
-      // Gamma path of flight from IP Conservation
-      /**
-       * @brief Conservation of photon 1 path from IP
-       * @param x pointer to the variables table - artificial variable to use TF1
-       * @param p pointer to the parameters table - physical variables to fit
-       * @returns double precision value of a constraint
-       */
-      Double_t Photon1PathConsvLAB(Double_t * x, Double_t * p) override
-      {
-        _chosenPhoton = 0;
-        return PhotonPathConsvLAB(x, p);
-      };
-      /**
-       * @brief Conservation of photon 2 path from IP
-       * @param x pointer to the variables table - artificial variable to use TF1
-       * @param p pointer to the parameters table - physical variables to fit
-       * @returns double precision value of a constraint
-       */
-      Double_t Photon2PathConsvLAB(Double_t * x, Double_t * p) override
-      {
-        _chosenPhoton = 1;
-        return PhotonPathConsvLAB(x, p);
-      };
-      /**
-       * @brief Conservation of photon 3 path from IP
-       * @param x pointer to the variables table - artificial variable to use TF1
-       * @param p pointer to the parameters table - physical variables to fit
-       * @returns double precision value of a constraint
-       */
-      Double_t Photon3PathConsvLAB(Double_t * x, Double_t * p) override
-      {
-        _chosenPhoton = 2;
-        return PhotonPathConsvLAB(x, p);
-      };
-      /**
-       * @brief Conservation of photon 4 path from IP
-       * @param x pointer to the variables table - artificial variable to use TF1
-       * @param p pointer to the parameters table - physical variables to fit
-       * @returns double precision value of a constraint
-       */
-      Double_t Photon4PathConsvLAB(Double_t * x, Double_t * p) override
-      {
-        _chosenPhoton = 3;
-        return PhotonPathConsvLAB(x, p);
-      };
+  public:
+    /* Specific physical Constraints for Omega-pi0 hypothesis */
+
+    /**
+     * @brief A method used to pair the photons in an event. Needed to get omega and neutral pions' parameters.
+     */
+    void PhotonPairing();
+
+    // Four momentum conservation in LAB
+    /**
+     * @brief Conservation of total momentum's x-component
+     * @param x pointer to the variables table - artificial variable to use TF1
+     * @param p pointer to the parameters table - physical variables to fit
+     * @returns double precision value of a constraint
+     */
+    Double_t PxConsvLAB(Double_t *x, Double_t *p) override
+    {
+      _chosen4MomComponent = 0;
+      return FourMomConsvLAB(x, p);
     };
-  }
+    /**
+     * @brief Conservation of total momentum's y-component
+     * @param x pointer to the variables table - artificial variable to use TF1
+     * @param p pointer to the parameters table - physical variables to fit
+     * @returns double precision value of a constraint
+     */
+    Double_t PyConsvLAB(Double_t *x, Double_t *p) override
+    {
+      _chosen4MomComponent = 1;
+      return FourMomConsvLAB(x, p);
+    };
+    /**
+     * @brief Conservation of total momentum's z-component
+     * @param x pointer to the variables table - artificial variable to use TF1
+     * @param p pointer to the parameters table - physical variables to fit
+     * @returns double precision value of a constraint
+     */
+    Double_t PzConsvLAB(Double_t *x, Double_t *p) override
+    {
+      _chosen4MomComponent = 2;
+      return FourMomConsvLAB(x, p);
+    };
+    /**
+     * @brief Conservation of total energy
+     * @param x pointer to the variables table - artificial variable to use TF1
+     * @param p pointer to the parameters table - physical variables to fit
+     * @returns double precision value of a constraint
+     */
+    Double_t EnergyConsvLAB(Double_t *x, Double_t *p) override
+    {
+      _chosen4MomComponent = 3;
+      return FourMomConsvLAB(x, p);
+    };
+
+    // Gamma path of flight from IP Conservation
+    /**
+     * @brief Conservation of photon 1 path from IP
+     * @param x pointer to the variables table - artificial variable to use TF1
+     * @param p pointer to the parameters table - physical variables to fit
+     * @returns double precision value of a constraint
+     */
+    Double_t Photon1PathConsvLAB(Double_t *x, Double_t *p) override
+    {
+      _chosenPhoton = 0;
+      return PhotonPathConsvLAB(x, p);
+    };
+    /**
+     * @brief Conservation of photon 2 path from IP
+     * @param x pointer to the variables table - artificial variable to use TF1
+     * @param p pointer to the parameters table - physical variables to fit
+     * @returns double precision value of a constraint
+     */
+    Double_t Photon2PathConsvLAB(Double_t *x, Double_t *p) override
+    {
+      _chosenPhoton = 1;
+      return PhotonPathConsvLAB(x, p);
+    };
+    /**
+     * @brief Conservation of photon 3 path from IP
+     * @param x pointer to the variables table - artificial variable to use TF1
+     * @param p pointer to the parameters table - physical variables to fit
+     * @returns double precision value of a constraint
+     */
+    Double_t Photon3PathConsvLAB(Double_t *x, Double_t *p) override
+    {
+      _chosenPhoton = 2;
+      return PhotonPathConsvLAB(x, p);
+    };
+    /**
+     * @brief Conservation of photon 4 path from IP
+     * @param x pointer to the variables table - artificial variable to use TF1
+     * @param p pointer to the parameters table - physical variables to fit
+     * @returns double precision value of a constraint
+     */
+    Double_t Photon4PathConsvLAB(Double_t *x, Double_t *p) override
+    {
+      _chosenPhoton = 3;
+      return PhotonPathConsvLAB(x, p);
+    };
+
+    Double_t MinvConsvOmega(Double_t *x, Double_t *p) override
+    {
+      _minvMode = "omega";
+      return MinvConsv(x, p);
+    };
+  };
+}
 #endif

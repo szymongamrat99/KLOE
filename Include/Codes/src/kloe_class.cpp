@@ -1,5 +1,11 @@
 #include <kloe_class.h>
 #include <const.h>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <boost/filesystem.hpp>
+#include <cctype>
+#include <ctime>
 
 namespace KLOE
 {
@@ -1029,17 +1035,16 @@ namespace KLOE
       const std::vector<Float_t> &kaon1Pos,
       const std::vector<Float_t> &kaon2Mom,
       const std::vector<Float_t> &kaon2Pos,
-      const std::vector<Float_t> &phiMom,
       const std::vector<Float_t> &ipPos)
   {
     KaonProperTimes result;
 
     // Oblicz czasy dla pierwszego kaona
-    CalculateSingleKaonTime(kaon1Mom, kaon1Pos, phiMom, ipPos,
+    CalculateSingleKaonTime(kaon1Mom, kaon1Pos, ipPos,
                             result.kaon1TimeLAB, result.kaon1TimeCM);
 
     // Oblicz czasy dla drugiego kaona
-    CalculateSingleKaonTime(kaon2Mom, kaon2Pos, phiMom, ipPos,
+    CalculateSingleKaonTime(kaon2Mom, kaon2Pos, ipPos,
                             result.kaon2TimeLAB, result.kaon2TimeCM);
 
     // Oblicz różnice czasów
@@ -1052,14 +1057,13 @@ namespace KLOE
   void KLOE::pm00::CalculateSingleKaonTime(
       const std::vector<Float_t> &kaonMom,
       const std::vector<Float_t> &kaonPos,
-      const std::vector<Float_t> &phiMom,
       const std::vector<Float_t> &ipPos,
       Double_t &timeLAB,
       Double_t &timeCM)
   {
     // Sprawdź rozmiary wektorów
     if (kaonMom.size() < 4 || kaonPos.size() < 3 ||
-        phiMom.size() < 4 || ipPos.size() < 3)
+        ipPos.size() < 3)
     {
       std::cerr << "ERROR: Invalid vector sizes in CalculateSingleKaonTime" << std::endl;
       timeLAB = -999.0;
@@ -1087,7 +1091,6 @@ namespace KLOE
     }
     else
     {
-      std::cerr << "ERROR: Zero kaon velocity in LAB frame" << std::endl;
       timeLAB = -999.0;
       timeCM = -999.0;
       return;
@@ -1143,4 +1146,122 @@ void KLOE::pm00::trilaterationReconstruction(TVectorD X, Double_t neuVtx[2][4], 
       neuVtx[i][j] = S.sol[i][j];
     }
   }
+}
+
+// File Management Methods
+bool KLOE::pm00::CreateCurrentLinks(const std::string &rootFilesDir)
+{
+  try
+  {
+    // Sprawdź czy katalog root_files istnieje
+    if (!boost::filesystem::exists(rootFilesDir))
+    {
+      std::cerr << "Katalog " << rootFilesDir << " nie istnieje!" << std::endl;
+      return false;
+    }
+    
+    // Znajdź folder z najnowszą datą
+    std::string latestDateFolder;
+    std::time_t latestTime = 0;
+    
+    for (boost::filesystem::directory_iterator entry(rootFilesDir); entry != boost::filesystem::directory_iterator(); ++entry)
+    {
+      if (boost::filesystem::is_directory(entry->status()))
+      {
+        std::string folderName = entry->path().filename().string();
+        if (IsValidDateFormat(folderName))
+        {
+          std::time_t folderTime = boost::filesystem::last_write_time(entry->path());
+          if (latestDateFolder.empty() || folderTime > latestTime)
+          {
+            latestDateFolder = folderName;
+            latestTime = folderTime;
+          }
+        }
+      }
+    }
+    
+    if (latestDateFolder.empty())
+    {
+      std::cerr << "Nie znaleziono folderów z datą w formacie YYYY-MM-DD!" << std::endl;
+      return false;
+    }
+    
+    // Utwórz folder current
+    std::string currentPath = rootFilesDir + "/current";
+    if (boost::filesystem::exists(currentPath))
+    {
+      boost::filesystem::remove_all(currentPath);
+    }
+    boost::filesystem::create_directory(currentPath);
+    
+    // Ścieżka do najnowszego folderu
+    std::string latestFolderPath = rootFilesDir + "/" + latestDateFolder;
+    
+    // Znajdź wszystkie pliki .root w najnowszym folderze i utwórz dla nich symlinki
+    int linkCount = 0;
+    for (boost::filesystem::directory_iterator entry(latestFolderPath); entry != boost::filesystem::directory_iterator(); ++entry)
+    {
+      if (boost::filesystem::is_regular_file(entry->status()))
+      {
+        std::string fileName = entry->path().filename().string();
+        // Sprawdź czy to plik .root
+        if (fileName.length() > 5 && fileName.substr(fileName.length() - 5) == ".root")
+        {
+          std::string sourcePath = entry->path().string();
+          std::string linkPath = currentPath + "/" + fileName;
+          
+          boost::filesystem::create_symlink(sourcePath, linkPath);
+          std::cout << "Utworzono link: " << fileName << " -> " << sourcePath << std::endl;
+          linkCount++;
+        }
+      }
+    }
+    
+    if (linkCount == 0)
+    {
+      std::cout << "Ostrzeżenie: Nie znaleziono plików .root w folderze " << latestDateFolder << std::endl;
+    }
+    
+    std::cout << "Pomyślnie utworzono folder current z linkami do " << latestDateFolder << std::endl;
+    return true;
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << "Błąd podczas tworzenia linków: " << e.what() << std::endl;
+    return false;
+  }
+}
+
+bool KLOE::pm00::IsValidDateFormat(const std::string &folderName)
+{
+  // Sprawdź czy string ma długość 10 (YYYY-MM-DD)
+  if (folderName.length() != 10)
+    return false;
+  
+  // Sprawdź czy ma myślniki w odpowiednich miejscach
+  if (folderName[4] != '-' || folderName[7] != '-')
+    return false;
+  
+  // Sprawdź czy pozostałe znaki to cyfry
+  for (int i = 0; i < 10; i++)
+  {
+    if (i != 4 && i != 7)  // Pomiń myślniki
+    {
+      if (!std::isdigit(folderName[i]))
+        return false;
+    }
+  }
+  
+  // Dodatkowa walidacja miesięcy i dni
+  int month = std::stoi(folderName.substr(5, 2));
+  int day = std::stoi(folderName.substr(8, 2));
+  
+  if (month < 1 || month > 12)
+    return false;
+  
+  if (day < 1 || day > 31)
+    return false;
+  
+  return true;
 }
