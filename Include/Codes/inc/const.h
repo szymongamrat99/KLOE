@@ -4,6 +4,8 @@
 
 #include <TString.h>
 #include <TStyle.h>
+#include <TH1.h>
+#include <TH2.h>
 
 #include <TMath.h>
 
@@ -139,7 +141,54 @@ namespace KLOE
 
   extern const std::map<Int_t, TString> channName;    //!< Map of channel names
   extern const std::map<TString, TString> channTitle; //!< Map of channel titles
-  extern const std::map<TString, Color_t> channColor; //!< Map of channel LaTeX names
+  extern const std::map<TString, Color_t> channColor; //!< Map of channel colors
+
+  namespace Histograms
+  {
+    extern const std::vector<TString> varNames; //!< Vector of variable names
+
+    struct HistConfig1D
+    {
+      Int_t nBins;
+      Double_t xMin;
+      Double_t xMax;
+      TString title;
+      TString xLabel;
+      TString yLabel;
+
+      HistConfig1D(Int_t bins = 100, Double_t xMin = -10., Double_t xMax = 10., const TString &t = "", const TString &xl = "", const TString &yl = "Counts")
+          : nBins(bins), xMin(xMin), xMax(xMax), title(t), xLabel(xl), yLabel(yl) {}
+    }; // struct HistConfig1D
+
+    struct HistConfig2D
+    {
+      Int_t nBinsX, nBinsY;
+      Double_t xMin, xMax, yMin, yMax;
+      TString title;
+      TString xLabel, yLabel, zLabel;
+
+      HistConfig2D(Int_t binsX = 100, Int_t binsY = 100,
+                   Double_t minX = -10., Double_t maxX = 10.,
+                   Double_t minY = -10., Double_t maxY = 10.,
+                   const TString &t = "", const TString &xl = "",
+                   const TString &yl = "", const TString &zl = "Counts")
+          : nBinsX(binsX), nBinsY(binsY), xMin(minX), xMax(maxX),
+            yMin(minY), yMax(maxY), title(t), xLabel(xl), yLabel(yl), zLabel(zl) {}
+    };
+
+    // Mapy konfiguracji histogramów
+    extern const std::map<TString, HistConfig1D> histConfigs1D;
+    extern const std::map<TString, HistConfig2D> histConfigs2D;
+    extern const std::map<TString, std::pair<TString, TString>> histConfigs2D_Variables; // Para zmiennych dla 2D
+
+    // Helper functions
+    TH1F *CreateHist1D(const TString &varName, const TString &histName = "");
+    TH1F *CreateHist1D(const TString &varName, const TString &channName, const TString &histName = "");
+
+    TH2F *CreateHist2D(const TString &var1, const TString &var2, const TString &histName);
+    TH2F *CreateHist2D(const TString &configName, const TString &histName);
+
+  }
 
   void setGlobalStyle();
 
