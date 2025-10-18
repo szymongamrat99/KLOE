@@ -8,13 +8,16 @@ namespace KLOE
     _multiGraph = new TMultiGraph();
     _legend = new TLegend(legendPos[0], legendPos[2], legendPos[1], legendPos[3]);
 
-    if (ToLower(_mode) == "efficiency" && _y.size() == KLOE::channNum)
+    if (ToLower(_mode) == "efficiency" && _y.size() == channNum)
     {
-      for (Int_t i = 0; i < KLOE::channNum; i++)
+      for (const auto &name : channName)
       {
-        _effGraphs.push_back(new TGraph(_NumOfPts, _x.data(), _y[i].data()));
-        _effGraphs[i]->SetMarkerColor(channColor[i]);
-        _multiGraph->Add(_effGraphs[i]);
+        if (name.second != "Data" && name.second != "MC sum")
+        {
+          _effGraphs[name.second] = new TGraph(_NumOfPts, _x.data(), _y[name.first - 1].data());
+          _effGraphs[name.second]->SetMarkerColor(channColor.at(name.first));
+          _multiGraph->Add(_effGraphs[name.second]);
+        }
       }
 
       _minYLimitL = 0.0;
@@ -115,7 +118,7 @@ namespace KLOE
 
     if (ToLower(_mode) == "fitresulterr")
     {
-     _multiGraph->Draw("AP");
+      _multiGraph->Draw("AP");
     }
     if (ToLower(_mode) == "errvsvalue")
     {

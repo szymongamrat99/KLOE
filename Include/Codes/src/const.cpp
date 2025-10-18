@@ -106,19 +106,19 @@ namespace PhysicsConstants
   Double_t br_kl_pimu = 0.2704;
 
   // Kaons' properties and CPV
-  Double_t tau_S_nonCPT = (Double_t)constants["values"]["/S012T"] * 1E9; // ns
-  Double_t tau_S_CPT = 0.8954E-1;                                        // ns
-  Double_t tau_L = (Double_t)constants["values"]["/S013T"] * 1E9;        // ns
-  Double_t delta_mass_nonCPT = (Double_t)constants["values"]["/S013D"];  // hbar s^-1
-  Double_t delta_mass_CPT = 0.5293E10;                                   // hbar s^-1
-  Double_t mod_epsilon = (Double_t)constants["values"]["/S013EP"];
-  Double_t Re = (Double_t)constants["values"]["/S013EPS"];
-  Double_t Im_nonCPT = (Double_t)constants["values"]["/S013EPI"] * (M_PI / 180.); // deg
-  Double_t Im_CPT = -0.002;                                                       // deg
-  Double_t phi_pm_nonCPT = (Double_t)constants["values"]["/S013F+-"];             // deg
-  Double_t phi_pm_CPT = 43.51;                                                    // deg
-  Double_t phi_00_nonCPT = (Double_t)constants["values"]["/S013FOO"];             // deg
-  Double_t phi_00_CPT = 43.52;                                                    // deg
+  Double_t tau_S_nonCPT = 0.89564E-1;     // ns
+  Double_t tau_S_CPT = 0.8954E-1;         // ns
+  Double_t tau_L = 51.16;                 // ns
+  Double_t delta_mass_nonCPT = 0.5289E10; // hbar s^-1
+  Double_t delta_mass_CPT = 0.5293E10;    // hbar s^-1
+  Double_t mod_epsilon = 2.228E-3;
+  Double_t Re = 1.66E-3;
+  Double_t Im_nonCPT = -0.11 * (M_PI / 180.); // rad
+  Double_t Im_CPT = -0.002;                   // deg
+  Double_t phi_pm_nonCPT = 43.4;              // deg
+  Double_t phi_pm_CPT = 43.51;                // deg
+  Double_t phi_00_nonCPT = 43.7;              // deg
+  Double_t phi_00_CPT = 43.52;                // deg
 }
 
 namespace KLOE
@@ -164,8 +164,6 @@ namespace KLOE
       {"Other", kGreen - 1},
       {"pi+pi-pi+pi-", kYellow},
       {"MC sum", kOrange}};
-
-  const UInt_t channNum = channName.size();
 
   void setGlobalStyle()
   {
@@ -220,6 +218,8 @@ namespace KLOE
 
 namespace Utils
 {
+  json properties;
+  json constants;
 
   TString elapsedTimeHMS(double totalSeconds)
   {
@@ -244,15 +244,15 @@ namespace Utils
     {
       constants = json::parse(fconst);
 
-      PhysicsConstants::mK0 = constants.at("values").at("/S011M").get<Double_t>();
-      PhysicsConstants::tau_S_nonCPT = constants.at("values").at("/S012T").get<Double_t>() * 1E9;
-      PhysicsConstants::tau_L = constants.at("values").at("/S013T").get<Double_t>() * 1E9;      
-      PhysicsConstants::delta_mass_nonCPT = constants.at("values").at("/S013D").get<Double_t>();
-      PhysicsConstants::mod_epsilon = constants.at("values").at("/S013EP").get<Double_t>();
-      PhysicsConstants::Re = constants.at("values").at("/S013EPS").get<Double_t>();
-      PhysicsConstants::Im_nonCPT = constants.at("values").at("/S013EPI").get<Double_t>() * (M_PI / 180.);
-      PhysicsConstants::phi_pm_nonCPT = constants.at("values").at("/S013F+-").get<Double_t>();            
-      PhysicsConstants::phi_00_nonCPT = constants.at("values").at("/S013FOO").get<Double_t>();           
+      // PhysicsConstants::mK0 = constants.at("values").at("/S011M").get<Double_t>();
+      // PhysicsConstants::tau_S_nonCPT = constants.at("values").at("/S012T").get<Double_t>() * 1E9;
+      // PhysicsConstants::tau_L = constants.at("values").at("/S013T").get<Double_t>() * 1E9;
+      // PhysicsConstants::delta_mass_nonCPT = constants.at("values").at("/S013D").get<Double_t>();
+      // PhysicsConstants::mod_epsilon = constants.at("values").at("/S013EP").get<Double_t>();
+      // PhysicsConstants::Re = constants.at("values").at("/S013EPS").get<Double_t>();
+      // PhysicsConstants::Im_nonCPT = constants.at("values").at("/S013EPI").get<Double_t>() * (M_PI / 180.);
+      // PhysicsConstants::phi_pm_nonCPT = constants.at("values").at("/S013F+-").get<Double_t>();
+      // PhysicsConstants::phi_00_nonCPT = constants.at("values").at("/S013FOO").get<Double_t>();
     }
 
     // Parsing of the KLOE properties
@@ -261,22 +261,22 @@ namespace Utils
     {
       properties = json::parse(fprop);
 
-      Paths::path_tmp = (std::string)properties["variables"]["rootFiles"]["path"];
-      Paths::path_cs = (std::string)properties["variables"]["rootFiles"]["pathControlSample"];
+      // Paths::path_tmp = (std::string)properties["variables"]["rootFiles"]["path"];
+      // Paths::path_cs = (std::string)properties["variables"]["rootFiles"]["pathControlSample"];
 
-      KLOE::firstFileMax = properties["variables"]["rootFiles"]["firstFileMax"];
-      KLOE::lastFileMax = properties["variables"]["rootFiles"]["lastFileMax"];
-      KLOE::numOfThreads = properties["variables"]["parallelization"]["numOfThreads"];
+      // KLOE::firstFileMax = properties["variables"]["rootFiles"]["firstFileMax"];
+      // KLOE::lastFileMax = properties["variables"]["rootFiles"]["lastFileMax"];
+      // KLOE::numOfThreads = properties["variables"]["parallelization"]["numOfThreads"];
 
-      Filenames::gen_vars_tree = (std::string)properties["variables"]["tree"]["treename"]["mctruth"];
-      Filenames::neutrec_triangle_tree = (std::string)properties["variables"]["tree"]["treename"]["trianglefinal"];
-      Filenames::omegarec_tree = (std::string)properties["variables"]["tree"]["treename"]["omegarec"];
-      Filenames::omegarec_kin_fit_tree = (std::string)properties["variables"]["tree"]["treename"]["omegarec"];
+      // Filenames::gen_vars_tree = (std::string)properties["variables"]["tree"]["treename"]["mctruth"];
+      // Filenames::neutrec_triangle_tree = (std::string)properties["variables"]["tree"]["treename"]["trianglefinal"];
+      // Filenames::omegarec_tree = (std::string)properties["variables"]["tree"]["treename"]["omegarec"];
+      // Filenames::omegarec_kin_fit_tree = (std::string)properties["variables"]["tree"]["treename"]["omegarec"];
 
-      Filenames::omegaRecPath = (std::string)properties["variables"]["tree"]["filename"]["omegarec"];
-      Filenames::mctruthPath = (std::string)properties["variables"]["tree"]["filename"]["mctruth"];
-      Filenames::genvarsPath = (std::string)properties["variables"]["tree"]["filename"]["generatedvars"];
-      Filenames::trianglePath = (std::string)properties["variables"]["tree"]["filename"]["trianglefinal"];
+      // Filenames::omegaRecPath = (std::string)properties["variables"]["tree"]["filename"]["omegarec"];
+      // Filenames::mctruthPath = (std::string)properties["variables"]["tree"]["filename"]["mctruth"];
+      // Filenames::genvarsPath = (std::string)properties["variables"]["tree"]["filename"]["generatedvars"];
+      // Filenames::trianglePath = (std::string)properties["variables"]["tree"]["filename"]["trianglefinal"];
     }
   }
 

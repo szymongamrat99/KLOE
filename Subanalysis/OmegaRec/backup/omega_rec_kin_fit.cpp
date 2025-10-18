@@ -56,7 +56,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 			datestamp = Obj.getCurrentDate(),
 			name = "";
 
-	name = omegarec_dir + root_files_dir + omega_rec_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
+	name = omegarec_dir + Paths::root_files_dir + omega_rec_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + Paths::ext_root;
 
 	Utils::properties["variables"]["tree"]["filename"]["omegarecKinFit"] = name;
 

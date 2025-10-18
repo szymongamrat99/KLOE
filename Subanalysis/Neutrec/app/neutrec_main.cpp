@@ -102,7 +102,7 @@ int Neutrec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt
       logger.getLog(infoCode, "Comparison of Neutral Reconstruction Methods");
 
       Obj.startTimer();
-      CompOfMethods(chain, dataTypeOpt, logger, Obj);
+      // CompOfMethods(chain, dataTypeOpt, logger, Obj);
       
       infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
       logger.getLog(infoCode, Obj.endTimer());

@@ -20,6 +20,7 @@
 #include <TMatrixD.h>
 #include <TVectorD.h>
 #include <TError.h>
+#include <boost/progress.hpp>
 
 #include "const.h"
 #include "uncertainties.h"
@@ -42,11 +43,11 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			datestamp = Obj.getCurrentDate(),
 			name = "";
 
-	name = omegarec_dir + root_files_dir + omega_rec_filename + datestamp + "_" + int(data_type) + ext_root;
+	name = Paths::omegarec_dir + Paths::root_files_dir + Filenames::omega_rec_filename + datestamp + "_" + int(data_type) + Paths::ext_root;
 	// -----------------------------------------------------------------------------------------
 
 	TFile *file = new TFile(name.c_str(), "recreate");
-	TTree *tree = new TTree(omegarec_tree, "Omega reconstruction with kin fit");
+	TTree *tree = new TTree(Filenames::omegarec_tree, "Omega reconstruction with kin fit");
 
 	// Branches' addresses
 	// Bhabha vars
@@ -86,7 +87,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 
 	chain.SetBranchAddress("mctruth", &mctruth);
 	chain.SetBranchAddress("mcflag", &mcflag);
-	chain.SetBranchAddress("ncll", baseKin.ncll);
+	chain.SetBranchAddress("ncll", baseKin.ncll.data());
 
 	Int_t nentries = (Int_t)chain.GetEntries();
 
@@ -218,10 +219,10 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 							// -----------------------------------------------------------------------
 							// Check of logical conditions, if clusters have good Utils::properties
 							Bool_t cond_ene =
-												 cluster[4][baseKin.ncll[ind_gam[0]] - 1] > MIN_CLU_ENE &&
-												 cluster[4][baseKin.ncll[ind_gam[1]] - 1] > MIN_CLU_ENE &&
-												 cluster[4][baseKin.ncll[ind_gam[2]] - 1] > MIN_CLU_ENE &&
-												 cluster[4][baseKin.ncll[ind_gam[3]] - 1] > MIN_CLU_ENE,
+												 cluster[4][baseKin.ncll[ind_gam[0]] - 1] > KLOE::MIN_CLU_ENE &&
+												 cluster[4][baseKin.ncll[ind_gam[1]] - 1] > KLOE::MIN_CLU_ENE &&
+												 cluster[4][baseKin.ncll[ind_gam[2]] - 1] > KLOE::MIN_CLU_ENE &&
+												 cluster[4][baseKin.ncll[ind_gam[3]] - 1] > KLOE::MIN_CLU_ENE,
 										 cond_clus[4] = {false, false, false, false},
 										 total_cond;
 
@@ -513,7 +514,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	delete file;	 // Deletion of the file pointer
 
 	Utils::properties["variables"]["tree"]["filename"]["omegarec"] = (std::string)name;
-	Utils::properties["variables"]["tree"]["treename"]["omegarec"] = (std::string)omegarec_tree;
+	Utils::properties["variables"]["tree"]["treename"]["omegarec"] = (std::string)Filenames::omegarec_tree;
 
 	Utils::properties["lastScript"] = "Plots of Omega Reconstruction";
 	Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();

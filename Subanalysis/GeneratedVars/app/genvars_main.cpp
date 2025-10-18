@@ -9,7 +9,7 @@ using namespace std;
 int GenVars_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
   // Set logger for error logging
-  std::string logFilename = (std::string)gen_vars_dir + (std::string)Paths::logs_dir + "genVars_" + Obj.getCurrentDate() + ".log";
+  std::string logFilename = (std::string)Paths::gen_vars_dir + (std::string)Paths::logs_dir + "genVars_" + Obj.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------

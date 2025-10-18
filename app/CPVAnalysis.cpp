@@ -5,6 +5,8 @@
 #include <FileManager.h>
 #include <event_data.h>
 
+#include <const.h>
+
 using namespace std;
 using namespace std::chrono;
 
@@ -18,6 +20,10 @@ int main(int argc, char *argv[])
 
   UInt_t firstFile, lastFile, csFlag;
 
+  // -------------------------------------------------------------------
+  // Initialize utility variables
+  Utils::InitializeVariables();
+  // -------------------------------------------------------------------
   // Set KLOE class instance
   KLOE::pm00 eventAnalysis;
   // -------------------------------------------------------------------
@@ -39,7 +45,7 @@ int main(int argc, char *argv[])
   Controls::Menu *dataType = new Controls::Menu(2); // For data type
   // -------------------------------------------------------------------
   // Set global style for histograms
-  setGlobalStyle();
+  KLOE::setGlobalStyle();
   // -------------------------------------------------------------------
   // Set config file watcher
   // ConfigWatcher cfgWatcher(Paths::propName);
@@ -61,7 +67,7 @@ int main(int argc, char *argv[])
   {
     // Set the data type options
     auto callParams = InputParamsHandler::getParams(
-        Utils::properties, lastFileMax, Paths::propName, logger, dataType);
+        Utils::properties, KLOE::lastFileMax, Paths::propName, logger, dataType);
 
     initObj.chainInit(chain, callParams.dataTypeOpt, callParams.firstFile, callParams.lastFile, callParams.firstFile, callParams.lastFile, logger, callParams.csFlag);
 
@@ -76,11 +82,11 @@ int main(int argc, char *argv[])
         callParams.dataTypeOpt,
         logger,
         infoCode);
-        // cfgWatcher);
+    // cfgWatcher);
   }
   else
   {
-    std::ifstream rootFiles(rootfilesName);
+    std::ifstream rootFiles(Paths::rootfilesName);
     json filePaths = json::parse(rootFiles);
 
     std::cout << "Choose the file type to analyze: " << std::endl;
@@ -138,7 +144,7 @@ int main(int argc, char *argv[])
       return 1;
     }
     }
-    
+
     // -------------------------------------------------------
     infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 

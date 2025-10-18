@@ -13,6 +13,7 @@
 #include <TTreeReader.h>
 
 #include <boost/optional.hpp>
+#include <boost/progress.hpp>
 #include <SplitFileWriter.h>
 #include <event_data.h>
 #include <ConfigManager.h>
@@ -191,7 +192,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
                                 { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
 
   std::string
-      dirname = (std::string)charged_dir + (std::string)root_files_dir,
+      dirname = (std::string)Paths::charged_dir + (std::string)Paths::root_files_dir,
       dated_folder = Obj.CreateDatedFolder(dirname);
 
   std::string base_filename = "KchRec_FourPiTwoBody";
@@ -511,7 +512,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   if (dataType == Controls::DataType::MC_ONLY)
   {
     std::string
-        hist_dir = (std::string)charged_dir + (std::string)img_dir;
+        hist_dir = (std::string)Paths::charged_dir + (std::string)Paths::img_dir;
 
     std::string dated_hist_dir = Obj.CreateDatedFolder(hist_dir);
 

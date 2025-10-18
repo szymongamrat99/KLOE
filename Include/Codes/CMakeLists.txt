@@ -45,6 +45,7 @@ add_library(LibRec SHARED
             src/NeutralReconstruction.cpp
             src/VariableConfig.cpp
             src/DataAccessWrapper.cpp
+            src/const.cpp
             )
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.

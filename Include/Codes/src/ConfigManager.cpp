@@ -23,13 +23,13 @@ ConfigManager::~ConfigManager() {
     }
 }
 
-// Load both Utils::properties and constants JSON files
+// Load both properties and constants JSON files
 void ConfigManager::loadConfigurations() {
     loadProperties();
     loadConstants();
 }
 
-// Load Utils::properties.json file
+// Load properties.json file
 void ConfigManager::loadProperties() {
     try {
         const char* propertiesPath = getenv("PROPERTIESKLOE");
@@ -39,16 +39,16 @@ void ConfigManager::loadProperties() {
             return;
         }
         
-        propertiesFilePath = std::string(propertiesPath) + "/Utils::properties.json";
+        propertiesFilePath = std::string(propertiesPath) + "/properties.json";
         std::ifstream propertyFile(propertiesFilePath.c_str());
         
         if (!propertyFile.is_open()) {
             ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
-            errorLogger->getErrLog(errCode, "Cannot open Utils::properties file: " + propertiesFilePath);
+            errorLogger->getErrLog(errCode, "Cannot open properties file: " + propertiesFilePath);
             return;
         }
         
-        Utils::properties = json::parse(propertyFile);
+        properties = json::parse(propertyFile);
         propertiesLoaded = true;
         
         ErrorHandling::InfoCodes infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
@@ -56,10 +56,10 @@ void ConfigManager::loadProperties() {
         
     } catch (const json::parse_error& e) {
         ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::DATA_TYPE;
-        errorLogger->getErrLog(errCode, "JSON parse error in Utils::properties: " + std::string(e.what()));
+        errorLogger->getErrLog(errCode, "JSON parse error in properties: " + std::string(e.what()));
     } catch (const std::exception& e) {
         ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::NOT_RECOGNIZED;
-        errorLogger->getErrLog(errCode, "Unexpected error loading Utils::properties: " + std::string(e.what()));
+        errorLogger->getErrLog(errCode, "Unexpected error loading properties: " + std::string(e.what()));
     }
 }
 
@@ -185,7 +185,7 @@ void ConfigManager::cleanup() {
 // Check if property exists
 bool ConfigManager::hasProperty(const std::string& path) const {
     if (!propertiesLoaded) return false;
-    json value = navigateJsonPath(Utils::properties, path);
+    json value = navigateJsonPath(properties, path);
     return !value.is_null();
 }
 
@@ -201,22 +201,22 @@ TString ConfigManager::getPropertyTString(const std::string& path, const TString
     return TString(value.c_str());
 }
 
-// Save Utils::properties to the original file
+// Save properties to the original file
 bool ConfigManager::saveProperties() const {
     if (!propertiesLoaded || propertiesFilePath.empty()) {
         ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
-        errorLogger->getErrLog(errCode, "Cannot save Utils::properties: not loaded or file path empty");
+        errorLogger->getErrLog(errCode, "Cannot save properties: not loaded or file path empty");
         return false;
     }
     
     return savePropertiesToFile(propertiesFilePath);
 }
 
-// Save Utils::properties to specific file
+// Save properties to specific file
 bool ConfigManager::savePropertiesToFile(const std::string& filePath) const {
     if (!propertiesLoaded) {
         ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
-        errorLogger->getErrLog(errCode, "Cannot save Utils::properties: not loaded");
+        errorLogger->getErrLog(errCode, "Cannot save properties: not loaded");
         return false;
     }
     
@@ -224,12 +224,12 @@ bool ConfigManager::savePropertiesToFile(const std::string& filePath) const {
         std::ofstream propertyFile(filePath);
         if (!propertyFile.is_open()) {
             ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
-            errorLogger->getErrLog(errCode, "Cannot open Utils::properties file for writing: " + filePath);
+            errorLogger->getErrLog(errCode, "Cannot open properties file for writing: " + filePath);
             return false;
         }
         
         // Write JSON with nice formatting (indentation = 2)
-        propertyFile << Utils::properties.dump(4) << std::endl;
+        propertyFile << properties.dump(4) << std::endl;
         propertyFile.close();
         
         ErrorHandling::InfoCodes infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
@@ -239,7 +239,7 @@ bool ConfigManager::savePropertiesToFile(const std::string& filePath) const {
         
     } catch (const std::exception& e) {
         ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::NOT_RECOGNIZED;
-        errorLogger->getErrLog(errCode, "Error saving Utils::properties to " + filePath + ": " + std::string(e.what()));
+        errorLogger->getErrLog(errCode, "Error saving properties to " + filePath + ": " + std::string(e.what()));
         return false;
     }
 }
@@ -249,7 +249,7 @@ bool ConfigManager::reloadConfigurations() {
     std::lock_guard<std::mutex> lock(mutex_);
     propertiesLoaded = false;
     constantsLoaded = false;
-    Utils::properties.clear();
+    properties.clear();
     constants.clear();
     
     loadConfigurations();

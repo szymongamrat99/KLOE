@@ -18,7 +18,7 @@ int main()
   clearstruct_(); // Clear of the structure
 
   TChain *chain = new TChain("h1");
-  chain->Add(prod2root_path_v26 + "/*" + ext_root);
+  chain->Add(prod2root_path_v26 + "/*" + Paths::ext_root);
 
   chain->SetBranchAddress("Bx", &interfcommon_.Bx);
   chain->SetBranchAddress("By", &interfcommon_.By);

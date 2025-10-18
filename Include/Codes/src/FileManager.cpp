@@ -61,7 +61,7 @@ namespace KLOE
   {
     ErrorHandling::InfoCodes infoCode;
 
-    std::ifstream rootFiles(rootfilesName);
+    std::ifstream rootFiles(Paths::rootfilesName);
     json filePaths = json::parse(rootFiles);
 
     Bool_t *all_phys;
@@ -69,7 +69,7 @@ namespace KLOE
     TString fullname = "",
             dirnamedata,
             filenamedata,
-            extension = ext_root,
+            extension = Paths::ext_root,
             newestDateStampData = (std::string)Utils::properties["variables"]["rootFiles"]["newestFileDateStampData"],
             newestDateStampMC = (std::string)Utils::properties["variables"]["rootFiles"]["newestFileDateStampMC"],
             path = (std::string)Utils::properties["variables"]["rootFiles"]["path"];
@@ -208,7 +208,7 @@ namespace KLOE
   {
     ErrorHandling::InfoCodes infoCode;
 
-    std::ifstream rootFiles(rootfilesName);
+    std::ifstream rootFiles(Paths::rootfilesName);
     json filePaths = json::parse(rootFiles);
 
     std::string

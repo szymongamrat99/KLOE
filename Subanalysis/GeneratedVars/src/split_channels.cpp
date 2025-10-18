@@ -29,11 +29,11 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
         datestamp = Obj.getCurrentDate(),
         name = "";
 
-    name = gen_vars_dir + root_files_dir + mctruth_filename + datestamp + "_" + int(data_type) + ext_root;
+    name = Paths::base_path + Paths::root_files_dir + Filenames::mctruth_filename + datestamp + "_" + int(data_type) + Paths::ext_root;
     // -----------------------------------------------------------------------------------------
 
     file = new TFile(name.c_str(), "recreate");
-    tree = new TTree(gen_vars_tree, "Mctruth for all channels");
+    tree = new TTree(Filenames::gen_vars_tree, "Mctruth for all channels");
 
     tree->Branch("mctruth", &baseKin.mctruth_int, "mctruth/I");
 
@@ -200,7 +200,7 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
     file->Close();
 
     Utils::properties["variables"]["tree"]["filename"]["mctruth"] = (std::string)name;
-    Utils::properties["variables"]["tree"]["treename"]["mctruth"] = (std::string)gen_vars_tree;
+    Utils::properties["variables"]["tree"]["treename"]["mctruth"] = (std::string)Filenames::gen_vars_tree;
 
     Utils::properties["lastScript"] = "Mctruth division of files.";
     Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();

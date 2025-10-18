@@ -67,7 +67,7 @@ int main(int argc, const char *argv[])
       *tree_triangle;
 
   TString
-      mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + "40000_40003" + ext_root;
+      mctruth_name = gen_vars_dir + Paths::root_files_dir + mctruth_filename + "40000_40003" + Paths::ext_root;
 
   file_mctruth = new TFile(mctruth_name);
   tree_mctruth = (TTree *)file_mctruth->Get(gen_vars_tree);

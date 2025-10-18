@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <TCut.h>
+#include <TChain.h>
 
 #include <const.h>
 #include "ErrorLogs.h"

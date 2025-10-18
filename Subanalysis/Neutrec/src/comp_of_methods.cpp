@@ -62,7 +62,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   file_name.push_back(filename_trilateration_kin_fit);
   file_name.push_back(filename_triangle);
 
-  tree_name.push_back(neutrec_tri_tree);
+  tree_name.push_back(Filenames::neutrec_tri_tree);
   tree_name.push_back(treename_trilateration_kin_fit);
   tree_name.push_back(treename_triangle);
 
@@ -1573,7 +1573,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     bunch[j]->Draw();
 
     id_canva = "bunchnum" + std::to_string(j + 1);
-    canvas[j][23]->Print(img_dir + id_canva + ext_root);
+    canvas[j][23]->Print(img_dir + id_canva + Paths::ext_root);
 
     canvas[j][25]->SetRightMargin(0.15);
     canvas[j][25]->SetLeftMargin(0.17);

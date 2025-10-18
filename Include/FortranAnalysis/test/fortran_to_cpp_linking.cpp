@@ -13,7 +13,7 @@ using namespace std;
 int main()
 {
   TChain *chain = new TChain("h1");
-  chain->Add(prod2root_path_v26 + "/*"+ ext_root);
+  chain->Add(prod2root_path_v26 + "/*"+ Paths::ext_root);
 
   chain->SetBranchAddress("PxTv",interfcommon_.PxTV);
 

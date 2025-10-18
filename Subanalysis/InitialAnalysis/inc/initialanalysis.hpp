@@ -7,6 +7,7 @@
 
 #include <TVectorT.h>
 #include <TMatrixT.h>
+#include <TChain.h>
 
 #include <const.h>
 #include <ErrorLogs.h>

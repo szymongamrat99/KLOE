@@ -16,7 +16,7 @@ int CPFit_main(TChain &chain, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher, Contro
           jmax = Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMax"];
 
   // Set logger for error logging
-  std::string logFilename = (std::string)cpfit_dir + (std::string)Paths::logs_dir + "cpfit.log";
+  std::string logFilename = (std::string)Paths::cpfit_dir + (std::string)Paths::logs_dir + "cpfit.log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------

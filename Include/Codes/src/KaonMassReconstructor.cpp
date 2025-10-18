@@ -7,7 +7,7 @@ KaonReconstructionResult KaonMassReconstructor::reconstructKaonMass(
     const std::vector<Double_t>& kaonBoost,
     const std::vector<Double_t>& interactionPoint,
     const std::vector<std::vector<Double_t>>& tracks,
-    const Double_t PhysicsConstants::mPiCh,
+    const Double_t mPiCh,
     KLOE::pm00& obj)
 {
     KaonReconstructionResult result;
@@ -116,7 +116,7 @@ void KaonMassReconstructor::transformToKaonCMFrame(
 void KaonMassReconstructor::reconstructPionsInCMFrame(
     const std::vector<TLorentzVector>& tracksCM,
     const Double_t kaonMass,
-    const Double_t PhysicsConstants::mPiCh,
+    const Double_t mPiCh,
     std::vector<TVector3>& pionsCM,
     KLOE::pm00& obj)
 {

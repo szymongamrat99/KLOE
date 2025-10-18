@@ -99,10 +99,10 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
           *S = R->MySolve(selected);
 
-          clusterEnergy = cluster[4][Asscl[ind_gam[0]] - 1] > MIN_CLU_ENE &&
-                          cluster[4][Asscl[ind_gam[1]] - 1] > MIN_CLU_ENE &&
-                          cluster[4][Asscl[ind_gam[2]] - 1] > MIN_CLU_ENE &&
-                          cluster[4][Asscl[ind_gam[3]] - 1] > MIN_CLU_ENE;
+          clusterEnergy = cluster[4][Asscl[ind_gam[0]] - 1] > KLOE::MIN_CLU_ENE &&
+                          cluster[4][Asscl[ind_gam[1]] - 1] > KLOE::MIN_CLU_ENE &&
+                          cluster[4][Asscl[ind_gam[2]] - 1] > KLOE::MIN_CLU_ENE &&
+                          cluster[4][Asscl[ind_gam[3]] - 1] > KLOE::MIN_CLU_ENE;
 
           for (Int_t k = 0; k < 4; k++)
           {
@@ -159,7 +159,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
             {
               kinematicFitObj->ParameterInitialization(Param, Errors);
 
-              Tcorr = k1 * T0;
+              Tcorr = k1 * KLOE::T0;
 
               CHISQRTMP = kinematicFitObj->FitFunction(Tcorr);
 

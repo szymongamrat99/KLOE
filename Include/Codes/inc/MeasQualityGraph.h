@@ -17,7 +17,7 @@ namespace KLOE
     class MeasQualityGraph : protected pm00
     {
     private:
-        std::vector<TGraph *>
+        std::map<TString, TGraph *>
             _effGraphs;
 
         std::vector<Double_t>

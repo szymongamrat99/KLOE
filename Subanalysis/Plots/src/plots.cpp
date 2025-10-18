@@ -32,10 +32,10 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			*tree_triangle;
 
 	TString
-			mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
+			mctruth_name = gen_vars_dir + Paths::root_files_dir + mctruth_filename + first_file + "_" + last_file + Paths::ext_root,
 			omega_name = std::string(Utils::properties["variables"]["tree"]["filename"]["omegarec"]),
 			tree_name = std::string(Utils::properties["variables"]["tree"]["treename"]["omegarec"]),
-			filename_triangle = Paths::neutrec_dir + root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + ext_root;
+			filename_triangle = Paths::neutrec_dir + Paths::root_files_dir + neu_triangle_filename + first_file + "_" + last_file + "_" + loopcount + "_" + M + "_" + range + "_" + int(data_type) + Paths::ext_root;
 
 	file_mctruth = new TFile(mctruth_name);
 	tree_mctruth = (TTree *)file_mctruth->Get(gen_vars_tree);
@@ -283,7 +283,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 	KLOE::interference event("split", 0, 91, -90, 90, split);
 
 	TString
-			name = efficiency_dir + root_files_dir + cut_vars_filename + first_file + "_" + last_file + ext_root;
+			name = efficiency_dir + Paths::root_files_dir + cut_vars_filename + first_file + "_" + last_file + Paths::ext_root;
 
 	for (Int_t i = 0; i < nentries; i++)
 	{

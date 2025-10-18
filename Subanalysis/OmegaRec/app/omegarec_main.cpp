@@ -9,7 +9,7 @@ using namespace std;
 int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
   // Set logger for error logging
-  std::string logFilename = (std::string)omegarec_dir + (std::string)Paths::logs_dir + "omegaRec_" + Obj.getCurrentDate() + ".log";
+  std::string logFilename = (std::string)Paths::omegarec_dir + (std::string)Paths::logs_dir + "omegaRec_" + Obj.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
@@ -92,7 +92,7 @@ int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOp
       logger.getLog(infoCode, "Omega-pi0 Reconstruction: Plots");
 
       Obj.startTimer();
-      plots(chain, loopcount, numOfConstraints, jmin, jmax, dataTypeOpt, Obj, logger);
+      // plots(chain, loopcount, numOfConstraints, jmin, jmax, dataTypeOpt, Obj, logger);
       
       infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
       logger.getLog(infoCode, Obj.endTimer());

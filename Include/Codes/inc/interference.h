@@ -12,6 +12,7 @@
 #include <TGraphErrors.h>
 #include <TFile.h>
 #include <vector>
+#include <array>
 
 namespace KLOE
 {
@@ -19,8 +20,10 @@ namespace KLOE
   {
     public:
 
-      std::vector<Double_t> time_diff[KLOE::channNum], time_diff_gen, time_diff_data;
-      std::vector<Double_t> time_diff_rand_mc[KLOE::channNum], time_diff_rand_data[KLOE::channNum], time_diff_gen_rand_mc, time_diff_gen_rand_data;
+      std::array<std::vector<Double_t>, channNum> time_diff;
+      std::vector<Double_t> time_diff_gen, time_diff_data;
+      std::array<std::vector<Double_t>, channNum> time_diff_rand_mc, time_diff_rand_data;
+      std::vector<Double_t> time_diff_gen_rand_mc, time_diff_gen_rand_data;
 
       Double_t *exclusions, left_x_split, center_x_split, right_x_split;
 
@@ -40,15 +43,6 @@ namespace KLOE
         else if (mode == "mc") num_of_vars = 3;
         else if (mode == "bcg") num_of_vars = 8;
         else if (mode == "final") num_of_vars = 3;
-
-        /*for(Int_t i = 0; i < num_of_vars; i++)
-        {
-          if(i == 0) init_vars.push_back(PhysicsConstants::Re);
-          if(i == 1) init_vars.push_back(M_PI*PhysicsConstants::Im_nonCPT/180.);
-          else init_vars.push_back(1.0);
-          
-          step.push_back(abs(init_vars[i]/10.));
-        }*/
 
         pm00();
 
@@ -168,7 +162,7 @@ namespace KLOE
 
       /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      std::vector<Double_t> b[6], e[6];
+      std::array<std::vector<Double_t>, channNum> b, e;
       std::vector<Double_t> b_mcsum, e_mcsum;
       std::vector<Double_t> b_data, e_data;
 
