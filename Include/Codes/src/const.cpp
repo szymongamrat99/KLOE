@@ -4,6 +4,11 @@
 #include <ctime>
 #include <fstream>
 
+#include <iostream>
+
+#include <TH1.h>
+#include <TH2.h>
+
 using json = nlohmann::json;
 
 namespace Paths
@@ -165,6 +170,259 @@ namespace KLOE
       {"pi+pi-pi+pi-", kYellow},
       {"MC sum", kOrange}};
 
+  namespace Histograms
+  {
+    const std::vector<TString> varNames = {
+        "px_Pi1", "py_Pi1", "pz_Pi1", "Energy_Pi1",
+        "px_Pi2", "py_Pi2", "pz_Pi2", "Energy_Pi2",
+        "px_Kch", "py_Kch", "pz_Kch", "Energy_Kch",
+        "px_Kne", "py_Kne", "pz_Kne", "Energy_Kne",
+        "px_phi", "py_phi", "pz_phi", "Energy_phi",
+        "mass_Kch", "mass_Kne", "mass_phi", "mass_pi01", "mass_pi02", "combined_mass_pi0",
+        "vKne", "deltaPhiv", "deltaPhivFit", "Qmiss",
+        "chi2_signalKinFit", "chi2_trilaterationKinFit", "prob_signal",
+        "curv1", "phiv1", "cotv1",
+        "curv2", "phiv2", "cotv2",
+        "vtxNeu_x", "vtxNeu_y", "vtxNeu_z",
+        "vtxNeu_x_Fit", "vtxNeu_y_Fit", "vtxNeu_z_Fit",
+        "phi_vtx_x", "phi_vtx_y", "phi_vtx_z",
+        "time_neutral_MC", "delta_t",
+        "pull1", "pull2", "pull3", "pull4", "pull5", "pull6", "pull7", "pull8", "pull9", "pull10", "pull11", "pull12", "pull13", "pull14", "pull15", "pull16", "pull17", "pull18", "pull19", "pull20", "pull21", "pull22", "pull23", "pull24", "pull25", "pull26", "pull27", "pull28", "pull29", "pull30", "pull31", "pull32", "pull33", "pull34", "pull35", "pull36",
+        "openingAngleCharged", "openingAngleNeutral",
+        "nev", "nrun", "TransvRadius"};
+
+    // Konfiguracje histogramów 1D
+    const std::map<TString, HistConfig1D> histConfigs1D = {
+        // Pędy cząstek
+        {"px_Pi1", {100, -500., 500., "Pion 1 p_{x}", "p_{x} [MeV/c]", "Counts"}},
+        {"py_Pi1", {100, -500., 500., "Pion 1 p_{y}", "p_{y} [MeV/c]", "Counts"}},
+        {"pz_Pi1", {100, -500., 500., "Pion 1 p_{z}", "p_{z} [MeV/c]", "Counts"}},
+        {"Energy_Pi1", {100, 0., 1000., "Pion 1 Energy", "E [MeV]", "Counts"}},
+
+        {"px_Pi2", {100, -500., 500., "Pion 2 p_{x}", "p_{x} [MeV/c]", "Counts"}},
+        {"py_Pi2", {100, -500., 500., "Pion 2 p_{y}", "p_{y} [MeV/c]", "Counts"}},
+        {"pz_Pi2", {100, -500., 500., "Pion 2 p_{z}", "p_{z} [MeV/c]", "Counts"}},
+        {"Energy_Pi2", {100, 0., 1000., "Pion 2 Energy", "E [MeV]", "Counts"}},
+
+        {"px_Kch", {100, -500., 500., "Kch p_{x}", "p_{x} [MeV/c]", "Counts"}},
+        {"py_Kch", {100, -500., 500., "Kch p_{y}", "p_{y} [MeV/c]", "Counts"}},
+        {"pz_Kch", {100, -500., 500., "Kch p_{z}", "p_{z} [MeV/c]", "Counts"}},
+        {"Energy_Kch", {100, 0., 1000., "Kch Energy", "E [MeV]", "Counts"}},
+
+        {"px_Kne", {100, -500., 500., "Kne p_{x}", "p_{x} [MeV/c]", "Counts"}},
+        {"py_Kne", {100, -500., 500., "Kne p_{y}", "p_{y} [MeV/c]", "Counts"}},
+        {"pz_Kne", {100, -500., 500., "Kne p_{z}", "p_{z} [MeV/c]", "Counts"}},
+        {"Energy_Kne", {100, 0., 1000., "Kne Energy", "E [MeV]", "Counts"}},
+
+        {"px_Phi", {100, -500., 500., "Phi p_{x}", "p_{x} [MeV/c]", "Counts"}},
+        {"py_Phi", {100, -500., 500., "Phi p_{y}", "p_{y} [MeV/c]", "Counts"}},
+        {"pz_Phi", {100, -500., 500., "Phi p_{z}", "p_{z} [MeV/c]", "Counts"}},
+        {"Energy_Phi", {100, 0., 1000., "Phi Energy", "E [MeV]", "Counts"}},
+
+        // Masy
+        {"mass_Kch", {100, -5., 5., "Kaon Mass", "m^{inv}_{#pi^{+}#pi^{-}} - m_{K^{0}} [MeV/c^{2}]", "Counts"}},
+        {"mass_Kne", {100, -200., 200., "Kaon Mass", "m^{inv}_{4#gamma} - m_{K^{0}} [MeV/c^{2}]", "Counts"}},
+        {"mass_phi", {100, 1010., 1030., "#phi Meson Mass", "m_{#phi} [MeV/c^{2}]", "Counts"}},
+        {"mass_pi01", {100, -20., 20., "#pi^{0} Mass 1", "m^{inv}_{2#gamma,1} - m_{#pi^{0}} [MeV/c^{2}]", "Counts"}},
+        {"mass_pi02", {100, -20., 20., "#pi^{0} Mass 2", "m^{inv}_{2#gamma,2} - m_{#pi^{0}} [MeV/c^{2}]", "Counts"}},
+        {"combined_mass_pi0", {100, 0., 100., "#pi^{0} Combined", "Comb^{#pi^0}_{err} [MeV/c^{2}]", "Counts"}},
+
+        // Chi-square
+        {"chi2_signalKinFit", {100, 0., 50., "Signal Kinematic Fit #chi^{2}", "#chi^{2}_{signal}", "Counts"}},
+        {"prob_signal", {100, 0., 1., "Signal Kinematic Fit Probability", "Prob_{signal}", "Counts"}},
+        {"chi2_trilaterationKinFit", {100, 0., 50., "Trilateration Fit #chi^{2}", "#chi^{2}_{tri}", "Counts"}},
+
+        // Vertex
+        {"vtxNeu_x", {100, -20., 20., "Neutral Vertex x", "x [cm]", "Counts"}},
+        {"vtxNeu_y", {100, -20., 20., "Neutral Vertex y", "y [cm]", "Counts"}},
+        {"vtxNeu_z", {100, -50., 50., "Neutral Vertex z", "z [cm]", "Counts"}},
+
+        // Vertex
+        {"vtxNeu_x_Fit", {100, -20., 20., "Neutral Vertex x Fit", "x [cm]", "Counts"}},
+        {"vtxNeu_y_Fit", {100, -20., 20., "Neutral Vertex y Fit", "y [cm]", "Counts"}},
+        {"vtxNeu_z_Fit", {100, -50., 50., "Neutral Vertex z Fit", "z [cm]", "Counts"}},
+
+        // Path i Radius
+        {"TransvRadius", {100, 0., 50., "Transversal Radius of Kaons", "R [cm]", "Counts"}},
+
+        // Pull Signal Fit
+        {"pull1", {100, -5., 5., "Pull 1 Signal Fit", "Pull", "Counts"}},
+        {"pull2", {100, -5., 5., "Pull 2 Signal Fit", "Pull", "Counts"}},
+        {"pull3", {100, -5., 5., "Pull 3 Signal Fit", "Pull", "Counts"}},
+        {"pull4", {100, -5., 5., "Pull 4 Signal Fit", "Pull", "Counts"}},
+        {"pull5", {100, -5., 5., "Pull 5 Signal Fit", "Pull", "Counts"}},
+        {"pull6", {100, -5., 5., "Pull 6 Signal Fit", "Pull", "Counts"}},
+        {"pull7", {100, -5., 5., "Pull 7 Signal Fit", "Pull", "Counts"}},
+        {"pull8", {100, -5., 5., "Pull 8 Signal Fit", "Pull", "Counts"}},
+        {"pull9", {100, -5., 5., "Pull 9 Signal Fit", "Pull", "Counts"}},
+        {"pull10", {100, -5., 5., "Pull 10 Signal Fit", "Pull", "Counts"}},
+        {"pull11", {100, -5., 5., "Pull 11 Signal Fit", "Pull", "Counts"}},
+        {"pull12", {100, -5., 5., "Pull 12 Signal Fit", "Pull", "Counts"}},
+        {"pull13", {100, -5., 5., "Pull 13 Signal Fit", "Pull", "Counts"}},
+        {"pull14", {100, -5., 5., "Pull 14 Signal Fit", "Pull", "Counts"}},
+        {"pull15", {100, -5., 5., "Pull 15 Signal Fit", "Pull", "Counts"}},
+        {"pull16", {100, -5., 5., "Pull 16 Signal Fit", "Pull", "Counts"}},
+        {"pull17", {100, -5., 5., "Pull 17 Signal Fit", "Pull", "Counts"}},
+        {"pull18", {100, -5., 5., "Pull 18 Signal Fit", "Pull", "Counts"}},
+        {"pull19", {100, -5., 5., "Pull 19 Signal Fit", "Pull", "Counts"}},
+        {"pull20", {100, -5., 5., "Pull 20 Signal Fit", "Pull", "Counts"}},
+        {"pull21", {100, -5., 5., "Pull 21 Signal Fit", "Pull", "Counts"}},
+        {"pull22", {100, -5., 5., "Pull 22 Signal Fit", "Pull", "Counts"}},
+        {"pull23", {100, -5., 5., "Pull 23 Signal Fit", "Pull", "Counts"}},
+        {"pull24", {100, -5., 5., "Pull 24 Signal Fit", "Pull", "Counts"}},
+        {"pull25", {100, -5., 5., "Pull 25 Signal Fit", "Pull", "Counts"}},
+        {"pull26", {100, -5., 5., "Pull 26 Signal Fit", "Pull", "Counts"}},
+        {"pull27", {100, -5., 5., "Pull 27 Signal Fit", "Pull", "Counts"}},
+        {"pull28", {100, -5., 5., "Pull 28 Signal Fit", "Pull", "Counts"}},
+        {"pull29", {100, -5., 5., "Pull 29 Signal Fit", "Pull", "Counts"}},
+        {"pull30", {100, -5., 5., "Pull 30 Signal Fit", "Pull", "Counts"}},
+        {"pull31", {100, -5., 5., "Pull 31 Signal Fit", "Pull", "Counts"}},
+        {"pull32", {100, -5., 5., "Pull 32 Signal Fit", "Pull", "Counts"}},
+        {"pull33", {100, -5., 5., "Pull 33 Signal Fit", "Pull", "Counts"}},
+        {"pull34", {100, -5., 5., "Pull 34 Signal Fit", "Pull", "Counts"}},
+        {"pull35", {100, -5., 5., "Pull 35 Signal Fit", "Pull", "Counts"}},
+        {"pull36", {100, -5., 5., "Pull 36 Signal Fit", "Pull", "Counts"}},
+
+        // Czasy
+        {"time_neutral_MC", {100, -4., 2., "Neutral Kaon Time (MC)", "Trc_{sum} [ns]", "Counts"}},
+        {"delta_t", {121, -30., 30., "Time Difference", "#Deltat [#tau_{S}]", "Counts"}},
+
+        // Kąty i zmienne kinematyczne
+        {"openingAngleCharged", {100, 0., 180., "Charged Particles Opening Angle", "#alpha [deg]", "Counts"}},
+        {"openingAngleNeutral", {100, 0., 180., "Neutral Particles Opening Angle", "#alpha [deg]", "Counts"}},
+        {"Qmiss", {100, 0, 15., "Missing 4-momentum", "Q_{miss} [MeV]", "Counts"}},
+
+        // Track parameters
+        {"curv1", {100, -0.01, 0.01, "Track 1 Curvature", "1/p_{T} [1/MeV]", "Counts"}},
+        {"phiv1", {100, -TMath::Pi(), TMath::Pi(), "Track 1 #phi", "#phi [rad]", "Counts"}},
+        {"cotv1", {100, -5., 5., "Track 1 cot(#theta)", "cot(#theta)", "Counts"}},
+        {"curv2", {100, -0.01, 0.01, "Track 2 Curvature", "1/p_{T} [1/MeV]", "Counts"}},
+        {"phiv2", {100, -TMath::Pi(), TMath::Pi(), "Track 2 #phi", "#phi [rad]", "Counts"}},
+        {"cotv2", {100, -5., 5., "Track 2 cot(#theta)", "cot(#theta)", "Events"}},
+        {"deltaPhiv", {100, 2., 4., "#phi_{+} - #phi_{-}", "#Delta#phi_{+-} [rad]", "Counts"}},
+        {"deltaPhivFit", {100, 2., 4., "#phi_{+} - #phi_{-} Fit", "#Delta#phi^{fit}_{+-} [rad]", "Counts"}}};
+
+    // Konfiguracje histogramów 2D
+    const std::map<TString, HistConfig2D> histConfigs2D = {
+        // Korelacje mas
+        {"mass_pi01_vs_mass_pi02", {50, 50, 120., 150., 120., 150., "#pi^{0} Mass Correlation", "m_{#pi^{0}_{1}} [MeV/c^{2}]", "m_{#pi^{0}_{2}} [MeV/c^{2}]", ""}},
+
+        {"mass_Kch_vs_mass_Kne", {50, 50, 480., 520., 480., 520., "Kaon Mass Correlation", "m_{K^{#pm}} [MeV/c^{2}]", "m_{K^{0}} [MeV/c^{2}]", ""}},
+
+        // Vertex pozycje
+        {"vtxNeu_x_vs_vtxNeu_y", {100, 100, -20., 20., -20., 20., "Neutral Vertex Position", "x [cm]", "y [cm]", ""}},
+
+        {"vtxNeu_x_vs_vtxNeu_z", {100, 100, -20., 20., -50., 50., "Neutral Vertex x vs z", "x [cm]", "z [cm]", ""}},
+
+        // Pędy vs masy
+        {"Energy_Pi1_vs_mass_pi01", {50, 50, 0., 1000., 120., 150., "Pion Energy vs #pi^{0} Mass", "E_{#pi^{#pm}} [MeV]", "m_{#pi^{0}} [MeV/c^{2}]", ""}},
+
+        // Chi-square korelacje
+        {"chi2_signalKinFit_vs_chi2_trilaterationKinFit", {50, 50, 0., 50., 0., 50., "#chi^{2} Correlation", "#chi^{2}_{signal}", "#chi^{2}_{tri}", ""}},
+
+        // Track korelacje
+        {"curv1_vs_curv2", {50, 50, -0.01, 0.01, -0.01, 0.01, "Track Curvature Correlation", "1/p_{T1} [1/MeV]", "1/p_{T2} [1/MeV]", ""}},
+
+        {"phiv1_vs_phiv2", {50, 50, -TMath::Pi(), TMath::Pi(), -TMath::Pi(), TMath::Pi(), "Track #phi Correlation", "#phi_{1} [rad]", "#phi_{2} [rad]", ""}},
+
+        // Czas vs Czas MC
+        {"delta_t_vs_delta_t_mc", {161, 81, -40., 40., -20., 20., "#Deltat_{rec} vs. #Deltat_{mc}", "#Deltat_{MC} [#tau_{S}]", "(#Deltat_{rec} - #Deltat_{MC}) [#tau_{S}]", ""}},
+        {"delta_t_fit_vs_delta_t_mc", {161, 81, -40., 40., -20., 20., "#Deltat_{fit} vs. #Deltat_{mc}", "#Deltat_{MC} [#tau_{S}]", "(#Deltat_{fit} - #Deltat_{MC}) [#tau_{S}]", ""}}};
+
+    // Mapowanie nazw 2D na pary zmiennych (dla automatycznego tworzenia)
+    const std::map<TString, std::pair<TString, TString>> histConfigs2D_Variables = {
+        {"mass_correlation", {"mass_pi01", "mass_pi02"}},
+        {"kaon_masses", {"mass_Kch", "mass_Kne"}},
+        {"vertex_xy", {"vtxNeu_x", "vtxNeu_y"}},
+        {"vertex_xz", {"vtxNeu_x", "vtxNeu_z"}},
+        {"energy_mass", {"Energy_Pi1", "mass_pi01"}},
+        {"chi2_correlation", {"chi2_signalKinFit", "chi2_trilaterationKinFit"}},
+        {"track_curvature", {"curv1", "curv2"}},
+        {"track_phi", {"phiv1", "phiv2"}},
+        {"delta_t_vs_delta_t_mc", {"delta_t", "delta_t_mc"}},
+        {"delta_t_fit_vs_delta_t_mc", {"delta_t_fit", "delta_t_mc"}}};
+
+    // Helper functions implementacja
+    TH1F *CreateHist1D(const TString &varName, const TString &histName)
+    {
+      auto it = histConfigs1D.find(varName);
+      if (it == histConfigs1D.end())
+      {
+        std::cerr << "WARNING: No 1D config found for variable: " << varName << std::endl;
+        return new TH1F(histName.IsNull() ? varName : histName, varName, 100, -10., 10.);
+      }
+
+      const auto &config = it->second;
+      TString name = histName.IsNull() ? ("h_" + varName) : histName;
+      TH1F *hist = new TH1F(name, config.title, config.nBins, config.xMin, config.xMax);
+      hist->GetXaxis()->SetTitle(config.xLabel);
+      hist->GetYaxis()->SetTitle(config.yLabel);
+      return hist;
+    }
+
+    TH1F *CreateHist1D(const TString &varName, const TString &channName, const TString &histName)
+    {
+      auto it = histConfigs1D.find(varName);
+      if (it == histConfigs1D.end())
+      {
+        std::cerr << "WARNING: No 1D config found for variable: " << varName << std::endl;
+        return new TH1F(histName.IsNull() ? varName : histName, varName, 100, -10., 10.);
+      }
+
+      const auto &config = it->second;
+      TString name = histName.IsNull() ? ("h_" + varName + "_" + channName) : histName;
+      TH1F *hist = new TH1F(name, config.title, config.nBins, config.xMin, config.xMax);
+      hist->GetXaxis()->SetTitle(config.xLabel);
+      hist->GetYaxis()->SetTitle(config.yLabel);
+      return hist;
+    }
+
+    TH2F *CreateHist2D(const TString &var1, const TString &var2, const TString &histName)
+    {
+      auto config1 = histConfigs1D.find(var1);
+      auto config2 = histConfigs1D.find(var2);
+
+      if (config1 == histConfigs1D.end() || config2 == histConfigs1D.end())
+      {
+        std::cerr << "WARNING: Config not found for variables: " << var1 << ", " << var2 << std::endl;
+        return new TH2F(histName.IsNull() ? (var1 + "_vs_" + var2) : histName,
+                        var1 + " vs " + var2, 100, -10., 10., 100, -10., 10.);
+      }
+
+      const auto &c1 = config1->second;
+      const auto &c2 = config2->second;
+      TString name = histName.IsNull() ? ("h_" + var1 + "_vs_" + var2) : histName;
+      TString title = c1.title + " vs " + c2.title;
+
+      TH2F *hist = new TH2F(name, title, c1.nBins, c1.xMin, c1.xMax,
+                            c2.nBins, c2.xMin, c2.xMax);
+      hist->GetXaxis()->SetTitle(c1.xLabel);
+      hist->GetYaxis()->SetTitle(c2.xLabel);
+      hist->GetZaxis()->SetTitle("Events");
+      return hist;
+    }
+
+    TH2F *CreateHist2D(const TString &configName, const TString &histName)
+    {
+      auto it = histConfigs2D.find(configName);
+      if (it == histConfigs2D.end())
+      {
+        std::cerr << "WARNING: No 2D config found for: " << configName << std::endl;
+        return new TH2F(histName.IsNull() ? configName : histName, configName,
+                        100, -10., 10., 100, -10., 10.);
+      }
+
+      const auto &config = it->second;
+      TString name = histName.IsNull() ? ("h_" + configName) : histName;
+      TH2F *hist = new TH2F(name, config.title, config.nBinsX, config.xMin, config.xMax,
+                            config.nBinsY, config.yMin, config.yMax);
+      hist->GetXaxis()->SetTitle(config.xLabel);
+      hist->GetYaxis()->SetTitle(config.yLabel);
+      hist->GetZaxis()->SetTitle(config.zLabel);
+      return hist;
+    }
+  }
+
   void setGlobalStyle()
   {
     // Global Style of histograms, pads, etc.
@@ -244,15 +502,15 @@ namespace Utils
     {
       constants = json::parse(fconst);
 
-      // PhysicsConstants::mK0 = constants.at("values").at("/S011M").get<Double_t>();
-      // PhysicsConstants::tau_S_nonCPT = constants.at("values").at("/S012T").get<Double_t>() * 1E9;
-      // PhysicsConstants::tau_L = constants.at("values").at("/S013T").get<Double_t>() * 1E9;
-      // PhysicsConstants::delta_mass_nonCPT = constants.at("values").at("/S013D").get<Double_t>();
-      // PhysicsConstants::mod_epsilon = constants.at("values").at("/S013EP").get<Double_t>();
-      // PhysicsConstants::Re = constants.at("values").at("/S013EPS").get<Double_t>();
-      // PhysicsConstants::Im_nonCPT = constants.at("values").at("/S013EPI").get<Double_t>() * (M_PI / 180.);
-      // PhysicsConstants::phi_pm_nonCPT = constants.at("values").at("/S013F+-").get<Double_t>();
-      // PhysicsConstants::phi_00_nonCPT = constants.at("values").at("/S013FOO").get<Double_t>();
+      PhysicsConstants::mK0 = constants.at("values").at("/S011M").get<Double_t>();
+      PhysicsConstants::tau_S_nonCPT = constants.at("values").at("/S012T").get<Double_t>() * 1E9;
+      PhysicsConstants::tau_L = constants.at("values").at("/S013T").get<Double_t>() * 1E9;
+      PhysicsConstants::delta_mass_nonCPT = constants.at("values").at("/S013D").get<Double_t>();
+      PhysicsConstants::mod_epsilon = constants.at("values").at("/S013EP").get<Double_t>();
+      PhysicsConstants::Re = constants.at("values").at("/S013EPS").get<Double_t>();
+      PhysicsConstants::Im_nonCPT = constants.at("values").at("/S013EPI").get<Double_t>() * (M_PI / 180.);
+      PhysicsConstants::phi_pm_nonCPT = constants.at("values").at("/S013F+-").get<Double_t>();
+      PhysicsConstants::phi_00_nonCPT = constants.at("values").at("/S013FOO").get<Double_t>();
     }
 
     // Parsing of the KLOE properties
@@ -261,22 +519,22 @@ namespace Utils
     {
       properties = json::parse(fprop);
 
-      // Paths::path_tmp = (std::string)properties["variables"]["rootFiles"]["path"];
-      // Paths::path_cs = (std::string)properties["variables"]["rootFiles"]["pathControlSample"];
+      Paths::path_tmp = (std::string)properties["variables"]["rootFiles"]["path"];
+      Paths::path_cs = (std::string)properties["variables"]["rootFiles"]["pathControlSample"];
 
-      // KLOE::firstFileMax = properties["variables"]["rootFiles"]["firstFileMax"];
-      // KLOE::lastFileMax = properties["variables"]["rootFiles"]["lastFileMax"];
-      // KLOE::numOfThreads = properties["variables"]["parallelization"]["numOfThreads"];
+      KLOE::firstFileMax = properties["variables"]["rootFiles"]["firstFileMax"];
+      KLOE::lastFileMax = properties["variables"]["rootFiles"]["lastFileMax"];
+      KLOE::numOfThreads = properties["variables"]["parallelization"]["numOfThreads"];
 
-      // Filenames::gen_vars_tree = (std::string)properties["variables"]["tree"]["treename"]["mctruth"];
-      // Filenames::neutrec_triangle_tree = (std::string)properties["variables"]["tree"]["treename"]["trianglefinal"];
-      // Filenames::omegarec_tree = (std::string)properties["variables"]["tree"]["treename"]["omegarec"];
-      // Filenames::omegarec_kin_fit_tree = (std::string)properties["variables"]["tree"]["treename"]["omegarec"];
+      Filenames::gen_vars_tree = (std::string)properties["variables"]["tree"]["treename"]["mctruth"];
+      Filenames::neutrec_triangle_tree = (std::string)properties["variables"]["tree"]["treename"]["trianglefinal"];
+      Filenames::omegarec_tree = (std::string)properties["variables"]["tree"]["treename"]["omegarec"];
+      Filenames::omegarec_kin_fit_tree = (std::string)properties["variables"]["tree"]["treename"]["omegarec"];
 
-      // Filenames::omegaRecPath = (std::string)properties["variables"]["tree"]["filename"]["omegarec"];
-      // Filenames::mctruthPath = (std::string)properties["variables"]["tree"]["filename"]["mctruth"];
-      // Filenames::genvarsPath = (std::string)properties["variables"]["tree"]["filename"]["generatedvars"];
-      // Filenames::trianglePath = (std::string)properties["variables"]["tree"]["filename"]["trianglefinal"];
+      Filenames::omegaRecPath = (std::string)properties["variables"]["tree"]["filename"]["omegarec"];
+      Filenames::mctruthPath = (std::string)properties["variables"]["tree"]["filename"]["mctruth"];
+      Filenames::genvarsPath = (std::string)properties["variables"]["tree"]["filename"]["generatedvars"];
+      Filenames::trianglePath = (std::string)properties["variables"]["tree"]["filename"]["trianglefinal"];
     }
   }
 

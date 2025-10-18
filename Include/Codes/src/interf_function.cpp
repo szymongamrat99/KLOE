@@ -13,8 +13,8 @@ Double_t interf_function(const Float_t x)
 
     Epsilon = PhysicsConstants::mod_epsilon;
     Dphi = PhysicsConstants::phi_pm_nonCPT - PhysicsConstants::phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
-    TauKs = PhysicsConstants::tau_S_nonCPT * pow(10, -9);   // PDG fit not assuming CPT (s)
-    TauKl = PhysicsConstants::tau_L * pow(10, -9);          // Kl mean life (s)
+    TauKs = PhysicsConstants::tau_S_nonCPT * 1E-9;   // PDG fit not assuming CPT (s)
+    TauKl = PhysicsConstants::tau_L * 1E-9;          // Kl mean life (s)
     MassDiff = PhysicsConstants::delta_mass_nonCPT;         // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
                                           // PDG fit not assuming CPT
     RePart = PhysicsConstants::Re;
