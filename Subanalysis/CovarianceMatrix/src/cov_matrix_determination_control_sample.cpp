@@ -26,8 +26,6 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	// =============================================================================
 	KLOE::BaseKinematics
 			baseKin;
-	NeutRec4
-			neutVars;
 	TChain
 			*chainDoublePiPi;
 	// =============================================================================

@@ -5,7 +5,7 @@ add_library(OmegaRec SHARED
             app/omegarec_main.cpp
             src/omega_rec.cpp 
             src/omega_rec_kin_fit.cpp
-            src/plots.cpp)
+            )
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
 # PUBLIC: oznacza, że katalog z nagłówkami (tu: bieżący katalog, '.') będzie

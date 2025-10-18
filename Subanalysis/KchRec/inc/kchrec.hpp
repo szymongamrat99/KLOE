@@ -8,6 +8,7 @@
 #include <TBranch.h>
 #include <TFile.h>
 #include <TTree.h>
+#include <TChain.h>
 
 #include <charged_mom.h>
 #include <ErrorLogs.h>

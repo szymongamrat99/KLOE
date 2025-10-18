@@ -8,7 +8,7 @@ using namespace std;
 int InitAnalysis_main(TChain &chain, Controls::FileType &fileTypeOpt, KLOE::pm00 &Obj)
 {
   // Set logger for error logging
-  std::string logFilename = (std::string)initialanalysis_dir + (std::string)Paths::logs_dir + "InitialAnalysis.log";
+  std::string logFilename = (std::string)Paths::initialanalysis_dir + (std::string)Paths::logs_dir + "InitialAnalysis.log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------

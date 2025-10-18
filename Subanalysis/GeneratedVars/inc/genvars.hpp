@@ -4,10 +4,10 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <omp.h>
 
 #include <TTree.h>
 #include <TFile.h>
+#include <TChain.h>
 
 #include <const.h>
 #include <ErrorLogs.h>

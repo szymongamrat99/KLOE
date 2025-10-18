@@ -6,6 +6,7 @@
 #include <string>
 
 #include <const.h>
+#include <TChain.h>
 
 #include <MainMenu.h>
 #include <ErrorLogs.h>

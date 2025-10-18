@@ -11,6 +11,7 @@
 #include <TH1F.h>
 #include <TCanvas.h>
 #include <TLegend.h>
+#include <boost/progress.hpp>
 
 #include <event_data.h>
 #include <GeneratedVariables.h>
@@ -105,12 +106,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     nPions = 2;
   }
 
-  std::ifstream file(cutlimitsName);
+  std::ifstream file(Paths::cutlimitsName);
   json j = json::parse(file);
 
-  StatisticalCutter cutter(cutlimitsName, 7, hypoCode);
+  StatisticalCutter cutter(Paths::cutlimitsName, 7, hypoCode);
 
-  std::ifstream rootFiles(rootfilesName);
+  std::ifstream rootFiles(Paths::rootfilesName);
   json filePaths = json::parse(rootFiles);
 
   std::vector<std::string> baseFilenames = {filePaths["Data"]["filenameBase"],
@@ -124,7 +125,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   }
 
   std::string
-      dirname = (std::string)initialanalysis_dir + (std::string)root_files_dir,
+      dirname = (std::string)Paths::initialanalysis_dir + (std::string)Paths::root_files_dir,
       dated_folder = Obj.CreateDatedFolder(dirname);
 
   SplitFileWriter writer(baseFilenames[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024 * 0.01, false, dated_folder);

@@ -6,24 +6,24 @@
 #include <stdexcept>
 #include <iostream>
 
-HistManager::HistManager(Int_t KLOE::channNum, const Color_t* channColors, 
+HistManager::HistManager(Int_t channNum, const Color_t* channColors, 
                                  const std::vector<TString>& channelNames,
                                  Int_t dataStyle, Int_t dataColor, Int_t sumColor) 
-    : fChannNum(KLOE::channNum), fDataStyle(dataStyle), fDataColor(dataColor), fSumColor(sumColor) {
+    : fChannNum(channNum), fDataStyle(dataStyle), fDataColor(dataColor), fSumColor(sumColor) {
     
-    for(Int_t i = 0; i < KLOE::channNum; ++i) {
+    for(Int_t i = 0; i < channNum; ++i) {
         fChannColors.push_back(channColors[i]);
     }
     
     // Initialize channel names
     if(channelNames.empty()) {
         // Use default names if none provided
-        for(Int_t i = 0; i < KLOE::channNum; ++i) {
+        for(Int_t i = 0; i < channNum; ++i) {
             fChannelNames.push_back(Form("Channel %d", i+1));
         }
     } else {
         // Use provided names
-        if(channelNames.size() != static_cast<size_t>(KLOE::channNum)) {
+        if(channelNames.size() != static_cast<size_t>(channNum)) {
             throw std::runtime_error("Number of channel names doesn't match number of channels");
         }
         fChannelNames = channelNames;

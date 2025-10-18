@@ -6,6 +6,7 @@
 #include <TTree.h>
 #include <TH2.h>
 #include <TCanvas.h>
+#include <boost/progress.hpp>
 
 #include <reconstructor.h>
 #include <neu_triangle.h>
@@ -76,7 +77,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 		chain.SetBranchAddress("Kchboost", Kchboost);
 		chain.SetBranchAddress("Knereclor", Knereclor);
 		chain.SetBranchAddress("g4taken", g4taken);
-		chain.SetBranchAddress("ncll", baseKin.ncll);
+		chain.SetBranchAddress("ncll", baseKin.ncll.data());
 
 		Int_t done_kinfit = 0, g4taken_kinfit[4] = {0};
 		Float_t chi2min_tri, Knetri_kinfit[10];
@@ -96,12 +97,12 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 				datestamp = Obj.getCurrentDate(),
 				name = "";
 
-		name = Paths::neutrec_dir + root_files_dir + neu_triangle_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
+		name = Paths::neutrec_dir + Paths::root_files_dir + Filenames::neu_triangle_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + Paths::ext_root;
 
 		Utils::properties["variables"]["tree"]["filename"]["trianglefinal"] = name;
 
 		TFile *file = new TFile(name.c_str(), "recreate");
-		TTree *tree = new TTree(neutrec_triangle_tree, "Neu vtx rec with triangle method");
+		TTree *tree = new TTree(Filenames::neutrec_triangle_tree, "Neu vtx rec with triangle method");
 
 		// Variables
 		Bool_t cond_ene, cond_clus[4];
@@ -191,8 +192,8 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 					ind_gam[2] = g4taken_kinfit[2];
 					ind_gam[3] = g4taken_kinfit[3];
 
-					cond_ene = cluster[4][baseKin.ncll[ind_gam[0]] - 1] > MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[1]] - 1] > MIN_CLU_ENE &&
-										 cluster[4][baseKin.ncll[ind_gam[2]] - 1] > MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[3]] - 1] > MIN_CLU_ENE;
+					cond_ene = cluster[4][baseKin.ncll[ind_gam[0]] - 1] > KLOE::MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[1]] - 1] > KLOE::MIN_CLU_ENE &&
+										 cluster[4][baseKin.ncll[ind_gam[2]] - 1] > KLOE::MIN_CLU_ENE && cluster[4][baseKin.ncll[ind_gam[3]] - 1] > KLOE::MIN_CLU_ENE;
 
 					cond_clus[0] = cluster[3][baseKin.ncll[ind_gam[0]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[0]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[0]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[0]] - 1] != 0;
 					cond_clus[1] = cluster[3][baseKin.ncll[ind_gam[1]] - 1] > 0 && cluster[0][baseKin.ncll[ind_gam[1]] - 1] != 0 && cluster[1][baseKin.ncll[ind_gam[1]] - 1] != 0 && cluster[2][baseKin.ncll[ind_gam[1]] - 1] != 0;

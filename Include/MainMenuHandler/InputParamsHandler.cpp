@@ -6,9 +6,9 @@
 #include <MainMenu.h>
 
 InputParamsHandler::Params InputParamsHandler::getParams(
-    nlohmann::json& Utils::properties,
+    nlohmann::json& properties,
     int lastFileMax,
-    const std::string& Paths::propName,
+    const std::string& propName,
     ErrorHandling::ErrorLogs& logger,
     Controls::Menu* dataType
 ) {

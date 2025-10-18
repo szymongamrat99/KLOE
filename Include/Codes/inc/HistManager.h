@@ -154,14 +154,14 @@ public:
 
     /**
      * @brief Konstruktor
-     * @param KLOE::channNum Liczba kanałów MC (mctruth 1-7)
+     * @param channNum Liczba kanałów MC (mctruth 1-7)
      * @param channColors Tablica kolorów dla kanałów MC
      * @param channelNames Nazwy kanałów (opcjonalne)
      * @param dataStyle Styl markera dla danych eksperymentalnych
      * @param dataColor Kolor dla danych eksperymentalnych
      * @param sumColor Kolor dla sumy MC
      */
-    HistManager(Int_t KLOE::channNum, const Color_t* channColors, 
+    HistManager(Int_t channNum, const Color_t* channColors, 
                 const std::vector<TString>& channelNames = std::vector<TString>(),
                 Int_t dataStyle = kFullCircle, Int_t dataColor = kBlack,
                 Int_t sumColor = kOrange);

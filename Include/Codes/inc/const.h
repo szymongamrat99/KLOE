@@ -135,7 +135,7 @@ namespace KLOE
   extern Int_t lastFileMax;
   extern Int_t numOfThreads;
 
-  extern const UInt_t channNum; //!< Number of analyzed channels
+  static constexpr UInt_t channNum = 7; //!< Number of analyzed channels
 
   extern const std::map<Int_t, TString> channName;    //!< Map of channel names
   extern const std::map<TString, TString> channTitle; //!< Map of channel titles
@@ -265,7 +265,9 @@ namespace KLOE
         eclfilfoword,
         ntcl,
         bunchnum,
-        errorCode;
+        errorCode,
+        doneTriKinFit,
+        mcflag;
 
     std::vector<Float_t>
         Kchrecnew,
@@ -376,7 +378,8 @@ namespace KLOE
         errors,
         cuts,
         g4takenTriKinFit,
-        goodClustersTriKinFit;
+        goodClustersTriKinFit,
+        ncll;
 
     void resize()
     {

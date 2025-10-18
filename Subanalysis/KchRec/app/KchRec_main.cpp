@@ -5,7 +5,7 @@ using namespace std;
 int KchRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
   // Set logger for error logging
-  std::string logFilename = (std::string)charged_dir + (std::string)Paths::logs_dir + "KchRec_" + Obj.getCurrentDate() + ".log";
+  std::string logFilename = (std::string)Paths::charged_dir + (std::string)Paths::logs_dir + "KchRec_" + Obj.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   // -----------------------------------------------------------------------------------
   // Set Menu instance

@@ -1,4 +1,5 @@
 #include <cylinder_intersection.h>
+#include <boost/progress.hpp>
 #include "../inc/genvars.hpp"
 
 Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
@@ -8,11 +9,11 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 			datestamp = Obj.getCurrentDate(),
 			name = "";
 
-	name = gen_vars_dir + root_files_dir + gen_vars_filename + datestamp + "_" + int(data_type) + ext_root;
+	name = Paths::gen_vars_dir + Paths::root_files_dir + Filenames::gen_vars_filename + datestamp + "_" + int(data_type) + Paths::ext_root;
 	// -----------------------------------------------------------------------------------------
 
 	TFile *file = new TFile(name.c_str(), "recreate");
-	TTree *tree = new TTree(gen_vars_tree, "Gen vars for klspm00");
+	TTree *tree = new TTree(Filenames::gen_vars_tree, "Gen vars for klspm00");
 
 	// Branches' addresses
 	// Bhabha vars
@@ -292,7 +293,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 	delete file;
 
 	Utils::properties["variables"]["tree"]["filename"]["generatedvars"] = (std::string)name;
-	Utils::properties["variables"]["tree"]["treename"]["generatedvars"] = (std::string)gen_vars_tree;
+	Utils::properties["variables"]["tree"]["treename"]["generatedvars"] = (std::string)Filenames::gen_vars_tree;
 
 	Utils::properties["lastScript"] = "Generated variables for Monte Carlo.";
 	Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();

@@ -20,7 +20,7 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 			*tree_cutvars;
 
 	TString
-			mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
+			mctruth_name = gen_vars_dir + Paths::root_files_dir + mctruth_filename + first_file + "_" + last_file + Paths::ext_root,
 			omega_name = std::string(Utils::properties["variables"]["tree"]["filename"]["omegarec"]),
 			tree_name = std::string(Utils::properties["variables"]["tree"]["treename"]["omegarec"]),
 			cutvars_csv_name = "CutVars";

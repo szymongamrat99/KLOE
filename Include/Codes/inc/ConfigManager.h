@@ -12,9 +12,9 @@ using json = nlohmann::json;
 
 /**
  * @class ConfigManager
- * @brief Thread-safe singleton for managing Utils::properties and constants configuration
+ * @brief Thread-safe singleton for managing properties and constants configuration
  * 
- * This class provides centralized access to JSON configuration files (Utils::properties.json and pdg_const.json)
+ * This class provides centralized access to JSON configuration files (properties.json and pdg_const.json)
  * with proper error handling using the ErrorHandling system and thread-safe lazy initialization.
  */
 class ConfigManager {
@@ -22,7 +22,7 @@ private:
     static ConfigManager* instance;
     static std::mutex mutex_;
     
-    json Utils::properties;
+    json properties;
     json constants;
     bool propertiesLoaded;
     bool constantsLoaded;
@@ -37,12 +37,12 @@ private:
     ConfigManager();
     
     /**
-     * @brief Load both Utils::properties and constants JSON files
+     * @brief Load both properties and constants JSON files
      */
     void loadConfigurations();
     
     /**
-     * @brief Load Utils::properties.json file
+     * @brief Load properties.json file
      */
     void loadProperties();
     
@@ -104,7 +104,7 @@ public:
         }
         
         try {
-            json value = navigateJsonPath(Utils::properties, path);
+            json value = navigateJsonPath(properties, path);
             if (value.is_null()) {
                 return defaultValue;
             }
@@ -201,13 +201,13 @@ public:
     bool setProperty(const std::string& path, const T& value) {
         if (!propertiesLoaded) {
             ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
-            errorLogger->getErrLog(errCode, "Cannot set property, Utils::properties not loaded: " + path);
+            errorLogger->getErrLog(errCode, "Cannot set property, properties not loaded: " + path);
             return false;
         }
         
         try {
             json jsonValue = value; // Convert to JSON
-            setNestedJsonValue(Utils::properties, path, jsonValue);
+            setNestedJsonValue(properties, path, jsonValue);
             
             ErrorHandling::InfoCodes infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
             errorLogger->getLog(infoCode, "Property set successfully: " + path);
@@ -221,14 +221,14 @@ public:
     }
     
     /**
-     * @brief Save current Utils::properties to the original file
+     * @brief Save current properties to the original file
      * @return True if save was successful, false otherwise
      */
     bool saveProperties() const;
     
     /**
-     * @brief Save current Utils::properties to a specific file
-     * @param filePath Path to the file where Utils::properties should be saved
+     * @brief Save current properties to a specific file
+     * @param filePath Path to the file where properties should be saved
      * @return True if save was successful, false otherwise
      */
     bool savePropertiesToFile(const std::string& filePath) const;
@@ -249,7 +249,7 @@ public:
     
     /**
      * @brief Check if configurations are loaded successfully
-     * @return True if both Utils::properties and constants are loaded
+     * @return True if both properties and constants are loaded
      */
     bool isConfigurationLoaded() const;
     

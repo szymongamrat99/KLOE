@@ -37,9 +37,9 @@ void API::RTI::setParsPath(std::string parsPath)
   _parPath = parsPath;
 }
 
-void API::RTI::setMultiURL(TString Paths::propName)
+void API::RTI::setMultiURL(TString propName)
 {
-  std::ifstream fprop(Paths::propName);
+  std::ifstream fprop(propName);
   json MultiURL = json::parse(fprop);
 
   _URLschema = (std::string)MultiURL["PDGURL"];

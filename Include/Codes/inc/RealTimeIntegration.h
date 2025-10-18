@@ -52,7 +52,7 @@ namespace API
 
     void setParsPath(std::string parsPath);
 
-    void setMultiURL(TString Paths::propName);
+    void setMultiURL(TString propName);
 
     void getAPICall();
     void getMultiAPICall();

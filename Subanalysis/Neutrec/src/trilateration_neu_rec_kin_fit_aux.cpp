@@ -14,6 +14,8 @@
 #include "TVectorD.h"
 #include "TError.h"
 
+#include <boost/progress.hpp>
+
 #include "reconstructor.h"
 #include "const.h"
 #include "uncertainties.h"
@@ -60,12 +62,12 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 			datestamp = Obj.getCurrentDate(),
 			name = "";
 
-	name = Paths::neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
+	name = Paths::neutrec_dir + Paths::root_files_dir + Filenames::neu_trilateration_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + Paths::ext_root;
 
 	Utils::properties["variables"]["tree"]["filename"]["trilaterationKinFit"] = name;
 
 	TFile *file = new TFile(name.c_str(), "recreate");
-	TTree *tree = new TTree(neutrec_tri_tree, "Trilateration reconstruction with kin fit");
+	TTree *tree = new TTree(Filenames::neutrec_tri_tree, "Trilateration reconstruction with kin fit");
 
 	// Branches' addresses
 	// Bhabha vars
@@ -101,7 +103,7 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 
 	chain.SetBranchAddress("mctruth", &mctruth);
 	chain.SetBranchAddress("mcflag", &mcflag);
-	chain.SetBranchAddress("ncll", baseKin.ncll);
+	chain.SetBranchAddress("ncll", baseKin.ncll.data());
 
 	Int_t nentries = (Int_t)chain.GetEntries();
 
@@ -206,10 +208,10 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 
 							S = R.MySolve(selected);
 
-							clusterEnergy = cluster[4][baseKin.ncll[ind_gam[0]] - 1] > MIN_CLU_ENE &&
-															cluster[4][baseKin.ncll[ind_gam[1]] - 1] > MIN_CLU_ENE &&
-															cluster[4][baseKin.ncll[ind_gam[2]] - 1] > MIN_CLU_ENE &&
-															cluster[4][baseKin.ncll[ind_gam[3]] - 1] > MIN_CLU_ENE;
+							clusterEnergy = cluster[4][baseKin.ncll[ind_gam[0]] - 1] > KLOE::MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[1]] - 1] > KLOE::MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[2]] - 1] > KLOE::MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[3]] - 1] > KLOE::MIN_CLU_ENE;
 
 							for (Int_t k = 0; k < 4; k++)
 							{
@@ -259,7 +261,7 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 								{
 									kinematicFitObj->ParameterInitialization(Param, Errors);
 
-									Tcorr = k1 * T0;
+									Tcorr = k1 * KLOE::T0;
 
 									CHISQRTMP = kinematicFitObj->FitFunction(Tcorr);
 

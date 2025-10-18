@@ -127,7 +127,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	chain.SetBranchAddress("TclOld", baseKin.cluster[3]);
 	chain.SetBranchAddress("Enecl", baseKin.cluster[4]);
 
-	chain.SetBranchAddress("ncll", baseKin.ncll);
+	chain.SetBranchAddress("ncll", baseKin.ncll.data());
 
 	chain.SetBranchAddress("Kchrec", Kchrec);
 	chain.SetBranchAddress("Bx", &ip_avg[0]);
@@ -428,7 +428,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		if(i < 8)
 			fit_text->Draw();
 
-		canvas_cont[i]->Print(img_dir + "OmegaRec/cont_plot_" + std::to_string(i) + ext_img);
+		canvas_cont[i]->Print(Paths::img_dir + "OmegaRec/cont_plot_" + std::to_string(i) + Paths::ext_img);
 
 		if(i < 8)
 			fit_text->Clear();
@@ -664,7 +664,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		if (i == 3)
 			legend_chi2->Draw();
 
-		canva[i]->Print(img_dir + "OmegaRec/hist" + std::to_string(i) + ext_img);
+		canva[i]->Print(Paths::img_dir + "OmegaRec/hist" + std::to_string(i) + Paths::ext_img);
 		// legend_chann->Clear();
 		legend_chi2->Clear();
 	}
@@ -681,7 +681,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		hist2d[j]->GetYaxis()->SetTitle("m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]");
 		hist2d[j]->Draw("COLZ");
 
-		canva2d[j]->Print(img_dir + "OmegaRec/angle_2d_kaon_" + channName[j] + ext_img);
+		canva2d[j]->Print(Paths::img_dir + "OmegaRec/angle_2d_kaon_" + channName[j] + Paths::ext_img);
 	}
 
 	TString xTitleControl[2] = {"#rho_{+-,00} [cm]", "z_{+-,00} [cm]"};
@@ -717,7 +717,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		else if (i == 3)
 			legend_chi2->Draw();
 
-		canva[i + 6]->Print(img_dir + "OmegaRec/hist_control_chann" + std::to_string(i) + ext_img);
+		canva[i + 6]->Print(Paths::img_dir + "OmegaRec/hist_control_chann" + std::to_string(i) + Paths::ext_img);
 		legend_chann_cont->Clear();
 		legend_chi2->Clear();
 	}
@@ -752,7 +752,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		else if (i == 3)
 			legend_chi2->Draw();
 
-		canva[i + 6]->Print(img_dir + "OmegaRec/hist_pm_IP_" + std::to_string(i) + ext_img);
+		canva[i + 6]->Print(Paths::img_dir + "OmegaRec/hist_pm_IP_" + std::to_string(i) + Paths::ext_img);
 		legend_chann_cont->Clear();
 		legend_chi2->Clear();
 	}
@@ -787,7 +787,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		else if (i == 3)
 			legend_chi2->Draw();
 
-		canva[i + 8]->Print(img_dir + "OmegaRec/hist_00_IP_" + std::to_string(i) + ext_img);
+		canva[i + 8]->Print(Paths::img_dir + "OmegaRec/hist_00_IP_" + std::to_string(i) + Paths::ext_img);
 		legend_chann_cont->Clear();
 		legend_chi2->Clear();
 	}
@@ -804,7 +804,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		hist2d_00IP_pmIP[0][j]->GetYaxis()->SetTitle("#rho_{00,IP} [cm]");
 		hist2d_00IP_pmIP[0][j]->Draw("COLZ");
 
-		canva2d[j + KLOE::channNum]->Print(img_dir + "OmegaRec/rho_2d_" + channName[j] + ext_img);
+		canva2d[j + KLOE::channNum]->Print(Paths::img_dir + "OmegaRec/rho_2d_" + channName[j] + Paths::ext_img);
 	}
 
 	for (Int_t j = 0; j < KLOE::channNum; j++)
@@ -819,7 +819,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		hist2d_00IP_pmIP[1][j]->GetYaxis()->SetTitle("z_{00,IP} [cm]");
 		hist2d_00IP_pmIP[1][j]->Draw("COLZ");
 
-		canva2d[j + 2 * KLOE::channNum]->Print(img_dir + "OmegaRec/z_2d_" + channName[j] + ext_img);
+		canva2d[j + 2 * KLOE::channNum]->Print(Paths::img_dir + "OmegaRec/z_2d_" + channName[j] + Paths::ext_img);
 	}
 
 	TF1 *fit2D = new TF1("fit2D", "[0]*x + [1]", 0, 300); // pol1: y = a*x + b
@@ -910,7 +910,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	gaus->SetLineColor(kBlue);
 	gaus->Draw("same");
 
-	c1->Print(omegarec_dir + img_dir + "widthOfDistribution" + ext_img);
+	c1->Print(omegarec_dir + Paths::img_dir + "widthOfDistribution" + Paths::ext_img);
 
 	// Addition of stdDevs to the Utils::properties file
 	std::string decayType[2] = {"neutral", "charged"};

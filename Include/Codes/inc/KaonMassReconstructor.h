@@ -20,7 +20,7 @@ public:
         const std::vector<Double_t>& kaonBoost,    // 9 elements: px,py,pz,E,vx,vy,vz
         const std::vector<Double_t>& interactionPoint, // 3 elements: x,y,z
         const std::vector<std::vector<Double_t>>& tracks, // 2 tracks, each 4 elements: px,py,pz,E
-        const Double_t PhysicsConstants::mPiCh,  // charged pion mass
+        const Double_t mPiCh,  // charged pion mass
         KLOE::pm00& obj       // KLOE object for utility functions
     );
 
@@ -40,7 +40,7 @@ private:
     static void reconstructPionsInCMFrame(
         const std::vector<TLorentzVector>& tracksCM,
         const Double_t kaonMass,
-        const Double_t PhysicsConstants::mPiCh,
+        const Double_t mPiCh,
         std::vector<TVector3>& pionsCM,
         KLOE::pm00& obj
     );

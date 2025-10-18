@@ -12,6 +12,7 @@
 #include <TMatrixD.h>
 #include <TVectorD.h>
 #include <TError.h>
+#include <boost/progress.hpp>
 
 #include <reconstructor.h>
 #include "uncertainties.h"
@@ -54,12 +55,12 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 			datestamp = Obj.getCurrentDate(),
 			name = "";
 
-	name = omegarec_dir + root_files_dir + omega_rec_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
+	name = Paths::omegarec_dir + Paths::root_files_dir + Filenames::omega_rec_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + Paths::ext_root;
 
 	Utils::properties["variables"]["tree"]["filename"]["omegarecKinFit"] = name;
 
 	TFile *file = new TFile(name.c_str(), "recreate");
-	TTree *tree = new TTree(omegarec_kin_fit_tree, "Omega reconstruction with kin fit");
+	TTree *tree = new TTree(Filenames::omegarec_kin_fit_tree, "Omega reconstruction with kin fit");
 
 	// Branches' addresses
 	// Bhabha vars
@@ -95,12 +96,12 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
 	chain.SetBranchAddress("mctruth", &mctruth);
 	chain.SetBranchAddress("mcflag", &mcflag);
-	chain.SetBranchAddress("ncll", baseKin.ncll);
+	chain.SetBranchAddress("ncll", baseKin.ncll.data());
 
 	// Charged vars
 	chain.SetBranchAddress("nv", &baseKin.nv);
 	chain.SetBranchAddress("ntv", &baseKin.ntv);
-	chain.SetBranchAddress("ivOld", baseKin.ivOld);
+	chain.SetBranchAddress("ivOld", baseKin.iv.data());
 	chain.SetBranchAddress("CurvOld", baseKin.CurvOld);
 	chain.SetBranchAddress("PhivOld", baseKin.PhivOld);
 	chain.SetBranchAddress("CotvOld", baseKin.CotvOld);
@@ -213,7 +214,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
 	// Initialization of Charged part of decay reconstruction class
 	// Constructor is below, in the loop
-	boost::optional<KLOE::ChargedVtxRec<Float_t, UChar_t>> eventAnalysis;
+	boost::optional<KLOE::ChargedVtxRec<Float_t, Int_t>> eventAnalysis;
 	// -------------------------------------------------------------
 
 	std::vector<std::string> ConstSet = {
@@ -254,7 +255,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 			// Reconstruction of the charged part of the decay - vtx closest to the IP - to be included
 
 			// Construction of the charged rec class object
-			eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.ivOld, bhabha_vtx, baseKin.CurvOld, baseKin.PhivOld, baseKin.CotvOld, baseKin.xvOld, baseKin.yvOld, baseKin.zvOld, mode);
+			eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.iv.data(), bhabha_vtx, baseKin.CurvOld, baseKin.PhivOld, baseKin.CotvOld, baseKin.xvOld, baseKin.yvOld, baseKin.zvOld, mode);
 
 			// // Finding the vtx closest to the interaction point
 			// eventAnalysis->findKClosestRec(baseKin.Kchrec, baseKin.trk[0], baseKin.trk[1], baseKin.vtaken, baseKin.errFlag);
@@ -271,10 +272,10 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 							ind_gam[2] = j3;
 							ind_gam[3] = j4;
 
-							clusterEnergy = cluster[4][baseKin.ncll[ind_gam[0]] - 1] > MIN_CLU_ENE &&
-															cluster[4][baseKin.ncll[ind_gam[1]] - 1] > MIN_CLU_ENE &&
-															cluster[4][baseKin.ncll[ind_gam[2]] - 1] > MIN_CLU_ENE &&
-															cluster[4][baseKin.ncll[ind_gam[3]] - 1] > MIN_CLU_ENE;
+							clusterEnergy = cluster[4][baseKin.ncll[ind_gam[0]] - 1] > KLOE::MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[1]] - 1] > KLOE::MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[2]] - 1] > KLOE::MIN_CLU_ENE &&
+															cluster[4][baseKin.ncll[ind_gam[3]] - 1] > KLOE::MIN_CLU_ENE;
 
 							for (Int_t k = 0; k < 4; k++)
 							{

@@ -39,7 +39,7 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 
 	TString name = "";
 
-	name = omegarec_dir + root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + int(data_type) + ext_root;
+	name = omegarec_dir + Paths::root_files_dir + omega_rec_filename + first_file + "_" + last_file + "_" + int(data_type) + Paths::ext_root;
 
 	TFile *file = new TFile(name, "recreate");
 	TTree *tree = new TTree(omegarec_tree, "Omega reconstruction with kin fit");

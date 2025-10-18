@@ -23,8 +23,6 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 	// =============================================================================
 	KLOE::BaseKinematics
 			baseKin;
-	NeutRec4
-			neutVars;
 	Int_t
 			file_num;
 	TFile
@@ -38,7 +36,7 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 			*tree_omega;
 	// =============================================================================
 
-	const TString cpfit_res_dir = cpfit_dir + result_dir;
+	const TString cpfit_res_dir = Paths::cpfit_dir + Paths::result_dir;
 
 	Double_t *eff_vals;
 
@@ -172,17 +170,17 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 	}
 	else if (file_num == 1)
 	{
-		tree->SetBranchAddress("done4_kinfit", &neutVars.done);
-		tree->SetBranchAddress("fourKnetri_kinfit", neutVars.Knerec);
-		tree->SetBranchAddress("g4takentri_kinfit", neutVars.gtaken);
-		tree->SetBranchAddress("chi2min", &neutVars.chi2min);
+		tree->SetBranchAddress("done4_kinfit", &baseKin.doneTriKinFit);
+		tree->SetBranchAddress("fourKnetri_kinfit", baseKin.Knerec.data());
+		tree->SetBranchAddress("g4takentri_kinfit", baseKin.g4takenTriKinFit.data());
+		tree->SetBranchAddress("chi2min", &baseKin.Chi2TriKinFit);
 	}
 	else if (file_num == 2)
 	{
-		tree->SetBranchAddress("done_triangle", &neutVars.done);
-		tree->SetBranchAddress("fourKnetriangle", neutVars.Knerec);
-		tree->SetBranchAddress("g4taken_triangle", neutVars.gtaken);
-		tree->SetBranchAddress("chi2min", &neutVars.chi2min);
+		tree->SetBranchAddress("done_triangle", &baseKin.doneTriKinFit);
+		tree->SetBranchAddress("fourKnetriangle", baseKin.Knerec.data());
+		tree->SetBranchAddress("g4taken_triangle", baseKin.g4takenTriKinFit.data());
+		tree->SetBranchAddress("chi2min", &baseKin.Chi2TriKinFit);
 	}
 
 	Int_t
@@ -313,14 +311,14 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 	{
 		chain.GetEntry(i);
 
-		if (neutVars.done == 1 && doneOmega == 1)
+		if (baseKin.doneTriKinFit == 1 && doneOmega == 1)
 		{
 			velocity_kch = PhysicsConstants::cVel * sqrt(pow(baseKin.Kchboost[0], 2) + pow(baseKin.Kchboost[1], 2) + pow(baseKin.Kchboost[2], 2)) / baseKin.Kchboost[3];
 
-			velocity_kne = PhysicsConstants::cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
+			velocity_kne = PhysicsConstants::cVel * sqrt(pow(baseKin.Knerec.data()[0], 2) + pow(baseKin.Knerec.data()[1], 2) + pow(baseKin.Knerec.data()[2], 2)) / baseKin.Knerec.data()[3];
 
 			tch_LAB = sqrt(pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + pow(baseKin.Kchboost[8] - baseKin.ip[2], 2)) / velocity_kch;
-			tne_LAB = sqrt(pow(neutVars.Knerec[6] - baseKin.ip[0], 2) + pow(neutVars.Knerec[7] - baseKin.ip[1], 2) + pow(neutVars.Knerec[8] - baseKin.ip[2], 2)) / velocity_kne;
+			tne_LAB = sqrt(pow(baseKin.Knerec.data()[6] - baseKin.ip[0], 2) + pow(baseKin.Knerec.data()[7] - baseKin.ip[1], 2) + pow(baseKin.Knerec.data()[8] - baseKin.ip[2], 2)) / velocity_kne;
 
 			Kch_LAB[0] = baseKin.Kchboost[6] - baseKin.ip[0];
 			Kch_LAB[1] = baseKin.Kchboost[7] - baseKin.ip[1];
@@ -332,15 +330,15 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 			Kchmom_LAB[2] = baseKin.Kchboost[2];
 			Kchmom_LAB[3] = baseKin.Kchboost[3];
 
-			Kne_LAB[0] = neutVars.Knerec[6] - baseKin.ip[0];
-			Kne_LAB[1] = neutVars.Knerec[7] - baseKin.ip[1];
-			Kne_LAB[2] = neutVars.Knerec[8] - baseKin.ip[2];
+			Kne_LAB[0] = baseKin.Knerec.data()[6] - baseKin.ip[0];
+			Kne_LAB[1] = baseKin.Knerec.data()[7] - baseKin.ip[1];
+			Kne_LAB[2] = baseKin.Knerec.data()[8] - baseKin.ip[2];
 			Kne_LAB[3] = tne_LAB * PhysicsConstants::cVel;
 
-			Knemom_LAB[0] = neutVars.Knerec[0];
-			Knemom_LAB[1] = neutVars.Knerec[1];
-			Knemom_LAB[2] = neutVars.Knerec[2];
-			Knemom_LAB[3] = neutVars.Knerec[3];
+			Knemom_LAB[0] = baseKin.Knerec.data()[0];
+			Knemom_LAB[1] = baseKin.Knerec.data()[1];
+			Knemom_LAB[2] = baseKin.Knerec.data()[2];
+			Knemom_LAB[3] = baseKin.Knerec.data()[3];
 
 			Phi_boost[0] = -baseKin.phi_mom[0] / baseKin.phi_mom[3];
 			Phi_boost[1] = -baseKin.phi_mom[1] / baseKin.phi_mom[3];
@@ -366,7 +364,7 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 
 			for (Int_t i = 0; i < 4; i++)
 			{
-				TRCV[i] = baseKin.cluster[3][neutVars.gtaken[i]] - (sqrt(pow(baseKin.cluster[0][neutVars.gtaken[i]] - neutVars.Knerec[6], 2) + pow(baseKin.cluster[1][neutVars.gtaken[i]] - neutVars.Knerec[7], 2) + pow(baseKin.cluster[2][neutVars.gtaken[i]] - neutVars.Knerec[8], 2)) / PhysicsConstants::cVel) - tne_LAB;
+				TRCV[i] = baseKin.cluster[3][baseKin.g4takenTriKinFit.data()[i]] - (sqrt(pow(baseKin.cluster[0][baseKin.g4takenTriKinFit.data()[i]] - baseKin.Knerec.data()[6], 2) + pow(baseKin.cluster[1][baseKin.g4takenTriKinFit.data()[i]] - baseKin.Knerec.data()[7], 2) + pow(baseKin.cluster[2][baseKin.g4takenTriKinFit.data()[i]] - baseKin.Knerec.data()[8], 2)) / PhysicsConstants::cVel) - tne_LAB;
 			}
 
 			trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
@@ -380,12 +378,12 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 
 			for (Int_t i = 0; i < 3; i++)
 			{
-				radius[0] += pow(neutVars.Knerec[6 + i] - interfcommon_.ip[i], 2);
+				radius[0] += pow(baseKin.Knerec.data()[6 + i] - interfcommon_.ip[i], 2);
 				radius_ch[0] += pow(baseKin.Kchboost[6 + i] - interfcommon_.ip[i], 2);
 
 				if (i < 2)
 				{
-					radius[1] += pow(neutVars.Knerec[6 + i] - interfcommon_.ip[i], 2);
+					radius[1] += pow(baseKin.Knerec.data()[6 + i] - interfcommon_.ip[i], 2);
 					radius_ch[1] += pow(baseKin.Kchboost[6 + i] - interfcommon_.ip[i], 2);
 				}
 			}
@@ -700,9 +698,9 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 
 	TString
 			modeGraph = "FitResultErr",
-			imageTitle = cpfit_dir + img_dir + "scan_of_errors_fit" + ext_img,
-			realTitle = cpfit_dir + img_dir + "real_errors_vs_value_fit" + ext_img,
-			imaginaryTitle = cpfit_dir + img_dir + "imaginary_errors_vs_value_fit" + ext_img;
+			imageTitle = Paths::cpfit_dir + Paths::img_dir + "scan_of_errors_fit" + Paths::ext_img,
+			realTitle = Paths::cpfit_dir + Paths::img_dir + "real_errors_vs_value_fit" + Paths::ext_img,
+			imaginaryTitle = Paths::cpfit_dir + Paths::img_dir + "imaginary_errors_vs_value_fit" + Paths::ext_img;
 
 	Double_t legendPos[4] = {0.2, 0.5, 0.7, 0.9};
 
