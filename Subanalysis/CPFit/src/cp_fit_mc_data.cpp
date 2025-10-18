@@ -22,7 +22,7 @@
 int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
 {
 	// =============================================================================
-	BaseKinematics
+	KLOE::BaseKinematics
 			baseKin;
 	NeutRec4
 			neutVars;
@@ -39,7 +39,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 			*tree_omega;
 	// =============================================================================
 
-	properties = cfgWatcher.getConfig();
+	Utils::properties = cfgWatcher.getConfig();
 
 	const TString cpfit_res_dir = cpfit_dir + result_dir;
 
@@ -93,20 +93,20 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	// ===========================================================================
 
 	TString
-			filename_trilateration = std::string(properties["variables"]["tree"]["filename"]["trilateration"]),
-			treename_trilateration = std::string(properties["variables"]["tree"]["treename"]["trilateration"]),
+			filename_trilateration = std::string(Utils::properties["variables"]["tree"]["filename"]["trilateration"]),
+			treename_trilateration = std::string(Utils::properties["variables"]["tree"]["treename"]["trilateration"]),
 
-			filename_trilateration_kin_fit = std::string(properties["variables"]["tree"]["filename"]["trilaterationKinFit"]),
-			treename_trilateration_kin_fit = std::string(properties["variables"]["tree"]["treename"]["trilaterationKinFit"]),
+			filename_trilateration_kin_fit = std::string(Utils::properties["variables"]["tree"]["filename"]["trilaterationKinFit"]),
+			treename_trilateration_kin_fit = std::string(Utils::properties["variables"]["tree"]["treename"]["trilaterationKinFit"]),
 
-			filename_triangle = std::string(properties["variables"]["tree"]["filename"]["trianglefinal"]),
-			treename_triangle = std::string(properties["variables"]["tree"]["treename"]["trianglefinal"]),
+			filename_triangle = std::string(Utils::properties["variables"]["tree"]["filename"]["trianglefinal"]),
+			treename_triangle = std::string(Utils::properties["variables"]["tree"]["treename"]["trianglefinal"]),
 
-			filename_omega = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
-			treename_omega = std::string(properties["variables"]["tree"]["treename"]["omegarec"]),
+			filename_omega = std::string(Utils::properties["variables"]["tree"]["filename"]["omegarec"]),
+			treename_omega = std::string(Utils::properties["variables"]["tree"]["treename"]["omegarec"]),
 
-			filename_mctruth = std::string(properties["variables"]["tree"]["filename"]["mctruth"]),
-			treename_mctruth = std::string(properties["variables"]["tree"]["treename"]["mctruth"]);
+			filename_mctruth = std::string(Utils::properties["variables"]["tree"]["filename"]["mctruth"]),
+			treename_mctruth = std::string(Utils::properties["variables"]["tree"]["treename"]["mctruth"]);
 
 	std::vector<TString>
 			file_name,
@@ -251,9 +251,9 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	UInt_t nentries = chain.GetEntries();
 
 	const Double_t
-			x_min = properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
-			x_max = properties["variables"]["CPFit"]["histoResults"]["rangeX"][1],
-			res_deltaT = properties["variables"]["Resolutions"]["deltaT"];
+			x_min = Utils::properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
+			x_max = Utils::properties["variables"]["CPFit"]["histoResults"]["rangeX"][1],
+			res_deltaT = Utils::properties["variables"]["Resolutions"]["deltaT"];
 	const UInt_t
 			nbins = 1 + ((x_max - x_min) / res_deltaT);
 
@@ -285,7 +285,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 					"RhoCutOmega",
 					"ChiSqrCut"};
 
-	Bool_t scanFlag = (Bool_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["flag"];
+	Bool_t scanFlag = (Bool_t)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["flag"];
 	Int_t numberOfPoints;
 	Double_t
 			cutLimits[2] = {0.0},
@@ -293,9 +293,9 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 	if (scanFlag)
 	{
-		numberOfPoints = (Int_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["numberOfPoints"];
-		cutLimits[0] = (Double_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][0];
-		cutLimits[1] = (Double_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][1];
+		numberOfPoints = (Int_t)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["numberOfPoints"];
+		cutLimits[0] = (Double_t)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][0];
+		cutLimits[1] = (Double_t)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][1];
 	}
 	else
 	{
@@ -315,14 +315,14 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 			realValue(2),
 			imaginaryValue(2);
 
-	TString xTitle = (std::string)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutTitle"],
-					yTitle = "|#sigma(Re(#varepsilon'/#varepsilon))/Re(#varepsilon'/#varepsilon)|",
+	TString xTitle = (std::string)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutTitle"],
+					yTitle = "|#sigma(PhysicsConstants::Re(#varepsilon'/#varepsilon))/PhysicsConstants::Re(#varepsilon'/#varepsilon)|",
 					yRightTitle = "|#sigma(Im(#varepsilon'/#varepsilon))/Im(#varepsilon'/#varepsilon)|",
-					yTitleReal = "Re(#varepsilon'/#varepsilon)",
-					yRightTitleReal = "#sigma(Re(#varepsilon'/#varepsilon))",
+					yTitleReal = "PhysicsConstants::Re(#varepsilon'/#varepsilon)",
+					yRightTitleReal = "#sigma(PhysicsConstants::Re(#varepsilon'/#varepsilon))",
 					yTitleImaginary = "Im(#varepsilon'/#varepsilon)",
 					yRightTitleImaginary = "#sigma(Im(#varepsilon'/#varepsilon))",
-					cutName = (std::string)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutName"];
+					cutName = (std::string)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutName"];
 
 	// Values of cuts to be used in the analysis
 	Double_t
@@ -333,17 +333,17 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	for (Int_t scanIter = 1; scanIter <= numberOfPoints; scanIter++)
 	{
 		Bool_t
-				simona_cuts = properties["variables"]["CPFit"]["cuts"]["simonaCuts"]["flag"];
+				simona_cuts = Utils::properties["variables"]["CPFit"]["cuts"]["simonaCuts"]["flag"];
 
 		Double_t
 				sigmas = 1.5,
-				sigma = (Double_t)properties["variables"]["RegenRejection"]["sigma"],
+				sigma = (Double_t)Utils::properties["variables"]["RegenRejection"]["sigma"],
 				ChHigher[2] = {
-						properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
-						sigma * (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1]},
-				ChLower[2] = {properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0], sigma * (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0]}, TrHigher[2] = {properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1], sigma * (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1]}, TrLower[2] = {properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0], sigma * (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0]}, OmegaCut1[2], OmegaCut2[2];
+						Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
+						sigma * (Double_t)Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1]},
+				ChLower[2] = {Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0], sigma * (Double_t)Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0]}, TrHigher[2] = {Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1], sigma * (Double_t)Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1]}, TrLower[2] = {Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0], sigma * (Double_t)Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0]}, OmegaCut1[2], OmegaCut2[2];
 
-		if (properties["variables"]["CPFit"]["cuts"]["omegaRho"].is_null())
+		if (Utils::properties["variables"]["CPFit"]["cuts"]["omegaRho"].is_null())
 			rho_cut = 0.;
 		else if (scanFlag && ToLower(cutName) == "rho")
 		{
@@ -353,7 +353,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 			std::cout << rho_cut << std::endl;
 		}
 		else
-			rho_cut = properties["variables"]["CPFit"]["cuts"]["omegaRho"];
+			rho_cut = Utils::properties["variables"]["CPFit"]["cuts"]["omegaRho"];
 		// ---------------------------------------------------------------
 		if (scanFlag && ToLower(cutName) == "regen")
 		{
@@ -382,20 +382,20 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		else
 		{
 			Double_t
-					meanInvMass = properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"],
-					// meanInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"],
-					stdInvMass = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"],
-					// stdInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"],
+					meanInvMass = Utils::properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"],
+					// meanInvMassErr = Utils::properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"],
+					stdInvMass = Utils::properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"],
+					// stdInvMassErr = Utils::properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"],
 					InvMass[2] = {meanInvMass, 3 * stdInvMass},
-					meanKinEne = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"],
-					// meanKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"],
-					stdKinEne = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"],
-					// stdKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"],
+					meanKinEne = Utils::properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"],
+					// meanKinEneErr = Utils::properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"],
+					stdKinEne = Utils::properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"],
+					// stdKinEneErr = Utils::properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"],
 					KinEne[2] = {meanKinEne, 3 * stdKinEne};
 
-			a = properties["variables"]["OmegaRec"]["combined"]["line"]["slope"],
-			b = properties["variables"]["OmegaRec"]["combined"]["line"]["inter"],
-			lineWidth = properties["variables"]["OmegaRec"]["combined"]["stdDev"]["value"];
+			a = Utils::properties["variables"]["OmegaRec"]["combined"]["line"]["slope"],
+			b = Utils::properties["variables"]["OmegaRec"]["combined"]["line"]["inter"],
+			lineWidth = Utils::properties["variables"]["OmegaRec"]["combined"]["stdDev"]["value"];
 
 			OmegaCut1[0] = meanInvMass;
 			OmegaCut1[1] = sigmas * stdInvMass;
@@ -431,10 +431,10 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				momVecMC(numberOfMomenta * 3),
 				momVecSmeared(numberOfMomenta * 3);
 
-		std::vector<double> elems = properties["momSmearing"]["covarianceMatrix"]["fElements"].get<std::vector<Double_t>>();
+		std::vector<double> elems = Utils::properties["momSmearing"]["covarianceMatrix"]["fElements"].get<std::vector<Double_t>>();
 
-		Int_t nRows = properties["momSmearing"]["covarianceMatrix"]["fNrows"],
-					nCols = properties["momSmearing"]["covarianceMatrix"]["fNcols"];
+		Int_t nRows = Utils::properties["momSmearing"]["covarianceMatrix"]["fNrows"],
+					nCols = Utils::properties["momSmearing"]["covarianceMatrix"]["fNcols"];
 
 		TMatrixT<Double_t>
 				covMatrix(nRows, nCols, elems.data());
@@ -475,8 +475,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 					KchrecSmeared[1] = momVecSmeared[1] + momVecSmeared[4];
 					KchrecSmeared[2] = momVecSmeared[2] + momVecSmeared[5];
 
-					energyPion[0] = sqrt(pow(momVecSmeared[0], 2) + pow(momVecSmeared[1], 2) + pow(momVecSmeared[2], 2) + pow(mPiCh, 2));
-					energyPion[1] = sqrt(pow(momVecSmeared[3], 2) + pow(momVecSmeared[4], 2) + pow(momVecSmeared[5], 2) + pow(mPiCh, 2));
+					energyPion[0] = sqrt(pow(momVecSmeared[0], 2) + pow(momVecSmeared[1], 2) + pow(momVecSmeared[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+					energyPion[1] = sqrt(pow(momVecSmeared[3], 2) + pow(momVecSmeared[4], 2) + pow(momVecSmeared[5], 2) + pow(PhysicsConstants::mPiCh, 2));
 
 					KchrecSmeared[3] = energyPion[0] + energyPion[1];
 
@@ -502,9 +502,9 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 					KchboostSmeared[3] = baseKin.Kchboost[3];
 				}
 
-				velocity_kch = cVel * sqrt(pow(KchboostSmeared[0], 2) + pow(KchboostSmeared[1], 2) + pow(KchboostSmeared[2], 2)) / KchboostSmeared[3];
+				velocity_kch = PhysicsConstants::cVel * sqrt(pow(KchboostSmeared[0], 2) + pow(KchboostSmeared[1], 2) + pow(KchboostSmeared[2], 2)) / KchboostSmeared[3];
 
-				velocity_kne = cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
+				velocity_kne = PhysicsConstants::cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
 
 				tch_LAB = sqrt(pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + pow(baseKin.Kchboost[8] - baseKin.ip[2], 2)) / velocity_kch;
 				tne_LAB = sqrt(pow(neutVars.Knerec[6] - baseKin.ip[0], 2) + pow(neutVars.Knerec[7] - baseKin.ip[1], 2) + pow(neutVars.Knerec[8] - baseKin.ip[2], 2)) / velocity_kne;
@@ -512,7 +512,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				Kch_LAB[0] = baseKin.Kchboost[6] - baseKin.ip[0];
 				Kch_LAB[1] = baseKin.Kchboost[7] - baseKin.ip[1];
 				Kch_LAB[2] = baseKin.Kchboost[8] - baseKin.ip[2];
-				Kch_LAB[3] = tch_LAB * cVel;
+				Kch_LAB[3] = tch_LAB * PhysicsConstants::cVel;
 
 				Kchmom_LAB[0] = KchboostSmeared[0];
 				Kchmom_LAB[1] = KchboostSmeared[1];
@@ -522,7 +522,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				Kne_LAB[0] = neutVars.Knerec[6] - baseKin.ip[0];
 				Kne_LAB[1] = neutVars.Knerec[7] - baseKin.ip[1];
 				Kne_LAB[2] = neutVars.Knerec[8] - baseKin.ip[2];
-				Kne_LAB[3] = tne_LAB * cVel;
+				Kne_LAB[3] = tne_LAB * PhysicsConstants::cVel;
 
 				Knemom_LAB[0] = neutVars.Knerec[0];
 				Knemom_LAB[1] = neutVars.Knerec[1];
@@ -549,11 +549,11 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				Obj.lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
 				Obj.lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
 
-				baseKin.Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (cVel * tau_S_nonCPT);
+				baseKin.Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (PhysicsConstants::cVel * PhysicsConstants::tau_S_nonCPT);
 
 				for (Int_t i = 0; i < 4; i++)
 				{
-					TRCV[i] = baseKin.cluster[3][neutVars.gtaken[i]] - (sqrt(pow(baseKin.cluster[0][neutVars.gtaken[i]] - neutVars.Knerec[6], 2) + pow(baseKin.cluster[1][neutVars.gtaken[i]] - neutVars.Knerec[7], 2) + pow(baseKin.cluster[2][neutVars.gtaken[i]] - neutVars.Knerec[8], 2)) / cVel) - tne_LAB;
+					TRCV[i] = baseKin.cluster[3][neutVars.gtaken[i]] - (sqrt(pow(baseKin.cluster[0][neutVars.gtaken[i]] - neutVars.Knerec[6], 2) + pow(baseKin.cluster[1][neutVars.gtaken[i]] - neutVars.Knerec[7], 2) + pow(baseKin.cluster[2][neutVars.gtaken[i]] - neutVars.Knerec[8], 2)) / PhysicsConstants::cVel) - tne_LAB;
 				}
 
 				trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
@@ -599,7 +599,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 				for (Int_t i = 0; i < 2; i++)
 					for (Int_t j = 0; j < 3; j++)
 					{
-						stdDevOmegaVtx[i * 3 + j] = properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["stdDev"][j];
+						stdDevOmegaVtx[i * 3 + j] = Utils::properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["stdDev"][j];
 					}
 
 				Double_t
@@ -723,22 +723,22 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		minimum->SetFunction(minimized_function);
 
 		const Double_t init_vars[num_of_vars] = {
-				Re,
-				Im_nonCPT,
-				properties["variables"]["CPFit"]["initParams"]["Norm"]["Signal"],
-				properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarLeft"],
-				properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseLeft"],
-				properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseRight"],
-				properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarRight"],
-				properties["variables"]["CPFit"]["initParams"]["Norm"]["Omegapi0"],
-				properties["variables"]["CPFit"]["initParams"]["Norm"]["Threepi0"],
-				properties["variables"]["CPFit"]["initParams"]["Norm"]["Semileptonic"],
-				properties["variables"]["CPFit"]["initParams"]["Norm"]["Other"]},
-									 step[num_of_vars] = {properties["variables"]["CPFit"]["step"]["Re"], properties["variables"]["CPFit"]["step"]["Im"], properties["variables"]["CPFit"]["step"]["Norm"]["Signal"], properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["FarLeft"], properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["CloseLeft"], properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["CloseRight"], properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["FarRight"], properties["variables"]["CPFit"]["step"]["Norm"]["Omegapi0"], properties["variables"]["CPFit"]["step"]["Norm"]["Threepi0"], properties["variables"]["CPFit"]["step"]["Norm"]["Semileptonic"], properties["variables"]["CPFit"]["step"]["Norm"]["Other"]};
+				PhysicsConstants::Re,
+				PhysicsConstants::Im_nonCPT,
+				Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Signal"],
+				Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarLeft"],
+				Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseLeft"],
+				Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseRight"],
+				Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarRight"],
+				Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Omegapi0"],
+				Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Threepi0"],
+				Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Semileptonic"],
+				Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Other"]},
+									 step[num_of_vars] = {Utils::properties["variables"]["CPFit"]["step"]["PhysicsConstants::Re"], Utils::properties["variables"]["CPFit"]["step"]["Im"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Signal"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["FarLeft"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["CloseLeft"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["CloseRight"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["FarRight"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Omegapi0"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Threepi0"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Semileptonic"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Other"]};
 
 		Double_t
-				limit_upper = properties["variables"]["CPFit"]["limitPer"]["upper"],
-				limit_lower = properties["variables"]["CPFit"]["limitPer"]["lower"];
+				limit_upper = Utils::properties["variables"]["CPFit"]["limitPer"]["upper"],
+				limit_lower = Utils::properties["variables"]["CPFit"]["limitPer"]["lower"];
 
 		minimum->SetVariable(0, "Real part", init_vars[0], step[0]);
 		minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]);
@@ -831,10 +831,10 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 	{
 		Double_t sum_of_events = 0., fractions[6] = {0.};
 
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 			sum_of_events += event.time_diff[i].size();
 
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 			fractions[i] = 100 * event.time_diff[i].size() / sum_of_events;
 
 		std::ofstream myfile_num;
@@ -853,7 +853,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 			sig_total->Fill(no_cuts_sig[1][i]);
 		}
 
-		for (UInt_t i = 0; i < channNum; i++)
+		for (UInt_t i = 0; i < KLOE::channNum; i++)
 		{
 			for (UInt_t j = 0; j < event.time_diff[i].size(); j++)
 			{
@@ -901,7 +901,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		event.frac[4]->Scale(par[9] * event.frac[4]->GetEntries() / event.frac[4]->Integral(0, nbins + 1));
 		event.frac[5]->Scale(par[10] * event.frac[5]->GetEntries() / event.frac[5]->Integral(0, nbins + 1));
 
-		for (UInt_t i = 0; i < channNum; i++)
+		for (UInt_t i = 0; i < KLOE::channNum; i++)
 		{
 			event.mc_sum->Add(event.frac[i]);
 
@@ -1021,7 +1021,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 		TLegend *legend_chann = new TLegend(0.6, 0.7, 0.9, 0.9);
 		legend_chann->SetFillColor(kWhite);
-		for (UInt_t i = 0; i < channNum; i++)
+		for (UInt_t i = 0; i < KLOE::channNum; i++)
 		{
 			legend_chann->AddEntry(event.frac[i], channName[i], "l");
 			event.frac[i]->Draw("HISTSAME");
@@ -1061,32 +1061,32 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
 		c2->Print(cpfit_dir + img_dir + "residuals_hist" + ext_img);
 
-		properties["variables"]["CPFit"]["result"]["value"]["Re"] = par[0];
-		properties["variables"]["CPFit"]["result"]["value"]["Im"] = par[1];
-		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Signal"] = par[2];
-		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarLeft"] = par[3];
-		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseLeft"] = par[4];
-		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseRight"] = par[5];
-		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarRight"] = par[6];
-		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Omegapi0"] = par[7];
-		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Threepi0"] = par[8];
-		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Semileptonic"] = par[9];
-		properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Other"] = par[10];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["PhysicsConstants::Re"] = par[0];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["Im"] = par[1];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Signal"] = par[2];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarLeft"] = par[3];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseLeft"] = par[4];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseRight"] = par[5];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarRight"] = par[6];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Omegapi0"] = par[7];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Threepi0"] = par[8];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Semileptonic"] = par[9];
+		Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Other"] = par[10];
 
-		properties["variables"]["CPFit"]["result"]["error"]["Re"] = parErr[0];
-		properties["variables"]["CPFit"]["result"]["error"]["Im"] = parErr[1];
-		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Signal"] = parErr[2];
-		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarLeft"] = parErr[3];
-		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseLeft"] = parErr[4];
-		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseRight"] = parErr[5];
-		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarRight"] = parErr[6];
-		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Omegapi0"] = parErr[7];
-		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Threepi0"] = parErr[8];
-		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Semileptonic"] = parErr[9];
-		properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Other"] = parErr[10];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["PhysicsConstants::Re"] = parErr[0];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["Im"] = parErr[1];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Signal"] = parErr[2];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarLeft"] = parErr[3];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseLeft"] = parErr[4];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseRight"] = parErr[5];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarRight"] = parErr[6];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Omegapi0"] = parErr[7];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Threepi0"] = parErr[8];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Semileptonic"] = parErr[9];
+		Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Other"] = parErr[10];
 
-		properties["variables"]["CPFit"]["result"]["chi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2");
-		properties["variables"]["CPFit"]["result"]["normChi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2/NDF");
+		Utils::properties["variables"]["CPFit"]["result"]["chi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2");
+		Utils::properties["variables"]["CPFit"]["result"]["normChi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2/NDF");
 
 		delete residuals_hist;
 		delete c1;
@@ -1117,11 +1117,11 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 		imaginaryGraph.DrawGraphs(imaginaryTitle);
 	}
 
-	properties["lastScript"] = "Final CP Parameters normalization";
-	properties["lastUpdate"] = Obj.getCurrentTimestamp();
+	Utils::properties["lastScript"] = "Final CP Parameters normalization";
+	Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();
 
-	std::ofstream outfile(propName);
-	outfile << properties.dump(4);
+	std::ofstream outfile(Paths::propName);
+	outfile << Utils::properties.dump(4);
 	outfile.close();
 
 	return 0;

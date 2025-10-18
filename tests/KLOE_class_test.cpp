@@ -28,8 +28,8 @@ struct KLOETestFixture {
     const Float_t EPSILON = 1e-3f;  // Precision for floating-point comparisons, relaxed for float
     
     // Constants for physics calculations
-    const Float_t mPhi = 1019.461f;  // φ meson mass [MeV/c²]
-    const Float_t mK0 = 497.611f;    // K⁰ meson mass [MeV/c²]
+    const Float_t PhysicsConstants::mPhi = 1019.461f;  // φ meson mass [MeV/c²]
+    const Float_t PhysicsConstants::mK0 = 497.611f;    // K⁰ meson mass [MeV/c²]
     const Float_t c = 299.792458f;   // Speed of light [mm/ns]
 };
 
@@ -43,7 +43,7 @@ BOOST_FIXTURE_TEST_SUITE(KLOETests, KLOETestFixture)
  * 3. Proper transformation of time component
  */
 BOOST_AUTO_TEST_CASE(LorentzTransformation) {
-    Float_t input[4] = {100.0f, 0.0f, 0.0f, static_cast<Float_t>(std::sqrt(100.0f*100.0f + mK0*mK0))};  // px=100 MeV/c
+    Float_t input[4] = {100.0f, 0.0f, 0.0f, static_cast<Float_t>(std::sqrt(100.0f*100.0f + PhysicsConstants::mK0*PhysicsConstants::mK0))};  // px=100 MeV/c
     Float_t boost[3] = {0.1f, 0.0f, 0.0f};  // βx = 0.1
     Float_t output[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(LorentzTransformation) {
  * φ → K⁰K⁰
  */
 BOOST_AUTO_TEST_CASE(TwoBodyDecayMomentum) {
-    double p = obj.TwoBodyDecayMass(mPhi, mK0, mK0);
+    double p = obj.TwoBodyDecayMass(PhysicsConstants::mPhi, PhysicsConstants::mK0, PhysicsConstants::mK0);
     double expected = 110.4;  // Expected momentum ~110.4 MeV/c
     
     BOOST_CHECK_CLOSE(p, expected, 0.1);
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(DeltaTCalculation) {
     // Create two kaons in back-to-back configuration
     // First kaon at origin, second kaon displaced in positive x
     Float_t p = 110.4f;
-    Float_t E = std::sqrt(p*p + mK0*mK0);
+    Float_t E = std::sqrt(p*p + PhysicsConstants::mK0*PhysicsConstants::mK0);
     
     TLorentzVector momKch(p, 0, 0, E);
     TLorentzVector posKne(0, 0, 0, 0);
@@ -165,8 +165,8 @@ BOOST_AUTO_TEST_CASE(NeutralVertexReconstruction) {
             {100.0f, 100.0f, 0.0f, 471.4f, 100.0f}     // Cluster 4: t = sqrt(x²+y²)/c
         },
         ip[3] = {0.0f, 0.0f, 0.0f},
-        phi4Mom[4] = {0.0f, 0.0f, 0.0f, mPhi},
-        kne4Mom[4] = {110.4f, 0.0f, 0.0f, std::sqrt(110.4f*110.4f + mK0*mK0)},
+        phi4Mom[4] = {0.0f, 0.0f, 0.0f, PhysicsConstants::mPhi},
+        kne4Mom[4] = {110.4f, 0.0f, 0.0f, std::sqrt(110.4f*110.4f + PhysicsConstants::mK0*PhysicsConstants::mK0)},
         kne4Vec[4] = {0.0f, 0.0f, 0.0f, 0.0f},
         trc[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 

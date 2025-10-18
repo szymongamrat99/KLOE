@@ -99,7 +99,7 @@ void StatisticalCutter::LoadCutsFromFiles(const std::string& propertiesPath, con
     json props, cuts;
     {
         std::ifstream f(propertiesPath);
-        if (!f.is_open()) throw std::runtime_error("Cannot open properties file: " + propertiesPath);
+        if (!f.is_open()) throw std::runtime_error("Cannot open Utils::properties file: " + propertiesPath);
         f >> props;
     }
     {

@@ -44,16 +44,16 @@
 #include "../Include/const.h"
 #include "../Include/Codes/interf_function.h"
 
-TCanvas *canva1d_semi[10], *canva1d_three[10], *canva1d_pipi[10], *canva2d[10][channNum], *canvaproj[10][channNum];
+TCanvas *canva1d_semi[10], *canva1d_three[10], *canva1d_pipi[10], *canva2d[10][KLOE::channNum], *canvaproj[10][KLOE::channNum];
 TCanvas *canva1d_seminocuts, *canva1d_threenocuts, *canva1d_pipinocuts;
 TCanvas *canva1d_semiwithcuts, *canva1d_threewithcuts, *canva1d_pipiwithcuts;
 TCanvas *canva_efficiency, *canva_eff_signal;
 
-TH1 *hist_semi[10][channNum], *hist_three[10][channNum], *hist_pipi[10][channNum];
+TH1 *hist_semi[10][KLOE::channNum], *hist_three[10][KLOE::channNum], *hist_pipi[10][KLOE::channNum];
 TH1 *hist_signal, *hist_signal_nocuts;
 TH1 *hist_semi_nocuts, *hist_three_nocuts, *hist_pipi_nocuts;
 TH1 *hist_semi_withcuts, *hist_three_withcuts, *hist_pipi_withcuts;
-TH2 *hist2d[10][channNum];
+TH2 *hist2d[10][KLOE::channNum];
 
 TLegend *legend[10];
 
@@ -72,7 +72,7 @@ TEfficiency *pEff_semimc;
 TEfficiency *pEff_threemc;
 TEfficiency *pEff_pipimc;
 
-Int_t entries[channNum] = {0}, entries_sel[3][channNum] = {};
+Int_t entries[KLOE::channNum] = {0}, entries_sel[3][KLOE::channNum] = {};
 
 Double_t tot_br_semi = ((br_kl_piele + br_kl_pimu)/(br_kl_piele + br_kl_pimu + br_ks_piele + br_ks_pimu))*br_ks_pi0pi0 + ((br_ks_piele + br_ks_pimu)/(br_kl_piele + br_kl_pimu + br_ks_piele + br_ks_pimu))*br_kl_pi0pi0;
 Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pippim + ((br_ks_pippim)/(br_kl_pippim + br_ks_pippim))*br_kl_pippim;
@@ -97,36 +97,36 @@ void full_analysis::Begin(TTree * /*tree*/)
    canva1d_pipiwithcuts = new TCanvas("Canva pipi cuts", "", 750, 750);
 
   // for(Int_t i = 0; i < 10; i++)
-  //    for(Int_t j = 0; j < channNum-2; j++) canva2d[i][j] = new TCanvas((channName[j] + " canva2d" + to_string(i)).c_str(), "", 750, 750);
+  //    for(Int_t j = 0; j < KLOE::channNum-2; j++) canva2d[i][j] = new TCanvas((channName[j] + " canva2d" + to_string(i)).c_str(), "", 750, 750);
   // for(Int_t i = 0; i < 10; i++)
-  //    for(Int_t j = 0; j < channNum-2; j++) canvaproj[i][j] = new TCanvas((channName[j] + " canvaproj" + to_string(i)).c_str(), "", 750, 750);
+  //    for(Int_t j = 0; j < KLOE::channNum-2; j++) canvaproj[i][j] = new TCanvas((channName[j] + " canvaproj" + to_string(i)).c_str(), "", 750, 750);
 
-   for(Int_t j = 0; j < channNum; j++) hist_semi[0][j] = new TH1F(channName[j] + "0semi", "", 91, -90, 90);
-   for(Int_t j = 0; j < channNum; j++) hist_semi[1][j] = new TH1F(channName[j] + "1semi", "", 101, 0, 100);
-   for(Int_t j = 0; j < channNum; j++) hist_semi[2][j] = new TH1F(channName[j] + "2semi", "", 101, 0, 100);
-   for(Int_t j = 0; j < channNum; j++) hist_semi[3][j] = new TH1F(channName[j] + "3semi", "", 300, -100, 100);
-   for(Int_t j = 0; j < channNum; j++) hist_semi[4][j] = new TH1F(channName[j] + "4semi", "", 150, 0, 180);
-   for(Int_t j = 0; j < channNum; j++) hist_semi[5][j] = new TH1F(channName[j] + "5semi", "", 150, 0, 220);
-   for(Int_t j = 0; j < channNum; j++) hist_semi[6][j] = new TH1F(channName[j] + "6semi", "", 200, 300, 1000);
-   for(Int_t j = 0; j < channNum; j++) hist_semi[7][j] = new TH1F(channName[j] + "7semi", "", 200, 300, 1000);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_semi[0][j] = new TH1F(channName[j] + "0semi", "", 91, -90, 90);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_semi[1][j] = new TH1F(channName[j] + "1semi", "", 101, 0, 100);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_semi[2][j] = new TH1F(channName[j] + "2semi", "", 101, 0, 100);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_semi[3][j] = new TH1F(channName[j] + "3semi", "", 300, -100, 100);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_semi[4][j] = new TH1F(channName[j] + "4semi", "", 150, 0, 180);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_semi[5][j] = new TH1F(channName[j] + "5semi", "", 150, 0, 220);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_semi[6][j] = new TH1F(channName[j] + "6semi", "", 200, 300, 1000);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_semi[7][j] = new TH1F(channName[j] + "7semi", "", 200, 300, 1000);
 
-   for(Int_t j = 0; j < channNum; j++) hist_three[0][j] = new TH1F(channName[j] + "0three", "", 91, -90, 90);
-   for(Int_t j = 0; j < channNum; j++) hist_three[1][j] = new TH1F(channName[j] + "1three", "", 100, 0, 50);
-   for(Int_t j = 0; j < channNum; j++) hist_three[2][j] = new TH1F(channName[j] + "2three", "", 100, 0, 50);
-   for(Int_t j = 0; j < channNum; j++) hist_three[3][j] = new TH1F(channName[j] + "3three", "", 200, -10, 10);
-   for(Int_t j = 0; j < channNum; j++) hist_three[4][j] = new TH1F(channName[j] + "4three", "", 200, 0, 7000);
-   for(Int_t j = 0; j < channNum; j++) hist_three[5][j] = new TH1F(channName[j] + "5three", "", 30, -1.0, 0.0);
-   for(Int_t j = 0; j < channNum; j++) hist_three[6][j] = new TH1F(channName[j] + "6three", "", 200, 300, 1000);
-   for(Int_t j = 0; j < channNum; j++) hist_three[7][j] = new TH1F(channName[j] + "7three", "", 200, 300, 1000);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_three[0][j] = new TH1F(channName[j] + "0three", "", 91, -90, 90);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_three[1][j] = new TH1F(channName[j] + "1three", "", 100, 0, 50);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_three[2][j] = new TH1F(channName[j] + "2three", "", 100, 0, 50);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_three[3][j] = new TH1F(channName[j] + "3three", "", 200, -10, 10);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_three[4][j] = new TH1F(channName[j] + "4three", "", 200, 0, 7000);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_three[5][j] = new TH1F(channName[j] + "5three", "", 30, -1.0, 0.0);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_three[6][j] = new TH1F(channName[j] + "6three", "", 200, 300, 1000);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_three[7][j] = new TH1F(channName[j] + "7three", "", 200, 300, 1000);
 
-   for(Int_t j = 0; j < channNum; j++) hist_pipi[0][j] = new TH1F(channName[j] + "0pipi", "", 91, -90, 90);
-   for(Int_t j = 0; j < channNum; j++) hist_pipi[1][j] = new TH1F(channName[j] + "1pipi", "", 100, 0, 50);
-   for(Int_t j = 0; j < channNum; j++) hist_pipi[2][j] = new TH1F(channName[j] + "2pipi", "", 100, 0, 50);
-   for(Int_t j = 0; j < channNum; j++) hist_pipi[3][j] = new TH1F(channName[j] + "3pipi", "", 200, -10, 10);
-   for(Int_t j = 0; j < channNum; j++) hist_pipi[4][j] = new TH1F(channName[j] + "4pipi", "", 200, -10, 10);
-   for(Int_t j = 0; j < channNum; j++) hist_pipi[5][j] = new TH1F(channName[j] + "5pipi", "", 100, -100, 5);
-   for(Int_t j = 0; j < channNum; j++) hist_pipi[6][j] = new TH1F(channName[j] + "6pipi", "", 12, mK0 - 20, mK0 + 20);
-   for(Int_t j = 0; j < channNum; j++) hist_pipi[7][j] = new TH1F(channName[j] + "7pipi", "", 200, 300, 1000);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_pipi[0][j] = new TH1F(channName[j] + "0pipi", "", 91, -90, 90);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_pipi[1][j] = new TH1F(channName[j] + "1pipi", "", 100, 0, 50);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_pipi[2][j] = new TH1F(channName[j] + "2pipi", "", 100, 0, 50);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_pipi[3][j] = new TH1F(channName[j] + "3pipi", "", 200, -10, 10);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_pipi[4][j] = new TH1F(channName[j] + "4pipi", "", 200, -10, 10);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_pipi[5][j] = new TH1F(channName[j] + "5pipi", "", 100, -100, 5);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_pipi[6][j] = new TH1F(channName[j] + "6pipi", "", 12, PhysicsConstants::mK0 - 20, PhysicsConstants::mK0 + 20);
+   for(Int_t j = 0; j < KLOE::channNum; j++) hist_pipi[7][j] = new TH1F(channName[j] + "7pipi", "", 200, 300, 1000);
 
    hist_signal = new TH1F("Signal histo", "", 100, -100, 10);
    hist_signal_nocuts = new TH1F("Signal histo nocuts", "", 91, -90, 90);
@@ -138,7 +138,7 @@ void full_analysis::Begin(TTree * /*tree*/)
    hist_pipi_withcuts = new TH1F("pipi histo cuts", "", 91, -90, 90);
 
    //   for(Int_t i = 0; i < 10; i++)
-   //      for(Int_t j = 0; j < channNum; j++)
+   //      for(Int_t j = 0; j < KLOE::channNum; j++)
    //         hist2d[i][j] = new TH2F(channName[j] + " 2d" + to_string(i), "", 13, 0, 60, 100, -100, 300);
 
    pEff_signal = new TEfficiency("eff_signal",";#Deltat [#tau_{S}];Efficiency",91,-90.,90.);
@@ -234,12 +234,12 @@ Bool_t full_analysis::Process(Long64_t entry)
    momPhi(2) = *Bpz;
    momPhi(3) = *Broots;
 
-   phi_vel = cVel*(sqrt(pow(momPhi(0),2) + pow(momPhi(1),2) + pow(momPhi(2),2))/momPhi(3));
+   phi_vel = PhysicsConstants::cVel*(sqrt(pow(momPhi(0),2) + pow(momPhi(1),2) + pow(momPhi(2),2))/momPhi(3));
 
    pos_phi(0) = 0.;
    pos_phi(1) = 0.;
    pos_phi(2) = 0.;
-   pos_phi(3) = cVel*(sqrt(pow(pos_phi(0),2) + pow(pos_phi(1),2) + pow(pos_phi(2),2))/phi_vel);
+   pos_phi(3) = PhysicsConstants::cVel*(sqrt(pow(pos_phi(0),2) + pow(pos_phi(1),2) + pow(pos_phi(2),2))/phi_vel);
 
    //Momentum and position of charged kaon MC
    mom_kch_mc(0) = KchmcOld[0];
@@ -247,12 +247,12 @@ Bool_t full_analysis::Process(Long64_t entry)
    mom_kch_mc(2) = KchmcOld[2];
    mom_kch_mc(3) = KchmcOld[3];
 
-   kaon_pm_vel = cVel*(sqrt(pow(mom_kch_mc(0),2) + pow(mom_kch_mc(1),2) + pow(mom_kch_mc(2),2))/mom_kch_mc(3));
+   kaon_pm_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kch_mc(0),2) + pow(mom_kch_mc(1),2) + pow(mom_kch_mc(2),2))/mom_kch_mc(3));
 
    pos_kch_mc(0) = KchmcOld[6] - ipmcOld[0];
    pos_kch_mc(1) = KchmcOld[7] - ipmcOld[1];
    pos_kch_mc(2) = KchmcOld[8] - ipmcOld[2];
-   pos_kch_mc(3) = cVel*(sqrt(pow(pos_kch_mc(0),2) + pow(pos_kch_mc(1),2) + pow(pos_kch_mc(2),2))/kaon_pm_vel);
+   pos_kch_mc(3) = PhysicsConstants::cVel*(sqrt(pow(pos_kch_mc(0),2) + pow(pos_kch_mc(1),2) + pow(pos_kch_mc(2),2))/kaon_pm_vel);
 
    //Momentum and position of neutral kaon MC
    mom_kne_mc(0) = KnemcOld[0];
@@ -260,12 +260,12 @@ Bool_t full_analysis::Process(Long64_t entry)
    mom_kne_mc(2) = KnemcOld[2];
    mom_kne_mc(3) = KnemcOld[3];
 
-   kaon_pm_vel = cVel*(sqrt(pow(mom_kne_mc(0),2) + pow(mom_kne_mc(1),2) + pow(mom_kne_mc(2),2))/mom_kne_mc(3));
+   kaon_pm_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kne_mc(0),2) + pow(mom_kne_mc(1),2) + pow(mom_kne_mc(2),2))/mom_kne_mc(3));
 
    pos_kne_mc(0) = KnemcOld[6] - ipmcOld[0];
    pos_kne_mc(1) = KnemcOld[7] - ipmcOld[1];
    pos_kne_mc(2) = KnemcOld[8] - ipmcOld[2];
-   pos_kne_mc(3) = cVel*(sqrt(pow(pos_kne_mc(0),2) + pow(pos_kne_mc(1),2) + pow(pos_kne_mc(2),2))/kaon_pm_vel);
+   pos_kne_mc(3) = PhysicsConstants::cVel*(sqrt(pow(pos_kne_mc(0),2) + pow(pos_kne_mc(1),2) + pow(pos_kne_mc(2),2))/kaon_pm_vel);
 
    //Momentum and position of charged kaon
    mom_kaon_pm(0) = Kchboost[0];
@@ -273,17 +273,17 @@ Bool_t full_analysis::Process(Long64_t entry)
    mom_kaon_pm(2) = Kchboost[2];
    mom_kaon_pm(3) = Kchboost[3];
 
-   kaon_pm_vel = cVel*(sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3));
+   kaon_pm_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3));
 
    pos_kaon_pm(0) = Kchboost[6] - *Bx;
    pos_kaon_pm(1) = Kchboost[7] - *By;
    pos_kaon_pm(2) = Kchboost[8] - *Bz;
-   pos_kaon_pm(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2))/kaon_pm_vel);
+   pos_kaon_pm(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2))/kaon_pm_vel);
 
    //Momentum and position of charged kaon
-   mom_kaon_pm_alt(0) = sqrt(pow(mom_kaon_pm(3),2) - pow(mK0,2))*(pos_kaon_pm(0) - pos_phi(0))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
-   mom_kaon_pm_alt(1) = sqrt(pow(mom_kaon_pm(3),2) - pow(mK0,2))*(pos_kaon_pm(1) - pos_phi(1))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
-   mom_kaon_pm_alt(2) = sqrt(pow(mom_kaon_pm(3),2) - pow(mK0,2))*(pos_kaon_pm(2) - pos_phi(2))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
+   mom_kaon_pm_alt(0) = sqrt(pow(mom_kaon_pm(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_pm(0) - pos_phi(0))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
+   mom_kaon_pm_alt(1) = sqrt(pow(mom_kaon_pm(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_pm(1) - pos_phi(1))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
+   mom_kaon_pm_alt(2) = sqrt(pow(mom_kaon_pm(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_pm(2) - pos_phi(2))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
    mom_kaon_pm_alt(3) = mom_kaon_pm(3);
 
    if(sqrt(pow(Kchrec1[6] - *Bx,2) + pow(Kchrec1[7] - *By,2) + pow(Kchrec1[8] - *Bz,2)) < sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)))
@@ -294,17 +294,17 @@ Bool_t full_analysis::Process(Long64_t entry)
       mom_kaon_s(2) = Kchrec1[2];
       mom_kaon_s(3) = Kchrec1[3];
 
-      kaon_s_vel = cVel*(sqrt(pow(mom_kaon_s(0),2) + pow(mom_kaon_s(1),2) + pow(mom_kaon_s(2),2))/mom_kaon_s(3));
+      kaon_s_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_s(0),2) + pow(mom_kaon_s(1),2) + pow(mom_kaon_s(2),2))/mom_kaon_s(3));
 
       pos_kaon_s(0) = Kchrec1[6] - *Bx;
       pos_kaon_s(1) = Kchrec1[7] - *By;
       pos_kaon_s(2) = Kchrec1[8] - *Bz;
-      pos_kaon_s(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_s(0),2) + pow(pos_kaon_s(1),2) + pow(pos_kaon_s(2),2))/kaon_s_vel);
+      pos_kaon_s(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_s(0),2) + pow(pos_kaon_s(1),2) + pow(pos_kaon_s(2),2))/kaon_s_vel);
 
       //Momentum and position of charged kaon_s alternative
-      mom_kaon_s_alt(0) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(0) - pos_phi(0))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));
-      mom_kaon_s_alt(1) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(1) - pos_phi(1))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
-      mom_kaon_s_alt(2) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(2) - pos_phi(2))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(0) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(0) - pos_phi(0))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));
+      mom_kaon_s_alt(1) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(1) - pos_phi(1))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(2) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(2) - pos_phi(2))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
       mom_kaon_s_alt(3) = mom_kaon_s(3);
 
       //Momentum and position of charged kaon_l
@@ -313,17 +313,17 @@ Bool_t full_analysis::Process(Long64_t entry)
       mom_kaon_l(2) = Kchrec2[2];
       mom_kaon_l(3) = Kchrec2[3];
 
-      kaon_l_vel = cVel*(sqrt(pow(mom_kaon_l(0),2) + pow(mom_kaon_l(1),2) + pow(mom_kaon_l(2),2))/mom_kaon_l(3));
+      kaon_l_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_l(0),2) + pow(mom_kaon_l(1),2) + pow(mom_kaon_l(2),2))/mom_kaon_l(3));
 
       pos_kaon_l(0) = Kchrec2[6] - *Bx;
       pos_kaon_l(1) = Kchrec2[7] - *By;
       pos_kaon_l(2) = Kchrec2[8] - *Bz;
-      pos_kaon_l(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_l(0),2) + pow(pos_kaon_l(1),2) + pow(pos_kaon_l(2),2))/kaon_l_vel);
+      pos_kaon_l(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_l(0),2) + pow(pos_kaon_l(1),2) + pow(pos_kaon_l(2),2))/kaon_l_vel);
 
       //Momentum and position of charged kaon_l alternative
-      mom_kaon_l_alt(0) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(0) - pos_phi(0))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));
-      mom_kaon_l_alt(1) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(1) - pos_phi(1))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
-      mom_kaon_l_alt(2) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(2) - pos_phi(2))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(0) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(0) - pos_phi(0))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));
+      mom_kaon_l_alt(1) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(1) - pos_phi(1))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(2) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(2) - pos_phi(2))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
       mom_kaon_l_alt(3) = mom_kaon_l(3);
    }
    else
@@ -334,17 +334,17 @@ Bool_t full_analysis::Process(Long64_t entry)
       mom_kaon_s(2) = Kchrec2[2];
       mom_kaon_s(3) = Kchrec2[3];
 
-      kaon_s_vel = cVel*(sqrt(pow(mom_kaon_s(0),2) + pow(mom_kaon_s(1),2) + pow(mom_kaon_s(2),2))/mom_kaon_s(3));
+      kaon_s_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_s(0),2) + pow(mom_kaon_s(1),2) + pow(mom_kaon_s(2),2))/mom_kaon_s(3));
 
       pos_kaon_s(0) = Kchrec2[6] - *Bx;
       pos_kaon_s(1) = Kchrec2[7] - *By;
       pos_kaon_s(2) = Kchrec2[8] - *Bz;
-      pos_kaon_s(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_s(0),2) + pow(pos_kaon_s(1),2) + pow(pos_kaon_s(2),2))/kaon_s_vel);
+      pos_kaon_s(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_s(0),2) + pow(pos_kaon_s(1),2) + pow(pos_kaon_s(2),2))/kaon_s_vel);
 
       //Momentum and position of charged kaon_s alternative
-      mom_kaon_s_alt(0) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(0) - pos_phi(0))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));
-      mom_kaon_s_alt(1) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(1) - pos_phi(1))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
-      mom_kaon_s_alt(2) = sqrt(pow(mom_kaon_s(3),2) - pow(mK0,2))*(pos_kaon_s(2) - pos_phi(2))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(0) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(0) - pos_phi(0))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));
+      mom_kaon_s_alt(1) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(1) - pos_phi(1))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(2) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(2) - pos_phi(2))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
       mom_kaon_s_alt(3) = mom_kaon_s(3);
 
       //Momentum and position of charged kaon_l
@@ -353,17 +353,17 @@ Bool_t full_analysis::Process(Long64_t entry)
       mom_kaon_l(2) = Kchrec1[2];
       mom_kaon_l(3) = Kchrec1[3];
 
-      kaon_l_vel = cVel*(sqrt(pow(mom_kaon_l(0),2) + pow(mom_kaon_l(1),2) + pow(mom_kaon_l(2),2))/mom_kaon_l(3));
+      kaon_l_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_l(0),2) + pow(mom_kaon_l(1),2) + pow(mom_kaon_l(2),2))/mom_kaon_l(3));
 
       pos_kaon_l(0) = Kchrec1[6] - *Bx;
       pos_kaon_l(1) = Kchrec1[7] - *By;
       pos_kaon_l(2) = Kchrec1[8] - *Bz;
-      pos_kaon_l(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_l(0),2) + pow(pos_kaon_l(1),2) + pow(pos_kaon_l(2),2))/kaon_l_vel);
+      pos_kaon_l(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_l(0),2) + pow(pos_kaon_l(1),2) + pow(pos_kaon_l(2),2))/kaon_l_vel);
 
       //Momentum and position of charged kaon_l alternative
-      mom_kaon_l_alt(0) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(0) - pos_phi(0))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));
-      mom_kaon_l_alt(1) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(1) - pos_phi(1))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
-      mom_kaon_l_alt(2) = sqrt(pow(mom_kaon_l(3),2) - pow(mK0,2))*(pos_kaon_l(2) - pos_phi(2))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(0) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(0) - pos_phi(0))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));
+      mom_kaon_l_alt(1) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(1) - pos_phi(1))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(2) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(2) - pos_phi(2))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
       mom_kaon_l_alt(3) = mom_kaon_l(3);
    }
 
@@ -373,17 +373,17 @@ Bool_t full_analysis::Process(Long64_t entry)
    mom_kaon_00_std(2) = Knereclor[2];
    mom_kaon_00_std(3) = Knereclor[3];
 
-   kaon_00_std_vel = cVel*(sqrt(pow(mom_kaon_00_std(0),2) + pow(mom_kaon_00_std(1),2) + pow(mom_kaon_00_std(2),2))/mom_kaon_00_std(3));
+   kaon_00_std_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_00_std(0),2) + pow(mom_kaon_00_std(1),2) + pow(mom_kaon_00_std(2),2))/mom_kaon_00_std(3));
 
    pos_kaon_00_std(0) = Knereclor[6] - *Bx;
    pos_kaon_00_std(1) = Knereclor[7] - *By;
    pos_kaon_00_std(2) = Knereclor[8] - *Bz;
-   pos_kaon_00_std(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_00_std(0),2) + pow(pos_kaon_00_std(1),2) + pow(pos_kaon_00_std(2),2))/kaon_00_std_vel);
+   pos_kaon_00_std(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_00_std(0),2) + pow(pos_kaon_00_std(1),2) + pow(pos_kaon_00_std(2),2))/kaon_00_std_vel);
 
    //Momentum and position of neutral standard kaon
-   mom_kaon_00_std_alt(0) = sqrt(pow(mom_kaon_00_std(3),2) - pow(mK0,2))*(pos_kaon_00_std(0) - pos_phi(0))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));
-   mom_kaon_00_std_alt(1) = sqrt(pow(mom_kaon_00_std(3),2) - pow(mK0,2))*(pos_kaon_00_std(1) - pos_phi(1))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));;
-   mom_kaon_00_std_alt(2) = sqrt(pow(mom_kaon_00_std(3),2) - pow(mK0,2))*(pos_kaon_00_std(2) - pos_phi(2))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));;
+   mom_kaon_00_std_alt(0) = sqrt(pow(mom_kaon_00_std(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_std(0) - pos_phi(0))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));
+   mom_kaon_00_std_alt(1) = sqrt(pow(mom_kaon_00_std(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_std(1) - pos_phi(1))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));;
+   mom_kaon_00_std_alt(2) = sqrt(pow(mom_kaon_00_std(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_std(2) - pos_phi(2))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));;
    mom_kaon_00_std_alt(3) = mom_kaon_00_std(3);
 
    //Momentum and position of neutral trilateration kaon
@@ -392,17 +392,17 @@ Bool_t full_analysis::Process(Long64_t entry)
    mom_kaon_00_tri(2) = fourKnetri[2];
    mom_kaon_00_tri(3) = fourKnetri[3];
 
-   kaon_00_tri_vel = cVel*mom_kaon_00_tri.BoostVector().Mag();
+   kaon_00_tri_vel = PhysicsConstants::cVel*mom_kaon_00_tri.BoostVector().Mag();
 
    pos_kaon_00_tri(0) = fourKnetri[6] - *Bx;
    pos_kaon_00_tri(1) = fourKnetri[7] - *By;
    pos_kaon_00_tri(2) = fourKnetri[8] - *Bz;
-   pos_kaon_00_tri(3) = cVel*(pos_phi(3) + sqrt(pow(pos_kaon_00_tri(0),2) + pow(pos_kaon_00_tri(1),2) + pow(pos_kaon_00_tri(2),2))/kaon_00_tri_vel);
+   pos_kaon_00_tri(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_00_tri(0),2) + pow(pos_kaon_00_tri(1),2) + pow(pos_kaon_00_tri(2),2))/kaon_00_tri_vel);
 
    //Momentum and position of neutral standard kaon
-   mom_kaon_00_tri_alt(0) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(mK0,2))*(pos_kaon_00_tri(0) - pos_phi(0))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));
-   mom_kaon_00_tri_alt(1) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(mK0,2))*(pos_kaon_00_tri(1) - pos_phi(1))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
-   mom_kaon_00_tri_alt(2) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(mK0,2))*(pos_kaon_00_tri(2) - pos_phi(2))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
+   mom_kaon_00_tri_alt(0) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_tri(0) - pos_phi(0))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));
+   mom_kaon_00_tri_alt(1) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_tri(1) - pos_phi(1))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
+   mom_kaon_00_tri_alt(2) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_tri(2) - pos_phi(2))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
    mom_kaon_00_tri_alt(3) = mom_kaon_00_tri(3);
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Lorentz transformation to CM of Phi
@@ -477,13 +477,13 @@ Bool_t full_analysis::Process(Long64_t entry)
 
    // Calculation of time difference
 
-   tpm = pos_kaon_pm(3)/(tau_S_nonCPT*cVel);
-   t00_std = pos_kaon_00_std(3)/(tau_S_nonCPT*cVel);
-   t00_tri = pos_kaon_00_tri(3)/(tau_S_nonCPT*cVel);
-   ts = pos_kaon_s(3)/(tau_S_nonCPT*cVel);
-   tl = pos_kaon_l(3)/(tau_S_nonCPT*cVel);
-   tpm_mc = pos_kch_mc(3)/(tau_S_nonCPT*cVel);
-   t00_mc = pos_kne_mc(3)/(tau_S_nonCPT*cVel);  
+   tpm = pos_kaon_pm(3)/(PhysicsConstants::tau_S_nonCPT*PhysicsConstants::cVel);
+   t00_std = pos_kaon_00_std(3)/(PhysicsConstants::tau_S_nonCPT*PhysicsConstants::cVel);
+   t00_tri = pos_kaon_00_tri(3)/(PhysicsConstants::tau_S_nonCPT*PhysicsConstants::cVel);
+   ts = pos_kaon_s(3)/(PhysicsConstants::tau_S_nonCPT*PhysicsConstants::cVel);
+   tl = pos_kaon_l(3)/(PhysicsConstants::tau_S_nonCPT*PhysicsConstants::cVel);
+   tpm_mc = pos_kch_mc(3)/(PhysicsConstants::tau_S_nonCPT*PhysicsConstants::cVel);
+   t00_mc = pos_kne_mc(3)/(PhysicsConstants::tau_S_nonCPT*PhysicsConstants::cVel);  
 
    DeltaT_signal = (tpm - t00_std);
    DeltaT_control = (tpm - t00_tri);
@@ -492,7 +492,7 @@ Bool_t full_analysis::Process(Long64_t entry)
 
    ///////////////////////////////////////////////////////////////////////////////////////////////
 
-   //for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00/(k_beta00*cVel));
+   //for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/PhysicsConstants::cVel) - (k_path00/(k_beta00*PhysicsConstants::cVel));
 
    //trcv_sum = TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3];
 
@@ -501,18 +501,18 @@ Bool_t full_analysis::Process(Long64_t entry)
    //Signal truth check
    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-   for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/cVel) - (k_path00_tri/(k_beta00_tri*cVel));
+   for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/PhysicsConstants::cVel) - (k_path00_tri/(k_beta00_tri*PhysicsConstants::cVel));
    trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
    if(*mctruth == 1)
 	{
       trcv_sum_signal = trcv[g4taken[0]-1] + trcv[g4taken[1]-1] + trcv[g4taken[2]-1] + trcv[g4taken[3]-1];
-      pEff_signal->FillWeighted(trcv_sum_signal > -1 && abs(*minv4gam - mK0) < 76 && abs(Kchrec[5] - mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, interf_function(DeltaT_mc,1,0), DeltaT_signal);
-      pEff_signal_tri->FillWeighted(trcv_sum > -1 && abs(fourKnetri[5] - mK0) < 76 && abs(Kchrec[5] - mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, interf_function(DeltaT_mc,1,0), DeltaT_signal);
+      pEff_signal->FillWeighted(trcv_sum_signal > -1 && abs(*minv4gam - PhysicsConstants::mK0) < 76 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, interf_function(DeltaT_mc,1,0), DeltaT_signal);
+      pEff_signal_tri->FillWeighted(trcv_sum > -1 && abs(fourKnetri[5] - PhysicsConstants::mK0) < 76 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, interf_function(DeltaT_mc,1,0), DeltaT_signal);
 
       signal_before->Fill(DeltaT_signal, interf_function(DeltaT_mc,1,0));
 
-      if(trcv_sum_signal > -1 && abs(*minv4gam - mK0) < 76 && abs(Kchrec[5] - mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8)
+      if(trcv_sum_signal > -1 && abs(*minv4gam - PhysicsConstants::mK0) < 76 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8)
       {
          signal_after->Fill(DeltaT_signal, interf_function(DeltaT_mc,1,0));
       }
@@ -522,10 +522,10 @@ Bool_t full_analysis::Process(Long64_t entry)
    cuts_semi[0] = abs(*Qmiss_inv - 71.13) < 25;
    cuts_semi[1] = abs(*anglepipi_CM_kch - 145.8) < 10;
 
-   cuts_signal_neutral_cs[0] = (abs(fourKnetri[5] - mK0) < 76);
+   cuts_signal_neutral_cs[0] = (abs(fourKnetri[5] - PhysicsConstants::mK0) < 76);
    cuts_signal_neutral_cs[1] = (trcv_sum > -1.0);
 
-   cuts_signal_charged_cs[0] = (abs(Kchrec[5] - mK0) < 1.2);
+   cuts_signal_charged_cs[0] = (abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2);
    cuts_signal_charged_cs[1] = (*Qmiss_inv < 3.75);
    cuts_signal_charged_cs[2] = (cos(M_PI*(*anglepipi_CM_kch)/180.) < -0.8);
 
@@ -753,7 +753,7 @@ Bool_t full_analysis::Process(Long64_t entry)
    }
 
    //Pipi selection
-   if(donepipi[0] == 1 && donepipi[1] == 1)// && abs(Kchrec1[5] - mK0) < 2)
+   if(donepipi[0] == 1 && donepipi[1] == 1)// && abs(Kchrec1[5] - PhysicsConstants::mK0) < 2)
    {
       if(1)//tot_cuts_charged)
       {
@@ -858,14 +858,14 @@ Bool_t full_analysis::Process(Long64_t entry)
 
    if(tot_cuts_semi && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_semimc->FillWeighted(tot_cuts_neutral, tot_br_semi, DeltaT_control);
    if(*done == 1 && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_threemc->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
-   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - mK0) < 2 && *mcflag == 1 && *mctruth != 0) pEff_pipimc->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
+   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 1 && *mctruth != 0) pEff_pipimc->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
 
    if(tot_cuts_semi && *mcflag == 0 && *done4 == 1) pEff_semi->FillWeighted(tot_cuts_neutral, tot_br_semi, DeltaT_control);
    if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
-   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - mK0) < 2 && *mcflag == 0) pEff_pipi->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
+   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 0) pEff_pipi->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
 
    if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three_length->FillWeighted(tot_cuts_charged, br_ks_pippim, sqrt(pow(Kchrec[6] - *Bx,2) + pow(Kchrec[7] - *By,2) + pow(Kchrec[8] - *Bz,2)));
-   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - mK0) < 2 && *mcflag == 0) pEff_pipi_length->FillWeighted(tot_cuts_charged, tot_br_pipi, sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)));
+   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 0) pEff_pipi_length->FillWeighted(tot_cuts_charged, tot_br_pipi, sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)));
 
    return kTRUE;
 }
@@ -890,9 +890,9 @@ void full_analysis::Terminate()
 
 
    hist_semi[0][0]->Scale(tot_br_semi*(Float_t)entries_sel[0][0]/hist_semi[0][0]->Integral(0,hist_semi[0][0]->GetNbinsX()+1));
-   mc_three = new TObjArray(channNum-2);
-   mc_pipi = new TObjArray(channNum-2);
-   mc_semi = new TObjArray(channNum-3);
+   mc_three = new TObjArray(KLOE::channNum-2);
+   mc_pipi = new TObjArray(KLOE::channNum-2);
+   mc_semi = new TObjArray(KLOE::channNum-3);
    
    std::cout << hist_semi[0][5]->GetEntries() << std::endl;
    
@@ -904,21 +904,21 @@ void full_analysis::Terminate()
    mc_semi->Add(hist_semi[0][6]);
 
    /*for(Int_t i = 0; i < 8; i++)
-	   for(Int_t j = 0; j < channNum - 2; j++) mc_three[i]->Add(hist_three[i][j]);
+	   for(Int_t j = 0; j < KLOE::channNum - 2; j++) mc_three[i]->Add(hist_three[i][j]);
 
    for(Int_t i = 0; i < 8; i++)
-	   for(Int_t j = 0; j < channNum - 2; j++) mc_pipi[i]->Add(hist_pipi[i][j]);*/
+	   for(Int_t j = 0; j < KLOE::channNum - 2; j++) mc_pipi[i]->Add(hist_pipi[i][j]);*/
 
    TFractionFitter* fit_semi;
    //TFractionFitter* fit_three[10];
    //TFractionFitter* fit_pipi[10];
 
    Int_t bins_data, bin_width_data;
-   Double_t scaling_factor, factor_error, int_initial[channNum], int_data, int_initial_tot;
+   Double_t scaling_factor, factor_error, int_initial[KLOE::channNum], int_data, int_initial_tot;
 
-	fit_semi = new TFractionFitter(hist_semi[0][channNum-2],mc_semi);
-	//fit_three[i] = new TFractionFitter(hist_three[i][channNum-2],mc_three[i]);
-	//fit_pipi[i] = new TFractionFitter(hist_pipi[i][channNum-2],mc_pipi[i]);
+	fit_semi = new TFractionFitter(hist_semi[0][KLOE::channNum-2],mc_semi);
+	//fit_three[i] = new TFractionFitter(hist_three[i][KLOE::channNum-2],mc_three[i]);
+	//fit_pipi[i] = new TFractionFitter(hist_pipi[i][KLOE::channNum-2],mc_pipi[i]);
 
 	fit_semi->Constrain(0,0.0,1.0);
 	fit_semi->Constrain(1,0.0,1.0);
@@ -934,12 +934,12 @@ void full_analysis::Terminate()
 	//fit_three[i]->Fit();
 	//fit_pipi[i]->Fit();
 
-	//hist_semi[0][channNum - 1] = (TH1F*) fit_semi->GetPlot();
-	//hist_three[i][channNum - 1] = (TH1F*) fit_three[i]->GetPlot();
-	//hist_pipi[i][channNum - 1] = (TH1F*) fit_pipi[i]->GetPlot();
+	//hist_semi[0][KLOE::channNum - 1] = (TH1F*) fit_semi->GetPlot();
+	//hist_three[i][KLOE::channNum - 1] = (TH1F*) fit_three[i]->GetPlot();
+	//hist_pipi[i][KLOE::channNum - 1] = (TH1F*) fit_pipi[i]->GetPlot();
 	
-	/*bins_data = hist_semi[i][channNum-2]->GetNbinsX();
-	bin_width_data = hist_semi[i][channNum-2]->GetBinWidth(1);
+	/*bins_data = hist_semi[i][KLOE::channNum-2]->GetNbinsX();
+	bin_width_data = hist_semi[i][KLOE::channNum-2]->GetBinWidth(1);
 	int_initial[0] = hist_semi[i][0]->Integral(1,bins_data);
 	int_initial[1] = hist_semi[i][1]->Integral(1,bins_data);
 	int_initial[2] = hist_semi[i][2]->Integral(1,bins_data);
@@ -947,11 +947,11 @@ void full_analysis::Terminate()
 	int_initial[4] = hist_semi[i][4]->Integral(1,bins_data);
 	int_initial[5] = hist_semi[i][5]->Integral(1,bins_data);
 	int_initial[6] = hist_semi[i][6]->Integral(1,bins_data);
-	int_data = hist_semi[i][channNum-2]->Integral(1,bins_data);*/
+	int_data = hist_semi[i][KLOE::channNum-2]->Integral(1,bins_data);*/
 
 	//int_initial_tot = int_initial[0] + int_initial[1] + int_initial[2] + int_initial[3] + int_initial[4] + int_initial[5] + int_initial[6];
 
-   	/*for(Int_t j = 0; j < channNum - 2; j++)
+   	/*for(Int_t j = 0; j < KLOE::channNum - 2; j++)
    	{
 		fit_semi[i]->GetResult(j,scaling_factor,factor_error);
 
@@ -964,7 +964,7 @@ void full_analysis::Terminate()
 		//fit_pipi[i]->Constrain(j,0.0,1.0);
 		//
 
-		hist_semi[i][channNum-1]->Add(hist_semi[i][j]);
+		hist_semi[i][KLOE::channNum-1]->Add(hist_semi[i][j]);
 	}*/
 
 
@@ -974,9 +974,9 @@ void full_analysis::Terminate()
       legend[i] = new TLegend(0.65,0.7,0.9,0.9);
       //legend[i] = new TLegend(0.15,0.7,0.4,0.9);
 
-      for(Int_t j = 0; j < channNum-2; j++)
+      for(Int_t j = 0; j < KLOE::channNum-2; j++)
       {
-         if(j == channNum - 2) legend[i]->AddEntry(hist_semi[i][j], channName[j], "PE1");
+         if(j == KLOE::channNum - 2) legend[i]->AddEntry(hist_semi[i][j], channName[j], "PE1");
          else legend[i]->AddEntry(hist_semi[i][j], channName[j], "L");
       }
    }
@@ -987,8 +987,8 @@ void full_analysis::Terminate()
    gStyle->SetStatH(0.15);
    gStyle->SetStatW(0.25);
 
-   Int_t index_sort_semi[10][channNum], index_sort_three[10][channNum], index_sort_pipi[10][channNum];
-   Double_t max_counts_semi[10][channNum], max_counts_three[10][channNum], max_counts_pipi[10][channNum];
+   Int_t index_sort_semi[10][KLOE::channNum], index_sort_three[10][KLOE::channNum], index_sort_pipi[10][KLOE::channNum];
+   Double_t max_counts_semi[10][KLOE::channNum], max_counts_three[10][KLOE::channNum], max_counts_pipi[10][KLOE::channNum];
    TString title_semi[100], title_three[100], title_pipi[100];
 
    title_semi[0] = "#Deltat [#tau_{S}]";
@@ -1021,31 +1021,31 @@ void full_analysis::Terminate()
    Float_t y1d_semi[10][2], y1d_three[10][2], y1d_pipi[10][2], x2d[2], y2d[2]; 
 
    for(Int_t i = 0; i < 8; i++)
-      for(Int_t j = 0; j < channNum; j++) max_counts_semi[i][j] = hist_semi[i][j]->GetMaximum();
+      for(Int_t j = 0; j < KLOE::channNum; j++) max_counts_semi[i][j] = hist_semi[i][j]->GetMaximum();
 
    for(Int_t i = 0; i < 8; i++)
-      for(Int_t j = 0; j < channNum; j++) max_counts_three[i][j] = hist_three[i][j]->GetMaximum();
+      for(Int_t j = 0; j < KLOE::channNum; j++) max_counts_three[i][j] = hist_three[i][j]->GetMaximum();
    
    for(Int_t i = 0; i < 8; i++)
-      for(Int_t j = 0; j < channNum; j++) max_counts_pipi[i][j] = hist_pipi[i][j]->GetMaximum();
+      for(Int_t j = 0; j < KLOE::channNum; j++) max_counts_pipi[i][j] = hist_pipi[i][j]->GetMaximum();
 
    for(Int_t i = 0; i < 8; i++)
    {
-      TMath::Sort(channNum-2, max_counts_semi[i], index_sort_semi[i]);
+      TMath::Sort(KLOE::channNum-2, max_counts_semi[i], index_sort_semi[i]);
       y1d_semi[i][0] = 0.1;
       y1d_semi[i][1] = 1E10;//max_counts_semi[i][index_sort_semi[i][0]] + 200.;
    }
 
    for(Int_t i = 0; i < 8; i++)
    {
-      TMath::Sort(channNum-2, max_counts_three[i], index_sort_three[i]);
+      TMath::Sort(KLOE::channNum-2, max_counts_three[i], index_sort_three[i]);
       y1d_three[i][0] = 0.1;
       y1d_three[i][1] = 1E10;//max_counts_three[i][index_sort_three[i][0]] + 200.;
    }
 
    for(Int_t i = 0; i < 8; i++)
    {
-      TMath::Sort(channNum-2, max_counts_pipi[i], index_sort_pipi[i]);
+      TMath::Sort(KLOE::channNum-2, max_counts_pipi[i], index_sort_pipi[i]);
       y1d_pipi[i][0] = 0.1;
       y1d_pipi[i][1] = 1E10;//max_counts_pipi[i][index_sort_pipi[i][0]] + 200.;
    }
@@ -1054,15 +1054,15 @@ void full_analysis::Terminate()
 
    std::cout << hist_semi[4][4]->GetBinCenter(hist_semi[4][4]->GetMaximumBin()) << std::endl;
 
-   TLine *line_down = new TLine(mK0-2,0,mK0-2,1E10);
-   TLine *line_up = new TLine(mK0+2,0,mK0+2,1E10);
+   TLine *line_down = new TLine(PhysicsConstants::mK0-2,0,PhysicsConstants::mK0-2,1E10);
+   TLine *line_up = new TLine(PhysicsConstants::mK0+2,0,PhysicsConstants::mK0+2,1E10);
    line_up->SetLineWidth(3);
    line_down->SetLineWidth(3);
    line_up->SetLineStyle(10);
    line_down->SetLineStyle(10);
 
-   TBox *box_down = new TBox(mK0-20,0,mK0-2,1E10);
-   TBox *box_up = new TBox(mK0+2,0,mK0+20,1E10);
+   TBox *box_down = new TBox(PhysicsConstants::mK0-20,0,PhysicsConstants::mK0-2,1E10);
+   TBox *box_up = new TBox(PhysicsConstants::mK0+2,0,PhysicsConstants::mK0+20,1E10);
 
    box_down->SetFillStyle(3544);
    box_up->SetFillStyle(3544);
@@ -1072,7 +1072,7 @@ void full_analysis::Terminate()
 
    for(Int_t i = 0; i < 8; i++)
    {
-      for(Int_t j = 0; j < channNum-2; j++)
+      for(Int_t j = 0; j < KLOE::channNum-2; j++)
       {
          canva1d_semi[i]->SetLeftMargin(0.15);
          canva1d_semi[i]->SetBottomMargin(0.15);
@@ -1092,12 +1092,12 @@ void full_analysis::Terminate()
                hist_semi[i][index_sort_semi[i][j]]->GetYaxis()->CenterTitle(1);
 
                hist_semi[i][index_sort_semi[i][j]]->GetYaxis()->SetRangeUser(y1d_semi[i][0], y1d_semi[i][1]);
-	       if(index_sort_semi[i][j] == channNum - 2) hist_semi[i][index_sort_semi[i][j]]->Draw("PE1");
+	       if(index_sort_semi[i][j] == KLOE::channNum - 2) hist_semi[i][index_sort_semi[i][j]]->Draw("PE1");
 	       else hist_semi[i][index_sort_semi[i][j]]->Draw("HIST");
             }
             else
             {
-	       if(index_sort_semi[i][j] == channNum - 2) hist_semi[i][index_sort_semi[i][j]]->Draw("PE1SAME");
+	       if(index_sort_semi[i][j] == KLOE::channNum - 2) hist_semi[i][index_sort_semi[i][j]]->Draw("PE1SAME");
 	       else hist_semi[i][index_sort_semi[i][j]]->Draw("HISTSAME");
             }
          
@@ -1113,7 +1113,7 @@ void full_analysis::Terminate()
 
    for(Int_t i = 0; i < 8; i++)
    {
-      for(Int_t j = 0; j < channNum-2; j++)
+      for(Int_t j = 0; j < KLOE::channNum-2; j++)
       {
          canva1d_three[i]->SetLeftMargin(0.15);
          canva1d_three[i]->SetBottomMargin(0.15);
@@ -1134,12 +1134,12 @@ void full_analysis::Terminate()
                hist_three[i][index_sort_three[i][j]]->GetYaxis()->CenterTitle(1);
 
                hist_three[i][index_sort_three[i][j]]->GetYaxis()->SetRangeUser(y1d_three[i][0], y1d_three[i][1]);
-	       if(index_sort_three[i][j] == channNum - 2) hist_three[i][index_sort_three[i][j]]->Draw("PE1");
+	       if(index_sort_three[i][j] == KLOE::channNum - 2) hist_three[i][index_sort_three[i][j]]->Draw("PE1");
 	       else hist_three[i][index_sort_three[i][j]]->Draw("HIST");
             }
             else
             {
-	       if(index_sort_three[i][j] == channNum - 2) hist_three[i][index_sort_three[i][j]]->Draw("PE1SAME");
+	       if(index_sort_three[i][j] == KLOE::channNum - 2) hist_three[i][index_sort_three[i][j]]->Draw("PE1SAME");
 	       else hist_three[i][index_sort_three[i][j]]->Draw("HISTSAME");
             }
          
@@ -1151,7 +1151,7 @@ void full_analysis::Terminate()
 
    for(Int_t i = 0; i < 8; i++)
    {
-      for(Int_t j = 0; j < channNum-2; j++)
+      for(Int_t j = 0; j < KLOE::channNum-2; j++)
       {
          canva1d_pipi[i]->SetLeftMargin(0.15);
          canva1d_pipi[i]->SetBottomMargin(0.15);
@@ -1173,12 +1173,12 @@ void full_analysis::Terminate()
 
                hist_pipi[i][index_sort_pipi[i][j]]->GetYaxis()->SetRangeUser(y1d_pipi[i][0], y1d_pipi[i][1]);
 
-	       if(index_sort_pipi[i][j] == channNum - 2) hist_pipi[i][index_sort_pipi[i][j]]->Draw("PE1");
+	       if(index_sort_pipi[i][j] == KLOE::channNum - 2) hist_pipi[i][index_sort_pipi[i][j]]->Draw("PE1");
 	       else hist_pipi[i][index_sort_pipi[i][j]]->Draw("HIST");
             }
             else
             {
-	       if(index_sort_pipi[i][j] == channNum - 2) hist_pipi[i][index_sort_pipi[i][j]]->Draw("PE1SAME");
+	       if(index_sort_pipi[i][j] == KLOE::channNum - 2) hist_pipi[i][index_sort_pipi[i][j]]->Draw("PE1SAME");
 	       else hist_pipi[i][index_sort_pipi[i][j]]->Draw("HISTSAME");
             }
          
@@ -1194,7 +1194,7 @@ void full_analysis::Terminate()
 
    /*for(Int_t i = 0; i < 8; i++)
    {
-      for(Int_t j = 0; j < channNum-2; j++)
+      for(Int_t j = 0; j < KLOE::channNum-2; j++)
       {
          canva2d[i][j]->SetLeftMargin(0.15);
          canva2d[i][j]->SetRightMargin(0.15);
@@ -1225,8 +1225,8 @@ void full_analysis::Terminate()
       //legend_nocuts[i] = new TLegend(0.15,0.7,0.4,0.9);
    }
 
-   legend_nocuts[0]->AddEntry(hist_semi[0][channNum-1], "Expected #Deltat distribution for K#rightarrow#pi^{0}#pi^{0} from MC", "L");
-   legend_nocuts[0]->AddEntry(hist_semi[0][channNum-2], "Expected #Deltat distribution for K#rightarrow#pi^{0}#pi^{0} from DATA", "PE1");
+   legend_nocuts[0]->AddEntry(hist_semi[0][KLOE::channNum-1], "Expected #Deltat distribution for K#rightarrow#pi^{0}#pi^{0} from MC", "L");
+   legend_nocuts[0]->AddEntry(hist_semi[0][KLOE::channNum-2], "Expected #Deltat distribution for K#rightarrow#pi^{0}#pi^{0} from DATA", "PE1");
    legend_nocuts[1]->AddEntry(hist_semi_nocuts, "Expected #Deltat distribution for K_{S}#rightarrow#pi^{+}#pi^{-}", "L");
    legend_nocuts[2]->AddEntry(hist_semi_nocuts, "Expected #Deltat distribution for K#rightarrow#pi^{+}#pi^{-}", "L");
 
@@ -1234,17 +1234,17 @@ void full_analysis::Terminate()
    canva1d_seminocuts->SetBottomMargin(0.15);
    canva1d_seminocuts->cd();
 
-   hist_semi[0][channNum-1]->GetYaxis()->SetRangeUser(0,1.3*hist_semi[0][channNum-1]->GetMaximum());
-   hist_semi[0][channNum-1]->SetLineColor(kGray+1);
-   hist_semi[0][channNum-1]->GetYaxis()->SetTitle("Counts");
-   hist_semi[0][channNum-1]->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
+   hist_semi[0][KLOE::channNum-1]->GetYaxis()->SetRangeUser(0,1.3*hist_semi[0][KLOE::channNum-1]->GetMaximum());
+   hist_semi[0][KLOE::channNum-1]->SetLineColor(kGray+1);
+   hist_semi[0][KLOE::channNum-1]->GetYaxis()->SetTitle("Counts");
+   hist_semi[0][KLOE::channNum-1]->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
 
-   hist_semi[0][channNum-2]->SetMarkerStyle(8);
-   hist_semi[0][channNum-2]->SetMarkerColor(kBlack);
-   hist_semi[0][channNum-2]->SetLineColor(kBlack);
+   hist_semi[0][KLOE::channNum-2]->SetMarkerStyle(8);
+   hist_semi[0][KLOE::channNum-2]->SetMarkerColor(kBlack);
+   hist_semi[0][KLOE::channNum-2]->SetLineColor(kBlack);
 
-   hist_semi[0][channNum-1]->Draw("HIST");
-   hist_semi[0][channNum-2]->Draw("PE1SAME");
+   hist_semi[0][KLOE::channNum-1]->Draw("HIST");
+   hist_semi[0][KLOE::channNum-2]->Draw("PE1SAME");
    legend_nocuts[0]->Draw();
 
    /*canva1d_threenocuts->SetLeftMargin(0.15);

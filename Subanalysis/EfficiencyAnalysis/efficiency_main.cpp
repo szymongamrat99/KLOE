@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
   Controls::Menu *menu = new Controls::Menu(7);
   ErrorHandling::ErrorLogs logger;
   ofstream LogFile;
-  LogFile.open(efficiency_dir + logs_dir + "Efficiency.log");
+  LogFile.open(efficiency_dir + Paths::logs_dir + "Efficiency.log");
   setGlobalStyle();
 
   Int_t firstFile, lastFile, ind_data_mc;

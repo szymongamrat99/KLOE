@@ -292,18 +292,18 @@ Bool_t signal_vs_bcg::Process(Long64_t entry)
 
   Knerec[4] = sqrt(pow(Knerec[0], 2) + pow(Knerec[1], 2) + pow(Knerec[2], 2));
 
-  Float_t vKchFit = cVel * KchboostFit[4] / KchboostFit[3],
+  Float_t vKchFit = PhysicsConstants::cVel * KchboostFit[4] / KchboostFit[3],
           pathKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
                             pow(KchboostFit[7] - ipFit[1], 2) +
                             pow(KchboostFit[8] - ipFit[2], 2)),
           tKchFit = KchboostFit[9] / 0.0895,
-          vKneFit = cVel * KnereclorFit[4] / KnereclorFit[3],
+          vKneFit = PhysicsConstants::cVel * KnereclorFit[4] / KnereclorFit[3],
           pathKneFit = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
                             pow(KnerecFit[7] - ipFit[1], 2) +
                             pow(KnerecFit[8] - ipFit[2], 2)),
           tKneFit = KnerecFit[9] / 0.0895,
-          vKneMC = cVel * Knemc[4] / Knemc[3],
-          vKne = cVel * Knerec[4] / Knerec[3],
+          vKneMC = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
+          vKne = PhysicsConstants::cVel * Knerec[4] / Knerec[3],
           pathKne = sqrt(pow(KneTriangle[6] - ip[0], 2) +
                          pow(KneTriangle[7] - ip[1], 2) +
                          pow(KneTriangle[8] - ip[2], 2)),
@@ -322,20 +322,20 @@ Bool_t signal_vs_bcg::Process(Long64_t entry)
                              pow(photonFit4[5] - KnerecFit[7], 2) +
                              pow(photonFit4[6] - KnerecFit[8], 2));
 
-  Float_t trc1Fit = photonFit1[7] - photon1path / cVel - tKneFit * 0.0895,
-          trc2Fit = photonFit2[7] - photon2path / cVel - tKneFit * 0.0895,
-          trc3Fit = photonFit3[7] - photon3path / cVel - tKneFit * 0.0895,
-          trc4Fit = photonFit4[7] - photon4path / cVel - tKneFit * 0.0895,
+  Float_t trc1Fit = photonFit1[7] - photon1path / PhysicsConstants::cVel - tKneFit * 0.0895,
+          trc2Fit = photonFit2[7] - photon2path / PhysicsConstants::cVel - tKneFit * 0.0895,
+          trc3Fit = photonFit3[7] - photon3path / PhysicsConstants::cVel - tKneFit * 0.0895,
+          trc4Fit = photonFit4[7] - photon4path / PhysicsConstants::cVel - tKneFit * 0.0895,
           TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
   Float_t deltaTfit = tKchFit - tKneFit,
           deltaT = *KaonChTimeLAB - tKne,
           deltaTMC = *KaonChTimeLABMC - *KaonNeTimeLABMC;
 
-  Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - mPi0, 2) +
-                                    pow(pi02Fit[5] - mPi0, 2)),
-          combinedMassPi0 = sqrt(pow(pi01[5] - mPi0, 2) +
-                                 pow(pi02[5] - mPi0, 2));
+  Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
+                                    pow(pi02Fit[5] - PhysicsConstants::mPi0, 2)),
+          combinedMassPi0 = sqrt(pow(pi01[5] - PhysicsConstants::mPi0, 2) +
+                                 pow(pi02[5] - PhysicsConstants::mPi0, 2));
 
   Float_t kaonChPath = sqrt(pow(Kchrec[6] - ip[0], 2) +
                             pow(Kchrec[7] - ip[1], 2) +
@@ -426,7 +426,7 @@ Bool_t signal_vs_bcg::Process(Long64_t entry)
     deltaPhiMC = phi1MCCorr - phi2MCCorr;
   }
 
-  if (*mctruth >= 0 /*&& *Chi2SignalKinFit < 30. && combinedMassPi0Fit < 35. && *TrcSum > -1 && abs(Kchrec[5] - mK0) < 1.2 && abs(*minv4gam - mK0) < 76. &&  *Qmiss < 3.75*/)
+  if (*mctruth >= 0 /*&& *Chi2SignalKinFit < 30. && combinedMassPi0Fit < 35. && *TrcSum > -1 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && abs(*minv4gam - PhysicsConstants::mK0) < 76. &&  *Qmiss < 3.75*/)
   {
 
     std::cout << cutsApplied[0] << std::endl;
@@ -441,24 +441,24 @@ Bool_t signal_vs_bcg::Process(Long64_t entry)
     {
 
       // Fill histograms for reconstructed variables
-      histsReconstructed["mass_Kch"][channelTypes[*mctruth]]->Fill(Kchrec[5] - mK0, weight);
+      histsReconstructed["mass_Kch"][channelTypes[*mctruth]]->Fill(Kchrec[5] - PhysicsConstants::mK0, weight);
 
-      histsReconstructed["mass_Kne"][channelTypes[*mctruth]]->Fill(*minv4gam - mK0, weight);
+      histsReconstructed["mass_Kne"][channelTypes[*mctruth]]->Fill(*minv4gam - PhysicsConstants::mK0, weight);
 
-      histsReconstructed["mass_pi01"][channelTypes[*mctruth]]->Fill(pi01[5] - mPi0, weight);
-      histsReconstructed["mass_pi02"][channelTypes[*mctruth]]->Fill(pi02[5] - mPi0, weight);
+      histsReconstructed["mass_pi01"][channelTypes[*mctruth]]->Fill(pi01[5] - PhysicsConstants::mPi0, weight);
+      histsReconstructed["mass_pi02"][channelTypes[*mctruth]]->Fill(pi02[5] - PhysicsConstants::mPi0, weight);
 
       histsReconstructed["time_neutral_MC"][channelTypes[*mctruth]]->Fill(*TrcSum, weight);
 
       histsReconstructed["combined_mass_pi0"][channelTypes[*mctruth]]->Fill(combinedMassPi0, weight);
 
       // Fitted signal variables
-      histsFittedSignal["mass_Kch"][channelTypes[*mctruth]]->Fill(KchrecFit[5] - mK0, weight);
+      histsFittedSignal["mass_Kch"][channelTypes[*mctruth]]->Fill(KchrecFit[5] - PhysicsConstants::mK0, weight);
 
-      histsFittedSignal["mass_Kne"][channelTypes[*mctruth]]->Fill(KnerecFit[5] - mK0, weight);
+      histsFittedSignal["mass_Kne"][channelTypes[*mctruth]]->Fill(KnerecFit[5] - PhysicsConstants::mK0, weight);
 
-      histsFittedSignal["mass_pi01"][channelTypes[*mctruth]]->Fill(pi01Fit[5] - mPi0, weight);
-      histsFittedSignal["mass_pi02"][channelTypes[*mctruth]]->Fill(pi02Fit[5] - mPi0, weight);
+      histsFittedSignal["mass_pi01"][channelTypes[*mctruth]]->Fill(pi01Fit[5] - PhysicsConstants::mPi0, weight);
+      histsFittedSignal["mass_pi02"][channelTypes[*mctruth]]->Fill(pi02Fit[5] - PhysicsConstants::mPi0, weight);
 
       histsFittedSignal["chi2_signalKinFit"][channelTypes[*mctruth]]->Fill(*Chi2SignalKinFit / 10., weight);
       histsFittedSignal["chi2_trilaterationKinFit"][channelTypes[*mctruth]]->Fill(*Chi2TriKinFit, weight);

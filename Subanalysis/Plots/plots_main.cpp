@@ -15,7 +15,7 @@ int Plots_main(Int_t firstFile, Int_t lastFile)
   Controls::Menu *menu = new Controls::Menu(9);
   ErrorHandling::ErrorLogs logger;
   ofstream LogFile;
-  LogFile.open(gen_vars_dir + logs_dir + "Plots.log");
+  LogFile.open(gen_vars_dir + Paths::logs_dir + "Plots.log");
   setGlobalStyle();
 
   Int_t ind_data_mc;

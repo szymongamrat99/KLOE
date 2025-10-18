@@ -22,12 +22,12 @@ int main(int argc, char *argv[])
   KLOE::pm00 eventAnalysis;
   // -------------------------------------------------------------------
   // Set logger for error logging
-  std::string logFilename = (std::string)base_path + (std::string)logs_dir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
+  std::string logFilename = (std::string)Paths::base_path + (std::string)Paths::logs_dir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Set tree name
-  const std::string generalTreeName = properties["variables"]["tree"]["treename"]["general"];
+  const std::string generalTreeName = Utils::properties["variables"]["tree"]["treename"]["general"];
   // -------------------------------------------------------------------
   // Set Menu instance
   Controls::Menu mainMenu(10); // For analysis options
@@ -42,14 +42,14 @@ int main(int argc, char *argv[])
   setGlobalStyle();
   // -------------------------------------------------------------------
   // Set config file watcher
-  // ConfigWatcher cfgWatcher(propName);
+  // ConfigWatcher cfgWatcher(Paths::propName);
   // cfgWatcher.start();
   // -------------------------------------------------------------------
   Controls::DataType dataTypeOpt;
   Controls::FileType fileTypeOpt;
 
   // Set flag for initial analysis
-  Bool_t initialAnalysisExecution = properties["flags"]["initialAnalysisExec"]["flag"];
+  Bool_t initialAnalysisExecution = Utils::properties["flags"]["initialAnalysisExec"]["flag"];
 
   // Initialize and fill the TChain object
   TChain chain(generalTreeName.c_str());
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
   {
     // Set the data type options
     auto callParams = InputParamsHandler::getParams(
-        properties, lastFileMax, propName, logger, dataType);
+        Utils::properties, lastFileMax, Paths::propName, logger, dataType);
 
     initObj.chainInit(chain, callParams.dataTypeOpt, callParams.firstFile, callParams.lastFile, callParams.firstFile, callParams.lastFile, logger, callParams.csFlag);
 

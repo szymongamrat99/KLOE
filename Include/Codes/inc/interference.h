@@ -19,8 +19,8 @@ namespace KLOE
   {
     public:
 
-      std::vector<Double_t> time_diff[channNum], time_diff_gen, time_diff_data;
-      std::vector<Double_t> time_diff_rand_mc[channNum], time_diff_rand_data[channNum], time_diff_gen_rand_mc, time_diff_gen_rand_data;
+      std::vector<Double_t> time_diff[KLOE::channNum], time_diff_gen, time_diff_data;
+      std::vector<Double_t> time_diff_rand_mc[KLOE::channNum], time_diff_rand_data[KLOE::channNum], time_diff_gen_rand_mc, time_diff_gen_rand_data;
 
       Double_t *exclusions, left_x_split, center_x_split, right_x_split;
 
@@ -43,8 +43,8 @@ namespace KLOE
 
         /*for(Int_t i = 0; i < num_of_vars; i++)
         {
-          if(i == 0) init_vars.push_back(Re);
-          if(i == 1) init_vars.push_back(M_PI*Im_nonCPT/180.);
+          if(i == 0) init_vars.push_back(PhysicsConstants::Re);
+          if(i == 1) init_vars.push_back(M_PI*PhysicsConstants::Im_nonCPT/180.);
           else init_vars.push_back(1.0);
           
           step.push_back(abs(init_vars[i]/10.));
@@ -68,7 +68,7 @@ namespace KLOE
 
         // Channels of MC: pm00, regen, omega, three, semi, other bcg (6)
 
-        for (Int_t i = 0; i < channNum; i++)
+        for (Int_t i = 0; i < KLOE::channNum; i++)
           frac.push_back(new TH1D(("Fitted histo " + std::to_string(i)).c_str(), "", bin_number, x_min, x_max));
 
         // MC sum histogram
@@ -79,7 +79,7 @@ namespace KLOE
 
         if(mode == "mc" || mode == "bcg")
         {
-          for (Int_t i = 0; i < channNum; i++)
+          for (Int_t i = 0; i < KLOE::channNum; i++)
             frac_data.push_back(new TH1D(("MC 'data' fracs " + std::to_string(i)).c_str(), "", bin_number, x_min, x_max));
         }
 
@@ -100,7 +100,7 @@ namespace KLOE
 			    e_data.push_back(0.);
 		    }
 
-        for (Int_t i = 0; i < channNum; i++)
+        for (Int_t i = 0; i < KLOE::channNum; i++)
           for (Int_t j = 0; j < bin_number; j++)
           {
             b[i].push_back(0.);

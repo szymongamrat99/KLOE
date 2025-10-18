@@ -40,11 +40,11 @@ Int_t selected[4] = {1, 2, 3, 4};
 int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
 	const int
-			loopcount = properties["variables"]["KinFit"]["Omega"]["loopCount"],
-			M = properties["variables"]["KinFit"]["Omega"]["numOfConstraints"],
-			N_free = properties["variables"]["KinFit"]["Omega"]["freeVars"],
-			N_const = properties["variables"]["KinFit"]["Omega"]["fixedVars"],
-			chiSqrStep = properties["variables"]["KinFit"]["Omega"]["chiSqrStep"];
+			loopcount = Utils::properties["variables"]["KinFit"]["Omega"]["loopCount"],
+			M = Utils::properties["variables"]["KinFit"]["Omega"]["numOfConstraints"],
+			N_free = Utils::properties["variables"]["KinFit"]["Omega"]["freeVars"],
+			N_const = Utils::properties["variables"]["KinFit"]["Omega"]["fixedVars"],
+			chiSqrStep = Utils::properties["variables"]["KinFit"]["Omega"]["chiSqrStep"];
 
 	TF1
 			*constraints[M];
@@ -58,7 +58,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
 	name = omegarec_dir + root_files_dir + omega_rec_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
 
-	properties["variables"]["tree"]["filename"]["omegarecKinFit"] = name;
+	Utils::properties["variables"]["tree"]["filename"]["omegarecKinFit"] = name;
 
 	TFile *file = new TFile(name.c_str(), "recreate");
 	TTree *tree = new TTree(omegarec_kin_fit_tree, "Omega reconstruction with kin fit");
@@ -86,7 +86,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 	UChar_t mctruth, mcflag;
 	Float_t cluster[5][500], Kchboost[9], Knerec[9], KnemcOld[9], ipmcOld[3], ip[3], Dtmc, bunch_corr;
 
-	BaseKinematics baseKin;
+	KLOE::BaseKinematics baseKin;
 
 	chain.SetBranchAddress("nclu", &nclu);
 	chain.SetBranchAddress("Xcl", cluster[0]);
@@ -304,19 +304,19 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 								X_init(21) = baseKin.Kchrec[7];
 								X_init(22) = baseKin.Kchrec[8];
 
-								V(20, 20) = pow(Double_t(properties["variables"]["Resolutions"]["vtxCharged"][0]), 2);
-								V(21, 21) = pow(Double_t(properties["variables"]["Resolutions"]["vtxCharged"][1]), 2);
-								V(22, 22) = pow(Double_t(properties["variables"]["Resolutions"]["vtxCharged"][2]), 2);
+								V(20, 20) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["vtxCharged"][0]), 2);
+								V(21, 21) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["vtxCharged"][1]), 2);
+								V(22, 22) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["vtxCharged"][2]), 2);
 
 								X_init(23) = baseKin.Kchrec[0];
 								X_init(24) = baseKin.Kchrec[1];
 								X_init(25) = baseKin.Kchrec[2];
 								X_init(26) = baseKin.Kchrec[3];
 
-								V(23, 23) = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][0]), 2);
-								V(24, 24) = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][1]), 2);
-								V(25, 25) = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][2]), 2);
-								V(26, 26) = pow(Double_t(properties["variables"]["Resolutions"]["momCharged"][3]), 2);
+								V(23, 23) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][0]), 2);
+								V(24, 24) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][1]), 2);
+								V(25, 25) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][2]), 2);
+								V(26, 26) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][3]), 2);
 
 								X_init(27) = bhabha_mom[0];
 								X_init(28) = bhabha_mom[1];
@@ -470,7 +470,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 																			(sqrt(pow(cluster[0][baseKin.ncll[g4takenomega[k]] - 1] - bhabha_vtx[0], 2) +
 																						pow(cluster[1][baseKin.ncll[g4takenomega[k]] - 1] - bhabha_vtx[1], 2) +
 																						pow(cluster[2][baseKin.ncll[g4takenomega[k]] - 1] - baseKin.Kchrec[8], 2)) /
-																			 cVel);
+																			 PhysicsConstants::cVel);
 
 										totEnergy += cluster[4][baseKin.ncll[g4takenomega[k]] - 1];
 
@@ -497,7 +497,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
 									Float_t
 											kaonMomTot = sqrt(pow(kaonMom[0], 2) + pow(kaonMom[1], 2) + pow(kaonMom[2], 2)),
-											kaonVelTot = cVel * (kaonMomTot / kaonMom[3]);
+											kaonVelTot = PhysicsConstants::cVel * (kaonMomTot / kaonMom[3]);
 
 									for (Int_t k = 0; k < 3; k++)
 										neu_vtx_avg[k] = lengthPhotonAvg * kaonVelTot * (kaonMom[k] / kaonMomTot) + IP_vtx[k];
@@ -509,7 +509,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 																					pow(PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[j][0], 2) -
 																					pow(PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[j][1], 2) -
 																					pow(PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[j][2], 2));
-										M_omega_diff[j] = M_omega_tmp[j] - mOmega;
+										M_omega_diff[j] = M_omega_tmp[j] - PhysicsConstants::mOmega;
 									}
 
 									if (std::isnan(M_omega_diff[0]) || std::isnan(M_omega_diff[1]))
@@ -732,8 +732,8 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 	file->Close();
 	delete file;
 
-	std::ofstream outfile(propName);
-	outfile << properties.dump(4);
+	std::ofstream outfile(Paths::propName);
+	outfile << Utils::properties.dump(4);
 	outfile.close();
 
 	return 0;

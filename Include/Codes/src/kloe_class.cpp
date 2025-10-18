@@ -80,11 +80,11 @@ namespace KLOE
     photon_mom[3].SetPxPyPzE(0., 0., 0., 0.);
     photon_pos[3].SetXYZT(0., 0., 0., 0.);
 
-    _MClistPath1 = path_tmp; // + (std::string)properties["variables"]["rootFiles"]["MClistFilename"][0];
-    _MClistPath2 = path_tmp; // + (std::string)properties["variables"]["rootFiles"]["MClistFilename"][1];
-    _MClistPath3 = path_tmp; // + (std::string)properties["variables"]["rootFiles"]["MClistFilename"][2];
+    _MClistPath1 = Paths::path_tmp;
+    _MClistPath2 = Paths::path_tmp;
+    _MClistPath3 = Paths::path_tmp;
 
-    _DatalistPath = path_tmp; // + (std::string)properties["variables"]["rootFiles"]["DatalistFilename"];
+    _DatalistPath = Paths::path_tmp;
   }
 
   void pm00::inv_mass_calc(TLorentzVector four_mom)
@@ -154,7 +154,7 @@ namespace KLOE
     posKch->Boost(-boostVKch);
     posKne->Boost(-boostVKne);
 
-    Double_t DeltaT = (posKch->T() - posKne->T()) / (tau_S_nonCPT * cVel);
+    Double_t DeltaT = (posKch->T() - posKne->T()) / (PhysicsConstants::tau_S_nonCPT * PhysicsConstants::cVel);
 
     return DeltaT;
   }
@@ -296,7 +296,7 @@ namespace KLOE
   Int_t pm00::neu_triangle(Float_t *TrcSumFinal, Float_t *vtxSigmaFinal, Float_t Clu5Vec[4][5], Float_t *ip, Float_t *Phi4Mom, Float_t *Kne4Mom, Float_t *Kne4Vec, Float_t *trc) const
   {
     // Logging of errors
-    std::string logFilename = (std::string)neutrec_dir + (std::string)logs_dir + "TriangleIter.log";
+    std::string logFilename = (std::string)Paths::neutrec_dir + (std::string)Paths::logs_dir + "TriangleIter.log";
     ErrorHandling::ErrorLogs logger(logFilename);
     // ----------------------------------------------------------------------------
 
@@ -326,8 +326,8 @@ namespace KLOE
 
       CosPkD[i] = (D[i].Dot(pK)) / (DTot[i] * KneTotMom);
 
-      B[i] = 2 * (DTot[i] * CosPkD[i] - (cVel * Clu5Vec[i][3] / BetaK));
-      C[i] = pow(cVel * Clu5Vec[i][3], 2) - pow(DTot[i], 2);
+      B[i] = 2 * (DTot[i] * CosPkD[i] - (PhysicsConstants::cVel * Clu5Vec[i][3] / BetaK));
+      C[i] = pow(PhysicsConstants::cVel * Clu5Vec[i][3], 2) - pow(DTot[i], 2);
 
       Delta[i] = pow(B[i], 2) - 4 * A * C[i];
 
@@ -351,13 +351,13 @@ namespace KLOE
             for (Int_t k = 0; k < 3; k++)
               NeuVtxTmp[i][j][k] = ip[k] + (lK[i][j] * (pK(k) / KneTotMom));
 
-            NeuVtxTmp[i][j][3] = (lK[i][j] / (cVel * BetaK));
+            NeuVtxTmp[i][j][3] = (lK[i][j] / (PhysicsConstants::cVel * BetaK));
 
             lGamma[i][j] = sqrt(pow(Clu5Vec[i][0] - NeuVtxTmp[i][j][0], 2) +
                                 pow(Clu5Vec[i][1] - NeuVtxTmp[i][j][1], 2) +
                                 pow(Clu5Vec[i][2] - NeuVtxTmp[i][j][2], 2));
 
-            trctmp[i][j] = Clu5Vec[i][3] - NeuVtxTmp[i][j][3] - (lGamma[i][j] / cVel);
+            trctmp[i][j] = Clu5Vec[i][3] - NeuVtxTmp[i][j][3] - (lGamma[i][j] / PhysicsConstants::cVel);
           }
 
           if (abs(trctmp[i][0]) < abs(trctmp[i][1]))
@@ -391,14 +391,14 @@ namespace KLOE
     NeuVtxAvg[3] = sqrt(pow(NeuVtxAvg[0] - ip[0], 2) +
                         pow(NeuVtxAvg[1] - ip[1], 2) +
                         pow(NeuVtxAvg[2] - ip[2], 2)) /
-                   (BetaK * cVel);
+                   (BetaK * PhysicsConstants::cVel);
 
     for (Int_t i = 0; i < 4; i++)
     {
       lGammaFinal[i] = sqrt(pow(Clu5Vec[i][0] - NeuVtxAvg[0], 2) +
                             pow(Clu5Vec[i][1] - NeuVtxAvg[1], 2) +
                             pow(Clu5Vec[i][2] - NeuVtxAvg[2], 2));
-      trc[i] = Clu5Vec[i][3] - NeuVtxAvg[3] - (lGammaFinal[i] / cVel);
+      trc[i] = Clu5Vec[i][3] - NeuVtxAvg[3] - (lGammaFinal[i] / PhysicsConstants::cVel);
 
       vtxSigma += Clu5Vec[i][4] * sqrt(pow(NeuVtxTrueClu[i][0] - NeuVtxAvg[0], 2) + pow(NeuVtxTrueClu[i][1] - NeuVtxAvg[1], 2) + pow(NeuVtxTrueClu[i][2] - NeuVtxAvg[2], 2)) / EneTot;
     }
@@ -423,7 +423,7 @@ namespace KLOE
     Int_t numOfPhotons = Clu4Vec->size();
 
     // Logging of errors
-    std::string logFilename = (std::string)neutrec_dir + (std::string)logs_dir + "TriangleIter" + std::to_string(numOfPhotons) + ".log";
+    std::string logFilename = (std::string)Paths::neutrec_dir + (std::string)Paths::logs_dir + "TriangleIter" + std::to_string(numOfPhotons) + ".log";
     ErrorHandling::ErrorLogs logger(logFilename);
     // ----------------------------------------------------------------------------
 
@@ -455,8 +455,8 @@ namespace KLOE
 
       CosPkD[i] = (D[i].Dot(pK)) / (DTot[i] * KneTotMom);
 
-      B[i] = 2 * (DTot[i] * CosPkD[i] - (cVel * (*Clu4Vec)[i][3] / BetaK));
-      C[i] = pow(cVel * (*Clu4Vec)[i][3], 2) - pow(DTot[i], 2);
+      B[i] = 2 * (DTot[i] * CosPkD[i] - (PhysicsConstants::cVel * (*Clu4Vec)[i][3] / BetaK));
+      C[i] = pow(PhysicsConstants::cVel * (*Clu4Vec)[i][3], 2) - pow(DTot[i], 2);
 
       Delta[i] = pow(B[i], 2) - 4 * A * C[i];
 
@@ -480,13 +480,13 @@ namespace KLOE
             for (Int_t k = 0; k < 3; k++)
               NeuVtxTmp[i][j][k] = ip[k] + (lK[i][j] * (pK(k) / KneTotMom));
 
-            NeuVtxTmp[i][j][3] = (lK[i][j] / (cVel * BetaK));
+            NeuVtxTmp[i][j][3] = (lK[i][j] / (PhysicsConstants::cVel * BetaK));
 
             lGamma[i][j] = sqrt(pow((*Clu4Vec)[i][0] - NeuVtxTmp[i][j][0], 2) +
                                 pow((*Clu4Vec)[i][1] - NeuVtxTmp[i][j][1], 2) +
                                 pow((*Clu4Vec)[i][2] - NeuVtxTmp[i][j][2], 2));
 
-            trctmp[i][j] = (*Clu4Vec)[i][3] - NeuVtxTmp[i][j][3] - (lGamma[i][j] / cVel);
+            trctmp[i][j] = (*Clu4Vec)[i][3] - NeuVtxTmp[i][j][3] - (lGamma[i][j] / PhysicsConstants::cVel);
           }
 
           if (abs(trctmp[i][0]) < abs(trctmp[i][1]))
@@ -520,14 +520,14 @@ namespace KLOE
     NeuVtxAvg[3] = sqrt(pow(NeuVtxAvg[0] - ip[0], 2) +
                         pow(NeuVtxAvg[1] - ip[1], 2) +
                         pow(NeuVtxAvg[2] - ip[2], 2)) /
-                   (BetaK * cVel);
+                   (BetaK * PhysicsConstants::cVel);
 
     for (Int_t i = 0; i < 4; i++)
     {
       lGammaFinal[i] = sqrt(pow((*Clu4Vec)[i][0] - NeuVtxAvg[0], 2) +
                             pow((*Clu4Vec)[i][1] - NeuVtxAvg[1], 2) +
                             pow((*Clu4Vec)[i][2] - NeuVtxAvg[2], 2));
-      trc[i] = (*Clu4Vec)[i][3] - NeuVtxAvg[3] - (lGammaFinal[i] / cVel);
+      trc[i] = (*Clu4Vec)[i][3] - NeuVtxAvg[3] - (lGammaFinal[i] / PhysicsConstants::cVel);
 
       vtxSigma += (*Clu4Mom)[i][3] * sqrt(pow(NeuVtxTrueClu[i][0] - NeuVtxAvg[0], 2) + pow(NeuVtxTrueClu[i][1] - NeuVtxAvg[1], 2) + pow(NeuVtxTrueClu[i][2] - NeuVtxAvg[2], 2)) / EneTot;
     }
@@ -557,7 +557,7 @@ namespace KLOE
     _end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(_end_time - _start_time);
 
-    return (std::string)elapsedTimeHMS(duration.count());
+    return (std::string)Utils::elapsedTimeHMS(duration.count());
   }
   // -------------------------------------------------------------------
 
@@ -1016,7 +1016,7 @@ namespace KLOE
 
         invMassDiff[i] = sqrt(pow(E[i], 2) - pow(px[i], 2) - pow(py[i], 2) - pow(pz[i], 2));
 
-        invMassDiffTot += pow(invMassDiff[i] - mPi0, 2);
+        invMassDiffTot += pow(invMassDiff[i] - PhysicsConstants::mPi0, 2);
       }
 
       invMassDiffTot = sqrt(invMassDiffTot);
@@ -1108,8 +1108,8 @@ namespace KLOE
     lorentz_transf(kaonBetaLAB, kaon4VecLAB, kaon4VecKaonCM);
 
     // Czas własny w jednostkach τ_S
-    timeCM = kaon4VecKaonCM.T() / (cVel * tau_S_nonCPT);
-    timeLAB = timeLAB / (cVel * tau_S_nonCPT);
+    timeCM = kaon4VecKaonCM.T() / (PhysicsConstants::cVel * PhysicsConstants::tau_S_nonCPT);
+    timeLAB = timeLAB / (PhysicsConstants::cVel * PhysicsConstants::tau_S_nonCPT);
   }
 }
 

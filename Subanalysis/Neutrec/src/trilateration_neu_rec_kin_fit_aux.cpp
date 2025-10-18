@@ -31,19 +31,19 @@ using namespace std;
 Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
 	Bool_t
-			good_clus = (Bool_t)properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
+			good_clus = (Bool_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
 
 	const Short_t
-			loopcount = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
-			jmin = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
-			jmax = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
-			M = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
-			N_const = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["fixedVars"],
-			N_free = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["freeVars"],
+			loopcount = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+			jmin = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+			jmax = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
+			M = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+			N_const = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["fixedVars"],
+			N_free = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["freeVars"],
 			range = Int_t(jmax - jmin) + 1;
 
 	const Double_t
-			chiSqrStep = (Double_t)properties["variables"]["KinFit"]["Trilateration"]["chiSqrStep"];
+			chiSqrStep = (Double_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["chiSqrStep"];
 
 	Double_t det;
 	Float_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, Tcorr;
@@ -60,9 +60,9 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 			datestamp = Obj.getCurrentDate(),
 			name = "";
 
-	name = neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
+	name = Paths::neutrec_dir + root_files_dir + neu_trilateration_kin_fit_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
 
-	properties["variables"]["tree"]["filename"]["trilaterationKinFit"] = name;
+	Utils::properties["variables"]["tree"]["filename"]["trilaterationKinFit"] = name;
 
 	TFile *file = new TFile(name.c_str(), "recreate");
 	TTree *tree = new TTree(neutrec_tri_tree, "Trilateration reconstruction with kin fit");
@@ -90,7 +90,7 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 	UChar_t mctruth, mcflag;
 	Float_t cluster[5][500], Kchboost[9], Knerec[9], KnemcOld[9], ipmcOld[3], ip[3], Dtmc, bunch_corr;
 
-	BaseKinematics baseKin;
+	KLOE::BaseKinematics baseKin;
 
 	chain.SetBranchAddress("nclu", &nclu);
 	chain.SetBranchAddress("Xcl", cluster[0]);
@@ -315,7 +315,7 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 										fourKnetri_tmp[k][4] = sqrt(pow(fourKnetri_tmp[k][0], 2) + pow(fourKnetri_tmp[k][1], 2) + pow(fourKnetri_tmp[k][2], 2));
 										fourKnetri_tmp[k][5] = sqrt(pow(fourKnetri_tmp[k][3], 2) - pow(fourKnetri_tmp[k][4], 2));
 
-										kaon_vel_tmp[k] = cVel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
+										kaon_vel_tmp[k] = PhysicsConstants::cVel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
 
 										y_axis[0] = 0.;
 										y_axis[1] = X[21];
@@ -332,7 +332,7 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 																			 pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
 																			 pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
 
-										value[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - mK0, 2));
+										value[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - PhysicsConstants::mK0, 2));
 
 										if (TMath::IsNaN(value[k]))
 											value[k] = 999999.;

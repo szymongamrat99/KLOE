@@ -65,7 +65,7 @@ void cp_fit(Bool_t check = false, TString mode = "")
         chain->GetEntry(i);
         tree->GetEntry(i);
 
-        if(Chi2 < 40 && abs(minv4gam - mK0) < 76 && abs(Kchrec[5] - mK0) < 1.2 && Qmiss < 3.75)
+        if(Chi2 < 40 && abs(minv4gam - PhysicsConstants::mK0) < 76 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75)
         {
             if(mcflag == 1)
             {
@@ -126,7 +126,7 @@ void cp_fit(Bool_t check = false, TString mode = "")
  
     minimum->SetFunction(minimized_function);
 
-    const Double_t init_vars[num_of_vars] = {Re, M_PI*Im_nonCPT/180., 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, 
+    const Double_t init_vars[num_of_vars] = {PhysicsConstants::Re, M_PI*PhysicsConstants::Im_nonCPT/180., 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, 
                    step[num_of_vars] = {1E-5, 1E-5, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
 
     Double_t limit_span_signal = 0.3, limit_span = 0.3 , limit_pars = 1.0;
@@ -158,7 +158,7 @@ void cp_fit(Bool_t check = false, TString mode = "")
 
     Double_t par[2] = {minimum->X()[0], minimum->X()[1]};
 
-    for(UInt_t i = 0; i < channNum; i++)
+    for(UInt_t i = 0; i < KLOE::channNum; i++)
     {
 
         std::cout <<  event.time_diff_rand_mc[i].size() << std::endl;
@@ -242,14 +242,14 @@ void cp_fit(Bool_t check = false, TString mode = "")
 
     rp->GetUpperPad()->cd();
 
-    for(UInt_t i = 0; i < channNum; i++)
+    for(UInt_t i = 0; i < KLOE::channNum; i++)
     {
         event.frac[i]->Draw("HISTSAME");
     }
 
     TLegend *legend_chann = new TLegend(0.6,0.5,0.9,0.9);
     legend_chann->SetFillColor(kWhite);
-    for(UInt_t i = 0; i < channNum; i++)
+    for(UInt_t i = 0; i < KLOE::channNum; i++)
     {
       legend_chann->AddEntry(event.frac[i],channName[i],"l");
       event.frac[i]->Draw("HISTSAME");

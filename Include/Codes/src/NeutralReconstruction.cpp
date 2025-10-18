@@ -97,7 +97,7 @@ namespace KLOE
 
         invMass[i] = sqrt(pow(E[i], 2) - pow(px[i], 2) - pow(py[i], 2) - pow(pz[i], 2));
 
-        invMassDiffTot += pow(invMass[i] - mPi0, 2);
+        invMassDiffTot += pow(invMass[i] - PhysicsConstants::mPi0, 2);
       }
 
       invMassDiffTot = sqrt(invMassDiffTot);
@@ -143,7 +143,7 @@ namespace KLOE
 
         invMass[i] = sqrt(pow(E[i], 2) - pow(px[i], 2) - pow(py[i], 2) - pow(pz[i], 2));
 
-        invMassDiffTot += pow(invMass[i] - mPi0, 2);
+        invMassDiffTot += pow(invMass[i] - PhysicsConstants::mPi0, 2);
       }
 
       invMassDiffTot = invMassDiffTot / pow(mPi0Sigma, 2);
@@ -154,7 +154,7 @@ namespace KLOE
       {
         _OmegaReconstructionCore(i);
         invMassDiffTotOmega[i] = invMassDiffTot +
-                                 pow(_omega.mass - mOmega, 2) / pow(mOmegaSigma, 2);
+                                 pow(_omega.mass - PhysicsConstants::mOmega, 2) / pow(mOmegaSigma, 2);
       }
 
       if (invMassDiffTotOmega[0] < invMassDiffTotOmega[1])

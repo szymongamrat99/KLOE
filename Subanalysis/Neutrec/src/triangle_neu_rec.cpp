@@ -17,20 +17,20 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 {
 
 	Bool_t
-			good_clus = (Bool_t)properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
+			good_clus = (Bool_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
 
 	const Short_t
-			loopcount = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
-			jmin = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
-			jmax = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
-			M = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
-			N_const = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["fixedVars"],
-			N_free = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["freeVars"],
+			loopcount = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+			jmin = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+			jmax = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
+			M = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+			N_const = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["fixedVars"],
+			N_free = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["freeVars"],
 			range = Int_t(jmax - jmin) + 1;
 
 	TString
-			filename_trilateration = (std::string)properties["variables"]["tree"]["filename"]["trilaterationKinFit"],
-			treename_trilateration = (std::string)properties["variables"]["tree"]["treename"]["trilaterationKinFit"];
+			filename_trilateration = (std::string)Utils::properties["variables"]["tree"]["filename"]["trilaterationKinFit"],
+			treename_trilateration = (std::string)Utils::properties["variables"]["tree"]["treename"]["trilaterationKinFit"];
 
 	try
 	{
@@ -60,7 +60,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 		Int_t nclu;
 		UChar_t mctruth, mcflag, g4taken[4], ncll[50];
 		Float_t cluster[5][500], Kchboost[9], Knereclor[9], KnemcOld[9], ip[3];
-		BaseKinematics baseKin;
+		KLOE::BaseKinematics baseKin;
 
 		chain.SetBranchAddress("nclu", &nclu);
 		chain.SetBranchAddress("Xacl", cluster[0]);
@@ -96,9 +96,9 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 				datestamp = Obj.getCurrentDate(),
 				name = "";
 
-		name = neutrec_dir + root_files_dir + neu_triangle_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
+		name = Paths::neutrec_dir + root_files_dir + neu_triangle_filename + datestamp + "_" + std::to_string(N_free) + "_" + std::to_string(N_const) + "_" + std::to_string(M) + "_" + std::to_string(loopcount) + "_" + int(dataType) + ext_root;
 
-		properties["variables"]["tree"]["filename"]["trianglefinal"] = name;
+		Utils::properties["variables"]["tree"]["filename"]["trianglefinal"] = name;
 
 		TFile *file = new TFile(name.c_str(), "recreate");
 		TTree *tree = new TTree(neutrec_triangle_tree, "Neu vtx rec with triangle method");
@@ -263,7 +263,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 					}
 				}
 
-				Double_t vKne = cVel * (Knereclor[4] / Knereclor[3]);
+				Double_t vKne = PhysicsConstants::cVel * (Knereclor[4] / Knereclor[3]);
 				Double_t trec = sqrt(pow(Knereclor[6] - ip[0], 2) +
 														 pow(Knereclor[7] - ip[1], 2) +
 														 pow(Knereclor[8] - ip[2], 2)) /
@@ -287,11 +287,11 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 		return int(err);
 	}
 
-	properties["lastScript"] = "Triangle Reconstruction";
-	properties["lastUpdate"] = Obj.getCurrentTimestamp();
+	Utils::properties["lastScript"] = "Triangle Reconstruction";
+	Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();
 
-	std::ofstream outfile(propName);
-	outfile << properties.dump(4);
+	std::ofstream outfile(Paths::propName);
+	outfile << Utils::properties.dump(4);
 	outfile.close();
 
 	return 0;

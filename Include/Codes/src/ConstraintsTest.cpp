@@ -69,5 +69,5 @@ Double_t ConstraintsTest::MinvConsv(Double_t *x, Double_t *p)
   std::map<std::string, Float_t> minvModes = {
       {"neutral", 2 * photon[0].fourMom[3] * photon[1].fourMom[3] * (1. - cos(p[2]))}};
 
-  return minvModes[_minvMode] - pow(mPi0, 2); // MeV/c^2
+  return minvModes[_minvMode] - pow(PhysicsConstants::mPi0, 2); // MeV/c^2
 }

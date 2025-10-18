@@ -150,7 +150,7 @@ namespace OmegaConstraints
                    pow(cluster[0][2] - neu_vtx[2], 2) );
     
 
-    value_min = cVel * cluster[0][3] - R_gamma;
+    value_min = PhysicsConstants::cVel * cluster[0][3] - R_gamma;
 
     return value_min;
   }
@@ -179,7 +179,7 @@ namespace OmegaConstraints
                    pow(cluster[1][2] - neu_vtx[2], 2) );
     
 
-    value_min = cVel * cluster[1][3] - R_gamma;
+    value_min = PhysicsConstants::cVel * cluster[1][3] - R_gamma;
 
     return value_min;
   }
@@ -208,7 +208,7 @@ namespace OmegaConstraints
                    pow(cluster[2][2] - neu_vtx[2], 2) );
     
 
-    value_min = cVel * cluster[2][3] - R_gamma;
+    value_min = PhysicsConstants::cVel * cluster[2][3] - R_gamma;
 
     return value_min;
   };
@@ -237,7 +237,7 @@ namespace OmegaConstraints
                    pow(cluster[3][2] - neu_vtx[2], 2) );
     
 
-    value_min = cVel * cluster[3][3] - R_gamma;
+    value_min = PhysicsConstants::cVel * cluster[3][3] - R_gamma;
 
     return value_min;
   }

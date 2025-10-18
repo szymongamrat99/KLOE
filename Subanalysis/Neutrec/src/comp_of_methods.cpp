@@ -33,28 +33,28 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   Double_t cut_prob = 0.0, time_cut = 100.0;
 
   int
-      loopcount = (Int_t)properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
-      M = (Int_t)properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
-      jmin = (Int_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
-      jmax = (Int_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
+      loopcount = (Int_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+      M = (Int_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+      jmin = (Int_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+      jmax = (Int_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
       range = Int_t(jmax - jmin) + 1,
       bunch_int = 9;
 
   TString
-      filename_trilateration = std::string(properties["variables"]["tree"]["filename"]["trilateration"]),
-      treename_trilateration = std::string(properties["variables"]["tree"]["treename"]["trilateration"]),
+      filename_trilateration = std::string(Utils::properties["variables"]["tree"]["filename"]["trilateration"]),
+      treename_trilateration = std::string(Utils::properties["variables"]["tree"]["treename"]["trilateration"]),
 
-      filename_trilateration_kin_fit = std::string(properties["variables"]["tree"]["filename"]["trilaterationKinFit"]),
-      treename_trilateration_kin_fit = std::string(properties["variables"]["tree"]["treename"]["trilaterationKinFit"]),
+      filename_trilateration_kin_fit = std::string(Utils::properties["variables"]["tree"]["filename"]["trilaterationKinFit"]),
+      treename_trilateration_kin_fit = std::string(Utils::properties["variables"]["tree"]["treename"]["trilaterationKinFit"]),
 
-      filename_triangle = std::string(properties["variables"]["tree"]["filename"]["trianglefinal"]),
-      treename_triangle = std::string(properties["variables"]["tree"]["treename"]["trianglefinal"]),
+      filename_triangle = std::string(Utils::properties["variables"]["tree"]["filename"]["trianglefinal"]),
+      treename_triangle = std::string(Utils::properties["variables"]["tree"]["treename"]["trianglefinal"]),
 
-      filename_mctruth = std::string(properties["variables"]["tree"]["filename"]["mctruth"]),
-      treename_mctruth = std::string(properties["variables"]["tree"]["treename"]["mctruth"]),
+      filename_mctruth = std::string(Utils::properties["variables"]["tree"]["filename"]["mctruth"]),
+      treename_mctruth = std::string(Utils::properties["variables"]["tree"]["treename"]["mctruth"]),
 
-      filename_gen = std::string(properties["variables"]["tree"]["filename"]["generatedvars"]),
-      treename_gen = std::string(properties["variables"]["tree"]["treename"]["generatedvars"]);
+      filename_gen = std::string(Utils::properties["variables"]["tree"]["filename"]["generatedvars"]),
+      treename_gen = std::string(Utils::properties["variables"]["tree"]["treename"]["generatedvars"]);
 
   std::vector<TString> file_name, tree_name;
 
@@ -114,7 +114,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
   if (file_num == 2)
     interface = "pureTriangle";
 
-  BaseKinematics baseKin;
+  KLOE::BaseKinematics baseKin;
 
   UChar_t errId, cutId;
 
@@ -616,19 +616,19 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       //
       // Kaon velocity
       if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
-        v_Kchmc = cVel * baseKin.KchmcOld[4] / baseKin.KchmcOld[3];
+        v_Kchmc = PhysicsConstants::cVel * baseKin.KchmcOld[4] / baseKin.KchmcOld[3];
       else
-        v_Kchmc = cVel * Kchmc_bcg[4] / Kchmc_bcg[3];
+        v_Kchmc = PhysicsConstants::cVel * Kchmc_bcg[4] / Kchmc_bcg[3];
 
-      v_Kchrec = cVel * baseKin.Kchboost[4] / baseKin.Kchboost[3];
+      v_Kchrec = PhysicsConstants::cVel * baseKin.Kchboost[4] / baseKin.Kchboost[3];
 
       if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
-        v_Kneumc = cVel * baseKin.KnemcOld[4] / baseKin.KnemcOld[3];
+        v_Kneumc = PhysicsConstants::cVel * baseKin.KnemcOld[4] / baseKin.KnemcOld[3];
       else
-        v_Kneumc = cVel * Knemc_bcg[4] / Knemc_bcg[3];
+        v_Kneumc = PhysicsConstants::cVel * Knemc_bcg[4] / Knemc_bcg[3];
 
-      v_Kneutri = cVel * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)) / Knetri_kinfit[3];
-      v_Kneurec = cVel * Knereclor[4] / Knereclor[3];
+      v_Kneutri = PhysicsConstants::cVel * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)) / Knetri_kinfit[3];
+      v_Kneurec = PhysicsConstants::cVel * Knereclor[4] / Knereclor[3];
       //
       // Kaon flight times
       t_chrec = lengthch_rec / v_Kchrec;
@@ -747,8 +747,8 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
           Bool_t
               cut_trcsum = 1,   //= trcsum > -1.,
-              cut_Kneuminv = 1, //= (minv4gam - mK0) < 76,
-              cut_Kchminv = 1,  //= (baseKin.Kchrec[5] - mK0) < 1.2,
+              cut_Kneuminv = 1, //= (minv4gam - PhysicsConstants::mK0) < 76,
+              cut_Kchminv = 1,  //= (baseKin.Kchrec[5] - PhysicsConstants::mK0) < 1.2,
               cut_Qmiss = 1,    //= sqrt(pow(baseKin.Kchboost[3] - baseKin.Kchrec[3], 2) +
                                 //  pow(baseKin.Kchboost[0] - baseKin.Kchrec[0], 2) +
                                 //  pow(baseKin.Kchboost[1] - baseKin.Kchrec[1], 2) +
@@ -844,18 +844,18 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
             if (angle_boost_kaon_mom < 90.)
             {
-              betadt_hist[j]->Fill(lengthneu_tri / (cVel * t_neurec));
-              betapm_hist[j]->Fill(v_Kneutri / cVel);
+              betadt_hist[j]->Fill(lengthneu_tri / (PhysicsConstants::cVel * t_neurec));
+              betapm_hist[j]->Fill(v_Kneutri / PhysicsConstants::cVel);
             }
             else if (angle_boost_kaon_mom > 90.)
             {
-              betadtover90_hist[j]->Fill(lengthneu_tri / (cVel * t_neurec));
-              betapmover90_hist[j]->Fill(v_Kneutri / cVel);
+              betadtover90_hist[j]->Fill(lengthneu_tri / (PhysicsConstants::cVel * t_neurec));
+              betapmover90_hist[j]->Fill(v_Kneutri / PhysicsConstants::cVel);
             }
 
-            beta1_hist[j]->Fill(v_Kneumc / cVel, v_Kneutri / cVel);
+            beta1_hist[j]->Fill(v_Kneumc / PhysicsConstants::cVel, v_Kneutri / PhysicsConstants::cVel);
 
-            beta2_hist[j]->Fill(v_Kneumc / cVel, lengthneu_tri / (cVel * t_neurec));
+            beta2_hist[j]->Fill(v_Kneumc / PhysicsConstants::cVel, lengthneu_tri / (PhysicsConstants::cVel * t_neurec));
 
             bunch[j]->Fill(bunchnum);
           }
@@ -894,16 +894,16 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
                 if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
                 {
                   neu_vtx_corr[j][3]->Fill(t_neumc, t_neutri); // Knetri_kinfit[6 + k]);
-                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_neutri - t_neumc) / tau_S_nonCPT);
-                  pulls[j][4 + k]->Fill((t_neutri - t_neumc) / tau_S_nonCPT);
+                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_neutri - t_neumc) / PhysicsConstants::tau_S_nonCPT);
+                  pulls[j][4 + k]->Fill((t_neutri - t_neumc) / PhysicsConstants::tau_S_nonCPT);
                   pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.KnemcOld[k]);
                   neu_mom[j][k]->Fill(baseKin.KnemcOld[k], Knetri_kinfit[k]);
                 }
                 else
                 {
                   neu_vtx_corr[j][3]->Fill(t_neumc, t_neutri); // Knetri_kinfit[6 + k]);
-                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_neutri - t_neumc) / tau_S_nonCPT);
-                  pulls[j][4 + k]->Fill((t_neutri - t_neumc) / tau_S_nonCPT);
+                  sigmas_std[j][3]->Fill(lengthneu_mc, (t_neutri - t_neumc) / PhysicsConstants::tau_S_nonCPT);
+                  pulls[j][4 + k]->Fill((t_neutri - t_neumc) / PhysicsConstants::tau_S_nonCPT);
                   pulls[j][k]->Fill(Knetri_kinfit[k] - baseKin.KnemcOld[k]);
                   neu_mom[j][k]->Fill(Knemc_bcg[k], Knetri_kinfit[k]);
                 }
@@ -943,7 +943,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
             for (Int_t k = 0; k < 4; k++)
             {
-              tcl = gamma_kinfit[k][7] - (sqrt(pow(gamma_kinfit[k][4] - Knetri_kinfit[6], 2) + pow(gamma_kinfit[k][5] - Knetri_kinfit[7], 2) + pow(gamma_kinfit[k][6] - Knetri_kinfit[8], 2)) / cVel) - t_neutri;
+              tcl = gamma_kinfit[k][7] - (sqrt(pow(gamma_kinfit[k][4] - Knetri_kinfit[6], 2) + pow(gamma_kinfit[k][5] - Knetri_kinfit[7], 2) + pow(gamma_kinfit[k][6] - Knetri_kinfit[8], 2)) / PhysicsConstants::cVel) - t_neutri;
               tcl_hist[j]->Fill(tcl);
 
               cluscorr_hist[j][0]->Fill(gamma_kinfit[0][4], gamma_kinfit[1][4]);
@@ -952,7 +952,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
             clusenergy_hist[j]->Fill(Knetri_kinfit[5]);
 
-            first_clus_hist[j]->Fill(baseKin.cluster[3][0] - (d_cl / cVel));
+            first_clus_hist[j]->Fill(baseKin.cluster[3][0] - (d_cl / PhysicsConstants::cVel));
 
             mcisr_hist[j]->Fill(baseKin.mcisr);
           }
@@ -1513,40 +1513,40 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
         fit_text->AddText(fit_stats[2]);
 
         // if(i >= 0 && i < 4)
-        //   properties["variables"]["Resolutions"]["momCharged"][i] = comb_std_dev(result->GetParams(), result->GetErrors());
+        //   Utils::properties["variables"]["Resolutions"]["momCharged"][i] = comb_std_dev(result->GetParams(), result->GetErrors());
         // else if(i >= 4 && i < 8)
-        //   properties["variables"]["Resolutions"]["vtxCharged"][i - 4] = comb_std_dev(result->GetParams(), result->GetErrors());
+        //   Utils::properties["variables"]["Resolutions"]["vtxCharged"][i - 4] = comb_std_dev(result->GetParams(), result->GetErrors());
         // else if( i == 8 )
-        //   properties["variables"]["Resolutions"]["rhoCharged"] = comb_std_dev(result->GetParams(), result->GetErrors());
+        //   Utils::properties["variables"]["Resolutions"]["rhoCharged"] = comb_std_dev(result->GetParams(), result->GetErrors());
         // else if( i == 9 )
-        //   properties["variables"]["Resolutions"]["pathCharged"] = comb_std_dev(result->GetParams(), result->GetErrors());
+        //   Utils::properties["variables"]["Resolutions"]["pathCharged"] = comb_std_dev(result->GetParams(), result->GetErrors());
         if (i >= 0 && i < 4)
-          properties["variables"]["Resolutions"]["momNeutral"][interface][i] = comb_std_dev(result->GetParams(), result->GetErrors());
+          Utils::properties["variables"]["Resolutions"]["momNeutral"][interface][i] = comb_std_dev(result->GetParams(), result->GetErrors());
         else if (i >= 4 && i < 8)
-          properties["variables"]["Resolutions"]["vtxNeutral"][interface][i - 4] = comb_std_dev(result->GetParams(), result->GetErrors());
+          Utils::properties["variables"]["Resolutions"]["vtxNeutral"][interface][i - 4] = comb_std_dev(result->GetParams(), result->GetErrors());
         else if (i == 8)
-          properties["variables"]["Resolutions"]["rhoNeutral"][interface] = comb_std_dev(result->GetParams(), result->GetErrors());
+          Utils::properties["variables"]["Resolutions"]["rhoNeutral"][interface] = comb_std_dev(result->GetParams(), result->GetErrors());
         else if (i == 9)
-          properties["variables"]["Resolutions"]["pathNeutral"][interface] = comb_std_dev(result->GetParams(), result->GetErrors());
+          Utils::properties["variables"]["Resolutions"]["pathNeutral"][interface] = comb_std_dev(result->GetParams(), result->GetErrors());
       }
       else if (result == 1 && j == 0)
       {
         // if(i >= 0 && i < 4)
-        //   properties["variables"]["Resolutions"]["momCharged"][i] = nullptr;
+        //   Utils::properties["variables"]["Resolutions"]["momCharged"][i] = nullptr;
         // else if(i >= 4 && i < 8)
-        //   properties["variables"]["Resolutions"]["vtxCharged"][i - 4] = nullptr;
+        //   Utils::properties["variables"]["Resolutions"]["vtxCharged"][i - 4] = nullptr;
         // else if( i == 8 )
-        //   properties["variables"]["Resolutions"]["rhoCharged"] = nullptr;
+        //   Utils::properties["variables"]["Resolutions"]["rhoCharged"] = nullptr;
         // else if( i == 9 )
-        //   properties["variables"]["Resolutions"]["pathCharged"] = nullptr;
+        //   Utils::properties["variables"]["Resolutions"]["pathCharged"] = nullptr;
         if (i >= 0 && i < 4)
-          properties["variables"]["Resolutions"]["momNeutral"][interface][i] = nullptr;
+          Utils::properties["variables"]["Resolutions"]["momNeutral"][interface][i] = nullptr;
         else if (i >= 4 && i < 8)
-          properties["variables"]["Resolutions"]["vtxNeutral"][interface][i - 4] = nullptr;
+          Utils::properties["variables"]["Resolutions"]["vtxNeutral"][interface][i - 4] = nullptr;
         else if (i == 8)
-          properties["variables"]["Resolutions"]["rhoNeutral"][interface] = nullptr;
+          Utils::properties["variables"]["Resolutions"]["rhoNeutral"][interface] = nullptr;
         else if (i == 9)
-          properties["variables"]["Resolutions"]["pathNeutral"][interface] = nullptr;
+          Utils::properties["variables"]["Resolutions"]["pathNeutral"][interface] = nullptr;
       }
 
       pulls[j][i]->SetLineWidth(5);
@@ -1776,8 +1776,8 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
     legend->Clear();
   }
 
-  std::ofstream outfile(propName);
-  outfile << properties.dump(4);
+  std::ofstream outfile(Paths::propName);
+  outfile << Utils::properties.dump(4);
   outfile.close();
 
   return 0;

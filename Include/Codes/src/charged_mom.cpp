@@ -16,11 +16,11 @@ namespace KLOE
     mom_vec[2] = CotvOld * 1000. / abs(CurvOld);
 
     if (mode == 1)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mPiCh, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mPiCh, 2));
     else if (mode == 2)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mElec, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mElec, 2));
     else if (mode == 3)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mMuon, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mMuon, 2));
   }
 
   template <typename F, typename T>
@@ -31,11 +31,11 @@ namespace KLOE
     mom_vec[2] = _CotV[i] * 1000. / abs(_CurV[i]);
 
     if (_mode == 1)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mPiCh, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mPiCh, 2));
     else if (_mode == 2)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mElec, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mElec, 2));
     else if (_mode == 3)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(mMuon, 2));
+      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mMuon, 2));
   }
 
   template <typename F, typename T>
@@ -61,10 +61,10 @@ namespace KLOE
         momVecMC(numberOfMomenta * 3),
         momVecSmeared(numberOfMomenta * 3);
 
-    std::vector<double> elems = properties["momSmearing"]["covarianceMatrix"]["fElements"].get<std::vector<Double_t>>();
+    std::vector<double> elems = Utils::properties["momSmearing"]["covarianceMatrix"]["fElements"].get<std::vector<Double_t>>();
 
-    Int_t nRows = properties["momSmearing"]["covarianceMatrix"]["fNrows"],
-          nCols = properties["momSmearing"]["covarianceMatrix"]["fNcols"];
+    Int_t nRows = Utils::properties["momSmearing"]["covarianceMatrix"]["fNrows"],
+          nCols = Utils::properties["momSmearing"]["covarianceMatrix"]["fNcols"];
 
     TMatrixT<Double_t>
         covMatrix(nRows, nCols, elems.data());
@@ -117,8 +117,8 @@ namespace KLOE
                   momVecSmeared[5] = mom_vec2Tmp[2];
                 }
 
-                energyPion[0] = sqrt(pow(momVecSmeared[0], 2) + pow(momVecSmeared[1], 2) + pow(momVecSmeared[2], 2) + pow(mPiCh, 2));
-                energyPion[1] = sqrt(pow(momVecSmeared[3], 2) + pow(momVecSmeared[4], 2) + pow(momVecSmeared[5], 2) + pow(mPiCh, 2));
+                energyPion[0] = sqrt(pow(momVecSmeared[0], 2) + pow(momVecSmeared[1], 2) + pow(momVecSmeared[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+                energyPion[1] = sqrt(pow(momVecSmeared[3], 2) + pow(momVecSmeared[4], 2) + pow(momVecSmeared[5], 2) + pow(PhysicsConstants::mPiCh, 2));
 
                 for (Int_t k = 0; k < 3; k++)
                   KchTmp[k] = momVecSmeared[k] + momVecSmeared[k + 3];
@@ -129,7 +129,7 @@ namespace KLOE
                 KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
                 KchTmp[4] = sqrt(KchTmp[4]);
 
-                if (vtaken[0] <= -1 || abs(KchTmp[5] - mK0) < abs(KchRec[5] - mK0))
+                if (vtaken[0] <= -1 || abs(KchTmp[5] - PhysicsConstants::mK0) < abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
                   vtaken[1] = j1;
@@ -225,8 +225,8 @@ namespace KLOE
                   momVecSmeared[5] = mom_vec2Tmp[2];
                 }
 
-                energyPion[0] = sqrt(pow(momVecSmeared[0], 2) + pow(momVecSmeared[1], 2) + pow(momVecSmeared[2], 2) + pow(mPiCh, 2));
-                energyPion[1] = sqrt(pow(momVecSmeared[3], 2) + pow(momVecSmeared[4], 2) + pow(momVecSmeared[5], 2) + pow(mPiCh, 2));
+                energyPion[0] = sqrt(pow(momVecSmeared[0], 2) + pow(momVecSmeared[1], 2) + pow(momVecSmeared[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+                energyPion[1] = sqrt(pow(momVecSmeared[3], 2) + pow(momVecSmeared[4], 2) + pow(momVecSmeared[5], 2) + pow(PhysicsConstants::mPiCh, 2));
 
                 for (Int_t k = 0; k < 3; k++)
                   KchTmp[k] = momVecSmeared[k] + momVecSmeared[k + 3];
@@ -236,7 +236,7 @@ namespace KLOE
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
                 KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
                 KchTmp[4] = sqrt(KchTmp[4]);
-                if (vtaken[0] <= -1 || abs(KchTmp[5] - mK0) < abs(KchRec[5] - mK0))
+                if (vtaken[0] <= -1 || abs(KchTmp[5] - PhysicsConstants::mK0) < abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
                   vtaken[1] = j1;
@@ -253,8 +253,8 @@ namespace KLOE
                     trk2[k] = momVecSmeared[k + 3];
                   }
 
-                  trk1[3] = sqrt(pow(trk1[0], 2) + pow(trk1[1], 2) + pow(trk1[2], 2) + pow(mPiCh, 2));
-                  trk2[3] = sqrt(pow(trk2[0], 2) + pow(trk2[1], 2) + pow(trk2[2], 2) + pow(mPiCh, 2));
+                  trk1[3] = sqrt(pow(trk1[0], 2) + pow(trk1[1], 2) + pow(trk1[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+                  trk2[3] = sqrt(pow(trk2[0], 2) + pow(trk2[1], 2) + pow(trk2[2], 2) + pow(PhysicsConstants::mPiCh, 2));
 
                   found = true;
                 }
@@ -320,7 +320,7 @@ namespace KLOE
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
                 KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
                 KchTmp[4] = sqrt(KchTmp[4]);
-                if (vtaken[0] <= -1 || abs(KchTmp[5] - mK0) < abs(KchRec[5] - mK0))
+                if (vtaken[0] <= -1 || abs(KchTmp[5] - PhysicsConstants::mK0) < abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
                   vtaken[1] = j1;
@@ -400,7 +400,7 @@ namespace KLOE
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
                 KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
                 KchTmp[4] = sqrt(KchTmp[4]);
-                if (vtaken[0] <= -1 || abs(KchTmp[5] - mK0) < abs(KchRec[5] - mK0))
+                if (vtaken[0] <= -1 || abs(KchTmp[5] - PhysicsConstants::mK0) < abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
                   vtaken[1] = j1;
@@ -563,7 +563,7 @@ namespace KLOE
   {
     std::string
         name = "";
-    name = base_path + logs_dir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
+    name = Paths::base_path + Paths::logs_dir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
 
     ErrorHandling::ErrorLogs logger(name);
 
@@ -597,11 +597,11 @@ namespace KLOE
     beta_gamma_sq = pow(pb_mod, 2) / (pow(pboost[3], 2) - pow(pb_mod, 2));
     gamma_sq = 1. + beta_gamma_sq;
 
-    pcm_sq = 0.25 * (pow(pboost[3], 2) - pow(pb_mod, 2)) - pow(mK0, 2);
+    pcm_sq = 0.25 * (pow(pboost[3], 2) - pow(pb_mod, 2)) - pow(PhysicsConstants::mK0, 2);
 
-    C = pow(beta_gamma_sq * pow(mK0, 2) - pcm_sq, 2);
+    C = pow(beta_gamma_sq * pow(PhysicsConstants::mK0, 2) - pcm_sq, 2);
     A = pow(gamma_sq * (1. - beta_sq * cosb_sq), 2);
-    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * pow(mK0, 2) - pcm_sq) - 2. * beta_gamma_sq * pow(mK0, 2) * cosb_sq);
+    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * pow(PhysicsConstants::mK0, 2) - pcm_sq) - 2. * beta_gamma_sq * pow(PhysicsConstants::mK0, 2) * cosb_sq);
 
     F
         disc = pow(B, 2) - A * C;
@@ -645,9 +645,9 @@ namespace KLOE
     for (Int_t i = 0; i < 3; i++)
       pKaonBoost[i] = pKaon[i] * (pK_from_boost / pK_mod);
 
-    pKaonBoost[3] = sqrt(pow(pK_from_boost, 2) + pow(mK0, 2));
+    pKaonBoost[3] = sqrt(pow(pK_from_boost, 2) + pow(PhysicsConstants::mK0, 2));
     pKaonBoost[4] = pK_from_boost;
-    pKaonBoost[5] = mK0;
+    pKaonBoost[5] = PhysicsConstants::mK0;
     pKaonBoost[6] = pKaon[6];
     pKaonBoost[7] = pKaon[7];
     pKaonBoost[8] = pKaon[8];
@@ -659,7 +659,7 @@ namespace KLOE
   {
     std::string
         name = "";
-    name = base_path + logs_dir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
+    name = Paths::base_path + Paths::logs_dir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
 
     ErrorHandling::ErrorLogs logger(name);
 
@@ -693,11 +693,11 @@ namespace KLOE
     beta_gamma_sq = pow(pb_mod, 2) / (pow(pboost[3], 2) - pow(pb_mod, 2));
     gamma_sq = 1. + beta_gamma_sq;
 
-    pcm_sq = 0.25 * (pow(pboost[3], 2) - pow(pb_mod, 2)) - pow(mK0, 2);
+    pcm_sq = 0.25 * (pow(pboost[3], 2) - pow(pb_mod, 2)) - pow(PhysicsConstants::mK0, 2);
 
-    C = pow(beta_gamma_sq * pow(mK0, 2) - pcm_sq, 2);
+    C = pow(beta_gamma_sq * pow(PhysicsConstants::mK0, 2) - pcm_sq, 2);
     A = pow(gamma_sq * (1. - beta_sq * cosb_sq), 2);
-    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * pow(mK0, 2) - pcm_sq) - 2. * beta_gamma_sq * pow(mK0, 2) * cosb_sq);
+    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * pow(PhysicsConstants::mK0, 2) - pcm_sq) - 2. * beta_gamma_sq * pow(PhysicsConstants::mK0, 2) * cosb_sq);
 
     F
         disc = pow(B, 2) - A * C;
@@ -741,9 +741,9 @@ namespace KLOE
     for (Int_t i = 0; i < 3; i++)
       pKaonBoost[i] = pKaon[i] * (pK_from_boost / pK_mod);
 
-    pKaonBoost[3] = sqrt(pow(pK_from_boost, 2) + pow(mK0, 2));
+    pKaonBoost[3] = sqrt(pow(pK_from_boost, 2) + pow(PhysicsConstants::mK0, 2));
     pKaonBoost[4] = pK_from_boost;
-    pKaonBoost[5] = mK0;
+    pKaonBoost[5] = PhysicsConstants::mK0;
     pKaonBoost[6] = pKaon[6];
     pKaonBoost[7] = pKaon[7];
     pKaonBoost[8] = pKaon[8];
@@ -756,7 +756,7 @@ namespace KLOE
   {
     std::string
         name = "";
-    name = base_path + logs_dir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
+    name = Paths::base_path + Paths::logs_dir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
 
     ErrorHandling::ErrorLogs logger(name);
 
@@ -792,7 +792,7 @@ namespace KLOE
   {
     std::string
         name = "";
-    name = base_path + logs_dir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
+    name = Paths::base_path + Paths::logs_dir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
 
     ErrorHandling::ErrorLogs logger(name);
 

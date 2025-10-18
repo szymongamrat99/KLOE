@@ -24,7 +24,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	ConfigManager &config = ConfigManager::getInstance();
 
 	// =============================================================================
-	BaseKinematics
+	KLOE::BaseKinematics
 			baseKin;
 	NeutRec4
 			neutVars;

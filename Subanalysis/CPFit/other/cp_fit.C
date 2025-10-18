@@ -65,7 +65,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
         chain->GetEntry(i);
         tree->GetEntry(i);
 
-        if(Chi2 < 40 && abs(minv4gam - mK0) < 76 && abs(Kchrec[5] - mK0) < 1.2 && Qmiss < 3.75)
+        if(Chi2 < 40 && abs(minv4gam - PhysicsConstants::mK0) < 76 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75)
         {
             if(mcflag == 1)
             {
@@ -124,7 +124,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
  
     minimum->SetFunction(minimized_function);
 
-    const Double_t init_vars[num_of_vars] = {Re, M_PI*Im_nonCPT/180., 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, 
+    const Double_t init_vars[num_of_vars] = {PhysicsConstants::Re, M_PI*PhysicsConstants::Im_nonCPT/180., 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, 
                    step[num_of_vars] = {1E-5, 1E-5, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
 
     Double_t limit_span_signal = 0.3, limit_span = 0.3 , limit_pars = 1.0;
@@ -175,10 +175,10 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     Double_t sum_of_events = 0., fractions[6] = {0.};
 
-    for(Int_t i = 0; i < channNum; i++)
+    for(Int_t i = 0; i < KLOE::channNum; i++)
       sum_of_events += event.time_diff[i].size();
 
-    for(Int_t i = 0; i < channNum; i++)
+    for(Int_t i = 0; i < KLOE::channNum; i++)
      fractions[i] = 100*event.time_diff[i].size()/sum_of_events;
 
     std::ofstream myfile_num;
@@ -194,7 +194,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     Double_t par[2] = {minimum->X()[0], minimum->X()[1]};
 
-    for(UInt_t i = 0; i < channNum; i++)
+    for(UInt_t i = 0; i < KLOE::channNum; i++)
     {
         for(UInt_t j = 0; j < event.time_diff[i].size(); j++)
         {
@@ -236,7 +236,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
     event.frac[4]->Scale(minimum->X()[9]*event.frac[4]->GetEntries() / event.frac[4]->Integral(0, nbins + 1) );
     event.frac[5]->Scale(minimum->X()[10]*event.frac[5]->GetEntries() / event.frac[5]->Integral(0, nbins + 1) );
 
-    for(UInt_t i = 0; i < channNum; i++)
+    for(UInt_t i = 0; i < KLOE::channNum; i++)
     {
         event.mc_sum->Add(event.frac[i]);
 
@@ -299,7 +299,7 @@ void cp_fit(Bool_t check_corr = false, TString mode = "")
 
     TLegend *legend_chann = new TLegend(0.6,0.5,0.9,0.9);
     legend_chann->SetFillColor(kWhite);
-    for(UInt_t i = 0; i < channNum; i++)
+    for(UInt_t i = 0; i < KLOE::channNum; i++)
     {
       legend_chann->AddEntry(event.frac[i],channName[i],"l");
       event.frac[i]->Draw("HISTSAME");

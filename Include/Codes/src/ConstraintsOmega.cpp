@@ -135,5 +135,5 @@ Double_t ConstraintsOmega::MinvConsv(Double_t *x, Double_t *p)
   std::map<std::string, Float_t> minvModes = {
       {"omega", omega.total[5]}};
 
-  return minvModes[_minvMode] - mOmega; // MeV/c^2
+  return minvModes[_minvMode] - PhysicsConstants::mOmega; // MeV/c^2
 }

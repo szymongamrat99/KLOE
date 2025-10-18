@@ -250,27 +250,27 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
   Knerec[4] = sqrt(pow(Knerec[0], 2) + pow(Knerec[1], 2) + pow(Knerec[2], 2));
 
-  Float_t vKchFit = cVel * KchboostFit[4] / KchboostFit[3],
+  Float_t vKchFit = PhysicsConstants::cVel * KchboostFit[4] / KchboostFit[3],
           pathKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
                             pow(KchboostFit[7] - ipFit[1], 2) +
                             pow(KchboostFit[8] - ipFit[2], 2)),
           tKchFit = KchboostFit[9] / (0.0895),
-          vKneFit = cVel * KnereclorFit[4] / KnereclorFit[3],
+          vKneFit = PhysicsConstants::cVel * KnereclorFit[4] / KnereclorFit[3],
           pathKneFit = sqrt(pow(KnereclorFit[6] - ipFit[0], 2) +
                             pow(KnereclorFit[7] - ipFit[1], 2) +
                             pow(KnereclorFit[8] - ipFit[2], 2)),
           tKneFit = KnereclorFit[9] / (0.0895),
-          vKneMC = cVel * Knemc[4] / Knemc[3],
-          vKne = cVel * Knerec[4] / Knerec[3],
+          vKneMC = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
+          vKne = PhysicsConstants::cVel * Knerec[4] / Knerec[3],
           pathKne = sqrt(pow(KneTriangle[6] - ip[0], 2) +
                          pow(KneTriangle[7] - ip[1], 2) +
                          pow(KneTriangle[8] - ip[2], 2)),
           tKne = pathKne / (vKne * 0.0895);
 
-  Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - mPi0, 2) +
-                                    pow(pi02Fit[5] - mPi0, 2)),
-          combinedMassPi0 = sqrt(pow(pi01[5] - mPi0, 2) +
-                                 pow(pi02[5] - mPi0, 2));
+  Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
+                                    pow(pi02Fit[5] - PhysicsConstants::mPi0, 2)),
+          combinedMassPi0 = sqrt(pow(pi01[5] - PhysicsConstants::mPi0, 2) +
+                                 pow(pi02[5] - PhysicsConstants::mPi0, 2));
 
   Float_t photon1path = sqrt(pow(photonFit1[4] - KnerecFit[6], 2) +
                              pow(photonFit1[5] - KnerecFit[7], 2) +
@@ -285,10 +285,10 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                              pow(photonFit4[5] - KnerecFit[7], 2) +
                              pow(photonFit4[6] - KnerecFit[8], 2));
 
-  Float_t trc1Fit = photonFit1[7] - photon1path / cVel - tKneFit * 0.0895,
-          trc2Fit = photonFit2[7] - photon2path / cVel - tKneFit * 0.0895,
-          trc3Fit = photonFit3[7] - photon3path / cVel - tKneFit * 0.0895,
-          trc4Fit = photonFit4[7] - photon4path / cVel - tKneFit * 0.0895,
+  Float_t trc1Fit = photonFit1[7] - photon1path / PhysicsConstants::cVel - tKneFit * 0.0895,
+          trc2Fit = photonFit2[7] - photon2path / PhysicsConstants::cVel - tKneFit * 0.0895,
+          trc3Fit = photonFit3[7] - photon3path / PhysicsConstants::cVel - tKneFit * 0.0895,
+          trc4Fit = photonFit4[7] - photon4path / PhysicsConstants::cVel - tKneFit * 0.0895,
           TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
   Float_t deltaTfit = tKchFit - tKneFit,
@@ -309,16 +309,16 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["py_Kch"]->Fill(Kchrec[1] - Kchmc[1]);
     histsReconstructed["pz_Kch"]->Fill(Kchrec[2] - Kchmc[2]);
     histsReconstructed["Energy_Kch"]->Fill(Kchrec[3] - Kchmc[3]);
-    histsReconstructed["mass_Kch"]->Fill(Kchrec[5] - mK0);
+    histsReconstructed["mass_Kch"]->Fill(Kchrec[5] - PhysicsConstants::mK0);
 
     histsReconstructed["px_Kne"]->Fill(Knerec[0] - Knemc[0]);
     histsReconstructed["py_Kne"]->Fill(Knerec[1] - Knemc[1]);
     histsReconstructed["pz_Kne"]->Fill(Knerec[2] - Knemc[2]);
     histsReconstructed["Energy_Kne"]->Fill(Knerec[3] - Knemc[3]);
-    histsReconstructed["mass_Kne"]->Fill(*minv4gam - mK0);
+    histsReconstructed["mass_Kne"]->Fill(*minv4gam - PhysicsConstants::mK0);
 
-    histsReconstructed["mass_pi01"]->Fill(pi01[5] - mPi0);
-    histsReconstructed["mass_pi02"]->Fill(pi02[5] - mPi0);
+    histsReconstructed["mass_pi01"]->Fill(pi01[5] - PhysicsConstants::mPi0);
+    histsReconstructed["mass_pi02"]->Fill(pi02[5] - PhysicsConstants::mPi0);
 
     histsReconstructed["vtxNeu_x"]->Fill(KneTriangle[6] - Knemc[6]);
     histsReconstructed["vtxNeu_y"]->Fill(KneTriangle[7] - Knemc[7]);
@@ -377,16 +377,16 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsFittedSignal["py_Kch"]->Fill(KchrecFit[1] - Kchmc[1]);
     histsFittedSignal["pz_Kch"]->Fill(KchrecFit[2] - Kchmc[2]);
     histsFittedSignal["Energy_Kch"]->Fill(KchrecFit[3] - Kchmc[3]);
-    histsFittedSignal["mass_Kch"]->Fill(KchrecFit[5] - mK0);
+    histsFittedSignal["mass_Kch"]->Fill(KchrecFit[5] - PhysicsConstants::mK0);
 
     histsFittedSignal["px_Kne"]->Fill(KnerecFit[0] - Knemc[0]);
     histsFittedSignal["py_Kne"]->Fill(KnerecFit[1] - Knemc[1]);
     histsFittedSignal["pz_Kne"]->Fill(KnerecFit[2] - Knemc[2]);
     histsFittedSignal["Energy_Kne"]->Fill(KnerecFit[3] - Knemc[3]);
-    histsFittedSignal["mass_Kne"]->Fill(KnerecFit[5] - mK0);
+    histsFittedSignal["mass_Kne"]->Fill(KnerecFit[5] - PhysicsConstants::mK0);
 
-    histsFittedSignal["mass_pi01"]->Fill(pi01Fit[5] - mPi0);
-    histsFittedSignal["mass_pi02"]->Fill(pi02Fit[5] - mPi0);
+    histsFittedSignal["mass_pi01"]->Fill(pi01Fit[5] - PhysicsConstants::mPi0);
+    histsFittedSignal["mass_pi02"]->Fill(pi02Fit[5] - PhysicsConstants::mPi0);
 
     histsFittedSignal["chi2_signalKinFit"]->Fill(*Chi2SignalKinFit);
     histsFittedSignal["chi2_trilaterationKinFit"]->Fill(*Chi2TriKinFit);

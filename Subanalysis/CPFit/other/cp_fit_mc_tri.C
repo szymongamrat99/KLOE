@@ -75,13 +75,13 @@ void cp_fit(Bool_t check = false, TString mode = "")
     {
         chain->GetEntry(i);
 
-        if(done4 == 1)// && Chi2 < 40 && abs(fourKnetri[5] - mK0) < 76 && abs(Kchrec[5] - mK0) < 1.2 && Qmiss < 3.75)
+        if(done4 == 1)// && Chi2 < 40 && abs(fourKnetri[5] - PhysicsConstants::mK0) < 76 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75)
         {
-            velocity_kch = cVel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
+            velocity_kch = PhysicsConstants::cVel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
 
-            velocity_kne = cVel*sqrt(pow(fourKnetri[0],2) + pow(fourKnetri[1],2) + pow(fourKnetri[2],2))/fourKnetri[3];
+            velocity_kne = PhysicsConstants::cVel*sqrt(pow(fourKnetri[0],2) + pow(fourKnetri[1],2) + pow(fourKnetri[2],2))/fourKnetri[3];
 
-            Dtboostlor = ((sqrt(pow(Kchboost[6] - ip[0],2) + pow(Kchboost[7] - ip[1],2) + pow(Kchboost[8] - ip[2],2))/velocity_kch) - (sqrt(pow(fourKnetri[6] - ip[0],2) + pow(fourKnetri[7] - ip[1],2) + pow(fourKnetri[8] - ip[2],2))/velocity_kne))/tau_S_nonCPT;
+            Dtboostlor = ((sqrt(pow(Kchboost[6] - ip[0],2) + pow(Kchboost[7] - ip[1],2) + pow(Kchboost[8] - ip[2],2))/velocity_kch) - (sqrt(pow(fourKnetri[6] - ip[0],2) + pow(fourKnetri[7] - ip[1],2) + pow(fourKnetri[8] - ip[2],2))/velocity_kne))/PhysicsConstants::tau_S_nonCPT;
 
             if(mcflag == 1)
             {
@@ -142,7 +142,7 @@ void cp_fit(Bool_t check = false, TString mode = "")
  
     minimum->SetFunction(minimized_function);
 
-    const Double_t init_vars[num_of_vars] = {Re, M_PI*Im_nonCPT/180., 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, 
+    const Double_t init_vars[num_of_vars] = {PhysicsConstants::Re, M_PI*PhysicsConstants::Im_nonCPT/180., 1.0, 1.0, 1.0, 1.0, 1.0, 1.0}, 
                    step[num_of_vars] = {1E-5, 1E-5, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
 
     Double_t limit_span_signal = 0.3, limit_span = 0.3 , limit_pars = 1.0;
@@ -174,7 +174,7 @@ void cp_fit(Bool_t check = false, TString mode = "")
 
     Double_t par[2] = {minimum->X()[0], minimum->X()[1]};
 
-    for(UInt_t i = 0; i < channNum; i++)
+    for(UInt_t i = 0; i < KLOE::channNum; i++)
     {
 
         std::cout <<  event.time_diff_rand_mc[i].size() << std::endl;
@@ -258,14 +258,14 @@ void cp_fit(Bool_t check = false, TString mode = "")
 
     rp->GetUpperPad()->cd();
 
-    for(UInt_t i = 0; i < channNum; i++)
+    for(UInt_t i = 0; i < KLOE::channNum; i++)
     {
         event.frac[i]->Draw("HISTSAME");
     }
 
     TLegend *legend_chann = new TLegend(0.6,0.5,0.9,0.9);
     legend_chann->SetFillColor(kWhite);
-    for(UInt_t i = 0; i < channNum; i++)
+    for(UInt_t i = 0; i < KLOE::channNum; i++)
     {
       legend_chann->AddEntry(event.frac[i],channName[i],"l");
       event.frac[i]->Draw("HISTSAME");

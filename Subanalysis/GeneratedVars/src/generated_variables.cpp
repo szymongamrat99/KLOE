@@ -134,7 +134,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 					Kl[0] = mom_mc[0][j];
 					Kl[1] = mom_mc[1][j];
 					Kl[2] = mom_mc[2][j];
-					Kl[5] = mK0;
+					Kl[5] = PhysicsConstants::mK0;
 					Kl[4] = pow(Kl[0], 2) + pow(Kl[1], 2) + pow(Kl[2], 2);
 					Kl[3] = sqrt(Kl[4] + pow(Kl[5], 2));
 					Kl[4] = sqrt(Kl[4]);
@@ -148,7 +148,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 					Ks[0] = mom_mc[0][j];
 					Ks[1] = mom_mc[1][j];
 					Ks[2] = mom_mc[2][j];
-					Ks[5] = mK0;
+					Ks[5] = PhysicsConstants::mK0;
 					Ks[4] = pow(Ks[0], 2) + pow(Ks[1], 2) + pow(Ks[2], 2);
 					Ks[3] = sqrt(Ks[4] + pow(Ks[5], 2));
 					Ks[4] = sqrt(Ks[4]);
@@ -187,7 +187,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 						trkMC[0][3] = sqrt(pow(trkMC[0][0], 2) +
 															 pow(trkMC[0][1], 2) +
 															 pow(trkMC[0][2], 2) +
-															 pow(mPiCh, 2));
+															 pow(PhysicsConstants::mPiCh, 2));
 					}
 					else
 					{
@@ -197,7 +197,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 						trkMC[1][3] = sqrt(pow(trkMC[1][0], 2) +
 															 pow(trkMC[1][1], 2) +
 															 pow(trkMC[1][2], 2) +
-															 pow(mPiCh, 2));
+															 pow(PhysicsConstants::mPiCh, 2));
 					}
 				}
 			}
@@ -223,11 +223,11 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 					pgammc[count][5] = cluster[1];
 					pgammc[count][6] = cluster[2];
 
-					Float_t beta_c = cVel * KnemcOld[4] / KnemcOld[3], length = sqrt(pow(KnemcOld[6] - ipmcOld[0], 2) + pow(KnemcOld[7] - ipmcOld[1], 2) + pow(KnemcOld[8] - ipmcOld[2], 2)), time_K = length / beta_c;
+					Float_t beta_c = PhysicsConstants::cVel * KnemcOld[4] / KnemcOld[3], length = sqrt(pow(KnemcOld[6] - ipmcOld[0], 2) + pow(KnemcOld[7] - ipmcOld[1], 2) + pow(KnemcOld[8] - ipmcOld[2], 2)), time_K = length / beta_c;
 
 					Float_t length_clus = sqrt(pow(cluster[0] - KnemcOld[6], 2) + pow(cluster[1] - KnemcOld[7], 2) + pow(cluster[2] - KnemcOld[8], 2));
 
-					pgammc[count][7] = time_K + (length_clus / cVel);
+					pgammc[count][7] = time_K + (length_clus / PhysicsConstants::cVel);
 
 					count++;
 				}
@@ -291,14 +291,14 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 	file->Close();
 	delete file;
 
-	properties["variables"]["tree"]["filename"]["generatedvars"] = (std::string)name;
-	properties["variables"]["tree"]["treename"]["generatedvars"] = (std::string)gen_vars_tree;
+	Utils::properties["variables"]["tree"]["filename"]["generatedvars"] = (std::string)name;
+	Utils::properties["variables"]["tree"]["treename"]["generatedvars"] = (std::string)gen_vars_tree;
 
-	properties["lastScript"] = "Generated variables for Monte Carlo.";
-	properties["lastUpdate"] = Obj.getCurrentTimestamp();
+	Utils::properties["lastScript"] = "Generated variables for Monte Carlo.";
+	Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();
 
-	std::ofstream outfile(propName);
-	outfile << properties.dump(4);
+	std::ofstream outfile(Paths::propName);
+	outfile << Utils::properties.dump(4);
 	outfile.close();
 
 	return 0;

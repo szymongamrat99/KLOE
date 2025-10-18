@@ -11,8 +11,8 @@
 
 struct KaonMassReconstructorFixture {
     KLOE::pm00 obj;
-    const Double_t mPiCh = 139.57061;  // Charged pion mass [MeV/c²]
-    const Double_t mK0 = 497.611;      // K⁰ meson mass [MeV/c²]
+    const Double_t PhysicsConstants::mPiCh = 139.57061;  // Charged pion mass [MeV/c²]
+    const Double_t PhysicsConstants::mK0 = 497.611;      // K⁰ meson mass [MeV/c²]
     const Double_t EPSILON = 1e-4;     // Precision for floating-point comparisons
 
     // Helper function to create test kaon data
@@ -47,7 +47,7 @@ BOOST_FIXTURE_TEST_SUITE(KaonMassReconstructorTests, KaonMassReconstructorFixtur
 BOOST_AUTO_TEST_CASE(BackToBackPionsTest) {
     // Test case with back-to-back pions in kaon rest frame
     Double_t p = 110.4;  // Momentum magnitude for K⁰→π⁺π⁻
-    Double_t E = std::sqrt(p*p + mK0*mK0);
+    Double_t E = std::sqrt(p*p + PhysicsConstants::mK0*PhysicsConstants::mK0);
 
     // Kaon moving along x-axis
     auto kaonBoost = createKaonBoost(p, 0, 0, E, 20.0, 0, 0);
@@ -55,16 +55,16 @@ BOOST_AUTO_TEST_CASE(BackToBackPionsTest) {
 
     // Two pions with opposite momenta
     auto tracks = createTracks(
-        p/2, 0, 0, std::sqrt(pow(p/2, 2) + mPiCh*mPiCh),
-        -p/2, 0, 0, std::sqrt(pow(p/2, 2) + mPiCh*mPiCh)
+        p/2, 0, 0, std::sqrt(pow(p/2, 2) + PhysicsConstants::mPiCh*PhysicsConstants::mPiCh),
+        -p/2, 0, 0, std::sqrt(pow(p/2, 2) + PhysicsConstants::mPiCh*PhysicsConstants::mPiCh)
     );
 
     auto result = KLOE::KaonMassReconstructor::reconstructKaonMass(
-        kaonBoost, ip, tracks, mPiCh, obj
+        kaonBoost, ip, tracks, PhysicsConstants::mPiCh, obj
     );
 
     // Check kaon mass
-    BOOST_CHECK_CLOSE(result.KaonTwoBody[5], mK0, EPSILON);
+    BOOST_CHECK_CLOSE(result.KaonTwoBody[5], PhysicsConstants::mK0, EPSILON);
     
     // Check momentum conservation
     Double_t totalPx = result.track1TwoBody[0] + result.track2TwoBody[0];
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(BackToBackPionsTest) {
 BOOST_AUTO_TEST_CASE(PerpendicularPionsTest) {
     // Test case with pions at 90 degrees in kaon rest frame
     Double_t p = 110.4;
-    Double_t E = std::sqrt(p*p + mK0*mK0);
+    Double_t E = std::sqrt(p*p + PhysicsConstants::mK0*PhysicsConstants::mK0);
     Double_t pPi = p/std::sqrt(2.0);  // Pion momentum
 
     auto kaonBoost = createKaonBoost(0, p, 0, E, 0, 20.0, 0);
@@ -87,16 +87,16 @@ BOOST_AUTO_TEST_CASE(PerpendicularPionsTest) {
 
     // Pions at 90 degrees to each other
     auto tracks = createTracks(
-        pPi, 0, 0, std::sqrt(pPi*pPi + mPiCh*mPiCh),
-        0, pPi, 0, std::sqrt(pPi*pPi + mPiCh*mPiCh)
+        pPi, 0, 0, std::sqrt(pPi*pPi + PhysicsConstants::mPiCh*PhysicsConstants::mPiCh),
+        0, pPi, 0, std::sqrt(pPi*pPi + PhysicsConstants::mPiCh*PhysicsConstants::mPiCh)
     );
 
     auto result = KLOE::KaonMassReconstructor::reconstructKaonMass(
-        kaonBoost, ip, tracks, mPiCh, obj
+        kaonBoost, ip, tracks, PhysicsConstants::mPiCh, obj
     );
 
     // Check kaon mass
-    BOOST_CHECK_CLOSE(result.KaonTwoBody[5], mK0, EPSILON);
+    BOOST_CHECK_CLOSE(result.KaonTwoBody[5], PhysicsConstants::mK0, EPSILON);
 
     // Check that pions are perpendicular in CM frame
     Double_t dotProduct = 
@@ -115,20 +115,20 @@ BOOST_AUTO_TEST_CASE(BoostInvariantMassTest) {
 
     for(Double_t beta : boosts) {
         Double_t gamma = 1.0/std::sqrt(1.0 - beta*beta);
-        Double_t E = gamma * std::sqrt(p*p + mK0*mK0);
-        Double_t pz = gamma * beta * std::sqrt(p*p + mK0*mK0);
+        Double_t E = gamma * std::sqrt(p*p + PhysicsConstants::mK0*PhysicsConstants::mK0);
+        Double_t pz = gamma * beta * std::sqrt(p*p + PhysicsConstants::mK0*PhysicsConstants::mK0);
 
         auto kaonBoost = createKaonBoost(0, 0, pz, E, 0, 0, 20.0);
         std::vector<Double_t> ip = {0, 0, 0};
 
         // Back-to-back pions in rest frame
         auto tracks = createTracks(
-            p/2, 0, 0, std::sqrt(pow(p/2, 2) + mPiCh*mPiCh),
-            -p/2, 0, 0, std::sqrt(pow(p/2, 2) + mPiCh*mPiCh)
+            p/2, 0, 0, std::sqrt(pow(p/2, 2) + PhysicsConstants::mPiCh*PhysicsConstants::mPiCh),
+            -p/2, 0, 0, std::sqrt(pow(p/2, 2) + PhysicsConstants::mPiCh*PhysicsConstants::mPiCh)
         );
 
         auto result = KLOE::KaonMassReconstructor::reconstructKaonMass(
-            kaonBoost, ip, tracks, mPiCh, obj
+            kaonBoost, ip, tracks, PhysicsConstants::mPiCh, obj
         );
 
         if(baseMass == 0) {
@@ -141,18 +141,18 @@ BOOST_AUTO_TEST_CASE(BoostInvariantMassTest) {
 
 BOOST_AUTO_TEST_CASE(EnergyConservationTest) {
     Double_t p = 110.4;
-    Double_t E = std::sqrt(p*p + mK0*mK0);
+    Double_t E = std::sqrt(p*p + PhysicsConstants::mK0*PhysicsConstants::mK0);
 
-    auto kaonBoost = createKaonBoost(p, p, 0, std::sqrt(2*p*p + mK0*mK0), 20.0, 20.0, 0);
+    auto kaonBoost = createKaonBoost(p, p, 0, std::sqrt(2*p*p + PhysicsConstants::mK0*PhysicsConstants::mK0), 20.0, 20.0, 0);
     std::vector<Double_t> ip = {0, 0, 0};
 
     auto tracks = createTracks(
-        p/2, p/2, 0, std::sqrt(p*p/2 + mPiCh*mPiCh),
-        -p/2, -p/2, 0, std::sqrt(p*p/2 + mPiCh*mPiCh)
+        p/2, p/2, 0, std::sqrt(p*p/2 + PhysicsConstants::mPiCh*PhysicsConstants::mPiCh),
+        -p/2, -p/2, 0, std::sqrt(p*p/2 + PhysicsConstants::mPiCh*PhysicsConstants::mPiCh)
     );
 
     auto result = KLOE::KaonMassReconstructor::reconstructKaonMass(
-        kaonBoost, ip, tracks, mPiCh, obj
+        kaonBoost, ip, tracks, PhysicsConstants::mPiCh, obj
     );
 
     Double_t totalE = result.track1TwoBody[3] + result.track2TwoBody[3];

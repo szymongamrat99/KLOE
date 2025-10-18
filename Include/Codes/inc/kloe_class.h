@@ -113,7 +113,7 @@ namespace KLOE
 
     void calculateTimeOfFlightPhoton()
     {
-      timeOfFlight = path / cVel;
+      timeOfFlight = path / PhysicsConstants::cVel;
     }
 
     void FillFourMom(Float_t &px, Float_t &py, Float_t &pz, Float_t &E)
@@ -203,7 +203,7 @@ namespace KLOE
     {
       calculateBeta();
 
-      lifetimeLAB = path / (beta * cVel);
+      lifetimeLAB = path / (beta * PhysicsConstants::cVel);
     };
 
     void SetTotalVector()
@@ -368,7 +368,7 @@ namespace KLOE
     pm00();
 
     /**
-     * @brief Calculation of the invariant mass using the properties of TLorentzVector.
+     * @brief Calculation of the invariant mass using the Utils::properties of TLorentzVector.
      * @param four_mom Four momentum of the particle.
      */
     void inv_mass_calc(TLorentzVector four_mom);

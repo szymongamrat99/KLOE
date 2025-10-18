@@ -34,10 +34,10 @@ int plots(Int_t firstFile, Int_t lastFile)
   propertyName.push_back("trianglefinal");
   propertyName.push_back("mctruth");
 
-  treeNames[propertyName[0]] = (std::string)properties["variables"]["tree"]["treename"][propertyName[0]];
-  fileNames[propertyName[0]] = (std::string)properties["variables"]["tree"]["filename"][propertyName[0]];
-  treeNames[propertyName[1]] = (std::string)properties["variables"]["tree"]["treename"][propertyName[1]];
-  fileNames[propertyName[1]] = (std::string)properties["variables"]["tree"]["filename"][propertyName[1]];
+  treeNames[propertyName[0]] = (std::string)Utils::properties["variables"]["tree"]["treename"][propertyName[0]];
+  fileNames[propertyName[0]] = (std::string)Utils::properties["variables"]["tree"]["filename"][propertyName[0]];
+  treeNames[propertyName[1]] = (std::string)Utils::properties["variables"]["tree"]["treename"][propertyName[1]];
+  fileNames[propertyName[1]] = (std::string)Utils::properties["variables"]["tree"]["filename"][propertyName[1]];
 
   //
 
@@ -73,12 +73,12 @@ int plots(Int_t firstFile, Int_t lastFile)
   method_dict[1] = "#rho_section";
 
   Double_t
-      width_rho_triangle = properties["variables"]["Resolutions"]["rhoNeutral"]["triTriangle"],
-      width_R_triangle = properties["variables"]["Resolutions"]["pathNeutral"]["triTriangle"],
-      width_rho_pure_triangle = properties["variables"]["Resolutions"]["rhoNeutral"]["triTriangle"],
-      width_R_pure_triangle = properties["variables"]["Resolutions"]["pathNeutral"]["triTriangle"],
-      width_rho_charged = properties["variables"]["Resolutions"]["rhoCharged"],
-      width_R_charged = properties["variables"]["Resolutions"]["pathCharged"];
+      width_rho_triangle = Utils::properties["variables"]["Resolutions"]["rhoNeutral"]["triTriangle"],
+      width_R_triangle = Utils::properties["variables"]["Resolutions"]["pathNeutral"]["triTriangle"],
+      width_rho_pure_triangle = Utils::properties["variables"]["Resolutions"]["rhoNeutral"]["triTriangle"],
+      width_R_pure_triangle = Utils::properties["variables"]["Resolutions"]["pathNeutral"]["triTriangle"],
+      width_rho_charged = Utils::properties["variables"]["Resolutions"]["rhoCharged"],
+      width_R_charged = Utils::properties["variables"]["Resolutions"]["pathCharged"];
 
   Double_t
       max_path = 50.0,
@@ -105,9 +105,9 @@ int plots(Int_t firstFile, Int_t lastFile)
   TString deltaT_name = "";
 
   Double_t
-      dt_min = properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
-      dt_max = properties["variables"]["CPFit"]["histoResults"]["rangeX"][1],
-      dtWidth = properties["variables"]["Resolutions"]["deltaT"];
+      dt_min = Utils::properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
+      dt_max = Utils::properties["variables"]["CPFit"]["histoResults"]["rangeX"][1],
+      dtWidth = Utils::properties["variables"]["Resolutions"]["deltaT"];
 
   Int_t bin_num = floor((dt_max - dt_min) / dtWidth) + 1;
 
@@ -124,30 +124,30 @@ int plots(Int_t firstFile, Int_t lastFile)
   method.push_back("methodA");
 
   Double_t
-      methodA_lower = properties["variables"]["RegenRejection"]["boundaries"][method[1]][0],
-      methodA_higher = properties["variables"]["RegenRejection"]["boundaries"][method[1]][1],
-      methodB_bound = properties["variables"]["RegenRejection"]["boundaries"][method[0]][0],
-      sigma = properties["variables"]["RegenRejection"]["sigma"];
+      methodA_lower = Utils::properties["variables"]["RegenRejection"]["boundaries"][method[1]][0],
+      methodA_higher = Utils::properties["variables"]["RegenRejection"]["boundaries"][method[1]][1],
+      methodB_bound = Utils::properties["variables"]["RegenRejection"]["boundaries"][method[0]][0],
+      sigma = Utils::properties["variables"]["RegenRejection"]["sigma"];
 
   Long64_t count_tot = 0, count_neg_reg = 0, count_pos_reg = 0, count_sig = 0, count_sig_neg = 0, count_sig_pos = 0;
 
   KLOE::pm00 auxilliary;
 
   Double_t
-        meanRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
-        errorRadiusChHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1],
-        meanRadiusChLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0],
-        errorRadiusChLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0],
+        meanRadiusChHigher = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
+        errorRadiusChHigher = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1],
+        meanRadiusChLower = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0],
+        errorRadiusChLower = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0],
         
-        meanRadiusTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1],
-        errorRadiusTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1],
-        meanRadiusTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0],
-        errorRadiusTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0],
+        meanRadiusTriangleHigher = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1],
+        errorRadiusTriangleHigher = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1],
+        meanRadiusTriangleLower = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0],
+        errorRadiusTriangleLower = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0],
         
-        meanRadiusPureTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["pureTriangle"]["spherical"]["mean"][1],
-        errorRadiusPureTriangleHigher = properties["variables"]["RegenRejection"]["results"]["methodA"]["pureTriangle"]["spherical"]["width"][1],
-        meanRadiusPureTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["pureTriangle"]["cylindrical"]["mean"][0],
-        errorRadiusPureTriangleLower = properties["variables"]["RegenRejection"]["results"]["methodA"]["pureTriangle"]["cylindrical"]["width"][0];
+        meanRadiusPureTriangleHigher = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["pureTriangle"]["spherical"]["mean"][1],
+        errorRadiusPureTriangleHigher = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["pureTriangle"]["spherical"]["width"][1],
+        meanRadiusPureTriangleLower = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["pureTriangle"]["cylindrical"]["mean"][0],
+        errorRadiusPureTriangleLower = Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["pureTriangle"]["cylindrical"]["width"][0];
 
   for (Int_t i = 0; i < nentries; i++)
   {
@@ -189,17 +189,17 @@ int plots(Int_t firstFile, Int_t lastFile)
 
       TLorentzVector *momKch = new TLorentzVector(interfcommon_.KchBoost[0], interfcommon_.KchBoost[1], interfcommon_.KchBoost[2], interfcommon_.KchBoost[3]);
 
-      TVector3 boostCh = momKch->BoostVector() * cVel;
+      TVector3 boostCh = momKch->BoostVector() * PhysicsConstants::cVel;
       Double_t tCh = radius_ch[0] / (boostCh.Mag());
 
-      TLorentzVector *posKch = new TLorentzVector(interfcommon_.KchBoost[6] - interfcommon_.ip[0], interfcommon_.KchBoost[7] - interfcommon_.ip[1], interfcommon_.KchBoost[8] - interfcommon_.ip[2], tCh * cVel);
+      TLorentzVector *posKch = new TLorentzVector(interfcommon_.KchBoost[6] - interfcommon_.ip[0], interfcommon_.KchBoost[7] - interfcommon_.ip[1], interfcommon_.KchBoost[8] - interfcommon_.ip[2], tCh * PhysicsConstants::cVel);
 
       TLorentzVector *momKne = new TLorentzVector(interfcommon_.KneRecTriangle[0], interfcommon_.KneRecTriangle[1], interfcommon_.KneRecTriangle[2], interfcommon_.KneRecTriangle[3]);
 
-      TVector3 boostNeu = momKne->BoostVector() * cVel;
+      TVector3 boostNeu = momKne->BoostVector() * PhysicsConstants::cVel;
       Double_t tNeu = radius_tri[0] / (boostNeu.Mag());
 
-      TLorentzVector *posKne = new TLorentzVector(interfcommon_.KneRecTriangle[6] - interfcommon_.ip[0], interfcommon_.KneRecTriangle[7] - interfcommon_.ip[1], interfcommon_.KneRecTriangle[8] - interfcommon_.ip[2], tNeu * cVel);
+      TLorentzVector *posKne = new TLorentzVector(interfcommon_.KneRecTriangle[6] - interfcommon_.ip[0], interfcommon_.KneRecTriangle[7] - interfcommon_.ip[1], interfcommon_.KneRecTriangle[8] - interfcommon_.ip[2], tNeu * PhysicsConstants::cVel);
 
       interfcommon_.DtBoostRec = auxilliary.DeltaT(momKch, posKch, momKne, posKne);
 

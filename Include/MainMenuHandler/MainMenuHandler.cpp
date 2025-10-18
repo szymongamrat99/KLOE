@@ -15,7 +15,7 @@ void MainMenuHandler::runMenuLoop(
     ErrorHandling::InfoCodes& infoCode
     // ConfigWatcher& cfgWatcher
 ) {
-    ConfigWatcher cfgWatcher(propName);
+    ConfigWatcher cfgWatcher(Paths::propName);
 
     bool dataTypeErr = false, menuRangeErr = false;
     do

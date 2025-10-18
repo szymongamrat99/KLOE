@@ -59,7 +59,7 @@ void four_pi::Begin(TTree * /*tree*/)
 
    TString option = GetOption();
 
-   histMgr = new HistManager(channNum, channColor, channNames, kFullCircle, kBlack, kOrange);
+   histMgr = new HistManager(KLOE::channNum, channColor, channNames, kFullCircle, kBlack, kOrange);
 
 
    std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
@@ -71,18 +71,18 @@ void four_pi::Begin(TTree * /*tree*/)
 
    Obj = new KLOE::pm00();
 
-   Float_t pKTwoBody = Obj->TwoBodyDecayMass(mPhi, mK0, mK0);
+   Float_t pKTwoBody = Obj->TwoBodyDecayMass(PhysicsConstants::mPhi, PhysicsConstants::mK0, PhysicsConstants::mK0);
 
    ///////////////////////////////////////////////////////////////////
    cutter->RegisterVariableGetter("InvMassKS", [&]()
                                   { return KchrecKS[5]; });
    cutter->RegisterCentralValueGetter("InvMassKS", [&]()
-                                      { return mK0; });
+                                      { return PhysicsConstants::mK0; });
    ///////////////////////////////////////////////////////////////////
    cutter->RegisterVariableGetter("InvMassKL", [&]()
                                   { return KchrecKL[5]; });
    cutter->RegisterCentralValueGetter("InvMassKL", [&]()
-                                      { return mK0; });
+                                      { return PhysicsConstants::mK0; });
    ///////////////////////////////////////////////////////////////////
    cutter->RegisterVariableGetter("TwoBodyMomKS", [&]()
                                   { return KchrecKSMom; });

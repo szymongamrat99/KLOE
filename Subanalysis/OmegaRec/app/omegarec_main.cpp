@@ -9,7 +9,7 @@ using namespace std;
 int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
   // Set logger for error logging
-  std::string logFilename = (std::string)omegarec_dir + (std::string)logs_dir + "omegaRec_" + Obj.getCurrentDate() + ".log";
+  std::string logFilename = (std::string)omegarec_dir + (std::string)Paths::logs_dir + "omegaRec_" + Obj.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
@@ -18,11 +18,11 @@ int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOp
   Controls::OmegaRec menuOpt;
   // -------------------------------------------------------------------
 
-  Short_t good_clus = properties["variables"]["KinFit"]["Trilateration"]["goodClus"],
-          loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
-          numOfConstraints = properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
-          jmin = properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
-          jmax = properties["variables"]["KinFit"]["Trilateration"]["bunchMax"];
+  Short_t good_clus = Utils::properties["variables"]["KinFit"]["Trilateration"]["goodClus"],
+          loopcount = Utils::properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+          numOfConstraints = Utils::properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+          jmin = Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+          jmax = Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMax"];
 
   bool
       dataTypeErr,

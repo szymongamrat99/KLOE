@@ -163,7 +163,7 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                         kaon_mom[l1][3] += gamma_mom[l1][l2][3];
                                     }
                                                             
-                                    kaon_vel[l1] = cVel*sqrt(pow(kaon_mom[l1][0],2) + pow(kaon_mom[l1][1],2) + pow(kaon_mom[l1][2],2))/(kaon_mom[l1][3]); 
+                                    kaon_vel[l1] = PhysicsConstants::cVel*sqrt(pow(kaon_mom[l1][0],2) + pow(kaon_mom[l1][1],2) + pow(kaon_mom[l1][2],2))/(kaon_mom[l1][3]); 
                                     kaon_len[l1] = sqrt(pow(S.sol[l1][0] - bhabha_vtx[0],2) + pow(S.sol[l1][1] - bhabha_vtx[1],2) + pow(S.sol[l1][2] - bhabha_vtx[2],2));
                                 }
 
@@ -252,7 +252,7 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                         Knetri_tmp[8] = solution[2];
                                         Knetri_tmp[9] = solution[3];
 
-                                        total_err = abs(Knetri_tmp[5] - mK0);
+                                        total_err = abs(Knetri_tmp[5] - PhysicsConstants::mK0);
 
                                 }
                                 else

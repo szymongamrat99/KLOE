@@ -11,14 +11,14 @@ Double_t interf_function(const Float_t x)
 
     // Parameters from PDG2023
 
-    Epsilon = mod_epsilon;
-    Dphi = phi_pm_nonCPT - phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
-    TauKs = tau_S_nonCPT * pow(10, -9);   // PDG fit not assuming CPT (s)
-    TauKl = tau_L * pow(10, -9);          // Kl mean life (s)
-    MassDiff = delta_mass_nonCPT;         // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
+    Epsilon = PhysicsConstants::mod_epsilon;
+    Dphi = PhysicsConstants::phi_pm_nonCPT - PhysicsConstants::phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
+    TauKs = PhysicsConstants::tau_S_nonCPT * pow(10, -9);   // PDG fit not assuming CPT (s)
+    TauKl = PhysicsConstants::tau_L * pow(10, -9);          // Kl mean life (s)
+    MassDiff = PhysicsConstants::delta_mass_nonCPT;         // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
                                           // PDG fit not assuming CPT
-    RePart = Re;
-    ImPart = Im_nonCPT; // Im(epsilon'/epsilon) = Dphi/3;
+    RePart = PhysicsConstants::Re;
+    ImPart = PhysicsConstants::Im_nonCPT; // Im(epsilon'/epsilon) = Dphi/3;
 
     // All parameters are calculated taking into account that DT is in TauKs units
     GammaKs = 1.;

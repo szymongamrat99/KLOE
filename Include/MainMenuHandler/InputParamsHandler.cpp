@@ -6,9 +6,9 @@
 #include <MainMenu.h>
 
 InputParamsHandler::Params InputParamsHandler::getParams(
-    nlohmann::json& properties,
+    nlohmann::json& Utils::properties,
     int lastFileMax,
-    const std::string& propName,
+    const std::string& Paths::propName,
     ErrorHandling::ErrorLogs& logger,
     Controls::Menu* dataType
 ) {
@@ -80,15 +80,15 @@ InputParamsHandler::Params InputParamsHandler::getParams(
         break;
     }
 
-    // Zapis do properties
-    properties["variables"]["rootFiles"]["Data"]["firstFile"] = params.firstFile;
-    properties["variables"]["rootFiles"]["Data"]["lastFile"] = params.lastFile;
-    // properties["variables"]["rootFiles"]["MC"]["firstFile"] = params.firstFile;
-    // properties["variables"]["rootFiles"]["MC"]["lastFile"] = params.lastFile;
+    // Zapis do Utils::properties
+    Utils::properties["variables"]["rootFiles"]["Data"]["firstFile"] = params.firstFile;
+    Utils::properties["variables"]["rootFiles"]["Data"]["lastFile"] = params.lastFile;
+    // Utils::properties["variables"]["rootFiles"]["MC"]["firstFile"] = params.firstFile;
+    // Utils::properties["variables"]["rootFiles"]["MC"]["lastFile"] = params.lastFile;
 
-    std::ofstream outfile(propName);
+    std::ofstream outfile(Paths::propName);
     if (outfile.is_open()) {
-        outfile << properties.dump(4);
+        outfile << Utils::properties.dump(4);
         outfile.close();
     } else {
         auto err = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;

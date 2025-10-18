@@ -371,35 +371,3 @@ Double_t KinFitter::DerivativeCalc(Int_t i, Int_t j)
 
   return derivativeAux;
 };
-
-// void KinFitter::PhotonPairing(std::vector<NeuPart> _Photons)
-// {
-//   Int_t PhotonsNum = _Photons.size();
-//   if (PhotonsNum % 2 != 0)
-//   {
-//     std::cerr << "Liczba fotonów musi być parzysta." << std::endl;
-//     return;
-//   }
-//   const Int_t div = Int_t(PhotonsNum / 2.);
-//   Double_t AuxMinv[div];
-//   Double_t AuxChi2 = 0., AuxChi2Min = 99999.;
-//   do
-//   {
-//     for (Int_t i = 0; i < div; i++)
-//     {
-//       AuxMinv[i] += pow(_Photons[i * div].FourMom[3] + _Photons[i * div + 1].FourMom[3], 2);
-//       for (Int_t j = 0; j < 3; j++)
-//       {
-//         AuxMinv[i] -= pow(_Photons[i * div].FourMom[j] + _Photons[i * div + 1].FourMom[j], 2);
-//       }
-//       AuxMinv[i] = sqrt(AuxMinv[i]);
-//       AuxChi2 += pow(AuxMinv[i] - mPi0, 2);
-//     }
-//     AuxChi2 = sqrt(AuxChi2);
-//     if (AuxChi2 < AuxChi2Min)
-//     {
-//       AuxChi2Min = AuxChi2;
-//     }
-//   } while (std::next_permutation(_Photons.begin(), _Photons.end(), [](const auto & lhs, const auto & rhs)
-//                                  { return lhs.index < rhs.index; }));
-// }

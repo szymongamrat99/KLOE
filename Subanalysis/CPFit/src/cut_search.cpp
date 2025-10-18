@@ -21,7 +21,7 @@
 int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
 	// =============================================================================
-	BaseKinematics
+	KLOE::BaseKinematics
 			baseKin;
 	NeutRec4
 			neutVars;
@@ -90,20 +90,20 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 	// ===========================================================================
 
 	TString
-			filename_trilateration = std::string(properties["variables"]["tree"]["filename"]["trilateration"]),
-			treename_trilateration = std::string(properties["variables"]["tree"]["treename"]["trilateration"]),
+			filename_trilateration = std::string(Utils::properties["variables"]["tree"]["filename"]["trilateration"]),
+			treename_trilateration = std::string(Utils::properties["variables"]["tree"]["treename"]["trilateration"]),
 
-			filename_trilateration_kin_fit = std::string(properties["variables"]["tree"]["filename"]["trilaterationKinFit"]),
-			treename_trilateration_kin_fit = std::string(properties["variables"]["tree"]["treename"]["trilaterationKinFit"]),
+			filename_trilateration_kin_fit = std::string(Utils::properties["variables"]["tree"]["filename"]["trilaterationKinFit"]),
+			treename_trilateration_kin_fit = std::string(Utils::properties["variables"]["tree"]["treename"]["trilaterationKinFit"]),
 
-			filename_triangle = std::string(properties["variables"]["tree"]["filename"]["trianglefinal"]),
-			treename_triangle = std::string(properties["variables"]["tree"]["treename"]["trianglefinal"]),
+			filename_triangle = std::string(Utils::properties["variables"]["tree"]["filename"]["trianglefinal"]),
+			treename_triangle = std::string(Utils::properties["variables"]["tree"]["treename"]["trianglefinal"]),
 
-			filename_omega = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
-			treename_omega = std::string(properties["variables"]["tree"]["treename"]["omegarec"]),
+			filename_omega = std::string(Utils::properties["variables"]["tree"]["filename"]["omegarec"]),
+			treename_omega = std::string(Utils::properties["variables"]["tree"]["treename"]["omegarec"]),
 
-			filename_mctruth = std::string(properties["variables"]["tree"]["filename"]["mctruth"]),
-			treename_mctruth = std::string(properties["variables"]["tree"]["treename"]["mctruth"]);
+			filename_mctruth = std::string(Utils::properties["variables"]["tree"]["filename"]["mctruth"]),
+			treename_mctruth = std::string(Utils::properties["variables"]["tree"]["treename"]["mctruth"]);
 
 	std::vector<TString>
 			file_name,
@@ -248,9 +248,9 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 	UInt_t nentries = chain.GetEntries();
 
 	const Double_t
-			x_min = properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
-			x_max = properties["variables"]["CPFit"]["histoResults"]["rangeX"][1],
-			res_deltaT = properties["variables"]["Resolutions"]["deltaT"];
+			x_min = Utils::properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
+			x_max = Utils::properties["variables"]["CPFit"]["histoResults"]["rangeX"][1],
+			res_deltaT = Utils::properties["variables"]["Resolutions"]["deltaT"];
 	const UInt_t
 			nbins = 1 + ((x_max - x_min) / res_deltaT);
 
@@ -264,7 +264,7 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 	// Initialization of cut formulas
 	Int_t cuts_number = 6;
 
-	Bool_t scanFlag = (Bool_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["flag"];
+	Bool_t scanFlag = (Bool_t)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["flag"];
 	Int_t numberOfPoints;
 	Double_t
 			cutLimits[2] = {0.0},
@@ -272,9 +272,9 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 
 	if (scanFlag)
 	{
-		numberOfPoints = (Int_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["numberOfPoints"];
-		cutLimits[0] = (Double_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][0];
-		cutLimits[1] = (Double_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][1];
+		numberOfPoints = (Int_t)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["numberOfPoints"];
+		cutLimits[0] = (Double_t)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][0];
+		cutLimits[1] = (Double_t)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][1];
 	}
 
 	cutStep = abs(cutLimits[1] - cutLimits[0]) / (Double_t)numberOfPoints;
@@ -296,13 +296,13 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 
 	Double_t
 			sigmas = 1,
-			sigma = (Double_t)properties["variables"]["RegenRejection"]["sigma"],
+			sigma = (Double_t)Utils::properties["variables"]["RegenRejection"]["sigma"],
 			ChHigher[2] = {
-					properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
-					(Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1]},
-			ChLower[2] = {properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0], (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0]}, TrHigher[2] = {properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1], (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1]}, TrLower[2] = {properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0], (Double_t)properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0]}, OmegaCut1[2], OmegaCut2[2];
+					Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["mean"][1],
+					(Double_t)Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["spherical"]["width"][1]},
+			ChLower[2] = {Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["mean"][0], (Double_t)Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["charged"]["cylindrical"]["width"][0]}, TrHigher[2] = {Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["mean"][1], (Double_t)Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["spherical"]["width"][1]}, TrLower[2] = {Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["mean"][0], (Double_t)Utils::properties["variables"]["RegenRejection"]["results"]["methodA"]["triangle"]["cylindrical"]["width"][0]}, OmegaCut1[2], OmegaCut2[2];
 
-	// rho_cut = properties["variables"]["CPFit"]["cuts"]["omegaRho"];
+	// rho_cut = Utils::properties["variables"]["CPFit"]["cuts"]["omegaRho"];
 
 	TrHigher[1] = 1.5;
 	ChHigher[1] = 1.5;
@@ -315,9 +315,9 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 
 		if (neutVars.done == 1 && doneOmega == 1)
 		{
-			velocity_kch = cVel * sqrt(pow(baseKin.Kchboost[0], 2) + pow(baseKin.Kchboost[1], 2) + pow(baseKin.Kchboost[2], 2)) / baseKin.Kchboost[3];
+			velocity_kch = PhysicsConstants::cVel * sqrt(pow(baseKin.Kchboost[0], 2) + pow(baseKin.Kchboost[1], 2) + pow(baseKin.Kchboost[2], 2)) / baseKin.Kchboost[3];
 
-			velocity_kne = cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
+			velocity_kne = PhysicsConstants::cVel * sqrt(pow(neutVars.Knerec[0], 2) + pow(neutVars.Knerec[1], 2) + pow(neutVars.Knerec[2], 2)) / neutVars.Knerec[3];
 
 			tch_LAB = sqrt(pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + pow(baseKin.Kchboost[8] - baseKin.ip[2], 2)) / velocity_kch;
 			tne_LAB = sqrt(pow(neutVars.Knerec[6] - baseKin.ip[0], 2) + pow(neutVars.Knerec[7] - baseKin.ip[1], 2) + pow(neutVars.Knerec[8] - baseKin.ip[2], 2)) / velocity_kne;
@@ -325,7 +325,7 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 			Kch_LAB[0] = baseKin.Kchboost[6] - baseKin.ip[0];
 			Kch_LAB[1] = baseKin.Kchboost[7] - baseKin.ip[1];
 			Kch_LAB[2] = baseKin.Kchboost[8] - baseKin.ip[2];
-			Kch_LAB[3] = tch_LAB * cVel;
+			Kch_LAB[3] = tch_LAB * PhysicsConstants::cVel;
 
 			Kchmom_LAB[0] = baseKin.Kchboost[0];
 			Kchmom_LAB[1] = baseKin.Kchboost[1];
@@ -335,7 +335,7 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 			Kne_LAB[0] = neutVars.Knerec[6] - baseKin.ip[0];
 			Kne_LAB[1] = neutVars.Knerec[7] - baseKin.ip[1];
 			Kne_LAB[2] = neutVars.Knerec[8] - baseKin.ip[2];
-			Kne_LAB[3] = tne_LAB * cVel;
+			Kne_LAB[3] = tne_LAB * PhysicsConstants::cVel;
 
 			Knemom_LAB[0] = neutVars.Knerec[0];
 			Knemom_LAB[1] = neutVars.Knerec[1];
@@ -362,11 +362,11 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 			Obj.lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
 			Obj.lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
 
-			baseKin.Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (cVel * tau_S_nonCPT);
+			baseKin.Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3]) / (PhysicsConstants::cVel * PhysicsConstants::tau_S_nonCPT);
 
 			for (Int_t i = 0; i < 4; i++)
 			{
-				TRCV[i] = baseKin.cluster[3][neutVars.gtaken[i]] - (sqrt(pow(baseKin.cluster[0][neutVars.gtaken[i]] - neutVars.Knerec[6], 2) + pow(baseKin.cluster[1][neutVars.gtaken[i]] - neutVars.Knerec[7], 2) + pow(baseKin.cluster[2][neutVars.gtaken[i]] - neutVars.Knerec[8], 2)) / cVel) - tne_LAB;
+				TRCV[i] = baseKin.cluster[3][neutVars.gtaken[i]] - (sqrt(pow(baseKin.cluster[0][neutVars.gtaken[i]] - neutVars.Knerec[6], 2) + pow(baseKin.cluster[1][neutVars.gtaken[i]] - neutVars.Knerec[7], 2) + pow(baseKin.cluster[2][neutVars.gtaken[i]] - neutVars.Knerec[8], 2)) / PhysicsConstants::cVel) - tne_LAB;
 			}
 
 			trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
@@ -408,7 +408,7 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 			for (Int_t i = 0; i < 2; i++)
 				for (Int_t j = 0; j < 3; j++)
 				{
-					stdDevOmegaVtx[i * 3 + j] = properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["stdDev"][j];
+					stdDevOmegaVtx[i * 3 + j] = Utils::properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["stdDev"][j];
 				}
 
 			Double_t
@@ -488,19 +488,19 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 
 	// Omega cuts
 	Double_t
-			meanInvMass = properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"],
-			// meanInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"],
-			stdInvMass = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"],
-			// stdInvMassErr = properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"],
+			meanInvMass = Utils::properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"],
+			// meanInvMassErr = Utils::properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"],
+			stdInvMass = Utils::properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"],
+			// stdInvMassErr = Utils::properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"],
 			InvMass[2] = {meanInvMass, 3 * stdInvMass},
-			meanKinEne = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"],
-			// meanKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"],
-			stdKinEne = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"],
-			// stdKinEneErr = properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"],
+			meanKinEne = Utils::properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"],
+			// meanKinEneErr = Utils::properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"],
+			stdKinEne = Utils::properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"],
+			// stdKinEneErr = Utils::properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"],
 			KinEne[2] = {meanKinEne, 3 * stdKinEne},
-			a = properties["variables"]["OmegaRec"]["combined"]["line"]["slope"],
-			b = properties["variables"]["OmegaRec"]["combined"]["line"]["inter"],
-			lineWidth = properties["variables"]["OmegaRec"]["combined"]["stdDev"]["value"];
+			a = Utils::properties["variables"]["OmegaRec"]["combined"]["line"]["slope"],
+			b = Utils::properties["variables"]["OmegaRec"]["combined"]["line"]["inter"],
+			lineWidth = Utils::properties["variables"]["OmegaRec"]["combined"]["stdDev"]["value"];
 	// -------------------------------------------------------------------------------
 
 	Bool_t
@@ -692,11 +692,11 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 	TString xTitle = "Number of standard deviations [-]",
 					yTitle = "Relative error of parameter",
 					yRightTitle = "", //"|#sigma(Im(#varepsilon'/#varepsilon))/Im(#varepsilon'/#varepsilon)|",
-			yTitleReal = "Re(#varepsilon'/#varepsilon)",
-					yRightTitleReal = "#sigma(Re(#varepsilon'/#varepsilon))",
+			yTitleReal = "PhysicsConstants::Re(#varepsilon'/#varepsilon)",
+					yRightTitleReal = "#sigma(PhysicsConstants::Re(#varepsilon'/#varepsilon))",
 					yTitleImaginary = "Im(#varepsilon'/#varepsilon)",
 					yRightTitleImaginary = "#sigma(Im(#varepsilon'/#varepsilon))",
-					cutName = (std::string)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutName"];
+					cutName = (std::string)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutName"];
 
 	TString
 			modeGraph = "FitResultErr",
@@ -718,11 +718,11 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 	realGraph.DrawGraphs(realTitle);
 	imaginaryGraph.DrawGraphs(imaginaryTitle);
 
-	properties["lastScript"] = "Final CP Parameters normalization";
-	properties["lastUpdate"] = Obj.getCurrentTimestamp();
+	Utils::properties["lastScript"] = "Final CP Parameters normalization";
+	Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();
 
-	std::ofstream outfile(propName);
-	outfile << properties.dump(4);
+	std::ofstream outfile(Paths::propName);
+	outfile << Utils::properties.dump(4);
 	outfile.close();
 
 	return 0;

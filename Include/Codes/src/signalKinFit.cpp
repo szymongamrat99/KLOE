@@ -172,7 +172,7 @@ namespace KLOE
       Double_t kaonPath = sqrt(pow(_ipFit[0] - _KnerecFit[6], 2) +
                                    pow(_ipFit[1] - _KnerecFit[7], 2) +
                                    pow(_ipFit[2] - _KnerecFit[8], 2)),
-               kaonVel = cVel * _KnerecFit[4] / _KnerecFit[3],
+               kaonVel = PhysicsConstants::cVel * _KnerecFit[4] / _KnerecFit[3],
                kaonTime = kaonPath / kaonVel;
 
       Bool_t condTime = kaonTime < _X_min[3] &&

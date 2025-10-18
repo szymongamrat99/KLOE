@@ -10,7 +10,7 @@ using namespace std;
 int CovMatrix_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt)
 {
   // Set logger for error logging
-  std::string logFilename = (std::string)covmatrix_dir + (std::string)logs_dir + "covmatrix.log";
+  std::string logFilename = (std::string)covmatrix_dir + (std::string)Paths::logs_dir + "covmatrix.log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------

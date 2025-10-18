@@ -7,6 +7,6 @@
   },
   "pdgids": {
     "values": ["/S013EPS", "/S013EPI", "/S011M", "/S012T", "/S013T", "/S013D", "/S013EP", "/S013F+-", "/S013FOO"],
-    "names": ["Re", "ImNonCPT", "mK0", "tauSnonCPT", "tauL", "deltaMassnonCPT", "modEpsilon", "phiPMnonCPT", "phi00nonCPT" ]
+    "names": ["Re", "ImNonCPT", "PhysicsConstants::mK0", "tauSnonCPT", "tauL", "deltaMassnonCPT", "modEpsilon", "phiPMnonCPT", "phi00nonCPT" ]
   }
 }

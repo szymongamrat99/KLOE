@@ -8,9 +8,9 @@ namespace KLOE
     _multiGraph = new TMultiGraph();
     _legend = new TLegend(legendPos[0], legendPos[2], legendPos[1], legendPos[3]);
 
-    if (ToLower(_mode) == "efficiency" && _y.size() == channNum)
+    if (ToLower(_mode) == "efficiency" && _y.size() == KLOE::channNum)
     {
-      for (Int_t i = 0; i < channNum; i++)
+      for (Int_t i = 0; i < KLOE::channNum; i++)
       {
         _effGraphs.push_back(new TGraph(_NumOfPts, _x.data(), _y[i].data()));
         _effGraphs[i]->SetMarkerColor(channColor[i]);
@@ -36,7 +36,7 @@ namespace KLOE
       _multiGraph->Add(_ReErrGraph);
       _multiGraph->Add(_ImErrGraph);
 
-      _legend->AddEntry(_ReErrGraph, "Re(#varepsilon'/#varepsilon) relative error", "p");
+      _legend->AddEntry(_ReErrGraph, "PhysicsConstants::Re(#varepsilon'/#varepsilon) relative error", "p");
       _legend->AddEntry(_ImErrGraph, "Im(#varepsilon'/#varepsilon) relative error", "p");
 
       _minYLimitL = 0.0;

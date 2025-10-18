@@ -19,7 +19,7 @@
 
 int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t &jmin, Short_t &jmax, Controls::DataType &dataType, KLOE::pm00 &Obj, ErrorHandling::ErrorLogs &logger)
 {
-	BaseKinematics baseKin;
+	KLOE::BaseKinematics baseKin;
 
 	TFile
 			*file_mctruth,
@@ -32,10 +32,10 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 			*tree_triangle;
 
 	TString
-			omega_name = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
-			tree_name = std::string(properties["variables"]["tree"]["treename"]["omegarec"]),
-			mctruth_name = std::string(properties["variables"]["tree"]["filename"]["mctruth"]),
-			mctruth_tree_name = std::string(properties["variables"]["tree"]["treename"]["mctruth"]);
+			omega_name = std::string(Utils::properties["variables"]["tree"]["filename"]["omegarec"]),
+			tree_name = std::string(Utils::properties["variables"]["tree"]["treename"]["omegarec"]),
+			mctruth_name = std::string(Utils::properties["variables"]["tree"]["filename"]["mctruth"]),
+			mctruth_tree_name = std::string(Utils::properties["variables"]["tree"]["treename"]["mctruth"]);
 
 	file_mctruth = new TFile(mctruth_name);
 	tree_mctruth = (TTree *)file_mctruth->Get(mctruth_tree_name);
@@ -166,13 +166,13 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	};
 
 	std::vector<TH1 *>
-			hist[channNum],
-			hist_control_chann[channNum],
-			hist_pm_IP[channNum],
-			hist_00_IP[channNum];
+			hist[KLOE::channNum],
+			hist_control_chann[KLOE::channNum],
+			hist_pm_IP[KLOE::channNum],
+			hist_00_IP[KLOE::channNum];
 	TString hist_name = "";
 
-	for (Int_t i = 0; i < channNum; i++)
+	for (Int_t i = 0; i < KLOE::channNum; i++)
 		for (Int_t j = 0; j < 7; j++)
 		{
 			hist_name = "hist_" + std::to_string(i) + std::to_string(j);
@@ -202,7 +202,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	std::vector<TCanvas *> canva2d;
 	TString canva2d_name = "";
 
-	for (Int_t i = 0; i < 3 * channNum; i++)
+	for (Int_t i = 0; i < 3 * KLOE::channNum; i++)
 	{
 		canva2d_name = "canva2d_" + std::to_string(i);
 		canva2d.push_back(new TCanvas(canva2d_name, canva2d_name, 790, 790));
@@ -213,13 +213,13 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 			hist2d_00IP_pmIP[2];
 	TString hist2d_name = "";
 
-	for (Int_t i = 0; i < channNum; i++)
+	for (Int_t i = 0; i < KLOE::channNum; i++)
 	{
 		hist2d_name = channName[i];
 		hist2d.push_back(new TH2D(hist2d_name, "", 200.0, 0.0, 300.0, 200.0, 600.0, 1000.0));
 	};
 
-	for (Int_t i = 0; i < channNum; i++)
+	for (Int_t i = 0; i < KLOE::channNum; i++)
 	{
 		hist2d_name = channName[i] + "100Ip";
 		hist2d_00IP_pmIP[0].push_back(new TH2D(hist2d_name, "", 50.0, 0.0, 20.0, 50.0, 0.0, 20.0));
@@ -257,7 +257,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 
 	Double_t
 			split[3] = {0., 0., 0.},
-			par[2] = {Re, Im_nonCPT},
+			par[2] = {PhysicsConstants::Re, PhysicsConstants::Im_nonCPT},
 			M_omega_tmp[2] = {0.},
 			M_omega_diff[2] = {0.};
 
@@ -640,7 +640,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	{
 		canva[i]->cd();
 		canva[i]->SetLogy(1);
-		for (Int_t j = 0; j < channNum; j++)
+		for (Int_t j = 0; j < KLOE::channNum; j++)
 		{
 			hist[j][i]->SetLineColor(channColor[j]);
 			hist[j][i]->SetLineWidth(3);
@@ -669,7 +669,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		legend_chi2->Clear();
 	}
 
-	for (Int_t j = 0; j < channNum; j++)
+	for (Int_t j = 0; j < KLOE::channNum; j++)
 	{
 		canva2d[j]->cd();
 		canva2d[j]->SetLogz(1);
@@ -693,7 +693,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	{
 		canva[i + 6]->cd();
 		canva[i + 6]->SetLogy(1);
-		for (Int_t j = 0; j < channNum; j++)
+		for (Int_t j = 0; j < KLOE::channNum; j++)
 		{
 			hist_control_chann[j][i]->SetLineColor(channColor[j]);
 			hist_control_chann[j][i]->SetLineWidth(3);
@@ -728,7 +728,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	{
 		canva[i + 6]->cd();
 		canva[i + 6]->SetLogy(1);
-		for (Int_t j = 0; j < channNum; j++)
+		for (Int_t j = 0; j < KLOE::channNum; j++)
 		{
 			hist_pm_IP[j][i]->SetLineColor(channColor[j]);
 			hist_pm_IP[j][i]->SetLineWidth(3);
@@ -763,7 +763,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	{
 		canva[i + 8]->cd();
 		canva[i + 8]->SetLogy(1);
-		for (Int_t j = 0; j < channNum; j++)
+		for (Int_t j = 0; j < KLOE::channNum; j++)
 		{
 			hist_00_IP[j][i]->SetLineColor(channColor[j]);
 			hist_00_IP[j][i]->SetLineWidth(3);
@@ -792,10 +792,10 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		legend_chi2->Clear();
 	}
 
-	for (Int_t j = 0; j < channNum; j++)
+	for (Int_t j = 0; j < KLOE::channNum; j++)
 	{
-		canva2d[j + channNum]->cd();
-		canva2d[j + channNum]->SetLogz(1);
+		canva2d[j + KLOE::channNum]->cd();
+		canva2d[j + KLOE::channNum]->SetLogz(1);
 
 		hist2d_00IP_pmIP[0][j]->SetMarkerColor(channColor[j]);
 		hist2d_00IP_pmIP[0][j]->SetMarkerSize(2);
@@ -804,13 +804,13 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		hist2d_00IP_pmIP[0][j]->GetYaxis()->SetTitle("#rho_{00,IP} [cm]");
 		hist2d_00IP_pmIP[0][j]->Draw("COLZ");
 
-		canva2d[j + channNum]->Print(img_dir + "OmegaRec/rho_2d_" + channName[j] + ext_img);
+		canva2d[j + KLOE::channNum]->Print(img_dir + "OmegaRec/rho_2d_" + channName[j] + ext_img);
 	}
 
-	for (Int_t j = 0; j < channNum; j++)
+	for (Int_t j = 0; j < KLOE::channNum; j++)
 	{
-		canva2d[j + 2 * channNum]->cd();
-		canva2d[j + 2 * channNum]->SetLogz(1);
+		canva2d[j + 2 * KLOE::channNum]->cd();
+		canva2d[j + 2 * KLOE::channNum]->SetLogz(1);
 
 		hist2d_00IP_pmIP[1][j]->SetMarkerColor(channColor[j]);
 		hist2d_00IP_pmIP[1][j]->SetMarkerSize(2);
@@ -819,7 +819,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 		hist2d_00IP_pmIP[1][j]->GetYaxis()->SetTitle("z_{00,IP} [cm]");
 		hist2d_00IP_pmIP[1][j]->Draw("COLZ");
 
-		canva2d[j + 2 * channNum]->Print(img_dir + "OmegaRec/z_2d_" + channName[j] + ext_img);
+		canva2d[j + 2 * KLOE::channNum]->Print(img_dir + "OmegaRec/z_2d_" + channName[j] + ext_img);
 	}
 
 	TF1 *fit2D = new TF1("fit2D", "[0]*x + [1]", 0, 300); // pol1: y = a*x + b
@@ -912,36 +912,36 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 
 	c1->Print(omegarec_dir + img_dir + "widthOfDistribution" + ext_img);
 
-	// Addition of stdDevs to the properties file
+	// Addition of stdDevs to the Utils::properties file
 	std::string decayType[2] = {"neutral", "charged"};
 	for (Int_t i = 0; i < 2; i++)
 		for (Int_t j = 0; j < 3; j++)
 		{
-			properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["stdDev"][j] = stdDevOmegaVtx[i * 3 + j];
-			properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["error"][j] = stdDevOmegaVtxErr[i * 3 + j];
+			Utils::properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["stdDev"][j] = stdDevOmegaVtx[i * 3 + j];
+			Utils::properties["variables"]["OmegaRec"]["fiducialVolume"][decayType[i]]["error"][j] = stdDevOmegaVtxErr[i * 3 + j];
 		}
 
-	properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"] = meanInvMass;
-	properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"] = meanInvMassErr;
-	properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"] = stdInvMass;
-	properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"] = stdInvMassErr;
+	Utils::properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"] = meanInvMass;
+	Utils::properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"] = meanInvMassErr;
+	Utils::properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"] = stdInvMass;
+	Utils::properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"] = stdInvMassErr;
 
-	properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"] = meanKinEne;
-	properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"] = meanKinEneErr;
-	properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"] = stdKinEne;
-	properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"] = stdKinEneErr;
+	Utils::properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"] = meanKinEne;
+	Utils::properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"] = meanKinEneErr;
+	Utils::properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"] = stdKinEne;
+	Utils::properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"] = stdKinEneErr;
 
-	properties["variables"]["OmegaRec"]["combined"]["stdDev"]["value"] = sigma;
-	properties["variables"]["OmegaRec"]["combined"]["stdDev"]["error"] = sigmaErr;
+	Utils::properties["variables"]["OmegaRec"]["combined"]["stdDev"]["value"] = sigma;
+	Utils::properties["variables"]["OmegaRec"]["combined"]["stdDev"]["error"] = sigmaErr;
 
-	properties["variables"]["OmegaRec"]["combined"]["line"]["slope"] = a;
-	properties["variables"]["OmegaRec"]["combined"]["line"]["inter"] = b;
+	Utils::properties["variables"]["OmegaRec"]["combined"]["line"]["slope"] = a;
+	Utils::properties["variables"]["OmegaRec"]["combined"]["line"]["inter"] = b;
 
-	properties["lastScript"] = "Plots of Omega Reconstruction";
-	properties["lastUpdate"] = Obj.getCurrentTimestamp();
+	Utils::properties["lastScript"] = "Plots of Omega Reconstruction";
+	Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();
 
-	std::ofstream outfile(propName);
-	outfile << properties.dump(4);
+	std::ofstream outfile(Paths::propName);
+	outfile << Utils::properties.dump(4);
 	outfile.close();
 
 	return 0;

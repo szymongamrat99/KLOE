@@ -69,7 +69,7 @@ void init_analysis::Begin(TTree * /*tree*/)
 
    TString option = GetOption();
 
-   histMgr = new HistManager(channNum, channColor, channNames, kFullCircle, kBlack, 0.0, kOrange);
+   histMgr = new HistManager(KLOE::channNum, channColor, channNames, kFullCircle, kBlack, 0.0, kOrange);
 
    // Inicjalizacja Triple Gauss Fitter
    gaussFitter = new KLOE::TripleGaussFitter();
@@ -90,7 +90,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    cutter->RegisterVariableGetter("InvMassKch", [&]()
                                   { return Kchrec[5]; });
    cutter->RegisterCentralValueGetter("InvMassKch", [&]()
-                                      { return mK0; });
+                                      { return PhysicsConstants::mK0; });
 
    cutter->RegisterVariableGetter("Qmiss", [&]()
                                   { return *Qmiss; });
@@ -98,7 +98,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    cutter->RegisterVariableGetter("InvMassKne", [&]()
                                   { return *minv4gam; });
    cutter->RegisterCentralValueGetter("InvMassKne", [&]()
-                                      { return mK0; });
+                                      { return PhysicsConstants::mK0; });
 
    invMassKchConfig.name = "invMassKch";
    invMassKchConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
@@ -530,7 +530,7 @@ Bool_t init_analysis::Process(Long64_t entry)
          Float_t minv4gam_tri = sqrt(pow(KnereclorFit[3], 2) - pow(KnereclorFit[0], 2) - pow(KnereclorFit[1], 2) - pow(KnereclorFit[2], 2));
 
          Float_t distance = sqrt(pow(KneTriangle[6] - ip[0], 2) + pow(KneTriangle[7] - ip[1], 2) + pow(KneTriangle[8] - ip[2], 2)),
-                 velocity = cVel * sqrt(pow(KneTriangle[0], 2) + pow(KneTriangle[1], 2) + pow(KneTriangle[2], 2)) / KneTriangle[3],
+                 velocity = PhysicsConstants::cVel * sqrt(pow(KneTriangle[0], 2) + pow(KneTriangle[1], 2) + pow(KneTriangle[2], 2)) / KneTriangle[3],
                  timeOfFlight = (distance / velocity) / (tau_S);
 
          histMgr->Fill1D("invMassKch", *mctruth, KchrecFit[5], weight);

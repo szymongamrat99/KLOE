@@ -27,7 +27,7 @@ public:
     // Konstruktor z jednym plikiem JSON (dla kompatybilności)
     StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::HypothesisCode hypoCode);
 
-    // Konstruktor z dwoma plikami (properties i cuts)
+    // Konstruktor z dwoma plikami (Utils::properties i cuts)
     StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode);
 
     void RegisterVariableGetter(const std::string& varName, std::function<double()> getter);

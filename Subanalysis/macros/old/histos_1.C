@@ -31,14 +31,14 @@
 
 #include "../Include/const.h"
 
-TCanvas *canva1d, *canva2d[channNum], *canvaproj[channNum];
+TCanvas *canva1d, *canva2d[KLOE::channNum], *canvaproj[KLOE::channNum];
 
-TH1 *hist1d[2][channNum];
-TH2 *hist2d[2][channNum];
+TH1 *hist1d[2][KLOE::channNum];
+TH2 *hist2d[2][KLOE::channNum];
 
 TLegend *legend;
 
-Int_t entries[channNum-2] = {0}, entries_sel[channNum-2] = {0}, pred_entries_sel[channNum-2] = {0};
+Int_t entries[KLOE::channNum-2] = {0}, entries_sel[KLOE::channNum-2] = {0}, pred_entries_sel[KLOE::channNum-2] = {0};
 void histos_1::Begin(TTree * /*tree*/)
 {
    // The Begin() function is called at the start of the query.
@@ -46,21 +46,21 @@ void histos_1::Begin(TTree * /*tree*/)
    // The tree argument is deprecated (on PROOF 0 is passed).
 
    canva1d = new TCanvas("canva1d", "canva1d", 750, 750);
-   for(Int_t i = 0; i < channNum-2; i++) canva2d[i] = new TCanvas(channName[i] + " canva2d", channName[i] + " canva2d", 750, 750);
-   for(Int_t i = 0; i < channNum-2; i++) canvaproj[i] = new TCanvas(channName[i] + " canvaproj", channName[i] + " canvaproj", 750, 750);
+   for(Int_t i = 0; i < KLOE::channNum-2; i++) canva2d[i] = new TCanvas(channName[i] + " canva2d", channName[i] + " canva2d", 750, 750);
+   for(Int_t i = 0; i < KLOE::channNum-2; i++) canvaproj[i] = new TCanvas(channName[i] + " canvaproj", channName[i] + " canvaproj", 750, 750);
 
    for(Int_t i = 0; i < 2; i++)
-      for(Int_t j = 0; j < channNum; j++)
+      for(Int_t j = 0; j < KLOE::channNum; j++)
          hist1d[i][j] = new TH1F(channName[j] + i, "", 500, 0, 1000);
    for(Int_t i = 0; i < 2; i++)
-      for(Int_t j = 0; j < channNum; j++)
+      for(Int_t j = 0; j < KLOE::channNum; j++)
          hist2d[i][j] = new TH2F(channName[j] + " 2d" + i, "", 13, 0, 60, 100, -100, 300);
 
 
    legend = new TLegend(0.65,0.65,0.9,0.9);
    //legend = new TLegend(0.15,0.65,0.4,0.9);
 
-   for(Int_t i = 0; i < channNum-2; i++)
+   for(Int_t i = 0; i < KLOE::channNum-2; i++)
    {
       if(i == 7) legend->AddEntry(hist1d[0][i], channName[i], "PE1");
       else legend->AddEntry(hist1d[0][i], channName[i], "L");
@@ -108,7 +108,7 @@ Bool_t histos_1::Process(Long64_t entry)
    if(*mctruth_pipi == 1) entries[5]++;
    if(*mctruth == 7) entries[6]++;
 
-   if(1)//abs(*Qmiss_inv - 104.6) < 15 && abs(*anglepipi_CM_kch - 145) < 25 && *done4 == 1 && abs(Kchrec1[5] - mK0) < 76)
+   if(1)//abs(*Qmiss_inv - 104.6) < 15 && abs(*anglepipi_CM_kch - 145) < 25 && *done4 == 1 && abs(Kchrec1[5] - PhysicsConstants::mK0) < 76)
    {
    	   if(*mctruth == 1)
 	   {
@@ -170,8 +170,8 @@ void histos_1::Terminate()
    canva1d->cd();
    canva1d->SetLogy(1);
 
-   Int_t index_sort[channNum];
-   Double_t max_counts[channNum];
+   Int_t index_sort[KLOE::channNum];
+   Double_t max_counts[KLOE::channNum];
    TString title[100];
 
    title[0] = "|V_{K^{0}}^{rec} - V_{#phi}^{rec}|" + units[0];
@@ -189,9 +189,9 @@ void histos_1::Terminate()
 
    Float_t x1d[2], y1d[2], x2d[2], y2d[2]; 
 
-   for(Int_t i = 0; i < channNum; i++) max_counts[i] = hist1d[0][i]->GetMaximum();
+   for(Int_t i = 0; i < KLOE::channNum; i++) max_counts[i] = hist1d[0][i]->GetMaximum();
 
-   TMath::Sort(channNum, max_counts, index_sort);
+   TMath::Sort(KLOE::channNum, max_counts, index_sort);
 
    x1d[0] = 0;
    x1d[1] = 1000;
@@ -203,7 +203,7 @@ void histos_1::Terminate()
    y2d[0] = -100;
    y2d[1] = 300;
 
-   for(Int_t i = 0; i < channNum-2; i++)
+   for(Int_t i = 0; i < KLOE::channNum-2; i++)
    {
       hist1d[0][i]->SetLineColor(channColor[i]);
 
@@ -231,7 +231,7 @@ void histos_1::Terminate()
 
    legend->Draw();
 
-   for(Int_t i = 0; i < channNum-2; i++)
+   for(Int_t i = 0; i < KLOE::channNum-2; i++)
    {
       canva2d[i]->SetLeftMargin(0.15);
       canva2d[i]->SetRightMargin(0.15);
