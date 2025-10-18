@@ -316,7 +316,7 @@ void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, const Int_t *mother, 
       region.push_back(CylIndObj.inter_point(pgammaAux.data(), neu_vtx, cluster.data()));
 
       Float_t
-          beta_c = cVel * Knemc[4] / Knemc[3],
+          beta_c = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
           length = sqrt(pow(Knemc[6] - ipmc[0], 2) +
                         pow(Knemc[7] - ipmc[1], 2) +
                         pow(Knemc[8] - ipmc[2], 2)),
@@ -325,7 +325,7 @@ void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, const Int_t *mother, 
                              pow(cluster[1] - Knemc[7], 2) +
                              pow(cluster[2] - Knemc[8], 2));
 
-      Float_t auxTim = time_K + (length_clus / cVel);
+      Float_t auxTim = time_K + (length_clus / PhysicsConstants::cVel);
       std::vector<Float_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, cluster[0], cluster[1], cluster[2], auxTim};
 
       pgammaMC.push_back(auxiliaryVec);
@@ -441,7 +441,7 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
       Float_t auxEne = sqrt(pow(pxmc[j], 2) +
                             pow(pymc[j], 2) +
                             pow(pzmc[j], 2) +
-                            pow(mPiCh, 2));
+                            pow(PhysicsConstants::mPiCh, 2));
       std::vector<Float_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 10};
 
       trkMC.push_back(auxiliaryVec);
@@ -461,7 +461,7 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
       Float_t auxEne = sqrt(pow(pxmc[j], 2) +
                             pow(pymc[j], 2) +
                             pow(pzmc[j], 2) +
-                            pow(mPiCh, 2));
+                            pow(PhysicsConstants::mPiCh, 2));
       std::vector<Float_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 16};
 
       trkMC.push_back(auxiliaryVec);
@@ -507,7 +507,7 @@ void GeneratedVariables::KSLGenerated(Int_t nvtxmc, const Int_t *mother, Float_t
       Kl[0] = pxmc[j];
       Kl[1] = pymc[j];
       Kl[2] = pzmc[j];
-      Kl[5] = mK0;
+      Kl[5] = PhysicsConstants::mK0;
       Kl[4] = pow(Kl[0], 2) + pow(Kl[1], 2) + pow(Kl[2], 2);
       Kl[3] = sqrt(Kl[4] + pow(Kl[5], 2));
       Kl[4] = sqrt(Kl[4]);
@@ -521,7 +521,7 @@ void GeneratedVariables::KSLGenerated(Int_t nvtxmc, const Int_t *mother, Float_t
       Ks[0] = pxmc[j];
       Ks[1] = pymc[j];
       Ks[2] = pzmc[j];
-      Ks[5] = mK0;
+      Ks[5] = PhysicsConstants::mK0;
       Ks[4] = pow(Ks[0], 2) + pow(Ks[1], 2) + pow(Ks[2], 2);
       Ks[3] = sqrt(Ks[4] + pow(Ks[5], 2));
       Ks[4] = sqrt(Ks[4]);

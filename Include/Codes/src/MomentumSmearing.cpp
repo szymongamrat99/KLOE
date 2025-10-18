@@ -277,18 +277,18 @@ namespace KLOE
     // Parsowanie do JSON object zamiast string
     try {
         nlohmann::json jsonObj = nlohmann::json::parse(cleaned_json);
-        properties["momSmearing"][varName] = jsonObj;
+        Utils::properties["momSmearing"][varName] = jsonObj;
     } catch (const std::exception& e) {
         std::cerr << "ERROR: Failed to parse JSON: " << e.what() << std::endl;
         std::cerr << "Raw JSON: " << json << std::endl;
         std::cerr << "Cleaned JSON: " << cleaned_json << std::endl;
         // Fallback - save as string if parsing fails
-        properties["momSmearing"][varName] = cleaned_json;
+        Utils::properties["momSmearing"][varName] = cleaned_json;
     }
 
-    std::ofstream outfile(propName); // Assuming propName is defined in your project
+    std::ofstream outfile(Paths::propName); // Assuming Paths::propName is defined in your project
     if (outfile.is_open()) {
-        outfile << properties.dump(4);
+        outfile << Utils::properties.dump(4);
         outfile.close();
         std::cout << "Covariance matrix saved to JSON as '" << varName << "'" << std::endl;
     } else {

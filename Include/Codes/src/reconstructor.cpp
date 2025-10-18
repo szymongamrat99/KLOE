@@ -2,7 +2,7 @@
 #include <const.h>
 #include <cmath>
 
-const float c = cVel;
+const float c = PhysicsConstants::cVel;
 
 void Reconstructor::SetClu(int i, float x, float y, float z, float t, float E){
   _clu[i][0] = x;
@@ -214,7 +214,7 @@ float Reconstructor::GetInvMasses(float * sol, int * comb,
 /****************** Difference between Mpi and mgg x 3 **************/
 float Reconstructor::GetInvMassDiscrepancy(float * sol, int * comb)const{
 
-  const float mPi0 = mPi0; // Mev/c2  
+  const float PhysicsConstants::mPi0 = PhysicsConstants::mPi0; // Mev/c2  
   float * mgg = new float[3];
   GetInvMasses(sol, comb, mgg);
   
@@ -235,8 +235,8 @@ float Reconstructor::GetInvMassDiscrepancy(float * sol, int * comb)const{
   // finally calculate discrepancy
   float d = 0;
   for(int i=0;i<3;i++){
-    d += abs( mgg[i] - mPi0 ) / dM[i];
-    //    d += abs( mgg[i] - mPi0 ) * pow( _ene[comb[2*i+1]-1] + _ene[comb[2*i]-1], -2. );
+    d += abs( mgg[i] - PhysicsConstants::mPi0 ) / dM[i];
+    //    d += abs( mgg[i] - PhysicsConstants::mPi0 ) * pow( _ene[comb[2*i+1]-1] + _ene[comb[2*i]-1], -2. );
   }
 
   return d;
@@ -252,7 +252,7 @@ float Reconstructor::GetInvMassDiscrepancy(float * sol, int * comb)const{
  */
 void Reconstructor::GetKmomentum(const float * sol, float * p)const{
 
-  const float mK0  = mK0;  // Mev/c2 
+  const float PhysicsConstants::mK0  = PhysicsConstants::mK0;  // Mev/c2 
 
   // calculate momenta of gammas
   float pgam[6][3];
@@ -278,7 +278,7 @@ void Reconstructor::GetKmomentum(const float * sol, float * p)const{
     }
     p[4] += p[j]*p[j];
   }
-  p[3] = sqrt( p[4] + mK0*mK0 );
+  p[3] = sqrt( p[4] + PhysicsConstants::mK0*PhysicsConstants::mK0 );
   p[4] = sqrt( p[4] );
   
 }

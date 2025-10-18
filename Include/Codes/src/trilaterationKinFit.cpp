@@ -242,7 +242,7 @@ namespace KLOE
 									fourKnetri_tmp[k][4] = sqrt(pow(fourKnetri_tmp[k][0], 2) + pow(fourKnetri_tmp[k][1], 2) + pow(fourKnetri_tmp[k][2], 2));
 									fourKnetri_tmp[k][5] = sqrt(pow(fourKnetri_tmp[k][3], 2) - pow(fourKnetri_tmp[k][0], 2) - pow(fourKnetri_tmp[k][1], 2) - pow(fourKnetri_tmp[k][2], 2));
 
-									kaon_vel_tmp[k] = cVel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
+									kaon_vel_tmp[k] = PhysicsConstants::cVel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
 
 									y_axis[0] = 0.;
 									y_axis[1] = _X[21];
@@ -259,7 +259,7 @@ namespace KLOE
 													   pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
 													   pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
 
-									value_tmp[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - mK0, 2));
+									value_tmp[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - PhysicsConstants::mK0, 2));
 
 									if (TMath::IsNaN(value_tmp[k]))
 										value_tmp[k] = 999999.;

@@ -57,7 +57,7 @@ void conferenceCuts::Begin(TTree * /*tree*/)
 
 	TString option = GetOption();
 
-	histMgr = new HistManager(channNum, channColor, channNames, kFullCircle, kBlack, kOrange);
+	histMgr = new HistManager(KLOE::channNum, channColor, channNames, kFullCircle, kBlack, kOrange);
 
 	std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
 
@@ -66,7 +66,7 @@ void conferenceCuts::Begin(TTree * /*tree*/)
 	cutter->RegisterVariableGetter("InvMassKch", [&]()
 								   { return Kchrec[5]; });
 	cutter->RegisterCentralValueGetter("InvMassKch", [&]()
-									   { return mK0; });
+									   { return PhysicsConstants::mK0; });
 
 	cutter->RegisterVariableGetter("Qmiss", [&]()
 								   { return *Qmiss; });
@@ -83,7 +83,7 @@ void conferenceCuts::Begin(TTree * /*tree*/)
 	cutter->RegisterVariableGetter("InvMassKne", [&]()
 								   { return *minv4gam; });
 	cutter->RegisterCentralValueGetter("InvMassKne", [&]()
-									   { return mK0; });
+									   { return PhysicsConstants::mK0; });
 
 	invMassKchConfig.name = "invMassKch";
 	invMassKchConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
@@ -199,7 +199,7 @@ Bool_t conferenceCuts::Process(Long64_t entry)
 
 	fReader.SetLocalEntry(entry);
 
-	CombinedPi0Masses = sqrt(pow(pi0fit[0] - mPi0, 2) + pow(pi0fit[1] - mPi0, 2));
+	CombinedPi0Masses = sqrt(pow(pi0fit[0] - PhysicsConstants::mPi0, 2) + pow(pi0fit[1] - PhysicsConstants::mPi0, 2));
 
 	trcvsum = trcv[g4taken[0]] + trcv[g4taken[1]] + trcv[g4taken[2]] + trcv[g4taken[3]];
 

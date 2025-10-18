@@ -7,7 +7,7 @@ KaonReconstructionResult KaonMassReconstructor::reconstructKaonMass(
     const std::vector<Double_t>& kaonBoost,
     const std::vector<Double_t>& interactionPoint,
     const std::vector<std::vector<Double_t>>& tracks,
-    const Double_t mPiCh,
+    const Double_t PhysicsConstants::mPiCh,
     KLOE::pm00& obj)
 {
     KaonReconstructionResult result;
@@ -68,7 +68,7 @@ KaonReconstructionResult KaonMassReconstructor::reconstructKaonMass(
 
     // 3. Reconstruct pions in CM frame
     std::vector<TVector3> pionsCM(2);
-    reconstructPionsInCMFrame(tracksCM, result.KaonTwoBody[5], mPiCh, pionsCM, obj);
+    reconstructPionsInCMFrame(tracksCM, result.KaonTwoBody[5], PhysicsConstants::mPiCh, pionsCM, obj);
 
     // 4. Transform back to lab frame
     kaonMomLAB = -kaonMomLAB;  // Invert boost direction
@@ -76,7 +76,7 @@ KaonReconstructionResult KaonMassReconstructor::reconstructKaonMass(
     std::vector<TLorentzVector> pionsLAB(2);
     for(int i = 0; i < 2; i++) {
         TLorentzVector pionCM;
-        Double_t E = sqrt(pionsCM[i].Mag2() + pow(mPiCh, 2));
+        Double_t E = sqrt(pionsCM[i].Mag2() + pow(PhysicsConstants::mPiCh, 2));
         pionCM.SetPxPyPzE(pionsCM[i].X(), pionsCM[i].Y(), pionsCM[i].Z(), E);
         
         TLorentzVector pionLAB;
@@ -89,7 +89,7 @@ KaonReconstructionResult KaonMassReconstructor::reconstructKaonMass(
         result.track1TwoBody[i] = pionMomLAB.X();
         result.track1TwoBody[i+1] = pionMomLAB.Y();
         result.track1TwoBody[i+2] = pionMomLAB.Z();
-        result.track1TwoBody[3] = sqrt(pionMomLAB.Mag2() + pow(mPiCh, 2));
+        result.track1TwoBody[3] = sqrt(pionMomLAB.Mag2() + pow(PhysicsConstants::mPiCh, 2));
     }
 
     return result;
@@ -116,7 +116,7 @@ void KaonMassReconstructor::transformToKaonCMFrame(
 void KaonMassReconstructor::reconstructPionsInCMFrame(
     const std::vector<TLorentzVector>& tracksCM,
     const Double_t kaonMass,
-    const Double_t mPiCh,
+    const Double_t PhysicsConstants::mPiCh,
     std::vector<TVector3>& pionsCM,
     KLOE::pm00& obj)
 {

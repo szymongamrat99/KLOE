@@ -7,7 +7,7 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
     TTree
         *tree;
 
-    BaseKinematics baseKin;
+    KLOE::BaseKinematics baseKin;
 
     UChar_t pidmcOld[50], vtxmcOld[50], motherOld[50], mctruth, mcflag;
 
@@ -199,14 +199,14 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
     file->Write();
     file->Close();
 
-    properties["variables"]["tree"]["filename"]["mctruth"] = (std::string)name;
-    properties["variables"]["tree"]["treename"]["mctruth"] = (std::string)gen_vars_tree;
+    Utils::properties["variables"]["tree"]["filename"]["mctruth"] = (std::string)name;
+    Utils::properties["variables"]["tree"]["treename"]["mctruth"] = (std::string)gen_vars_tree;
 
-    properties["lastScript"] = "Mctruth division of files.";
-    properties["lastUpdate"] = Obj.getCurrentTimestamp();
+    Utils::properties["lastScript"] = "Mctruth division of files.";
+    Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();
 
-    std::ofstream outfile(propName);
-    outfile << properties.dump(4);
+    std::ofstream outfile(Paths::propName);
+    outfile << Utils::properties.dump(4);
     outfile.close();
 
     return 0;

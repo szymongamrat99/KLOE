@@ -11,15 +11,15 @@
 int cp_fit_func(KLOE::interference &event, std::vector<std::vector<Double_t>> &relativeErr, std::vector<std::vector<Double_t>> &real, std::vector<std::vector<Double_t>> &imaginary, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
 	const Double_t
-			x_min = properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
-			x_max = properties["variables"]["CPFit"]["histoResults"]["rangeX"][1],
-			res_deltaT = properties["variables"]["Resolutions"]["deltaT"];
+			x_min = Utils::properties["variables"]["CPFit"]["histoResults"]["rangeX"][0],
+			x_max = Utils::properties["variables"]["CPFit"]["histoResults"]["rangeX"][1],
+			res_deltaT = Utils::properties["variables"]["Resolutions"]["deltaT"];
 	const UInt_t
 			nbins = 1 + ((x_max - x_min) / res_deltaT);
 
 	Double_t split[3] = {-30.0, 0.0, 30.0};
 
-	Bool_t scanFlag = (Bool_t)properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["flag"];
+	Bool_t scanFlag = (Bool_t)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["flag"];
 	Int_t numberOfPoints;
 	Double_t
 			cutLimits[2] = {0.0},
@@ -50,22 +50,22 @@ int cp_fit_func(KLOE::interference &event, std::vector<std::vector<Double_t>> &r
 	minimum->SetFunction(minimized_function);
 
 	const Double_t init_vars[num_of_vars] = {
-			Re,
-			Im_nonCPT,
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Signal"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarLeft"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseLeft"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseRight"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarRight"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Omegapi0"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Threepi0"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Semileptonic"],
-			properties["variables"]["CPFit"]["initParams"]["Norm"]["Other"]},
+			PhysicsConstants::Re,
+			PhysicsConstants::Im_nonCPT,
+			Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Signal"],
+			Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarLeft"],
+			Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseLeft"],
+			Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["CloseRight"],
+			Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Regeneration"]["FarRight"],
+			Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Omegapi0"],
+			Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Threepi0"],
+			Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Semileptonic"],
+			Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Other"]},
 								 step[num_of_vars] = {1E-5, 1E-5, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05};
 
 	Double_t
-			limit_upper = properties["variables"]["CPFit"]["limitPer"]["upper"],
-			limit_lower = properties["variables"]["CPFit"]["limitPer"]["lower"];
+			limit_upper = Utils::properties["variables"]["CPFit"]["limitPer"]["upper"],
+			limit_lower = Utils::properties["variables"]["CPFit"]["limitPer"]["lower"];
 
 	minimum->SetVariable(0, "Real part", init_vars[0], step[0]);
 	minimum->SetVariable(1, "Imaginary part", init_vars[1], step[1]);

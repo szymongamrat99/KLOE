@@ -207,5 +207,5 @@ Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)
       {"neutral", Knerec.total[5]},
       {"charged", Kchrec.total[5]}};
 
-  return minvModes[_minvMode] - mK0; // MeV/c^2
+  return minvModes[_minvMode] - PhysicsConstants::mK0; // MeV/c^2
 }

@@ -23,11 +23,11 @@ namespace KLOE
 
 		// Parameters from PDG2023
 
-		Epsilon = mod_epsilon;
-		Dphi = phi_pm_nonCPT - phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
-		TauKs = tau_S_nonCPT * pow(10, -9);		// PDG fit not assuming CPT (s)
-		TauKl = tau_L * pow(10, -9);					// Kl mean life (s)
-		MassDiff = delta_mass_nonCPT;					// M(Kl)-M(Ks) ( (h/2pi)s-1 ):
+		Epsilon = PhysicsConstants::mod_epsilon;
+		Dphi = PhysicsConstants::phi_pm_nonCPT - PhysicsConstants::phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
+		TauKs = PhysicsConstants::tau_S_nonCPT * pow(10, -9);		// PDG fit not assuming CPT (s)
+		TauKl = PhysicsConstants::tau_L * pow(10, -9);					// Kl mean life (s)
+		MassDiff = PhysicsConstants::delta_mass_nonCPT;					// M(Kl)-M(Ks) ( (h/2pi)s-1 ):
 																					// PDG fit not assuming CPT
 
 		if (check == 0)
@@ -37,8 +37,8 @@ namespace KLOE
 		}
 		else
 		{
-			RePart = Re;
-			ImPart = Im_nonCPT; // M_PI * (Dphi / 3.) / 180.; // Im(epsilon'/epsilon) = Dphi/3;
+			RePart = PhysicsConstants::Re;
+			ImPart = PhysicsConstants::Im_nonCPT; // M_PI * (Dphi / 3.) / 180.; // Im(epsilon'/epsilon) = Dphi/3;
 		}
 
 		// All parameters are calculated taking into account that DT is in TauKs units
@@ -72,7 +72,7 @@ namespace KLOE
 
 	void interference::bin_extraction(UInt_t channel, TH1 *histogram)
 	{
-		if (channel < channNum)
+		if (channel < KLOE::channNum)
 		{
 			for (Int_t i = 0; i < bin_number; i++)
 				b[channel][i] = (histogram->GetBinContent(i + 1));
@@ -98,7 +98,7 @@ namespace KLOE
 		UInt_t rnd_ind;
 		srand(time(NULL));
 
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 		{
 			for (Int_t j = 0; j < time_diff[i].size(); j++)
 			{
@@ -150,7 +150,7 @@ namespace KLOE
 		Norm[8] = xx[10]; // Other norm
 
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 		{
 			for (Int_t j = 0; j < time_diff[i].size(); j++)
 			{
@@ -185,7 +185,7 @@ namespace KLOE
 
 		/////////////////////////////////////////////////////////////////////////////////////////////
 
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 			frac[i]->Reset("ICESM");
 
 		data->Reset("ICESM");
@@ -202,7 +202,7 @@ namespace KLOE
 			e_mcsum[i] = 0.;
 		}
 
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 		{
 			for (Int_t j = 0; j < bin_number; j++)
 			{
@@ -260,7 +260,7 @@ namespace KLOE
 		Double_t Norm[6] = {xx[2], xx[3], xx[4], xx[5], xx[6], xx[7]};
 
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 		{
 			for (Int_t j = 0; j < time_diff[i].size(); j++)
 			{
@@ -283,7 +283,7 @@ namespace KLOE
 				interference::bin_extraction(i, frac[i]);
 		}
 
-		for (Int_t i = 0; i < channNum - 2; i++)
+		for (Int_t i = 0; i < KLOE::channNum - 2; i++)
 			frac[i]->Reset("ICESM");
 		/////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -298,7 +298,7 @@ namespace KLOE
 			err_sum[i] = 0.;
 		}
 
-		for (Int_t i = 0; i < channNum - 3; i++)
+		for (Int_t i = 0; i < KLOE::channNum - 3; i++)
 			for (Int_t j = 0; j < bin_number; j++)
 			{
 				bin_sum[j] += Norm[i] * b[i][j];
@@ -378,7 +378,7 @@ namespace KLOE
 		Norm[7] = tmp_norm[7]; // Other bcg norm
 
 		/////////////////////////////////////////////////////////////////////////////////////////////
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 		{
 			for (Int_t j = 0; j < time_diff[i].size(); j++)
 			{
@@ -418,7 +418,7 @@ namespace KLOE
 		for (Int_t j = 0; j < time_diff_data.size(); j++)
 			data->Fill(time_diff_data[j]); //! Filling DATA
 
-		for (Int_t i = 1; i < channNum; i++)
+		for (Int_t i = 1; i < KLOE::channNum; i++)
 		{
 			data->Add(frac[i], -1.);
 		}
@@ -430,7 +430,7 @@ namespace KLOE
 
 		/////////////////////////////////////////////////////////////////////////////////////////////
 
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 			frac[i]->Reset("ICESM");
 
 		data->Reset("ICESM");
@@ -474,7 +474,7 @@ namespace KLOE
 
 		/////////////////////////////////////////////////////////////////////////////////////////////
 
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 		{
 			for (Int_t j = 0; j < time_diff_rand_mc[i].size(); j++)
 			{
@@ -519,7 +519,7 @@ namespace KLOE
 			e_mcsum[i] = 0.;
 		}
 
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 			for (Int_t j = 0; j < bin_number; j++)
 			{
 				b_mcsum[j] += Norm[i] * b[i][j];

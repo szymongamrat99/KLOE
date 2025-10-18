@@ -169,7 +169,7 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
                                                                 kaon_mom[l1][3] += gamma_mom[l1][l2][3];
                                                             }
                                                             
-                                                            kaon_vel[l1] = cVel*sqrt(pow(kaon_mom[l1][0],2) + pow(kaon_mom[l1][1],2) + pow(kaon_mom[l1][2],2))/(kaon_mom[l1][3]); 
+                                                            kaon_vel[l1] = PhysicsConstants::cVel*sqrt(pow(kaon_mom[l1][0],2) + pow(kaon_mom[l1][1],2) + pow(kaon_mom[l1][2],2))/(kaon_mom[l1][3]); 
                                                             kaon_len[l1] = sqrt(pow(S.sol[l1][0] - bhabha_vtx[0],2) + pow(S.sol[l1][1] - bhabha_vtx[1],2) + pow(S.sol[l1][2] - bhabha_vtx[2],2));
 
                                                             cond_sol[l1][0] = (S.sol[l1][3] >= 0) && (S.sol[l1][3] < 60);

@@ -38,8 +38,8 @@ int combs6[15][6] =
 
 
 /********************  Some globals  ********************************/
-const double mPi0 = 134.9766; // Mev/c2
-const double mK0  = 497.614;  // Mev/c2 
+const double PhysicsConstants::mPi0 = 134.9766; // Mev/c2
+const double PhysicsConstants::mK0  = 497.614;  // Mev/c2 
 
 #define ECLMIN 20. // minimal single-cluster energy
 
@@ -242,12 +242,12 @@ void reconstruct3pi0_(int * ncl,
       m6g = Rec->GetInvMasses( //iS.sol[0]
 			      meanSol[0], combs6[ic], m2g );
 	
-      if( fabs( m2g[0]-mPi0 ) +
-	  fabs( m2g[1]-mPi0 ) +
-	  fabs( m2g[2]-mPi0 ) < errMin ){
-	errMin = ( fabs( m2g[0]-mPi0 ) +
-		   fabs( m2g[1]-mPi0 ) +
-		   fabs( m2g[2]-mPi0 ) );
+      if( fabs( m2g[0]-PhysicsConstants::mPi0 ) +
+	  fabs( m2g[1]-PhysicsConstants::mPi0 ) +
+	  fabs( m2g[2]-PhysicsConstants::mPi0 ) < errMin ){
+	errMin = ( fabs( m2g[0]-PhysicsConstants::mPi0 ) +
+		   fabs( m2g[1]-PhysicsConstants::mPi0 ) +
+		   fabs( m2g[2]-PhysicsConstants::mPi0 ) );
 	icMin = ic;
       } 
     }
@@ -303,9 +303,9 @@ void reconstruct3pi0_(int * ncl,
     
 
     
-    // find cluster set with smallest deviation from mK0
-    //    if( fabs(m6g-mK0) < mK0Min ){
-    //      mK0Min = fabs(m6g-mK0) ;
+    // find cluster set with smallest deviation from PhysicsConstants::mK0
+    //    if( fabs(m6g-PhysicsConstants::mK0) < mK0Min ){
+    //      mK0Min = fabs(m6g-PhysicsConstants::mK0) ;
     if( totalResidual < residualMin ){
       residualMin = totalResidual;
       bestComb = combNo;

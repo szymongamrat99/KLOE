@@ -10,13 +10,13 @@ int Neutrec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt
 {
 
   Short_t 
-          loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
-          numOfConstraints = properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
-          jmin = properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
-          jmax = properties["variables"]["KinFit"]["Trilateration"]["bunchMax"];
+          loopcount = Utils::properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+          numOfConstraints = Utils::properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+          jmin = Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+          jmax = Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMax"];
 
   // Set logger for error logging
-  std::string logFilename = (std::string)neutrec_dir + (std::string)logs_dir + "neutRec.log";
+  std::string logFilename = (std::string)Paths::neutrec_dir + (std::string)Paths::logs_dir + "neutRec.log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
@@ -68,7 +68,7 @@ int Neutrec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt
       // auto end = std::chrono::system_clock::now();
       // std::chrono::duration<double> elapsed_seconds = end - start;
 
-      // std::cout << elapsedTimeHMS(elapsed_seconds.count()) << std::endl;
+      // std::cout << Utils::elapsedTimeHMS(elapsed_seconds.count()) << std::endl;
 
       break;
     }
@@ -79,7 +79,7 @@ int Neutrec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
 
-      std::cout << elapsedTimeHMS(elapsed_seconds.count()) << std::endl;
+      std::cout << Utils::elapsedTimeHMS(elapsed_seconds.count()) << std::endl;
 
       break;
     }

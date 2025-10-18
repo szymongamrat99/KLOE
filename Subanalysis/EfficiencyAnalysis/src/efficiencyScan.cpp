@@ -21,8 +21,8 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 
 	TString
 			mctruth_name = gen_vars_dir + root_files_dir + mctruth_filename + first_file + "_" + last_file + ext_root,
-			omega_name = std::string(properties["variables"]["tree"]["filename"]["omegarec"]),
-			tree_name = std::string(properties["variables"]["tree"]["treename"]["omegarec"]),
+			omega_name = std::string(Utils::properties["variables"]["tree"]["filename"]["omegarec"]),
+			tree_name = std::string(Utils::properties["variables"]["tree"]["treename"]["omegarec"]),
 			cutvars_csv_name = "CutVars";
 
 	// Wrapper to read the CSV file properly
@@ -89,12 +89,12 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 	chain->AddFriend(tree_omega);
 
 	UInt_t
-			sel_ev[channNum],
-			total_ev[channNum];
+			sel_ev[KLOE::channNum],
+			total_ev[KLOE::channNum];
 
 	TCut
 			cut,
-			channelChoice[channNum];
+			channelChoice[KLOE::channNum];
 
 	TString
 			cutStr;
@@ -108,12 +108,12 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 			step;
 
 	std::vector<std::vector<Float_t>>
-			x_val[channNum],
-			eff[channNum],
+			x_val[KLOE::channNum],
+			eff[KLOE::channNum],
 			purity(lineNum - 1),
 			measure(lineNum - 1);
 
-	for (Int_t i = 0; i < channNum; i++)
+	for (Int_t i = 0; i < KLOE::channNum; i++)
 	{
 		x_val[i].resize(lineNum - 1);
 		eff[i].resize(lineNum - 1);
@@ -129,7 +129,7 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 			absVal;
 
 	std::vector<TGraph *>
-			eff_graphs[channNum],
+			eff_graphs[KLOE::channNum],
 			purity_graph;
 
 	for (Int_t i = 0; i < lineNum - 1; i++)
@@ -168,8 +168,8 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 
 	for (Int_t k = 0; k < 3; k++)
 	{
-		resCh[k] = properties["variables"]["Resolutions"]["vtxCharged"][k];
-		resNeu[k] = properties["variables"]["Resolutions"]["vtxNeutral"]["triTriangle"][k];
+		resCh[k] = Utils::properties["variables"]["Resolutions"]["vtxCharged"][k];
+		resNeu[k] = Utils::properties["variables"]["Resolutions"]["vtxNeutral"]["triTriangle"][k];
 
 		resComb[k] = resCh[k] + resNeu[k];
 
@@ -181,9 +181,9 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 	condition[2] = "abs(Kchrec[8] - " + omegarec_tree + ".NeuVtxAvg[2]) < " + resCombString[2];
 
 	// Total num of events
-	for (Int_t i = 0; i < channNum; i++)
+	for (Int_t i = 0; i < KLOE::channNum; i++)
 	{
-		channelChoice[i] = gen_vars_tree + ".mctruth == " + channelInt[i] + "&&" + omegarec_tree + ".doneomega == 1" + "&&" + condition[0] + "&&" + condition[1] + "&&" + condition[2];
+		channelChoice[i] = gen_vars_tree + ".mctruth == " + std::to_string(i+1) + "&&" + omegarec_tree + ".doneomega == 1" + "&&" + condition[0] + "&&" + condition[1] + "&&" + condition[2];
 		total_ev[i] = chain->GetEntries(channelChoice[i]);
 	}
 
@@ -191,7 +191,7 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 	{
 		for (Int_t j = 0; j <= points_num[k]; j++)
 		{
-			for (Int_t i = 0; i < channNum; i++)
+			for (Int_t i = 0; i < KLOE::channNum; i++)
 			{
 				x_val[i][k].push_back(min_lim[k] + j * step[k]);
 
@@ -225,7 +225,7 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 
 		auto legend = new TLegend(0.48, 0.7, 0.85, 0.9);
 
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 		{
 			eff_graphs[i].push_back(new TGraph(points_num[k] + 1, x_val[i][k].data(), eff[i][k].data()));
 			eff_graphs[i][k]->SetTitle(channName[i] + " efficiency");
@@ -249,7 +249,7 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 
 		TMultiGraph *mg = new TMultiGraph();
 
-		for (Int_t i = 0; i < channNum; i++)
+		for (Int_t i = 0; i < KLOE::channNum; i++)
 			mg->Add(eff_graphs[i][k]);
 
 		mg->Add(purity_graph[k]);

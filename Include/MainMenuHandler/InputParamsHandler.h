@@ -16,9 +16,9 @@ public:
     };
 
     static Params getParams(
-        nlohmann::json& properties,
+        nlohmann::json& Utils::properties,
         int lastFileMax,
-        const std::string& propName,
+        const std::string& Paths::propName,
         ErrorHandling::ErrorLogs& logger,
         Controls::Menu* dataType
     );

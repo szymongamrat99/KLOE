@@ -33,10 +33,10 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
   propertyName.push_back("trianglefinal");
   propertyName.push_back("mctruth");
 
-  treeNames[propertyName[0]] = (std::string)properties["variables"]["tree"]["treename"][propertyName[0]];
-  fileNames[propertyName[0]] = (std::string)properties["variables"]["tree"]["filename"][propertyName[0]];
-  treeNames[propertyName[1]] = (std::string)properties["variables"]["tree"]["treename"][propertyName[1]];
-  fileNames[propertyName[1]] = (std::string)properties["variables"]["tree"]["filename"][propertyName[1]];
+  treeNames[propertyName[0]] = (std::string)Utils::properties["variables"]["tree"]["treename"][propertyName[0]];
+  fileNames[propertyName[0]] = (std::string)Utils::properties["variables"]["tree"]["filename"][propertyName[0]];
+  treeNames[propertyName[1]] = (std::string)Utils::properties["variables"]["tree"]["treename"][propertyName[1]];
+  fileNames[propertyName[1]] = (std::string)Utils::properties["variables"]["tree"]["filename"][propertyName[1]];
 
   //
 
@@ -85,12 +85,12 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
   method_dict[1] = "#rho_section";
 
   Double_t
-        width_rho_triangle = properties["variables"]["Resolutions"]["rhoNeutral"]["triTriangle"],
-        width_R_triangle = properties["variables"]["Resolutions"]["pathNeutral"]["triTriangle"],
-        width_rho_pure_triangle = properties["variables"]["Resolutions"]["rhoNeutral"]["triTriangle"],
-        width_R_pure_triangle = properties["variables"]["Resolutions"]["pathNeutral"]["triTriangle"],
-        width_rho_charged = properties["variables"]["Resolutions"]["rhoCharged"],
-        width_R_charged = properties["variables"]["Resolutions"]["pathCharged"];
+        width_rho_triangle = Utils::properties["variables"]["Resolutions"]["rhoNeutral"]["triTriangle"],
+        width_R_triangle = Utils::properties["variables"]["Resolutions"]["pathNeutral"]["triTriangle"],
+        width_rho_pure_triangle = Utils::properties["variables"]["Resolutions"]["rhoNeutral"]["triTriangle"],
+        width_R_pure_triangle = Utils::properties["variables"]["Resolutions"]["pathNeutral"]["triTriangle"],
+        width_rho_charged = Utils::properties["variables"]["Resolutions"]["rhoCharged"],
+        width_R_charged = Utils::properties["variables"]["Resolutions"]["pathCharged"];
 
   Double_t
         max_path = 50.0,
@@ -137,10 +137,10 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
   method.push_back("methodA");
 
   Double_t
-      methodA_lower = properties["variables"]["RegenRejection"]["boundaries"][method[1]][0],
-      methodA_higher = properties["variables"]["RegenRejection"]["boundaries"][method[1]][1],
-      methodB_bound = properties["variables"]["RegenRejection"]["boundaries"][method[0]][0],
-      sigma = properties["variables"]["RegenRejection"]["sigma"];
+      methodA_lower = Utils::properties["variables"]["RegenRejection"]["boundaries"][method[1]][0],
+      methodA_higher = Utils::properties["variables"]["RegenRejection"]["boundaries"][method[1]][1],
+      methodB_bound = Utils::properties["variables"]["RegenRejection"]["boundaries"][method[0]][0],
+      sigma = Utils::properties["variables"]["RegenRejection"]["sigma"];
 
   Long64_t count_tot = 0, count_neg_reg = 0, count_pos_reg = 0, count_sig = 0, count_sig_neg = 0, count_sig_pos = 0;
 
@@ -280,17 +280,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 2)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["mean"][0] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["width"][0] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["mean"][0] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["width"][0] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["mean"][0] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["width"][0] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["mean"][0] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["width"][0] = r->Error(2);
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["mean"][1] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["width"][1] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["mean"][1] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["width"][1] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["mean"][1] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["width"][1] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["mean"][1] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["width"][1] = r->Error(2);
           }
 
           cout << img_name << ": (" << r->Parameter(1) << "+-" << r->Error(1) << ")" << endl;
@@ -300,17 +300,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 2)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["width"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["width"][0] = nullptr;
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["width"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["spherical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["spherical"]["width"][1] = nullptr;
           }
         }
 
@@ -325,17 +325,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 3)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["mean"][0] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["width"][0] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["mean"][0] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["width"][0] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["mean"][0] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["width"][0] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["mean"][0] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["width"][0] = r->Error(2);
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["mean"][1] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["width"][1] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["mean"][1] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["width"][1] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["mean"][1] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["width"][1] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["mean"][1] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["width"][1] = r->Error(2);
           }
 
           cout << img_name << ": (" << r->Parameter(1) << "+-" << r->Error(1) << ")" << endl;
@@ -345,17 +345,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 3)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["width"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["width"][0] = nullptr;
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["width"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["pureTriangle"]["cylindrical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["pureTriangle"]["cylindrical"]["width"][1] = nullptr;
           }
         }
       }
@@ -386,17 +386,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 2)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["mean"][0] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["width"][0] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["mean"][0] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["width"][0] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["mean"][0] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["width"][0] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["mean"][0] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["width"][0] = r->Error(2);
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["mean"][1] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["width"][1] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["mean"][1] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["width"][1] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["mean"][1] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["width"][1] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["mean"][1] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["width"][1] = r->Error(2);
           }
 
           cout << img_name << ": (" << r->Parameter(1) << "+-" << r->Error(1) << ")" << endl;
@@ -406,17 +406,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 2)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["width"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["width"][0] = nullptr;
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["width"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["spherical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["spherical"]["width"][1] = nullptr;
           }
         }
         h_radius_ch[i][j]->GetXaxis()->SetTitle("R [cm]");
@@ -430,17 +430,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 3)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["mean"][0] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["width"][0] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["mean"][0] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["width"][0] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["mean"][0] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["width"][0] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["mean"][0] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["width"][0] = r->Error(2);
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["mean"][1] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["width"][1] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["mean"][1] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["width"][1] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["mean"][1] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["width"][1] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["mean"][1] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["width"][1] = r->Error(2);
           }
 
           cout << img_name << ": (" << r->Parameter(1) << "+-" << r->Error(1) << ")" << endl;
@@ -450,17 +450,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 3)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["width"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["width"][0] = nullptr;
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["width"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["charged"]["cylindrical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["charged"]["cylindrical"]["width"][1] = nullptr;
           }
         }
 
@@ -496,17 +496,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 2)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["mean"][0] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["width"][0] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["mean"][0] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["width"][0] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["mean"][0] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["width"][0] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["mean"][0] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["width"][0] = r->Error(2);
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["mean"][1] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["width"][1] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["mean"][1] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["width"][1] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["mean"][1] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["width"][1] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["mean"][1] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["width"][1] = r->Error(2);
           }
 
           cout << img_name << ": (" << r->Parameter(1) << "+-" << r->Error(1) << ")" << endl;
@@ -516,17 +516,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 2)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["width"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["width"][0] = nullptr;
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["width"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["spherical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["spherical"]["width"][1] = nullptr;
           }
         }
         h_radius_tri[i][j]->GetXaxis()->SetTitle("R [cm]");
@@ -545,17 +545,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 3)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["mean"][0] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["width"][0] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["mean"][0] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["width"][0] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["mean"][0] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["width"][0] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["mean"][0] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["width"][0] = r->Error(2);
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["mean"][1] = r->Parameter(1);
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["width"][1] = r->Parameter(2);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["mean"][1] = r->Error(1);
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["width"][1] = r->Error(2);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["mean"][1] = r->Parameter(1);
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["width"][1] = r->Parameter(2);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["mean"][1] = r->Error(1);
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["width"][1] = r->Error(2);
           }
 
           cout << img_name << ": (" << r->Parameter(1) << "+-" << r->Error(1) << ")" << endl;
@@ -565,17 +565,17 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
         {
           if (j == 3)
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["width"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["mean"][0] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["width"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["mean"][0] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["width"][0] = nullptr;
           }
           else
           {
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["width"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["mean"][1] = nullptr;
-            properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["results"][method[i]]["triangle"]["cylindrical"]["width"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["mean"][1] = nullptr;
+            Utils::properties["variables"]["RegenRejection"]["errors"][method[i]]["triangle"]["cylindrical"]["width"][1] = nullptr;
           }
         }
 
@@ -589,8 +589,8 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
       canva_num++;
     }
 
-  std::ofstream result(propName);
-  result << properties.dump(4);
+  std::ofstream result(Paths::propName);
+  result << Utils::properties.dump(4);
   result.close();
 
   // count_tot = 982142857;

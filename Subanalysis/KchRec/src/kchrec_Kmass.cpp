@@ -49,7 +49,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   ConfigManager &config = ConfigManager::getInstance();
 
   // Structure from const.h to ease navigation
-  BaseKinematics baseKin;
+  KLOE::BaseKinematics baseKin;
 
   TTreeReader reader(&chain);
 
@@ -151,18 +151,18 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
   StatisticalCutter cutter(cutFileName, 7, KLOE::HypothesisCode::FOUR_PI);
 
-  Float_t pKTwoBody = Obj.TwoBodyDecayMass(mPhi, mK0, mK0);
+  Float_t pKTwoBody = Obj.TwoBodyDecayMass(PhysicsConstants::mPhi, PhysicsConstants::mK0, PhysicsConstants::mK0);
 
   ///////////////////////////////////////////////////////////////////
   cutter.RegisterVariableGetter("InvMassKS", [&]()
                                 { return KchrecKS->at(5); });
   cutter.RegisterCentralValueGetter("InvMassKS", [&]()
-                                    { return mK0; });
+                                    { return PhysicsConstants::mK0; });
   ///////////////////////////////////////////////////////////////////
   cutter.RegisterVariableGetter("InvMassKL", [&]()
                                 { return KchrecKL->at(5); });
   cutter.RegisterCentralValueGetter("InvMassKL", [&]()
-                                    { return mK0; });
+                                    { return PhysicsConstants::mK0; });
   ///////////////////////////////////////////////////////////////////
   cutter.RegisterVariableGetter("TwoBodyMomKS", [&]()
                                 { return KchrecKSMom; });
@@ -1056,7 +1056,7 @@ ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Float_t> *Kchboost, 
                             trk4VecKaonCM[1][2]);
 
   Double_t
-      PiMomMagKaonCM1 = Obj.TwoBodyDecayMass(KchrecTwoBody[5], mPiCh, mPiCh);
+      PiMomMagKaonCM1 = Obj.TwoBodyDecayMass(KchrecTwoBody[5], PhysicsConstants::mPiCh, PhysicsConstants::mPiCh);
 
   Double_t angle1 = trkMomVecKaonCM[0].Phi(),
            angle2 = trkMomVecKaonCM[1].Phi(),
@@ -1082,8 +1082,8 @@ ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Float_t> *Kchboost, 
                           PiMomMagKaonCM1 * sin(theta2) * sin(angle2 + gamma),
                           PiMomMagKaonCM1 * cos(theta2));
 
-  PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomKaonCM[0][0], 2) + pow(PiMomKaonCM[0][1], 2) + pow(PiMomKaonCM[0][2], 2) + pow(mPiCh, 2)));
-  PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomKaonCM[1][0], 2) + pow(PiMomKaonCM[1][1], 2) + pow(PiMomKaonCM[1][2], 2) + pow(mPiCh, 2)));
+  PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomKaonCM[0][0], 2) + pow(PiMomKaonCM[0][1], 2) + pow(PiMomKaonCM[0][2], 2) + pow(PhysicsConstants::mPiCh, 2)));
+  PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomKaonCM[1][0], 2) + pow(PiMomKaonCM[1][1], 2) + pow(PiMomKaonCM[1][2], 2) + pow(PhysicsConstants::mPiCh, 2)));
 
   kaonMomLAB = -kaonMomLAB; // Invert the boost direction for the pions
   Obj.lorentz_transf(kaonMomLAB, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
@@ -1114,11 +1114,11 @@ ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Float_t> *Kchboost, 
   PiKaon4VecLAB[0].SetPxPyPzE(PiMomKaonLAB[0][0],
                               PiMomKaonLAB[0][1],
                               PiMomKaonLAB[0][2],
-                              sqrt(PiMomKaonLAB[0].Mag2() + pow(mPiCh, 2)));
+                              sqrt(PiMomKaonLAB[0].Mag2() + pow(PhysicsConstants::mPiCh, 2)));
   PiKaon4VecLAB[1].SetPxPyPzE(PiMomKaonLAB[1][0],
                               PiMomKaonLAB[1][1],
                               PiMomKaonLAB[1][2],
-                              sqrt(PiMomKaonLAB[1].Mag2() + pow(mPiCh, 2)));
+                              sqrt(PiMomKaonLAB[1].Mag2() + pow(PhysicsConstants::mPiCh, 2)));
 
   trk4VecLAB[0].SetPxPyPzE(trkMomVecLAB[0][0],
                            trkMomVecLAB[0][1],

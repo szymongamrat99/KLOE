@@ -153,7 +153,7 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 			mctruth = {1, 3, 4, 5, 6, 7};
 
 	std::vector<std::string>
-			filterMctruth(channNum);
+			filterMctruth(KLOE::channNum);
 
 	for(Int_t i = 0; i < filterMctruth.size(); i++)
 	{
@@ -201,14 +201,14 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 
 	auto setLorentzVectorPos = [](ROOT::RVec<Float_t> &v, ROOT::RVec<Float_t> &w)
 	{
-		TLorentzVector vLorentz(v[6] - w[0], v[7] - w[1], v[8] - w[2], cVel * v[9]);
+		TLorentzVector vLorentz(v[6] - w[0], v[7] - w[1], v[8] - w[2], PhysicsConstants::cVel * v[9]);
 
 		return vLorentz;
 	};
 
 	auto setLorentzVectorPosAlt = [](ROOT::RVec<Float_t> &v, ROOT::RVec<Float_t> &w, Float_t TimeCh)
 	{
-		TLorentzVector vLorentz(v[6] - w[0], v[7] - w[1], v[8] - w[2], cVel * TimeCh);
+		TLorentzVector vLorentz(v[6] - w[0], v[7] - w[1], v[8] - w[2], PhysicsConstants::cVel * TimeCh);
 
 		return vLorentz;
 	};
@@ -216,7 +216,7 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 	auto getTimeCh = [](ROOT::RVec<Float_t> &v, ROOT::RVec<Float_t> &w)
 	{
 		Float_t 
-			boost = cVel * sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2], 2)) / v[3],
+			boost = PhysicsConstants::cVel * sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2], 2)) / v[3],
 			time = sqrt(pow(v[6] - w[0], 2) + pow(v[7] - w[1], 2) + pow(v[8] - w[2], 2)) / boost;
 
 		return time;
@@ -240,7 +240,7 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 
 		TLegend *legend = new TLegend(0.7,0.7,0.95,0.95);
 
-		for (Int_t j = 0; j < channNum; j++)
+		for (Int_t j = 0; j < KLOE::channNum; j++)
 		{
 			hist_name = "hist_" + std::to_string(j);
 			hist.push_back(new TH1D(hist_name, channName[j], bin_num[alias[index]], range_min[alias[index]], range_max[alias[index]]));
@@ -320,14 +320,14 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 
 		canvas[index]->cd();
 
-		for (Int_t j = 0; j < channNum; j++)
+		for (Int_t j = 0; j < KLOE::channNum; j++)
 		{
 			hist[indices[j]]->SetLineColor(channColor[indices[j]]);
 			legend->AddEntry(hist[j], channName[j], "l");
 
 			if (j == 0)
 			{
-				if (maxHeight[indices[0]] / maxHeight[indices[channNum - 1]] > 10.)
+				if (maxHeight[indices[0]] / maxHeight[indices[KLOE::channNum - 1]] > 10.)
 				{
 					canvas[index]->SetLogy(1);
 					hist[indices[j]]->GetYaxis()->SetRangeUser(1E-1, maxHeight[indices[j]] * 10.0);
@@ -359,7 +359,7 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 	std::vector<TCanvas*> canva2D;
 	TString canva2D_name = "";
 	
-	for (Int_t i = 0; i < channNum * hist2DNum; i++)
+	for (Int_t i = 0; i < KLOE::channNum * hist2DNum; i++)
 	{
 		canva2D_name = "canva2D_" + std::to_string(i);
 		canva2D.push_back(new TCanvas(canva2D_name, canva2D_name));
@@ -368,7 +368,7 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 	std::vector<TH2*> hist2D;
 	TString hist2D_name = "";
 	
-	for (Int_t i = 0; i < channNum; i++)
+	for (Int_t i = 0; i < KLOE::channNum; i++)
 	{
 		hist2D_name = "hist2D_" + std::to_string(i);
 		hist2D.push_back(new TH2D());

@@ -28,7 +28,7 @@ extern "C"
   //======================== Include constans.inc =========================
   const double Mpip = 139.57039;
   const double Mpio = 134.9768;
-  const double Mko = mK0;
+  const double Mko = PhysicsConstants::mK0;
   const double Momega = 782.66;
   const double Cvel = 29.9792458;
   const double TauKs = 0.08954;

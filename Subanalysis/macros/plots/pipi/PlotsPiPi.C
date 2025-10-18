@@ -48,7 +48,7 @@ void PlotsPiPi::Begin(TTree * /*tree*/)
 
    TString histKS_name = "";
 
-   for (Int_t i = 0; i < channNum; i++)
+   for (Int_t i = 0; i < KLOE::channNum; i++)
    {
       histKS_name = "histKS_" + std::to_string(i);
       histKS.push_back(new TH1D(histKS_name, "", 100, -400, 400));
@@ -56,7 +56,7 @@ void PlotsPiPi::Begin(TTree * /*tree*/)
 
    TString histKL_name = "";
 
-   for (Int_t i = 0; i < channNum; i++)
+   for (Int_t i = 0; i < KLOE::channNum; i++)
    {
       histKL_name = "histKL_" + std::to_string(i);
       histKL.push_back(new TH1D(histKL_name, "", 100, -400, 400));
@@ -166,7 +166,7 @@ void PlotsPiPi::Terminate()
    line1->SetLineColor(kBlack); // opcjonalnie kolor
    line1->SetLineWidth(2);    // opcjonalnie grubość
 
-   for (Int_t i = 0; i < channNum; i++)
+   for (Int_t i = 0; i < KLOE::channNum; i++)
    {
       histKS[i]->SetLineColor(channColor[i]);
       histKL[i]->SetLineColor(channColor[i]);

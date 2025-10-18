@@ -49,7 +49,7 @@ void init_analysis::Begin(TTree * /*tree*/)
 
    TString option = GetOption();
 
-   histMgr = new HistManager(channNum, channColor, channNames, kFullCircle, kBlack, kOrange);
+   histMgr = new HistManager(KLOE::channNum, channColor, channNames, kFullCircle, kBlack, kOrange);
 
    std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
 
@@ -61,7 +61,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    cutter->RegisterVariableGetter("InvMassKch", [&]()
                                   { return Kchrec[5]; });
    cutter->RegisterCentralValueGetter("InvMassKch", [&]()
-                                      { return mK0; });
+                                      { return PhysicsConstants::mK0; });
 
    cutter->RegisterVariableGetter("Qmiss", [&]()
                                   { return *Qmiss; });
@@ -69,7 +69,7 @@ void init_analysis::Begin(TTree * /*tree*/)
    cutter->RegisterVariableGetter("InvMassKne", [&]()
                                   { return *minv4gam; });
    cutter->RegisterCentralValueGetter("InvMassKne", [&]()
-                                      { return mK0; });
+                                      { return PhysicsConstants::mK0; });
 
    invMassKchConfig.name = "invMassKch";
    invMassKchConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";

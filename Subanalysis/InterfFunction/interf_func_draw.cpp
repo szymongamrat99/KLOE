@@ -17,11 +17,11 @@ Double_t interf_function(Double_t *x, Double_t *par)
 
     // Parameters from PDG2023
 
-    Epsilon = mod_epsilon;
-    Dphi = phi_pm_nonCPT - phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
-    TauKs = tau_S_nonCPT * pow(10, -9);   // PDG fit not assuming CPT (s)
-    TauKl = tau_L * pow(10, -9);          // Kl mean life (s)
-    MassDiff = delta_mass_nonCPT;         // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
+    Epsilon = PhysicsConstants::mod_epsilon;
+    Dphi = PhysicsConstants::phi_pm_nonCPT - PhysicsConstants::phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
+    TauKs = PhysicsConstants::tau_S_nonCPT * pow(10, -9);   // PDG fit not assuming CPT (s)
+    TauKl = PhysicsConstants::tau_L * pow(10, -9);          // Kl mean life (s)
+    MassDiff = PhysicsConstants::delta_mass_nonCPT;         // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
                                           // PDG fit not assuming CPT
     RePart = par[0];
     ImPart = par[1]; // Im(epsilon'/epsilon) = Dphi/3;
@@ -97,7 +97,7 @@ int main()
     const Double_t frontRe = 0.005 / pow(10, expRe), frontIm = 0.05 / pow(10, expIm);  
 
     name_0 = "#varepsilon'/#varepsilon = 0";
-    name_1 = Form("#splitline{Re(#varepsilon'/#varepsilon) = %.2f#times10^{%d}}{Im(#varepsilon'/#varepsilon) = %.2f#times10^{%d}}",frontRe,expRe,frontIm,expIm);
+    name_1 = Form("#splitline{PhysicsConstants::Re(#varepsilon'/#varepsilon) = %.2f#times10^{%d}}{Im(#varepsilon'/#varepsilon) = %.2f#times10^{%d}}",frontRe,expRe,frontIm,expIm);
 
     legend->AddEntry(func_wo_im, name_0, "l");
     legend->AddEntry(func_with_im, name_1, "l");

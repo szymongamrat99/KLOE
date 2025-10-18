@@ -50,7 +50,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 
 	// Branches' addresses
 	// Bhabha vars
-	BaseKinematics baseKin;
+	KLOE::BaseKinematics baseKin;
 	Float_t bhabha_mom[4], bhabha_mom_err[4], bhabha_vtx[3];
 
 	chain.SetBranchAddress("Bpx", &bhabha_mom[0]);
@@ -216,7 +216,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 							Int_t
 									ind_gam[4] = {j1, j2, j3, j4};
 							// -----------------------------------------------------------------------
-							// Check of logical conditions, if clusters have good properties
+							// Check of logical conditions, if clusters have good Utils::properties
 							Bool_t cond_ene =
 												 cluster[4][baseKin.ncll[ind_gam[0]] - 1] > MIN_CLU_ENE &&
 												 cluster[4][baseKin.ncll[ind_gam[1]] - 1] > MIN_CLU_ENE &&
@@ -247,7 +247,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 								lengthPhotonAux = (sqrt(pow(cluster[0][baseKin.ncll[ind_gam[k]] - 1] - bhabha_vtx[0], 2) +
 																				pow(cluster[1][baseKin.ncll[ind_gam[k]] - 1] - bhabha_vtx[1], 2) +
 																				pow(cluster[2][baseKin.ncll[ind_gam[k]] - 1] - baseKin.Kchrec[8], 2)) /
-																	 cVel);
+																	 PhysicsConstants::cVel);
 								lengthPhoton[k] = cluster[3][baseKin.ncll[ind_gam[k]] - 1] - lengthPhotonAux; // path of single 'Kaon'
 
 								totEnergy += cluster[4][baseKin.ncll[ind_gam[k]] - 1];
@@ -307,7 +307,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 
 			Float_t
 					kaonMomTot = sqrt(pow(kaonMom[0], 2) + pow(kaonMom[1], 2) + pow(kaonMom[2], 2)), // total 'Kaon' momentum
-					kaonVelTot = cVel * (kaonMomTot / kaonMom[3]);																	 // total 'Kaon' velocity
+					kaonVelTot = PhysicsConstants::cVel * (kaonMomTot / kaonMom[3]);																	 // total 'Kaon' velocity
 
 			for (Int_t k = 0; k < 3; k++)
 			{
@@ -349,7 +349,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 															pow(PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[j][0], 2) -
 															pow(PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[j][1], 2) -
 															pow(PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[j][2], 2));
-				M_omega_diff[j] = M_omega_tmp[j] - mOmega;
+				M_omega_diff[j] = M_omega_tmp[j] - PhysicsConstants::mOmega;
 			}
 
 			if (std::isnan(M_omega_diff[0]) && std::isnan(M_omega_diff[1])) // Check if both differences are NaN
@@ -512,14 +512,14 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	file->Close(); // Closing the file
 	delete file;	 // Deletion of the file pointer
 
-	properties["variables"]["tree"]["filename"]["omegarec"] = (std::string)name;
-	properties["variables"]["tree"]["treename"]["omegarec"] = (std::string)omegarec_tree;
+	Utils::properties["variables"]["tree"]["filename"]["omegarec"] = (std::string)name;
+	Utils::properties["variables"]["tree"]["treename"]["omegarec"] = (std::string)omegarec_tree;
 
-	properties["lastScript"] = "Plots of Omega Reconstruction";
-	properties["lastUpdate"] = Obj.getCurrentTimestamp();
+	Utils::properties["lastScript"] = "Plots of Omega Reconstruction";
+	Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();
 
-	std::ofstream outfile(propName);
-	outfile << properties.dump(4);
+	std::ofstream outfile(Paths::propName);
+	outfile << Utils::properties.dump(4);
 	outfile.close();
 
 	return 0;

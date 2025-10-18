@@ -58,7 +58,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   Int_t totEvents = 0;
 
-  BaseKinematics baseKin;
+  KLOE::BaseKinematics baseKin;
 
   GeneratedVariables genVarClassifier;
   // Set flag for initial analysis
@@ -188,12 +188,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     cutter.RegisterVariableGetter("InvMassKch", [&]()
                                   { return baseKin.KchrecKS[5]; });
     cutter.RegisterCentralValueGetter("InvMassKch", [&]()
-                                      { return mK0; });
+                                      { return PhysicsConstants::mK0; });
     ///////////////////////////////////////////////////////////////////
     cutter.RegisterVariableGetter("InvMassKne", [&]()
                                   { return baseKin.KchrecKL[5]; });
     cutter.RegisterCentralValueGetter("InvMassKne", [&]()
-                                      { return mK0; });
+                                      { return PhysicsConstants::mK0; });
     ///////////////////////////////////////////////////////////////////
     cutter.RegisterVariableGetter("TwoBodyMomKS", [&]()
                                   { return KchrecKSMom; });
@@ -227,7 +227,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     cutter.RegisterVariableGetter("InvMassKch", [&]()
                                   { return baseKin.Kchrecnew[5]; });
     cutter.RegisterCentralValueGetter("InvMassKch", [&]()
-                                      { return mK0; });
+                                      { return PhysicsConstants::mK0; });
 
     cutter.RegisterVariableGetter("Chi2Signal", [&]()
                                   { return baseKin.Chi2SignalKinFit; });
@@ -241,7 +241,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     cutter.RegisterVariableGetter("InvMassKne", [&]()
                                   { return baseKin.Knerec[5]; });
     cutter.RegisterCentralValueGetter("InvMassKne", [&]()
-                                      { return mK0; });
+                                      { return PhysicsConstants::mK0; });
   }
 
   // Initialization of momentum smearing
@@ -250,7 +250,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   // -------------------------------------------------------------
 
   Bool_t
-      good_clus = (Bool_t)properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
+      good_clus = (Bool_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["goodClus"];
 
   std::map<std::string, Short_t>
       N_free,
@@ -265,16 +265,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   for (const auto &method : kinFitMethods)
   {
-    loopcount[method] = (Short_t)properties["variables"]["KinFit"][method]["loopCount"];
-    N_free[method] = (Short_t)properties["variables"]["KinFit"][method]["freeVars"];
-    N_const[method] = (Short_t)properties["variables"]["KinFit"][method]["fixedVars"];
-    M[method] = (Short_t)properties["variables"]["KinFit"][method]["numOfConstraints"];
-    chiSqrStep[method] = (Float_t)properties["variables"]["KinFit"][method]["chiSqrStep"];
+    loopcount[method] = (Short_t)Utils::properties["variables"]["KinFit"][method]["loopCount"];
+    N_free[method] = (Short_t)Utils::properties["variables"]["KinFit"][method]["freeVars"];
+    N_const[method] = (Short_t)Utils::properties["variables"]["KinFit"][method]["fixedVars"];
+    M[method] = (Short_t)Utils::properties["variables"]["KinFit"][method]["numOfConstraints"];
+    chiSqrStep[method] = (Float_t)Utils::properties["variables"]["KinFit"][method]["chiSqrStep"];
   }
 
   const Short_t
-      jmin = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
-      jmax = (Short_t)properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
+      jmin = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+      jmax = (Short_t)Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMax"],
       range = Int_t(jmax - jmin) + 1;
 
   KLOE::TrilaterationReconstructionKinFit trilatKinFitObj(N_free["Trilateration"], N_const["Trilateration"], M["Trilateration"], loopcount["Trilateration"], chiSqrStep["Trilateration"], jmin, jmax, logger);
@@ -683,7 +683,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                         -dataAccess.GetBpz() / dataAccess.GetBRoots()},
                     trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {};
 
-                pKTwoBody = Obj.TwoBodyDecayMass(mPhi, mK0, mK0);
+                pKTwoBody = Obj.TwoBodyDecayMass(PhysicsConstants::mPhi, PhysicsConstants::mK0, PhysicsConstants::mK0);
 
                 Obj.lorentz_transf(boostPhi, baseKin.trkKS[0].data(), trkKS_PhiCM[0]);
                 Obj.lorentz_transf(boostPhi, baseKin.trkKS[1].data(), trkKS_PhiCM[1]);
@@ -1132,7 +1132,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         // }
 
         // Clone of the branches of the old tree
-        // General properties of the event
+        // General Utils::properties of the event
         baseKin.nrun = dataAccess.GetNRun();
         baseKin.nev = dataAccess.GetNEv();
 

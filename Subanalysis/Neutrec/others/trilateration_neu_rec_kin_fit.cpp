@@ -333,7 +333,7 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 											mom_kaon[k][2] = gamma_mom[k][0][2] + gamma_mom[k][1][2] + gamma_mom[k][2][2] + gamma_mom[k][3][2];
 											mom_kaon[k][3] = gamma_mom[k][0][3] + gamma_mom[k][1][3] + gamma_mom[k][2][3] + gamma_mom[k][3][3];
 
-											v_kaon[k] = cVel * sqrt(pow(mom_kaon[k][0], 2) + pow(mom_kaon[k][1], 2) + pow(mom_kaon[k][2], 2)) / mom_kaon[k][3];
+											v_kaon[k] = PhysicsConstants::cVel * sqrt(pow(mom_kaon[k][0], 2) + pow(mom_kaon[k][1], 2) + pow(mom_kaon[k][2], 2)) / mom_kaon[k][3];
 
 											bhabha_mom_fit[0] = P1[20];
 											bhabha_mom_fit[1] = P1[21];

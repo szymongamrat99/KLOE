@@ -68,15 +68,7 @@ namespace KLOE
         _X_init_min,
         _X_init_aux;
 
-    std::vector<ChPart>
-        _PiCh;
 
-    std::vector<NeuPart>
-        _Photon,
-        _PiNeu,
-        _Kaon;
-    Phi
-        _PhiMeson;
 
     KinFit *_baseObj;
 
@@ -139,8 +131,6 @@ namespace KLOE
 
     Int_t ConstraintSet(std::vector<std::string> ConstrSet);
     Int_t ConstraintSet(std::vector<TF1 *> ConstrSet);
-
-    void PhotonPairing(std::vector<NeuPart> _Photons);
 
     Double_t FitFunction(Double_t bunchCorr = 0);
 

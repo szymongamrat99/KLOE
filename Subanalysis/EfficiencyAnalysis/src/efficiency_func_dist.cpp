@@ -73,7 +73,7 @@ void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
 
         if((mctruth == 1 || mctruth == 2) && done4 == 1)
         {
-            velocity_kch = cVel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
+            velocity_kch = PhysicsConstants::cVel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
 
             velocity_kne = fourKnetri[4]/fourKnetri[3];
 
@@ -85,7 +85,7 @@ void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
             Kch_LAB[0] = Kchboost[6] - ip[0];
             Kch_LAB[1] = Kchboost[7] - ip[1];
             Kch_LAB[2] = Kchboost[8] - ip[2];
-            Kch_LAB[3] = tch_LAB * cVel;
+            Kch_LAB[3] = tch_LAB * PhysicsConstants::cVel;
 
             Kchmom_LAB[0] = Kchboost[0];
             Kchmom_LAB[1] = Kchboost[1];
@@ -95,7 +95,7 @@ void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
             Kne_LAB[0] = fourKnetri[6] - iptri_kinfit[0];
             Kne_LAB[1] = fourKnetri[7] - iptri_kinfit[1];
             Kne_LAB[2] = fourKnetri[8] - iptri_kinfit[2];
-            Kne_LAB[3] = tne_LAB * cVel;
+            Kne_LAB[3] = tne_LAB * PhysicsConstants::cVel;
 
             Knemom_LAB[0] = fourKnetri[0];
             Knemom_LAB[1] = fourKnetri[1];
@@ -126,13 +126,13 @@ void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
             lorentz_transf(Kch_boost, Kch_CM, Kch_CMCM);
             lorentz_transf(Kch_boost, Kne_CM, Kne_CMCM);
 
-            Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3])/(cVel * tau_S_nonCPT);
+            Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3])/(PhysicsConstants::cVel * PhysicsConstants::tau_S_nonCPT);
 
-            for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[g4takentri_kinfit[i]-1] - (sqrt(pow(Xcl[g4takentri_kinfit[i]-1] - fourKnetri[6],2) + pow(Ycl[g4takentri_kinfit[i]-1] - fourKnetri[7],2) + pow(Zcl[g4takentri_kinfit[i]-1] - fourKnetri[8],2))/cVel) - fourKnetri[9];
+            for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[g4takentri_kinfit[i]-1] - (sqrt(pow(Xcl[g4takentri_kinfit[i]-1] - fourKnetri[6],2) + pow(Ycl[g4takentri_kinfit[i]-1] - fourKnetri[7],2) + pow(Zcl[g4takentri_kinfit[i]-1] - fourKnetri[8],2))/PhysicsConstants::cVel) - fourKnetri[9];
 
             trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
-            passed_cond = (minv4gam - mK0) < 76 && abs(Kchboost[5] - mK0) < 1.2 && Qmiss < 3.75;
+            passed_cond = (minv4gam - PhysicsConstants::mK0) < 76 && abs(Kchboost[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75;
             efficiency->Fill(passed_cond, Dtboostlor);
 
             trcv_hist->Fill(trcv_sum);

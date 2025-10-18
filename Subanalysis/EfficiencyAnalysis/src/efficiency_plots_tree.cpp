@@ -19,7 +19,7 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
 	}
     }
 
-    UInt_t sel_ev[channNum - 2], total_ev[channNum - 2];
+    UInt_t sel_ev[KLOE::channNum - 2], total_ev[KLOE::channNum - 2];
     TCut cut;
 
     //Total num of events
@@ -31,13 +31,13 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
     total_ev[5] = chain.GetEntries("mctruth_pipi == 1");
     total_ev[6] = chain.GetEntries("mctruth == 7");
 
-    Float_t step, x_val[channNum - 2][points_num + 1], eff[channNum - 2][points_num + 1], purity[points_num + 1];
+    Float_t step, x_val[KLOE::channNum - 2][points_num + 1], eff[KLOE::channNum - 2][points_num + 1], purity[points_num + 1];
 
     step = (max_lim - min_lim)/(Float_t)points_num;
 
     for(Int_t j = 0; j <= points_num; j++)
     {
-        for(Int_t i = 0; i < channNum - 2; i++)
+        for(Int_t i = 0; i < KLOE::channNum - 2; i++)
         {
             x_val[i][j] = min_lim + j*step;
 
@@ -60,10 +60,10 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
 
     auto legend = new TLegend(0.48,0.7,0.85,0.9);
 
-    TGraph *eff_graphs[channNum - 2];
+    TGraph *eff_graphs[KLOE::channNum - 2];
     TGraph *purity_graph;
 
-    for(Int_t i = 0; i < channNum - 2; i++)
+    for(Int_t i = 0; i < KLOE::channNum - 2; i++)
     {
         eff_graphs[i] = new TGraph(points_num + 1, x_val[i], eff[i]);
         eff_graphs[i]->SetTitle(channName[i] + " efficiency");
@@ -87,7 +87,7 @@ void efficiency_plots( const UInt_t points_num = 1, TString var = "", TString si
 
     TMultiGraph *mg = new TMultiGraph();
 
-    for(Int_t i = 0; i < channNum - 2; i++) mg->Add(eff_graphs[i]);
+    for(Int_t i = 0; i < KLOE::channNum - 2; i++) mg->Add(eff_graphs[i]);
 
     mg->Add(purity_graph);
 

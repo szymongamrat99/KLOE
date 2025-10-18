@@ -80,15 +80,15 @@ Int_t Pi0PhotonPair(Int_t ClusterIndex[4], Float_t PhotonMom[4][8], Int_t Cluste
     }
     else
     {
-      InvMassOmega[i * 2] = mOmega;
-      InvMassOmega[i * 2 + 1] = mOmega;
+      InvMassOmega[i * 2] = PhysicsConstants::mOmega;
+      InvMassOmega[i * 2 + 1] = PhysicsConstants::mOmega;
     }
   }
 
   for (Int_t i = 0; i < 3; i++)
   {
-    PseudoChi2[i * 2] = pow((InvMassPi01[i * 2] - mPi0) / 17.0, 2) + pow((InvMassPi02[i * 2] - mPi0) / 17.0, 2) + pow((InvMassOmega[i * 2] - mOmega) / 20.0, 2);
-    PseudoChi2[i * 2 + 1] = pow((InvMassPi01[i * 2 + 1] - mPi0) / 17.0, 2) + pow((InvMassPi02[i * 2 + 1] - mPi0) / 17.0, 2) + pow((InvMassOmega[i * 2 + 1] - mOmega) / 20.0, 2);
+    PseudoChi2[i * 2] = pow((InvMassPi01[i * 2] - PhysicsConstants::mPi0) / 17.0, 2) + pow((InvMassPi02[i * 2] - PhysicsConstants::mPi0) / 17.0, 2) + pow((InvMassOmega[i * 2] - PhysicsConstants::mOmega) / 20.0, 2);
+    PseudoChi2[i * 2 + 1] = pow((InvMassPi01[i * 2 + 1] - PhysicsConstants::mPi0) / 17.0, 2) + pow((InvMassPi02[i * 2 + 1] - PhysicsConstants::mPi0) / 17.0, 2) + pow((InvMassOmega[i * 2 + 1] - PhysicsConstants::mOmega) / 20.0, 2);
   }
 
   Int_t min_iter = std::distance(PseudoChi2.begin(), std::min_element(PseudoChi2.begin(), PseudoChi2.end()));

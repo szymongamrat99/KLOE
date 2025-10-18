@@ -27,7 +27,7 @@ void selection_vars(UInt_t firstFile, UInt_t lastFile)
 	chain_init(chain, firstFile, lastFile);
 
 	// =============================================================================
-	BaseKinematics
+	KLOE::BaseKinematics
 			baseKin;
 	NeutRec4
 			neutVars;
@@ -46,10 +46,10 @@ void selection_vars(UInt_t firstFile, UInt_t lastFile)
 	// =============================================================================
 
 	TString
-			mctruthFileName = (std::string)properties["variables"]["tree"]["filename"]["mctruth"],
-			mctruthTreeName = (std::string)properties["variables"]["tree"]["treename"]["mctruth"],
-			fileName = (std::string)properties["variables"]["tree"]["filename"]["selectionvars"],
-			treeName = (std::string)properties["variables"]["tree"]["treename"]["selectionvars"];
+			mctruthFileName = (std::string)Utils::properties["variables"]["tree"]["filename"]["mctruth"],
+			mctruthTreeName = (std::string)Utils::properties["variables"]["tree"]["treename"]["mctruth"],
+			fileName = (std::string)Utils::properties["variables"]["tree"]["filename"]["selectionvars"],
+			treeName = (std::string)Utils::properties["variables"]["tree"]["treename"]["selectionvars"];
 
 	// =============================================================================
 

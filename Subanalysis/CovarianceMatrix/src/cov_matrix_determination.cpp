@@ -22,7 +22,7 @@
 int CovarianceMatrixDetermination(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
 {
 	// =============================================================================
-	BaseKinematics
+	KLOE::BaseKinematics
 			baseKin;
 
 	ConfigManager &config = ConfigManager::getInstance();

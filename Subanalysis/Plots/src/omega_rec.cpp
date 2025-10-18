@@ -67,7 +67,7 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 	UChar_t mctruth, mcflag;
 	Float_t cluster[5][500], Kchboost[9], Knerec[9], KnemcOld[9], ipmcOld[3], ip[3], Dtmc, bunch_corr;
 
-	BaseKinematics baseKin;
+	KLOE::BaseKinematics baseKin;
 
 	chain->SetBranchAddress("nclu", &nclu);
 	chain->SetBranchAddress("Xcl", cluster[0]);
@@ -222,7 +222,7 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 																	(sqrt(pow(cluster[0][baseKin.ncll[ind_gam[k]] - 1] - bhabha_vtx[0], 2) +
 																				pow(cluster[1][baseKin.ncll[ind_gam[k]] - 1] - bhabha_vtx[1], 2) +
 																				pow(cluster[2][baseKin.ncll[ind_gam[k]] - 1] - baseKin.Kchrec[8], 2)) /
-																	 cVel);
+																	 PhysicsConstants::cVel);
 
 								totEnergy += cluster[4][baseKin.ncll[ind_gam[k]] - 1];
 
@@ -278,7 +278,7 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 
 			Float_t 
 						kaonMomTot = sqrt(pow(kaonMom[0],2) + pow(kaonMom[1],2) + pow(kaonMom[2],2)),
-						kaonVelTot = cVel *(kaonMomTot / kaonMom[3]);
+						kaonVelTot = PhysicsConstants::cVel *(kaonMomTot / kaonMom[3]);
 
 			neu_vtx_avg[0] = lengthPhotonMinAvg * kaonVelTot * (kaonMom[0]/kaonMomTot) + IP_vtx[0];
 			neu_vtx_avg[1] = lengthPhotonMinAvg * kaonVelTot * (kaonMom[1]/kaonMomTot) + IP_vtx[1];
@@ -310,7 +310,7 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 															pow(PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[j][0], 2) -
 															pow(PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[j][1], 2) -
 															pow(PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[j][2], 2));
-				M_omega_diff[j] = M_omega_tmp[j] - mOmega;
+				M_omega_diff[j] = M_omega_tmp[j] - PhysicsConstants::mOmega;
 			}
 
 			//

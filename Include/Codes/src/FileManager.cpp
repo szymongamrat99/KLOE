@@ -70,12 +70,12 @@ namespace KLOE
             dirnamedata,
             filenamedata,
             extension = ext_root,
-            newestDateStampData = (std::string)properties["variables"]["rootFiles"]["newestFileDateStampData"],
-            newestDateStampMC = (std::string)properties["variables"]["rootFiles"]["newestFileDateStampMC"],
-            path = (std::string)properties["variables"]["rootFiles"]["path"];
+            newestDateStampData = (std::string)Utils::properties["variables"]["rootFiles"]["newestFileDateStampData"],
+            newestDateStampMC = (std::string)Utils::properties["variables"]["rootFiles"]["newestFileDateStampMC"],
+            path = (std::string)Utils::properties["variables"]["rootFiles"]["path"];
 
-    Int_t fileNumData[2] = {properties["variables"]["rootFiles"]["Data"]["firstFile"],
-                            properties["variables"]["rootFiles"]["Data"]["lastFile"]};
+    Int_t fileNumData[2] = {Utils::properties["variables"]["rootFiles"]["Data"]["firstFile"],
+                            Utils::properties["variables"]["rootFiles"]["Data"]["lastFile"]};
 
     std::vector<Int_t> fileNumMC[3];
 
@@ -88,8 +88,8 @@ namespace KLOE
 
       dirnamemc.push_back(path + newestDateStampMC);
       filenamemc.push_back((std::string)filePaths["MC"]["filenameBase"][i]);
-      fileNumMC[i].push_back(properties["variables"]["rootFiles"]["MC"][i]["firstFile"]);
-      fileNumMC[i].push_back(properties["variables"]["rootFiles"]["MC"][i]["lastFile"]);
+      fileNumMC[i].push_back(Utils::properties["variables"]["rootFiles"]["MC"][i]["firstFile"]);
+      fileNumMC[i].push_back(Utils::properties["variables"]["rootFiles"]["MC"][i]["lastFile"]);
     }
 
     dirnamedata = path + newestDateStampData;

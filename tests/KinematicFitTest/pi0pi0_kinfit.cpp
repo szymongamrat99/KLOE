@@ -97,7 +97,7 @@ int main()
     pi0Gen.fourMom[3] = sqrt(pow(pi0Gen.fourMom[0], 2) +
                              pow(pi0Gen.fourMom[1], 2) +
                              pow(pi0Gen.fourMom[2], 2) +
-                             pow(mPi0, 2));
+                             pow(PhysicsConstants::mPi0, 2));
 
     Double_t beta = pi0Gen.fourMom[0] / pi0Gen.fourMom[3],
              gamma = 1. / sqrt(1. - beta * beta);
@@ -110,8 +110,8 @@ int main()
     {
         // Generacja w układzie środka masy pi0
         // Rozpad pi0 na dwa fotony
-        gamma1.fourMom[3] = mPi0 / 2.;
-        gamma2.fourMom[3] = mPi0 / 2.;
+        gamma1.fourMom[3] = PhysicsConstants::mPi0 / 2.;
+        gamma2.fourMom[3] = PhysicsConstants::mPi0 / 2.;
 
         Double_t theta1 = randGen.Uniform(0., TMath::TwoPi()),
                  theta2 = TMath::Pi() + theta1;

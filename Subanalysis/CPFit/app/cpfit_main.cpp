@@ -10,13 +10,13 @@ using namespace std;
 int CPFit_main(TChain &chain, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher, Controls::DataType &dataTypeOpt)
 {
   Short_t 
-          loopcount = properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
-          numOfConstraints = properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
-          jmin = properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
-          jmax = properties["variables"]["KinFit"]["Trilateration"]["bunchMax"];
+          loopcount = Utils::properties["variables"]["KinFit"]["Trilateration"]["loopCount"],
+          numOfConstraints = Utils::properties["variables"]["KinFit"]["Trilateration"]["numOfConstraints"],
+          jmin = Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMin"],
+          jmax = Utils::properties["variables"]["KinFit"]["Trilateration"]["bunchMax"];
 
   // Set logger for error logging
-  std::string logFilename = (std::string)cpfit_dir + (std::string)logs_dir + "cpfit.log";
+  std::string logFilename = (std::string)cpfit_dir + (std::string)Paths::logs_dir + "cpfit.log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------

@@ -45,8 +45,8 @@
   cout << "Units: cm, ns, tau_{S}, MeV/c^{2}, MeV/c, MeV" << endl;
   TString units[6] = {" [cm]", " [ns]", " [#tau_{S}]", " [MeV/c^{2}]", " [MeV/c]", " [MeV]"};
 
-  const unsigned int channNum = 7;
-  const Color_t channColor[channNum] = {kRed, kGreen, kViolet, kCyan, kBlue, kGreen - 1, kYellow};
+  const unsigned int KLOE::channNum = 7;
+  const Color_t channColor[KLOE::channNum] = {kRed, kGreen, kViolet, kCyan, kBlue, kGreen - 1, kYellow};
   const std::vector<TString> channNames = {"K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{0}#pi^{0}", "Regeneration",
                            "#omega#pi^{0}#rightarrow#pi^{+}#pi^{-}#pi^{0}#pi^{0}",
                            "K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}3#pi^{0}",
@@ -54,7 +54,7 @@
                            "Other bcg", "K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{+}#pi^{-}"};
   const Color_t dataColor = kBlack;
 
-  const Float_t mK0 = 497.611; // MeV/c^{2}
-  const Float_t mPhi = 1019.455; // MeV/c^{2}
-  const Float_t mPi0 = 134.9768; // MeV/c^{2}
+  const Float_t PhysicsConstants::mK0 = 497.611; // MeV/c^{2}
+  const Float_t PhysicsConstants::mPhi = 1019.455; // MeV/c^{2}
+  const Float_t PhysicsConstants::mPi0 = 134.9768; // MeV/c^{2}
 }
