@@ -87,7 +87,7 @@ namespace KLOE
 				_cluster[k][2] != 0;
 		}
 
-		Bool_t cond_tot = cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
+		Bool_t cond_tot = 1;//cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
 
 		if (cond_tot)
 		{
@@ -175,10 +175,10 @@ namespace KLOE
                kaonVel = PhysicsConstants::cVel * _KnerecFit[4] / _KnerecFit[3],
                kaonTime = kaonPath / kaonVel;
 
-      Bool_t condTime = kaonTime < _X_min[3] &&
-                        kaonTime < _X_min[8] &&
-                        kaonTime < _X_min[13] &&
-                        kaonTime < _X_min[18];
+      Bool_t condTime = 1;//kaonTime < _X_min[3] &&
+                        // kaonTime < _X_min[8] &&
+                        // kaonTime < _X_min[13] &&
+                        // kaonTime < _X_min[18];
 
 
 

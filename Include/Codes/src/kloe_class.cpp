@@ -986,6 +986,22 @@ namespace KLOE
     return ErrorHandling::ErrorCodes::NO_ERROR;
   }
 
+  ErrorHandling::ErrorCodes pm00::NeuCluWrongCheck(std::vector<Int_t> neuclulist, phiMeson phi, kaonNeutral Kchboost, std::vector<Float_t> Xcl, std::vector<Float_t> Ycl, std::vector<Float_t> Zcl, std::vector<Float_t> Tcl, std::vector<Float_t> Enecl)
+  {
+    TLorentzVector Kch4MomLAB, Phi4MomLAB, Kch4MomCM, Kch4MomCMKaon;
+    Phi4MomLAB.SetXYZT(phi.fourMom[0], phi.fourMom[1], phi.fourMom[2], phi.fourMom[3]);
+    Kch4MomLAB.SetXYZT(Kchboost.fourMom[0], Kchboost.fourMom[1], Kchboost.fourMom[2], Kchboost.fourMom[3]);
+
+    TVector3 PhiBeta = -Phi4MomLAB.BoostVector();
+
+    lorentz_transf(PhiBeta, Kch4MomLAB, Kch4MomCM);
+    
+
+
+
+    return ErrorHandling::ErrorCodes::NO_ERROR;
+  }
+
   void pm00::PhotonPairingToPi0(std::vector<Float_t> *photonMom, Int_t numOfPhotons, std::vector<Int_t> &bestPairingIndex)
   {
     Int_t intPi0 = numOfPhotons / 2.;

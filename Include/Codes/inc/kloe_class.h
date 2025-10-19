@@ -530,6 +530,8 @@ namespace KLOE
     Int_t neu_triangle(std::vector<TLorentzVector> *Clu4Mom, std::vector<TLorentzVector> *Clu4Vec, Float_t *ip, TLorentzVector *Phi4Mom, TLorentzVector *Kne4Mom, TLorentzVector *Kne4Vec, Float_t *trc, Float_t *TrcSumFinal, Float_t *vtxSigmaFinal) const;
     /// @overload
 
+    ErrorHandling::ErrorCodes NeuCluWrongCheck(std::vector<Int_t> neuclulist, phiMeson phi, kaonNeutral Kchboost, std::vector<Float_t> Xcl, std::vector<Float_t> Ycl, std::vector<Float_t> Zcl, std::vector<Float_t> Tcl, std::vector<Float_t> Enecl);
+
     static ErrorHandling::ErrorCodes triangleReconstruction(std::vector<Int_t> g4taken_kinfit, std::vector<Float_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Float_t> bhabha_mom, std::vector<Float_t> Kchboost, std::vector<Float_t> ip, std::vector<Float_t> &Knetriangle, std::vector<Float_t> gammatriangle[4], Float_t &minv4gam, std::vector<Float_t> &trcfinal, ErrorHandling::ErrorLogs &logger);
 
     ErrorHandling::ErrorCodes triangleReconstruction(std::vector<neutralParticle> &photon, phiMeson phi, kaonNeutral Kchboost, Float_t *ip, kaonNeutral &Knetriangle);
