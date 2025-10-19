@@ -2,83 +2,96 @@
 
 namespace KLOE
 {
-  Double_t ConstraintsTrilateration::EnergyConsvCM(Double_t *x, Double_t *p)
+  void ConstraintsTrilateration::ResetParameters()
   {
-    Double_t boost_vec[3] = {-p[20] / p[23], -p[21] / p[23], -p[22] / p[23]},
-             gamma_mom[4][4],
-             neu_vtx[4],
-             value[2],
-             value_min;
-
-    Reconstructor R; // Reconstructor object
-    Solution S;      // Solution struct
-
-    // Setting clusters for a solution
-    for (Int_t k = 0; k < 4; k++)
+    // Setting parameters from the array p to the member variables
+    // of the base classes to be used in the constraint calculations.
+    if (bhabha_mom.size() != 4)
     {
-      R.SetClu(k, p[k * 5],
-               p[k * 5 + 1],
-               p[k * 5 + 2],
-               p[k * 5 + 3],
-               p[k * 5 + 4]);
-
-      R.SetClu(4, 0., 0., 0., 0., 0.);
-      R.SetClu(5, 0., 0., 0., 0., 0.);
+      bhabha_mom.clear();
+      bhabha_mom.resize(4);
     }
-    // -------------------------------
 
-    S = R.MySolve(_selected); // Filling up the structure
+    if (cluster.size() != 4)
+    {
+      for (Int_t i = 0; i < cluster.size(); i++)
+        cluster[i].clear();
+      cluster.clear();
+      cluster.resize(4);
+    }
+
+    for (Int_t i = 0; i < cluster.size(); i++)
+    {
+      if (cluster[i].size() != 5)
+      {
+        cluster[i].clear();
+        cluster[i].resize(5);
+      }
+    }
+
+    if (pionCh.size() != 2)
+    {
+      pionCh.clear();
+      pionCh.resize(2);
+    }
+
+    if (photon.size() != 4)
+    {
+      photon.clear();
+      photon.resize(4);
+    }
+
+    if (ip.size() != 3)
+    {
+      ip.clear();
+      ip.resize(3);
+    }
+  }
+
+  void ConstraintsTrilateration::SetParameters(Double_t *p)
+  {
+    // Setting parameters from the array p to the member variables
+    // of the base classes to be used in the constraint calculations.
+    ResetParameters();
+
+    for (Int_t i = 0; i < 4; i++)
+    {
+      for (Int_t j = 0; j < 5; j++)
+      {
+        photon[i].clusterParams[j] = p[i * 5 + j];
+      }
+    }
+
+    for (Int_t i = 0; i < 4; i++)
+    {
+      phi.fourMom[i] = p[20 + i];
+
+      if (i < 3)
+      {
+        phi.vtxPos[i] = p[24 + i];
+      };
+    }
+
+    phi.SetTotalVector();
+  }
+
+  void ConstraintsTrilateration::IntermediateReconstruction()
+  {
+    std::array<kaonNeutral, 2> KnerecTmp;                    // Temporary kaon neutral objects
+    std::array<std::array<neutralParticle, 4>, 2> photonTmp; // Temporary photon objects
+
+    std::array<std::array<Float_t, 3>, 2> ipTmp;
+
+    std::array<Double_t, 2> value = {0., 0.};
+
+    for (Int_t i = 0; i < 2; i++)
+      KnerecTmp[i] = Knerec;
 
     for (Int_t i = 0; i < 2; i++)
     {
-      if (S.error[i] == 0)
-      {
-        neu_vtx[0] = S.sol[i][0];
-        neu_vtx[1] = S.sol[i][1];
-        neu_vtx[2] = S.sol[i][2];
-        neu_vtx[3] = S.sol[i][3];
-
-        for (Int_t j = 0; j < 4; j++)
-          neutral_mom(p[j * 5],
-                      p[j * 5 + 1],
-                      p[j * 5 + 2],
-                      p[j * 5 + 4],
-                      neu_vtx,
-                      gamma_mom[j]);
-
-        Double_t
-            vec_init[4] = {0.},
-            vec_end[4] = {0.};
-
-        for (Int_t j = 0; j < 4; j++)
-          for (Int_t k = 0; k < 4; k++)
-            vec_init[j] += gamma_mom[k][j];
-
-        lorentz_transf(boost_vec, vec_init, vec_end);
-
-        value[i] = vec_end[3] - (p[23] / 2.);
-      }
-      else
-      {
-        value[i] = 999999.;
-      }
+      for (Int_t j = 0; j < 4; j++)
+        photonTmp[i][j] = photon[j];
     }
-
-    if (abs(value[0]) < abs(value[1]))
-      value_min = value[0];
-    else
-      value_min = value[1];
-
-    return value_min;
-  }
-
-  Double_t ConstraintsTrilateration::MinvConsv(Double_t *x, Double_t *p)
-  {
-    Double_t gamma_mom[4][4],
-        neu_vtx[4],
-        inv_mass_kaon,
-        value[2],
-        value_min;
 
     Reconstructor R; // Reconstructor object
     Solution S;      // Solution struct
@@ -86,16 +99,13 @@ namespace KLOE
     // Setting clusters for a solution
     for (Int_t k = 0; k < 4; k++)
     {
-      R.SetClu(k, p[k * 5],
-               p[k * 5 + 1],
-               p[k * 5 + 2],
-               p[k * 5 + 3],
-               p[k * 5 + 4]);
-
-      R.SetClu(4, 0., 0., 0., 0., 0.);
-      R.SetClu(5, 0., 0., 0., 0., 0.);
+      R.SetClu(k, photon[k].clusterParams[0],
+               photon[k].clusterParams[1],
+               photon[k].clusterParams[2],
+               photon[k].clusterParams[3],
+               photon[k].clusterParams[4]);
     }
-    // -------------------------------
+    // --------------------------------------------
 
     S = R.MySolve(_selected); // Filling up the structure
 
@@ -103,33 +113,66 @@ namespace KLOE
     {
       if (!S.error[i])
       {
-        neu_vtx[0] = S.sol[i][0];
-        neu_vtx[1] = S.sol[i][1];
-        neu_vtx[2] = S.sol[i][2];
-        neu_vtx[3] = S.sol[i][3];
+        KnerecTmp[i].fourPos[0] = S.sol[i][0];
+        KnerecTmp[i].fourPos[1] = S.sol[i][1];
+        KnerecTmp[i].fourPos[2] = S.sol[i][2];
+        KnerecTmp[i].fourPos[3] = S.sol[i][3];
 
         for (Int_t j = 0; j < 4; j++)
-          neutral_mom(p[j * 5],
-                      p[j * 5 + 1],
-                      p[j * 5 + 2],
-                      p[j * 5 + 4],
-                      neu_vtx,
-                      gamma_mom[j]);
+        {
+          neutral_mom(photonTmp[i][j].clusterParams[0],
+                      photonTmp[i][j].clusterParams[1],
+                      photonTmp[i][j].clusterParams[2],
+                      photonTmp[i][j].clusterParams[4],
+                      KnerecTmp[i].fourPos.data(),
+                      photonTmp[i][j].fourMom.data());
 
-        Double_t
-            kaon_mom[4] = {0.};
+          photonTmp[i][j].fourPos[0] = photonTmp[i][j].clusterParams[0];
+          photonTmp[i][j].fourPos[1] = photonTmp[i][j].clusterParams[1];
+          photonTmp[i][j].fourPos[2] = photonTmp[i][j].clusterParams[2];
+          photonTmp[i][j].fourPos[3] = photonTmp[i][j].clusterParams[3];
+
+          photonTmp[i][j].calculatePath(KnerecTmp[i].fourPos.data());
+          photonTmp[i][j].calculateTimeOfFlightPhoton();
+          photonTmp[i][j].SetTotalVectorPhoton();
+        }
 
         for (Int_t j = 0; j < 4; j++)
-          for (Int_t k = 0; k < 4; k++)
-            kaon_mom[j] += gamma_mom[k][j];
+          KnerecTmp[i].fourMom[j] = photonTmp[i][0].fourMom[j] +
+                                    photonTmp[i][1].fourMom[j] +
+                                    photonTmp[i][2].fourMom[j] +
+                                    photonTmp[i][3].fourMom[j];
 
-        inv_mass_kaon = sqrt(pow(kaon_mom[3], 2) -
-                             pow(kaon_mom[0], 2) -
-                             pow(kaon_mom[1], 2) -
-                             pow(kaon_mom[2], 2));
-                             
+        Float_t X_line[3] = {KnerecTmp[i].fourPos[0],
+                             KnerecTmp[i].fourPos[1],
+                             KnerecTmp[i].fourPos[2]},
+                mom[3] = {KnerecTmp[i].fourMom[0],
+                          KnerecTmp[i].fourMom[1],
+                          KnerecTmp[i].fourMom[2]},
+                xB[3] = {phi.vtxPos[0],
+                         phi.vtxPos[1],
+                         phi.vtxPos[2]},
+                plane_perp[3] = {0.,
+                                 phi.fourMom[1],
+                                 0.};
 
-        value[i] = inv_mass_kaon - PhysicsConstants::mK0;
+        // Corrected IP event by event
+        IPBoostCorr(X_line, mom, xB, plane_perp, ipTmp[i].data());
+
+        ipTmp[i][0] = phi.vtxPos[0];
+        ipTmp[i][1] = phi.vtxPos[1];
+        // // ip[2] is fitted
+        if (abs(ipTmp[i][2] - phi.vtxPos[2]) > 2.)
+          ipTmp[i][2] = phi.vtxPos[2];
+
+        KnerecTmp[i].calculatePath(ipTmp[i].data());
+        KnerecTmp[i].SetTotalVector();
+        KnerecTmp[i].calculateLifetimeLAB();
+        KnerecTmp[i].fourPos[3] = S.sol[i][3];
+        KnerecTmp[i].total[9] = S.sol[i][3];
+
+        value[i] = sqrt(pow(KnerecTmp[i].total[5] - PhysicsConstants::mK0, 2) +
+                        pow(KnerecTmp[i].fourPos[3] - KnerecTmp[i].lifetimeLAB, 2));
       }
       else
       {
@@ -137,95 +180,70 @@ namespace KLOE
       }
     }
 
-    if (abs(value[0]) < abs(value[1]))
-      value_min = value[0];
-    else
-      value_min = value[1];
+    if (value[0] < value[1])
+    {
+      Knerec = KnerecTmp[0];
 
-    return value_min;
+      for (Int_t j = 0; j < 4; j++)
+        photon[j] = photonTmp[0][j];
+
+      for (Int_t j = 0; j < 3; j++)
+        ip[j] = ipTmp[0][j];
+    }
+    else if (value[1] < value[0])
+    {
+      Knerec = KnerecTmp[1];
+
+      for (Int_t j = 0; j < 4; j++)
+        photon[j] = photonTmp[1][j];
+
+      for (Int_t j = 0; j < 3; j++)
+        ip[j] = ipTmp[1][j];
+    }
+    else // If strange values just put first solution in
+    {
+      Knerec = KnerecTmp[0];
+      for (Int_t j = 0; j < 4; j++)
+        photon[j] = photonTmp[0][j];
+
+      for (Int_t j = 0; j < 3; j++)
+        ip[j] = ipTmp[0][j];
+    }
+
+    Float_t boostVec[3] = {-phi.fourMom[0] / phi.fourMom[3],
+                           -phi.fourMom[1] / phi.fourMom[3],
+                           -phi.fourMom[2] / phi.fourMom[3]};
+
+    lorentz_transf(boostVec,
+                   Knerec.fourMom.data(),
+                   KnerecCMPhi.fourMom.data());
+  }
+
+  Double_t ConstraintsTrilateration::EnergyConsvCM(Double_t *x, Double_t *p)
+  {
+    SetParameters(p);
+    IntermediateReconstruction();
+
+    return KnerecCMPhi.fourMom[3] - (phi.fourMom[3] / 2.);
+  }
+
+  Double_t ConstraintsTrilateration::MinvConsv(Double_t *x, Double_t *p)
+  {
+    SetParameters(p);
+    IntermediateReconstruction();
+
+    return Knerec.total[5] - PhysicsConstants::mK0;
   }
 
   Double_t ConstraintsTrilateration::NeutralPathConsvLAB(Double_t *x, Double_t *p)
   {
-    Double_t
-        gamma_mom[4][4],
-        neu_vtx[4],
-        bhabha_vtx[3] = {p[24], p[25], p[26]},
-        y_axis[3] = {0., p[21], 0.},
-        ip[3],
-        dist,
-        kaon_vel,
-        tot_length,
-        tot_vel,
-        value[2],
-        value_min;
+    SetParameters(p);
+    IntermediateReconstruction();
 
-    Reconstructor R;
-    Solution S;
+    Double_t pathComp = abs(Knerec.fourPos[_chosenComponent] -
+                            ip[_chosenComponent]),
+             kneVelComp = abs(Knerec.fourMom[_chosenComponent] / Knerec.fourMom[3] * PhysicsConstants::cVel);
 
-    // Setting clusters for a solution
-    for (Int_t k = 0; k < 4; k++)
-    {
-      R.SetClu(k, p[k * 5],
-               p[k * 5 + 1],
-               p[k * 5 + 2],
-               p[k * 5 + 3],
-               p[k * 5 + 4]);
-
-      R.SetClu(4, 0., 0., 0., 0., 0.);
-      R.SetClu(5, 0., 0., 0., 0., 0.);
-    }
-
-    S = R.MySolve(_selected);
-
-    for (Int_t i = 0; i < 2; i++)
-    {
-      if (S.error[i] == 0)
-      {
-        neu_vtx[0] = S.sol[i][0];
-        neu_vtx[1] = S.sol[i][1];
-        neu_vtx[2] = S.sol[i][2];
-        neu_vtx[3] = S.sol[i][3];
-
-        for (Int_t j = 0; j < 4; j++)
-          neutral_mom(p[j * 5],
-                      p[j * 5 + 1],
-                      p[j * 5 + 2],
-                      p[j * 5 + 4],
-                      neu_vtx,
-                      gamma_mom[j]);
-
-        Double_t
-            kaon_mom[4] = {0.};
-
-        for (Int_t j = 0; j < 4; j++)
-          for (Int_t k = 0; k < 4; k++)
-            kaon_mom[j] += gamma_mom[k][j];
-
-        plane_intersection(bhabha_vtx, y_axis, neu_vtx, kaon_mom, ip);
-
-        ip[0] = p[24];
-        ip[1] = p[25];
-        if (abs(p[26] - ip[2]) > 2)
-          ip[2] = p[26];
-
-        dist = neu_vtx[_chosenComponent] - ip[_chosenComponent];
-        kaon_vel = PhysicsConstants::cVel * kaon_mom[_chosenComponent] / kaon_mom[3];
-
-        value[i] = neu_vtx[3] - (dist / kaon_vel);
-      }
-      else
-      {
-        value[i] = 999999.;
-      }
-    }
-
-    if (abs(value[0]) < abs(value[1]))
-      value_min = value[0];
-    else
-      value_min = value[1];
-
-    return value_min;
+    return Knerec.fourPos[3] - pathComp / kneVelComp;
   }
-
 }

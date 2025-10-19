@@ -24,6 +24,7 @@
 //
 
 #include "MC_fit_comparison.h"
+#include <kloe_class.h>
 #include <TH1.h>
 #include <TH2.h>
 #include <TCanvas.h>
@@ -183,6 +184,8 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
 
   TString option = GetOption();
 
+  KLOE::setGlobalStyle();
+
   fitter = new KLOE::TripleGaussFitter();
 
   // Create canvases
@@ -262,9 +265,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
           tKneFit = KnereclorFit[9] / (0.0895),
           vKneMC = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
           vKne = PhysicsConstants::cVel * Knerec[4] / Knerec[3],
-          pathKne = sqrt(pow(KneTriangle[6] - ip[0], 2) +
-                         pow(KneTriangle[7] - ip[1], 2) +
-                         pow(KneTriangle[8] - ip[2], 2)),
+          pathKne = sqrt(pow(Knerec[6] - ip[0], 2) +
+                         pow(Knerec[7] - ip[1], 2) +
+                         pow(Knerec[8] - ip[2], 2)),
           tKne = pathKne / (vKne * 0.0895);
 
   Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
@@ -292,7 +295,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
           TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
   Float_t deltaTfit = tKchFit - tKneFit,
-          deltaT = *KaonChTimeLAB - tKne,
+          deltaT = *KaonChTimeLABBoostLor - tKne,
           deltaTMC = *KaonChTimeLABMC - *KaonNeTimeLABMC;
 
   Float_t deltaPhi = *PhivSmeared1 - *PhivSmeared2;
@@ -320,17 +323,17 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["mass_pi01"]->Fill(pi01[5] - PhysicsConstants::mPi0);
     histsReconstructed["mass_pi02"]->Fill(pi02[5] - PhysicsConstants::mPi0);
 
-    histsReconstructed["vtxNeu_x"]->Fill(KneTriangle[6] - Knemc[6]);
-    histsReconstructed["vtxNeu_y"]->Fill(KneTriangle[7] - Knemc[7]);
-    histsReconstructed["vtxNeu_z"]->Fill(KneTriangle[8] - Knemc[8]);
+    histsReconstructed["vtxNeu_x"]->Fill(Knerec[6] - Knemc[6]);
+    histsReconstructed["vtxNeu_y"]->Fill(Knerec[7] - Knemc[7]);
+    histsReconstructed["vtxNeu_z"]->Fill(Knerec[8] - Knemc[8]);
 
     histsReconstructed["phi_vtx_x"]->Fill(*Bx - ipmc[0]);
     histsReconstructed["phi_vtx_y"]->Fill(*By - ipmc[1]);
     histsReconstructed["phi_vtx_z"]->Fill(*Bz - ipmc[2]);
 
-    histsReconstructed["vtxNeu_x_Fit"]->Fill(KneTriangle[6] - Knemc[6]);
-    histsReconstructed["vtxNeu_y_Fit"]->Fill(KneTriangle[7] - Knemc[7]);
-    histsReconstructed["vtxNeu_z_Fit"]->Fill(KneTriangle[8] - Knemc[8]);
+    histsReconstructed["vtxNeu_x_Fit"]->Fill(Knerec[6] - Knemc[6]);
+    histsReconstructed["vtxNeu_y_Fit"]->Fill(Knerec[7] - Knemc[7]);
+    histsReconstructed["vtxNeu_z_Fit"]->Fill(Knerec[8] - Knemc[8]);
 
     histsReconstructed["vKne"]->Fill(vKne - vKneMC);
 

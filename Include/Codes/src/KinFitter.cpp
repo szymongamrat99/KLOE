@@ -120,29 +120,15 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
     try
     {
-      if (1)
-      {
-        if (_X(4) < 0)
-          _X(4) = MIN_CLU_ENE;
-        if (_X(9) < 0)
-          _X(9) = MIN_CLU_ENE;
-        if (_X(14) < 0)
-          _X(14) = MIN_CLU_ENE;
-        if (_X(19) < 0)
-          _X(19) = MIN_CLU_ENE;
-
-        // if(_X(3) < 0)
-        //   _X(3) = 0.;
-        // if(_X(8) < 0)
-        //   _X(8) = 0.;
-        // if(_X(13) < 0)
-        //   _X(13) = 0.;
-        // if(_X(18) < 0)
-        //   _X(18) = 0.;
-
-        _baseObj->SetParameters(_X.GetMatrixArray());
-        _baseObj->IntermediateReconstruction();
-      }
+      // Enforce positive energies and times
+      if (_X(4) < 0)
+        _X(4) = MIN_CLU_ENE;
+      if (_X(9) < 0)
+        _X(9) = MIN_CLU_ENE;
+      if (_X(14) < 0)
+        _X(14) = MIN_CLU_ENE;
+      if (_X(19) < 0)
+        _X(19) = MIN_CLU_ENE;
 
       for (Int_t l = 0; l < _M; l++)
       {
@@ -252,14 +238,20 @@ Int_t KinFitter::ConstraintSet(std::vector<std::string> ConstSet)
   return 0;
 }
 
-void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, TVectorD &C, TVectorD &L)
+void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &phiFit)
 {
   X = _X;
   V = _V;
   X_init = _X_init;
   V_init = _V_init;
-  C = _C_aux;
-  L = _L_aux;
+
+  ipFit = _baseObj->ip;
+
+  for (Int_t i = 0; i < 4; i++)
+    photonFit[i] = _baseObj->photon[i].total;
+
+  KnerecFit = _baseObj->Knerec.total;
+  phiFit = _baseObj->phi.total;
 }
 
 void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit)
@@ -305,7 +297,7 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
   for (Int_t i = 0; i < 4; i++)
     photonFit[i] = _baseObj->photon[i].total;
 
-  Pi0OmegaFit =  _baseObj->pionNe[0].total;
+  Pi0OmegaFit = _baseObj->pionNe[0].total;
   PhiMomFit = _baseObj->phi.total;
 }
 

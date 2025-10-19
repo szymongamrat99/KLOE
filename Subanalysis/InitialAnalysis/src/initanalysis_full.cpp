@@ -502,6 +502,35 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         }
       }
     }
+    else
+    {
+      // Default values for data events
+      mcflag = 0;
+      mctruth = 0;
+      baseKin.ipmc = std::vector<Float_t>(3, 0.0f);
+      baseKin.Kchmc = std::vector<Float_t>(9, 0.0f);
+      baseKin.Knemc = std::vector<Float_t>(9, 0.0f);
+      baseKin.trkMC[0] = std::vector<Float_t>(4, 0.0f);
+      baseKin.trkMC[1] = std::vector<Float_t>(4, 0.0f);
+      baseKin.goodClusIndex = std::vector<Int_t>(4, 0.0f);
+      baseKin.trkKSmc[0] = std::vector<Float_t>(4, 0.0f);
+      baseKin.trkKSmc[1] = std::vector<Float_t>(4, 0.0f);
+      baseKin.trkKLmc[0] = std::vector<Float_t>(4, 0.0f);
+      baseKin.trkKLmc[1] = std::vector<Float_t>(4, 0.0f);
+      pgammaMC[0] = std::vector<Float_t>(4, 0.0f);
+      pgammaMC[1] = std::vector<Float_t>(4, 0.0f);
+      pgammaMC[2] = std::vector<Float_t>(4, 0.0f);
+      pgammaMC[3] = std::vector<Float_t>(4, 0.0f);
+      baseKin.CurvMC = std::vector<Float_t>(2, 0.0f);
+      baseKin.PhivMC = std::vector<Float_t>(2, 0.0f);
+      baseKin.CotvMC = std::vector<Float_t>(2, 0.0f);
+      clusterMC[0] = std::vector<Float_t>(5, 0.0f);
+      clusterMC[1] = std::vector<Float_t>(5, 0.0f);
+      clusterMC[2] = std::vector<Float_t>(5, 0.0f);
+      clusterMC[3] = std::vector<Float_t>(5, 0.0f);
+
+      kaonTimesMC = KLOE::KaonProperTimes();
+    }
 
     if (mctruth == 1)
     {
@@ -1233,14 +1262,22 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             {"Bpy", baseKin.Bpy},
             {"Bpz", baseKin.Bpz},
             {"Broots", baseKin.Broots},
-            {"KaonChTimeLAB", baseKin.kaonChTimeLAB},
-            {"KaonChTimeCM", baseKin.kaonChTimeCM},
-            {"KaonNeTimeLAB", baseKin.kaonNeTimeLAB},
-            {"KaonNeTimeCM", baseKin.kaonNeTimeCM},
-            {"KaonNeTimeLABMC", baseKin.kaonNeTimeLABMC},
-            {"KaonNeTimeCMMC", baseKin.kaonNeTimeCMMC},
-            {"KaonChTimeLABMC", baseKin.kaonChTimeLABMC},
-            {"KaonChTimeCMMC", baseKin.kaonChTimeCMMC},
+            {"KaonChTimeLABBoostLor", kaonTimesTriangleBoostLor.kaon1TimeLAB},
+            {"KaonChTimeCMBoostLor", kaonTimesTriangleBoostLor.kaon1TimeCM},
+            {"KaonNeTimeLABBoostLor", kaonTimesTriangleBoostLor.kaon2TimeLAB},
+            {"KaonNeTimeCMBoostLor", kaonTimesTriangleBoostLor.kaon2TimeCM},
+            {"KaonChTimeLABTriFitBoostLor", kaonTimesTriKinFit.kaon1TimeLAB},
+            {"KaonChTimeCMTriFitBoostLor", kaonTimesTriKinFit.kaon1TimeCM},
+            {"KaonNeTimeLABTriFitBoostLor", kaonTimesTriKinFit.kaon2TimeLAB},
+            {"KaonNeTimeCMTriFitBoostLor", kaonTimesTriKinFit.kaon2TimeCM},
+            {"KaonNeTimeLABMC", kaonTimesMC.kaon2TimeLAB},
+            {"KaonNeTimeCMMC", kaonTimesMC.kaon2TimeCM},
+            {"KaonChTimeLABMC", kaonTimesMC.kaon1TimeLAB},
+            {"KaonChTimeCMMC", kaonTimesMC.kaon1TimeCM},
+            {"KaonNeTimeLABSignalFitBoostLor", kaonTimesSignalKinFit.kaon2TimeLAB},
+            {"KaonNeTimeCMSignalFitBoostLor", kaonTimesSignalKinFit.kaon2TimeCM},
+            {"KaonChTimeLABSignalFitBoostLor", kaonTimesSignalKinFit.kaon1TimeLAB},
+            {"KaonChTimeCMSignalFitBoostLor", kaonTimesSignalKinFit.kaon1TimeCM},
             {"Qmiss", baseKin.Qmiss},
             {"minv4gam", baseKin.minv4gam},
             {"Chi2TriKinFit", baseKin.Chi2TriKinFit},

@@ -265,7 +265,7 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 
 									CHISQRTMP = kinematicFitObj->FitFunction(Tcorr);
 
-									kinematicFitObj->GetResults(X, V, X_init, V_init, C, L);
+									kinematicFitObj->GetResults(X, V, X_init, V_init);
 
 									Reconstructor R;
 									Solution S;
@@ -358,7 +358,7 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 											FUNVALMIN = FUNVALTMP;
 											CHISQRMIN = CHISQRTMP;
 
-											kinematicFitObj->GetResults(X_min, V_min, X_init_min, V_init, C_min, L_min);
+											kinematicFitObj->GetResults(X_min, V_min, X_init_min, V_init);
 
 											g4takentri_kinfit[0] = ind_gam[0];
 											g4takentri_kinfit[1] = ind_gam[1];
@@ -409,7 +409,7 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 											FUNVALMIN = FUNVALTMP;
 											CHISQRMIN = CHISQRTMP;
 
-											kinematicFitObj->GetResults(X_min, V_min, X_init_min, V_init, C_min, L_min);
+											kinematicFitObj->GetResults(X_min, V_min, X_init_min, V_init);
 
 											g4takentri_kinfit[0] = ind_gam[0];
 											g4takentri_kinfit[1] = ind_gam[1];

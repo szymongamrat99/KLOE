@@ -3,9 +3,9 @@
 root -b <<EOF
 TChain *chain = new TChain("h1");
 
-for (Int_t i = 1; i <= 6; i++)\
+for (Int_t i = 1; i <= 1; i++)\
 {\
-    chain->Add(Form("../../../../InitialAnalysis/root_files/2025-10-16/mk0*all_phys_SIGNAL_MIXED_%d.root",i));\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-10-19/mk0*all_phys3_SIGNAL_MIXED_%d.root",i));\
 }
 chain->Process("MC_fit_comparison.C");
 .q

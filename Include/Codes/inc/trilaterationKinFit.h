@@ -54,7 +54,7 @@ namespace KLOE
 		Bool_t
 				_isConverged;
 
-		std::unique_ptr<Int_t[]>
+		std::vector<Int_t>
 				_ind_gam;
 
 		std::vector<Float_t>
@@ -67,7 +67,11 @@ namespace KLOE
 				_iptri_kinfit,
 				_fourKnetri_kinfit,
 				_neu_vtx_min,
-				_gamma_mom_final[4];
+				_gamma_mom_final[4],
+        _KnerecFitTri,
+        _PhiFitTri,
+        _photonFitTri[4],
+        _ipFitTri;
 
 		std::vector<Int_t>
 				_NeuClusters,

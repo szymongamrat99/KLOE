@@ -343,7 +343,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									FUNVALMIN = FUNVALTMP;
 									CHISQRMIN = CHISQRTMP;
 
-									kinematicFitObj.GetResults(X_min, V_min, X_init_min, V_min, C_min, L_min);
+									kinematicFitObj.GetResults(X_min, V_min, X_init_min, V_min);
 
 									g4takenomega[0] = ind_gam[0];
 									g4takenomega[1] = ind_gam[1];

@@ -43,7 +43,7 @@ namespace KLOE
       _selected.resize(4);
       for (Int_t i = 1; i <= 4; i++)
         _selected[i - 1] = i;
-      _ind_gam = std::make_unique<Int_t[]>(4);
+      _ind_gam.resize(4);
 
       for (Int_t i = 0; i < 4; i++)
         _gamma_mom_final[i].resize(8);
@@ -64,7 +64,7 @@ namespace KLOE
       _selected.resize(6);
       for (Int_t i = 1; i <= 6; i++)
         _selected[i - 1] = i;
-      _ind_gam = std::make_unique<Int_t[]>(6);
+      _ind_gam.resize(6);
     }
     else
     {
@@ -122,8 +122,8 @@ namespace KLOE
       }
     }
 
-    // if(_NeuClusters.size() - neucluwrong < NCLMIN)
-    //   return ErrorHandling::ErrorCodes::LESS_THAN_FOUR_CLUSTERS_WITH_GOOD_ENERGY;
+    if (_NeuClusters.size() - neucluwrong < NCLMIN)
+      return ErrorHandling::ErrorCodes::LESS_THAN_FOUR_CLUSTERS_WITH_GOOD_ENERGY;
 
     for (Int_t j1 = 0; j1 < _NeuClusters.size() - 3; j1++)
       for (Int_t j2 = j1 + 1; j2 < _NeuClusters.size() - 2; j2++)
@@ -135,18 +135,18 @@ namespace KLOE
             _ind_gam[2] = j3;
             _ind_gam[3] = j4;
 
-            // Bool_t hasBadCluster = false;
-            // for(const auto & idx : neucluwrongInd)
-            // {
-            //   if(idx == j1 || idx == j2 || idx == j3 || idx == j4)
-            //   {
-            //     hasBadCluster = true;
-            //     break;
-            //   }
-            // }
+            Bool_t hasBadCluster = false;
+            for (const auto &idx : neucluwrongInd)
+            {
+              if (idx == j1 || idx == j2 || idx == j3 || idx == j4)
+              {
+                hasBadCluster = true;
+                break;
+              }
+            }
 
-            // if(hasBadCluster)
-            //   continue;
+            if (hasBadCluster)
+              continue;
 
             for (Int_t k = 0; k < 4; k++)
             {
@@ -169,8 +169,8 @@ namespace KLOE
             }
 
             Bool_t cond_tot = cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
-            
-            if (cond_tot && (!_S.error[0] || !_S.error[1]))
+
+            if (cond_tot) //&& (!_S.error[0] || !_S.error[1]))
             {
               for (Int_t k = 0; k < 4; k++)
               {
@@ -205,191 +205,40 @@ namespace KLOE
 
                 CHISQRTMP = KinFitter::FitFunction(Tcorr);
 
-                KinFitter::GetResults(_X, _V, _X_init, _V_init, _C, _L);
+                KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _ipFitTri, _photonFitTri, _KnerecFitTri, _PhiFitTri);
 
-                for (Int_t k = 0; k < 4; k++)
-                {
-                  _R.SetClu(k, _X[k * 5],
-                            _X[k * 5 + 1],
-                            _X[k * 5 + 2],
-                            _X[k * 5 + 3],
-                            _X[k * 5 + 4]);
-                }
-
-                _S = _R.MySolve(_selected.data());
-
-                for (Int_t k = 0; k < 2; k++)
-                {
-                  if (!_S.error[k])
-                  {
-                    for (Int_t l = 0; l < 4; l++)
-                      neu_vtx[k][l] = _S.sol[k][l];
-                  }
-                  else
-                  {
-                    for (Int_t l = 0; l < 4; l++)
-                      neu_vtx[k][l] = 999.;
-                  }
-
-                  for (Int_t l = 0; l < 4; l++)
-                  {
-                    neutral_mom(_X[l * 5], _X[l * 5 + 1], _X[l * 5 + 2], _X[l * 5 + 4], neu_vtx[k], gamma_mom_tmp[l]);
-
-                    gamma_mom_tmp[l][4] = _X[l * 5];
-                    gamma_mom_tmp[l][5] = _X[l * 5 + 1];
-                    gamma_mom_tmp[l][6] = _X[l * 5 + 2];
-                    gamma_mom_tmp[l][7] = _X[l * 5 + 3];
-                  }
-
-                  fourKnetri_tmp[k][0] = gamma_mom_tmp[0][0] + gamma_mom_tmp[1][0] + gamma_mom_tmp[2][0] + gamma_mom_tmp[3][0];
-                  fourKnetri_tmp[k][1] = gamma_mom_tmp[0][1] + gamma_mom_tmp[1][1] + gamma_mom_tmp[2][1] + gamma_mom_tmp[3][1];
-                  fourKnetri_tmp[k][2] = gamma_mom_tmp[0][2] + gamma_mom_tmp[1][2] + gamma_mom_tmp[2][2] + gamma_mom_tmp[3][2];
-                  fourKnetri_tmp[k][3] = gamma_mom_tmp[0][3] + gamma_mom_tmp[1][3] + gamma_mom_tmp[2][3] + gamma_mom_tmp[3][3];
-
-                  fourKnetri_tmp[k][4] = sqrt(pow(fourKnetri_tmp[k][0], 2) + pow(fourKnetri_tmp[k][1], 2) + pow(fourKnetri_tmp[k][2], 2));
-                  fourKnetri_tmp[k][5] = sqrt(pow(fourKnetri_tmp[k][3], 2) - pow(fourKnetri_tmp[k][4], 2));
-
-                  kaon_vel_tmp[k] = PhysicsConstants::cVel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
-
-                  y_axis[0] = 0.;
-                  y_axis[1] = _X[21];
-                  y_axis[2] = 0.;
-
-                  _chargedVtxRec.IPBoostCorr(_bhabha_vtx.data(), y_axis, neu_vtx[k], fourKnetri_tmp[k], ip_tmp[k]);
-
-                  ip_tmp[k][0] = _bhabha_vtx[0];
-                  ip_tmp[k][1] = _bhabha_vtx[1];
-                  if (abs(ip_tmp[k][2] - _bhabha_vtx[2]) > 2)
-                    ip_tmp[k][2] = _bhabha_vtx[2];
-
-                  dist_tmp[k] = sqrt(pow(neu_vtx[k][0] - ip_tmp[k][0], 2) +
-                                     pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
-                                     pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
-
-                  value_tmp[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - PhysicsConstants::mK0, 2));
-
-                  if (TMath::IsNaN(value_tmp[k]))
-                    value_tmp[k] = 999999.;
-                }
-
-                cond_time_clus[0] = _S.sol[0][3] < _X(3) &&
-                                    _S.sol[0][3] < _X(8) &&
-                                    _S.sol[0][3] < _X(13) &&
-                                    _S.sol[0][3] < _X(18);
-
-                cond_time_clus[1] = _S.sol[1][3] < _X(3) &&
-                                    _S.sol[1][3] < _X(8) &&
-                                    _S.sol[1][3] < _X(13) &&
-                                    _S.sol[1][3] < _X(18);
-                
-
-                clusterEnergy = 1; //_X(4) > MIN_CLU_ENE &&
-                                   // _X(9) > MIN_CLU_ENE &&
-                                   // _X(14) > MIN_CLU_ENE &&
-                                   // _X(19) > MIN_CLU_ENE;
-
-                for (Int_t k = 0; k < 4; k++)
-                {
-                  cond_clus[k] =
-                      _X(5 * k) != 0 &&
-                      _X(5 * k + 1) != 0 &&
-                      _X(5 * k + 2) != 0;
-                }
-
-                cond_tot = clusterEnergy && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3];
-
-                // ZMIENIONA LOGIKA - sprawdź NAJPIERW chi2, POTEM warunki
                 Bool_t hasBetterChi2 = (CHISQRTMP < _CHISQRMIN);
 
-                // Sprawdź czy JAKIEKOLWIEK rozwiązanie jest fizycznie sensowne
-                Bool_t hasSolution0 = cond_time_clus[0] && !TMath::IsNaN(value_tmp[0]) && value_tmp[0] < 999999.;
-                Bool_t hasSolution1 = cond_time_clus[1] && !TMath::IsNaN(value_tmp[1]) && value_tmp[1] < 999999.;
+                Bool_t condTime = 1;//_KnerecFitTri[9] < _X_min(3) &&
+                                  // _KnerecFitTri[9] < _X_min(8) &&
+                                  // _KnerecFitTri[9] < _X_min(13) &&
+                                  // _KnerecFitTri[9] < _X_min(18);
 
-                // Sprawdź podstawowe warunki geometryczne (bardziej liberalne)
-                cond_tot = (cond_clus[0] || cond_clus[1] || cond_clus[2] || cond_clus[3]); // przynajmniej 1 cluster OK
-
-              
-                Bool_t acceptSolution = (hasBetterChi2 &&
-                                        (cond_tot) && // jeśli nie mamy rozwiązania, akceptuj nawet słabsze
-                                        (hasSolution0 || hasSolution1)) || (_isConverged == 0);
-
-                if (acceptSolution)
+                if ((hasBetterChi2 && condTime) || _isConverged == 0)
                 {
-                  // Wybierz rozwiązanie
+                  _isConverged = 1;
+                  _FUNVALMIN = FUNVALTMP;
+                  _CHISQRMIN = CHISQRTMP;
 
-                  if (hasSolution0 && hasSolution1)
-                  {
-                    // Oba rozwiązania OK - wybierz lepsze
-                    chosenSolution = (value_tmp[0] < value_tmp[1]) ? 0 : 1;
-                  }
-                  else if (hasSolution0)
-                  {
-                    chosenSolution = 0;
-                  }
-                  else if (hasSolution1)
-                  {
-                    chosenSolution = 1;
-                  }
-                  
-                  if(_isConverged == 0)
-                  {
-                    // Żadne rozwiązanie nie jest OK, ale to pierwsze znalezione - wybierz pierwsze
-                    chosenSolution = 0;
-                  }
+                  _Chi2TriKinFit = _CHISQRMIN;
 
-                  if (chosenSolution >= 0)
-                  {
-                    _isConverged = 1;
-                    _FUNVALMIN = FUNVALTMP;
-                    _CHISQRMIN = CHISQRTMP;
+                  _g4takentri_kinfit = _ind_gam;
 
-                    _Chi2TriKinFit = _CHISQRMIN;
-                    
-                    KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _C_min, _L_min);
+                  _neu_vtx_min[0] = _KnerecFitTri[6];
+                  _neu_vtx_min[1] = _KnerecFitTri[7];
+                  _neu_vtx_min[2] = _KnerecFitTri[8];
+                  _neu_vtx_min[3] = _KnerecFitTri[9];
 
-                    _g4takentri_kinfit[0] = _ind_gam[0];
-                    _g4takentri_kinfit[1] = _ind_gam[1];
-                    _g4takentri_kinfit[2] = _ind_gam[2];
-                    _g4takentri_kinfit[3] = _ind_gam[3];
+                  _gamma_mom_final[0] = _photonFitTri[0];
+                  _gamma_mom_final[1] = _photonFitTri[1];
+                  _gamma_mom_final[2] = _photonFitTri[2];
+                  _gamma_mom_final[3] = _photonFitTri[3];
 
-                    _neu_vtx_min[0] = neu_vtx[chosenSolution][0];
-                    _neu_vtx_min[1] = neu_vtx[chosenSolution][1];
-                    _neu_vtx_min[2] = neu_vtx[chosenSolution][2];
-                    _neu_vtx_min[3] = neu_vtx[chosenSolution][3];
+                  _fourKnetri_kinfit = _KnerecFitTri;
 
-                    for (Int_t l = 0; l < 4; l++)
-                    {
-                      distance[l] = sqrt(pow(_X[l * 5] - neu_vtx[chosenSolution][0], 2) +
-                                         pow(_X[l * 5 + 1] - neu_vtx[chosenSolution][1], 2) +
-                                         pow(_X[l * 5 + 2] - neu_vtx[chosenSolution][2], 2));
+                  _iptri_kinfit = _ipFitTri;
 
-                      _gamma_mom_final[l][0] = _X[l * 5 + 4] * ((_X[l * 5] - neu_vtx[chosenSolution][0]) / distance[l]);
-                      _gamma_mom_final[l][1] = _X[l * 5 + 4] * ((_X[l * 5 + 1] - neu_vtx[chosenSolution][1]) / distance[l]);
-                      _gamma_mom_final[l][2] = _X[l * 5 + 4] * ((_X[l * 5 + 2] - neu_vtx[chosenSolution][2]) / distance[l]);
-                      _gamma_mom_final[l][3] = _X[l * 5 + 4];
-                      _gamma_mom_final[l][4] = _X[l * 5];
-                      _gamma_mom_final[l][5] = _X[l * 5 + 1];
-                      _gamma_mom_final[l][6] = _X[l * 5 + 2];
-                      _gamma_mom_final[l][7] = _X[l * 5 + 3];
-                    }
-
-                    _fourKnetri_kinfit[0] = _gamma_mom_final[0][0] + _gamma_mom_final[1][0] + _gamma_mom_final[2][0] + _gamma_mom_final[3][0];
-                    _fourKnetri_kinfit[1] = _gamma_mom_final[0][1] + _gamma_mom_final[1][1] + _gamma_mom_final[2][1] + _gamma_mom_final[3][1];
-                    _fourKnetri_kinfit[2] = _gamma_mom_final[0][2] + _gamma_mom_final[1][2] + _gamma_mom_final[2][2] + _gamma_mom_final[3][2];
-                    _fourKnetri_kinfit[3] = _gamma_mom_final[0][3] + _gamma_mom_final[1][3] + _gamma_mom_final[2][3] + _gamma_mom_final[3][3];
-                    _fourKnetri_kinfit[4] = sqrt(pow(_fourKnetri_kinfit[0], 2) + pow(_fourKnetri_kinfit[1], 2) + pow(_fourKnetri_kinfit[2], 2));
-                    _fourKnetri_kinfit[5] = sqrt(pow(_fourKnetri_kinfit[3], 2) - pow(_fourKnetri_kinfit[4], 2));
-                    _fourKnetri_kinfit[6] = _neu_vtx_min[0];
-                    _fourKnetri_kinfit[7] = _neu_vtx_min[1];
-                    _fourKnetri_kinfit[8] = _neu_vtx_min[2];
-                    _fourKnetri_kinfit[9] = _neu_vtx_min[3];
-
-                    _iptri_kinfit[0] = ip_tmp[0][0];
-                    _iptri_kinfit[1] = ip_tmp[0][1];
-                    _iptri_kinfit[2] = ip_tmp[0][2];
-
-                    _bunchnum = k1;
-                  }
+                  _bunchnum = k1;
                 }
               }
             }

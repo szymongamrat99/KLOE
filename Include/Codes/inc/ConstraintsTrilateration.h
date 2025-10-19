@@ -57,7 +57,7 @@ namespace KLOE
    * @class ConstraintsTrilateration
    * @brief Auxiliary class with the constraints for trilateration kinematic fit - do not include charged part of the event
    */
-  class ConstraintsTrilateration : public KinFit
+  class ConstraintsTrilateration : public KinFit, public ChargedVtxRec<Float_t, Int_t>
   {
   private:
     // Path conservation in LAB
@@ -78,15 +78,16 @@ namespace KLOE
     Double_t MinvConsvNeuKaon(Double_t *x, Double_t *p) override { return 0; };
     Double_t MinvConsvOmega(Double_t *x, Double_t *p) override { return 0; };
 
-    void SetParameters(Double_t *p) override {};
-    void ResetParameters() override {};
-    void IntermediateReconstruction() override {};
-
     Int_t
         _chosenComponent,
         _selected[4] = {1, 2, 3, 4};
     Bool_t
         _cond_detector = kFALSE;
+
+  protected:
+    void SetParameters(Double_t *p) override;
+    void ResetParameters() override;
+    void IntermediateReconstruction() override;
 
   public:
     /* Specific physical Constraints for trilateration kinematic fit */
