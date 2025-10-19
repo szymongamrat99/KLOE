@@ -246,7 +246,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
   Float_t deltaTfit = propTimesFit.deltaTimeCM,
-          deltaT = *KaonChTimeCM - *KaonNeTimeCM,
+          deltaT = *KaonChTimeCMBoostLor - *KaonNeTimeCMBoostLor,
           deltaTMC = *KaonChTimeCMMC - *KaonNeTimeCMMC;
 
   Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
@@ -291,7 +291,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   Float_t weight = 1.0;
 
   if (*mctruth == 1)
-    weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
+    weight = 1.0;//interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
   if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1)
     signal_tot++;
@@ -360,6 +360,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
     if ((*mcflag == 1 && *mctruth >= 1) || *mcflag == 0)
     {
+      std::cout << *Chi2SignalKinFit << " , " << *Chi2TriKinFit << std::endl;
+
       // Fill histograms for reconstructed variables
       histsReconstructed["mass_Kch"][KLOE::channName.at(*mctruth)]->Fill(Kchrec[5] - PhysicsConstants::mK0, weight);
 
@@ -410,7 +412,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       histsFittedSignal["nev"][KLOE::channName.at(*mctruth)]->Fill(*nev, weight);
       histsFittedSignal["nrun"][KLOE::channName.at(*mctruth)]->Fill(*nrun, weight);
 
-      if(abs(pathKchMC - pathKneMC) > 5)
+      if (abs(pathKchMC - pathKneMC) > 5)
         histsFittedSignal["TransvRadius"][KLOE::channName.at(*mctruth)]->Fill(pathKneFit, weight);
 
       hists2DFittedSignal["delta_t_fit_vs_delta_t_mc"][KLOE::channName.at(*mctruth)]->Fill(deltaTMC, deltaTfit - deltaTMC, weight);

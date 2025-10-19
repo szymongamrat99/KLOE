@@ -253,7 +253,8 @@ namespace KLOE
   struct phiMeson
   {
     phiMeson() : fourMom(4, 0.),
-                 vtxPos(3, 0.) {};
+                 vtxPos(3, 0.),
+                 total(7, 0.) {};
 
     std::vector<Float_t> fourMom; /*!< 4-momentum of the charged particle */
     std::vector<Float_t> vtxPos;  /*!< 3-momentum of the charged particle */
@@ -272,12 +273,12 @@ namespace KLOE
   };
 
   struct KaonProperTimes {
-    Double_t kaon1TimeLAB;
-    Double_t kaon1TimeCM;
-    Double_t kaon2TimeLAB;
-    Double_t kaon2TimeCM;
-    Double_t deltaTimeLAB;
-    Double_t deltaTimeCM;
+    Double_t kaon1TimeLAB = 0.;
+    Double_t kaon1TimeCM = 0.;
+    Double_t kaon2TimeLAB = 0.;
+    Double_t kaon2TimeCM = 0.;
+    Double_t deltaTimeLAB = 0.;
+    Double_t deltaTimeCM = 0.;
   };
   /**
    * @class General pm00 class for KLOE analysis. Includes most fundamental functions like timestamp, datestamp, array clearing functions, etc.
@@ -339,7 +340,8 @@ namespace KLOE
         Kchrec,    /*!< Charged kaon reconstructed from pions*/
         Kchboost,  /*!< Charged kaon fixed with lorentz boost*/
         Knerec,    /*!< Neutral kaon reconstructed from Photons*/
-        Knereclor; /*!< Neutral kaon reconstructed with Kchboost*/
+        Knereclor, /*!< Neutral kaon reconstructed with Kchboost*/
+        KnerecCMPhi;
 
     phiMeson
         phi; /*!< Phi meson */

@@ -58,13 +58,13 @@ public:
   TTreeReaderValue<Float_t> Curv2 = {fReader, "Curv2"};
   TTreeReaderValue<Float_t> CurvSmeared1 = {fReader, "CurvSmeared1"};
   TTreeReaderValue<Float_t> CurvSmeared2 = {fReader, "CurvSmeared2"};
-  TTreeReaderValue<Float_t> KaonChTimeCM = {fReader, "KaonChTimeCM"};
+  TTreeReaderValue<Float_t> KaonChTimeCMBoostLor = {fReader, "KaonChTimeCMBoostLor"};
   TTreeReaderValue<Float_t> KaonChTimeCMMC = {fReader, "KaonChTimeCMMC"};
-  TTreeReaderValue<Float_t> KaonChTimeLAB = {fReader, "KaonChTimeLAB"};
+  TTreeReaderValue<Float_t> KaonChTimeLABBoostLor = {fReader, "KaonChTimeLABBoostLor"};
   TTreeReaderValue<Float_t> KaonChTimeLABMC = {fReader, "KaonChTimeLABMC"};
-  TTreeReaderValue<Float_t> KaonNeTimeCM = {fReader, "KaonNeTimeCM"};
+  TTreeReaderValue<Float_t> KaonNeTimeCMBoostLor = {fReader, "KaonNeTimeCMBoostLor"};
   TTreeReaderValue<Float_t> KaonNeTimeCMMC = {fReader, "KaonNeTimeCMMC"};
-  TTreeReaderValue<Float_t> KaonNeTimeLAB = {fReader, "KaonNeTimeLAB"};
+  TTreeReaderValue<Float_t> KaonNeTimeLABBoostLor = {fReader, "KaonNeTimeLABBoostLor"};
   TTreeReaderValue<Float_t> KaonNeTimeLABMC = {fReader, "KaonNeTimeLABMC"};
   TTreeReaderValue<Float_t> Phiv1 = {fReader, "Phiv1"};
   TTreeReaderValue<Float_t> Phiv2 = {fReader, "Phiv2"};
@@ -100,7 +100,7 @@ public:
   TTreeReaderArray<float> KchrecFit = {fReader, "KchrecFit"};
   TTreeReaderArray<float> KchrecKL = {fReader, "KchrecKL"};
   TTreeReaderArray<float> KchrecKS = {fReader, "KchrecKS"};
-  TTreeReaderArray<float> KneTriangle = {fReader, "KneTriangle"};
+  TTreeReaderArray<float> Knerec = {fReader, "Knerec"};
   TTreeReaderArray<float> Knemc = {fReader, "Knemc"};
   TTreeReaderArray<float> KnerecFit = {fReader, "KnerecFit"};
   TTreeReaderArray<float> KnereclorFit = {fReader, "KnereclorFit"};
