@@ -36,16 +36,17 @@ namespace ErrorHandling
     FOUR_MOM_NOT_FILLED = 206,   /*!< Four momentum of a particle not filled*/
 
     // Physics-related errors
-    NO_VTX_WITH_TWO_TRACKS = 300,          /*!< No charged vertices or tracks available for analysis*/
-    LESS_THAN_FOUR_NEUTRAL_CLUSTERS = 301, /*!< Less than four neutral clusters available for analysis*/
-    LESS_THAN_SIX_NEUTRAL_CLUSTERS = 302,  /*!< Less than six neutral clusters available for analysis*/
-    NO_VTX_WITH_OPPOSITE_TRACKS = 303,     /*!< Not enough charged tracks for analysis*/
-    NO_TWO_VTX_WITH_TWO_TRACKS = 304,      /*!< No charged vertices or tracks available for analysis*/
-    CHARGED_KAON_MASS_PRE = 305,           /*!< Did not pass charged kaon invariant mass in preselection*/
-    TRILATERATION_KIN_FIT = 306,           /*!< Did not pass the trilateration kin fit*/
-    TRIANGLE_REC = 307,                    /*!< Did not pass the triangle reconstruction*/
-    SIGNAL_KIN_FIT = 308,                  /*!< Did not pass the signal kin fit*/
-    OMEGA_KIN_FIT = 309,                   /*!< Did not pass the omega kin fit*/
+    NO_VTX_WITH_TWO_TRACKS = 300,                   /*!< No charged vertices or tracks available for analysis*/
+    LESS_THAN_FOUR_NEUTRAL_CLUSTERS = 301,          /*!< Less than four neutral clusters available for analysis*/
+    LESS_THAN_SIX_NEUTRAL_CLUSTERS = 302,           /*!< Less than six neutral clusters available for analysis*/
+    NO_VTX_WITH_OPPOSITE_TRACKS = 303,              /*!< Not enough charged tracks for analysis*/
+    LESS_THAN_FOUR_CLUSTERS_WITH_GOOD_ENERGY = 304, /*!< Less than four neutral clusters with good energy available for analysis*/
+    NO_TWO_VTX_WITH_TWO_TRACKS = 305,               /*!< No charged vertices or tracks available for analysis*/
+    CHARGED_KAON_MASS_PRE = 306,                    /*!< Did not pass charged kaon invariant mass in preselection*/
+    TRILATERATION_KIN_FIT = 307,                    /*!< Did not pass the trilateration kin fit*/
+    TRIANGLE_REC = 308,                             /*!< Did not pass the triangle reconstruction*/
+    SIGNAL_KIN_FIT = 309,                           /*!< Did not pass the signal kin fit*/
+    OMEGA_KIN_FIT = 310,                            /*!< Did not pass the omega kin fit*/
 
     NOT_RECOGNIZED = 666, /*!< Unexpected exception*/
 
@@ -146,6 +147,8 @@ namespace ErrorHandling
         return "No vertices with two tracks available for analysis.";
       case ErrorCodes::NO_TWO_VTX_WITH_TWO_TRACKS:
         return "No two vertices with two tracks available for analysis.";
+      case ErrorCodes::LESS_THAN_FOUR_CLUSTERS_WITH_GOOD_ENERGY:
+        return "Less than four neutral clusters with good energy available for analysis.";
       case ErrorCodes::OMEGA_KIN_FIT:
         return "Did not pass the omega kin fit.";
 

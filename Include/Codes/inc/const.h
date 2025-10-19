@@ -143,6 +143,10 @@ namespace KLOE
   extern const std::map<TString, TString> channTitle; //!< Map of channel titles
   extern const std::map<TString, Color_t> channColor; //!< Map of channel colors
 
+  extern std::map<Int_t, Int_t> channEventCount; //!< Map of event counts per channel
+
+  Int_t TotalCountMC();
+
   namespace Histograms
   {
     extern const std::vector<TString> varNames; //!< Vector of variable names

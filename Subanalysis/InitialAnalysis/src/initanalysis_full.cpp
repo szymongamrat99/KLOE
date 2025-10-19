@@ -37,12 +37,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 {
   ConfigManager &config = ConfigManager::getInstance();
 
-  // TTreeReader reader(&chain);
-  // GeneralEventProperties generalProps(reader);
-  // ClusterProperties clusterProps(reader);
-  // ChargedVertexProperties chVtxProps(reader);
-  // BhabhaIP bhabhaProps(reader);
-
   // --------------- DataAccessWrapper initialization ----------------
 
   KLOE::DataAccessWrapper dataAccess(chain);
@@ -54,8 +48,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     return 1;
   }
 
-  std::map<Int_t, Int_t> totEventsPerMctruth = {
-      {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}};
+  //////////////////////////////////////////////////////////////////////
 
   Int_t totEvents = 0;
 
@@ -486,8 +479,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
       kaonTimesMC = Obj.CalculateKaonProperTimes(kaonChMom, kaonChPos, kaonNeMom, kaonNePos, ipPos);
 
-      totEventsPerMctruth[mctruth]++;
-      totEvents++;
+      KLOE::channEventCount[mctruth]++;
 
       if (mctruth == 7)
       {
@@ -1125,13 +1117,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         // Assign Int_t value for errorCode
         baseKin.errorCode = static_cast<Int_t>(errorCode);
 
-        // if (mctruth == 1)
-        // {
-        //   std::cout << baseKin.kaonChTimeLABMC << " " << baseKin.kaonNeTimeLABMC << std::endl;
-        //   std::cout << baseKin.kaonChTimeLAB << " " << baseKin.kaonNeTimeLAB << std::endl;
-        //   std::cout << baseKin.KchboostFit[9] / 0.0895 << " " << baseKin.KnerecFit[9] / 0.0895 << std::endl;
-        // }
-
         // Clone of the branches of the old tree
         // General Utils::properties of the event
         baseKin.nrun = dataAccess.GetNRun();
@@ -1404,11 +1389,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     physicsErrorCountsPerMctruth[i] = logger.getPhysicsErrorCountsForMctruth(i);
   };
 
+  totEvents = KLOE::TotalCountMC();
+
   for (Int_t i = 1; i <= 7; i++)
   {
-    Double_t efficiency = 100 * totEventsPerMctruth[i] / (Float_t)totEvents,
-             efficiencyError = efficiency / sqrt((Float_t)totEventsPerMctruth[i]);
-    std::cout << "Mctruth " << i << " count: " << totEventsPerMctruth[i] << " (" << efficiency << " +- " << efficiencyError << ") %\n";
+    Double_t efficiency = 100 * KLOE::channEventCount[i] / (Float_t)totEvents,
+             efficiencyError = efficiency / sqrt((Float_t)KLOE::channEventCount[i]);
+    std::cout << "Mctruth " << i << " count: " << KLOE::channEventCount[i] << " (" << efficiency << " +- " << efficiencyError << ") %\n";
   }
 
   logger.printPhysicsErrorStatsPerMctruth(false);
@@ -1419,8 +1406,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   config.setProperty<std::string>("lastScript", "Initial analysis");
 
   config.saveProperties();
-
-  Obj.CreateCurrentLinks(dirname);
 
   return 0;
 }

@@ -1,0 +1,123 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "description": "Analysis configuration with multiple hypotheses",
+    "lastModified": "2025-10-19",
+    "author": "gamrat@lnf.infn.it"
+  },
+  
+  "runMode": "FULL",
+  
+  "hypothesis": {
+    "active": "SIGNAL",
+    "enabled": ["SIGNAL", "OMEGA", "FOUR_PI"]
+  },
+  
+  "hypothesisConfigs": {
+    "SIGNAL": {
+      "enabled": true,
+      "description": "phi -> K0K0 -> pi+pi-pi0pi0",
+      "modules": {
+        "momentumSmearing": true,
+        "trilaterationKinFit": true,
+        "signalKinFit": true,
+        "omegaKinFit": false,
+        "triangleReconstruction": true,
+        "photonPairing": true,
+        "kaonProperTimes": true
+      },
+      "cuts": {
+        "minMassWindow": 480.0,
+        "maxMassWindow": 540.0,
+        "maxChi2": 50.0,
+        "applyPreselection": true,
+        "applyKinematicFit": true,
+        "applyStatisticalCuts": true
+      }
+    },
+    
+    "OMEGA": {
+      "enabled": true,
+      "description": "phi -> omega pi0 -> pi+pi-pi0pi0",
+      "modules": {
+        "momentumSmearing": true,
+        "trilaterationKinFit": false,
+        "signalKinFit": false,
+        "omegaKinFit": true,
+        "triangleReconstruction": false,
+        "photonPairing": true,
+        "kaonProperTimes": false
+      },
+      "cuts": {
+        "minMassWindow": 750.0,
+        "maxMassWindow": 810.0,
+        "maxChi2": 30.0,
+        "applyPreselection": true,
+        "applyKinematicFit": true,
+        "applyStatisticalCuts": true
+      }
+    },
+    
+    "FOUR_PI": {
+      "enabled": true,
+      "description": "phi -> pi+pi-pi0pi0 (direct)",
+      "modules": {
+        "momentumSmearing": true,
+        "trilaterationKinFit": false,
+        "signalKinFit": true,
+        "omegaKinFit": false,
+        "triangleReconstruction": false,
+        "photonPairing": true,
+        "kaonProperTimes": false
+      },
+      "cuts": {
+        "minMassWindow": 1000.0,
+        "maxMassWindow": 1040.0,
+        "maxChi2": 40.0,
+        "applyPreselection": true,
+        "applyKinematicFit": true,
+        "applyStatisticalCuts": true
+      }
+    },
+    
+    "THREE_PI0": {
+      "enabled": false,
+      "description": "phi -> pi0pi0pi0",
+      "modules": {
+        "momentumSmearing": false,
+        "trilaterationKinFit": false,
+        "signalKinFit": false,
+        "omegaKinFit": false,
+        "triangleReconstruction": false,
+        "photonPairing": true,
+        "kaonProperTimes": false
+      },
+      "cuts": {
+        "minMassWindow": 1000.0,
+        "maxMassWindow": 1040.0,
+        "maxChi2": 20.0,
+        "applyPreselection": true,
+        "applyKinematicFit": false,
+        "applyStatisticalCuts": true
+      }
+    }
+  },
+  
+  "output": {
+    "savePulls": true,
+    "saveIntermediateResults": false,
+    "saveDebugInfo": false,
+    "saveMCTruthAlways": true,
+    "verboseLevel": 1
+  },
+  
+  "performance": {
+    "parallelProcessing": false,
+    "nThreads": 4
+  },
+  
+  "validation": {
+    "checkPhysicalBounds": true,
+    "checkEnergyMomentum": true
+  }
+}

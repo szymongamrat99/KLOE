@@ -170,6 +170,28 @@ namespace KLOE
       {"pi+pi-pi+pi-", kYellow},
       {"MC sum", kOrange}};
 
+  std::map<Int_t, Int_t> channEventCount = {
+      {0, 0},
+      {1, 0},
+      {2, 0},
+      {3, 0},
+      {4, 0},
+      {5, 0},
+      {6, 0},
+      {7, 0},
+      {8, 0}};
+
+  Int_t TotalCountMC()
+  {
+    Int_t total = 0;
+    for (const auto &pair : channEventCount)
+    {
+      if (pair.first != 0 && pair.first != 8) // Pomijamy dane
+        total += pair.second;
+    }
+    return total;
+  }
+
   namespace Histograms
   {
     const std::vector<TString> varNames = {

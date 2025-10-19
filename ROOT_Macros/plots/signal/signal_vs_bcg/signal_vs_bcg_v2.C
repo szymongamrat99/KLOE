@@ -191,9 +191,9 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           tKneFit = KnereclorFit[9] / 0.0895,
           vKneMC = 0, // PhysicsConstants::cVel * Knemc[4] / Knemc[3],
       vKne = PhysicsConstants::cVel * Knerec[4] / Knerec[3],
-          pathKne = sqrt(pow(KneTriangle[6] - ip[0], 2) +
-                         pow(KneTriangle[7] - ip[1], 2) +
-                         pow(KneTriangle[8] - ip[2], 2)),
+          pathKne = sqrt(pow(Knerec[6] - ip[0], 2) +
+                         pow(Knerec[7] - ip[1], 2) +
+                         pow(Knerec[8] - ip[2], 2)),
           tKne = pathKne / (vKne * 0.0895),
           pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
                            pow(Kchmc[7] - ipmc[1], 2) +
@@ -261,9 +261,9 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                           (Kchrec[7] - ip[1]) / kaonChPath * Kchboost[4],
                           (Kchrec[8] - ip[2]) / kaonChPath * Kchboost[4]};
 
-  TVector3 boostNeutralKaon(-KneTriangle[0] / KneTriangle[3],
-                            -KneTriangle[1] / KneTriangle[3],
-                            -KneTriangle[2] / KneTriangle[3]),
+  TVector3 boostNeutralKaon(-Knerec[0] / Knerec[3],
+                            -Knerec[1] / Knerec[3],
+                            -Knerec[2] / Knerec[3]),
       boostChargedKaon(-kaonChMom[0] / Kchboost[3],
                        -kaonChMom[1] / Kchboost[3],
                        -kaonChMom[2] / Kchboost[3]);
@@ -350,7 +350,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   ///////////////////////////////////////////////////////////////////////////////
 
-  if (*mctruth >= 0 /*&& combinedMassPi0Fit < 10. && *Chi2SignalKinFit < 30.*/ /*&& *TrcSum > -1 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && abs(*minv4gam - PhysicsConstants::mK0) < 76. &&  *Qmiss < 3.75 && openingAngleCharged > acosCutAngle*/ && abs(deltaPhi - 3.09) > 2 * 0.087 && condMassKch && condMassKne && condMassPi01 && condMassPi02 && pathKchMC < 30.0 && pathKneMC < 30.0)
+  if (*mctruth >= 0 /*&& combinedMassPi0Fit < 10. && *Chi2SignalKinFit < 30.*/ /*&& *TrcSum > -1 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && abs(*minv4gam - PhysicsConstants::mK0) < 76. &&  *Qmiss < 3.75 && openingAngleCharged > acosCutAngle && abs(deltaPhi - 3.09) > 2 * 0.087 && condMassKch && condMassKne && condMassPi01 && condMassPi02 && pathKchMC < 30.0 && pathKneMC < 30.0*/)
   {
     if ((*mctruth == 1) && *mcflag == 1)
       signal_num++;

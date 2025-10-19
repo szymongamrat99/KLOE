@@ -120,7 +120,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
     try
     {
-      if (_mode == "SignalGlobal")
+      if (1)
       {
         if (_X(4) < 0)
           _X(4) = MIN_CLU_ENE;

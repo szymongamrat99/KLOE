@@ -103,7 +103,7 @@ public :
    TTreeReaderArray<float> KchrecFit = {fReader, "KchrecFit"};
    TTreeReaderArray<float> KchrecKL = {fReader, "KchrecKL"};
    TTreeReaderArray<float> KchrecKS = {fReader, "KchrecKS"};
-   TTreeReaderArray<float> KneTriangle = {fReader, "KneTriangle"};
+   TTreeReaderArray<float> Knerec = {fReader, "Knerec"};
    TTreeReaderArray<float> Knemc = {fReader, "Knemc"};
    TTreeReaderArray<float> KnerecFit = {fReader, "KnerecFit"};
    TTreeReaderArray<float> KnereclorFit = {fReader, "KnereclorFit"};
