@@ -360,8 +360,6 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
     if ((*mcflag == 1 && *mctruth >= 1) || *mcflag == 0)
     {
-      std::cout << *Chi2SignalKinFit << " , " << *Chi2TriKinFit << std::endl;
-
       // Fill histograms for reconstructed variables
       histsReconstructed["mass_Kch"][KLOE::channName.at(*mctruth)]->Fill(Kchrec[5] - PhysicsConstants::mK0, weight);
 
@@ -375,7 +373,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       histsReconstructed["combined_mass_pi0"][KLOE::channName.at(*mctruth)]->Fill(combinedMassPi0Fit, weight);
 
       // Fitted signal variables
-      histsFittedSignal["mass_Kch"][KLOE::channName.at(*mctruth)]->Fill(Kchrec[5] - PhysicsConstants::mK0, weight);
+      histsFittedSignal["mass_Kch"][KLOE::channName.at(*mctruth)]->Fill(Kchrec[5] - PhysicsConstants::mOmega, weight);
 
       histsFittedSignal["mass_Kne"][KLOE::channName.at(*mctruth)]->Fill(*minv4gam - PhysicsConstants::mK0, weight);
 

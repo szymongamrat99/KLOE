@@ -81,10 +81,12 @@ bool AnalysisConfig::LoadFromFile(const std::string& filename) {
                 
                 config.enabled = item.value().value("enabled", false);
                 config.description = item.value().value("description", "");
+                config.signal = item.value().value("signal", 1);
                 
                 // Modules
                 if (item.value().contains("modules")) {
                     auto& mod = item.value()["modules"];
+                    config.modules.signalOnly = mod.value("signalOnly", false);
                     config.modules.momentumSmearing = mod.value("momentumSmearing", true);
                     config.modules.trilaterationKinFit = mod.value("trilaterationKinFit", true);
                     config.modules.signalKinFit = mod.value("signalKinFit", true);
@@ -198,7 +200,7 @@ bool AnalysisConfig::IsDebugMode() const {
 
 void AnalysisConfig::Print() const {
     std::cout << "\n╔═══════════════════════════════════════════╗" << std::endl;
-    std::cout << "║     KLOE Analysis Configuration          ║" << std::endl;
+    std::cout << "║     KLOE Analysis Configuration           ║" << std::endl;
     std::cout << "╚═══════════════════════════════════════════╝" << std::endl;
     
     if (!metadata.author.empty()) {
@@ -217,6 +219,7 @@ void AnalysisConfig::Print() const {
     }
     
     std::cout << "Modules:" << std::endl;
+    std::cout << "   Signal only:       " << (hypConfig.modules.signalOnly ? "✅" : "❌") << std::endl;
     std::cout << "   Momentum Smearing:       " << (hypConfig.modules.momentumSmearing ? "✅" : "❌") << std::endl;
     std::cout << "   Trilateration KinFit:    " << (hypConfig.modules.trilaterationKinFit ? "✅" : "❌") << std::endl;
     std::cout << "   Signal KinFit:           " << (hypConfig.modules.signalKinFit ? "✅" : "❌") << std::endl;

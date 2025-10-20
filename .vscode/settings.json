@@ -90,6 +90,7 @@
     "full_analysis.C": "cpp",
     "cp_fit.C": "cpp",
     "histos.C": "cpp",
-    "dupa.C": "cpp"
+    "dupa.C": "cpp",
+    "signal_vs_bcg_v3.C": "cpp"
   }
 }
