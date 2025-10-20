@@ -392,6 +392,7 @@ namespace KLOE
         KchboostFit,
         ipFit,
         photonFit[4],
+        photonOmegaFit[4],
         KnerecFit,
         KnereclorFit,
         ParamSignal,
@@ -413,7 +414,8 @@ namespace KLOE
         phiOmegaFit,
         trkOmegaFit[2],
         Knerec,
-        Knereclor;
+        Knereclor,
+        ipOmegaFit;
 
     std::vector<Int_t>
         vtaken,
@@ -456,6 +458,7 @@ namespace KLOE
       pi01Fit.resize(6, 0.0);
       pi02Fit.resize(6, 0.0);
       ipTriKinFit.resize(3, 0.0);
+      ipOmegaFit.resize(3, 0.0);
       KnetriKinFit.resize(10, 0.0);
       neuVtxTriKinFit.resize(4, 0.0);
       gammaMomTriKinFit1.resize(8, 0.0);
@@ -475,10 +478,14 @@ namespace KLOE
       KchrecFit.resize(10, 0);
       KchboostFit.resize(10, 0);
       ipFit.resize(3, 0);
-      photonFit[0].resize(4, 0.0);
-      photonFit[1].resize(4, 0.0);
-      photonFit[2].resize(4, 0.0);
-      photonFit[3].resize(4, 0.0);
+      photonFit[0].resize(8, 0.0);
+      photonFit[1].resize(8, 0.0);
+      photonFit[2].resize(8, 0.0);
+      photonFit[3].resize(8, 0.0);
+      photonOmegaFit[0].resize(8, 0.0);
+      photonOmegaFit[1].resize(8, 0.0);
+      photonOmegaFit[2].resize(8, 0.0);
+      photonOmegaFit[3].resize(8, 0.0);
       KnerecFit.resize(10, 0.0);
       KnereclorFit.resize(10, 0.0);
       ParamSignal.resize(5, 0.0);
@@ -567,10 +574,15 @@ namespace KLOE
       KchrecFit.clear();
       KchboostFit.clear();
       ipFit.clear();
+      ipOmegaFit.clear();
       photonFit[0].clear();
       photonFit[1].clear();
       photonFit[2].clear();
       photonFit[3].clear();
+      photonOmegaFit[0].clear();
+      photonOmegaFit[1].clear();
+      photonOmegaFit[2].clear();
+      photonOmegaFit[3].clear();
       KnerecFit.clear();
       KnereclorFit.clear();
       ParamSignal.clear();

@@ -4,6 +4,7 @@
 #include "../Include/MainMenuHandler/InputParamsHandler.h"
 #include <FileManager.h>
 #include <event_data.h>
+#include <AnalysisManager.h>
 
 #include <const.h>
 
@@ -23,6 +24,10 @@ int main(int argc, char *argv[])
   // -------------------------------------------------------------------
   // Initialize utility variables
   Utils::InitializeVariables();
+  // -------------------------------------------------------------------
+  // Analysis flags and settings
+  KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();
+  analysisConfig.LoadFromFile(Paths::analysisConfigPath);
   // -------------------------------------------------------------------
   // Set KLOE class instance
   KLOE::pm00 eventAnalysis;

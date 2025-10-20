@@ -4,7 +4,7 @@
         "analysisCode": "SIGNAL",
         "covMatrixType": "MIXED",
         "initialAnalysisExec": {
-            "MC": true,
+            "MC": false,
             "flag": true,
             "parts": {
                 "covMatrixInitialAnalysisExec": false,
@@ -15,7 +15,7 @@
         "trilaterationReconstructionMode": "TWO_PI0"
     },
     "lastScript": "Initial analysis",
-    "lastUpdate": "2025-10-19",
+    "lastUpdate": "2025-10-20",
     "momSmearing": {
         "bootstrapMeanCovMatrix": {
             "_typename": "TMatrixT<double>",

@@ -64,6 +64,7 @@ public:
     };
     
     struct HypothesisModules {
+        bool signalOnly = false;
         bool momentumSmearing = true;
         bool trilaterationKinFit = true;
         bool signalKinFit = true;
@@ -84,6 +85,7 @@ public:
     
     struct HypothesisConfig {
         bool enabled = false;
+        int signal = 1;
         std::string description;
         HypothesisModules modules;
         HypothesisCuts cuts;
