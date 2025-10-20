@@ -292,9 +292,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
           trc4Fit = photonFit4[7] - photon4path / PhysicsConstants::cVel - tKneFit * 0.0895,
           TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
-  Float_t deltaTfit = tKchFit - tKneFit,
-          deltaT = *KaonChTimeLABBoostLor - tKne,
-          deltaTMC = *KaonChTimeLABMC - *KaonNeTimeLABMC;
+  Float_t deltaTfit = *KaonChTimeCMSignalFit - *KaonNeTimeCMSignalFit,
+          deltaT = *KaonChTimeCMBoostLor - *KaonNeTimeCMBoostLor,
+          deltaTMC = *KaonChTimeCMMC - *KaonNeTimeCMMC;
 
   Float_t deltaPhi = *PhivSmeared1 - *PhivSmeared2;
 
@@ -429,6 +429,7 @@ void MC_fit_comparison::SlaveTerminate()
   // have been processed. When running with PROOF SlaveTerminate() is called
   // on each slave server.
 }
+
 
 void MC_fit_comparison::Terminate()
 {

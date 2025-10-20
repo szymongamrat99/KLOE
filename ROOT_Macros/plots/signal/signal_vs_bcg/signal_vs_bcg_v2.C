@@ -245,9 +245,14 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           trc4Fit = photonFit4[7] - photon4path / PhysicsConstants::cVel - tKneFit * 0.0895,
           TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
-  Float_t deltaTfit = propTimesFit.deltaTimeCM,
+  Float_t deltaTfit = *KaonChTimeCMSignalFit - *KaonNeTimeCMSignalFit,
           deltaT = *KaonChTimeCMBoostLor - *KaonNeTimeCMBoostLor,
           deltaTMC = *KaonChTimeCMMC - *KaonNeTimeCMMC;
+
+  std::cout << *KaonChTimeCMBoostLor << " " << *KaonNeTimeCMBoostLor << " " << deltaT << std::endl;
+  std::cout << *KaonChTimeCMSignalFit << " " << *KaonNeTimeCMSignalFit << " " << deltaTfit << std::endl;
+
+          
 
   Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
                                     pow(pi02Fit[5] - PhysicsConstants::mPi0, 2)),
@@ -291,7 +296,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   Float_t weight = 1.0;
 
   if (*mctruth == 1)
-    weight = 1.0;//interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
+    weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
   if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1)
     signal_tot++;
@@ -373,7 +378,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       histsReconstructed["combined_mass_pi0"][KLOE::channName.at(*mctruth)]->Fill(combinedMassPi0Fit, weight);
 
       // Fitted signal variables
-      histsFittedSignal["mass_Kch"][KLOE::channName.at(*mctruth)]->Fill(Kchrec[5] - PhysicsConstants::mOmega, weight);
+      histsFittedSignal["mass_Kch"][KLOE::channName.at(*mctruth)]->Fill(Kchrec[5] - PhysicsConstants::mK0, weight);
 
       histsFittedSignal["mass_Kne"][KLOE::channName.at(*mctruth)]->Fill(*minv4gam - PhysicsConstants::mK0, weight);
 
@@ -381,7 +386,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       histsFittedSignal["mass_pi02"][KLOE::channName.at(*mctruth)]->Fill(pi02Fit[5] - PhysicsConstants::mPi0, weight);
 
       histsFittedSignal["chi2_signalKinFit"][KLOE::channName.at(*mctruth)]->Fill(*Chi2SignalKinFit, weight);
-      histsFittedSignal["chi2_trilaterationKinFit"][KLOE::channName.at(*mctruth)]->Fill(*Chi2TriKinFit, weight);
+      histsFittedSignal["chi2_trilaterationKinFit"][KLOE::channName.at(*mctruth)]->Fill(*Chi2OmegaKinFit, weight);
       histsFittedSignal["prob_signal"][KLOE::channName.at(*mctruth)]->Fill(TMath::Prob(*Chi2SignalKinFit, 10), weight);
 
       histsFittedSignal["combined_mass_pi0"][KLOE::channName.at(*mctruth)]->Fill(combinedMassPi0Fit, weight);
@@ -416,7 +421,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       hists2DFittedSignal["delta_t_fit_vs_delta_t_mc"][KLOE::channName.at(*mctruth)]->Fill(deltaTMC, deltaTfit - deltaTMC, weight);
       hists2DFittedSignal["delta_t_vs_delta_t_mc"][KLOE::channName.at(*mctruth)]->Fill(deltaTMC, deltaT - deltaTMC, weight);
 
-      hists2DFittedSignal["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(*mctruth)]->Fill(*Chi2SignalKinFit, *Chi2TriKinFit, weight);
+      hists2DFittedSignal["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(*mctruth)]->Fill(*Chi2SignalKinFit, *Chi2OmegaKinFit, weight);
     }
   }
 
