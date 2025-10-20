@@ -46,6 +46,7 @@ add_library(LibRec SHARED
             src/VariableConfig.cpp
             src/DataAccessWrapper.cpp
             src/const.cpp
+            src/AnalysisManager.cpp
             )
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.

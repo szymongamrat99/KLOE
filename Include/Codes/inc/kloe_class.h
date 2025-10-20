@@ -138,6 +138,21 @@ namespace KLOE
       total[7] = clusterParams[3];
     };
 
+    void SetTotalVector()
+    {
+      total.resize(9);
+
+      total[0] = fourMom[0];
+      total[1] = fourMom[1];
+      total[2] = fourMom[2];
+      total[3] = fourMom[3];
+      total[4] = sqrt(pow(fourMom[0], 2) + pow(fourMom[1], 2) + pow(fourMom[2], 2));
+      total[5] = sqrt(pow(fourMom[3], 2) - pow(total[4], 2));
+      total[6] = fourPos[0];
+      total[7] = fourPos[1];
+      total[8] = fourPos[2];
+    }
+
     void SetLorentzVectors()
     {
       lorentzFourMom.SetPxPyPzE(fourMom[0], fourMom[1], fourMom[2], fourMom[3]);
@@ -636,6 +651,24 @@ namespace KLOE
       std::cout << "Wrong analysis code!" << std::endl;
 
       return HypothesisCode::INVALID_VALUE;
+    };
+
+    static std::string HypothesisCodeToString(HypothesisCode code)
+    {
+      static const std::map<HypothesisCode, std::string> enumMap = {
+          {HypothesisCode::SIGNAL, "SIGNAL"},
+          {HypothesisCode::OMEGAPI, "OMEGAPI"},
+          {HypothesisCode::FOUR_PI, "FOUR_PI"}};
+
+      auto it = enumMap.find(code);
+      if (it != enumMap.end())
+      {
+        return it->second;
+      }
+
+      std::cout << "Wrong analysis code!" << std::endl;
+
+      return "INVALID_VALUE";
     };
 
     // -------------------------------------------------------------------------------

@@ -63,7 +63,7 @@ namespace KLOE
         _Errors,
         _OmegaFit,
         _ipFit,
-        _Pi0OmegaFit,
+        _Pi0OmegaFit[2],
         _PhiMomFit,
         _photonFit[4],
         _trkFit[2];
@@ -100,7 +100,7 @@ namespace KLOE
       _bhabhaVtxErr = bhabhaVtxErr;
     }
 
-    void GetResults(std::vector<Float_t> &Param, std::vector<Float_t> &Errors, std::vector<Float_t> &ParamFit, std::vector<Float_t> &ErrorsFit, std::vector<Float_t> trkFit[2], std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &OmegaFit, std::vector<Float_t> &Pi0OmegaFit, std::vector<Float_t> &PhiMomFit, Float_t &Chi2OmegaKinFit, std::vector<Float_t> &pulls)
+    void GetResults(std::vector<Float_t> &Param, std::vector<Float_t> &Errors, std::vector<Float_t> &ParamFit, std::vector<Float_t> &ErrorsFit, std::vector<Float_t> trkFit[2], std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &OmegaFit, std::vector<Float_t> Pi0OmegaFit[2], std::vector<Float_t> &PhiMomFit, Float_t &Chi2OmegaKinFit, std::vector<Float_t> &pulls)
     {
       Param = _Param;
       Errors = _Errors;
@@ -121,7 +121,9 @@ namespace KLOE
       for (Int_t i = 0; i < 4; i++)
         photonFit[i] = _photonFit[i];
 
-      Pi0OmegaFit = _Pi0OmegaFit;
+      Pi0OmegaFit[0] = _Pi0OmegaFit[0];
+      Pi0OmegaFit[1] = _Pi0OmegaFit[1];
+
       OmegaFit = _OmegaFit;
 
       PhiMomFit = _PhiMomFit;

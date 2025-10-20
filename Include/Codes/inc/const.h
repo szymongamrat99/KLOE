@@ -21,6 +21,7 @@ namespace Paths
   extern const std::string pdgConstFilePath;
   extern const std::string propertiesPath;
   extern const std::string propName;
+  extern const std::string analysisConfigPath;
   extern const std::string rootfilesName;
   extern const std::string cutlimitsName;
 
@@ -407,12 +408,10 @@ namespace KLOE
         pi02,
         pi01Fit,
         pi02Fit,
-        pi01OmegaFit,
-        pi02OmegaFit,
+        pi0OmegaFit[2],
         omegaFit,
         phiOmegaFit,
-        trk1OmegaFit,
-        trk2OmegaFit,
+        trkOmegaFit[2],
         Knerec,
         Knereclor;
 
@@ -492,12 +491,12 @@ namespace KLOE
       ParamOmegaFit.resize(5, 0.0);
       ErrorsOmegaFit.resize(5, 0.0);
       pullsOmegaFit.resize(0, 0.0);
-      pi01OmegaFit.resize(6, 0.0);
-      pi02OmegaFit.resize(6, 0.0);
+      pi0OmegaFit[0].resize(6, 0.0);
+      pi0OmegaFit[1].resize(6, 0.0);
       omegaFit.resize(9, 0.0);
       phiOmegaFit.resize(4, 0.0);
-      trk1OmegaFit.resize(4, 0.0);
-      trk2OmegaFit.resize(4, 0.0);
+      trkOmegaFit[0].resize(4, 0.0);
+      trkOmegaFit[1].resize(4, 0.0);
       // Resize trk vectors
       trknew[0].resize(4, 0.0);
       trknew[1].resize(4, 0.0);
@@ -584,12 +583,12 @@ namespace KLOE
       ParamOmegaFit.clear();
       ErrorsOmegaFit.clear();
       pullsOmegaFit.clear();
-      pi01OmegaFit.clear();
-      pi02OmegaFit.clear();
+      pi0OmegaFit[0].clear();
+      pi0OmegaFit[1].clear();
       omegaFit.clear();
       phiOmegaFit.clear();
-      trk1OmegaFit.clear();
-      trk2OmegaFit.clear();
+      trkOmegaFit[0].clear();
+      trkOmegaFit[1].clear();
       // Clear trk vectors
       trknew[0].clear();
       trknew[1].clear();

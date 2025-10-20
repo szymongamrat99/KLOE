@@ -42,7 +42,8 @@ namespace KLOE
     _ipFit.resize(3);
 
     _OmegaFit.resize(8);
-    _Pi0OmegaFit.resize(8);
+    _Pi0OmegaFit[0].resize(8);
+    _Pi0OmegaFit[1].resize(8);
     _PhiMomFit.resize(7);
 
     for (Int_t i = 0; i < 2; i++)
@@ -58,6 +59,8 @@ namespace KLOE
         "Photon3PathLAB",
         "Photon4PathLAB",
         "MinvConsvOmega"};
+
+    ConstraintSet(ConstSet);
 
     gErrorIgnoreLevel = 6001;
   }
