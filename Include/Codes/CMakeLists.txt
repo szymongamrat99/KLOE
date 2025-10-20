@@ -56,6 +56,7 @@ target_include_directories(LibRec PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../FortranAnalysis/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/..
+    ${Boost_INCLUDE_DIRS}
     # Jeśli AnalysisA.cpp używa nagłówków z src/ lub Subanalysis/,
     # trzeba je tu również dodać (np. parent_directory/src)
     # Przykład: target_include_directories(AnalysisALib PRIVATE ${CMAKE_SOURCE_DIR}/src)
@@ -65,6 +66,7 @@ target_include_directories(LibRec PUBLIC
 # Zmienna ${ROOT_LIBRARIES} jest dziedziczona z głównego CMakeLists.txt.
 target_link_libraries(LibRec PRIVATE
     ${ROOT_LIBRARIES}
+    ${Boost_LIBRARIES}
 )
 
 # Możesz tu także zdefiniować lokalny program wykonawczy, np. do testów.

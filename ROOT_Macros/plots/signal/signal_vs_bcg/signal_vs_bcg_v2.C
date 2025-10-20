@@ -249,10 +249,6 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           deltaT = *KaonChTimeCMBoostLor - *KaonNeTimeCMBoostLor,
           deltaTMC = *KaonChTimeCMMC - *KaonNeTimeCMMC;
 
-  std::cout << *KaonChTimeCMBoostLor << " " << *KaonNeTimeCMBoostLor << " " << deltaT << std::endl;
-  std::cout << *KaonChTimeCMSignalFit << " " << *KaonNeTimeCMSignalFit << " " << deltaTfit << std::endl;
-
-          
 
   Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
                                     pow(pi02Fit[5] - PhysicsConstants::mPi0, 2)),

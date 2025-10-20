@@ -12,7 +12,16 @@
 #include <iostream>
 #include <vector>
 
-#include "triple_gaus.h"
+// RooFit includes
+#include <RooRealVar.h>
+#include <RooDataHist.h>
+#include <RooGaussian.h>
+#include <RooAddPdf.h>
+#include <RooPlot.h>
+#include <RooFitResult.h>
+#include <RooArgList.h>
+#include <RooArgSet.h>
+#include <RooAbsReal.h>
 
 namespace KLOE {
 
@@ -84,7 +93,12 @@ public:
         Double_t combinedSigmaErr = 0.0;       ///< Błąd sigmy kombinowanej
         
         // Funkcja fitu (dla rysowania)
-        TF1* fitFunction = nullptr;            ///< Funkcja fitu
+        TF1* fitFunction = nullptr;            ///< Funkcja fitu (backward compatibility)
+        
+        // RooFit objects
+        RooFitResult* rooFitResult = nullptr;  ///< RooFit result object
+        RooAddPdf* rooPdf = nullptr;           ///< Combined PDF
+        RooDataHist* rooDataHist = nullptr;    ///< Data histogram
         
         FitResult() {
             parameters.resize(9, 0.0);
@@ -95,6 +109,18 @@ public:
             if(fitFunction) {
                 delete fitFunction;
                 fitFunction = nullptr;
+            }
+            if(rooFitResult) {
+                delete rooFitResult;
+                rooFitResult = nullptr;
+            }
+            if(rooPdf) {
+                delete rooPdf;
+                rooPdf = nullptr;
+            }
+            if(rooDataHist) {
+                delete rooDataHist;
+                rooDataHist = nullptr;
             }
         }
         
@@ -165,6 +191,17 @@ public:
      * @return Struktura z domyślnymi parametrami
      */
     FitParams PrepareDefaultParams(TH1* hist);
+    
+    /**
+     * @brief Przygotowuje restrykcyjne parametry dla histogramów z długimi ogonami
+     * @param hist Histogram do analizy
+     * @param meanWindow Okno dla średniej w jednostkach RMS (domyślnie 3.0)
+     * @param sigmaMax Maksymalna sigma w jednostkach RMS (domyślnie 3.0)
+     * @return Struktura z ograniczonymi parametrami
+     */
+    FitParams PrepareConstrainedParams(TH1* hist, 
+                                      Double_t meanWindow = 3.0,
+                                      Double_t sigmaMax = 3.0);
 
     // ==================== DOSTĘP DO WYNIKÓW ====================
     
@@ -267,6 +304,11 @@ public:
      * @brief Włącza/wyłącza tryb verbose
      */
     void SetVerbose(Bool_t verbose = true) { fVerbose = verbose; }
+    
+    /**
+     * @brief Wybiera metodę fitowania: true = RooFit, false = TF1 (legacy)
+     */
+    void UseRooFit(Bool_t useRooFit = true) { fUseRooFit = useRooFit; }
 
 private:
     // Wyniki ostatniego fitu
@@ -286,6 +328,7 @@ private:
     
     // Ustawienia
     Bool_t fVerbose = false;
+    Bool_t fUseRooFit = false;  // Domyślnie używaj starego TF1
     
     // Canvas dla rysowania
     TCanvas* fCanvas = nullptr;
@@ -299,6 +342,16 @@ private:
      * @return true jeśli sukces
      */
     Bool_t DoFit(TH1* hist, const FitParams& params);
+    
+    /**
+     * @brief Wykonuje fit używając TF1 (stara metoda)
+     */
+    Bool_t DoFitTF1(TH1* hist, const FitParams& params);
+    
+    /**
+     * @brief Wykonuje fit używając RooFit (nowa metoda)
+     */
+    Bool_t DoFitRooFit(TH1* hist, const FitParams& params);
     
     /**
      * @brief Oblicza wartości kombinowane
@@ -328,6 +381,13 @@ private:
      * @param isLogScale Czy używać skali logarytmicznej
      */
     void SetOptimalYAxisRange(TH1* hist, Bool_t isLogScale = false);
+    
+    /**
+     * @brief Tworzy TF1 dla backward compatibility z wynikami RooFit
+     * @param xmin Dolna granica funkcji
+     * @param xmax Górna granica funkcji
+     */
+    void CreateBackwardCompatibleTF1(Double_t xmin, Double_t xmax);
 };
 
 } // namespace KLOE
