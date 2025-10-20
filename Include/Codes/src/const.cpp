@@ -253,7 +253,7 @@ namespace KLOE
         // Chi-square
         {"chi2_signalKinFit", {100, 0., 50., "Signal Kinematic Fit #chi^{2}", "#chi^{2}_{signal}", "Counts"}},
         {"prob_signal", {100, 0., 1., "Signal Kinematic Fit Probability", "Prob_{signal}", "Counts"}},
-        {"chi2_trilaterationKinFit", {100, 0., 50., "Trilateration Fit #chi^{2}", "#chi^{2}_{tri}", "Counts"}},
+        {"chi2_trilaterationKinFit", {100, 0., 3000., "Trilateration Fit #chi^{2}", "#chi^{2}_{tri}", "Counts"}},
 
         // Vertex
         {"vtxNeu_x", {100, -20., 20., "Neutral Vertex x", "x [cm]", "Counts"}},
@@ -341,7 +341,7 @@ namespace KLOE
         {"Energy_Pi1_vs_mass_pi01", {50, 50, 0., 1000., 120., 150., "Pion Energy vs #pi^{0} Mass", "E_{#pi^{#pm}} [MeV]", "m_{#pi^{0}} [MeV/c^{2}]", ""}},
 
         // Chi-square korelacje
-        {"chi2_signalKinFit_vs_chi2_trilaterationKinFit", {50, 50, 0., 50., 0., 50., "#chi^{2} Correlation", "#chi^{2}_{signal}", "#chi^{2}_{tri}", ""}},
+        {"chi2_signalKinFit_vs_chi2_trilaterationKinFit", {50, 50, 0., 50., 0., 3000., "#chi^{2} Correlation", "#chi^{2}_{signal}", "#chi^{2}_{tri}", ""}},
 
         // Track korelacje
         {"curv1_vs_curv2", {50, 50, -0.01, 0.01, -0.01, 0.01, "Track Curvature Correlation", "1/p_{T1} [1/MeV]", "1/p_{T2} [1/MeV]", ""}},
