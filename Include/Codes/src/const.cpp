@@ -9,6 +9,8 @@
 #include <TH1.h>
 #include <TH2.h>
 
+#include <TGaxis.h>
+
 using json = nlohmann::json;
 
 namespace Paths
@@ -201,7 +203,7 @@ namespace KLOE
         "px_Kch", "py_Kch", "pz_Kch", "Energy_Kch",
         "px_Kne", "py_Kne", "pz_Kne", "Energy_Kne",
         "px_phi", "py_phi", "pz_phi", "Energy_phi",
-        "mass_Kch", "mass_Kne", "mass_phi", "mass_pi01", "mass_pi02", "combined_mass_pi0",
+        "mass_Kch", "mass_Kne", "mass_phi", "mass_pi01", "mass_pi02", "combined_mass_pi0", "mass_omega", "mass_omega_rec",
         "vKne", "deltaPhiv", "deltaPhivFit", "Qmiss",
         "chi2_signalKinFit", "chi2_trilaterationKinFit", "prob_signal",
         "curv1", "phiv1", "cotv1",
@@ -212,35 +214,35 @@ namespace KLOE
         "time_neutral_MC", "delta_t",
         "pull1", "pull2", "pull3", "pull4", "pull5", "pull6", "pull7", "pull8", "pull9", "pull10", "pull11", "pull12", "pull13", "pull14", "pull15", "pull16", "pull17", "pull18", "pull19", "pull20", "pull21", "pull22", "pull23", "pull24", "pull25", "pull26", "pull27", "pull28", "pull29", "pull30", "pull31", "pull32", "pull33", "pull34", "pull35", "pull36",
         "openingAngleCharged", "openingAngleNeutral",
-        "nev", "nrun", "TransvRadius"};
+        "nev", "nrun", "TransvRadius", "T0Omega"};
 
     // Konfiguracje histogramów 1D
     const std::map<TString, HistConfig1D> histConfigs1D = {
         // Pędy cząstek
-        {"px_Pi1", {100, -500., 500., "Pion 1 p_{x}", "p_{x} [MeV/c]", "Counts"}},
-        {"py_Pi1", {100, -500., 500., "Pion 1 p_{y}", "p_{y} [MeV/c]", "Counts"}},
-        {"pz_Pi1", {100, -500., 500., "Pion 1 p_{z}", "p_{z} [MeV/c]", "Counts"}},
-        {"Energy_Pi1", {100, 0., 1000., "Pion 1 Energy", "E [MeV]", "Counts"}},
+        {"px_Pi1", {100, -100., 100., "Pion 1 p_{x}", "p_{x} [MeV/c]", "Counts"}},
+        {"py_Pi1", {100, -100., 100., "Pion 1 p_{y}", "p_{y} [MeV/c]", "Counts"}},
+        {"pz_Pi1", {100, -100., 100., "Pion 1 p_{z}", "p_{z} [MeV/c]", "Counts"}},
+        {"Energy_Pi1", {100, -50.0, 50.0, "Pion 1 Energy", "E [MeV]", "Counts"}},
 
-        {"px_Pi2", {100, -500., 500., "Pion 2 p_{x}", "p_{x} [MeV/c]", "Counts"}},
-        {"py_Pi2", {100, -500., 500., "Pion 2 p_{y}", "p_{y} [MeV/c]", "Counts"}},
-        {"pz_Pi2", {100, -500., 500., "Pion 2 p_{z}", "p_{z} [MeV/c]", "Counts"}},
-        {"Energy_Pi2", {100, 0., 1000., "Pion 2 Energy", "E [MeV]", "Counts"}},
+        {"px_Pi2", {100, -100., 100., "Pion 2 p_{x}", "p_{x} [MeV/c]", "Counts"}},
+        {"py_Pi2", {100, -100., 100., "Pion 2 p_{y}", "p_{y} [MeV/c]", "Counts"}},
+        {"pz_Pi2", {100, -100., 100., "Pion 2 p_{z}", "p_{z} [MeV/c]", "Counts"}},
+        {"Energy_Pi2", {100, -50.0, 50.0, "Pion 2 Energy", "E [MeV]", "Counts"}},
 
-        {"px_Kch", {100, -500., 500., "Kch p_{x}", "p_{x} [MeV/c]", "Counts"}},
-        {"py_Kch", {100, -500., 500., "Kch p_{y}", "p_{y} [MeV/c]", "Counts"}},
-        {"pz_Kch", {100, -500., 500., "Kch p_{z}", "p_{z} [MeV/c]", "Counts"}},
-        {"Energy_Kch", {100, 0., 1000., "Kch Energy", "E [MeV]", "Counts"}},
+        {"px_Kch", {100, -20., 20., "Kch p_{x}", "p_{x} [MeV/c]", "Counts"}},
+        {"py_Kch", {100, -20., 20., "Kch p_{y}", "p_{y} [MeV/c]", "Counts"}},
+        {"pz_Kch", {100, -30., 30., "Kch p_{z}", "p_{z} [MeV/c]", "Counts"}},
+        {"Energy_Kch", {100, -10.0, 10.0, "Kch Energy", "E [MeV]", "Counts"}},
 
-        {"px_Kne", {100, -500., 500., "Kne p_{x}", "p_{x} [MeV/c]", "Counts"}},
-        {"py_Kne", {100, -500., 500., "Kne p_{y}", "p_{y} [MeV/c]", "Counts"}},
-        {"pz_Kne", {100, -500., 500., "Kne p_{z}", "p_{z} [MeV/c]", "Counts"}},
-        {"Energy_Kne", {100, 0., 1000., "Kne Energy", "E [MeV]", "Counts"}},
+        {"px_Kne", {100, -100., 100., "Kne p_{x}", "p_{x} [MeV/c]", "Counts"}},
+        {"py_Kne", {100, -100., 100., "Kne p_{y}", "p_{y} [MeV/c]", "Counts"}},
+        {"pz_Kne", {100, -100., 100., "Kne p_{z}", "p_{z} [MeV/c]", "Counts"}},
+        {"Energy_Kne", {100, -50.0, 50.0, "Kne Energy", "E [MeV]", "Counts"}},
 
-        {"px_Phi", {100, -500., 500., "Phi p_{x}", "p_{x} [MeV/c]", "Counts"}},
-        {"py_Phi", {100, -500., 500., "Phi p_{y}", "p_{y} [MeV/c]", "Counts"}},
-        {"pz_Phi", {100, -500., 500., "Phi p_{z}", "p_{z} [MeV/c]", "Counts"}},
-        {"Energy_Phi", {100, 0., 1000., "Phi Energy", "E [MeV]", "Counts"}},
+        {"px_Phi", {100, -100., 100., "Phi p_{x}", "p_{x} [MeV/c]", "Counts"}},
+        {"py_Phi", {100, -100., 100., "Phi p_{y}", "p_{y} [MeV/c]", "Counts"}},
+        {"pz_Phi", {100, -100., 100., "Phi p_{z}", "p_{z} [MeV/c]", "Counts"}},
+        {"Energy_Phi", {100, -50.0, 50.0, "Phi Energy", "E [MeV]", "Counts"}},
 
         // Masy
         {"mass_Kch", {100, -5., 5., "Kaon Mass", "m^{inv}_{#pi^{+}#pi^{-}} - m_{K^{0}} [MeV/c^{2}]", "Counts"}},
@@ -249,24 +251,34 @@ namespace KLOE
         {"mass_pi01", {100, -20., 20., "#pi^{0} Mass 1", "m^{inv}_{2#gamma,1} - m_{#pi^{0}} [MeV/c^{2}]", "Counts"}},
         {"mass_pi02", {100, -20., 20., "#pi^{0} Mass 2", "m^{inv}_{2#gamma,2} - m_{#pi^{0}} [MeV/c^{2}]", "Counts"}},
         {"combined_mass_pi0", {100, 0., 100., "#pi^{0} Combined", "Comb^{#pi^0}_{err} [MeV/c^{2}]", "Counts"}},
+        {"mass_omega", {100, -200., 100., "#omega Meson Mass", "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]", "Counts"}},
+        {"mass_omega_rec", {100, -200., 50., "#omega Meson Mass Rec", "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]", "Counts"}},
 
         // Chi-square
         {"chi2_signalKinFit", {100, 0., 50., "Signal Kinematic Fit #chi^{2}", "#chi^{2}_{signal}", "Counts"}},
         {"prob_signal", {100, 0., 1., "Signal Kinematic Fit Probability", "Prob_{signal}", "Counts"}},
         {"chi2_trilaterationKinFit", {100, 0., 3000., "Trilateration Fit #chi^{2}", "#chi^{2}_{tri}", "Counts"}},
 
-        // Vertex
-        {"vtxNeu_x", {100, -20., 20., "Neutral Vertex x", "x [cm]", "Counts"}},
-        {"vtxNeu_y", {100, -20., 20., "Neutral Vertex y", "y [cm]", "Counts"}},
-        {"vtxNeu_z", {100, -50., 50., "Neutral Vertex z", "z [cm]", "Counts"}},
+        // Phi vertex
+        {"phi_vtx_x", {100, -1.0, 1.0, "#phi Vertex x", "V^{#phi}_{x} [cm]", "Counts"}},
+        {"phi_vtx_y", {100, -0.02, 0.02, "#phi Vertex y", "V^{#phi}_{y} [cm]", "Counts"}},
+        {"phi_vtx_z", {100, -5.0, 5.0, "#phi Vertex z", "V^{#phi}_{z} [cm]", "Counts"}},
 
         // Vertex
-        {"vtxNeu_x_Fit", {100, -20., 20., "Neutral Vertex x Fit", "x [cm]", "Counts"}},
-        {"vtxNeu_y_Fit", {100, -20., 20., "Neutral Vertex y Fit", "y [cm]", "Counts"}},
-        {"vtxNeu_z_Fit", {100, -50., 50., "Neutral Vertex z Fit", "z [cm]", "Counts"}},
+        {"vtxNeu_x", {100, -4., 4., "Neutral Vertex x", "x [cm]", "Counts"}},
+        {"vtxNeu_y", {100, -4., 4., "Neutral Vertex y", "y [cm]", "Counts"}},
+        {"vtxNeu_z", {100, -10., 10., "Neutral Vertex z", "z [cm]", "Counts"}},
+
+        // Vertex
+        {"vtxNeu_x_Fit", {100, -4., 4., "Neutral Vertex x Fit", "V^{K_{ne}}_{x} [cm]", "Counts"}},
+        {"vtxNeu_y_Fit", {100, -4., 4., "Neutral Vertex y Fit", "V^{K_{ne}}_{y} [cm]", "Counts"}},
+        {"vtxNeu_z_Fit", {100, -10., 10., "Neutral Vertex z Fit", "V^{K_{ne}}_{z} [cm]", "Counts"}},
 
         // Path i Radius
         {"TransvRadius", {100, 0., 50., "Transversal Radius of Kaons", "R [cm]", "Counts"}},
+
+        // T0 Omega
+        {"T0Omega", {100, 0., 350., "T0 from Omega", "T0 [MeV]", "Counts"}},
 
         // Pull Signal Fit
         {"pull1", {100, -5., 5., "Pull 1 Signal Fit", "Pull", "Counts"}},
@@ -307,8 +319,8 @@ namespace KLOE
         {"pull36", {100, -5., 5., "Pull 36 Signal Fit", "Pull", "Counts"}},
 
         // Czasy
-        {"time_neutral_MC", {100, -4., 2., "Neutral Kaon Time (MC)", "Trc_{sum} [ns]", "Counts"}},
-        {"delta_t", {121, -30., 30., "Time Difference", "#Deltat [#tau_{S}]", "Counts"}},
+        {"time_neutral_MC", {100, -1., 1., "Neutral Kaon Time (MC)", "Trc_{sum} [ns]", "Counts"}},
+        {"delta_t", {121, -10., 10., "Time Difference", "#Deltat [#tau_{S}]", "Counts"}},
 
         // Kąty i zmienne kinematyczne
         {"openingAngleCharged", {100, 0., 180., "Charged Particles Opening Angle", "#alpha [deg]", "Counts"}},
@@ -316,12 +328,12 @@ namespace KLOE
         {"Qmiss", {100, 0, 15., "Missing 4-momentum", "Q_{miss} [MeV]", "Counts"}},
 
         // Track parameters
-        {"curv1", {100, -0.01, 0.01, "Track 1 Curvature", "1/p_{T} [1/MeV]", "Counts"}},
-        {"phiv1", {100, -TMath::Pi(), TMath::Pi(), "Track 1 #phi", "#phi [rad]", "Counts"}},
-        {"cotv1", {100, -5., 5., "Track 1 cot(#theta)", "cot(#theta)", "Counts"}},
-        {"curv2", {100, -0.01, 0.01, "Track 2 Curvature", "1/p_{T} [1/MeV]", "Counts"}},
-        {"phiv2", {100, -TMath::Pi(), TMath::Pi(), "Track 2 #phi", "#phi [rad]", "Counts"}},
-        {"cotv2", {100, -5., 5., "Track 2 cot(#theta)", "cot(#theta)", "Events"}},
+        {"curv1", {100, -2.0, 2.0, "Track 1 Curvature", "1/p_{T} [1/MeV]", "Counts"}},
+        {"phiv1", {100, -0.5, 0.5, "Track 1 #phi", "#phi [rad]", "Counts"}},
+        {"cotv1", {100, -1., 1., "Track 1 cot(#theta)", "cot(#theta)", "Counts"}},
+        {"curv2", {100, -2.0, 2.0, "Track 2 Curvature", "1/p_{T} [1/MeV]", "Counts"}},
+        {"phiv2", {100, -0.5, 0.5, "Track 2 #phi", "#phi [rad]", "Counts"}},
+        {"cotv2", {100, -1., 1., "Track 2 cot(#theta)", "cot(#theta)", "Events"}},
         {"deltaPhiv", {100, 2., 4., "#phi_{+} - #phi_{-}", "#Delta#phi_{+-} [rad]", "Counts"}},
         {"deltaPhivFit", {100, 2., 4., "#phi_{+} - #phi_{-} Fit", "#Delta#phi^{fit}_{+-} [rad]", "Counts"}}};
 
@@ -492,6 +504,8 @@ namespace KLOE
     gStyle->SetTitleFont(62, "Z");
 
     gStyle->SetTitle("");
+
+    TGaxis::SetMaxDigits(3);
 
     gStyle->cd();
   }

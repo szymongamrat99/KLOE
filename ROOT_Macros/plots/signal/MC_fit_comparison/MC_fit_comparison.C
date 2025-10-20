@@ -39,142 +39,33 @@
 #include <TFitResult.h>
 #include <TFitResultPtr.h>
 
-std::vector<TString> histList = {"px_Pi1", "py_Pi1", "pz_Pi1", "Energy_Pi1",
-                                 "px_Pi2", "py_Pi2", "pz_Pi2", "Energy_Pi2",
-                                 "px_Kch", "py_Kch", "pz_Kch", "Energy_Kch",
-                                 "px_Kne", "py_Kne", "pz_Kne", "Energy_Kne",
-                                 "px_phi", "py_phi", "pz_phi", "Energy_phi",
-                                 "mass_Kch", "mass_Kne", "mass_phi", "chi2_signalKinFit",
-                                 "chi2_trilaterationKinFit", "curv1", "phiv1", "cotv1",
-                                 "curv2", "phiv2", "cotv2", "vtxNeu_x", "vtxNeu_y", "vtxNeu_z",
-                                 "vtxNeu_x_Fit", "vtxNeu_y_Fit", "vtxNeu_z_Fit",
-                                 "mass_pi01", "mass_pi02",
-                                 "time_neutral_MC", "prob_signal", "delta_t",
-                                 "combined_mass_pi0",
-                                 "pull1", "pull2", "pull3", "pull4", "pull5", "phi_vtx_x", "phi_vtx_y", "phi_vtx_z", "vKne",
-                                 "goodClusNumTriKinFit", "pathKne", "pathKch"}; // List of histograms to be created
+namespace KH = KLOE::Histograms;
 
-std::map<TString, std::vector<TString>> histTitles = {
-    {"px_Pi1", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
-    {"py_Pi1", {"p_{y} - p_{y}^{MC} [MeV/c]"}},
-    {"pz_Pi1", {"p_{z} - p_{z}^{MC} [MeV/c]"}},
-    {"Energy_Pi1", {"E - E^{MC} [MeV]"}},
-    {"px_Pi2", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
-    {"py_Pi2", {"p_{y} - p_{y}^{MC} [MeV/c]"}},
-    {"pz_Pi2", {"p_{z} - p_{z}^{MC} [MeV/c]"}},
-    {"Energy_Pi2", {"E - E^{MC} [MeV]"}},
-    {"px_Kch", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
-    {"py_Kch", {"p_{y} - p_{y}^{MC} [MeV/c]"}},
-    {"pz_Kch", {"p_{z} - p_{z}^{MC} [MeV/c]"}},
-    {"Energy_Kch", {"E - E^{MC} [MeV]"}},
-    {"px_Kne", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
-    {"py_Kne", {"p_{y} - p_{y}^{MC} [MeV/c]"}},
-    {"pz_Kne", {"p_{z} - p_{z}^{MC} [MeV/c]"}},
-    {"Energy_Kne", {"E - E^{MC} [MeV]"}},
-    {"px_phi", {"p_{x} - p_{x}^{MC} [MeV/c]"}},
-    {"py_phi", {"p_{y} - p_{y}^{MC} [MeV/c]"}},
-    {"pz_phi", {"p_{z} - p_{z}^{MC} [MeV/c]"}},
-    {"Energy_phi", {"E - E^{MC} [MeV]"}},
-    {"mass_Kch", {"m_{#pi^{+}#pi^{-}} - m_{K^{0}} [MeV]"}},
-    {"mass_Kne", {"m^{inv}_{4#gamma} - m_{K^{0}} [MeV]"}},
-    {"mass_phi", {"m^{inv}_{#phi} - m_{#phi} [MeV]"}},
-    {"chi2_signalKinFit", {"#chi^{2} of signal kinematic fit"}},
-    {"chi2_trilaterationKinFit", {"#chi^{2} of trilateration kinematic fit"}},
-    {"curv1", {"Curvature_{1} - Curvature_{1}^{MC} [1/cm]"}},
-    {"phiv1", {"#phi_{1} - #phi_{1}^{MC} [rad]"}},
-    {"cotv1", {"cot(#theta_{1}) - cot(#theta_{1}^{MC})"}},
-    {"curv2", {"Curvature_{2} - Curvature_{2}^{MC} [1/cm]"}},
-    {"phiv2", {"#phi_{2} - #phi_{2}^{MC} [rad]"}},
-    {"cotv2", {"cot(#theta_{2}) - cot(#theta_{2}^{MC})"}},
-    {"vtxNeu_x", {"x_{neu} - x_{neu}^{MC} [cm]"}},
-    {"vtxNeu_y", {"y_{neu} - y_{neu}^{MC} [cm]"}},
-    {"vtxNeu_z", {"z_{neu} - z_{neu}^{MC} [cm]"}},
-    {"vtxNeu_x_Fit", {"x_{neu} - x_{neu}^{MC} [cm]"}},
-    {"vtxNeu_y_Fit", {"y_{neu} - y_{neu}^{MC} [cm]"}},
-    {"vtxNeu_z_Fit", {"z_{neu} - z_{neu}^{MC} [cm]"}},
-    {"mass_pi01", {"m_{#gamma#gamma} - m_{#pi^{0}} [MeV]"}},
-    {"mass_pi02", {"m_{#gamma#gamma} - m_{#pi^{0}} [MeV]"}},
-    {"time_neutral_MC", {"#sum_{i} T_{cl,i} - t_{K_{ne}} - t_{#gamma,i} [ns]"}},
-    {"prob_signal", {"Probability of signal"}},
-    {"delta_t", {"#Deltat - #Deltat^{MC} [#tau_{S}]"}},
-    {"combined_mass_pi0", {"#sqrt{(m_{#gamma#gamma,1} - m_{#pi^{0}})^2 + (m_{#gamma#gamma,2} - m_{#pi^{0}})^2} [MeV/c^{2}]"}},
-    {"pull1", {"Pull_{1} [MeV]"}},
-    {"pull2", {"Pull_{2} [MeV]"}},
-    {"pull3", {"Pull_{3} [MeV]"}},
-    {"pull4", {"Pull_{4} [MeV]"}},
-    {"pull5", {"Pull_{5} [MeV]"}},
-    {"phi_vtx_x", {"#phi_{vtx,x} - #phi_{vtx,x}^{MC} [cm]"}},
-    {"phi_vtx_y", {"#phi_{vtx,y} - #phi_{vtx,y}^{MC} [cm]"}},
-    {"phi_vtx_z", {"#phi_{vtx,z} - #phi_{vtx,z}^{MC} [cm]"}},
-    {"vKne", {"v_{K_{ne}} - v_{K_{ne}}^{MC} [cm/ns]"}},
-    {"goodClusNumTriKinFit", {"Number of good clusters used in trilateration kinematic fit"}},
-    {"pathKne", {"Path length [cm]"}},
-    {"pathKch", {"Path length of K_{ch} [cm]"}}};
+Int_t signal_num = 0, signal_tot = 0, signal_tot_err = 0, tot_events = 0, bkg_tot = 0;
 
-std::map<TString, std::vector<Double_t>>
-    histLimits = {{"px_Pi1", {-200, 200}},
-                  {"py_Pi1", {-200, 200}},
-                  {"pz_Pi1", {-250, 250}},
-                  {"Energy_Pi1", {-20, 20}},
-                  {"px_Pi2", {-200, 200}},
-                  {"py_Pi2", {-200, 200}},
-                  {"pz_Pi2", {-250, 250}},
-                  {"Energy_Pi2", {-20, 20}},
-                  {"px_Kch", {-200, 200}},
-                  {"py_Kch", {-200, 200}},
-                  {"pz_Kch", {-250, 250}},
-                  {"Energy_Kch", {-20, 20}},
-                  {"px_Kne", {-200, 200}},
-                  {"py_Kne", {-200, 200}},
-                  {"pz_Kne", {-250, 250}},
-                  {"Energy_Kne", {-20, 20}},
-                  {"px_phi", {-200, 200}},
-                  {"py_phi", {-200, 200}},
-                  {"pz_phi", {-250, 250}},
-                  {"Energy_phi", {-20, 20}},
-                  {"mass_Kch", {-20, 20}},
-                  {"mass_Kne", {-200, 200}},
-                  {"mass_phi", {-20, 20}},
-                  {"chi2_signalKinFit", {0, 50}},
-                  {"chi2_trilaterationKinFit", {0, 50}},
-                  {"curv1", {-0.5, 0.5}},
-                  {"phiv1", {-0.1, 0.1}},
-                  {"cotv1", {-0.1, 0.1}},
-                  {"curv2", {-0.5, 0.5}},
-                  {"phiv2", {-0.1, 0.1}},
-                  {"cotv2", {-0.1, 0.1}},
-                  {"vtxNeu_x", {-10, 10}},
-                  {"vtxNeu_y", {-10, 10}},
-                  {"vtxNeu_z", {-10, 10}},
-                  {"vtxNeu_x_Fit", {-10, 10}},
-                  {"vtxNeu_y_Fit", {-10, 10}},
-                  {"vtxNeu_z_Fit", {-10, 10}},
-                  {"mass_pi01", {-100, 100}},
-                  {"mass_pi02", {-100, 100}},
-                  {"time_neutral_MC", {-5, 2}},
-                  {"prob_signal", {0, 1}},
-                  {"delta_t", {-15, 15}},
-                  {"combined_mass_pi0", {-100, 100}},
-                  {"pull1", {-5, 5}},
-                  {"pull2", {-5, 5}},
-                  {"pull3", {-5, 5}},
-                  {"pull4", {-5, 5}},
-                  {"pull5", {-5, 5}},
-                  {"phi_vtx_x", {-1, 1}},
-                  {"phi_vtx_y", {-0.2, 0.2}},
-                  {"phi_vtx_z", {-10, 10}},
-                  {"vKne", {-2, 2}},
-                  {"goodClusNumTriKinFit", {-1, 6}},
-                  {"pathKne", {0, 50.}},
-                  {"pathKch", {0, 50.}}};
+std::map<TString, TCanvas *>
+    canvas;
 
-std::map<TString, TCanvas *> canvas;
+std::map<TString, TCanvas *>
+    canvas2D;
 
 std::map<TString, TH1 *>
     histsReconstructed,
     histsFittedSignal;
 
+std::map<TString, TH2 *>
+    hists2DReconstructed,
+    hists2DFittedSignal;
+
+TCanvas *canvaEff;
+
+TH1 *deltaTSignalTot;
+
 KLOE::TripleGaussFitter *fitter;
+
+KLOE::pm00 Obj;
+
+Int_t nbins = 121;
 
 void MC_fit_comparison::Begin(TTree * /*tree*/)
 {
@@ -184,25 +75,45 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
 
   TString option = GetOption();
 
+  KLOE::setGlobalStyle();
+
   fitter = new KLOE::TripleGaussFitter();
 
+  canvaEff = new TCanvas("Efficiency", "Efficiency", 800, 800);
+  deltaTSignalTot = new TH1D("EfficiencyHistTot", "Efficiency Histogram Total; #Deltat [#tau_{S}]; Efficiency [-]", nbins, -30, 30);
+
   // Create canvases
-  for (const auto &histName : histList)
+  for (const auto &histName : KH::varNames)
   {
     canvas[histName] = new TCanvas(Form("c_%s", histName.Data()),
                                    Form("Canvas for %s", histName.Data()), 750, 750);
   }
 
+  // Create canvases
+  for (const auto &histName : KH::histConfigs2D)
+  {
+    canvas2D[histName.first] = new TCanvas(Form("c_%s", histName.first.Data()), Form("Canvas for %s", histName.first.Data()), 750, 750);
+  }
+
   // Create histograms
-  for (const auto &histName : histList)
+  for (const auto &histName : KH::varNames)
   {
 
-    histsReconstructed[histName] = new TH1F(Form("h_reconstructed_%s", histName.Data()),
-                                            Form("Reconstructed %s; %s; Counts", histName.Data(), histName.Data()),
-                                            100, histLimits[histName][0], histLimits[histName][1]);
-    histsFittedSignal[histName] = new TH1F(Form("h_fittedSignal_%s", histName.Data()),
-                                           Form("Fitted Signal %s; %s; Counts", histName.Data(), histName.Data()),
-                                           100, histLimits[histName][0], histLimits[histName][1]);
+    TString nameRec = Form("h_rec_%s", histName.Data());
+    TString nameFit = Form("h_fit_%s", histName.Data());
+
+    histsReconstructed[histName] = KH::CreateHist1D(histName, "signal", nameRec);
+    histsFittedSignal[histName] = KH::CreateHist1D(histName, "signal", nameFit);
+  }
+
+  // Create histograms 2D
+  for (const auto &histName : KH::histConfigs2D)
+  {
+    TString nameRec = Form("h_rec2D_%s", histName.first.Data());
+    TString nameFit = Form("h_fit2D_%s", histName.first.Data());
+
+    hists2DReconstructed[histName.first] = KH::CreateHist2D(histName.first, nameRec);
+    hists2DFittedSignal[histName.first] = KH::CreateHist2D(histName.first, nameFit);
   }
 }
 
@@ -237,19 +148,6 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   // The return value is currently not used.
 
   fReader.SetLocalEntry(entry);
-
-  Float_t Knerec[9];
-
-  Knerec[0] = gammaMomTriangle1[0] + gammaMomTriangle2[0] +
-              gammaMomTriangle3[0] + gammaMomTriangle4[0];
-  Knerec[1] = gammaMomTriangle1[1] + gammaMomTriangle2[1] +
-              gammaMomTriangle3[1] + gammaMomTriangle4[1];
-  Knerec[2] = gammaMomTriangle1[2] + gammaMomTriangle2[2] +
-              gammaMomTriangle3[2] + gammaMomTriangle4[2];
-  Knerec[3] = gammaMomTriangle1[3] + gammaMomTriangle2[3] +
-              gammaMomTriangle3[3] + gammaMomTriangle4[3];
-
-  Knerec[4] = sqrt(pow(Knerec[0], 2) + pow(Knerec[1], 2) + pow(Knerec[2], 2));
 
   Float_t vKchFit = PhysicsConstants::cVel * KchboostFit[4] / KchboostFit[3],
           pathKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
@@ -292,24 +190,74 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
           trc4Fit = photonFit4[7] - photon4path / PhysicsConstants::cVel - tKneFit * 0.0895,
           TrcSumFit = trc1Fit + trc2Fit + trc3Fit + trc4Fit;
 
+  std::vector<Float_t> KchboostMom = {Kchboost[0], Kchboost[1], Kchboost[2], Kchboost[3]},
+                       KnereclorMom = {*Bpx - Kchboost[0], *Bpy - Kchboost[1], *Bpz - Kchboost[2], *Broots - Kchboost[3]},
+                       KchPos = {Kchboost[6], Kchboost[7], Kchboost[8]},
+                       KnePos = {Knerec[6], Knerec[7], Knerec[8]},
+                       ipPos = {ip[0], ip[1], ip[2]};
+
+  KLOE::KaonProperTimes timesBoostLor = Obj.CalculateKaonProperTimes(KchboostMom,
+                                                                     KchPos,
+                                                                     KnereclorMom,
+                                                                     KnePos,
+                                                                     ipPos);
+
+  Float_t Omega1MassTmp = sqrt(pow(trk1[3] + trk2[3] + pi0Omega1[3], 2) -
+                               pow(trk1[0] + trk2[0] + pi0Omega1[0], 2) -
+                               pow(trk1[1] + trk2[1] + pi0Omega1[1], 2) -
+                               pow(trk1[2] + trk2[2] + pi0Omega1[2], 2)),
+          Omega2MassTmp = sqrt(pow(trk1[3] + trk2[3] + pi0Omega2[3], 2) -
+                               pow(trk1[0] + trk2[0] + pi0Omega2[0], 2) -
+                               pow(trk1[1] + trk2[1] + pi0Omega2[1], 2) -
+                               pow(trk1[2] + trk2[2] + pi0Omega2[2], 2)),
+          Omega1ErrTmp = abs(Omega1MassTmp - PhysicsConstants::mOmega),
+          Omega2ErrTmp = abs(Omega2MassTmp - PhysicsConstants::mOmega);
+
+  Float_t radius00 = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
+                          pow(KnerecFit[7] - ipFit[1], 2)),
+          radiuspm = sqrt(pow(KchrecFit[6] - ipFit[0], 2) +
+                          pow(KchrecFit[7] - ipFit[1], 2)),
+          zdist00 = abs(KnerecFit[8] - ipFit[2]),
+          zdistpm = abs(KchrecFit[8] - ipFit[2]),
+          radiusLimit = 1,
+          zdistLimit = 0.6;
+
+  Bool_t isInsideFiducialVolume = (radius00 < radiusLimit) && (zdist00 < zdistLimit) &&
+                                  (radiuspm < radiusLimit) && (zdistpm < zdistLimit);
+
+  Float_t T0Omega = 0;
+
+  if(abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
+    T0Omega = Omega2MassTmp - (trk1[3] + trk2[3]) - pi0Omega2[5];
+  else
+    T0Omega = Omega1MassTmp - (trk1[3] + trk2[3]) - pi0Omega1[5];
+
   Float_t deltaTfit = *KaonChTimeCMSignalFit - *KaonNeTimeCMSignalFit,
-          deltaT = *KaonChTimeCMBoostLor - *KaonNeTimeCMBoostLor,
+          deltaT = timesBoostLor.deltaTimeCM,
           deltaTMC = *KaonChTimeCMMC - *KaonNeTimeCMMC;
 
   Float_t deltaPhi = *PhivSmeared1 - *PhivSmeared2;
 
-  if (*mctruth == 1)
+  if (*mctruth == 0 || *mctruth == -1 || *mctruth == 1)
+    signal_tot_err++;
+
+  if (*mctruth == 0 || *mctruth == 1)
+    signal_tot++;
+
+  if (*mctruth == 1)// && isInsideFiducialVolume)
   {
     if (*goodClustersTriKinFitSize < 4)
       numberOfAtLeastOneBad++;
     if (*goodClustersTriKinFitSize >= 4)
       numberOfAllGood++;
 
+    signal_num++;
+
     // Fill histograms for reconstructed variables
-    histsReconstructed["px_Kch"]->Fill(Kchrec[0] - Kchmc[0]);
-    histsReconstructed["py_Kch"]->Fill(Kchrec[1] - Kchmc[1]);
-    histsReconstructed["pz_Kch"]->Fill(Kchrec[2] - Kchmc[2]);
-    histsReconstructed["Energy_Kch"]->Fill(Kchrec[3] - Kchmc[3]);
+    histsReconstructed["px_Kch"]->Fill(Kchboost[0] - Kchmc[0]);
+    histsReconstructed["py_Kch"]->Fill(Kchboost[1] - Kchmc[1]);
+    histsReconstructed["pz_Kch"]->Fill(Kchboost[2] - Kchmc[2]);
+    histsReconstructed["Energy_Kch"]->Fill(Kchboost[3] - Kchmc[3]);
     histsReconstructed["mass_Kch"]->Fill(Kchrec[5] - PhysicsConstants::mK0);
 
     histsReconstructed["px_Kne"]->Fill(Knerec[0] - Knemc[0]);
@@ -320,6 +268,16 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsReconstructed["mass_pi01"]->Fill(pi01[5] - PhysicsConstants::mPi0);
     histsReconstructed["mass_pi02"]->Fill(pi02[5] - PhysicsConstants::mPi0);
+
+    if(abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
+      histsReconstructed["mass_omega"]->Fill(Omega2MassTmp - PhysicsConstants::mOmega);
+    else
+      histsReconstructed["mass_omega"]->Fill(Omega1MassTmp - PhysicsConstants::mOmega);
+
+    if(abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
+      histsReconstructed["mass_omega_rec"]->Fill(Omega2MassTmp - PhysicsConstants::mOmega);
+    else
+      histsReconstructed["mass_omega_rec"]->Fill(Omega1MassTmp - PhysicsConstants::mOmega);
 
     histsReconstructed["vtxNeu_x"]->Fill(Knerec[6] - Knemc[6]);
     histsReconstructed["vtxNeu_y"]->Fill(Knerec[7] - Knemc[7]);
@@ -341,7 +299,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsReconstructed["combined_mass_pi0"]->Fill(combinedMassPi0);
 
-    histsReconstructed["pathKne"]->Fill(pathKchFit);
+    histsReconstructed["T0Omega"]->Fill(T0Omega);
+
+    // histsReconstructed["pathKne"]->Fill(pathKchFit);
 
     // Decide which reconstructed track corresponds to which MC particle
 
@@ -389,13 +349,15 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsFittedSignal["mass_pi01"]->Fill(pi01Fit[5] - PhysicsConstants::mPi0);
     histsFittedSignal["mass_pi02"]->Fill(pi02Fit[5] - PhysicsConstants::mPi0);
 
+    histsFittedSignal["mass_omega"]->Fill(omegaFit[5] - PhysicsConstants::mOmega);
+
     histsFittedSignal["chi2_signalKinFit"]->Fill(*Chi2SignalKinFit);
     histsFittedSignal["chi2_trilaterationKinFit"]->Fill(*Chi2TriKinFit);
     histsFittedSignal["prob_signal"]->Fill(TMath::Prob(*Chi2SignalKinFit, 10));
 
-    histsFittedSignal["vtxNeu_x_Fit"]->Fill(KnerecFit[6] - Knemc[6]);
-    histsFittedSignal["vtxNeu_y_Fit"]->Fill(KnerecFit[7] - Knemc[7]);
-    histsFittedSignal["vtxNeu_z_Fit"]->Fill(KnerecFit[8] - Knemc[8]);
+    histsFittedSignal["vtxNeu_x_Fit"]->Fill(KnereclorFit[6] - Knemc[6]);
+    histsFittedSignal["vtxNeu_y_Fit"]->Fill(KnereclorFit[7] - Knemc[7]);
+    histsFittedSignal["vtxNeu_z_Fit"]->Fill(KnereclorFit[8] - Knemc[8]);
 
     histsFittedSignal["phi_vtx_x"]->Fill(ipFit[0] - ipmc[0]);
     histsFittedSignal["phi_vtx_y"]->Fill(ipFit[1] - ipmc[1]);
@@ -415,9 +377,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsFittedSignal["time_neutral_MC"]->Fill(TrcSumFit);
 
-    histsFittedSignal["goodClusNumTriKinFit"]->Fill(*goodClustersTriKinFitSize);
+    // histsFittedSignal["goodClusNumTriKinFit"]->Fill(*goodClustersTriKinFitSize);
 
-    histsFittedSignal["pathKne"]->Fill(pathKneFit);
+    // histsFittedSignal["pathKne"]->Fill(pathKneFit);
   }
 
   return kTRUE;
@@ -430,7 +392,6 @@ void MC_fit_comparison::SlaveTerminate()
   // on each slave server.
 }
 
-
 void MC_fit_comparison::Terminate()
 {
   // The Terminate() function is the last function to be called during
@@ -440,7 +401,7 @@ void MC_fit_comparison::Terminate()
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  for (const auto &histName : histList)
+  for (const auto &histName : KH::varNames)
   {
     canvas[histName]->cd();
     canvas[histName]->SetLogy(0);
@@ -452,22 +413,61 @@ void MC_fit_comparison::Terminate()
 
     Bool_t fitcond = histName == "curv1" || histName == "phiv1" || histName == "cotv1" ||
                      histName == "curv2" || histName == "phiv2" || histName == "cotv2" ||
-                     histName == "vtxNeu_x" || histName == "vtxNeu_y" || histName == "vtxNeu_z" || histName == "delta_t";
-
-    Bool_t fitcondGaus = histName == "phi_vtx_x" || histName == "phi_vtx_y" || histName == "phi_vtx_z";
+                     histName == "vtxNeu_x" || histName == "vtxNeu_y" || histName == "vtxNeu_z" || histName == "delta_t" || histName == "phi_vtx_x" || histName == "phi_vtx_y" || histName == "phi_vtx_z";
+    ;
 
     if (fitcond)
     {
-      fitter->FitHistogram(histsFittedSignal[histName]);
-      KLOE::TripleGaussFitter::FitResult result = fitter->GetLastResults();
+      Bool_t fitSuccess = false;
+
+      // ✅ SPECJALNE TRAKTOWANIE DLA delta_t
+      if (histName == "delta_t")
+      {
+        std::cout << "\n=== Fitting delta_t with TF1 (proven method) ===" << std::endl;
+
+        // Użyj starej, sprawdzonej metody TF1 dla delta_t
+        fitter->UseRooFit(false); // TF1 - działa lepiej dla delta_t
+        fitter->SetVerbose(false);
+        fitSuccess = fitter->FitHistogram(histsFittedSignal[histName]);
+      }
+      else
+      {
+        // ✅ Dla innych zmiennych użyj automatycznych parametrów
+        fitter->UseRooFit(false); // Możesz zmienić na false żeby użyć TF1
+        fitter->SetVerbose(false);
+        fitSuccess = fitter->FitHistogram(histsFittedSignal[histName]);
+      }
+
+      if (fitSuccess)
+      {
+        // Pobierz wyniki fitu
+        const KLOE::TripleGaussFitter::FitResult &result = fitter->GetLastResults();
+
+        // Wypisz wyniki do konsoli
+        std::cout << "\n=== Fit results for " << histName << " ===" << std::endl;
+        std::cout << "Status: " << result.status << ", Converged: " << result.converged << std::endl;
+        std::cout << "Chi2/NDF = " << result.chi2 << "/" << result.ndf
+                  << " = " << fitter->GetChi2NDF() << std::endl;
+        std::cout << "Combined mean = " << result.combinedMean
+                  << " ± " << result.combinedMeanErr << std::endl;
+        std::cout << "Combined sigma = " << result.combinedSigma
+                  << " ± " << result.combinedSigmaErr << std::endl;
+
+        // Wypisz parametry poszczególnych gaussów
+        for (int i = 0; i < 3; i++)
+        {
+          int idx = i * 3;
+          std::cout << "  Gauss " << (i + 1) << ": A=" << result.parameters[idx]
+                    << ", μ=" << result.parameters[idx + 1]
+                    << ", σ=" << result.parameters[idx + 2] << std::endl;
+        }
+      }
+      else
+      {
+        std::cerr << "WARNING: Fit failed for " << histName << std::endl;
+      }
     }
 
-    if (fitcondGaus)
-    {
-      histsFittedSignal[histName]->Fit("gaus");
-    }
-
-    histsReconstructed[histName]->GetXaxis()->SetTitle(histTitles[histName][0]);
     histsReconstructed[histName]->GetYaxis()->SetRangeUser(0.0, 1.5 * std::max(histsReconstructed[histName]->GetMaximum(), histsFittedSignal[histName]->GetMaximum()));
 
     histsReconstructed[histName]->Draw();
@@ -485,8 +485,23 @@ void MC_fit_comparison::Terminate()
     else
     {
       legend->AddEntry(histsReconstructed[histName], "Reconstructed", "l");
-      legend->AddEntry(histsFittedSignal[histName], "3x Gauss", "l");
-      fitter->DrawFitOnCurrentPad();
+      legend->AddEntry(histsFittedSignal[histName], "Fitted Data", "l");
+
+      // Sprawdź czy fit się udał przed użyciem wyników
+      if (fitter->IsLastFitSuccessful())
+      {
+        const KLOE::TripleGaussFitter::FitResult &r = fitter->GetLastResults();
+        legend->AddEntry((TObject *)0, Form("#chi^{2}/NDF = %.2f", fitter->GetChi2NDF()), "");
+        legend->AddEntry((TObject *)0, Form("#mu = %.3f #pm %.3f", r.combinedMean, r.combinedMeanErr), "");
+        legend->AddEntry((TObject *)0, Form("#sigma = %.3f #pm %.3f", r.combinedSigma, r.combinedSigmaErr), "");
+
+        // Narysuj fit z komponentami
+        fitter->DrawFitOnCurrentPad(true, false); // drawComponents=true, showStats=false
+      }
+      else
+      {
+        legend->AddEntry((TObject *)0, "Fit FAILED", "");
+      }
     }
 
     legend->SetBorderSize(1);
@@ -502,5 +517,9 @@ void MC_fit_comparison::Terminate()
 
   std::cout << "How many reconstructed events had all good clusters? " << numberOfAllGood << std::endl;
   std::cout << "How many reconstructed events had at least one bad cluster? " << numberOfAtLeastOneBad << std::endl;
-  std::cout << "Percentage of fully good events: " << (Float_t)numberOfAllGood / (numberOfAllGood + numberOfAtLeastOneBad) * 100 << " %" << std::endl;
+  std::cout << "Percentage of fully good events: " << (Float_t)numberOfAllGood / (numberOfAllGood + numberOfAtLeastOneBad) * 100 << " %" << std::endl
+            << std::endl;
+
+  std::cout << "Signal events without errors: " << signal_tot << " over " << signal_tot_err << " (" << (Float_t)signal_tot / signal_tot_err * 100 << " %) --> Efficiency of preselection" << std::endl;
+  std::cout << "Signal events after cuts: " << signal_num << " over " << signal_tot << " (" << (Float_t)signal_num / signal_tot * 100 << " %) --> Efficiency of analysis" << std::endl;
 }

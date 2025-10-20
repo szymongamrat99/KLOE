@@ -110,9 +110,8 @@ Boost_UNIT_TEST_FRAMEWORK_LIBRARY_RELEASE:FILEPATH=/usr/lib/x86_64-linux-gnu/lib
 //Path to a program.
 CMAKE_AR:FILEPATH=/usr/bin/ar
 
-//Choose the type of build, options are: None Debug Release RelWithDebInfo
-// MinSizeRel ...
-CMAKE_BUILD_TYPE:STRING=
+//No help, variable specified on the command line.
+CMAKE_BUILD_TYPE:STRING=Debug
 
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
@@ -141,6 +140,9 @@ CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
 //Flags used by the CXX compiler during RELWITHDEBINFO builds.
 CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 
+//No help, variable specified on the command line.
+CMAKE_C_COMPILER:FILEPATH=/usr/bin/clang
+
 //Flags used by the linker during all build types.
 CMAKE_EXE_LINKER_FLAGS:STRING=
 
@@ -156,8 +158,8 @@ CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
 //Flags used by the linker during RELWITHDEBINFO builds.
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
-//Enable/Disable output of compile commands during generation.
-CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=OFF
+//No help, variable specified on the command line.
+CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
 
 //Fortran compiler
 CMAKE_Fortran_COMPILER:FILEPATH=/usr/bin/f95
@@ -374,6 +376,12 @@ ROOT_ROOTVecOps_LIBRARY:FILEPATH=/data/4/users/gamrat/root_dirs/install_root/lib
 
 //Path to a library.
 ROOT_Rint_LIBRARY:FILEPATH=/data/4/users/gamrat/root_dirs/install_root/lib/libRint.so
+
+//Path to a library.
+ROOT_RooFitCore_LIBRARY:FILEPATH=/data/4/users/gamrat/root_dirs/install_root/lib/libRooFitCore.so
+
+//Path to a library.
+ROOT_RooFit_LIBRARY:FILEPATH=/data/4/users/gamrat/root_dirs/install_root/lib/libRooFit.so
 
 //Path to a library.
 ROOT_TMVA_LIBRARY:FILEPATH=/data/4/users/gamrat/root_dirs/install_root/lib/libTMVA.so
@@ -708,6 +716,10 @@ ROOT_ROOTDataFrame_LIBRARY-ADVANCED:INTERNAL=1
 ROOT_ROOTVecOps_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: ROOT_Rint_LIBRARY
 ROOT_Rint_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: ROOT_RooFitCore_LIBRARY
+ROOT_RooFitCore_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: ROOT_RooFit_LIBRARY
+ROOT_RooFit_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: ROOT_TMVA_LIBRARY
 ROOT_TMVA_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: ROOT_Thread_LIBRARY

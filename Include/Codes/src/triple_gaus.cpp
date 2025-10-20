@@ -108,17 +108,30 @@ Double_t comb_mean_err(const Double_t *p, const Double_t *err)
     // if (tot_rel_err > 0.9 || rel_err_N[i] > 0.9)
     //   N[i] = 0.;
 
-    nominator += pow(N[i] * sigma[i], 2);
     NTot += N[i];
-
-    err_sigma_tot += pow(mean_err[i], 2) * pow(N[i], 2) * pow(NTot, 2);
-    err_N_tot += pow(N_err[perm[i][0]], 2) * pow(N[perm[i][1]] * (mean[perm[i][0]] - mean[perm[i][1]]) + N[perm[i][2]] * (mean[perm[i][0]] - mean[perm[i][2]]), 2);
+    nominator += N[i] * mean[i];
   };
 
-  err_denominator = pow(NTot, 2);
-  err_nominator = err_sigma_tot + err_N_tot;
+  // Weighted mean: mu_comb = sum(N_i * mu_i) / N_total
+  Double_t mean_comb = nominator / NTot;
 
-  return sqrt(err_nominator) / err_denominator;
+  // Propagacja błędu przez pochodne cząstkowe:
+  // d(mu_comb)/d(mu_i) = N_i / N_tot
+  // d(mu_comb)/d(N_i) = (mu_i - mu_comb) / N_tot
+  
+  Double_t err_squared = 0.;
+  for (Int_t i = 0; i < 3; i++)
+  {
+    // Składowa od błędu mean_i
+    Double_t d_dmean = N[i] / NTot;
+    err_squared += pow(d_dmean * mean_err[i], 2);
+    
+    // Składowa od błędu N_i
+    Double_t d_dN = (mean[i] - mean_comb) / NTot;
+    err_squared += pow(d_dN * N_err[i], 2);
+  }
+
+  return sqrt(err_squared);
 }
 
 Double_t comb_std_dev(const Double_t *p, const Double_t *err)
@@ -151,10 +164,13 @@ Double_t comb_std_dev(const Double_t *p, const Double_t *err)
     //   N[i] = 0.;
 
     NTot += N[i];
-    nominator += pow(N[i] * sigma[i], 2);
+    // ✅ POPRAWKA: weighted variance, nie (N*sigma)^2!
+    // Stara formuła: pow(N[i] * sigma[i], 2) dawała zawyżone wartości
+    nominator += N[i] * sigma[i] * sigma[i];  // N * sigma^2
   }
 
-  return sqrt(nominator) / NTot;
+  // Weighted RMS: sqrt(sum(N_i * sigma_i^2) / N_total)
+  return sqrt(nominator / NTot);
 }
 
 Double_t comb_std_dev_err(const Double_t *p, const Double_t *err)
@@ -201,15 +217,29 @@ Double_t comb_std_dev_err(const Double_t *p, const Double_t *err)
     // if (tot_rel_err > 0.9 || rel_err_N[i] > 0.9)
     //   N[i] = 0.;
 
-    nominator += pow(N[i] * sigma[i], 2);
+    // ✅ POPRAWKA: zgodnie z nową formułą weighted variance
+    nominator += N[i] * sigma[i] * sigma[i];  // N * sigma^2
     NTot += N[i];
-
-    err_sigma_tot += pow(sigma_err[i], 2) * pow(N[i], 4) * pow(NTot, 2) * pow(sigma[i], 2);
-    err_N_tot += pow(N_err[perm[i][0]], 2) * pow(pow(N[perm[i][1]] * sigma[perm[i][1]], 2) + pow(N[perm[i][2]] * sigma[perm[i][2]], 2) - N[perm[i][0]] * (N[perm[i][1]] + N[perm[i][2]]) * pow(sigma[perm[i][0]], 2), 2);
   };
 
-  err_denominator = pow(NTot, 2) * sqrt(nominator);
-  err_nominator = err_sigma_tot + err_N_tot;
+  // Weighted RMS: sigma_comb = sqrt(sum(N_i * sigma_i^2) / N_total)
+  std_dev = sqrt(nominator / NTot);
 
-  return sqrt(err_nominator) / err_denominator;
+  // Propagacja błędu przez pochodne cząstkowe:
+  // d(sigma_comb)/d(sigma_i) = (N_i * sigma_i) / (N_tot * sigma_comb)
+  // d(sigma_comb)/d(N_i) = (sigma_i^2 - sigma_comb^2) / (2 * N_tot * sigma_comb)
+  
+  Double_t err_squared = 0.;
+  for (Int_t i = 0; i < 3; i++)
+  {
+    // Składowa od błędu sigma_i
+    Double_t d_dsigma = (N[i] * sigma[i]) / (NTot * std_dev);
+    err_squared += pow(d_dsigma * sigma_err[i], 2);
+    
+    // Składowa od błędu N_i
+    Double_t d_dN = (sigma[i]*sigma[i] - std_dev*std_dev) / (2.0 * NTot * std_dev);
+    err_squared += pow(d_dN * N_err[i], 2);
+  }
+
+  return sqrt(err_squared);
 }
