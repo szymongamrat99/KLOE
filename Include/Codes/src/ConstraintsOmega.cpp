@@ -77,6 +77,8 @@ void ConstraintsOmega::IntermediateReconstruction()
   for (Int_t i = 0; i < 2; i++)
   {
     charged_mom(pionCh[i].trackParams[0], pionCh[i].trackParams[1], pionCh[i].trackParams[2], pionCh[i].fourMom.data(), 1);
+
+    pionCh[i].fourMomFilled = true;
   }
 
   for (Int_t i = 0; i < 4; i++)
@@ -96,12 +98,24 @@ void ConstraintsOmega::IntermediateReconstruction()
     photon[i].calculatePath(omega.fourPos.data());
     photon[i].calculateTimeOfFlightPhoton();
     photon[i].SetTotalVectorPhoton();
+
+    photon[i].fourMomFilled = true;
   }
 
   std::vector<Int_t> bestPairingIndexNeutral, bestPairingIndexCharged;
 
   neutRec.PhotonPairingToPi0WithOmega(photon, pionCh, bestPairingIndexNeutral, bestPairingIndexCharged, omega);
+
   neutRec.Pi0Reconstruction(pionNe);
+
+  for (Int_t i = 0; i < 2; i++)
+  {
+    pionNe[i].SetTotalVector();
+  }
+
+  omega.total[6] = phi.vtxPos[0];
+  omega.total[7] = phi.vtxPos[1];
+  omega.total[8] = phi.vtxPos[2];
 }
 
 Double_t ConstraintsOmega::FourMomConsvLAB(Double_t *x, Double_t *p)
@@ -110,7 +124,7 @@ Double_t ConstraintsOmega::FourMomConsvLAB(Double_t *x, Double_t *p)
   IntermediateReconstruction();
 
   // Conservation of the chosen component of the 4-momentum in the LAB system
-  return (bhabha_mom[_chosen4MomComponent] -
+  return (phi.fourMom[_chosen4MomComponent] -
           pionCh[0].fourMom[_chosen4MomComponent] -
           pionCh[1].fourMom[_chosen4MomComponent] -
           photon[0].fourMom[_chosen4MomComponent] -
@@ -133,7 +147,7 @@ Double_t ConstraintsOmega::MinvConsv(Double_t *x, Double_t *p)
   IntermediateReconstruction();
 
   std::map<std::string, Float_t> minvModes = {
-      {"omega", omega.total[5]}};
+      {"omega", omega.mass}};
 
   return minvModes[_minvMode] - PhysicsConstants::mOmega; // MeV/c^2
 }

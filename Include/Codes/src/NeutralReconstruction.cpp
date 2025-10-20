@@ -44,8 +44,11 @@ namespace KLOE
     SetChargedParameters(pions);
 
     _PhotonPairingWithOmegaCore();
+
     _Pi0ReconstructionCore();
     _OmegaReconstructionCore(_bestPairingIndexOmega[0]);
+
+    _omega.SetTotalVector();
 
     photons = _Photons;
     pions = _Charged;
@@ -117,8 +120,8 @@ namespace KLOE
 
     std::iota(indices.begin(), indices.end(), 0);
 
-    Double_t mPi0Sigma = 0.0005, // MeV
-        mOmegaSigma = 0.13;      // MeV
+    Float_t mPi0Sigma = 100, // MeV
+        mOmegaSigma = 100;      // MeV
 
     _invMassDiffMin = 1.e6;
 
@@ -153,8 +156,9 @@ namespace KLOE
       for (Int_t i = 0; i < _nPions; i++)
       {
         _OmegaReconstructionCore(i);
-        invMassDiffTotOmega[i] = invMassDiffTot +
-                                 pow(_omega.mass - PhysicsConstants::mOmega, 2) / pow(mOmegaSigma, 2);
+
+        invMassDiffTotOmega[i] = sqrt(invMassDiffTot +
+                                 pow(_omega.mass - PhysicsConstants::mOmega, 2) / pow(mOmegaSigma, 2));
       }
 
       if (invMassDiffTotOmega[0] < invMassDiffTotOmega[1])
@@ -162,7 +166,7 @@ namespace KLOE
         invMassDiffTot = invMassDiffTotOmega[0];
         _bestPairingIndexOmega = {0, 1};
       }
-      else
+      else if (invMassDiffTotOmega[1] < invMassDiffTotOmega[0])
       {
         invMassDiffTot = invMassDiffTotOmega[1];
         _bestPairingIndexOmega = {1, 0};

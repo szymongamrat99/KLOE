@@ -184,8 +184,6 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
 
   TString option = GetOption();
 
-  KLOE::setGlobalStyle();
-
   fitter = new KLOE::TripleGaussFitter();
 
   // Create canvases

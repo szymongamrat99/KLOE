@@ -89,6 +89,7 @@
     "cp_fit_mc_tri.C": "cpp",
     "full_analysis.C": "cpp",
     "cp_fit.C": "cpp",
-    "histos.C": "cpp"
+    "histos.C": "cpp",
+    "dupa.C": "cpp"
   }
 }

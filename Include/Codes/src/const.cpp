@@ -21,6 +21,7 @@ namespace Paths
   const std::string pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json";
   const std::string propertiesPath = getenv("PROPERTIESKLOE");
   const std::string propName = propertiesPath + "/properties.json";
+  const std::string analysisConfigPath = propertiesPath + "/analysis_config.json";
   const std::string rootfilesName = propertiesPath + "/root-files.json";
   const std::string cutlimitsName = propertiesPath + "/cut-limits.json";
 

@@ -278,7 +278,7 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
   KnereclorFit = _baseObj->Knereclor.total;
 }
 
-void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> trkFit[2], std::vector<Float_t> &OmegaFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &Pi0OmegaFit, std::vector<Float_t> &PhiMomFit)
+void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> trkFit[2], std::vector<Float_t> &OmegaFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> Pi0OmegaFit[2], std::vector<Float_t> &PhiMomFit)
 {
   X = _X;
   V = _V;
@@ -297,7 +297,9 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
   for (Int_t i = 0; i < 4; i++)
     photonFit[i] = _baseObj->photon[i].total;
 
-  Pi0OmegaFit = _baseObj->pionNe[0].total;
+  Pi0OmegaFit[0] = _baseObj->pionNe[0].total;
+  Pi0OmegaFit[1] = _baseObj->pionNe[1].total;
+
   PhiMomFit = _baseObj->phi.total;
 }
 
