@@ -7,8 +7,6 @@ void ConstraintsOmega::ResetParameters()
   // Setting parameters from the array p to the member variables
   // of the base classes to be used in the constraint calculations.
 
-  neutRec.SetNumberOfPhotons(4);
-
   if (bhabha_mom.size() != 4)
   {
     bhabha_mom.clear();
@@ -44,25 +42,25 @@ void ConstraintsOmega::SetParameters(Double_t *p)
   {
     for (Int_t j = 0; j < 5; j++)
     {
-      photon[i].clusterParams[j] = p[i * 5 + j];
+      fphoton[i].clusterParams[j] = p[i * 5 + j];
     }
   }
 
   for (Int_t i = 0; i < 2; i++)
   {
-    pionCh[i].trackParams[0] = p[20 + i * 3];
-    pionCh[i].trackParams[1] = p[20 + i * 3 + 1];
-    pionCh[i].trackParams[2] = p[20 + i * 3 + 2];
+    fpionCh[i].trackParams[0] = p[20 + i * 3];
+    fpionCh[i].trackParams[1] = p[20 + i * 3 + 1];
+    fpionCh[i].trackParams[2] = p[20 + i * 3 + 2];
   }
 
   for (Int_t i = 0; i < 4; i++)
   {
-    phi.fourMom[i] = p[26 + i];
+    fphi.fourMom[i] = p[26 + i];
 
     if (i < 3)
     {
-      omega.fourPos[i] = p[30 + i];
-      phi.vtxPos[i] = p[33 + i];
+      fomega.fourPos[i] = p[30 + i];
+      fphi.vtxPos[i] = p[33 + i];
     };
   }
 }
@@ -71,6 +69,12 @@ void ConstraintsOmega::IntermediateReconstruction()
 {
   // Intermediate reconstruction to be done after setting the parameters
   // and before calculating the constraints.
+
+  if (fip.size() != 3)
+  {
+    fip.clear();
+    fip.resize(3);
+  }
 
   phi.SetTotalVector();
 
@@ -118,36 +122,117 @@ void ConstraintsOmega::IntermediateReconstruction()
   omega.total[8] = phi.vtxPos[2];
 }
 
+void ConstraintsOmega::IntermediateReconstruction(Double_t *p)
+{
+  // Intermediate reconstruction to be done after setting the parameters
+  // and before calculating the constraints.
+
+  neutRec.SetNumberOfPhotons(4);
+
+  for (Int_t i = 0; i < 4; i++)
+  {
+    for (Int_t j = 0; j < 5; j++)
+    {
+      fphoton[i].clusterParams[j] = p[i * 5 + j];
+    }
+  }
+
+  for (Int_t i = 0; i < 2; i++)
+  {
+    fpionCh[i].trackParams[0] = p[20 + i * 3];
+    fpionCh[i].trackParams[1] = p[20 + i * 3 + 1];
+    fpionCh[i].trackParams[2] = p[20 + i * 3 + 2];
+  }
+
+  for (Int_t i = 0; i < 4; i++)
+  {
+    fphi.fourMom[i] = p[26 + i];
+
+    if (i < 3)
+    {
+      fomega.fourPos[i] = p[30 + i];
+      fphi.vtxPos[i] = p[33 + i];
+    };
+  }
+
+  fphi.SetTotalVector();
+
+  for (Int_t i = 0; i < 2; i++)
+  {
+    charged_mom(fpionCh[i].trackParams[0], fpionCh[i].trackParams[1], fpionCh[i].trackParams[2], fpionCh[i].fourMom.data(), 1);
+
+    fpionCh[i].fourMomFilled = true;
+  }
+
+  for (Int_t i = 0; i < 4; i++)
+  {
+    neutral_mom(fphoton[i].clusterParams[0],
+                fphoton[i].clusterParams[1],
+                fphoton[i].clusterParams[2],
+                fphoton[i].clusterParams[4],
+                fomega.fourPos.data(),
+                fphoton[i].fourMom.data());
+
+    fphoton[i].fourPos[0] = fphoton[i].clusterParams[0];
+    fphoton[i].fourPos[1] = fphoton[i].clusterParams[1];
+    fphoton[i].fourPos[2] = fphoton[i].clusterParams[2];
+    fphoton[i].fourPos[3] = fphoton[i].clusterParams[3];
+
+    fphoton[i].calculatePath(fomega.fourPos.data());
+    fphoton[i].calculateTimeOfFlightPhoton();
+    fphoton[i].SetTotalVectorPhoton();
+
+    fphoton[i].fourMomFilled = true;
+  }
+
+  std::vector<Int_t> bestPairingIndexNeutral, bestPairingIndexCharged;
+
+  std::vector<chargedParticle> s_pionCh = {fpionCh[0], fpionCh[1]};
+  std::vector<neutralParticle> s_photon = {fphoton[0], fphoton[1], fphoton[2], fphoton[3]},
+                               s_pionNe(2);
+
+  neutRec.PhotonPairingToPi0WithOmega(s_photon, s_pionCh, bestPairingIndexNeutral, bestPairingIndexCharged, fomega);
+
+  neutRec.Pi0Reconstruction(s_pionNe);
+
+  for (Int_t i = 0; i < 2; i++)
+  {
+    s_pionNe[i].SetTotalVector();
+    fpionNe[i] = s_pionNe[i];
+  }
+
+  fomega.total[6] = fphi.vtxPos[0];
+  fomega.total[7] = fphi.vtxPos[1];
+  fomega.total[8] = fphi.vtxPos[2];
+}
+
 Double_t ConstraintsOmega::FourMomConsvLAB(Double_t *x, Double_t *p)
 {
-  SetParameters(p);
-  IntermediateReconstruction();
+  IntermediateReconstruction(p);
 
   // Conservation of the chosen component of the 4-momentum in the LAB system
-  return (phi.fourMom[_chosen4MomComponent] -
-          pionCh[0].fourMom[_chosen4MomComponent] -
-          pionCh[1].fourMom[_chosen4MomComponent] -
-          photon[0].fourMom[_chosen4MomComponent] -
-          photon[1].fourMom[_chosen4MomComponent] -
-          photon[2].fourMom[_chosen4MomComponent] -
-          photon[3].fourMom[_chosen4MomComponent]);
+  return (fphi.fourMom[_chosen4MomComponent] -
+          fpionCh[0].fourMom[_chosen4MomComponent] -
+          fpionCh[1].fourMom[_chosen4MomComponent] -
+          fphoton[0].fourMom[_chosen4MomComponent] -
+          fphoton[1].fourMom[_chosen4MomComponent] -
+          fphoton[2].fourMom[_chosen4MomComponent] -
+          fphoton[3].fourMom[_chosen4MomComponent]);
 };
 
 Double_t ConstraintsOmega::PhotonPathConsvLAB(Double_t *x, Double_t *p)
 {
-  SetParameters(p);
-  IntermediateReconstruction();
+  IntermediateReconstruction(p);
 
-  return photon[_chosenPhoton].fourPos[3] - photon[_chosenPhoton].timeOfFlight;
+  return fphoton[_chosenPhoton].fourPos[3] - fphoton[_chosenPhoton].timeOfFlight;
 }
 
 Double_t ConstraintsOmega::MinvConsv(Double_t *x, Double_t *p)
 {
-  SetParameters(p);
-  IntermediateReconstruction();
+  IntermediateReconstruction(p);
 
   std::map<std::string, Float_t> minvModes = {
-      {"omega", omega.mass}};
+      {"omega", fomega.mass}};
 
   return minvModes[_minvMode] - PhysicsConstants::mOmega; // MeV/c^2
 }

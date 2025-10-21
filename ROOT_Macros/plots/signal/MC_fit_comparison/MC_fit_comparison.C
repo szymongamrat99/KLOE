@@ -244,7 +244,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   if (*mctruth == 0 || *mctruth == 1)
     signal_tot++;
 
-  if (*mctruth == 1)// && isInsideFiducialVolume)
+  if (*mctruth == 1 && *Chi2SignalKinFit < 30.)// && isInsideFiducialVolume)
   {
     if (*goodClustersTriKinFitSize < 4)
       numberOfAtLeastOneBad++;

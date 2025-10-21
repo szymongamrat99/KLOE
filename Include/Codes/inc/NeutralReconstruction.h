@@ -25,12 +25,14 @@ namespace KLOE
         {
           if (!photon.fourMomFilled)
           {
+            std::cout << "DEBUG: Photon four momentum not filled." << std::endl;
             throw ErrorHandling::ErrorCodes::FOUR_MOM_NOT_FILLED;
           }
         }
       }
       catch (ErrorHandling::ErrorCodes &e)
       {
+        std::cout << "DEBUG: Exception caught in SetPhotonParameters" << std::endl;
         ErrorLogs::getErrLog(e);
         return;
       }
@@ -44,6 +46,7 @@ namespace KLOE
         {
           if (!pion.fourMomFilled)
           {
+            std::cout << "DEBUG: Charged particle four momentum not filled." << std::endl;
             throw ErrorHandling::ErrorCodes::FOUR_MOM_NOT_FILLED;
           }
         }
@@ -54,6 +57,7 @@ namespace KLOE
       }
       catch (ErrorHandling::ErrorCodes &e)
       {
+        std::cout << "DEBUG: Exception caught in SetChargedParameters" << std::endl;
         ErrorLogs::getErrLog(e);
         return;
       }

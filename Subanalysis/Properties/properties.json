@@ -15,7 +15,7 @@
         "trilaterationReconstructionMode": "TWO_PI0"
     },
     "lastScript": "Initial analysis",
-    "lastUpdate": "2025-10-21",
+    "lastUpdate": "2025-10-22",
     "momSmearing": {
         "bootstrapMeanCovMatrix": {
             "_typename": "TMatrixT<double>",
@@ -682,15 +682,15 @@
                 "chiSqrStep": 0.01,
                 "fixedVars": 0,
                 "freeVars": 36,
-                "loopCount": 30,
-                "numOfConstraints": 9,
+                "loopCount": 20,
+                "numOfConstraints": 8,
                 "range": null
             },
             "Signal": {
                 "chiSqrStep": 0.01,
                 "fixedVars": 0,
                 "freeVars": 39,
-                "loopCount": 30,
+                "loopCount": 20,
                 "numOfConstraints": 10,
                 "range": null
             },
@@ -701,7 +701,7 @@
                 "fixedVars": 3,
                 "freeVars": 24,
                 "goodClus": false,
-                "loopCount": 30,
+                "loopCount": 20,
                 "numOfConstraints": 5
             }
         },

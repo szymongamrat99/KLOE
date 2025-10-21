@@ -61,22 +61,22 @@ namespace KLOE
   {
   private:
     // Path conservation in LAB
-    Double_t NeutralPathConsvLAB(Double_t *x, Double_t *p) override;
+    Double_t NeutralPathConsvLAB(Double_t *x, Double_t *p);
 
     // Fictitious overriders
-    Double_t FourMomConsvLAB(Double_t *x, Double_t *p) override { return 0; };
-    Double_t PhotonPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
-    Double_t PxConsvLAB(Double_t *x, Double_t *p) override { return 0; };
-    Double_t PyConsvLAB(Double_t *x, Double_t *p) override { return 0; };
-    Double_t PzConsvLAB(Double_t *x, Double_t *p) override { return 0; };
-    Double_t EnergyConsvLAB(Double_t *x, Double_t *p) override { return 0; };
-    Double_t Photon1PathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
-    Double_t Photon2PathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
-    Double_t Photon3PathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
-    Double_t Photon4PathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
-    Double_t MinvConsvChKaon(Double_t *x, Double_t *p) override { return 0; };
-    Double_t MinvConsvNeuKaon(Double_t *x, Double_t *p) override { return 0; };
-    Double_t MinvConsvOmega(Double_t *x, Double_t *p) override { return 0; };
+    Double_t FourMomConsvLAB(Double_t *x, Double_t *p) { return 0; };
+    Double_t PhotonPathConsvLAB(Double_t *x, Double_t *p) { return 0; };
+    Double_t PxConsvLAB(Double_t *x, Double_t *p) { return 0; };
+    Double_t PyConsvLAB(Double_t *x, Double_t *p) { return 0; };
+    Double_t PzConsvLAB(Double_t *x, Double_t *p) { return 0; };
+    Double_t EnergyConsvLAB(Double_t *x, Double_t *p) { return 0; };
+    Double_t Photon1PathConsvLAB(Double_t *x, Double_t *p) { return 0; };
+    Double_t Photon2PathConsvLAB(Double_t *x, Double_t *p) { return 0; };
+    Double_t Photon3PathConsvLAB(Double_t *x, Double_t *p) { return 0; };
+    Double_t Photon4PathConsvLAB(Double_t *x, Double_t *p) { return 0; };
+    Double_t MinvConsvChKaon(Double_t *x, Double_t *p) { return 0; };
+    Double_t MinvConsvNeuKaon(Double_t *x, Double_t *p) { return 0; };
+    Double_t MinvConsvOmega(Double_t *x, Double_t *p) { return 0; };
 
     Int_t
         _chosenComponent,
@@ -85,32 +85,39 @@ namespace KLOE
         _cond_detector = kFALSE;
 
   protected:
-    void SetParameters(Double_t *p) override;
-    void ResetParameters() override;
-    void IntermediateReconstruction() override;
-    void IntermediateReconstruction(Double_t *p) override {};
+    void SetParameters(Double_t *p);
+    void ResetParameters();
+    void IntermediateReconstruction();
 
   public:
     /* Specific physical Constraints for trilateration kinematic fit */
 
+    neutralParticle fphoton[4];
+    chargedParticle fpionCh[2];
+    kaonNeutral fKchrec, fKchboost, fKnerec, fKnerecCMPhi, fKnereclor;
+    phiMeson fphi;
+    std::vector<Float_t> fip;
+
+    void IntermediateReconstruction(Double_t *p);
+
     // Energy conservation in CM
-    Double_t EnergyConsvCM(Double_t *x, Double_t *p) override;
+    Double_t EnergyConsvCM(Double_t *x, Double_t *p);
 
     // Invariant mass of Kaon conservation
-    Double_t MinvConsv(Double_t *x, Double_t *p) override;
+    Double_t MinvConsv(Double_t *x, Double_t *p);
 
     // Gamma path of flight from IP Conservation
-    Double_t NeutralXPathConsvLAB(Double_t *x, Double_t *p) override
+    Double_t NeutralXPathConsvLAB(Double_t *x, Double_t *p)
     {
       _chosenComponent = 0;
       return NeutralPathConsvLAB(x, p);
     };
-    Double_t NeutralYPathConsvLAB(Double_t *x, Double_t *p) override
+    Double_t NeutralYPathConsvLAB(Double_t *x, Double_t *p)
     {
       _chosenComponent = 1;
       return NeutralPathConsvLAB(x, p);
     };
-    Double_t NeutralZPathConsvLAB(Double_t *x, Double_t *p) override
+    Double_t NeutralZPathConsvLAB(Double_t *x, Double_t *p)
     {
       _chosenComponent = 2;
       return NeutralPathConsvLAB(x, p);

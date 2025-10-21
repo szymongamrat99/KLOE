@@ -41,6 +41,7 @@ namespace KLOE
   void NeutralReconstruction::PhotonPairingToPi0WithOmega(std::vector<neutralParticle> &photons, std::vector<chargedParticle> &pions, std::vector<Int_t> &bestPairingIndexNeutral, std::vector<Int_t> &bestPairingIndexOmega, neutralParticle &omega)
   {
     SetPhotonParameters(photons);
+
     SetChargedParameters(pions);
 
     _PhotonPairingWithOmegaCore();
@@ -124,8 +125,8 @@ namespace KLOE
       return;
     }
 
-    Float_t mPi0Sigma = 35.0, // MeV
-        mOmegaSigma = 8.5;    // MeV
+    Float_t mPi0Sigma = 8.5, // MeV
+        mOmegaSigma = 30.0;    // MeV
 
     _invMassDiffMin = 1.e6;
 
@@ -147,6 +148,7 @@ namespace KLOE
       }
 
       _Pi0ReconstructionCore(std::vector<Int_t>(indices.begin(), indices.end()));
+
 
       for (Int_t pionIdx = 0; pionIdx < _nPions; pionIdx++)
       {

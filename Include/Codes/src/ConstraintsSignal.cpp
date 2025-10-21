@@ -58,28 +58,28 @@ void ConstraintsSignal::SetParameters(Double_t *p)
   {
     for (Int_t j = 0; j < 5; j++)
     {
-      photon[i].clusterParams[j] = p[i * 5 + j];
+      fphoton[i].clusterParams[j] = p[i * 5 + j];
     }
   }
 
   for (Int_t i = 0; i < 3; i++)
-    Kchrec.fourPos[i] = p[20 + i];
+    fKchrec.fourPos[i] = p[20 + i];
 
   for (Int_t i = 0; i < 2; i++)
   {
-    pionCh[i].trackParams[0] = p[23 + i * 3];
-    pionCh[i].trackParams[1] = p[23 + i * 3 + 1];
-    pionCh[i].trackParams[2] = p[23 + i * 3 + 2];
+    fpionCh[i].trackParams[0] = p[23 + i * 3];
+    fpionCh[i].trackParams[1] = p[23 + i * 3 + 1];
+    fpionCh[i].trackParams[2] = p[23 + i * 3 + 2];
   }
 
   for (Int_t i = 0; i < 4; i++)
   {
-    phi.fourMom[i] = p[29 + i];
+    fphi.fourMom[i] = p[29 + i];
 
     if (i < 3)
     {
-      Knereclor.fourPos[i] = p[33 + i];
-      phi.vtxPos[i] = p[36 + i];
+      fKnereclor.fourPos[i] = p[33 + i];
+      fphi.vtxPos[i] = p[36 + i];
     };
   }
 }
@@ -178,6 +178,12 @@ void ConstraintsSignal::IntermediateReconstruction()
 
 void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
 {
+  if (fip.size() != 3)
+  {
+    fip.clear();
+    fip.resize(3);
+  }
+
   for (Int_t i = 0; i < 4; i++)
   {
     for (Int_t j = 0; j < 5; j++)
@@ -226,8 +232,8 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
   fKchboost.SetLorentzVectors();
 
   static Float_t X_line[3] = {fKchboost.fourPos[0],
-                       fKchboost.fourPos[1],
-                       fKchboost.fourPos[2]}, // Vertex laying on the line
+                              fKchboost.fourPos[1],
+                              fKchboost.fourPos[2]}, // Vertex laying on the line
       mom[3] = {fKchboost.fourMom[0],
                 fKchboost.fourMom[1],
                 fKchboost.fourMom[2]}, // Direction of the line
@@ -247,10 +253,10 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
   if (abs(fip[2] - fphi.vtxPos[2]) > 2.)
     fip[2] = fphi.vtxPos[2];
 
-  fKchrec.calculatePath(fip);
+  fKchrec.calculatePath(fip.data());
   fKchrec.SetTotalVector();
 
-  fKchboost.calculatePath(fip);
+  fKchboost.calculatePath(fip.data());
   fKchboost.SetTotalVector();
 
   // triangleReconstruction(photon, fphi, fKchboost, fip.data(), fKnereclor);
@@ -260,7 +266,7 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
   fKnereclor.fourMom[2] = fphi.fourMom[2] - fKchboost.fourMom[2];
   fKnereclor.fourMom[3] = fphi.fourMom[3] - fKchboost.fourMom[3];
 
-  fKnereclor.calculatePath(fip);
+  fKnereclor.calculatePath(fip.data());
   fKnereclor.SetTotalVector();
 
   for (Int_t i = 0; i < 4; i++)
@@ -292,36 +298,8 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
   fKnerec.fourPos[2] = fKnereclor.fourPos[2];
   fKnerec.fourPos[3] = fKnereclor.fourPos[3];
 
-  fKnerec.calculatePath(fip);
+  fKnerec.calculatePath(fip.data());
   fKnerec.SetTotalVector();
-
-
-  // Filling results
-
-  if (pionCh.size() != 2)
-    pionCh.resize(2);
-  for (Int_t i = 0; i < 2; i++)
-  {
-    pionCh[i] = fpionCh[i];
-  }
-
-  Kchrec = fKchrec;
-  Kchboost = fKchboost;
-
-  if (ip.size() != 3)
-    ip.resize(3);
-  for (Int_t i = 0; i < 3; i++)
-    ip[i] = fip[i];
-
-  if (photon.size() != 4)
-    photon.resize(4);
-  for (Int_t i = 0; i < 4; i++)
-    photon[i] = fphoton[i];
-
-  Knerec = fKnerec;
-  Knereclor = fKnereclor;
-
-  phi = fphi;
 }
 
 Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p)
@@ -343,7 +321,7 @@ Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
   // SetParameters(p);
   IntermediateReconstruction(p);
 
-  return fphoton[_chosenPhoton].fourPos[3] - fKnereclor.lifetimeLAB - fphoton[_chosenPhoton].timeOfFlight;
+  return fphoton[_chosenPhoton].fourPos[3] - fKnerec.lifetimeLAB - fphoton[_chosenPhoton].timeOfFlight;
 }
 
 Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)
