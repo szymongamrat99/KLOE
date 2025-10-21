@@ -212,12 +212,12 @@ namespace KLOE
 
               Bool_t hasBetterChi2 = (CHISQRTMP < _CHISQRMIN);
 
-              Bool_t condTime = 1; //_KnerecFitTri[9] < _X_min(3) &&
-                                   //_KnerecFitTri[9] < _X_min(8) &&
-                                   //_KnerecFitTri[9] < _X_min(13) &&
-                                   //_KnerecFitTri[9] < _X_min(18);
+              Bool_t condTime = _KnerecFitTri[9] < _X_min(3) &&
+                                _KnerecFitTri[9] < _X_min(8) &&
+                                _KnerecFitTri[9] < _X_min(13) &&
+                                _KnerecFitTri[9] < _X_min(18);
 
-              if ((hasBetterChi2 && condTime) || _isConverged == 0)
+              if ((hasBetterChi2 && condTime) || (hasBetterChi2 && _isConverged == 0))
               {
                 _isConverged = 1;
                 _FUNVALMIN = FUNVALTMP;

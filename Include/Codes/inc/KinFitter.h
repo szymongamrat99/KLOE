@@ -68,9 +68,10 @@ namespace KLOE
         _X_init_min,
         _X_init_aux;
 
-
-
     KinFit *_baseObj;
+    ConstraintsSignal *_objSignal;
+    ConstraintsTrilateration *_objTrilateration;
+    ConstraintsOmega *_objOmega;
 
     std::map<std::string, Double_t (KinFit::*)(Double_t *, Double_t *)>
         constraintMap = {
@@ -90,6 +91,39 @@ namespace KLOE
             {"neutralxpathconsvlab", &KinFit::NeutralXPathConsvLAB},
             {"neutralypathconsvlab", &KinFit::NeutralYPathConsvLAB},
             {"neutralzpathconsvlab", &KinFit::NeutralZPathConsvLAB}};
+
+    std::map<std::string, Double_t (ConstraintsSignal::*)(Double_t *, Double_t *)>
+        constraintMapSignal = {
+            {"energyconsvlab", &ConstraintsSignal::EnergyConsvLAB},
+            {"pxconsvlab", &ConstraintsSignal::PxConsvLAB},
+            {"pyconsvlab", &ConstraintsSignal::PyConsvLAB},
+            {"pzconsvlab", &ConstraintsSignal::PzConsvLAB},
+            {"photon1pathlab", &ConstraintsSignal::Photon1PathConsvLAB},
+            {"photon2pathlab", &ConstraintsSignal::Photon2PathConsvLAB},
+            {"photon3pathlab", &ConstraintsSignal::Photon3PathConsvLAB},
+            {"photon4pathlab", &ConstraintsSignal::Photon4PathConsvLAB},
+            {"minvconsvneutralkaon", &ConstraintsSignal::MinvConsvNeuKaon},
+            {"minvconsvchargedkaon", &ConstraintsSignal::MinvConsvChKaon}};
+
+    std::map<std::string, Double_t (ConstraintsTrilateration::*)(Double_t *, Double_t *)>
+        constraintMapTrilateration = {
+            {"energyconsvcm", &ConstraintsTrilateration::EnergyConsvCM},
+            {"minvconsv", &ConstraintsTrilateration::MinvConsv},
+            {"neutralxpathconsvlab", &ConstraintsTrilateration::NeutralXPathConsvLAB},
+            {"neutralypathconsvlab", &ConstraintsTrilateration::NeutralYPathConsvLAB},
+            {"neutralzpathconsvlab", &ConstraintsTrilateration::NeutralZPathConsvLAB}};
+
+    std::map<std::string, Double_t (ConstraintsOmega::*)(Double_t *, Double_t *)>
+        constraintMapOmega = {
+            {"energyconsvlab", &ConstraintsOmega::EnergyConsvLAB},
+            {"pxconsvlab", &ConstraintsOmega::PxConsvLAB},
+            {"pyconsvlab", &ConstraintsOmega::PyConsvLAB},
+            {"pzconsvlab", &ConstraintsOmega::PzConsvLAB},
+            {"photon1pathlab", &ConstraintsOmega::Photon1PathConsvLAB},
+            {"photon2pathlab", &ConstraintsOmega::Photon2PathConsvLAB},
+            {"photon3pathlab", &ConstraintsOmega::Photon3PathConsvLAB},
+            {"photon4pathlab", &ConstraintsOmega::Photon4PathConsvLAB},
+            {"minvconsvomega", &ConstraintsOmega::MinvConsvOmega}};
 
   protected:
     Int_t
@@ -138,7 +172,6 @@ namespace KLOE
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> trkFit[2], std::vector<Float_t> &KchrecFit, std::vector<Float_t> &KchboostFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &KnerecFit, std::vector<Float_t> &KnereclorFit);
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> trkFit[2], std::vector<Float_t> &OmegaFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> Pi0OmegaFit[2], std::vector<Float_t> &PhiMomFit);
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init);
-
 
     Double_t EnergyCalc(Double_t *p, Double_t mass);
 

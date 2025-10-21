@@ -56,7 +56,7 @@ namespace KLOE
    * @class ConstraintsOmega
    * @brief Auxiliary class with the constraints for \omega\pi^{0} fitting
    */
-  class ConstraintsOmega : public KinFit, public ChargedVtxRec<Float_t, Int_t>
+  class ConstraintsOmega : public ChargedVtxRec<Float_t, Int_t>
   {
   private:
     /**
@@ -65,7 +65,7 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t FourMomConsvLAB(Double_t *x, Double_t *p) override;
+    Double_t FourMomConsvLAB(Double_t *x, Double_t *p);
 
     /**
      * @brief Photon path conservation general method
@@ -73,24 +73,24 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t PhotonPathConsvLAB(Double_t *x, Double_t *p) override;
+    Double_t PhotonPathConsvLAB(Double_t *x, Double_t *p);
 
-    Double_t MinvConsv(Double_t *x, Double_t *p) override;
+    Double_t MinvConsv(Double_t *x, Double_t *p);
 
     // Fictitious overriders
     /** Fictitious overrider of virtual method - do not use*/
-    Double_t EnergyConsvCM(Double_t *x, Double_t *p) override { return 0; };
+    Double_t EnergyConsvCM(Double_t *x, Double_t *p) { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
-    Double_t MinvConsvChKaon(Double_t *x, Double_t *p) override { return 0; };
-    Double_t MinvConsvNeuKaon(Double_t *x, Double_t *p) override { return 0; };
+    Double_t MinvConsvChKaon(Double_t *x, Double_t *p) { return 0; };
+    Double_t MinvConsvNeuKaon(Double_t *x, Double_t *p) { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
-    Double_t NeutralPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t NeutralPathConsvLAB(Double_t *x, Double_t *p) { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
-    Double_t NeutralXPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t NeutralXPathConsvLAB(Double_t *x, Double_t *p) { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
-    Double_t NeutralYPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t NeutralYPathConsvLAB(Double_t *x, Double_t *p) { return 0; };
     /** Fictitious overrider of virtual method - do not use*/
-    Double_t NeutralZPathConsvLAB(Double_t *x, Double_t *p) override { return 0; };
+    Double_t NeutralZPathConsvLAB(Double_t *x, Double_t *p) { return 0; };
 
     Int_t
         _chosen4MomComponent, /*!< Component of a 4-momentum to choose from FourMomConsvLAB*/
@@ -102,13 +102,20 @@ namespace KLOE
         _minvMode; /*!< Mode of invariant mass conservation - omega or neutral kaon*/
 
   protected:
-    void SetParameters(Double_t *p) override;
-    void ResetParameters() override;
-    void IntermediateReconstruction() override;
-    void IntermediateReconstruction(Double_t *p) override {};
+    void SetParameters(Double_t *p);
+    void ResetParameters();
+    void IntermediateReconstruction();
 
   public:
     /* Specific physical Constraints for Omega-pi0 hypothesis */
+
+    neutralParticle fphoton[4], fomega, fpionNe[2];
+    chargedParticle fpionCh[2];
+    kaonNeutral fKchrec, fKchboost, fKnerec, fKnereclor;
+    phiMeson fphi;
+    std::vector<Float_t> fip;
+    
+    void IntermediateReconstruction(Double_t *p);
 
     /**
      * @brief A method used to pair the photons in an event. Needed to get omega and neutral pions' parameters.
@@ -122,7 +129,7 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t PxConsvLAB(Double_t *x, Double_t *p) override
+    Double_t PxConsvLAB(Double_t *x, Double_t *p)
     {
       _chosen4MomComponent = 0;
       return FourMomConsvLAB(x, p);
@@ -133,7 +140,7 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t PyConsvLAB(Double_t *x, Double_t *p) override
+    Double_t PyConsvLAB(Double_t *x, Double_t *p)
     {
       _chosen4MomComponent = 1;
       return FourMomConsvLAB(x, p);
@@ -144,7 +151,7 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t PzConsvLAB(Double_t *x, Double_t *p) override
+    Double_t PzConsvLAB(Double_t *x, Double_t *p)
     {
       _chosen4MomComponent = 2;
       return FourMomConsvLAB(x, p);
@@ -155,7 +162,7 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t EnergyConsvLAB(Double_t *x, Double_t *p) override
+    Double_t EnergyConsvLAB(Double_t *x, Double_t *p)
     {
       _chosen4MomComponent = 3;
       return FourMomConsvLAB(x, p);
@@ -168,7 +175,7 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t Photon1PathConsvLAB(Double_t *x, Double_t *p) override
+    Double_t Photon1PathConsvLAB(Double_t *x, Double_t *p)
     {
       _chosenPhoton = 0;
       return PhotonPathConsvLAB(x, p);
@@ -179,7 +186,7 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t Photon2PathConsvLAB(Double_t *x, Double_t *p) override
+    Double_t Photon2PathConsvLAB(Double_t *x, Double_t *p)
     {
       _chosenPhoton = 1;
       return PhotonPathConsvLAB(x, p);
@@ -190,7 +197,7 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t Photon3PathConsvLAB(Double_t *x, Double_t *p) override
+    Double_t Photon3PathConsvLAB(Double_t *x, Double_t *p)
     {
       _chosenPhoton = 2;
       return PhotonPathConsvLAB(x, p);
@@ -201,13 +208,13 @@ namespace KLOE
      * @param p pointer to the parameters table - physical variables to fit
      * @returns double precision value of a constraint
      */
-    Double_t Photon4PathConsvLAB(Double_t *x, Double_t *p) override
+    Double_t Photon4PathConsvLAB(Double_t *x, Double_t *p)
     {
       _chosenPhoton = 3;
       return PhotonPathConsvLAB(x, p);
     };
 
-    Double_t MinvConsvOmega(Double_t *x, Double_t *p) override
+    Double_t MinvConsvOmega(Double_t *x, Double_t *p)
     {
       _minvMode = "omega";
       return MinvConsv(x, p);
