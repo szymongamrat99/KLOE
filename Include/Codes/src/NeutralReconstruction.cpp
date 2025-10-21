@@ -74,111 +74,96 @@ namespace KLOE
 
   void NeutralReconstruction::_PhotonPairingCore()
   {
-    std::vector<Int_t> indices(_nPhotons);
-
-    std::iota(indices.begin(), indices.end(), 0);
+    if (_nPhotons != 4)
+    {
+      std::cerr << "ERROR: Photon pairing currently supports only 4 photons." << std::endl;
+      return;
+    }
 
     _invMassDiffMin = 1.e6;
 
-    do
-    {
-      std::vector<Float_t>
-          px(_nPions, 0.),
-          py(_nPions, 0.),
-          pz(_nPions, 0.),
-          E(_nPions, 0.),
-          invMass(_nPions, 0.);
+    std::vector<Float_t>
+        px(_nPions, 0.),
+        py(_nPions, 0.),
+        pz(_nPions, 0.),
+        E(_nPions, 0.),
+        invMass(_nPions, 0.);
 
-      Float_t invMassDiffTot = 0.;
+    for (const auto &indices : _combinations)
+    {
+      std::array<Float_t, 2> invMass;
+      Float_t chi2_pi0s = 0.0;
 
       for (Int_t i = 0; i < _nPions; i++)
       {
-        px[i] = _Photons[indices[i * _nPions]].fourMom[0] + _Photons[indices[i * _nPions + 1]].fourMom[0];
-        py[i] = _Photons[indices[i * _nPions]].fourMom[1] + _Photons[indices[i * _nPions + 1]].fourMom[1];
-        pz[i] = _Photons[indices[i * _nPions]].fourMom[2] + _Photons[indices[i * _nPions + 1]].fourMom[2];
-        E[i] = _Photons[indices[i * _nPions]].fourMom[3] + _Photons[indices[i * _nPions + 1]].fourMom[3];
+        Float_t px = _Photons[indices[i * 2]].fourMom[0] + _Photons[indices[i * 2 + 1]].fourMom[0];
+        Float_t py = _Photons[indices[i * 2]].fourMom[1] + _Photons[indices[i * 2 + 1]].fourMom[1];
+        Float_t pz = _Photons[indices[i * 2]].fourMom[2] + _Photons[indices[i * 2 + 1]].fourMom[2];
+        Float_t E = _Photons[indices[i * 2]].fourMom[3] + _Photons[indices[i * 2 + 1]].fourMom[3];
 
-        invMass[i] = sqrt(pow(E[i], 2) - pow(px[i], 2) - pow(py[i], 2) - pow(pz[i], 2));
+        invMass[i] = sqrt(E * E - px * px - py * py - pz * pz);
 
-        invMassDiffTot += pow(invMass[i] - PhysicsConstants::mPi0, 2);
+        chi2_pi0s += pow(invMass[i] - PhysicsConstants::mPi0, 2);
       }
 
-      invMassDiffTot = sqrt(invMassDiffTot);
+      chi2_pi0s = sqrt(chi2_pi0s);
 
-      if (invMassDiffTot < _invMassDiffMin)
+      if (chi2_pi0s < _invMassDiffMin)
       {
-        _invMassDiffMin = invMassDiffTot;
-        _bestPairingIndex = indices;
+        _invMassDiffMin = chi2_pi0s;
+        _bestPairingIndex = std::vector<Int_t>(indices.begin(), indices.end());
       }
-
-    } while (std::next_permutation(indices.begin(), indices.end()));
+    }
   }
 
   void NeutralReconstruction::_PhotonPairingWithOmegaCore()
   {
-    std::vector<Int_t> indices(_nPhotons);
+    if (_nPhotons != 4)
+    {
+      std::cerr << "ERROR: Photon pairing currently supports only 4 photons." << std::endl;
+      return;
+    }
 
-    std::iota(indices.begin(), indices.end(), 0);
-
-    Float_t mPi0Sigma = 100, // MeV
-        mOmegaSigma = 100;      // MeV
+    Float_t mPi0Sigma = 35.0, // MeV
+        mOmegaSigma = 8.5;    // MeV
 
     _invMassDiffMin = 1.e6;
 
-    do
+    for (const auto &indices : _combinations)
     {
-      std::vector<Float_t>
-          px(_nPions, 0.),
-          py(_nPions, 0.),
-          pz(_nPions, 0.),
-          E(_nPions, 0.),
-          invMass(_nPions, 0.);
-
-      Float_t invMassDiffTot = 0.,
-              invMassDiffTotOmega[2] = {0.};
+      std::array<Float_t, 2> invMass;
+      Float_t chi2_pi0s = 0.0;
 
       for (Int_t i = 0; i < _nPions; i++)
       {
-        px[i] = _Photons[indices[i * _nPions]].fourMom[0] + _Photons[indices[i * _nPions + 1]].fourMom[0];
-        py[i] = _Photons[indices[i * _nPions]].fourMom[1] + _Photons[indices[i * _nPions + 1]].fourMom[1];
-        pz[i] = _Photons[indices[i * _nPions]].fourMom[2] + _Photons[indices[i * _nPions + 1]].fourMom[2];
-        E[i] = _Photons[indices[i * _nPions]].fourMom[3] + _Photons[indices[i * _nPions + 1]].fourMom[3];
+        Float_t px = _Photons[indices[i * 2]].fourMom[0] + _Photons[indices[i * 2 + 1]].fourMom[0];
+        Float_t py = _Photons[indices[i * 2]].fourMom[1] + _Photons[indices[i * 2 + 1]].fourMom[1];
+        Float_t pz = _Photons[indices[i * 2]].fourMom[2] + _Photons[indices[i * 2 + 1]].fourMom[2];
+        Float_t E = _Photons[indices[i * 2]].fourMom[3] + _Photons[indices[i * 2 + 1]].fourMom[3];
 
-        invMass[i] = sqrt(pow(E[i], 2) - pow(px[i], 2) - pow(py[i], 2) - pow(pz[i], 2));
+        invMass[i] = sqrt(E * E - px * px - py * py - pz * pz);
 
-        invMassDiffTot += pow(invMass[i] - PhysicsConstants::mPi0, 2);
+        chi2_pi0s += pow((invMass[i] - PhysicsConstants::mPi0) / mPi0Sigma, 2);
       }
 
-      invMassDiffTot = invMassDiffTot / pow(mPi0Sigma, 2);
+      _Pi0ReconstructionCore(std::vector<Int_t>(indices.begin(), indices.end()));
 
-      _Pi0ReconstructionCore(indices);
-
-      for (Int_t i = 0; i < _nPions; i++)
+      for (Int_t pionIdx = 0; pionIdx < _nPions; pionIdx++)
       {
-        _OmegaReconstructionCore(i);
+        _OmegaReconstructionCore(pionIdx);
 
-        invMassDiffTotOmega[i] = sqrt(invMassDiffTot +
-                                 pow(_omega.mass - PhysicsConstants::mOmega, 2) / pow(mOmegaSigma, 2));
+        Float_t chi2_omega = pow((_omega.mass - PhysicsConstants::mOmega) / mOmegaSigma, 2);
+        Float_t chi2_total = chi2_pi0s + chi2_omega;
+
+        if (chi2_total < _invMassDiffMin)
+        {
+          _invMassDiffMin = chi2_total;
+          _bestPairingIndex = std::vector<Int_t>(indices.begin(), indices.end());
+          _bestPairingIndexOmega = {pionIdx, (pionIdx + 1) % 2};
+        }
       }
 
-      if (invMassDiffTotOmega[0] < invMassDiffTotOmega[1])
-      {
-        invMassDiffTot = invMassDiffTotOmega[0];
-        _bestPairingIndexOmega = {0, 1};
-      }
-      else if (invMassDiffTotOmega[1] < invMassDiffTotOmega[0])
-      {
-        invMassDiffTot = invMassDiffTotOmega[1];
-        _bestPairingIndexOmega = {1, 0};
-      }
-
-      if (invMassDiffTot < _invMassDiffMin)
-      {
-        _invMassDiffMin = invMassDiffTot;
-        _bestPairingIndex = indices;
-      }
-
-    } while (std::next_permutation(indices.begin(), indices.end()));
+    }
   }
 
   void NeutralReconstruction::_Pi0ReconstructionCore()

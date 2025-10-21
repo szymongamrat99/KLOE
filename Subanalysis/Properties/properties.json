@@ -4,7 +4,7 @@
         "analysisCode": "SIGNAL",
         "covMatrixType": "MIXED",
         "initialAnalysisExec": {
-            "MC": false,
+            "MC": true,
             "flag": true,
             "parts": {
                 "covMatrixInitialAnalysisExec": false,
@@ -15,7 +15,7 @@
         "trilaterationReconstructionMode": "TWO_PI0"
     },
     "lastScript": "Initial analysis",
-    "lastUpdate": "2025-10-20",
+    "lastUpdate": "2025-10-21",
     "momSmearing": {
         "bootstrapMeanCovMatrix": {
             "_typename": "TMatrixT<double>",
@@ -679,29 +679,29 @@
         },
         "KinFit": {
             "Omega": {
-                "chiSqrStep": 0.001,
+                "chiSqrStep": 0.01,
                 "fixedVars": 0,
                 "freeVars": 36,
-                "loopCount": 10,
+                "loopCount": 100,
                 "numOfConstraints": 9,
                 "range": null
             },
             "Signal": {
-                "chiSqrStep": 0.001,
+                "chiSqrStep": 0.01,
                 "fixedVars": 0,
                 "freeVars": 39,
-                "loopCount": 30,
+                "loopCount": 100,
                 "numOfConstraints": 10,
                 "range": null
             },
             "Trilateration": {
                 "bunchMax": 0,
                 "bunchMin": 0,
-                "chiSqrStep": 0.0001,
+                "chiSqrStep": 0.01,
                 "fixedVars": 3,
                 "freeVars": 24,
                 "goodClus": false,
-                "loopCount": 30,
+                "loopCount": 100,
                 "numOfConstraints": 5
             }
         },
