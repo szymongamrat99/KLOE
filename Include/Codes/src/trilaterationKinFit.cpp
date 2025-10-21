@@ -205,7 +205,7 @@ namespace KLOE
 
               Tcorr = k1 * T0;
 
-              CHISQRTMP = KinFitter::FitFunctionParallel(Tcorr);
+              CHISQRTMP = KinFitter::FitFunction(Tcorr);
 
 
               KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _ipFitTri, _photonFitTri, _KnerecFitTri, _PhiFitTri);

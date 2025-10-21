@@ -165,7 +165,7 @@ namespace KLOE
 
 			KinFitter::ParameterInitialization(_Param.data(), _Errors.data());
 
-			_CHISQRMIN = KinFitter::FitFunctionParallel(0);
+			_CHISQRMIN = KinFitter::FitFunction();
 
 
 			KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit, _KchrecFit, _KchboostFit, _ipFit, _photonFit, _KnerecFit, _KnereclorFit);

@@ -22,8 +22,8 @@
         "signalOnly": true,
         "momentumSmearing": false,
         "trilaterationKinFit": true,
-        "signalKinFit": true,
-        "omegaKinFit": true,
+        "signalKinFit": false,
+        "omegaKinFit": false,
         "triangleReconstruction": false,
         "photonPairing": true,
         "kaonProperTimes": true
