@@ -1,5 +1,5 @@
 #!/bin/bash
 cd build
-cmake ..
+cmake -DENABLE_PROFILING=ON ..
 make -j 5
 ./bin/KLSPM00

@@ -2,6 +2,7 @@
 #include <KinFitter.h>
 #include <uncertainties.h>
 #include <reconstructor.h>
+#include <chrono>
 
 #include "../inc/trilaterationKinFit.h"
 
@@ -170,76 +171,77 @@ namespace KLOE
 
             Bool_t cond_tot = cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
 
-            if (cond_tot) //&& (!_S.error[0] || !_S.error[1]))
+            if ((_S.error[0] && _S.error[1]) || !cond_tot)
+              continue;
+
+            for (Int_t k = 0; k < 4; k++)
             {
-              for (Int_t k = 0; k < 4; k++)
+              _Param[k * 5] = _cluster[0][_NeuClusters[_ind_gam[k]] - 1];
+              _Param[k * 5 + 1] = _cluster[1][_NeuClusters[_ind_gam[k]] - 1];
+              _Param[k * 5 + 2] = _cluster[2][_NeuClusters[_ind_gam[k]] - 1];
+              _Param[k * 5 + 3] = _cluster[3][_NeuClusters[_ind_gam[k]] - 1];
+              _Param[k * 5 + 4] = _cluster[4][_NeuClusters[_ind_gam[k]] - 1];
+
+              _Errors[k * 5] = clu_x_error(_Param[k * 5], _Param[k * 5 + 1], _Param[k * 5 + 2], _Param[k * 5 + 4]);
+              _Errors[k * 5 + 1] = clu_y_error(_Param[k * 5], _Param[k * 5 + 1], _Param[k * 5 + 2], _Param[k * 5 + 4]);
+              _Errors[k * 5 + 2] = clu_z_error(_Param[k * 5], _Param[k * 5 + 1], _Param[k * 5 + 2], _Param[k * 5 + 4]);
+              // cm
+              _Errors[k * 5 + 3] = clu_time_error(_Param[k * 5 + 4]); // ns
+              _Errors[k * 5 + 4] = clu_ene_error(_Param[k * 5 + 4]);  // MeV
+
+              _Param[20 + k] = _bhabha_mom[k];
+              _Errors[20 + k] = _bhabha_mom_err[k];
+
+              if (k < 3)
               {
-                _Param[k * 5] = _cluster[0][_NeuClusters[_ind_gam[k]] - 1];
-                _Param[k * 5 + 1] = _cluster[1][_NeuClusters[_ind_gam[k]] - 1];
-                _Param[k * 5 + 2] = _cluster[2][_NeuClusters[_ind_gam[k]] - 1];
-                _Param[k * 5 + 3] = _cluster[3][_NeuClusters[_ind_gam[k]] - 1];
-                _Param[k * 5 + 4] = _cluster[4][_NeuClusters[_ind_gam[k]] - 1];
-
-                _Errors[k * 5] = clu_x_error(_Param[k * 5], _Param[k * 5 + 1], _Param[k * 5 + 2], _Param[k * 5 + 4]);
-                _Errors[k * 5 + 1] = clu_y_error(_Param[k * 5], _Param[k * 5 + 1], _Param[k * 5 + 2], _Param[k * 5 + 4]);
-                _Errors[k * 5 + 2] = clu_z_error(_Param[k * 5], _Param[k * 5 + 1], _Param[k * 5 + 2], _Param[k * 5 + 4]);
-                // cm
-                _Errors[k * 5 + 3] = clu_time_error(_Param[k * 5 + 4]); // ns
-                _Errors[k * 5 + 4] = clu_ene_error(_Param[k * 5 + 4]);  // MeV
-
-                _Param[20 + k] = _bhabha_mom[k];
-                _Errors[20 + k] = _bhabha_mom_err[k];
-
-                if (k < 3)
-                {
-                  _Param[24 + k] = _bhabha_vtx[k];
-                  _Errors[24 + k] = 0.;
-                }
+                _Param[24 + k] = _bhabha_vtx[k];
+                _Errors[24 + k] = 0.;
               }
+            }
 
-              for (Int_t k1 = _jmin; k1 <= _jmax; k1++)
+            for (Int_t k1 = _jmin; k1 <= _jmax; k1++)
+            {
+              KinFitter::ParameterInitialization(_Param.data(), _Errors.data());
+
+              Tcorr = k1 * T0;
+
+              CHISQRTMP = KinFitter::FitFunction(Tcorr);
+
+
+              KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _ipFitTri, _photonFitTri, _KnerecFitTri, _PhiFitTri);
+
+              Bool_t hasBetterChi2 = (CHISQRTMP < _CHISQRMIN);
+
+              Bool_t condTime = 1; //_KnerecFitTri[9] < _X_min(3) &&
+                                   //_KnerecFitTri[9] < _X_min(8) &&
+                                   //_KnerecFitTri[9] < _X_min(13) &&
+                                   //_KnerecFitTri[9] < _X_min(18);
+
+              if ((hasBetterChi2 && condTime) || _isConverged == 0)
               {
-                KinFitter::ParameterInitialization(_Param.data(), _Errors.data());
+                _isConverged = 1;
+                _FUNVALMIN = FUNVALTMP;
+                _CHISQRMIN = CHISQRTMP;
 
-                Tcorr = k1 * T0;
+                _Chi2TriKinFit = _CHISQRMIN;
 
-                CHISQRTMP = KinFitter::FitFunction(Tcorr);
+                _g4takentri_kinfit = _ind_gam;
 
-                KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _ipFitTri, _photonFitTri, _KnerecFitTri, _PhiFitTri);
+                _neu_vtx_min[0] = _KnerecFitTri[6];
+                _neu_vtx_min[1] = _KnerecFitTri[7];
+                _neu_vtx_min[2] = _KnerecFitTri[8];
+                _neu_vtx_min[3] = _KnerecFitTri[9];
 
-                Bool_t hasBetterChi2 = (CHISQRTMP < _CHISQRMIN);
+                _gamma_mom_final[0] = _photonFitTri[0];
+                _gamma_mom_final[1] = _photonFitTri[1];
+                _gamma_mom_final[2] = _photonFitTri[2];
+                _gamma_mom_final[3] = _photonFitTri[3];
 
-                Bool_t condTime = 1;//_KnerecFitTri[9] < _X_min(3) &&
-                                  // _KnerecFitTri[9] < _X_min(8) &&
-                                  // _KnerecFitTri[9] < _X_min(13) &&
-                                  // _KnerecFitTri[9] < _X_min(18);
+                _fourKnetri_kinfit = _KnerecFitTri;
 
-                if ((hasBetterChi2 && condTime) || _isConverged == 0)
-                {
-                  _isConverged = 1;
-                  _FUNVALMIN = FUNVALTMP;
-                  _CHISQRMIN = CHISQRTMP;
+                _iptri_kinfit = _ipFitTri;
 
-                  _Chi2TriKinFit = _CHISQRMIN;
-
-                  _g4takentri_kinfit = _ind_gam;
-
-                  _neu_vtx_min[0] = _KnerecFitTri[6];
-                  _neu_vtx_min[1] = _KnerecFitTri[7];
-                  _neu_vtx_min[2] = _KnerecFitTri[8];
-                  _neu_vtx_min[3] = _KnerecFitTri[9];
-
-                  _gamma_mom_final[0] = _photonFitTri[0];
-                  _gamma_mom_final[1] = _photonFitTri[1];
-                  _gamma_mom_final[2] = _photonFitTri[2];
-                  _gamma_mom_final[3] = _photonFitTri[3];
-
-                  _fourKnetri_kinfit = _KnerecFitTri;
-
-                  _iptri_kinfit = _ipFitTri;
-
-                  _bunchnum = k1;
-                }
+                _bunchnum = k1;
               }
             }
           }

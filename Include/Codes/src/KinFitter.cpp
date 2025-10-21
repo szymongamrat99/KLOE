@@ -4,6 +4,8 @@
 
 #include <KinFitter.h>
 
+#include <chrono>
+
 using namespace KLOE;
 
 KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger) : _N_free(N_free), _N_const(N_const), _M(M), _M_act(M_active), _loopcount(loopcount), _jmin(0), _jmax(0), _CHISQRSTEP(chisqrstep), _logger(logger), _mode(mode), _V(N_free + N_const, N_free + N_const), _V_T(N_free + N_const, N_free + N_const), _V_init(N_free + N_const, N_free + N_const), _V_invert(N_free + N_const, N_free + N_const), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _Aux(M, M), _C(M), _L(M), _CORR(N_free + N_const), _X(N_free + N_const), _X_init(N_free + N_const), _X_final(N_free + N_const), _X_init_aux(N_free + N_const), _C_aux(M), _L_aux(M)
@@ -133,6 +135,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       for (Int_t l = 0; l < _M; l++)
       {
         _C(l) = _constraints[l]->EvalPar(0, _X.GetMatrixArray());
+
         for (Int_t m = 0; m < _N_free + _N_const; m++)
         {
           _constraints[l]->SetParameters(_X.GetMatrixArray());
@@ -166,9 +169,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
 
-      if (_CHISQR - _CHISQRTMP < _CHISQRSTEP && _CHISQR - _CHISQRTMP > 0)
-        break;
-
       _L_aux = _L;
       _C_aux = _C;
       _FUNVALTMP = _FUNVAL;
@@ -180,6 +180,9 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       _D.Zero();
       _D_T.Zero();
       _CORR.Zero();
+
+      if (_CHISQR < _CHISQRSTEP)
+          break;
     }
     catch (ErrorHandling::ErrorCodes err)
     {

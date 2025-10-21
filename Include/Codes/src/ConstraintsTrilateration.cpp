@@ -77,10 +77,10 @@ namespace KLOE
 
   void ConstraintsTrilateration::IntermediateReconstruction()
   {
-    std::array<kaonNeutral, 2> KnerecTmp;                    // Temporary kaon neutral objects
-    std::array<std::array<neutralParticle, 4>, 2> photonTmp; // Temporary photon objects
+    static kaonNeutral KnerecTmp[2];                    // Temporary kaon neutral objects
+    static neutralParticle photonTmp[2][4]; // Temporary photon objects
 
-    std::array<std::array<Float_t, 3>, 2> ipTmp;
+    static Float_t ipTmp[2][3]; // Temporary interaction point
 
     std::array<Double_t, 2> value = {0., 0.};
 
@@ -157,7 +157,7 @@ namespace KLOE
                                  0.};
 
         // Corrected IP event by event
-        IPBoostCorr(X_line, mom, xB, plane_perp, ipTmp[i].data());
+        IPBoostCorr(X_line, mom, xB, plane_perp, ipTmp[i]);
 
         ipTmp[i][0] = phi.vtxPos[0];
         ipTmp[i][1] = phi.vtxPos[1];
@@ -165,7 +165,7 @@ namespace KLOE
         if (abs(ipTmp[i][2] - phi.vtxPos[2]) > 2.)
           ipTmp[i][2] = phi.vtxPos[2];
 
-        KnerecTmp[i].calculatePath(ipTmp[i].data());
+        KnerecTmp[i].calculatePath(ipTmp[i]);
         KnerecTmp[i].SetTotalVector();
         KnerecTmp[i].calculateLifetimeLAB();
         KnerecTmp[i].fourPos[3] = S.sol[i][3];

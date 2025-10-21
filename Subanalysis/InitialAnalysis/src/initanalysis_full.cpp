@@ -12,6 +12,7 @@
 #include <TCanvas.h>
 #include <TLegend.h>
 #include <boost/progress.hpp>
+#include <chrono>
 
 #include <event_data.h>
 #include <GeneratedVariables.h>
@@ -286,6 +287,27 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   KLOE::SignalKinFit signalKinFitObj(N_free["Signal"], N_const["Signal"], M["Signal"], loopcount["Signal"], chiSqrStep["Signal"], logger);
   KLOE::OmegaKinFit omegaKinFitObj(N_free["Omega"], N_const["Omega"], M["Omega"], loopcount["Omega"], chiSqrStep["Omega"], logger);
 
+  // Skopiuj dane iv do lokalnej tablicy (jeśli potrzeba)
+  std::vector<Int_t> iv_data;
+
+  // Skopiuj dane do lokalnych tablic dla wskaźników
+  std::vector<Float_t> curv_data;
+  std::vector<Float_t> phiv_data;
+  std::vector<Float_t> cotv_data;
+  std::vector<Float_t> xv_data;
+  std::vector<Float_t> yv_data;
+  std::vector<Float_t> zv_data;
+
+  std::vector<std::vector<Float_t>>
+      trkMC,
+      pgammaMC,
+      clusterMC;
+
+  std::vector<Int_t> ivTmp;
+  std::map<Int_t, Int_t> mapTmp;
+
+  // Error codes for different hypotheses
+  std::map<KLOE::HypothesisCode, ErrorHandling::ErrorCodes> hypoMap;
   // Kaon times to calculate
 
   KLOE::KaonProperTimes
@@ -300,6 +322,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   Int_t mctruthSignal = analysisConfig.GetActiveHypothesisConfig().signal;
   Bool_t SignalOnly = analysisConfig.GetActiveHypothesisConfig().modules.signalOnly;
+  Bool_t smearing = analysisConfig.GetActiveHypothesisConfig().modules.momentumSmearing;
 
   while (dataAccess.Next())
   {
@@ -349,15 +372,15 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     Int_t mode_local = mode;
 
     // Skopiuj dane iv do lokalnej tablicy (jeśli potrzeba)
-    std::vector<Int_t> iv_data = dataAccess.GetIv();
+    iv_data = dataAccess.GetIv();
 
     // Skopiuj dane do lokalnych tablic dla wskaźników
-    std::vector<Float_t> curv_data = dataAccess.GetCurv();
-    std::vector<Float_t> phiv_data = dataAccess.GetPhiv();
-    std::vector<Float_t> cotv_data = dataAccess.GetCotv();
-    std::vector<Float_t> xv_data = dataAccess.GetXv();
-    std::vector<Float_t> yv_data = dataAccess.GetYv();
-    std::vector<Float_t> zv_data = dataAccess.GetZv();
+    curv_data = dataAccess.GetCurv();
+    phiv_data = dataAccess.GetPhiv();
+    cotv_data = dataAccess.GetCotv();
+    xv_data = dataAccess.GetXv();
+    yv_data = dataAccess.GetYv();
+    zv_data = dataAccess.GetZv();
 
     baseKin.bhabha_vtx[0] = dataAccess.GetBx();
     baseKin.bhabha_vtx[1] = dataAccess.GetBy();
@@ -368,19 +391,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     baseKin.phi_mom[2] = dataAccess.GetBpz();
     baseKin.phi_mom[3] = dataAccess.GetBRoots();
 
-    std::vector<std::vector<Float_t>>
-        trkMC,
-        pgammaMC,
-        clusterMC;
-
     // Transverse momenta of the two charged pions
     Double_t pT1 = 0, pT2 = 0;
 
-    // Error codes for different hypotheses
-    std::map<KLOE::HypothesisCode, ErrorHandling::ErrorCodes> hypoMap;
-
-    std::vector<Int_t> ivTmp(dataAccess.GetIv().begin(), dataAccess.GetIv().end());
-    std::map<Int_t, Int_t> mapTmp = Obj.CountRepeatingElements(ivTmp);
+    ivTmp = std::vector<Int_t>(dataAccess.GetIv().begin(), dataAccess.GetIv().end());
+    mapTmp = Obj.CountRepeatingElements(ivTmp);
 
     // Sprawdź czy jest przynajmniej jeden wierzchołek z dwoma dołączonymi śladami
     bool hasOne = false;
@@ -504,6 +519,19 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       kaonTimesMC = KLOE::KaonProperTimes();
     }
 
+    Bool_t badMcTruth = (mctruth != mctruthSignal);
+
+    // If only signal MC is to be analyzed, skip bad mctruth events
+    if (SignalOnly && badMcTruth)
+    {
+      noError = false;
+      passed = false;
+      ++show_progress;
+      continue;
+    }
+
+    // --------------------------------------------------------------------------------
+
     if (hypoCode == KLOE::HypothesisCode::FOUR_PI) // If we look for pipipipi - clusters do not matter
       errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
     else
@@ -515,21 +543,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                                       logger,
                                                       neuclulist);
     }
-
-    Bool_t badMcTruth = (mctruth != mctruthSignal);
-
-    // If only signal MC is to be analyzed, skip bad mctruth events
-    if (SignalOnly && badMcTruth)
-    {
-      noError = false;
-      passed = false;
-
-      neuclulist.clear();
-      ++show_progress;
-
-      continue;
-    }
-    // --------------------------------------------------------------------------------
 
     if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
     {
@@ -544,7 +557,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         goto skipEvent;
       }
       else
+      {
+        neuclulist.clear();
+        ++show_progress;
         continue;
+      }
     }
 
     if (!hasOne)
@@ -561,7 +578,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         goto skipEvent;
       }
       else
+      {
+        neuclulist.clear();
+        ++show_progress;
         continue;
+      }
     }
 
     if (eventAnalysis != nullptr)
@@ -572,7 +593,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     eventAnalysis = new KLOE::ChargedVtxRec<>(nv_local, ntv_local, iv_data.data(), bhabha_vtx, curv_data.data(), phiv_data.data(), cotv_data.data(), xv_data.data(), yv_data.data(), zv_data.data(), mode_local);
 
     // --------------------------------------------------------------------------------
-    if (analysisConfig.GetActiveHypothesisConfig().modules.momentumSmearing)
+    if (smearing)
     {
       // KMASS HYPOTHESIS WITH MOM SMEARING - FOR SIGNAL
       hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
@@ -655,7 +676,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         goto skipEvent;
       }
       else
+      {
+        neuclulist.clear();
+        ++show_progress;
         continue;
+      }
     }
 
     if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
@@ -835,9 +860,15 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
       // Trilateration Kin Fit + Results
 
+      auto a = std::chrono::high_resolution_clock::now();
+
       trilatKinFitObj.SetParameters(cluster, neuclulist, bhabha_mom, bhabha_mom_err, bhabha_vtx);
       errorCode = trilatKinFitObj.Reconstruct();
       trilatKinFitObj.GetResults(baseKin.bunchnum, baseKin.ipTriKinFit, baseKin.g4takenTriKinFit, gamma_mom_final, baseKin.KnetriKinFit, baseKin.neuVtxTriKinFit, baseKin.Chi2TriKinFit, baseKin.pullsTriKinFit);
+
+      auto b = std::chrono::high_resolution_clock::now();
+      std::cout << "Trilateration ";
+      std::cout << "took " << std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << " milliseconds" << std::endl;
 
       baseKin.gammaMomTriKinFit1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
       baseKin.gammaMomTriKinFit2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
@@ -857,7 +888,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           goto skipEvent;
         }
         else
+        {
+          neuclulist.clear();
+          ++show_progress;
           continue;
+        }
       }
       else
       {
@@ -878,6 +913,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             mctruth = -1;
 
             goto skipEvent;
+          }
+          else
+          {
+            neuclulist.clear();
+            ++show_progress;
+            continue;
           }
         }
         else
@@ -900,6 +941,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           }
 
           std::vector<Int_t> bestPairingIndex1;
+
 
           neutRec.PhotonPairingToPi0(photons, bestPairingIndex1);
           neutRec.Pi0Reconstruction(pions);
@@ -999,6 +1041,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           bhabhaVtxErr.push_back(0.002);
           bhabhaVtxErr.push_back(1.137);
 
+          a = std::chrono::high_resolution_clock::now();
+
           signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, neuVtx, neuVtxErr, bhabha_vtx, bhabhaVtxErr);
           errorCode = signalKinFitObj.Reconstruct();
           signalKinFitObj.GetResults(baseKin.ParamSignal,
@@ -1014,6 +1058,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                      baseKin.KnereclorFit,
                                      baseKin.Chi2SignalKinFit,
                                      baseKin.pullsSignalFit);
+
+          b = std::chrono::high_resolution_clock::now();
+          std::cout << "Signal fit ";
+          std::cout << "took " << std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << " milliseconds" << std::endl;
 
           for (Int_t i = 0; i < nPhotons; i++)
           {
@@ -1094,6 +1142,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                                 bhabhaVtxErr[1],
                                                 0.210};
 
+            a = std::chrono::high_resolution_clock::now();
+
             omegaKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, bhabha_mom, bhabha_mom_err, chargedVtx, chargedVtxErr, omegaVtx, omegaVtxErr);
             errorCode = omegaKinFitObj.Reconstruct();
             omegaKinFitObj.GetResults(baseKin.ParamOmega,
@@ -1108,6 +1158,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                       baseKin.phiOmegaFit,
                                       baseKin.Chi2OmegaKinFit,
                                       baseKin.pullsOmegaFit);
+
+            b = std::chrono::high_resolution_clock::now();
+            std::cout << "Omega fit ";
+            std::cout << "took " << std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << " milliseconds" << std::endl;
           }
 
           if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
@@ -1121,6 +1175,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             {
               passed = true;
               mctruth = -1;
+            }
+            {
+              neuclulist.clear();
+              ++show_progress;
+              continue;
             }
           }
           else

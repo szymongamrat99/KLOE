@@ -8,7 +8,7 @@ namespace KLOE
   {
   public:
     NeutralReconstruction(Int_t nPhotons);
-    NeutralReconstruction() : ErrorLogs("NeutralReconstruction.log") {};
+    NeutralReconstruction() : ErrorLogs("NeutralReconstruction.log"), _nPhotons(4), _nPions(2) {};
     void SetPhotonParameters(const std::vector<neutralParticle> &photons)
     {
       try
@@ -109,9 +109,16 @@ namespace KLOE
         _Photons, // Vector of photons for each event
         _Pions;   // Vector of pions for each event
 
-    neutralParticle _omega;          // Omega meson reconstructed from pions
+    neutralParticle _omega; // Omega meson reconstructed from pions
 
     std::vector<chargedParticle> _Charged; // Vector of charged particles for each event
+
+    // ✅ TYLKO 3 unikalne kombinacje dla 4 fotonów:
+    const std::array<std::array<int, 4>, 3> _combinations = {{
+        {0, 1, 2, 3}, // π⁰₁=(γ₀,γ₁), π⁰₂=(γ₂,γ₃)
+        {0, 2, 1, 3}, // π⁰₁=(γ₀,γ₂), π⁰₂=(γ₁,γ₃)
+        {0, 3, 1, 2}  // π⁰₁=(γ₀,γ₃), π⁰₂=(γ₁,γ₂)
+    }};
 
     std::vector<Int_t> _bestPairingIndex,
         _bestPairingIndexOmega; // Best pairing index for photons to pions
