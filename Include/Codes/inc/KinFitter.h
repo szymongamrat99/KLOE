@@ -4,6 +4,11 @@
 #include <vector> // for std::vector and other dynamic stuff
 #include <algorithm>
 #include <utility> // for std::swap
+#include <stdexcept> // for std::invalid_argument
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #include <TMath.h>
 #include <TMatrixD.h>
@@ -26,6 +31,10 @@ namespace KLOE
   class KinFitter
   {
   private:
+#ifdef _OPENMP
+    mutable omp_lock_t _constraint_lock;
+#endif
+
     Double_t
         _CHISQR,
         _FUNVAL,
@@ -68,8 +77,6 @@ namespace KLOE
         _X_init_min,
         _X_init_aux;
 
-
-
     KinFit *_baseObj;
 
     std::map<std::string, Double_t (KinFit::*)(Double_t *, Double_t *)>
@@ -90,6 +97,8 @@ namespace KLOE
             {"neutralxpathconsvlab", &KinFit::NeutralXPathConsvLAB},
             {"neutralypathconsvlab", &KinFit::NeutralYPathConsvLAB},
             {"neutralzpathconsvlab", &KinFit::NeutralZPathConsvLAB}};
+
+    Double_t CalculateGradientThreadSafe(Int_t constraint_idx, Int_t param_idx) const;
 
   protected:
     Int_t
@@ -139,12 +148,16 @@ namespace KLOE
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Float_t> trkFit[2], std::vector<Float_t> &OmegaFit, std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> Pi0OmegaFit[2], std::vector<Float_t> &PhiMomFit);
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init);
 
-
     Double_t EnergyCalc(Double_t *p, Double_t mass);
 
     Double_t DerivativeCalc(Int_t i, Int_t j);
 
     Double_t EnergyCalc(TLorentzVector p, Double_t mass);
+
+    void SetThreadSafeMode(bool enable);
+    Double_t FitFunctionParallel(Double_t bunchCorr);
+
+    ~KinFitter();
 
     ErrorHandling::ErrorCodes GetErrorCode() { return _err_code; }
   };
