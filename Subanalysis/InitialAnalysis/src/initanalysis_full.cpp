@@ -323,6 +323,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   Int_t mctruthSignal = analysisConfig.GetActiveHypothesisConfig().signal;
   Bool_t SignalOnly = analysisConfig.GetActiveHypothesisConfig().modules.signalOnly;
   Bool_t smearing = analysisConfig.GetActiveHypothesisConfig().modules.momentumSmearing;
+  Bool_t trilaterationKinFit = analysisConfig.GetActiveHypothesisConfig().modules.trilaterationKinFit;
+  Bool_t signalKinFit = analysisConfig.GetActiveHypothesisConfig().modules.signalKinFit;
+  Bool_t omegaKinFit = analysisConfig.GetActiveHypothesisConfig().modules.omegaKinFit;
+
+  auto a = std::chrono::high_resolution_clock::now();
 
   while (dataAccess.Next())
   {
@@ -859,16 +864,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       gamma_mom_final[3].resize(8);
 
       // Trilateration Kin Fit + Results
-
-      auto a = std::chrono::high_resolution_clock::now();
-
       trilatKinFitObj.SetParameters(cluster, neuclulist, bhabha_mom, bhabha_mom_err, bhabha_vtx);
       errorCode = trilatKinFitObj.Reconstruct();
       trilatKinFitObj.GetResults(baseKin.bunchnum, baseKin.ipTriKinFit, baseKin.g4takenTriKinFit, gamma_mom_final, baseKin.KnetriKinFit, baseKin.neuVtxTriKinFit, baseKin.Chi2TriKinFit, baseKin.pullsTriKinFit);
-
-      auto b = std::chrono::high_resolution_clock::now();
-      std::cout << "Trilateration ";
-      std::cout << "took " << std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << " milliseconds" << std::endl;
 
       baseKin.gammaMomTriKinFit1.assign(gamma_mom_final[0].begin(), gamma_mom_final[0].end());
       baseKin.gammaMomTriKinFit2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
@@ -941,7 +939,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           }
 
           std::vector<Int_t> bestPairingIndex1;
-
 
           neutRec.PhotonPairingToPi0(photons, bestPairingIndex1);
           neutRec.Pi0Reconstruction(pions);
@@ -1041,27 +1038,31 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           bhabhaVtxErr.push_back(0.002);
           bhabhaVtxErr.push_back(1.137);
 
-          a = std::chrono::high_resolution_clock::now();
+          // a = std::chrono::high_resolution_clock::now();
 
-          signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, neuVtx, neuVtxErr, bhabha_vtx, bhabhaVtxErr);
-          errorCode = signalKinFitObj.Reconstruct();
-          signalKinFitObj.GetResults(baseKin.ParamSignal,
-                                     baseKin.ErrorsSignal,
-                                     baseKin.ParamSignalFit,
-                                     baseKin.ErrorsSignalFit,
-                                     baseKin.trkFit,
-                                     baseKin.KchrecFit,
-                                     baseKin.KchboostFit,
-                                     baseKin.ipFit,
-                                     baseKin.photonFit,
-                                     baseKin.KnerecFit,
-                                     baseKin.KnereclorFit,
-                                     baseKin.Chi2SignalKinFit,
-                                     baseKin.pullsSignalFit);
+          if (signalKinFit)
+          {
 
-          b = std::chrono::high_resolution_clock::now();
-          std::cout << "Signal fit ";
-          std::cout << "took " << std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << " milliseconds" << std::endl;
+            signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, neuVtx, neuVtxErr, bhabha_vtx, bhabhaVtxErr);
+            errorCode = signalKinFitObj.Reconstruct();
+            signalKinFitObj.GetResults(baseKin.ParamSignal,
+                                       baseKin.ErrorsSignal,
+                                       baseKin.ParamSignalFit,
+                                       baseKin.ErrorsSignalFit,
+                                       baseKin.trkFit,
+                                       baseKin.KchrecFit,
+                                       baseKin.KchboostFit,
+                                       baseKin.ipFit,
+                                       baseKin.photonFit,
+                                       baseKin.KnerecFit,
+                                       baseKin.KnereclorFit,
+                                       baseKin.Chi2SignalKinFit,
+                                       baseKin.pullsSignalFit);
+          }
+
+          // b = std::chrono::high_resolution_clock::now();
+          // std::cout << "Signal fit ";
+          // std::cout << "took " << std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << " milliseconds" << std::endl;
 
           for (Int_t i = 0; i < nPhotons; i++)
           {
@@ -1132,7 +1133,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           kaonTimesSignalKinFit = Obj.CalculateKaonProperTimes(kaonChMomSignalKinFit, kaonChPosSignalKinFit, kaonNeMomSignalKinFit, kaonNePosSignalKinFit, ipPosSignalKinFit);
 
           // Additional Omega-Pi0 fit for better bkg rejection
-          if (analysisConfig.GetActiveHypothesisConfig().modules.omegaKinFit)
+          if (omegaKinFit)
           {
 
             std::vector<Float_t> omegaVtx = {bhabha_vtx[0],
@@ -1142,7 +1143,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                                 bhabhaVtxErr[1],
                                                 0.210};
 
-            a = std::chrono::high_resolution_clock::now();
+            auto a = std::chrono::high_resolution_clock::now();
 
             omegaKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, bhabha_mom, bhabha_mom_err, chargedVtx, chargedVtxErr, omegaVtx, omegaVtxErr);
             errorCode = omegaKinFitObj.Reconstruct();
@@ -1159,7 +1160,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                       baseKin.Chi2OmegaKinFit,
                                       baseKin.pullsOmegaFit);
 
-            b = std::chrono::high_resolution_clock::now();
+            auto b = std::chrono::high_resolution_clock::now();
             std::cout << "Omega fit ";
             std::cout << "took " << std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << " milliseconds" << std::endl;
           }
@@ -1508,6 +1509,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
     ++show_progress; // Progress of the loading bar
   }
+
+  auto b = std::chrono::high_resolution_clock::now();
+  std::cout << "Trilateration ";
+  std::cout << "took " << std::chrono::duration_cast<std::chrono::milliseconds>(b - a).count() << " milliseconds" << std::endl;
 
   // Wyniki
   for (size_t i = 0; i < cutter.GetCuts().size(); ++i)
