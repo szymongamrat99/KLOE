@@ -132,13 +132,15 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       if (_X(19) < 0)
         _X(19) = MIN_CLU_ENE;
 
+      Double_t *tempParams = _X.GetMatrixArray();
+
       for (Int_t l = 0; l < _M; l++)
       {
-        _C(l) = _constraints[l]->EvalPar(0, _X.GetMatrixArray());
+        _C(l) = _constraints[l]->EvalPar(0, tempParams);
 
         for (Int_t m = 0; m < _N_free + _N_const; m++)
         {
-          _constraints[l]->SetParameters(_X.GetMatrixArray());
+          _constraints[l]->SetParameters(tempParams);
           if (m < _N_free)
           {
             _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
@@ -192,8 +194,15 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
     }
   }
 
-  _baseObj->SetParameters(_X.GetMatrixArray());
-  _baseObj->IntermediateReconstruction();
+  if (_mode == "SignalGlobal")
+  {
+    _baseObj->IntermediateReconstruction(_X.GetMatrixArray());
+  }
+  else
+  {
+    _baseObj->SetParameters(_X.GetMatrixArray());
+    _baseObj->IntermediateReconstruction();
+  }
 
   _V = _V_final;
 

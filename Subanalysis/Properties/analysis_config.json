@@ -22,7 +22,7 @@
         "signalOnly": true,
         "momentumSmearing": false,
         "trilaterationKinFit": true,
-        "signalKinFit": false,
+        "signalKinFit": true,
         "omegaKinFit": false,
         "triangleReconstruction": false,
         "photonPairing": true,

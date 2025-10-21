@@ -105,6 +105,7 @@ namespace KLOE
     void SetParameters(Double_t *p) override;
     void ResetParameters() override;
     void IntermediateReconstruction() override;
+    void IntermediateReconstruction(Double_t *p) override {};
 
   public:
     /* Specific physical Constraints for Omega-pi0 hypothesis */

@@ -111,6 +111,14 @@ namespace KLOE
     void SetParameters(Double_t *p) override;
     void ResetParameters() override;
     void IntermediateReconstruction() override;
+    void IntermediateReconstruction(Double_t *p) override;
+
+    neutralParticle fphoton[4];
+    chargedParticle fpionCh[2];
+    kaonNeutral fKchrec, fKchboost, fKnerec, fKnereclor;
+    phiMeson fphi;
+    Float_t fip[3];
+
 
   public:
     /* Specific physical Constraints for Signal-pi0 hypothesis */

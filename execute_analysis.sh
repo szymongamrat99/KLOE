@@ -1,5 +1,7 @@
 #!/bin/bash
+nproc=$1
+
 cd build
-cmake -DENABLE_PROFILING=ON ..
-make -j 5
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j$(nproc)
 ./bin/KLSPM00

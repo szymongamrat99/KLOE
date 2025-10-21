@@ -176,36 +176,184 @@ void ConstraintsSignal::IntermediateReconstruction()
   Knerec.SetTotalVector();
 }
 
+void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
+{
+  for (Int_t i = 0; i < 4; i++)
+  {
+    for (Int_t j = 0; j < 5; j++)
+    {
+      fphoton[i].clusterParams[j] = p[i * 5 + j];
+    }
+  }
+
+  for (Int_t i = 0; i < 3; i++)
+    fKchrec.fourPos[i] = p[20 + i];
+
+  for (Int_t i = 0; i < 2; i++)
+  {
+    fpionCh[i].trackParams[0] = p[23 + i * 3];
+    fpionCh[i].trackParams[1] = p[23 + i * 3 + 1];
+    fpionCh[i].trackParams[2] = p[23 + i * 3 + 2];
+  }
+
+  for (Int_t i = 0; i < 4; i++)
+  {
+    fphi.fourMom[i] = p[29 + i];
+
+    if (i < 3)
+    {
+      fKnereclor.fourPos[i] = p[33 + i];
+      fphi.vtxPos[i] = p[36 + i];
+    };
+  }
+  // Intermediate reconstruction to be done after setting the parameters
+  // and before calculating the constraints.
+  for (Int_t i = 0; i < 2; i++)
+  {
+    charged_mom(fpionCh[i].trackParams[0], fpionCh[i].trackParams[1], fpionCh[i].trackParams[2], fpionCh[i].fourMom.data(), 1);
+  }
+
+  // Setting four momentum for kaon charged
+  for (Int_t i = 0; i < 4; i++)
+    fKchrec.fourMom[i] = fpionCh[0].fourMom[i] + fpionCh[1].fourMom[i];
+
+  // Setting total vector for kaon charged reconstructed from pions
+  fKchrec.SetLorentzVectors();
+  fKchrec.SetTotalVector();
+
+  KaonMomFromBoost(fKchrec.total.data(), fphi.fourMom.data(), fKchboost.total.data());
+  fKchboost.SetPositionAndMomentumFromTotal();
+  fKchboost.SetLorentzVectors();
+
+  static Float_t X_line[3] = {fKchboost.fourPos[0],
+                       fKchboost.fourPos[1],
+                       fKchboost.fourPos[2]}, // Vertex laying on the line
+      mom[3] = {fKchboost.fourMom[0],
+                fKchboost.fourMom[1],
+                fKchboost.fourMom[2]}, // Direction of the line
+      xB[3] = {fphi.vtxPos[0],
+               fphi.vtxPos[1],
+               fphi.vtxPos[2]}, // Bhabha vertex - laying on the plane
+      plane_perp[3] = {0.,
+                       fphi.fourMom[1],
+                       0.}; // Vector perpendicular to the plane from Bhabha momentum
+
+  // Corrected IP event by event
+  IPBoostCorr(X_line, mom, xB, plane_perp, fip);
+
+  fip[0] = fphi.vtxPos[0];
+  fip[1] = fphi.vtxPos[1];
+  // // fip[2] is fitted
+  if (abs(fip[2] - fphi.vtxPos[2]) > 2.)
+    fip[2] = fphi.vtxPos[2];
+
+  fKchrec.calculatePath(fip);
+  fKchrec.SetTotalVector();
+
+  fKchboost.calculatePath(fip);
+  fKchboost.SetTotalVector();
+
+  // triangleReconstruction(photon, fphi, fKchboost, fip.data(), fKnereclor);
+
+  fKnereclor.fourMom[0] = fphi.fourMom[0] - fKchboost.fourMom[0];
+  fKnereclor.fourMom[1] = fphi.fourMom[1] - fKchboost.fourMom[1];
+  fKnereclor.fourMom[2] = fphi.fourMom[2] - fKchboost.fourMom[2];
+  fKnereclor.fourMom[3] = fphi.fourMom[3] - fKchboost.fourMom[3];
+
+  fKnereclor.calculatePath(fip);
+  fKnereclor.SetTotalVector();
+
+  for (Int_t i = 0; i < 4; i++)
+  {
+    neutral_mom(fphoton[i].clusterParams[0],
+                fphoton[i].clusterParams[1],
+                fphoton[i].clusterParams[2],
+                fphoton[i].clusterParams[4],
+                fKnereclor.fourPos.data(),
+                fphoton[i].fourMom.data());
+
+    fphoton[i].fourPos[0] = fphoton[i].clusterParams[0];
+    fphoton[i].fourPos[1] = fphoton[i].clusterParams[1];
+    fphoton[i].fourPos[2] = fphoton[i].clusterParams[2];
+    fphoton[i].fourPos[3] = fphoton[i].clusterParams[3];
+
+    fphoton[i].calculatePath(fKnereclor.fourPos.data());
+    fphoton[i].calculateTimeOfFlightPhoton();
+    fphoton[i].SetTotalVectorPhoton();
+  }
+
+  fKnerec.fourMom[0] = fphoton[0].fourMom[0] + fphoton[1].fourMom[0] + fphoton[2].fourMom[0] + fphoton[3].fourMom[0];
+  fKnerec.fourMom[1] = fphoton[0].fourMom[1] + fphoton[1].fourMom[1] + fphoton[2].fourMom[1] + fphoton[3].fourMom[1];
+  fKnerec.fourMom[2] = fphoton[0].fourMom[2] + fphoton[1].fourMom[2] + fphoton[2].fourMom[2] + fphoton[3].fourMom[2];
+  fKnerec.fourMom[3] = fphoton[0].fourMom[3] + fphoton[1].fourMom[3] + fphoton[2].fourMom[3] + fphoton[3].fourMom[3];
+
+  fKnerec.fourPos[0] = fKnereclor.fourPos[0];
+  fKnerec.fourPos[1] = fKnereclor.fourPos[1];
+  fKnerec.fourPos[2] = fKnereclor.fourPos[2];
+  fKnerec.fourPos[3] = fKnereclor.fourPos[3];
+
+  fKnerec.calculatePath(fip);
+  fKnerec.SetTotalVector();
+
+
+  // Filling results
+
+  if (pionCh.size() != 2)
+    pionCh.resize(2);
+  for (Int_t i = 0; i < 2; i++)
+  {
+    pionCh[i] = fpionCh[i];
+  }
+
+  Kchrec = fKchrec;
+  Kchboost = fKchboost;
+
+  if (ip.size() != 3)
+    ip.resize(3);
+  for (Int_t i = 0; i < 3; i++)
+    ip[i] = fip[i];
+
+  if (photon.size() != 4)
+    photon.resize(4);
+  for (Int_t i = 0; i < 4; i++)
+    photon[i] = fphoton[i];
+
+  Knerec = fKnerec;
+  Knereclor = fKnereclor;
+
+  phi = fphi;
+}
+
 Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p)
 {
-  SetParameters(p);
-  IntermediateReconstruction();
+  // SetParameters(p);
+  IntermediateReconstruction(p);
 
-  return (phi.fourMom[_chosen4MomComponent] -
-          pionCh[0].fourMom[_chosen4MomComponent] -
-          pionCh[1].fourMom[_chosen4MomComponent] -
-          photon[0].fourMom[_chosen4MomComponent] -
-          photon[1].fourMom[_chosen4MomComponent] -
-          photon[2].fourMom[_chosen4MomComponent] -
-          photon[3].fourMom[_chosen4MomComponent]);
+  return (fphi.fourMom[_chosen4MomComponent] -
+          fpionCh[0].fourMom[_chosen4MomComponent] -
+          fpionCh[1].fourMom[_chosen4MomComponent] -
+          fphoton[0].fourMom[_chosen4MomComponent] -
+          fphoton[1].fourMom[_chosen4MomComponent] -
+          fphoton[2].fourMom[_chosen4MomComponent] -
+          fphoton[3].fourMom[_chosen4MomComponent]);
 }
 
 Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
 {
-  SetParameters(p);
-  IntermediateReconstruction();
+  // SetParameters(p);
+  IntermediateReconstruction(p);
 
-  return photon[_chosenPhoton].fourPos[3] - Knerec.lifetimeLAB - photon[_chosenPhoton].timeOfFlight;
+  return fphoton[_chosenPhoton].fourPos[3] - fKnereclor.lifetimeLAB - fphoton[_chosenPhoton].timeOfFlight;
 }
 
 Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)
 {
-  SetParameters(p);
-  IntermediateReconstruction();
+  // SetParameters(p);
+  IntermediateReconstruction(p);
 
   std::map<std::string, Float_t> minvModes = {
-      {"neutral", Knerec.total[5]},
-      {"charged", Kchrec.total[5]}};
+      {"neutral", fKnerec.total[5]},
+      {"charged", fKchrec.total[5]}};
 
   return minvModes[_minvMode] - PhysicsConstants::mK0; // MeV/c^2
 }

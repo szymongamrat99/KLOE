@@ -50,6 +50,7 @@ namespace KLOE
     virtual void SetParameters(Double_t *) = 0;
     virtual void ResetParameters() = 0;
     virtual void IntermediateReconstruction() = 0;
+    virtual void IntermediateReconstruction(Double_t *) = 0;
 
     virtual ~KinFit() = default;
   };
