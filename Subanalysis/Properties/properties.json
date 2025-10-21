@@ -682,7 +682,7 @@
                 "chiSqrStep": 0.01,
                 "fixedVars": 0,
                 "freeVars": 36,
-                "loopCount": 100,
+                "loopCount": 30,
                 "numOfConstraints": 9,
                 "range": null
             },
@@ -690,7 +690,7 @@
                 "chiSqrStep": 0.01,
                 "fixedVars": 0,
                 "freeVars": 39,
-                "loopCount": 100,
+                "loopCount": 30,
                 "numOfConstraints": 10,
                 "range": null
             },
@@ -701,7 +701,7 @@
                 "fixedVars": 3,
                 "freeVars": 24,
                 "goodClus": false,
-                "loopCount": 100,
+                "loopCount": 30,
                 "numOfConstraints": 5
             }
         },

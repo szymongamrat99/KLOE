@@ -5,11 +5,24 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# ✅ DODAJ BUILD TYPES I OPTYMALIZACJE
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
+endif()
+
+# Optymalizacje kompilaitora
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wall -Wextra")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
+
+message(STATUS "🔧 Build type: ${CMAKE_BUILD_TYPE}")
+message(STATUS "🔧 CXX flags: ${CMAKE_CXX_FLAGS} ${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}}")
+
 # FLAGI PROFILOWANIA
 option(ENABLE_PROFILING "Enable profiling with gprof" OFF)
 
 if(ENABLE_PROFILING)
-    message(STATUS "Profiling enabled with gprof")
+    message(STATUS "⚡ Profiling enabled with gprof")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 endif()
@@ -22,6 +35,15 @@ find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework)
 find_package(CURL REQUIRED)
 find_package(LAPACK REQUIRED)
 find_package(BLAS REQUIRED)
+
+# ✅ DODAJ OpenMP
+find_package(OpenMP)
+if(OpenMP_CXX_FOUND)
+    message(STATUS "⚡ OpenMP found: ${OpenMP_CXX_VERSION}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+else()
+    message(WARNING "OpenMP not found - parallel execution disabled")
+endif()
 
 # Enable tests for the files
 enable_testing()
@@ -79,7 +101,9 @@ target_link_libraries(KLSPM00 PRIVATE
   ${CURL_LIBRARIES}
   ${ROOT_LIBRARIES}
   LibRec
-  LibFort)
+  LibFort
+  # ✅ DODAJ OpenMP do linkowania
+  $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>)
 
 # Optional output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
