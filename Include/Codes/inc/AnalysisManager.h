@@ -64,6 +64,7 @@ public:
     };
     
     struct HypothesisModules {
+        bool classifyMCVariables = true;
         bool signalOnly = false;
         bool momentumSmearing = true;
         bool trilaterationKinFit = true;

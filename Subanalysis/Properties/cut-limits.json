@@ -90,39 +90,39 @@
     ],
     "SIGNAL": [
       {
-        "order": 1,
+        "order": 400,
         "cutDescription": "Chi2 of the kinematic fit for the signal hypothesis.",
         "cutId": "Chi2Signal",
         "cutType": "O",
-        "cutValue": 10000000000,
+        "cutValue": 100000,
         "cutCondition": "<="
       },
       {
-        "order": 2,
+        "order": 402,
         "cutDescription": "TrcSum of the event.",
         "cutId": "TrcSum",
         "cutType": "O",
-        "cutValue": -20,
+        "cutValue": -10,
         "cutCondition": ">="
       },
       {
-        "order": 3,
+        "order": 405,
         "cutDescription": "Missing energy in event.",
         "cutId": "Qmiss",
         "cutType": "O",
-        "cutValue": 1000,
+        "cutValue": 200,
         "cutCondition": "<="
       },
       {
-        "order": 4,
+        "order": 403,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKch",
         "cutType": "T",
-        "cutValue": 50,
+        "cutValue": 100,
         "cutCondition": "<="
       },
       {
-        "order": 5,
+        "order": 402,
         "cutDescription": "K->pi0pi0 decay invariant mass.",
         "cutId": "InvMassKne",
         "cutType": "T",

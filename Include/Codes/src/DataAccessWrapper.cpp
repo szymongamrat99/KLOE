@@ -180,10 +180,10 @@ void DataAccessWrapper::MapFileVersions()
     FileVersion version = DetermineFileVersion(filename);
     fFileVersionMap[filename] = version;
 
-    std::cout << "INFO: File " << filename << " -> Version "
-              << (version == FileVersion::V1 ? "v1" : version == FileVersion::V2 ? "v2"
-                                                                                 : "unknown")
-              << std::endl;
+    // std::cout << "INFO: File " << filename << " -> Version "
+    //           << (version == FileVersion::V1 ? "v1" : version == FileVersion::V2 ? "v2"
+    //                                                                              : "unknown")
+    //           << std::endl;
   }
 }
 

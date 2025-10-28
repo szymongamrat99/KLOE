@@ -60,8 +60,15 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   KLOE::BaseKinematics baseKin;
 
   GeneratedVariables genVarClassifier;
-  // Set flag for initial analysis
-  Bool_t MonteCarloInitAnalysis = config.getProperty<Bool_t>("flags.initialAnalysisExec.MC");
+  // Set flag if MC variables should be classified - false for Data
+  Bool_t MonteCarloInitAnalysis = analysisConfig.GetActiveHypothesisConfig().modules.classifyMCVariables;
+
+  Int_t mctruthSignal = analysisConfig.GetActiveHypothesisConfig().signal;
+  Bool_t SignalOnly = analysisConfig.GetActiveHypothesisConfig().modules.signalOnly;
+  Bool_t smearing = analysisConfig.GetActiveHypothesisConfig().modules.momentumSmearing;
+  Bool_t trilaterationKinFit = analysisConfig.GetActiveHypothesisConfig().modules.trilaterationKinFit;
+  Bool_t signalKinFit = analysisConfig.GetActiveHypothesisConfig().modules.signalKinFit;
+  Bool_t omegaKinFit = analysisConfig.GetActiveHypothesisConfig().modules.omegaKinFit;
 
   // Set flag for covariance matrix type
   std::string covMatrixType = config.getProperty<std::string>("flags.covMatrixType");
@@ -124,9 +131,19 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     smearingName = covMatrixType;
   }
 
-  for (Int_t i = 0; i < baseFilenames.size(); i++)
+  if(SignalOnly)
   {
-    baseFilenames[i] = baseFilenames[i] + "_" + hypoCodeStr + "_" + smearingName;
+    for (Int_t i = 0; i < baseFilenames.size(); i++)
+    {
+      baseFilenames[i] = baseFilenames[i] + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal));
+    }
+  }
+  else
+  {
+    for (Int_t i = 0; i < baseFilenames.size(); i++)
+    {
+      baseFilenames[i] = baseFilenames[i] + "_" + hypoCodeStr + "_" + smearingName;
+    }
   }
 
   std::string
@@ -319,13 +336,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       kaonTimesTriangleRecLor,
       kaonTimesTriangleBoostLor,
       kaonTimesSignalKinFit;
-
-  Int_t mctruthSignal = analysisConfig.GetActiveHypothesisConfig().signal;
-  Bool_t SignalOnly = analysisConfig.GetActiveHypothesisConfig().modules.signalOnly;
-  Bool_t smearing = analysisConfig.GetActiveHypothesisConfig().modules.momentumSmearing;
-  Bool_t trilaterationKinFit = analysisConfig.GetActiveHypothesisConfig().modules.trilaterationKinFit;
-  Bool_t signalKinFit = analysisConfig.GetActiveHypothesisConfig().modules.signalKinFit;
-  Bool_t omegaKinFit = analysisConfig.GetActiveHypothesisConfig().modules.omegaKinFit;
 
   while (dataAccess.Next())
   {
@@ -1055,7 +1065,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                        baseKin.pullsSignalFit);
           }
 
-
           for (Int_t i = 0; i < nPhotons; i++)
           {
             photons[i].FillFourMom(baseKin.photonFit[i][0],
@@ -1176,22 +1185,45 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           }
           else
           {
-
-            baseKin.cuts.clear();
-            baseKin.cuts.resize(cutter.GetCuts().size());
-
             for (Int_t iter = 0; iter < cutter.GetCuts().size(); iter++)
-              if (cutter.PassCut(iter))
-                baseKin.cuts[iter] = 1;
-              else if (!cutter.PassCut(iter))
+              if (!cutter.PassCut(iter))
               {
-                baseKin.cuts[iter] = 0;
+                switch (iter)
+                {
+                case 0:
+                {
+                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_CHI2_SIGNAL);
+                  break;
+                }
+                case 1:
+                {
+                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_TRCV);
+                  break;
+                }
+                case 2:
+                {
+                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_INV_MASS_KCH);
+                  break;
+                }
+                case 3:
+                {
+                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_INV_MASS_KNE);
+                  break;
+                }
+                case 4:
+                {
+                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_QMISS);
+                  break;
+                }
+                }
 
                 if (mctruth == 1)
                 {
                   passed = true;
                   mctruth = 0;
                 }
+
+                break;
               }
           }
         }
@@ -1312,7 +1344,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"nvtxmc", baseKin.nvtxmc},
           {"bunchnum", baseKin.bunchnum},
           {"errorcode", baseKin.errorCode},
-          {"goodClustersTriKinFitSize", baseKin.goodClustersTriKinFit.size()}};
+          {"goodClustersTriKinFitSize", baseKin.goodClustersTriKinFit.size()},
+          {"cutApplied", baseKin.cut}};
 
       // Float_t zmienne
       std::map<std::string, Float_t> floatVars = {
@@ -1385,7 +1418,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"mother", baseKin.mother},
           {"vtakenClosest", baseKin.vtakenClosest},
           {"vtaken", baseKin.vtaken},
-          {"cutsApplied", baseKin.cuts},
           {"g4takenTriKinFit", baseKin.g4takenTriKinFit},
           {"goodClustersTriKinFit", baseKin.goodClustersTriKinFit}};
 

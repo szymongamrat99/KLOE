@@ -231,7 +231,7 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
   fKchboost.SetPositionAndMomentumFromTotal();
   fKchboost.SetLorentzVectors();
 
-  static Float_t X_line[3] = {fKchboost.fourPos[0],
+  Float_t X_line[3] = {fKchboost.fourPos[0],
                               fKchboost.fourPos[1],
                               fKchboost.fourPos[2]}, // Vertex laying on the line
       mom[3] = {fKchboost.fourMom[0],
@@ -245,7 +245,7 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
                        0.}; // Vector perpendicular to the plane from Bhabha momentum
 
   // Corrected IP event by event
-  IPBoostCorr(X_line, mom, xB, plane_perp, fip);
+  IPBoostCorr(X_line, mom, xB, plane_perp, fip.data());
 
   fip[0] = fphi.vtxPos[0];
   fip[1] = fphi.vtxPos[1];
@@ -321,7 +321,7 @@ Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
   // SetParameters(p);
   IntermediateReconstruction(p);
 
-  return fphoton[_chosenPhoton].fourPos[3] - fKnerec.lifetimeLAB - fphoton[_chosenPhoton].timeOfFlight;
+  return fphoton[_chosenPhoton].fourPos[3] - fKnereclor.lifetimeLAB - fphoton[_chosenPhoton].timeOfFlight;
 }
 
 Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)

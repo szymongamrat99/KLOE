@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "version": "1.0",
+    "version": "1.1",
     "description": "Analysis configuration with multiple hypotheses",
-    "lastModified": "2025-10-19",
+    "lastModified": "2025-10-22",
     "author": "gamrat@lnf.infn.it"
   },
   
@@ -17,9 +17,10 @@
     "SIGNAL": {
       "enabled": true,
       "description": "phi -> K0K0 -> pi+pi-pi0pi0",
-      "signal": 1,
+      "signal": 3,
       "modules": {
-        "signalOnly": false,
+        "classifyMCVariables": true,
+        "signalOnly": true,
         "momentumSmearing": true,
         "trilaterationKinFit": true,
         "signalKinFit": true,
