@@ -48,6 +48,13 @@ namespace ErrorHandling
     SIGNAL_KIN_FIT = 309,                           /*!< Did not pass the signal kin fit*/
     OMEGA_KIN_FIT = 310,                            /*!< Did not pass the omega kin fit*/
 
+    CUT_CHI2_SIGNAL = 400, /*!< Did not pass chi2 cut for signal hypothesis*/
+    CUT_COMB_MPI0 = 401,   /*!< Did not pass combined mpi0 cut*/
+    CUT_TRCV = 402,    /*!< Did not pass TrcSum cut*/
+    CUT_INV_MASS_KCH = 403, /*!< Did not pass invariant mass cut for charged kaon*/
+    CUT_INV_MASS_KNE = 404, /*!< Did not pass invariant mass cut for neutral kaon*/
+    CUT_QMISS = 405,   /*!< Did not pass Qmiss cut*/
+
     NOT_RECOGNIZED = 666, /*!< Unexpected exception*/
 
     NO_ERROR = 0, /*!< No error occurred*/
@@ -151,6 +158,20 @@ namespace ErrorHandling
         return "Less than four neutral clusters with good energy available for analysis.";
       case ErrorCodes::OMEGA_KIN_FIT:
         return "Did not pass the omega kin fit.";
+
+      // Cut-related logs
+      case ErrorCodes::CUT_CHI2_SIGNAL:
+        return "Did not pass chi2 cut for signal hypothesis.";
+      case ErrorCodes::CUT_COMB_MPI0:
+        return "Did not pass combined mpi0 cut.";
+      case ErrorCodes::CUT_TRCV:
+        return "Did not pass TrcSum cut.";
+      case ErrorCodes::CUT_INV_MASS_KCH:
+        return "Did not pass invariant mass cut for charged kaon.";
+      case ErrorCodes::CUT_INV_MASS_KNE:
+        return "Did not pass invariant mass cut for neutral kaon.";
+      case ErrorCodes::CUT_QMISS:
+        return "Did not pass Qmiss cut.";
 
       // Not recognized logs
       case ErrorCodes::NOT_RECOGNIZED:

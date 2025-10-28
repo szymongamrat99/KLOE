@@ -86,6 +86,7 @@ bool AnalysisConfig::LoadFromFile(const std::string& filename) {
                 // Modules
                 if (item.value().contains("modules")) {
                     auto& mod = item.value()["modules"];
+                    config.modules.classifyMCVariables = mod.value("classifyMCVariables", true);
                     config.modules.signalOnly = mod.value("signalOnly", false);
                     config.modules.momentumSmearing = mod.value("momentumSmearing", true);
                     config.modules.trilaterationKinFit = mod.value("trilaterationKinFit", true);
@@ -219,14 +220,15 @@ void AnalysisConfig::Print() const {
     }
     
     std::cout << "Modules:" << std::endl;
-    std::cout << "   Signal only:       " << (hypConfig.modules.signalOnly ? "✅" : "❌") << std::endl;
-    std::cout << "   Momentum Smearing:       " << (hypConfig.modules.momentumSmearing ? "✅" : "❌") << std::endl;
-    std::cout << "   Trilateration KinFit:    " << (hypConfig.modules.trilaterationKinFit ? "✅" : "❌") << std::endl;
-    std::cout << "   Signal KinFit:           " << (hypConfig.modules.signalKinFit ? "✅" : "❌") << std::endl;
-    std::cout << "   Omega KinFit:            " << (hypConfig.modules.omegaKinFit ? "✅" : "❌") << std::endl;
-    std::cout << "   Triangle Reconstruction: " << (hypConfig.modules.triangleReconstruction ? "✅" : "❌") << std::endl;
-    std::cout << "   Photon Pairing:          " << (hypConfig.modules.photonPairing ? "✅" : "❌") << std::endl;
-    std::cout << "   Kaon Proper Times:       " << (hypConfig.modules.kaonProperTimes ? "✅" : "❌") << std::endl;
+    std::cout << "   Classify MC variables:       " << (hypConfig.modules.classifyMCVariables ? "true" : "false") << std::endl;
+    std::cout << "   Signal only:       " << (hypConfig.modules.signalOnly ? "true" : "false") << std::endl;
+    std::cout << "   Momentum Smearing:       " << (hypConfig.modules.momentumSmearing ? "true" : "false") << std::endl;
+    std::cout << "   Trilateration KinFit:    " << (hypConfig.modules.trilaterationKinFit ? "true" : "false") << std::endl;
+    std::cout << "   Signal KinFit:           " << (hypConfig.modules.signalKinFit ? "true" : "false") << std::endl;
+    std::cout << "   Omega KinFit:            " << (hypConfig.modules.omegaKinFit ? "true" : "false") << std::endl;
+    std::cout << "   Triangle Reconstruction: " << (hypConfig.modules.triangleReconstruction ? "true" : "false") << std::endl;
+    std::cout << "   Photon Pairing:          " << (hypConfig.modules.photonPairing ? "true" : "false") << std::endl;
+    std::cout << "   Kaon Proper Times:       " << (hypConfig.modules.kaonProperTimes ? "true" : "false") << std::endl;
     
     std::cout << "Cuts:" << std::endl;
     std::cout << "   Mass window: [" << hypConfig.cuts.minMassWindow 
@@ -234,8 +236,8 @@ void AnalysisConfig::Print() const {
     std::cout << "   Max χ²: " << hypConfig.cuts.maxChi2 << std::endl;
     
     std::cout << "Output:" << std::endl;
-    std::cout << "   Save Pulls:          " << (output.savePulls ? "✅" : "❌") << std::endl;
-    std::cout << "   Save MC Truth:       " << (output.saveMCTruthAlways ? "✅" : "❌") << std::endl;
+    std::cout << "   Save Pulls:          " << (output.savePulls ? "true" : "false") << std::endl;
+    std::cout << "   Save MC Truth:       " << (output.saveMCTruthAlways ? "true" : "false") << std::endl;
     std::cout << "   Verbose Level:       " << output.verboseLevel << std::endl;
     
     std::cout << "\n══════════════════════════════════════════════\n" << std::endl;

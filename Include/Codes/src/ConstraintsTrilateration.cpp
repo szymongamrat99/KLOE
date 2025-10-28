@@ -248,10 +248,10 @@ namespace KLOE
 
     fphi.SetTotalVector();
 
-    static kaonNeutral KnerecTmp[2];        // Temporary kaon neutral objects
-    static neutralParticle photonTmp[2][4]; // Temporary photon objects
+    kaonNeutral KnerecTmp[2];        // Temporary kaon neutral objects
+    neutralParticle photonTmp[2][4]; // Temporary photon objects
 
-    static Float_t ipTmp[2][3]; // Temporary interaction point
+    Float_t ipTmp[2][3]; // Temporary interaction point
 
     std::array<Double_t, 2> value = {0., 0.};
 
@@ -311,7 +311,7 @@ namespace KLOE
                                     photonTmp[i][2].fourMom[j] +
                                     photonTmp[i][3].fourMom[j];
 
-        static Float_t X_line[3] = {KnerecTmp[i].fourPos[0],
+        Float_t X_line[3] = {KnerecTmp[i].fourPos[0],
                              KnerecTmp[i].fourPos[1],
                              KnerecTmp[i].fourPos[2]},
                 mom[3] = {KnerecTmp[i].fourMom[0],

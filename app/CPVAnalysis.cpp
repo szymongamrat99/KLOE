@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 
     std::string
         DataPath = "",
-        runRegexPattern = R"(.*_(\d{5})_v2\.root$)";
+        runRegexPattern = R"(.*_(\d{5})_v\d\.root$)";
 
     std::vector<std::string> DataPathList(std::begin(filePaths["MC"]["path"][2]), std::end(filePaths["MC"]["path"][2]));
 
@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
       {
         runs = initObj.getRunStats(path, runRegexPattern);
         initObj.chainInit(chain, logger, path, runRegexPattern,
-                          runs.minRun, runs.minRun);
+                          runs.minRun, runs.maxRun);
       }
 
       break;

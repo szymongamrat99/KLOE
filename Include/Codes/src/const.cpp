@@ -5,9 +5,14 @@
 #include <fstream>
 
 #include <iostream>
+#include <sstream>
 
 #include <TH1.h>
 #include <TH2.h>
+#include <TObjArray.h>
+#include <TObjString.h>
+#include <TString.h>
+#include <TPrincipal.h>
 
 #include <TGaxis.h>
 
@@ -22,6 +27,9 @@ namespace Paths
   const std::string chainMCFiles = kloeMCPath + "/*.root";
   const std::string pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json";
   const std::string propertiesPath = getenv("PROPERTIESKLOE");
+  const std::string histogramConfigDir = propertiesPath + "/histogram_conf";
+  const std::string histogramConfig1DPath = histogramConfigDir + "/histogram1D.csv";
+  const std::string histogramConfig2DPath = histogramConfigDir + "/histogram2D.csv";
   const std::string propName = propertiesPath + "/properties.json";
   const std::string analysisConfigPath = propertiesPath + "/analysis_config.json";
   const std::string rootfilesName = propertiesPath + "/root-files.json";
@@ -250,14 +258,14 @@ namespace KLOE
         {"mass_phi", {100, 1010., 1030., "#phi Meson Mass", "m_{#phi} [MeV/c^{2}]", "Counts"}},
         {"mass_pi01", {100, -20., 20., "#pi^{0} Mass 1", "m^{inv}_{2#gamma,1} - m_{#pi^{0}} [MeV/c^{2}]", "Counts"}},
         {"mass_pi02", {100, -20., 20., "#pi^{0} Mass 2", "m^{inv}_{2#gamma,2} - m_{#pi^{0}} [MeV/c^{2}]", "Counts"}},
-        {"combined_mass_pi0", {100, 0., 100., "#pi^{0} Combined", "Comb^{#pi^0}_{err} [MeV/c^{2}]", "Counts"}},
+        {"combined_mass_pi0", {100, 0., 100., "#pi^{0} Combined", "Comb^{#pi^{0}}_{err} [MeV/c^{2}]", "Counts"}},
         {"mass_omega", {100, -200., 100., "#omega Meson Mass", "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]", "Counts"}},
         {"mass_omega_rec", {100, -200., 50., "#omega Meson Mass Rec", "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]", "Counts"}},
 
         // Chi-square
-        {"chi2_signalKinFit", {100, 0., 50., "Signal Kinematic Fit #chi^{2}", "#chi^{2}_{signal}", "Counts"}},
+        {"chi2_signalKinFit", {100, 0., 10., "Signal Kinematic Fit #chi^{2}", "#chi^{2}_{signal}", "Counts"}},
         {"prob_signal", {100, 0., 1., "Signal Kinematic Fit Probability", "Prob_{signal}", "Counts"}},
-        {"chi2_trilaterationKinFit", {100, 0., 3000., "Trilateration Fit #chi^{2}", "#chi^{2}_{tri}", "Counts"}},
+        {"chi2_trilaterationKinFit", {100, 0., 15., "Trilateration Fit #chi^{2}", "#chi^{2}_{#omega#pi^{0}}", "Counts"}},
 
         // Phi vertex
         {"phi_vtx_x", {100, -1.0, 1.0, "#phi Vertex x", "V^{#phi}_{x} [cm]", "Counts"}},
@@ -320,7 +328,7 @@ namespace KLOE
 
         // Czasy
         {"time_neutral_MC", {100, -1., 1., "Neutral Kaon Time (MC)", "Trc_{sum} [ns]", "Counts"}},
-        {"delta_t", {121, -10., 10., "Time Difference", "#Deltat [#tau_{S}]", "Counts"}},
+        {"delta_t", {161, -40., 40., "Time Difference", "#Deltat [#tau_{S}]", "Counts"}},
 
         // Kąty i zmienne kinematyczne
         {"openingAngleCharged", {100, 0., 180., "Charged Particles Opening Angle", "#alpha [deg]", "Counts"}},
@@ -353,7 +361,7 @@ namespace KLOE
         {"Energy_Pi1_vs_mass_pi01", {50, 50, 0., 1000., 120., 150., "Pion Energy vs #pi^{0} Mass", "E_{#pi^{#pm}} [MeV]", "m_{#pi^{0}} [MeV/c^{2}]", ""}},
 
         // Chi-square korelacje
-        {"chi2_signalKinFit_vs_chi2_trilaterationKinFit", {50, 50, 0., 50., 0., 3000., "#chi^{2} Correlation", "#chi^{2}_{signal}", "#chi^{2}_{tri}", ""}},
+        {"chi2_signalKinFit_vs_chi2_trilaterationKinFit", {50, 50, 0., 100., 0., 100., "#chi^{2} Correlation", "#chi^{2}_{signal}", "#chi^{2}_{tri}", ""}},
 
         // Track korelacje
         {"curv1_vs_curv2", {50, 50, -0.01, 0.01, -0.01, 0.01, "Track Curvature Correlation", "1/p_{T1} [1/MeV]", "1/p_{T2} [1/MeV]", ""}},
@@ -362,7 +370,10 @@ namespace KLOE
 
         // Czas vs Czas MC
         {"delta_t_vs_delta_t_mc", {161, 81, -40., 40., -20., 20., "#Deltat_{rec} vs. #Deltat_{mc}", "#Deltat_{MC} [#tau_{S}]", "(#Deltat_{rec} - #Deltat_{MC}) [#tau_{S}]", ""}},
-        {"delta_t_fit_vs_delta_t_mc", {161, 81, -40., 40., -20., 20., "#Deltat_{fit} vs. #Deltat_{mc}", "#Deltat_{MC} [#tau_{S}]", "(#Deltat_{fit} - #Deltat_{MC}) [#tau_{S}]", ""}}};
+        {"delta_t_fit_vs_delta_t_mc", {161, 81, -40., 40., -20., 20., "#Deltat_{fit} vs. #Deltat_{mc}", "#Deltat_{MC} [#tau_{S}]", "(#Deltat_{fit} - #Deltat_{MC}) [#tau_{S}]", ""}},
+        {"t00_tri_vs_t00_mc", {100, 100, -5., 300., 0., 300., "t^{00}_{tri} vs. t^{00}_{MC}", "t^{00}_{MC} [#tau_{S}]", "t^{00}_{tri} [#tau_{S}]", ""}},
+        {"t00_triangle_vs_t00_mc", {100, 100, -5., 300., 0., 300., "t^{00}_{triangle} vs. t^{00}_{MC}", "t^{00}_{MC} [#tau_{S}]", "t^{00}_{triangle} [#tau_{S}]", ""}},
+        {"t00_triangle_vs_t00_tri", {100, 100, -5., 300., 0., 300., "t^{00}_{triangle} vs. t^{00}_{tri}", "t^{00}_{triangle} [#tau_{S}]", "t^{00}_{tri} [#tau_{S}]", ""}}};
 
     // Mapowanie nazw 2D na pary zmiennych (dla automatycznego tworzenia)
     const std::map<TString, std::pair<TString, TString>> histConfigs2D_Variables = {
@@ -377,13 +388,146 @@ namespace KLOE
         {"delta_t_vs_delta_t_mc", {"delta_t", "delta_t_mc"}},
         {"delta_t_fit_vs_delta_t_mc", {"delta_t_fit", "delta_t_mc"}}};
 
+    // Funkcja pomocnicza do usuwania cudzysłowów
+    TString RemoveQuotes(const TString &str)
+    {
+      TString result = str;
+      if(result = "")
+        return result;
+      // Usuń cudzysłowy z początku
+      if (result.BeginsWith("\""))
+        result.Remove(0, 1);
+      // Usuń cudzysłowy z końca
+      if (result.EndsWith("\""))
+        result.Remove(result.Length() - 1, 1);
+      return result;
+    }
+
+    std::map<TString, HistConfig1D> LoadHistogramConfigs1D(const TString &filePath)
+    {
+      std::map<TString, HistConfig1D> configs;
+      std::ifstream file(filePath.Data());
+      if (!file.is_open())
+      {
+        std::cerr << "ERROR: Cannot open histogram configuration file: " << filePath << std::endl;
+        return configs;
+      }
+
+      TString line;
+      while (line.ReadLine(file))
+      {
+        if (line.BeginsWith("#") || line.IsWhitespace())
+          continue;
+
+        TObjArray *tokens = line.Tokenize(";");
+
+        if (tokens->GetEntries() < 7)
+        {
+          std::cerr << "WARNING: Invalid line format: " << line << std::endl;
+          delete tokens;
+          continue;
+        }
+
+        // Pobierz tokeny, usuń białe znaki i cudzysłowy
+        TString name = TString(((TObjString *)tokens->At(0))->String()).Strip(TString::kBoth);
+        name.ReplaceAll("\"", "");
+
+        TString nBinsStr = TString(((TObjString *)tokens->At(1))->String()).Strip(TString::kBoth);
+        TString xMinStr = TString(((TObjString *)tokens->At(2))->String()).Strip(TString::kBoth);
+        TString xMaxStr = TString(((TObjString *)tokens->At(3))->String()).Strip(TString::kBoth);
+
+        TString title = TString(((TObjString *)tokens->At(4))->String()).Strip(TString::kBoth);
+        title.ReplaceAll("\"", "");
+
+        TString xLabel = TString(((TObjString *)tokens->At(5))->String()).Strip(TString::kBoth);
+        xLabel.ReplaceAll("\"", "");
+
+        TString yLabel = TString(((TObjString *)tokens->At(6))->String()).Strip(TString::kBoth);
+        yLabel.ReplaceAll("\"", "");
+
+        Int_t nBins = nBinsStr.Atoi();
+        Double_t xMin = xMinStr.Atof();
+        Double_t xMax = xMaxStr.Atof();
+
+        configs[name] = {nBins, xMin, xMax, title, xLabel, yLabel};
+
+        delete tokens;
+      }
+
+      file.close();
+      return configs;
+    }
+
+    std::map<TString, HistConfig2D> LoadHistogramConfigs2D(const TString &filePath)
+    {
+      std::map<TString, HistConfig2D> configs;
+      std::ifstream file(filePath.Data());
+      if (!file.is_open())
+      {
+        std::cerr << "ERROR: Cannot open histogram configuration file: " << filePath << std::endl;
+        return configs;
+      }
+
+      TString line;
+      while (line.ReadLine(file))
+      {
+        if (line.BeginsWith("#") || line.IsWhitespace())
+          continue;
+
+        TObjArray *tokens = line.Tokenize(";");
+
+        if (tokens->GetEntries() < 10)
+        {
+          std::cerr << "WARNING: Invalid line format: " << line << std::endl;
+          delete tokens;
+          continue;
+        }
+
+        // Pobierz tokeny, usuń białe znaki i cudzysłowy
+        TString name = TString(((TObjString *)tokens->At(0))->String()).Strip(TString::kBoth);
+        name.ReplaceAll("\"", "");
+        TString nBinsXStr = TString(((TObjString *)tokens->At(1))->String()).Strip(TString::kBoth);
+        TString nBinsYStr = TString(((TObjString *)tokens->At(2))->String()).Strip(TString::kBoth);
+        TString xMinStr = TString(((TObjString *)tokens->At(3))->String()).Strip(TString::kBoth);
+        TString xMaxStr = TString(((TObjString *)tokens->At(4))->String()).Strip(TString::kBoth);
+        TString yMinStr = TString(((TObjString *)tokens->At(5))->String()).Strip(TString::kBoth);
+        TString yMaxStr = TString(((TObjString *)tokens->At(6))->String()).Strip(TString::kBoth);
+        TString title = TString(((TObjString *)tokens->At(7))->String()).Strip(TString::kBoth);
+        title.ReplaceAll("\"", "");
+        TString xLabel = TString(((TObjString *)tokens->At(8))->String()).Strip(TString::kBoth);
+        xLabel.ReplaceAll("\"", "");
+        TString yLabel = TString(((TObjString *)tokens->At(9))->String()).Strip(TString::kBoth);
+        yLabel.ReplaceAll("\"", "");  
+        TString zLabel = "";
+        if (tokens->GetEntries() > 10)
+        {
+          zLabel = TString(((TObjString *)tokens->At(10))->String()).Strip(TString::kBoth);
+          zLabel.ReplaceAll("\"", "");
+        }
+
+        Int_t nBinsX = nBinsXStr.Atoi();
+        Int_t nBinsY = nBinsYStr.Atoi();
+        Double_t xMin = xMinStr.Atof();
+        Double_t xMax = xMaxStr.Atof();
+        Double_t yMin = yMinStr.Atof();
+        Double_t yMax = yMaxStr.Atof();
+
+        configs[name] = {nBinsX, nBinsY, xMin, xMax, yMin, yMax, title, xLabel, yLabel, zLabel};
+
+        delete tokens;
+      }
+
+      file.close();
+      return configs;
+    }
+
     // Helper functions implementacja
     TH1F *CreateHist1D(const TString &varName, const TString &histName)
     {
       auto it = histConfigs1D.find(varName);
       if (it == histConfigs1D.end())
       {
-        std::cerr << "WARNING: No 1D config found for variable: " << varName << std::endl;
+        // std::cerr << "WARNING: No 1D config found for variable: " << varName << std::endl;
         return new TH1F(histName.IsNull() ? varName : histName, varName, 100, -10., 10.);
       }
 
@@ -400,13 +544,22 @@ namespace KLOE
       auto it = histConfigs1D.find(varName);
       if (it == histConfigs1D.end())
       {
-        std::cerr << "WARNING: No 1D config found for variable: " << varName << std::endl;
+        // std::cerr << "WARNING: No 1D config found for variable: " << varName << std::endl;
         return new TH1F(histName.IsNull() ? varName : histName, varName, 100, -10., 10.);
       }
 
       const auto &config = it->second;
       TString name = histName.IsNull() ? ("h_" + varName + "_" + channName) : histName;
       TH1F *hist = new TH1F(name, config.title, config.nBins, config.xMin, config.xMax);
+      hist->GetXaxis()->SetTitle(config.xLabel);
+      hist->GetYaxis()->SetTitle(config.yLabel);
+      return hist;
+    }
+
+    TH1F *CreateHist1D(const TString &histName, const HistConfig1D &config)
+    {
+      // Tworzenie histogramu na podstawie konfiguracji
+      TH1F *hist = new TH1F(histName, config.title, config.nBins, config.xMin, config.xMax);
       hist->GetXaxis()->SetTitle(config.xLabel);
       hist->GetYaxis()->SetTitle(config.yLabel);
       return hist;
@@ -450,6 +603,17 @@ namespace KLOE
       const auto &config = it->second;
       TString name = histName.IsNull() ? ("h_" + configName) : histName;
       TH2F *hist = new TH2F(name, config.title, config.nBinsX, config.xMin, config.xMax,
+                            config.nBinsY, config.yMin, config.yMax);
+      hist->GetXaxis()->SetTitle(config.xLabel);
+      hist->GetYaxis()->SetTitle(config.yLabel);
+      hist->GetZaxis()->SetTitle(config.zLabel);
+      return hist;
+    }
+
+    TH2F *CreateHist2D(const TString &histName, const HistConfig2D &config)
+    {
+      // Tworzenie histogramu na podstawie konfiguracji
+      TH2F *hist = new TH2F(histName, config.title, config.nBinsX, config.xMin, config.xMax,
                             config.nBinsY, config.yMin, config.yMax);
       hist->GetXaxis()->SetTitle(config.xLabel);
       hist->GetYaxis()->SetTitle(config.yLabel);

@@ -35,6 +35,7 @@
 #include <triple_gaus.h>
 #include <TPaveText.h>
 #include <TLegend.h>
+#include <TRegexp.h>
 
 #include <TFitResult.h>
 #include <TFitResultPtr.h>
@@ -73,7 +74,15 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
   // When running with PROOF Begin() is only called on the client.
   // The tree argument is deprecated (on PROOF 0 is passed).
 
+  // Creation of output folder with cut names
+  /////////////////////////////////////////
   TString option = GetOption();
+
+  if (option.IsNull())
+    option = "NO_CUTS";
+  folderPath = "img/" + option;
+  FolderManagement(folderPath);
+  /////////////////////////////////////////
 
   KLOE::setGlobalStyle();
 
@@ -147,24 +156,33 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   //
   // The return value is currently not used.
 
+  TString option = GetOption();
+  option.ToUpper();
+
   fReader.SetLocalEntry(entry);
 
   Float_t vKchFit = PhysicsConstants::cVel * KchboostFit[4] / KchboostFit[3],
-          pathKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
-                            pow(KchboostFit[7] - ipFit[1], 2) +
-                            pow(KchboostFit[8] - ipFit[2], 2)),
+          pathKchFit = sqrt(pow(KchboostFit[6] - ip[0], 2) +
+                            pow(KchboostFit[7] - ip[1], 2)),
+                            // pow(KchboostFit[8] - ip[2], 2)),
           tKchFit = KchboostFit[9] / (0.0895),
           vKneFit = PhysicsConstants::cVel * KnereclorFit[4] / KnereclorFit[3],
-          pathKneFit = sqrt(pow(KnereclorFit[6] - ipFit[0], 2) +
-                            pow(KnereclorFit[7] - ipFit[1], 2) +
-                            pow(KnereclorFit[8] - ipFit[2], 2)),
-          tKneFit = KnereclorFit[9] / (0.0895),
+          pathKneFit = sqrt(pow(KnereclorFit[6] - ip[0], 2) +
+                            pow(KnereclorFit[7] - ip[1], 2)),
+                            // pow(KnereclorFit[8] - ip[2], 2)),
+          tKneFit = KnerecFit[9] / (0.0895),
           vKneMC = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
           vKne = PhysicsConstants::cVel * Knerec[4] / Knerec[3],
           pathKne = sqrt(pow(Knerec[6] - ip[0], 2) +
                          pow(Knerec[7] - ip[1], 2) +
                          pow(Knerec[8] - ip[2], 2)),
-          tKne = pathKne / (vKne * 0.0895);
+          tKne = pathKne / (vKne * 0.0895),
+          pathKneMC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
+                         pow(Knemc[7] - ipmc[1], 2)), 
+                        //  pow(Knemc[8] - ipmc[2], 2)),
+            pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
+                         pow(Kchmc[7] - ipmc[1], 2));
+                        //  pow(Kchmc[8] - ipmc[2], 2))             ;
 
   Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
                                     pow(pi02Fit[5] - PhysicsConstants::mPi0, 2)),
@@ -219,6 +237,16 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                           pow(KchrecFit[7] - ipFit[1], 2)),
           zdist00 = abs(KnerecFit[8] - ipFit[2]),
           zdistpm = abs(KchrecFit[8] - ipFit[2]),
+          path00 = sqrt(pow(radius00, 2) + pow(zdist00, 2)),
+          pathpm = sqrt(pow(radiuspm, 2) + pow(zdistpm, 2)),
+          path00MC = sqrt(pow(sqrt(pow(Knemc[6] - ipmc[0], 2) +
+                                   pow(Knemc[7] - ipmc[1], 2)),
+                              2) +
+                          pow(abs(Knemc[8] - ipmc[2]), 2)),
+          pathpmMC = sqrt(pow(sqrt(pow(Kchmc[6] - ipmc[0], 2) +
+                                   pow(Kchmc[7] - ipmc[1], 2)),
+                              2) +
+                          pow(abs(Kchmc[8] - ipmc[2]), 2)),
           radiusLimit = 1,
           zdistLimit = 0.6;
 
@@ -227,7 +255,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
   Float_t T0Omega = 0;
 
-  if(abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
+  if (abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
     T0Omega = Omega2MassTmp - (trk1[3] + trk2[3]) - pi0Omega2[5];
   else
     T0Omega = Omega1MassTmp - (trk1[3] + trk2[3]) - pi0Omega1[5];
@@ -243,8 +271,8 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
   if (*mctruth == 0 || *mctruth == 1)
     signal_tot++;
-
-  if (*mctruth == 1 && *Chi2SignalKinFit < 30.)// && isInsideFiducialVolume)
+  
+  if (*mctruth == 1 && pathKchMC < 25. && pathKneMC < 25. && *Chi2SignalKinFit < 30.) // && isInsideFiducialVolume)
   {
     if (*goodClustersTriKinFitSize < 4)
       numberOfAtLeastOneBad++;
@@ -269,12 +297,12 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["mass_pi01"]->Fill(pi01[5] - PhysicsConstants::mPi0);
     histsReconstructed["mass_pi02"]->Fill(pi02[5] - PhysicsConstants::mPi0);
 
-    if(abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
+    if (abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
       histsReconstructed["mass_omega"]->Fill(Omega2MassTmp - PhysicsConstants::mOmega);
     else
       histsReconstructed["mass_omega"]->Fill(Omega1MassTmp - PhysicsConstants::mOmega);
 
-    if(abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
+    if (abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
       histsReconstructed["mass_omega_rec"]->Fill(Omega2MassTmp - PhysicsConstants::mOmega);
     else
       histsReconstructed["mass_omega_rec"]->Fill(Omega1MassTmp - PhysicsConstants::mOmega);
@@ -404,11 +432,22 @@ void MC_fit_comparison::Terminate()
   for (const auto &histName : KH::varNames)
   {
     canvas[histName]->cd();
-    canvas[histName]->SetLogy(0);
+
+    TRegexp pattern("vtxNeu.*Fit");
+
+    if (histName.Contains(pattern))
+    {
+      histsReconstructed[histName]->GetYaxis()->SetRangeUser(0.1, std::max(histsReconstructed[histName]->GetMaximum(), histsFittedSignal[histName]->GetMaximum()) * 100);
+      canvas[histName]->SetLogy(1);
+    }
+    else
+    {
+      histsReconstructed[histName]->GetYaxis()->SetRangeUser(0, std::max(histsReconstructed[histName]->GetMaximum(), histsFittedSignal[histName]->GetMaximum()) * 1.2);
+      canvas[histName]->SetLogy(0);
+    }
 
     histsReconstructed[histName]->SetTitle("");
 
-    histsReconstructed[histName]->GetYaxis()->SetRangeUser(0, std::max(histsReconstructed[histName]->GetMaximum(), histsFittedSignal[histName]->GetMaximum()) * 1.2);
     histsReconstructed[histName]->SetLineColor(kBlue);
 
     Bool_t fitcond = histName == "curv1" || histName == "phiv1" || histName == "cotv1" ||
@@ -468,7 +507,7 @@ void MC_fit_comparison::Terminate()
       }
     }
 
-    histsReconstructed[histName]->GetYaxis()->SetRangeUser(0.0, 1.5 * std::max(histsReconstructed[histName]->GetMaximum(), histsFittedSignal[histName]->GetMaximum()));
+    // histsReconstructed[histName]->GetYaxis()->SetRangeUser(0.0, 1.5 * std::max(histsReconstructed[histName]->GetMaximum(), histsFittedSignal[histName]->GetMaximum()));
 
     histsReconstructed[histName]->Draw();
     histsFittedSignal[histName]->SetLineColor(kRed);
@@ -512,14 +551,45 @@ void MC_fit_comparison::Terminate()
 
     canvas[histName]->Update();
 
-    canvas[histName]->SaveAs(Form("img/%s_comparison.png", histName.Data()));
+    canvas[histName]->SaveAs(Form(folderPath + "/%s_comparison.png", histName.Data()));
   }
+
+  Float_t fullyGoodPer = CalculateEfficiency(numberOfAllGood, numberOfAllGood + numberOfAtLeastOneBad) * 100,
+          preselectionEff = CalculateEfficiency(signal_tot, signal_tot_err) * 100,
+          analysisEff = CalculateEfficiency(signal_num, signal_tot) * 100,
+          totalEff = CalculateEfficiency(signal_num, signal_tot_err) * 100;
 
   std::cout << "How many reconstructed events had all good clusters? " << numberOfAllGood << std::endl;
   std::cout << "How many reconstructed events had at least one bad cluster? " << numberOfAtLeastOneBad << std::endl;
-  std::cout << "Percentage of fully good events: " << (Float_t)numberOfAllGood / (numberOfAllGood + numberOfAtLeastOneBad) * 100 << " %" << std::endl
+  std::cout << "Percentage of fully good events: " << fullyGoodPer << " %" << std::endl
             << std::endl;
 
-  std::cout << "Signal events without errors: " << signal_tot << " over " << signal_tot_err << " (" << (Float_t)signal_tot / signal_tot_err * 100 << " %) --> Efficiency of preselection" << std::endl;
-  std::cout << "Signal events after cuts: " << signal_num << " over " << signal_tot << " (" << (Float_t)signal_num / signal_tot * 100 << " %) --> Efficiency of analysis" << std::endl;
+  std::cout << "Signal events without errors: " << signal_tot << " over " << signal_tot_err << " (" << preselectionEff << " %) --> Efficiency of preselection" << std::endl;
+  std::cout << "Signal events after cuts: " << signal_num << " over " << signal_tot << " (" << analysisEff << " %) --> Efficiency of analysis" << std::endl;
+
+  std::cout << "Total Efficiency: " << totalEff << " %" << std::endl;
+}
+
+Double_t MC_fit_comparison::CalculatePurity(Int_t signal, Int_t total) const
+{
+  if (total == 0)
+    return 0.0; // Unikaj dzielenia przez zero
+  return static_cast<Double_t>(signal) / total;
+}
+
+Double_t MC_fit_comparison::CalculateEfficiency(Int_t signal, Int_t total) const
+{
+  if (total == 0)
+    return 0.0; // Unikaj dzielenia przez zero
+
+  return static_cast<Double_t>(signal) / total;
+}
+
+void MC_fit_comparison::FolderManagement(TString folderPath) const
+{
+  // Usuń folder, jeśli istnieje
+  system(Form("rm -rf %s", folderPath.Data()));
+
+  // Utwórz folder
+  system(Form("mkdir -p %s", folderPath.Data()));
 }

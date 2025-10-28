@@ -20,6 +20,9 @@ namespace Paths
   extern const std::string chainMCFiles;
   extern const std::string pdgConstFilePath;
   extern const std::string propertiesPath;
+  extern const std::string histogramConfigDir;
+  extern const std::string histogramConfig1DPath;
+  extern const std::string histogramConfig2DPath;
   extern const std::string propName;
   extern const std::string analysisConfigPath;
   extern const std::string rootfilesName;
@@ -186,13 +189,19 @@ namespace KLOE
     extern const std::map<TString, HistConfig2D> histConfigs2D;
     extern const std::map<TString, std::pair<TString, TString>> histConfigs2D_Variables; // Para zmiennych dla 2D
 
+    TString RemoveQuotes(const TString &str);
+
     // Helper functions
     TH1F *CreateHist1D(const TString &varName, const TString &histName = "");
     TH1F *CreateHist1D(const TString &varName, const TString &channName, const TString &histName = "");
+    TH1F *CreateHist1D(const TString &histName, const HistConfig1D &config);
 
     TH2F *CreateHist2D(const TString &var1, const TString &var2, const TString &histName);
     TH2F *CreateHist2D(const TString &configName, const TString &histName);
+    TH2F *CreateHist2D(const TString &histName, const HistConfig2D &config);
 
+    std::map<TString, HistConfig1D> LoadHistogramConfigs1D(const TString &filePath);
+    std::map<TString, HistConfig2D> LoadHistogramConfigs2D(const TString &filePath);
   }
 
   void setGlobalStyle();
@@ -230,7 +239,8 @@ namespace KLOE
                        pi01(6, 0.0),
                        pi02(6, 0.0),
                        pi01Fit(6, 0.0),
-                       pi02Fit(6, 0.0) {};
+                       pi02Fit(6, 0.0),
+                       cut(0) {};
 
     Float_t
         Kchboost[9],
@@ -321,7 +331,8 @@ namespace KLOE
         bunchnum,
         errorCode,
         doneTriKinFit,
-        mcflag;
+        mcflag,
+        cut;
 
     std::vector<Float_t>
         Kchrecnew,

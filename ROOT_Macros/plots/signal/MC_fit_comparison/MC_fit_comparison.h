@@ -224,6 +224,12 @@ public:
   virtual void SlaveTerminate();
   virtual void Terminate();
 
+  Double_t CalculatePurity(Int_t signal, Int_t total) const;
+  Double_t CalculateEfficiency(Int_t signal, Int_t total) const;
+  void FolderManagement(TString folderName) const;
+
+  TString folderPath = "NO_CUTS";
+
   ClassDef(MC_fit_comparison, 0);
 };
 
