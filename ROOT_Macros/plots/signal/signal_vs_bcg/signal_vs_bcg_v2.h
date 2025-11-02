@@ -15,6 +15,8 @@
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
 #include <TPrincipal.h>
+#include <TGraphErrors.h>
+#include <TH2.h>
 
 // Headers needed by this particular selector
 #include <vector>
@@ -271,6 +273,11 @@ public:
 
   void AddDataToPCA(Double_t *data);
   void WidthOfCorrelatedHist(Double_t *means, Double_t *sigmas, Double_t *vLong, Double_t *vTransv);
+
+  TGraphErrors* CreateRMSProfile(TH2 *h2D, const char* name, const char* title);
+  TCanvas* CreateCanvasWithProfiles(TH2 *h2D, const TString &name, 
+                                     Bool_t drawMeanProfile = kTRUE,
+                                     Bool_t drawSigmaProfile = kTRUE);
 
 
   TString folderPath = "NO_CUTS";
