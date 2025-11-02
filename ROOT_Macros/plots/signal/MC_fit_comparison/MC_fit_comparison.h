@@ -100,7 +100,7 @@ public:
   TTreeReaderValue<Float_t> TrcSum = {fReader, "TrcSum"};
   TTreeReaderValue<Float_t> minv4gam = {fReader, "minv4gam"};
   TTreeReaderArray<int> Asscl = {fReader, "Asscl"};
-  TTreeReaderArray<int> cutsApplied = {fReader, "cutsApplied"};
+  // TTreeReaderArray<int> cutsApplied = {fReader, "cutsApplied"};
   TTreeReaderArray<int> eclstream = {fReader, "eclstream"};
   TTreeReaderArray<int> g4takenTriKinFit = {fReader, "g4takenTriKinFit"};
   TTreeReaderArray<int> goodClustersTriKinFit = {fReader, "goodClustersTriKinFit"};

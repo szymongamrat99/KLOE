@@ -39,6 +39,7 @@
 #include <TVector3.h>
 #include <TLorentzVector.h>
 #include <TLine.h>
+#include <chi2_dist.h>
 
 #include <TFitResult.h>
 #include <TFitResultPtr.h>
@@ -78,6 +79,8 @@ TEfficiency *efficiency;
 
 TH1 *histCounts;
 
+TF1 *chi2DistFunc;
+
 // Wczytaj konfiguracje histogramów
 auto histogramConfigs1D = KLOE::Histograms::LoadHistogramConfigs1D(Paths::histogramConfig1DPath);
 auto histogramConfigs2D = KLOE::Histograms::LoadHistogramConfigs2D(Paths::histogramConfig2DPath);
@@ -100,6 +103,8 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
   folderPath = "img/" + option;
   FolderManagement(folderPath);
   /////////////////////////////////////////
+
+  chi2DistFunc = new TF1("chi2DistFunc", chi2dist, 0, 1E5, 2); // 2 parameters
 
   KLOE::setGlobalStyle();
 
@@ -218,19 +223,21 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   Float_t vKchFit = PhysicsConstants::cVel * KchboostFit[4] / KchboostFit[3],
           pathKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
-                            pow(KchboostFit[7] - ipFit[1], 2)),
-          // pow(KchboostFit[8] - ipFit[2], 2)),
-      RKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
-                     pow(KchboostFit[7] - ipFit[1], 2)),
+                            pow(KchboostFit[7] - ipFit[1], 2) +
+                            pow(KchboostFit[8] - ipFit[2], 2)),
+          RKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
+                         pow(KchboostFit[7] - ipFit[1], 2)),
           tKchFit = KchboostFit[9] / 0.0895,
           vKneFit = PhysicsConstants::cVel * KnereclorFit[4] / KnereclorFit[3],
           pathKneFit = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
-                            pow(KnerecFit[7] - ipFit[1], 2)),
+                            pow(KnerecFit[7] - ipFit[1], 2) +
+                            pow(KnerecFit[8] - ipFit[2], 2)),
           // pow(KnerecFit[8] - ipFit[2], 2)),
       RKneFit = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
                      pow(KnerecFit[7] - ipFit[1], 2)),
           tKneFit = KnereclorFit[9] / 0.0895,
-          vKneMC = 0, // PhysicsConstants::cVel * Knemc[4] / Knemc[3],
+          vKneMC = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
+          vKchMC = PhysicsConstants::cVel * Kchmc[4] / Kchmc[3],
       vKne = PhysicsConstants::cVel * Knerec[4] / Knerec[3],
           pathKne = sqrt(pow(Knerec[6] - ip[0], 2) +
                          pow(Knerec[7] - ip[1], 2) +
@@ -241,11 +248,11 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                       pow(Kchrec[7] - ip[1], 2)),
           tKne = pathKne / (vKne * 0.0895),
           pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
-                           pow(Kchmc[7] - ipmc[1], 2) +
-                           pow(Kchmc[8] - ipmc[2], 2)),
-          pathKneMC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
-                           pow(Knemc[7] - ipmc[1], 2) +
-                           pow(Knemc[8] - ipmc[2], 2));
+                           pow(Kchmc[7] - ipmc[1], 2)),
+          // pow(Kchmc[8] - ipmc[2], 2)),
+      pathKneMC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
+                       pow(Knemc[7] - ipmc[1], 2));
+  //  pow(Knemc[8] - ipmc[2], 2));
 
   std::vector<Float_t> kaonMom1Fit = {KchboostFit[0],
                                       KchboostFit[1],
@@ -363,50 +370,40 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       deltaPhiFit,
       deltaTheta;
 
-  Float_t Theta1 = atan2(1, *CotvSmeared1),
-          Theta2 = atan2(1, *CotvSmeared2);
+  TVector3 trk1Vec(trk1[0], trk1[1], trk1[2]),
+      trk2Vec(trk2[0], trk2[1], trk2[2]);
 
-  if (*CurvSmeared1 < *CurvSmeared2)
-  {
-    deltaPhiPhiCM = phiv2PhiCM - phiv1PhiCM;
-    deltaPhi = *PhivSmeared2 - *PhivSmeared1;
-    deltaTheta = Theta2 - Theta1;
-  }
-  else if (*CurvSmeared1 > *CurvSmeared2)
-  {
-    deltaPhiPhiCM = phiv1PhiCM - phiv2PhiCM;
-    deltaPhi = *PhivSmeared1 - *PhivSmeared2;
-    deltaTheta = Theta1 - Theta2;
-  }
+  Float_t Theta1 = trk1Vec.Theta(),
+          Theta2 = trk2Vec.Theta();
 
-  if (ParamSignalFit[24] > ParamSignalFit[27])
-    deltaPhiFit = ParamSignalFit[24] - ParamSignalFit[27];
-  else if (ParamSignalFit[24] < ParamSignalFit[27])
-    deltaPhiFit = ParamSignalFit[27] - ParamSignalFit[24];
+  deltaPhiPhiCM = phiv2PhiCM - phiv1PhiCM;
+  deltaPhi = abs(*Phiv2 - *Phiv1);
+  deltaTheta = abs(Theta2 - Theta1);
+  deltaPhiFit = abs(ParamSignalFit[27] - ParamSignalFit[24]);
 
   // Analiza Simony ciecie na phi bad
   const Double_t SLOPE = -10.0 / 9.0;
 
-  Bool_t condGeneral = (deltaTfit - deltaTMC)<-2.0,
+  Bool_t condGeneral = (deltaTfit - deltaTMC)<-5.0,
                                               condLowerLimit = (deltaTfit - deltaTMC)> SLOPE *
                        deltaTMC,
          condUpperLimit = (deltaTfit - deltaTMC) < (SLOPE * (deltaTMC - 2.0)),
-         badClusSimona = condGeneral && condLowerLimit && condUpperLimit; // && *Chi2SignalKinFit < 30.;
+         badClusSimona = condGeneral && *Chi2SignalKinFit < 30.;
   ///////////////////////////////////////////////////////////////////////////////
   // Analiza Simony cięcie na 3 sigma mas
-  Bool_t condMassKch = abs(Kchrec[5] - 0.018 - PhysicsConstants::mK0) < 3 * 0.836,
-         condMassKne = abs(*minv4gam + 7.834 - PhysicsConstants::mK0) < 3 * 33.989,
-         condMassPi01 = abs(pi01Fit[5] + 0.165 - PhysicsConstants::mPi0) < 3 * 5.507,
-         condMassPi02 = abs(pi02Fit[5] + 0.333 - PhysicsConstants::mPi0) < 3 * 5.856;
+  Bool_t condMassKch = abs(Kchrec[5] - 497.606) < 3 * 1.099,
+         condMassKne = abs(*minv4gam - 489.718) < 3 * 38.863,
+         condMassPi01 = abs(pi01Fit[5] - 134.894) < 3 * 6.291,
+         condMassPi02 = abs(pi02Fit[5] - 134.745) < 3 * 6.772;
 
   ///////////////////////////////////////////////////////////////////////////////
 
   Float_t radius00 = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
                           pow(KnerecFit[7] - ipFit[1], 2)),
-          radiuspm = sqrt(pow(KchrecFit[6] - ipFit[0], 2) +
-                          pow(KchrecFit[7] - ipFit[1], 2)),
-          zdist00 = abs(KnerecFit[8] - ipFit[2]),
-          zdistpm = abs(KchrecFit[8] - ipFit[2]),
+          radiuspm = sqrt(pow(Kchrec[6] - ip[0], 2) +
+                          pow(Kchrec[7] - ip[1], 2)),
+          zdist00 = abs(KnerecFit[8] - ip[2]),
+          zdistpm = abs(Kchrec[8] - ip[2]),
           path00 = sqrt(pow(radius00, 2) + pow(zdist00, 2)),
           pathpm = sqrt(pow(radiuspm, 2) + pow(zdistpm, 2)),
           path00MC = sqrt(pow(sqrt(pow(Knemc[6] - ipmc[0], 2) +
@@ -417,6 +414,14 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                    pow(Kchmc[7] - ipmc[1], 2)),
                               2) +
                           pow(abs(Kchmc[8] - ipmc[2]), 2)),
+          path00MCCenter = sqrt(pow(sqrt(pow(Knemc[6], 2) +
+                                         pow(Knemc[7], 2)),
+                                    2) +
+                                pow(abs(Knemc[8]), 2)),
+          pathpmMCCenter = sqrt(pow(sqrt(pow(Kchmc[6], 2) +
+                                         pow(Kchmc[7], 2)),
+                                    2) +
+                                pow(abs(Kchmc[8]), 2)),
           radiusLimit = 1,
           zdistLimit = 0.6;
 
@@ -440,17 +445,20 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   Double_t numSigmaSimona = 3.0;
 
+  Float_t  limitRadiusNeMC = 25.,
+           limitRadiusChMC = 25.;
+
   Bool_t mcflagCondition = (*mcflag == 1 && *mctruth >= 0) || *mcflag == 0,
          condAnalysisOld = *Chi2SignalKinFit < 40. && combinedMassPi0Fit < 35. && *TrcSum > -1 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && abs(*minv4gam - PhysicsConstants::mK0) < 76. && *Qmiss < 3.75 && openingAngleCharged > acosCutAngle,
-         simonaCuts = abs(deltaPhiFit - 3.151) > 2 * 0.189 && *Chi2SignalKinFit < 30.,
+         simonaCuts = abs(deltaPhiFit - 3.132) > 2 * 0.157 && *Chi2SignalKinFit < 30.,
          simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts,
-         shorterKaonPaths = pathKchMC < 25. && pathKneMC < 25.,
+         shorterKaonPaths = pathKchMC < limitRadiusChMC && pathKneMC < limitRadiusNeMC,
          blobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor > 75.,
          noBlobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor <= 75.,
          simonaChi2Cut = *Chi2SignalKinFit <= 30,
          simonaPositionLimits = radius00 < radiusLimit && radiuspm < radiusLimit &&
                                 zdist00 < zdistLimit && zdistpm < zdistLimit,
-         omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 132.046) < numSigmaSimona * 19.098 && abs(omega[5] - 771.135) < numSigmaSimona * 18.674 && omega[5] < T0Omega + 648.551 && omega[5] > T0Omega + 641.127)) || !simonaPositionLimits) && simonaKinCuts;
+         omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 132.215) < numSigmaSimona * 31.848 && abs(omega[5] - 776.571) < numSigmaSimona * 28.026 && omega[5] < T0Omega + 649.516 && omega[5] > T0Omega + 640.176)) || !simonaPositionLimits) && simonaKinCuts;
 
   if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1 && shorterKaonPaths)
     signal_tot++;
@@ -458,7 +466,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1 && shorterKaonPaths)
     signal_wo_err++;
 
-  if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1 && shorterKaonPaths)
+  if ((*mctruth == 1) && *mcflag == 1 && shorterKaonPaths)
   {
     deltaTSignalTot->Fill(deltaTfit, weight);
   }
@@ -504,9 +512,14 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     if (!noBlobCut)
       return kTRUE;
 
-  if (mcflagCondition && shorterKaonPaths)
+  if (mcflagCondition && *mctruth == 1)// && shorterKaonPaths) // && *cutApplied != 400 && *cutApplied != 403 && *cutApplied != 404 && *cutApplied != 405)// && *cutApplied != 402)
   {
-    if ((*mctruth == 1) && *mcflag == 1)
+    Int_t mctruth_tmp = *mctruth;
+
+    // if (mctruth_tmp == 0)
+    //   mctruth_tmp = 1;
+
+    if ((mctruth_tmp == 1) && *mcflag == 1)
       signal_num++;
 
     if (*mctruth > 1 && *mcflag == 1)
@@ -522,75 +535,82 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
         overflow++;
 
       // Fill histograms for reconstructed variables
-      histsReconstructed["mass_Kch"][KLOE::channName.at(*mctruth)]->Fill(Kchrec[5] - PhysicsConstants::mK0, weight);
+      histsReconstructed["mass_Kch"][KLOE::channName.at(mctruth_tmp)]->Fill(Kchrec[5], weight);
 
-      histsReconstructed["mass_Kne"][KLOE::channName.at(*mctruth)]->Fill(*minv4gam - PhysicsConstants::mK0, weight);
+      histsReconstructed["mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*minv4gam, weight);
 
-      histsReconstructed["mass_pi01"][KLOE::channName.at(*mctruth)]->Fill(pi01[5] - PhysicsConstants::mPi0, weight);
-      histsReconstructed["mass_pi02"][KLOE::channName.at(*mctruth)]->Fill(pi02[5] - PhysicsConstants::mPi0, weight);
+      histsReconstructed["mass_pi01"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01[5], weight);
+      histsReconstructed["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi02[5], weight);
 
-      histsReconstructed["time_neutral_MC"][KLOE::channName.at(*mctruth)]->Fill(*TrcSum, weight);
+      histsReconstructed["time_neutral_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(*TrcSum, weight);
 
-      histsReconstructed["combined_mass_pi0"][KLOE::channName.at(*mctruth)]->Fill(combinedMassPi0Fit, weight);
+      histsReconstructed["combined_mass_pi0"][KLOE::channName.at(mctruth_tmp)]->Fill(combinedMassPi0Fit, weight);
 
       // Fitted signal variables
-      histsFittedSignal["mass_Kch"][KLOE::channName.at(*mctruth)]->Fill(Kchrec[5] - PhysicsConstants::mK0, weight);
+      histsFittedSignal["mass_Kch"][KLOE::channName.at(mctruth_tmp)]->Fill(Kchrec[5], weight);
 
-      histsFittedSignal["mass_Kne"][KLOE::channName.at(*mctruth)]->Fill(*minv4gam - PhysicsConstants::mK0, weight);
+      histsFittedSignal["mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*minv4gam, weight);
 
-      histsFittedSignal["mass_pi01"][KLOE::channName.at(*mctruth)]->Fill(pi01Fit[5] - PhysicsConstants::mPi0, weight);
-      histsFittedSignal["mass_pi02"][KLOE::channName.at(*mctruth)]->Fill(pi02Fit[5] - PhysicsConstants::mPi0, weight);
+      histsFittedSignal["mass_pi01"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[5], weight);
+      histsFittedSignal["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi02Fit[5], weight);
 
-      histsFittedSignal["chi2_signalKinFit"][KLOE::channName.at(*mctruth)]->Fill(*Chi2SignalKinFit / 10., weight);
+      histsFittedSignal["chi2_signalKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., weight);
       histCounts->Fill(*Chi2SignalKinFit / 10.);
 
-      histsFittedSignal["chi2_trilaterationKinFit"][KLOE::channName.at(*mctruth)]->Fill(*Chi2OmegaKinFit / 8., weight);
-      histsFittedSignal["prob_signal"][KLOE::channName.at(*mctruth)]->Fill(TMath::Prob(*Chi2SignalKinFit, 10), weight);
+      histsFittedSignal["chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2OmegaKinFit / 8., weight);
+      histsFittedSignal["prob_signal"][KLOE::channName.at(mctruth_tmp)]->Fill(TMath::Prob(*Chi2SignalKinFit, 10), weight);
 
-      histsFittedSignal["combined_mass_pi0"][KLOE::channName.at(*mctruth)]->Fill(combinedMassPi0Fit, weight);
+      histsFittedSignal["combined_mass_pi0"][KLOE::channName.at(mctruth_tmp)]->Fill(combinedMassPi0Fit, weight);
 
       for (Int_t i = 0; i < 36; i++)
       {
-        histsFittedSignal["pull" + std::to_string(i + 1)][KLOE::channName.at(*mctruth)]->Fill(pullsSignalFit[i], weight);
+        histsFittedSignal["pull" + std::to_string(i + 1)][KLOE::channName.at(mctruth_tmp)]->Fill(pullsSignalFit[i], weight);
       }
 
-      histsFittedSignal["time_neutral_MC"][KLOE::channName.at(*mctruth)]->Fill(*TrcSum, weight);
+      histsFittedSignal["time_neutral_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(*TrcSum, weight);
 
-      histsFittedSignal["openingAngleCharged"][KLOE::channName.at(*mctruth)]->Fill(openingAngleCharged, weight);
-      histsFittedSignal["openingAngleNeutral"][KLOE::channName.at(*mctruth)]->Fill(openingAngleNeutral, weight);
+      histsFittedSignal["openingAngleCharged"][KLOE::channName.at(mctruth_tmp)]->Fill(openingAngleCharged, weight);
+      histsFittedSignal["openingAngleNeutral"][KLOE::channName.at(mctruth_tmp)]->Fill(openingAngleNeutral, weight);
 
-      histsFittedSignal["Qmiss"][KLOE::channName.at(*mctruth)]->Fill(*Qmiss, weight);
+      histsFittedSignal["Qmiss"][KLOE::channName.at(mctruth_tmp)]->Fill(*Qmiss, weight);
 
-      histsFittedSignal["delta_t"][KLOE::channName.at(*mctruth)]->Fill(deltaTfit, weight);
+      histsFittedSignal["delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTfit, weight);
 
-      histsFittedSignal["deltaPhiv"][KLOE::channName.at(*mctruth)]->Fill(deltaPhi, weight);
-      histsFittedSignal["deltaPhivFit"][KLOE::channName.at(*mctruth)]->Fill(deltaPhiFit, weight);
+      histsFittedSignal["deltaPhiv"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaPhi, weight);
+      histsFittedSignal["deltaPhivFit"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaPhiFit, weight);
 
-      histsFittedSignal["deltaTheta"][KLOE::channName.at(*mctruth)]->Fill(deltaTheta, weight);
+      histsFittedSignal["deltaTheta"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTheta, weight);
 
-      histsReconstructed["TransvRadius"][KLOE::channName.at(*mctruth)]->Fill(RKch, weight);
-      histsFittedSignal["TransvRadius"][KLOE::channName.at(*mctruth)]->Fill(RKne, weight);
+      histsFittedSignal["TransvRadius"][KLOE::channName.at(mctruth_tmp)]->Fill(path00MCCenter, weight);
 
-      histsFittedSignal["T0Omega"][KLOE::channName.at(*mctruth)]->Fill(T0Omega, weight);
-      histsFittedSignal["mass_omega"][KLOE::channName.at(*mctruth)]->Fill(omega[5], weight);
+      histsFittedSignal["T0Omega"][KLOE::channName.at(mctruth_tmp)]->Fill(T0Omega, weight);
+      histsFittedSignal["mass_omega"][KLOE::channName.at(mctruth_tmp)]->Fill(omega[5], weight);
 
-      histsFittedSignal["dist_z_Neu"][KLOE::channName.at(*mctruth)]->Fill(KnerecFit[8] - ipFit[2], weight);
-      histsFittedSignal["dist_z_Ch"][KLOE::channName.at(*mctruth)]->Fill(KchrecFit[8] - ipFit[2], weight);
+      histsFittedSignal["dist_z_Neu"][KLOE::channName.at(mctruth_tmp)]->Fill(KnerecFit[8] - ipFit[2], weight);
+      histsFittedSignal["dist_z_Ch"][KLOE::channName.at(mctruth_tmp)]->Fill(KchrecFit[8] - ipFit[2], weight);
 
-      hists2DFittedSignal["T0_omega_vs_mass_omega"][KLOE::channName.at(*mctruth)]->Fill(T0Omega, omega[5], weight);
+      hists2DFittedSignal["T0_omega_vs_mass_omega"][KLOE::channName.at(mctruth_tmp)]->Fill(T0Omega, omega[5], weight);
 
-      hists2DFittedSignal["delta_t_fit_vs_delta_t_mc"][KLOE::channName.at(*mctruth)]->Fill(deltaTMC, deltaTfit - deltaTMC, weight);
-      hists2DFittedSignal["delta_t_vs_delta_t_mc"][KLOE::channName.at(*mctruth)]->Fill(deltaTMC, deltaT - deltaTMC, weight);
+      hists2DFittedSignal["delta_t_fit_vs_delta_t_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTMC, deltaTfit - deltaTMC, weight);
+      hists2DFittedSignal["delta_t_vs_delta_t_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTMC, deltaT - deltaTMC, weight);
 
-      hists2DFittedSignal["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(*mctruth)]->Fill(*Chi2SignalKinFit, *Chi2OmegaKinFit, weight);
+      hists2DFittedSignal["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, *Chi2OmegaKinFit, weight);
 
-      hists2DFittedSignal["t00_tri_vs_t00_mc"][KLOE::channName.at(*mctruth)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostTriFit, weight);
+      hists2DFittedSignal["t00_tri_vs_t00_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostTriFit, weight);
 
-      hists2DFittedSignal["t00_triangle_vs_t00_mc"][KLOE::channName.at(*mctruth)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostLor, weight);
+      hists2DFittedSignal["t00_triangle_vs_t00_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostLor, weight);
 
-      hists2DFittedSignal["t00_triangle_vs_t00_tri"][KLOE::channName.at(*mctruth)]->Fill(*KaonNeTimeCMBoostLor, *KaonNeTimeCMBoostTriFit, weight);
+      hists2DFittedSignal["t00_triangle_vs_t00_tri"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMBoostLor, *KaonNeTimeCMBoostTriFit, weight);
 
-      hists2DFittedSignal["Rkne_vs_Rkch"][KLOE::channName.at(*mctruth)]->Fill(RKne, RKch, weight);
+      hists2DFittedSignal["Rkne_vs_Rkch"][KLOE::channName.at(mctruth_tmp)]->Fill(RKne, RKch, weight);
+
+      hists2DFittedSignal["chi2_signalKinFit_vs_mass_Kch"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, Kchrec[5] - PhysicsConstants::mK0, weight);
+
+      hists2DFittedSignal["chi2_signalKinFit_vs_mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, Knerec[5] - PhysicsConstants::mK0, weight);
+
+      hists2DFittedSignal["chi2_signalKinFit_vs_delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, deltaTfit, weight);
+
+      hists2DFittedSignal["TransvRadius_vs_delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(path00MCCenter, deltaTMC, weight);
 
       dataPCA[0] = T0Omega;
       dataPCA[1] = omega[5];
@@ -693,11 +713,17 @@ void signal_vs_bcg_v2::Terminate()
 
   Double_t meanMass = 0, sigmaMass = 0, meanT0 = 0, sigmaT0 = 0;
 
+  TF1 *chi2 = new TF1("chi2", chi2dist, 0, 1E5, 2);
+
   for (const auto &config : histogramConfigs1D)
   {
-    Bool_t fitTripleGaus = (config.first == "mass_Kch" || config.first == "mass_Kne" || config.first == "mass_pi01" || config.first == "mass_pi02"),
-           fitOmegaGaus = (config.first == "T0Omega" || config.first == "mass_omega"),
+    Bool_t fitTripleGaus = 0,// (config.first == "mass_Kch" || config.first == "mass_Kne" || config.first == "mass_pi01" || config.first == "mass_pi02"),
+        fitOmegaGaus = (config.first == "T0Omega" || config.first == "mass_omega"),
            fitSignalBadClus = (config.first == "deltaPhivFit" && fOption == "BAD_CLUS_SIMONA");
+    Bool_t chi2Fit = (config.first == "chi2_signalKinFit");
+
+    Bool_t logCond = (config.first == "time_neutral_MC" || config.first == "Qmiss"), // || config.first == "TransvRadius"),
+        logCondX = 0;                                                                                                                            //= (config.first == "chi2_signalKinFit");
 
     std::vector<TString> labels;
 
@@ -710,7 +736,16 @@ void signal_vs_bcg_v2::Terminate()
     legend->SetTextSize(0.03);
 
     canvas[config.first]->cd();
-    canvas[config.first]->SetLogy(0);
+    if (logCond)
+      canvas[config.first]->SetLogy(1);
+    else
+      canvas[config.first]->SetLogy(0);
+
+    if (logCondX)
+      canvas[config.first]->SetLogx(1);
+    else
+      canvas[config.first]->SetLogx(0);
+
     for (const auto &channelType : KLOE::channName)
     {
       histsReconstructed[config.first][channelType.second]->SetLineColor(KLOE::channColor.at(channelType.second) + 1);
@@ -718,7 +753,10 @@ void signal_vs_bcg_v2::Terminate()
 
       histsFittedSignal[config.first][channelType.second]->SetTitle("");
 
-      histsFittedSignal[config.first][channelType.second]->GetYaxis()->SetRangeUser(0, maxNum[config.first] * 1.2);
+      if (logCond)
+        histsFittedSignal[config.first][channelType.second]->GetYaxis()->SetRangeUser(1, maxNum[config.first] * 100);
+      else
+        histsFittedSignal[config.first][channelType.second]->GetYaxis()->SetRangeUser(0, maxNum[config.first] * 1.2);
 
       if (channelType.second == "Data")
       {
@@ -727,18 +765,20 @@ void signal_vs_bcg_v2::Terminate()
       }
       else
       {
-        if (channelType.second == "Signal" && fitTripleGaus)
+        if ((channelType.second == "Signal" && fitTripleGaus) || (channelType.second == "Omega" && fitOmegaGaus))
         {
           textresultsFitter->Clear();
           fitter->FitHistogram(histsFittedSignal[config.first][channelType.second]);
           fitter->DrawFitOnCurrentPad(true, false);
+          
           textresultsFitter->AddText(Form("Fit results:"));
+          textresultsFitter->AddText(Form("Chi2 / ndof: %.3f / %d", fitter->GetLastResults().chi2, fitter->GetLastResults().ndf));
           textresultsFitter->AddText(Form("Mean: %.3f #pm %.3f", fitter->GetLastResults().combinedMean, fitter->GetLastResults().combinedMeanErr));
           textresultsFitter->AddText(Form("Sigma: %.3f #pm %.3f", fitter->GetLastResults().combinedSigma, fitter->GetLastResults().combinedSigmaErr));
           textresultsFitter->Draw();
         }
 
-        if (0) //(channelType.second == "Signal" && fitSignalBadClus) || (channelType.second == "Omega" && fitOmegaGaus))
+        if ((channelType.second == "Signal" && fitSignalBadClus))
         {
           textresultsFitter->Clear();
 
@@ -748,8 +788,12 @@ void signal_vs_bcg_v2::Terminate()
           Double_t integral = histsFittedSignal[config.first][channelType.second]->Integral();
           Double_t binWidth = histsFittedSignal[config.first][channelType.second]->GetBinWidth(1);
 
-          // ✅ Użyj "gaus" i oblicz poprawną amplitudę
-          TF1 *gausFit = new TF1("gausFit", "gausn", mean - rms, mean + rms);
+          Int_t dof = 10;
+
+          // Użyj "gaus" i oblicz poprawną amplitudę
+          TF1 *gausFit = new TF1("gausFit", "gausn", mean - 10 * rms, mean + 10 * rms);
+
+          TF1 *chi2FitDist = new TF1("chi2FitDist", chi2dist, 0, 1E5, 2);
 
           // Parametry dla "gaus": [0] = amplituda, [1] = mean, [2] = sigma
           // Amplituda = Integral / (sigma * sqrt(2*pi))
@@ -760,9 +804,12 @@ void signal_vs_bcg_v2::Terminate()
           gausFit->SetParameter(2, 0.005 * rms);
 
           // Opcjonalnie: ustaw granice parametrów
-          gausFit->SetParLimits(0, 0, 100 * amplitude);      // Amplituda > 0
-          gausFit->SetParLimits(1, mean - rms, mean + rms);  // Amplituda > 0
-          gausFit->SetParLimits(2, 0.001 * rms, 0.01 * rms); // Sigma rozumna
+          gausFit->SetParLimits(0, 0, 100 * amplitude);                 // Amplituda > 0
+          gausFit->SetParLimits(1, mean - 1 * rms, mean + 1 * rms); // Amplituda > 0
+          gausFit->SetParLimits(2, 0.001 * rms, 0.01 * rms);            // Sigma rozumna
+
+          chi2FitDist->SetParameter(0, integral); // degrees of freedom
+          chi2FitDist->SetParameter(1, dof);
 
           TFitResultPtr result;
 
@@ -780,6 +827,10 @@ void signal_vs_bcg_v2::Terminate()
             meanMass = result->Parameter(1);
             sigmaMass = result->Parameter(2);
           }
+          else if (0) // chi2Fit
+          {
+            result = histsFittedSignal[config.first][channelType.second]->Fit(chi2FitDist, "RS");
+          }
           else
           {
             result = histsFittedSignal[config.first][channelType.second]->Fit(gausFit, "RS");
@@ -788,13 +839,14 @@ void signal_vs_bcg_v2::Terminate()
           histsFittedSignal[config.first][channelType.second]->Sumw2(false);
 
           textresultsFitter->AddText(Form("Fit results:"));
+          textresultsFitter->AddText(Form("Chi2/NDF: %.3f / %d", result->Chi2(), result->Ndf()));
           textresultsFitter->AddText(Form("Mean: %.3f #pm %.3f", result->Parameter(1), result->ParError(1)));
           textresultsFitter->AddText(Form("Sigma: %.3f #pm %.3f", result->Parameter(2), result->ParError(2)));
           textresultsFitter->Draw();
         }
 
         histsFittedSignal[config.first][channelType.second]->Draw("HIST SAME");
-        if (channelType.second == "Omega" && config.first == "TransvRadius")
+        if (config.first == "TransvRadius")
           histsReconstructed[config.first][channelType.second]->Draw("HIST SAME");
 
         gPad->Update();
@@ -802,11 +854,20 @@ void signal_vs_bcg_v2::Terminate()
       }
     }
 
-    meanT0 = 132.046;
-    sigmaT0 = 19.098;
+    meanT0 = 132.215;
+    sigmaT0 = 31.848;
 
-    meanMass = 771.135;
-    sigmaMass = 18.674;
+    meanMass = 776.571;
+    sigmaMass = 28.026;
+
+    // if (config.first == "chi2_signalKinFit")
+    // {
+    //   chi2->SetParameter(0, histsFittedSignal[config.first]["Signal"]->Integral(1,30));
+    //   chi2->SetParameter(1, 10); // degrees of freedom
+    //   chi2->SetLineColor(KLOE::channColor.at("Signal"));
+    //   histsFittedSignal[config.first]["Data"]->GetYaxis()->SetRangeUser(0, chi2->GetMaximum(10.0, 10.0) * 1.2);
+    //   chi2->Draw("SAME");
+    // }
 
     labels.push_back(Form("Events: %d", (Int_t)histsFittedSignal[config.first]["MC sum"]->GetEntries()));
 
@@ -814,8 +875,8 @@ void signal_vs_bcg_v2::Terminate()
 
     gPad->Update();
 
-    if (!fitTripleGaus && !fitOmegaGaus && !fitSignalBadClus && !(config.first == "TransvRadius"))
-      legend->Draw();
+    // if (!fitTripleGaus && !fitOmegaGaus && !fitSignalBadClus && !(config.first == "TransvRadius"))
+    //   legend->Draw();
 
     // Sprawdź czy JAKIKOLWIEK histogram ma wpisy
     Bool_t hasEntries = kFALSE;
@@ -1061,6 +1122,8 @@ void signal_vs_bcg_v2::Terminate()
   std::cout << "Purity: " << 100 * purity << " % (" << signal_num << "/" << tot_events << ")" << std::endl;
 
   std::cout << "Metryka: " << sigma_pull / (pow(eff, 2) * purity) << std::endl;
+
+  std::cout << "Topology eff signal: " << 100 * signal_wo_err / (Float_t)signal_tot << " % (" << signal_wo_err << "/" << signal_tot << ")" << std::endl;
 }
 
 Double_t signal_vs_bcg_v2::CalculatePurity(Int_t signal, Int_t total) const
