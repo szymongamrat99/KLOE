@@ -22,6 +22,7 @@
 #include <StatisticalCutter.h>
 #include <ConfigManager.h>
 #include <NeutralReconstruction.h>
+#include <FileManager.h>
 
 #include <DataAccessWrapper.h>
 
@@ -122,7 +123,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::vector<std::string> baseFilenames = {filePaths["Data"]["filenameBase"],
                                             filePaths["MC"]["filenameBase"][0],
                                             filePaths["MC"]["filenameBase"][1],
-                                            filePaths["MC"]["filenameBase"][2]};
+                                            filePaths["MC"]["filenameBase"][2]},
+                           baseFilenamesTot = {"",
+                                            "",
+                                            "",
+                                            ""};
 
   std::string smearingName = "NoSmearing";
 
@@ -131,26 +136,88 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     smearingName = covMatrixType;
   }
 
-  if(SignalOnly)
+  if (SignalOnly)
   {
     for (Int_t i = 0; i < baseFilenames.size(); i++)
     {
-      baseFilenames[i] = baseFilenames[i] + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal));
+      baseFilenamesTot[i] = baseFilenames[i] + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal));
     }
   }
   else
   {
     for (Int_t i = 0; i < baseFilenames.size(); i++)
     {
-      baseFilenames[i] = baseFilenames[i] + "_" + hypoCodeStr + "_" + smearingName;
+      baseFilenamesTot[i] = baseFilenames[i] + "_" + hypoCodeStr + "_" + smearingName;
     }
   }
 
+  // Helper function to convert FileType to string
+  auto fileTypeToString = [](Controls::FileType fileType) -> std::string {
+    switch (fileType)
+    {
+    case Controls::FileType::DATA:
+      return "DATA";
+    case Controls::FileType::ALL_PHYS:
+      return "ALL_PHYS";
+    case Controls::FileType::ALL_PHYS2:
+      return "ALL_PHYS2";
+    case Controls::FileType::ALL_PHYS3:
+      return "ALL_PHYS3";
+    default:
+      return "UNKNOWN";
+    }
+  };
+
+  std::string fileTypeStr = fileTypeToString(fileTypeOpt);
+
   std::string
       dirname = (std::string)Paths::initialanalysis_dir + (std::string)Paths::root_files_dir,
-      dated_folder = Obj.CreateDatedFolder(dirname);
+      dated_folder = Obj.CreateDatedFolder(dirname),
+      log_file_writer_lumi = "";
 
-  SplitFileWriter writer(baseFilenames[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024 * 0.01, false, dated_folder);
+  if (SignalOnly)
+  {
+    log_file_writer_lumi = "file_lumi_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + ".log";
+  }
+  else
+  {
+    log_file_writer_lumi = "file_lumi_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + ".log";
+  }
+
+  SplitFileWriter writer(baseFilenamesTot[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024 * 0.01, false, dated_folder, log_file_writer_lumi, fileTypeOpt);
+
+  KLOE::FileManager fileManager;
+  std::string inputLumiLog = "";
+
+  if (SignalOnly)
+  {
+    inputLumiLog = dated_folder + "/input_luminosity_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + ".log";
+  }
+  else
+  {
+    inputLumiLog = dated_folder + "/input_luminosity_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + ".log";
+  }
+
+  fileManager.LogChainLuminosity(chain, inputLumiLog);
+
+  // Oblicz całkowitą luminozność
+  double totalInputLuminosity = 0.0;
+  TObjArray *fileElements = chain.GetListOfFiles();
+  TIter next(fileElements);
+  TChainElement *chEl = nullptr;
+
+  while ((chEl = (TChainElement *)next()))
+  {
+    Long64_t entries = chEl->GetEntries();
+    totalInputLuminosity += KLOE::FileManager::EventsToLuminosity(entries);
+  }
+
+  // Współczynnik konwersji [nb^-1 / event]
+  const double luminosityPerEvent = 0.000908;
+
+  // W pętli - śledź zmiany plików
+  std::string currentInputFile = "";
+  Long64_t currentFileEvents = 0;
 
   Int_t mcflag = 0, mctruth = 0, NCLMIN = 4; // Assuming NCLMIN is 4, adjust as needed;
   std::vector<Int_t> neuclulist;
@@ -373,6 +440,30 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     baseKin.CurvMC.clear();
     baseKin.PhivMC.clear();
     baseKin.CotvMC.clear();
+
+    TFile *currentFile = chain.GetFile();
+    if (currentFile)
+    {
+      std::string newInputFile = currentFile->GetName();
+      if (newInputFile != currentInputFile)
+      {
+        currentInputFile = newInputFile;
+
+        // Znajdź liczbę zdarzeń w tym pliku
+        TObjArray *files = chain.GetListOfFiles();
+        TIter it(files);
+        TChainElement *el = nullptr;
+        while ((el = (TChainElement *)it()))
+        {
+          if (std::string(el->GetTitle()) == currentInputFile)
+          {
+            currentFileEvents = el->GetEntries();
+            writer.SetCurrentInputFile(currentInputFile, currentFileEvents, luminosityPerEvent);
+            break;
+          }
+        }
+      }
+    }
 
     // Construction of the charged rec class object
     Float_t bhabha_vtx[3] = {dataAccess.GetBx(),

@@ -17,7 +17,7 @@
     "SIGNAL": {
       "enabled": true,
       "description": "phi -> K0K0 -> pi+pi-pi0pi0",
-      "signal": 3,
+      "signal": 1,
       "modules": {
         "classifyMCVariables": true,
         "signalOnly": true,

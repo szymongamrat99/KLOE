@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
       {
         runs = initObj.getRunStats(path, runRegexPattern);
         initObj.chainInit(chain, logger, path, runRegexPattern,
-                          runs.minRun, runs.maxRun);
+                          runs.minRun, runs.minRun);
       }
 
       break;
@@ -155,6 +155,12 @@ int main(int argc, char *argv[])
 
     std::string infoMsg = "Initialized TChain with " + std::to_string(chain.GetEntries()) + " entries.";
     logger.getLog(infoCode, infoMsg);
+    
+    // Opcjonalnie: zaktualizuj statystyki o rzeczywistą liczbę zdarzeń i luminozność
+    // (tylko jeśli potrzebujesz tych informacji)
+    // initObj.UpdateRunStatsFromChain(runs, chain);
+    // std::cout << "Total luminosity: " << runs.totalLuminosity << " nb^-1" << std::endl;
+    
     // -------------------------------------------------------
     infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
 
