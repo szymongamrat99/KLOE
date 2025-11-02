@@ -16,3 +16,9 @@ t00_triangle_vs_t00_tri; 100; 100; -5.; 300.; 0.; 300.; "t^{00}_{triangle} vs. t
 T0_omega_vs_mass_omega; 100; 100; 0.; 350.; 600.; 1000.; "T_{0} vs. m^{inv}_{#pi^{+}#pi^{-}#pi^{0}}"; "T_{0} [MeV]"; "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]"; ""
 
 Rkne_vs_Rkch; 100; 100; 0.; 5.; 0.; 5.; "R_{00} vs. R_{+-}"; "Rt_{00} [cm]"; "Rt_{+-} [cm]"; ""
+
+chi2_signalKinFit_vs_mass_Kch; 100; 100; 0; 1.5E4.; -150.; 150.; "Chi2 vs Kch mass"; "#chi^{2}_{signal}"; "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]"; ""
+chi2_signalKinFit_vs_mass_Kne; 100; 100; 0; 1.5E4.; -320.; 320.; "Chi2 vs Kne mass"; "#chi^{2}_{signal}"; "m^{inv}_{4#gamma} [MeV/c^{2}]"; ""
+chi2_signalKinFit_vs_delta_t; 100; 121; 0; 1.5E5.; -100.; 100.; "Chi2 vs Delta t"; "#chi^{2}_{signal}"; "#Delta t [#tau_{S}]"; ""
+
+TransvRadius_vs_delta_t; 100; 201; 0; 50.; -100.; 100.; "TransvRadius vs Delta t"; "R [cm]"; "#Delta t [#tau_{S}]"; ""

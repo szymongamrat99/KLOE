@@ -123,7 +123,7 @@ TripleGaussFitter::FitParams TripleGaussFitter::PrepareDefaultParams(TH1 *hist)
     Int_t idx = i * 3;
     // Amplitudy - od 0 do 2x całkowita wartość
     lower[idx] = 0.0;
-    upper[idx] = integral * 2.0;
+    upper[idx] = integral * 3.0;
 
     // Średnie - w zakresie histogramu ± 20%
     lower[idx + 1] = xmin - range * 0.2;
