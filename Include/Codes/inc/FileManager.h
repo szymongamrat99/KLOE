@@ -6,14 +6,16 @@
 #include <vector>
 #include <string>
 #include <MainMenu.h>
+#include <TChainElement.h>
 
 namespace KLOE {
 struct RunStats {
     int minRun;
     int maxRun;
     size_t fileCount;
-    double totalGB;
+    Long64_t totalEvents;          // Całkowita liczba zdarzeń
     std::vector<int> runList;
+    double totalLuminosity;        // Całkowita luminozność w nb^-1
 };
 
 class FileManager {
@@ -42,9 +44,18 @@ public:
      * @brief Get statistics about runs in a directory matching a regex pattern.
      * @param directory Path to the directory to search.
      * @param regex_pattern Regex pattern with a capturing group for the run number.
-     * @return RunStats structure with min/max run, file count, total GB, and run list.
+     * @return RunStats structure with min/max run, file count, total events, and run list.
+     * @note This function only scans filenames (fast). Use UpdateRunStatsFromChain() to calculate events and luminosity.
      */
     RunStats getRunStats(const std::string& directory, const std::string& regex_pattern);
+
+    /**
+     * @brief Update RunStats with actual event counts and luminosity from a TChain.
+     * @param stats RunStats structure to update.
+     * @param chain TChain containing the files.
+     * @note Call this after chainInit() if you need accurate event counts and luminosity.
+     */
+    static void UpdateRunStatsFromChain(RunStats &stats, TChain &chain);
 
     /**
      * @brief Initialize a TChain with files in a given run range (using regex and directory).
@@ -62,6 +73,20 @@ public:
     void chainInit(TChain &chain_init, ErrorHandling::ErrorLogs &logger,
                   const std::vector<std::string>& fileList, const std::string& regex_pattern,
                   int minRun, int maxRun);
+
+    /**
+     * @brief Przelicz liczbę zdarzeń na luminozność.
+     * @param nEvents Liczba zdarzeń.
+     * @return Luminozność w nb^-1.
+     */
+    static double EventsToLuminosity(Long64_t nEvents);
+
+    /**
+     * @brief Loguj informacje o plikach w TChain wraz z luminozością.
+     * @param chain Reference do TChain.
+     * @param logFile Ścieżka do pliku logu.
+     */
+    static void LogChainLuminosity(TChain &chain, const std::string &logFile = "input_files.log");
 };
 }
 

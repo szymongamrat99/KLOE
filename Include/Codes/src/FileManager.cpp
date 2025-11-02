@@ -7,7 +7,11 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <iomanip>
+#include <ctime>
 #include <const.h>
+#include <TFile.h>
+#include <TTree.h>
 
 
 using json = nlohmann::json;
@@ -15,12 +19,95 @@ using json = nlohmann::json;
 namespace KLOE
 {
 
+  double FileManager::EventsToLuminosity(Long64_t nEvents)
+  {
+    // Wzór do przeliczenia liczby zdarzeń na luminozność
+    // 
+    // Dla KLOE:
+    // - Typowy plik z danymi ma ~N wydarzeń
+    // - Odpowiada to ~X nb^-1 luminozności
+    // 
+    // Wzór empiryczny bazujący na liczbie zdarzeń:
+    // Luminosity [nb^-1] = nEvents * conversion_factor + displacement
+    
+    const double conversion_factor = 0.000908;  // [nb^-1 / event]
+    const double displacement = 1.38;       // [nb^-1]
+    return nEvents * conversion_factor + displacement;
+  }
+
+  void FileManager::LogChainLuminosity(TChain &chain, const std::string &logFile)
+  {
+    std::ofstream log(logFile, std::ios::out | std::ios::trunc);
+    
+    if (!log.is_open())
+    {
+      std::cerr << "ERROR: Cannot open log file: " << logFile << std::endl;
+      return;
+    }
+    
+    // Nagłówek
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    log << "=== Input Files Luminosity Log ===" << std::endl;
+    log << "Timestamp: " << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << std::endl;
+    log << "Chain name: " << chain.GetName() << std::endl;
+    log << "Total entries: " << chain.GetEntries() << std::endl;
+    log << "==================================\n" << std::endl;
+    
+    double totalLuminosity = 0.0;
+    Long64_t totalEvents = 0;
+    
+    // Iteruj po plikach w TChain
+    TObjArray *fileElements = chain.GetListOfFiles();
+    TIter next(fileElements);
+    TChainElement *chEl = nullptr;
+    
+    log << std::left << std::setw(50) << "File" 
+        << std::right << std::setw(15) << "Events" 
+        << std::setw(15) << "Lumi [nb^-1]" << std::endl;
+    log << std::string(80, '-') << std::endl;
+    
+    while ((chEl = (TChainElement*)next()))
+    {
+      std::string filename = chEl->GetTitle();
+      boost::filesystem::path p(filename);
+      
+      // Pobierz liczbę zdarzeń z tego pliku
+      Long64_t entries = chEl->GetEntries();
+      
+      // Przelicz liczbę zdarzeń na luminozność
+      double lumi = EventsToLuminosity(entries);
+      
+      // Loguj
+      log << std::left << std::setw(50) << p.filename().string()
+          << std::right << std::fixed
+          << std::setw(15) << entries
+          << std::setw(15) << std::setprecision(4) << lumi << std::endl;
+      
+      totalLuminosity += lumi;
+      totalEvents += entries;
+    }
+    
+    log << std::string(80, '=') << std::endl;
+    log << std::left << std::setw(50) << "TOTAL"
+        << std::right << std::fixed
+        << std::setw(15) << totalEvents
+        << std::setw(15) << std::setprecision(4) << totalLuminosity << std::endl;
+    
+    log.close();
+    
+    std::cout << "Input files luminosity log saved to: " << logFile << std::endl;
+    std::cout << "Total integrated luminosity: " << std::setprecision(4) 
+              << totalLuminosity << " nb^-1 (" << totalEvents << " events)" << std::endl;
+  }
+
   RunStats FileManager::getRunStats(const std::string &directory, const std::string &regex_pattern)
   {
     std::set<int> runs;
-    size_t totalBytes = 0;
     std::regex run_regex(regex_pattern);
 
+    // Tylko przeskanuj nazwy plików - NIE otwieraj plików ROOT
+    // To dramatycznie przyspiesza działanie
     for (auto &entry : boost::filesystem::directory_iterator(directory))
     {
       if (!boost::filesystem::is_regular_file(entry.status()))
@@ -33,7 +120,6 @@ namespace KLOE
         {
           int run = std::stoi(match[1].str());
           runs.insert(run);
-          totalBytes += boost::filesystem::file_size(entry.path());
         }
         catch (...)
         {
@@ -52,9 +138,19 @@ namespace KLOE
       stats.minRun = stats.maxRun = -1;
     }
     stats.fileCount = runs.size();
-    stats.totalGB = totalBytes / (1024.0 * 1024.0 * 1024.0);
+    stats.totalEvents = 0;  // Będzie policzone przez TChain później
     stats.runList.assign(runs.begin(), runs.end());
+    stats.totalLuminosity = 0.0;  // Będzie obliczone później
     return stats;
+  }
+
+  void FileManager::UpdateRunStatsFromChain(RunStats &stats, TChain &chain)
+  {
+    // Oblicz całkowitą liczbę zdarzeń z TChain (już załadowanego)
+    stats.totalEvents = chain.GetEntries();
+    
+    // Oblicz luminozność
+    stats.totalLuminosity = EventsToLuminosity(stats.totalEvents);
   }
 
   void FileManager::chainInit(TChain &chain_init, Controls::DataType &dataTypeOpt, UInt_t &firstData, UInt_t &lastData, UInt_t &firstMC, UInt_t &lastMC, ErrorHandling::ErrorLogs &logger, Int_t csFlag)
