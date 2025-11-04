@@ -32,6 +32,7 @@
 #include <TMath.h>
 #include <TF1.h>
 #include <TripleGaussFitter.h>
+#include <DoublGaussFitter.h>
 #include <triple_gaus.h>
 #include <TPaveText.h>
 #include <TLegend.h>
@@ -64,6 +65,7 @@ TCanvas *canvaEff;
 TH1 *deltaTSignalTot;
 
 KLOE::TripleGaussFitter *fitter;
+KLOE::DoublGaussFitter *doubleFitter;
 
 KLOE::pm00 Obj;
 
@@ -93,6 +95,7 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
   KLOE::setGlobalStyle();
 
   fitter = new KLOE::TripleGaussFitter();
+  doubleFitter = new KLOE::DoublGaussFitter();
 
   canvaEff = new TCanvas("Efficiency", "Efficiency", 800, 800);
   deltaTSignalTot = new TH1D("EfficiencyHistTot", "Efficiency Histogram Total; #Deltat [#tau_{S}]; Efficiency [-]", nbins, -30, 30);
@@ -280,11 +283,11 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                               pow(Kchrec[7], 2) +
                               pow(Kchrec[8], 2)),
           path00FitCenter = sqrt(pow(KnerecFit[6], 2) +
-                              pow(KnerecFit[7], 2) +
-                              pow(KnerecFit[8], 2)),
+                                 pow(KnerecFit[7], 2) +
+                                 pow(KnerecFit[8], 2)),
           pathpmFitCenter = sqrt(pow(KchrecFit[6], 2) +
-                              pow(KchrecFit[7], 2) +
-                              pow(KchrecFit[8], 2)),
+                                 pow(KchrecFit[7], 2) +
+                                 pow(KchrecFit[8], 2)),
           path00MC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
                           pow(Knemc[7] - ipmc[1], 2) +
                           pow(Knemc[8] - ipmc[2], 2)),
@@ -335,7 +338,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   ///////////////////////////////////////////////////////////////////////////////
 
   Bool_t simonaCuts = abs(deltaPhiFit - 3.132) > 2 * 0.157 && *Chi2SignalKinFit < 30.,
-  simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts;
+         simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts;
 
   if (*mctruth == 0 || *mctruth == -1 || *mctruth == 1)
     signal_tot_err++;
@@ -354,7 +357,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                        pow(Kchmc[7] - ipmc[1], 2) +
                        pow(Kchmc[8] - ipmc[2], 2));
 
-  if ((*mctruth == 1 || *mctruth == 0))// && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC) // && *Chi2SignalKinFit < 30.) // && isInsideFiducialVolume)
+  if ((*mctruth == 1 || *mctruth == 0)) // && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC) // && *Chi2SignalKinFit < 30.) // && isInsideFiducialVolume)
   {
     Int_t mctruth_tmp = *mctruth;
 
@@ -425,32 +428,46 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     // Decide which reconstructed track corresponds to which MC particle
 
-    Double_t error1 = sqrt(pow(*Curv1 - CurvMC[0], 2) +
-                           pow(*Phiv1 - PhivMC[0], 2) +
-                           pow(*Cotv1 - CotvMC[0], 2)),
-             error2 = sqrt(pow(*Curv1 - CurvMC[1], 2) +
-                           pow(*Phiv1 - PhivMC[1], 2) +
-                           pow(*Cotv1 - CotvMC[1], 2));
+    Double_t  errorPart10, errorPart20, errorPart11, errorPart21, error1021, error1120; 
 
-    if (error1 < error2)
+    errorPart10 = pow(abs(*CurvSmeared1) - abs(CurvMC[0]), 2) +
+    pow(abs(*PhivSmeared1) - abs(PhivMC[0]), 2) +
+    pow(abs(*CotvSmeared1) - abs(CotvMC[0]), 2);
+
+    errorPart20 = pow(abs(*CurvSmeared2) - abs(CurvMC[0]), 2) +
+    pow(abs(*PhivSmeared2) - abs(PhivMC[0]), 2) +
+    pow(abs(*CotvSmeared2) - abs(CotvMC[0]), 2);
+
+    errorPart11 = pow(abs(*CurvSmeared1) - abs(CurvMC[1]), 2) +
+    pow(abs(*PhivSmeared1) - abs(PhivMC[1]), 2) +
+    pow(abs(*CotvSmeared1) - abs(CotvMC[1]), 2);
+
+    errorPart21 = pow(abs(*CurvSmeared2) - abs(CurvMC[1]), 2) +
+    pow(abs(*PhivSmeared2) - abs(PhivMC[1]), 2) +
+    pow(abs(*CotvSmeared2) - abs(CotvMC[1]), 2);
+
+    error1021 = sqrt(errorPart10 + errorPart21);
+    error1120 = sqrt(errorPart11 + errorPart20);
+    
+    if (error1021 < error1120)
     {
-      histsReconstructed["curv1"]->Fill(*Curv1 - CurvMC[0], weight);
-      histsReconstructed["phiv1"]->Fill(*Phiv1 - PhivMC[0], weight);
-      histsReconstructed["cotv1"]->Fill(*Cotv1 - CotvMC[0], weight);
+      histsReconstructed["curv1"]->Fill(abs(*CurvSmeared1) - abs(CurvMC[0]), weight);
+      histsReconstructed["phiv1"]->Fill(abs(*PhivSmeared1) - abs(PhivMC[0]), weight);
+      histsReconstructed["cotv1"]->Fill(abs(*CotvSmeared1) - abs(CotvMC[0]), weight);
 
-      histsReconstructed["curv2"]->Fill(*Curv2 - CurvMC[1], weight);
-      histsReconstructed["phiv2"]->Fill(*Phiv2 - PhivMC[1], weight);
-      histsReconstructed["cotv2"]->Fill(*Cotv2 - CotvMC[1], weight);
+      histsReconstructed["curv2"]->Fill(abs(*CurvSmeared2) - abs(CurvMC[1]), weight);
+      histsReconstructed["phiv2"]->Fill(abs(*PhivSmeared2) - abs(PhivMC[1]), weight);
+      histsReconstructed["cotv2"]->Fill(abs(*CotvSmeared2) - abs(CotvMC[1]), weight);
     }
     else
     {
-      histsReconstructed["curv1"]->Fill(*Curv1 - CurvMC[1], weight);
-      histsReconstructed["phiv1"]->Fill(*Phiv1 - PhivMC[1], weight);
-      histsReconstructed["cotv1"]->Fill(*Cotv1 - CotvMC[1], weight);
+      histsReconstructed["curv1"]->Fill(abs(*CurvSmeared1) - abs(CurvMC[1]), weight);
+      histsReconstructed["phiv1"]->Fill(abs(*PhivSmeared1) - abs(PhivMC[1]), weight);
+      histsReconstructed["cotv1"]->Fill(abs(*CotvSmeared1) - abs(CotvMC[1]), weight);
 
-      histsReconstructed["curv2"]->Fill(*Curv2 - CurvMC[0], weight);
-      histsReconstructed["phiv2"]->Fill(*Phiv2 - PhivMC[0], weight);
-      histsReconstructed["cotv2"]->Fill(*Cotv2 - CotvMC[0], weight);
+      histsReconstructed["curv2"]->Fill(abs(*CurvSmeared2) - abs(CurvMC[0]), weight);
+      histsReconstructed["phiv2"]->Fill(abs(*PhivSmeared2) - abs(PhivMC[0]), weight);
+      histsReconstructed["cotv2"]->Fill(abs(*CotvSmeared2) - abs(CotvMC[0]), weight);
     }
 
     // Fitted signal variables
@@ -496,6 +513,12 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsFittedSignal["pull5"]->Fill(pullsSignalFit[4], weight);
 
     histsFittedSignal["time_neutral_MC"]->Fill(TrcSumFit, weight);
+
+    for (Int_t i = 0; i < 38; i++)
+    {
+      Double_t chi2inp = pow(ParamSignalFit[i] - ParamSignal[i], 2) / pow(ErrorsSignal[i], 2);
+      histsReconstructed["Chi2Comp" + std::to_string(i + 1)]->Fill(chi2inp, weight);
+    }
   }
 
   return kTRUE;
@@ -531,9 +554,9 @@ void MC_fit_comparison::Terminate()
   {
     canvas[histName.first]->cd();
 
-    TRegexp pattern("vtxNeu.*Fit");
+    TRegexp pattern("vtxNeu.*Fit"), pattern1("Chi2Comp.*");
 
-    if (histName.first.Contains(pattern))
+    if (histName.first.Contains(pattern) || histName.first.Contains(pattern1))
     {
       histsReconstructed[histName.first]->GetYaxis()->SetRangeUser(0.1, std::max(histsReconstructed[histName.first]->GetMaximum(), histsFittedSignal[histName.first]->GetMaximum()) * 100);
       canvas[histName.first]->SetLogy(1);
@@ -558,42 +581,38 @@ void MC_fit_comparison::Terminate()
       Bool_t fitSuccess = false;
 
       // ✅ SPECJALNE TRAKTOWANIE DLA delta_t
-      if (1)//histName.first == "delta_t")
+      if (1) // histName.first == "delta_t")
       {
         std::cout << "\n=== Fitting delta_t with TF1 (proven method) ===" << std::endl;
 
         // Użyj starej, sprawdzonej metody TF1 dla delta_t
-        fitter->UseRooFit(false); // TF1 - działa lepiej dla delta_t
-        fitter->SetVerbose(true);
-        fitSuccess = fitter->FitHistogram(histsReconstructed[histName.first]);
+        fitSuccess = doubleFitter->FitHistogram(histsReconstructed[histName.first]);
       }
       else
       {
         // ✅ Dla innych zmiennych użyj automatycznych parametrów
-        fitter->UseRooFit(false); // Możesz zmienić na false żeby użyć TF1
-        fitter->SetVerbose(false);
-        fitSuccess = fitter->FitHistogram(histsReconstructed[histName.first]);
+        fitSuccess = doubleFitter->FitHistogram(histsReconstructed[histName.first]);
       }
 
       if (fitSuccess)
       {
         // Pobierz wyniki fitu
-        const KLOE::TripleGaussFitter::FitResult &result = fitter->GetLastResults();
+        const KLOE::DoublGaussFitter::FitResult &result = doubleFitter->GetLastResults();
 
         // Wypisz wyniki do konsoli
         std::cout << "\n=== Fit results for " << histName.first << " ===" << std::endl;
         std::cout << "Status: " << result.status << ", Converged: " << result.converged << std::endl;
         std::cout << "Chi2/NDF = " << result.chi2 << "/" << result.ndf
-                  << " = " << fitter->GetChi2NDF() << std::endl;
-        std::cout << "Combined mean = " << result.combinedMean
-                  << " ± " << result.combinedMeanErr << std::endl;
-        std::cout << "Combined sigma = " << result.combinedSigma
-                  << " ± " << result.combinedSigmaErr << std::endl;
+                  << " = " << doubleFitter->GetChi2NDF() << std::endl;
+        std::cout << "Combined mean = " << result.mean
+                  << " ± " << result.meanErr << std::endl;
+        std::cout << "Combined sigma = " << result.coreSigma
+                  << " ± " << result.coreSigmaErr << std::endl;
 
         // Wypisz parametry poszczególnych gaussów
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 2; i++)
         {
-          int idx = i * 3;
+          int idx = i * 2;
           std::cout << "  Gauss " << (i + 1) << ": A=" << result.parameters[idx]
                     << ", μ=" << result.parameters[idx + 1]
                     << ", σ=" << result.parameters[idx + 2] << std::endl;
@@ -633,15 +652,15 @@ void MC_fit_comparison::Terminate()
       legend->AddEntry(histsFittedSignal[histName.first], "Fitted Data", "l");
 
       // Sprawdź czy fit się udał przed użyciem wyników
-      if (fitter->IsLastFitSuccessful())
+      if (doubleFitter->IsLastFitSuccessful())
       {
-        const KLOE::TripleGaussFitter::FitResult &r = fitter->GetLastResults();
-        legend->AddEntry((TObject *)0, Form("#chi^{2}/NDF = %.2f", fitter->GetChi2NDF()), "");
-        legend->AddEntry((TObject *)0, Form("#mu = %.3f #pm %.3f", r.combinedMean, r.combinedMeanErr), "");
-        legend->AddEntry((TObject *)0, Form("#sigma = %.3f #pm %.3f", r.combinedSigma, r.combinedSigmaErr), "");
+        const KLOE::DoublGaussFitter::FitResult &r = doubleFitter->GetLastResults();
+        legend->AddEntry((TObject *)0, Form("#chi^{2}/NDF = %.2f", doubleFitter->GetChi2NDF()), "");
+        legend->AddEntry((TObject *)0, Form("#mu = %.3f #pm %.3f", r.mean, r.meanErr), "");
+        legend->AddEntry((TObject *)0, Form("#sigma = %.3f #pm %.3f", r.coreSigma, r.coreSigmaErr), "");
 
         // Narysuj fit z komponentami
-        fitter->DrawFitOnCurrentPad(true, false); // drawComponents=true, showStats=false
+        doubleFitter->DrawFitOnCurrentPad(true, false); // drawComponents=true, showStats=false
       }
       else
       {
