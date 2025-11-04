@@ -11,8 +11,8 @@ using namespace KLOE;
 // Definicja static const zmiennej
 const Int_t DataAccessWrapper::kMaxArraySize;
 
-DataAccessWrapper::DataAccessWrapper(TChain &chain, Bool_t useTTreeReader) 
-  : fChain(chain), fUseTTreeReader(useTTreeReader)
+DataAccessWrapper::DataAccessWrapper(TChain &chain, Bool_t useTTreeReader)
+    : fChain(chain), fUseTTreeReader(useTTreeReader)
 {
   // Inicjalizacja map dla v1/v2 arrays (SetBranchAddress)
   for (const auto &key : fVariableConfig.GetAllKeys())
@@ -75,7 +75,7 @@ Bool_t DataAccessWrapper::Initialize()
   fCurrentEntry = -1;
 
   std::cout << "INFO: DataAccessWrapper initialized successfully" << std::endl;
-  std::cout << "INFO: Using " << (fUseTTreeReader ? "TTreeReader" : "SetBranchAddress") 
+  std::cout << "INFO: Using " << (fUseTTreeReader ? "TTreeReader" : "SetBranchAddress")
             << " for v2 files" << std::endl;
   PrintFileTypeStats();
 
@@ -94,32 +94,36 @@ Bool_t DataAccessWrapper::Next()
   // Sprawdź czy zmienił się plik i zaktualizuj wersję
   FileVersion previousVersion = fCurrentFileVersion;
   TString previousFile = GetCurrentFileName();
-  
+
   // NAJPIERW załaduj entry do chain'a
   Int_t bytesRead = fChain.GetEntry(fCurrentEntry);
-  if (bytesRead <= 0) {
+  if (bytesRead <= 0)
+  {
     std::cerr << "ERROR: Failed to read entry " << fCurrentEntry << " from TChain" << std::endl;
     return false;
   }
-  
+
   UpdateCurrentFileVersion();
   TString currentFile = GetCurrentFileName();
 
   // Sprawdź czy zmienił się plik lub wersja
   Bool_t fileChanged = (previousFile != currentFile);
   Bool_t versionChanged = (previousVersion != fCurrentFileVersion);
-  
-  if (fileChanged || versionChanged) {
+
+  if (fileChanged || versionChanged)
+  {
     // std::cout << "INFO: File/Version change detected at entry " << fCurrentEntry << std::endl;
-    // std::cout << "  Previous: " << previousFile.Data() << " (" 
+    // std::cout << "  Previous: " << previousFile.Data() << " ("
     //           << (previousVersion == FileVersion::V1 ? "v1" : previousVersion == FileVersion::V2 ? "v2" : "unknown") << ")" << std::endl;
-    // std::cout << "  Current: " << currentFile.Data() << " (" 
+    // std::cout << "  Current: " << currentFile.Data() << " ("
     //           << (fCurrentFileVersion == FileVersion::V1 ? "v1" : fCurrentFileVersion == FileVersion::V2 ? "v2" : "unknown") << ")" << std::endl;
-    
+
     // REINICJALIZUJ TTreeReader tylko jeśli używamy go dla v2
-    if (fUseTTreeReader && fCurrentFileVersion == FileVersion::V2) {
+    if (fUseTTreeReader && fCurrentFileVersion == FileVersion::V2)
+    {
       // std::cout << "INFO: Reinitializing TTreeReader for v2 file..." << std::endl;
-      if (!ReinitializeTreeReader()) {
+      if (!ReinitializeTreeReader())
+      {
         std::cerr << "ERROR: Failed to reinitialize TTreeReader for entry " << fCurrentEntry << std::endl;
         return false;
       }
@@ -129,24 +133,31 @@ Bool_t DataAccessWrapper::Next()
   }
 
   // Aktualizuj statystyki w zależności od używanej metody dostępu
-  if (fCurrentFileVersion == FileVersion::V2) {
+  if (fCurrentFileVersion == FileVersion::V2)
+  {
     fV2Events++;
-    if (fUseTTreeReader) {
+    if (fUseTTreeReader)
+    {
       // Dla TTreeReader synchronizuj entry
-      if (fReader) {
+      if (fReader)
+      {
         fReader->SetEntry(fCurrentEntry);
-        if (fReader->GetEntryStatus() != TTreeReader::kEntryValid) {
-          std::cerr << "ERROR: TTreeReader entry " << fCurrentEntry << " is not valid. Status: " 
+        if (fReader->GetEntryStatus() != TTreeReader::kEntryValid)
+        {
+          std::cerr << "ERROR: TTreeReader entry " << fCurrentEntry << " is not valid. Status: "
                     << fReader->GetEntryStatus() << std::endl;
           return false;
         }
       }
       fTreeReaderEvents++;
-    } else {
+    }
+    else
+    {
       fSetBranchEvents++;
     }
   }
-  else if (fCurrentFileVersion == FileVersion::V1) {
+  else if (fCurrentFileVersion == FileVersion::V1)
+  {
     fV1Events++;
     fSetBranchEvents++;
   }
@@ -189,11 +200,12 @@ void DataAccessWrapper::MapFileVersions()
 
 Bool_t DataAccessWrapper::InitializeTreeReader()
 {
-  if (!fUseTTreeReader) {
+  if (!fUseTTreeReader)
+  {
     std::cout << "INFO: TTreeReader disabled - using SetBranchAddress for all files" << std::endl;
     return true; // Sukces, ale nic nie robimy
   }
-  
+
   try
   {
     fReader = std::make_unique<TTreeReader>(&fChain);
@@ -252,10 +264,11 @@ Bool_t DataAccessWrapper::InitializeTreeReader()
 
 Bool_t DataAccessWrapper::ReinitializeTreeReader()
 {
-  if (!fUseTTreeReader) {
+  if (!fUseTTreeReader)
+  {
     return true; // Sukces, ale nic nie robimy
   }
-  
+
   try
   {
     // Wyczyść stare readery
@@ -265,7 +278,7 @@ Bool_t DataAccessWrapper::ReinitializeTreeReader()
     fIntArrays_v2.clear();
     fFloatArrays_v2.clear();
     fUIntArrays_v2.clear();
-    
+
     // Stwórz nowy reader dla aktualnego pliku
     fReader.reset();
     fReader = std::make_unique<TTreeReader>(&fChain);
@@ -279,7 +292,8 @@ Bool_t DataAccessWrapper::ReinitializeTreeReader()
 
       TString branchName = info->nameV2;
 
-      try {
+      try
+      {
         if (info->isArray)
         {
           // Tablice
@@ -312,8 +326,10 @@ Bool_t DataAccessWrapper::ReinitializeTreeReader()
             fUIntValues_v2[key] = std::make_unique<TTreeReaderValue<UInt_t>>(*fReader, branchName.Data());
           }
         }
-      } catch (const std::exception& e) {
-        std::cerr << "WARNING: Failed to reinitialize branch " << branchName.Data() 
+      }
+      catch (const std::exception &e)
+      {
+        std::cerr << "WARNING: Failed to reinitialize branch " << branchName.Data()
                   << " for key " << key.Data() << ": " << e.what() << std::endl;
         // Kontynuuj z następnym branch'em
       }
@@ -450,9 +466,9 @@ void DataAccessWrapper::PrintFileTypeStats() const
   std::cout << "v2.root files: " << v2Count << std::endl;
   std::cout << "Unknown files: " << unknownCount << std::endl;
   std::cout << "Events processed - v1: " << fV1Events << ", v2: " << fV2Events << std::endl;
-  std::cout << "Access method - TTreeReader: " << fTreeReaderEvents 
+  std::cout << "Access method - TTreeReader: " << fTreeReaderEvents
             << ", SetBranchAddress: " << fSetBranchEvents << std::endl;
-  std::cout << "TTreeReader " << (fUseTTreeReader ? "ENABLED" : "DISABLED") 
+  std::cout << "TTreeReader " << (fUseTTreeReader ? "ENABLED" : "DISABLED")
             << " for v2 files" << std::endl;
   std::cout << "======================================" << std::endl;
 }
@@ -509,7 +525,6 @@ namespace
         {
           cache.push_back(it->second[i]);
         }
-
       }
       return cache;
     }
@@ -563,14 +578,14 @@ namespace
           return **it->second;
         }
       }
-      
+
       // Użyj SetBranchAddress dla v1 i domyślnie v2
       auto it = wrapper->fIntValues_v1.find(key);
       if (it != wrapper->fIntValues_v1.end())
       {
         return it->second;
       }
-      
+
       return Int_t{};
     }
   };
@@ -589,14 +604,14 @@ namespace
           return **it->second;
         }
       }
-      
+
       // Użyj SetBranchAddress dla v1 i domyślnie v2
       auto it = wrapper->fFloatValues_v1.find(key);
       if (it != wrapper->fFloatValues_v1.end())
       {
         return it->second;
       }
-      
+
       return Float_t{};
     }
   };
@@ -615,14 +630,14 @@ namespace
           return **it->second;
         }
       }
-      
+
       // Użyj SetBranchAddress dla v1 i domyślnie v2
       auto it = wrapper->fUIntValues_v1.find(key);
       if (it != wrapper->fUIntValues_v1.end())
       {
         return it->second;
       }
-      
+
       return UInt_t{};
     }
   };
@@ -663,7 +678,7 @@ namespace
           return cache;
         }
       }
-      
+
       // Użyj SetBranchAddress dla v1 i domyślnie v2
       const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
       if (info && info->sizeVariable.Length() > 0)
@@ -671,7 +686,7 @@ namespace
         Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
         return ArrayConverter<Int_t>::Convert(wrapper, key, size);
       }
-      
+
       static std::vector<Int_t> empty;
       return empty;
     }
@@ -693,7 +708,7 @@ namespace
           return cache;
         }
       }
-      
+
       // Użyj SetBranchAddress dla v1 i domyślnie v2
       const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
       if (info && info->sizeVariable.Length() > 0)
@@ -701,7 +716,7 @@ namespace
         Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
         return ArrayConverter<Float_t>::Convert(wrapper, key, size);
       }
-      
+
       static std::vector<Float_t> empty;
       return empty;
     }
@@ -723,7 +738,7 @@ namespace
           return cache;
         }
       }
-      
+
       // Użyj SetBranchAddress dla v1 i domyślnie v2
       const auto *info = wrapper->fVariableConfig.GetVariableInfo(key);
       if (info && info->sizeVariable.Length() > 0)
@@ -731,7 +746,7 @@ namespace
         Int_t size = wrapper->GetScalarValue<Int_t>(info->sizeVariable);
         return ArrayConverter<UInt_t>::Convert(wrapper, key, size);
       }
-      
+
       static std::vector<UInt_t> empty;
       return empty;
     }
@@ -775,6 +790,8 @@ Float_t DataAccessWrapper::GetBz() const { return GetScalarValue<Float_t>("bz");
 Float_t DataAccessWrapper::GetBxErr() const { return GetScalarValue<Float_t>("bxerr"); }
 Float_t DataAccessWrapper::GetByErr() const { return GetScalarValue<Float_t>("byerr"); }
 Float_t DataAccessWrapper::GetBzErr() const { return GetScalarValue<Float_t>("bzerr"); }
+Float_t DataAccessWrapper::GetBlumx() const { return GetScalarValue<Float_t>("blumx"); }
+Float_t DataAccessWrapper::GetBlumz() const { return GetScalarValue<Float_t>("blumz"); }
 Float_t DataAccessWrapper::GetBpx() const { return GetScalarValue<Float_t>("bpx"); }
 Float_t DataAccessWrapper::GetBpy() const { return GetScalarValue<Float_t>("bpy"); }
 Float_t DataAccessWrapper::GetBpz() const { return GetScalarValue<Float_t>("bpz"); }

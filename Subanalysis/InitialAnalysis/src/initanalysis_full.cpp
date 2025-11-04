@@ -1099,12 +1099,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           trackParameters[1].push_back(baseKin.PhivSmeared2);
           trackParameters[1].push_back(baseKin.CotvSmeared2);
 
-          trackParametersErr[0].push_back(0.021);
-          trackParametersErr[0].push_back(0.006);
-          trackParametersErr[0].push_back(0.005);
-          trackParametersErr[1].push_back(0.022);
-          trackParametersErr[1].push_back(0.006);
-          trackParametersErr[1].push_back(0.006);
+          trackParametersErr[0].push_back(0.052);
+          trackParametersErr[0].push_back(0.030);
+          trackParametersErr[0].push_back(0.042);
+          trackParametersErr[1].push_back(0.054);
+          trackParametersErr[1].push_back(0.032);
+          trackParametersErr[1].push_back(0.044);
 
           for (Int_t k = 0; k < 4; k++)
           {
@@ -1120,22 +1120,23 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             chargedVtx.push_back(baseKin.Kchboostnew[k]);
           }
 
-          chargedVtxErr.push_back(0.267);
-          chargedVtxErr.push_back(0.267);
-          chargedVtxErr.push_back(0.210);
+          chargedVtxErr.push_back(1.045);
+          chargedVtxErr.push_back(1.045);
+          chargedVtxErr.push_back(1.387);
 
           for (Int_t k = 6; k < 9; k++)
           {
             neuVtx.push_back(baseKin.Knerec[k]);
           }
 
-          neuVtxErr.push_back(0.493);
-          neuVtxErr.push_back(0.476);
-          neuVtxErr.push_back(0.944);
+          neuVtxErr.push_back(1.535);
+          neuVtxErr.push_back(1.548);
+          neuVtxErr.push_back(2.766);
 
-          bhabhaVtxErr.push_back(0.056);
-          bhabhaVtxErr.push_back(0.002);
-          bhabhaVtxErr.push_back(1.137);
+          // bhabha_vtx errors from the data access
+          bhabhaVtxErr.push_back(sqrt(pow(dataAccess.GetBxErr(), 2) + pow(dataAccess.GetBlumx(), 2)));
+          bhabhaVtxErr.push_back(dataAccess.GetByErr());
+          bhabhaVtxErr.push_back(sqrt(pow(dataAccess.GetBzErr(), 2) + pow(dataAccess.GetBlumz(), 2)));
 
           if (signalKinFit)
           {

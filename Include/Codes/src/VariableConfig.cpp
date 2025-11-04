@@ -98,6 +98,8 @@ void VariableConfig::InitializeDefaultMappings()
   AddVariable("bxerr", VariableInfo("BSx", "BSx", "Float_t"));
   AddVariable("byerr", VariableInfo("BSy", "BSy", "Float_t"));
   AddVariable("bzerr", VariableInfo("BSz", "BSz", "Float_t"));
+  AddVariable("blumx", VariableInfo("BLumx", "BLumx", "Float_t"));
+  AddVariable("blumz", VariableInfo("BLumz", "BLumz", "Float_t"));
   AddVariable("bpx", VariableInfo("BPx", "BPx", "Float_t"));
   AddVariable("bpy", VariableInfo("BPy", "BPy", "Float_t"));
   AddVariable("bpz", VariableInfo("BPz", "BPz", "Float_t"));

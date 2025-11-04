@@ -42,6 +42,7 @@
 #include <chi2_dist.h>
 #include <TProfile.h>
 #include <TGraphErrors.h>
+#include <TRegexp.h>
 
 #include <TFitResult.h>
 #include <TFitResultPtr.h>
@@ -474,13 +475,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                 zdist00 < zdistLimit && zdistpm < zdistLimit,
          omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 132.215) < numSigmaSimona * 31.848 && abs(omega[5] - 776.571) < numSigmaSimona * 28.026 && omega[5] < T0Omega + 649.516 && omega[5] > T0Omega + 640.176)) || !simonaPositionLimits) && simonaKinCuts;
 
-  if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1 && shorterKaonPaths)
+  if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1)
     signal_tot++;
 
-  if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1 && shorterKaonPaths)
+  if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1)
     signal_wo_err++;
 
-  if ((*mctruth == 1) && *mcflag == 1 && shorterKaonPaths)
+  if ((*mctruth == 1) && *mcflag == 1)
   {
     deltaTSignalTot->Fill(deltaTfit, weight);
   }
@@ -526,12 +527,12 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     if (!noBlobCut)
       return kTRUE;
 
-  if (mcflagCondition && *mctruth == 1 && *KaonNeTimeCMSignalFit <= *KaonNeTimeCMMC - (KLOE::T0 / (2. * PhysicsConstants::tau_S_nonCPT ))) // && shorterKaonPaths) // && *cutApplied != 400 && *cutApplied != 403 && *cutApplied != 404 && *cutApplied != 405)// && *cutApplied != 402)
+  if (mcflagCondition && shorterKaonPaths)
   {
     Int_t mctruth_tmp = *mctruth;
 
-    // if (mctruth_tmp == 0)
-    //   mctruth_tmp = 1;
+    if (mctruth_tmp == 0)
+      mctruth_tmp = 1;
 
     if ((mctruth_tmp == 1) && *mcflag == 1)
       signal_num++;
@@ -568,8 +569,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       histsFittedSignal["mass_pi01"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[5], weight);
       histsFittedSignal["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi02Fit[5], weight);
 
-      histsFittedSignal["chi2_signalKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., weight);
-      histCounts->Fill(*Chi2SignalKinFit / 10.);
+      histsFittedSignal["chi2_signalKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, weight);
+      histCounts->Fill(*Chi2SignalKinFit);
 
       histsFittedSignal["chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2OmegaKinFit / 8., weight);
       histsFittedSignal["prob_signal"][KLOE::channName.at(mctruth_tmp)]->Fill(TMath::Prob(*Chi2SignalKinFit, 10), weight);
@@ -613,7 +614,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
       hists2DFittedSignal["t_ch_fit_MC_vs_t_neu_fit_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMSignalFit - *KaonChTimeCMMC, *KaonNeTimeCMSignalFit - *KaonNeTimeCMMC, weight);
 
-      if(*KaonNeTimeCMSignalFit <= *KaonNeTimeCMMC - (KLOE::T0 / 2.))
+      if (*KaonNeTimeCMSignalFit <= *KaonNeTimeCMMC - (KLOE::T0 / 2.))
         hists2DFittedSignal["t_ch_fit_vs_t_neu_fit"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMSignalFit, *KaonNeTimeCMSignalFit, weight);
 
       hists2DFittedSignal["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, *Chi2OmegaKinFit, weight);
@@ -662,6 +663,8 @@ void signal_vs_bcg_v2::Terminate()
   // The Terminate() function is the last function to be called during
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file
+
+  std::cout << histsFittedSignal["chi2_signalKinFit"]["Signal"]->GetBinContent(histsFittedSignal["chi2_signalKinFit"]["Signal"]->FindBin(2.))  / histsFittedSignal["chi2_signalKinFit"]["Signal"]->GetMaximum() << std::endl;
 
   gErrorIgnoreLevel = kFatal;
 
@@ -744,7 +747,7 @@ void signal_vs_bcg_v2::Terminate()
            fitSignalBadClus = (config.first == "deltaPhivFit" && fOption == "BAD_CLUS_SIMONA");
     Bool_t chi2Fit = (config.first == "chi2_signalKinFit");
 
-    Bool_t logCond = (config.first == "time_neutral_MC" || config.first == "Qmiss"), // || config.first == "TransvRadius"),
+    Bool_t logCond = (config.first == "time_neutral_MC" || config.first == "Qmiss"),// || config.first == "chi2_signalKinFit"), // || config.first == "TransvRadius"),
         logCondX = 0;                                                                //= (config.first == "chi2_signalKinFit");
 
     std::vector<TString> labels;
@@ -800,7 +803,7 @@ void signal_vs_bcg_v2::Terminate()
           textresultsFitter->Draw();
         }
 
-        if ((channelType.second == "Signal" && fitSignalBadClus))
+        if ((channelType.second == "Signal" && chi2Fit))// && fitSignalBadClus))
         {
           textresultsFitter->Clear();
 
@@ -835,21 +838,21 @@ void signal_vs_bcg_v2::Terminate()
 
           TFitResultPtr result;
 
-          if (config.first == "T0Omega")
+          if (0)//config.first == "T0Omega")
           {
             result = histsFittedSignal[config.first][channelType.second]->Fit(gausFit, "RSQ", "", mean - rms, mean + rms);
 
             meanT0 = result->Parameter(1);
             sigmaT0 = result->Parameter(2);
           }
-          else if (config.first == "mass_omega")
+          else if (0)//config.first == "mass_omega")
           {
             result = histsFittedSignal[config.first][channelType.second]->Fit(gausFit, "RSQ", "", mean - rms, mean + rms);
 
             meanMass = result->Parameter(1);
             sigmaMass = result->Parameter(2);
           }
-          else if (0) // chi2Fit
+          else if (chi2Fit)
           {
             result = histsFittedSignal[config.first][channelType.second]->Fit(chi2FitDist, "RS");
           }
@@ -1373,6 +1376,15 @@ TCanvas *signal_vs_bcg_v2::CreateCanvasWithProfiles(TH2 *h2D, const TString &nam
   Double_t padBottom = 0.0;
   Double_t padTop = 0.0;
 
+  TString yTitleh2D = h2D->GetYaxis()->GetTitle();
+  TRegexp pattern("\\[.*\\]"); // Wzorzec dla [cokolwiek]
+
+  TString match = yTitleh2D(pattern);
+
+  TString yTitle2DReplaced = yTitleh2D.ReplaceAll(match, "").ReplaceAll("(", "").ReplaceAll(")", "").Strip(),
+          yTitleProf = Form("#mu(%s) %s", yTitle2DReplaced.Data(), match.Data()),
+          yTitleProfSigma = Form("#sigma(%s) %s", yTitle2DReplaced.Data(), match.Data());
+
   // === PAD 3 (najniższy): Sigma z fitu Gaussa ===
   if (drawSigmaProfile)
   {
@@ -1396,7 +1408,7 @@ TCanvas *signal_vs_bcg_v2::CreateCanvasWithProfiles(TH2 *h2D, const TString &nam
     grRMS->SetMarkerSize(0.8);
 
     grRMS->GetXaxis()->SetTitle(h2D->GetXaxis()->GetTitle());
-    grRMS->GetYaxis()->SetTitle("#sigma from Gauss fit [#tau_{S}]");
+    grRMS->GetYaxis()->SetTitle(yTitleProfSigma);
 
     grRMS->GetXaxis()->SetTitleSize(0.08);
     grRMS->GetXaxis()->SetLabelSize(0.08);
@@ -1440,7 +1452,7 @@ TCanvas *signal_vs_bcg_v2::CreateCanvasWithProfiles(TH2 *h2D, const TString &nam
     prof->SetLineColor(kRed);
     prof->SetMarkerSize(0.8);
 
-    prof->GetYaxis()->SetTitle("Mean [#tau_{S}]");
+    prof->GetYaxis()->SetTitle(yTitleProf);
     prof->GetYaxis()->SetTitleSize(0.08);
     prof->GetYaxis()->SetLabelSize(0.08);
     prof->GetYaxis()->SetTitleOffset(0.5);
