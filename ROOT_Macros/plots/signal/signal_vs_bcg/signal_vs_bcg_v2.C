@@ -527,7 +527,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     if (!noBlobCut)
       return kTRUE;
 
-  if (mcflagCondition && shorterKaonPaths)
+  if (mcflagCondition && *goodClustersTriKinFitSize == 4)
   {
     Int_t mctruth_tmp = *mctruth;
 
@@ -747,7 +747,7 @@ void signal_vs_bcg_v2::Terminate()
            fitSignalBadClus = (config.first == "deltaPhivFit" && fOption == "BAD_CLUS_SIMONA");
     Bool_t chi2Fit = (config.first == "chi2_signalKinFit");
 
-    Bool_t logCond = (config.first == "time_neutral_MC" || config.first == "Qmiss"),// || config.first == "chi2_signalKinFit"), // || config.first == "TransvRadius"),
+    Bool_t logCond = (config.first == "time_neutral_MC" || config.first == "Qmiss" || config.first == "chi2_signalKinFit" || config.first == "prob_signal"), // || config.first == "TransvRadius"),
         logCondX = 0;                                                                //= (config.first == "chi2_signalKinFit");
 
     std::vector<TString> labels;

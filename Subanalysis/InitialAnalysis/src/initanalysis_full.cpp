@@ -1099,12 +1099,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           trackParameters[1].push_back(baseKin.PhivSmeared2);
           trackParameters[1].push_back(baseKin.CotvSmeared2);
 
-          trackParametersErr[0].push_back(0.052);
-          trackParametersErr[0].push_back(0.030);
-          trackParametersErr[0].push_back(0.042);
-          trackParametersErr[1].push_back(0.054);
-          trackParametersErr[1].push_back(0.032);
-          trackParametersErr[1].push_back(0.044);
+          trackParametersErr[0].push_back(0.018);
+          trackParametersErr[0].push_back(0.005);
+          trackParametersErr[0].push_back(0.005);
+          trackParametersErr[1].push_back(0.016);
+          trackParametersErr[1].push_back(0.005);
+          trackParametersErr[1].push_back(0.005);
 
           for (Int_t k = 0; k < 4; k++)
           {
@@ -1120,18 +1120,18 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             chargedVtx.push_back(baseKin.Kchboostnew[k]);
           }
 
-          chargedVtxErr.push_back(1.045);
-          chargedVtxErr.push_back(1.045);
-          chargedVtxErr.push_back(1.387);
+          chargedVtxErr.push_back(0.102);
+          chargedVtxErr.push_back(0.104);
+          chargedVtxErr.push_back(0.183);
 
           for (Int_t k = 6; k < 9; k++)
           {
             neuVtx.push_back(baseKin.Knerec[k]);
           }
 
-          neuVtxErr.push_back(1.535);
-          neuVtxErr.push_back(1.548);
-          neuVtxErr.push_back(2.766);
+          neuVtxErr.push_back(0.523);
+          neuVtxErr.push_back(0.520);
+          neuVtxErr.push_back(1.334);
 
           // bhabha_vtx errors from the data access
           bhabhaVtxErr.push_back(sqrt(pow(dataAccess.GetBxErr(), 2) + pow(dataAccess.GetBlumx(), 2)));
