@@ -251,7 +251,7 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
   fip[1] = fphi.vtxPos[1];
   // // fip[2] is fitted
   if (abs(fip[2] - fphi.vtxPos[2]) > 2.)
-    fip[2] = fphi.vtxPos[2];
+  fip[2] = fphi.vtxPos[2];
 
   fKchrec.calculatePath(fip.data());
   fKchrec.SetTotalVector();

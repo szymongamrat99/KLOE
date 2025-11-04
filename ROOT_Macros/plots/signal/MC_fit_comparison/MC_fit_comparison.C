@@ -354,7 +354,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                        pow(Kchmc[7] - ipmc[1], 2) +
                        pow(Kchmc[8] - ipmc[2], 2));
 
-  if ((*mctruth == 1) && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC && simonaKinCuts) // && *Chi2SignalKinFit < 30.) // && isInsideFiducialVolume)
+  if ((*mctruth == 1 || *mctruth == 0))// && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC) // && *Chi2SignalKinFit < 30.) // && isInsideFiducialVolume)
   {
     Int_t mctruth_tmp = *mctruth;
 
@@ -401,9 +401,13 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["vtxNeu_y"]->Fill(Knerec[7] - Knemc[7], weight);
     histsReconstructed["vtxNeu_z"]->Fill(Knerec[8] - Knemc[8], weight);
 
-    histsReconstructed["phi_vtx_x"]->Fill(*Bx - ipmc[0], weight);
-    histsReconstructed["phi_vtx_y"]->Fill(*By - ipmc[1], weight);
-    histsReconstructed["phi_vtx_z"]->Fill(*Bz - ipmc[2], weight);
+    histsReconstructed["vtxCh_x"]->Fill(Kchrec[6] - Kchmc[6], weight);
+    histsReconstructed["vtxCh_y"]->Fill(Kchrec[7] - Kchmc[7], weight);
+    histsReconstructed["vtxCh_z"]->Fill(Kchrec[8] - Kchmc[8], weight);
+
+    histsReconstructed["phi_vtx_x"]->Fill(ip[0] - ipmc[0], weight);
+    histsReconstructed["phi_vtx_y"]->Fill(ip[1] - ipmc[1], weight);
+    histsReconstructed["phi_vtx_z"]->Fill(ip[2] - ipmc[2], weight);
 
     histsReconstructed["vtxNeu_x_Fit"]->Fill(Knerec[6] - Knemc[6], weight);
     histsReconstructed["vtxNeu_y_Fit"]->Fill(Knerec[7] - Knemc[7], weight);
@@ -421,46 +425,46 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     // Decide which reconstructed track corresponds to which MC particle
 
-    Double_t error1 = sqrt(pow(*CurvSmeared1 - CurvMC[0], 2) +
-                           pow(*PhivSmeared1 - PhivMC[0], 2) +
-                           pow(*CotvSmeared1 - CotvMC[0], 2)),
-             error2 = sqrt(pow(*CurvSmeared1 - CurvMC[1], 2) +
-                           pow(*PhivSmeared1 - PhivMC[1], 2) +
-                           pow(*CotvSmeared1 - CotvMC[1], 2));
+    Double_t error1 = sqrt(pow(*Curv1 - CurvMC[0], 2) +
+                           pow(*Phiv1 - PhivMC[0], 2) +
+                           pow(*Cotv1 - CotvMC[0], 2)),
+             error2 = sqrt(pow(*Curv1 - CurvMC[1], 2) +
+                           pow(*Phiv1 - PhivMC[1], 2) +
+                           pow(*Cotv1 - CotvMC[1], 2));
 
     if (error1 < error2)
     {
-      histsReconstructed["curv1"]->Fill(*CurvSmeared1 - CurvMC[0], weight);
-      histsReconstructed["phiv1"]->Fill(*PhivSmeared1 - PhivMC[0], weight);
-      histsReconstructed["cotv1"]->Fill(*CotvSmeared1 - CotvMC[0], weight);
+      histsReconstructed["curv1"]->Fill(*Curv1 - CurvMC[0], weight);
+      histsReconstructed["phiv1"]->Fill(*Phiv1 - PhivMC[0], weight);
+      histsReconstructed["cotv1"]->Fill(*Cotv1 - CotvMC[0], weight);
 
-      histsReconstructed["curv2"]->Fill(*CurvSmeared2 - CurvMC[1], weight);
-      histsReconstructed["phiv2"]->Fill(*PhivSmeared2 - PhivMC[1], weight);
-      histsReconstructed["cotv2"]->Fill(*CotvSmeared2 - CotvMC[1], weight);
+      histsReconstructed["curv2"]->Fill(*Curv2 - CurvMC[1], weight);
+      histsReconstructed["phiv2"]->Fill(*Phiv2 - PhivMC[1], weight);
+      histsReconstructed["cotv2"]->Fill(*Cotv2 - CotvMC[1], weight);
     }
     else
     {
-      histsReconstructed["curv1"]->Fill(*CurvSmeared1 - CurvMC[1], weight);
-      histsReconstructed["phiv1"]->Fill(*PhivSmeared1 - PhivMC[1], weight);
-      histsReconstructed["cotv1"]->Fill(*CotvSmeared1 - CotvMC[1], weight);
+      histsReconstructed["curv1"]->Fill(*Curv1 - CurvMC[1], weight);
+      histsReconstructed["phiv1"]->Fill(*Phiv1 - PhivMC[1], weight);
+      histsReconstructed["cotv1"]->Fill(*Cotv1 - CotvMC[1], weight);
 
-      histsReconstructed["curv2"]->Fill(*CurvSmeared2 - CurvMC[0], weight);
-      histsReconstructed["phiv2"]->Fill(*PhivSmeared2 - PhivMC[0], weight);
-      histsReconstructed["cotv2"]->Fill(*CotvSmeared2 - CotvMC[0], weight);
+      histsReconstructed["curv2"]->Fill(*Curv2 - CurvMC[0], weight);
+      histsReconstructed["phiv2"]->Fill(*Phiv2 - PhivMC[0], weight);
+      histsReconstructed["cotv2"]->Fill(*Cotv2 - CotvMC[0], weight);
     }
 
     // Fitted signal variables
-    histsFittedSignal["px_Kch"]->Fill(KchrecFit[0] - Kchmc[0], weight);
-    histsFittedSignal["py_Kch"]->Fill(KchrecFit[1] - Kchmc[1], weight);
-    histsFittedSignal["pz_Kch"]->Fill(KchrecFit[2] - Kchmc[2], weight);
-    histsFittedSignal["Energy_Kch"]->Fill(KchrecFit[3] - Kchmc[3], weight);
-    histsFittedSignal["mass_Kch"]->Fill(KchrecFit[5] - PhysicsConstants::mK0, weight);
+    histsFittedSignal["px_Kch"]->Fill(KchboostFit[0] - Kchmc[0], weight);
+    histsFittedSignal["py_Kch"]->Fill(KchboostFit[1] - Kchmc[1], weight);
+    histsFittedSignal["pz_Kch"]->Fill(KchboostFit[2] - Kchmc[2], weight);
+    histsFittedSignal["Energy_Kch"]->Fill(KchboostFit[3] - Kchmc[3], weight);
+    histsFittedSignal["mass_Kch"]->Fill(KchrecFit[5], weight);
 
-    histsFittedSignal["px_Kne"]->Fill(KnerecFit[0] - Knemc[0], weight);
-    histsFittedSignal["py_Kne"]->Fill(KnerecFit[1] - Knemc[1], weight);
-    histsFittedSignal["pz_Kne"]->Fill(KnerecFit[2] - Knemc[2], weight);
-    histsFittedSignal["Energy_Kne"]->Fill(KnerecFit[3] - Knemc[3], weight);
-    histsFittedSignal["mass_Kne"]->Fill(KnerecFit[5] - PhysicsConstants::mK0, weight);
+    histsFittedSignal["px_Kne"]->Fill(KnereclorFit[0] - Knemc[0], weight);
+    histsFittedSignal["py_Kne"]->Fill(KnereclorFit[1] - Knemc[1], weight);
+    histsFittedSignal["pz_Kne"]->Fill(KnereclorFit[2] - Knemc[2], weight);
+    histsFittedSignal["Energy_Kne"]->Fill(KnereclorFit[3] - Knemc[3], weight);
+    histsFittedSignal["mass_Kne"]->Fill(KnerecFit[5], weight);
 
     histsFittedSignal["mass_pi01"]->Fill(pi01Fit[5] - PhysicsConstants::mPi0, weight);
     histsFittedSignal["mass_pi02"]->Fill(pi02Fit[5] - PhysicsConstants::mPi0, weight);
@@ -546,7 +550,7 @@ void MC_fit_comparison::Terminate()
 
     Bool_t fitcond = histName.first == "curv1" || histName.first == "phiv1" || histName.first == "cotv1" ||
                      histName.first == "curv2" || histName.first == "phiv2" || histName.first == "cotv2" ||
-                     histName.first == "vtxNeu_x" || histName.first == "vtxNeu_y" || histName.first == "vtxNeu_z" || histName.first == "delta_t" || histName.first == "phi_vtx_x" || histName.first == "phi_vtx_y" || histName.first == "phi_vtx_z";
+                     histName.first == "vtxNeu_x" || histName.first == "vtxNeu_y" || histName.first == "vtxNeu_z" || histName.first == "delta_t" || histName.first == "phi_vtx_x" || histName.first == "phi_vtx_y" || histName.first == "phi_vtx_z" || histName.first == "vtxCh_x" || histName.first == "vtxCh_y" || histName.first == "vtxCh_z";
     ;
 
     if (fitcond)
@@ -554,21 +558,21 @@ void MC_fit_comparison::Terminate()
       Bool_t fitSuccess = false;
 
       // ✅ SPECJALNE TRAKTOWANIE DLA delta_t
-      if (histName.first == "delta_t")
+      if (1)//histName.first == "delta_t")
       {
         std::cout << "\n=== Fitting delta_t with TF1 (proven method) ===" << std::endl;
 
         // Użyj starej, sprawdzonej metody TF1 dla delta_t
         fitter->UseRooFit(false); // TF1 - działa lepiej dla delta_t
-        fitter->SetVerbose(false);
-        fitSuccess = fitter->FitHistogram(histsFittedSignal[histName.first]);
+        fitter->SetVerbose(true);
+        fitSuccess = fitter->FitHistogram(histsReconstructed[histName.first]);
       }
       else
       {
         // ✅ Dla innych zmiennych użyj automatycznych parametrów
         fitter->UseRooFit(false); // Możesz zmienić na false żeby użyć TF1
         fitter->SetVerbose(false);
-        fitSuccess = fitter->FitHistogram(histsFittedSignal[histName.first]);
+        fitSuccess = fitter->FitHistogram(histsReconstructed[histName.first]);
       }
 
       if (fitSuccess)
@@ -603,9 +607,9 @@ void MC_fit_comparison::Terminate()
 
     // histsReconstructed[histName.first]->GetYaxis()->SetRangeUser(0.0, 1.5 * std::max(histsReconstructed[histName.first]->GetMaximum(), histsFittedSignal[histName.first]->GetMaximum()));
 
-    histsReconstructed[histName.first]->Draw("HIST");
+    histsReconstructed[histName.first]->Draw();
     histsFittedSignal[histName.first]->SetLineColor(kRed);
-    histsFittedSignal[histName.first]->Draw("HIST SAME");
+    histsFittedSignal[histName.first]->Draw("SAME");
 
     // DODAJ WŁASNĄ LEGENDĘ W LEWYM GÓRNYM ROGU:
     TLegend *legend;

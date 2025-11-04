@@ -89,6 +89,8 @@ namespace KLOE
     Float_t GetBxErr() const;
     Float_t GetByErr() const;
     Float_t GetBzErr() const;
+    Float_t GetBlumx() const;
+    Float_t GetBlumz() const;
     Float_t GetBpx() const;
     Float_t GetBpy() const;
     Float_t GetBpz() const;

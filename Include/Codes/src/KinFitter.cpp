@@ -165,11 +165,30 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _CORR = _V * _D_T * _L;
 
+      for (Int_t j = 0; j < _CORR.GetNrows(); j++)
+      {
+        if (abs(_CORR(j)) > 1000.0)
+          _CORR(j) = 0.0;
+      }
+
       _X = _X - _CORR;
 
       _V_final = _V - _V * _D_T * _Aux * _D * _V;
 
       _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
+
+      // if (_mode == "SignalGlobal")
+      // {
+
+      //   std::cout << "Mode: " << _mode << " | Iteration " << i << ": Chi2 = " << _CHISQR << std::endl;
+      //   std::cout << "Elements of chi2: " << std::endl;
+      //   for (Int_t k = 0; k < _X.GetNrows(); k++)
+      //   {
+      //     Double_t val = (_X(k) - _X_init(k));
+      //     Double_t contrib = val * val * _V_invert(k, k);
+      //     std::cout << "  Param " << k << ": " << contrib << std::endl;
+      //   }
+      // }
 
       if (abs(_CHISQR - _CHISQRTMP) < _CHISQRSTEP)
         break;

@@ -50,7 +50,7 @@ Double_t clu_x_error(Float_t x_coor, Float_t y_coor, Float_t z_coor, Float_t Ene
 {
     Double_t sigma_x = 0.;
 
-    if (sqrt(pow(x_coor, 2) + pow(y_coor, 2)) > 200. && abs(z_coor) < 165)
+    if (sqrt(pow(x_coor, 2) + pow(y_coor, 2)) > 200.)
         sigma_x = sigma_coor;
     else
         sigma_x = sigma_coor;
@@ -67,7 +67,7 @@ Double_t clu_y_error(Float_t x_coor, Float_t y_coor, Float_t z_coor, Float_t Ene
 
     // Error in ns
 
-    if (sqrt(pow(x_coor, 2) + pow(y_coor, 2)) > 200. && abs(z_coor) < 165)
+    if (sqrt(pow(x_coor, 2) + pow(y_coor, 2)) > 200.)
         sigma_y = sigma_coor;
     else
         sigma_y = sigma_coor / sqrt(0.001 * Enecl);
@@ -84,7 +84,7 @@ Double_t clu_z_error(Float_t x_coor, Float_t y_coor, Float_t z_coor, Float_t Ene
 
     // Error in ns
 
-    if (sqrt(pow(x_coor, 2) + pow(y_coor, 2)) > 200. && abs(z_coor) < 165)
+    if (sqrt(pow(x_coor, 2) + pow(y_coor, 2)) > 200.)
         sigma_z = sigma_coor / sqrt(0.001 * Enecl);
     else
         sigma_z = sigma_coor;

@@ -281,7 +281,7 @@ public:
 
 
   TString folderPath = "NO_CUTS";
-  TPrincipal *pca = new TPrincipal(2, "ND");
+  TPrincipal *pca = new TPrincipal(2, "D");
 
   ClassDef(signal_vs_bcg_v2, 0);
 };
