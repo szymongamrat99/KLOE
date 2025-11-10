@@ -197,9 +197,13 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
 
   for (Int_t i = 0; i < 2; i++)
   {
-    fpionCh[i].trackParams[0] = p[23 + i * 3];
-    fpionCh[i].trackParams[1] = p[23 + i * 3 + 1];
-    fpionCh[i].trackParams[2] = p[23 + i * 3 + 2];
+    fpionCh[i].fourMom[0] = p[23 + i * 3];
+    fpionCh[i].fourMom[1] = p[23 + i * 3 + 1];
+    fpionCh[i].fourMom[2] = p[23 + i * 3 + 2];
+    fpionCh[i].fourMom[3] = sqrt(pow(fpionCh[i].fourMom[0], 2) +
+                                 pow(fpionCh[i].fourMom[1], 2) +
+                                 pow(fpionCh[i].fourMom[2], 2) +
+                                 pow(PhysicsConstants::mPiCh, 2));
   }
 
   for (Int_t i = 0; i < 4; i++)
@@ -211,12 +215,6 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
       fKnereclor.fourPos[i] = p[33 + i];
       fphi.vtxPos[i] = p[36 + i];
     };
-  }
-  // Intermediate reconstruction to be done after setting the parameters
-  // and before calculating the constraints.
-  for (Int_t i = 0; i < 2; i++)
-  {
-    charged_mom(fpionCh[i].trackParams[0], fpionCh[i].trackParams[1], fpionCh[i].trackParams[2], fpionCh[i].fourMom.data(), 1);
   }
 
   // Setting four momentum for kaon charged
@@ -232,15 +230,15 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
   fKchboost.SetLorentzVectors();
 
   Float_t X_line[3] = {fKchboost.fourPos[0],
-                              fKchboost.fourPos[1],
-                              fKchboost.fourPos[2]}, // Vertex laying on the line
+                       fKchboost.fourPos[1],
+                       fKchboost.fourPos[2]}, // Vertex laying on the line
       mom[3] = {fKchboost.fourMom[0],
                 fKchboost.fourMom[1],
                 fKchboost.fourMom[2]}, // Direction of the line
       xB[3] = {fphi.vtxPos[0],
                fphi.vtxPos[1],
                fphi.vtxPos[2]}, // Bhabha vertex - laying on the plane
-      plane_perp[3] = {0.,
+      plane_perp[3] = {fphi.fourMom[0],
                        fphi.fourMom[1],
                        0.}; // Vector perpendicular to the plane from Bhabha momentum
 
@@ -249,17 +247,15 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
 
   fip[0] = fphi.vtxPos[0];
   fip[1] = fphi.vtxPos[1];
-  // // fip[2] is fitted
-  if (abs(fip[2] - fphi.vtxPos[2]) > 2.)
-  fip[2] = fphi.vtxPos[2];
+  // fip[2] is fitted
+  if (abs(fip[2] - fphi.vtxPos[2]) > 2.8)
+    fip[2] = fphi.vtxPos[2];
 
   fKchrec.calculatePath(fip.data());
   fKchrec.SetTotalVector();
 
   fKchboost.calculatePath(fip.data());
   fKchboost.SetTotalVector();
-
-  // triangleReconstruction(photon, fphi, fKchboost, fip.data(), fKnereclor);
 
   fKnereclor.fourMom[0] = fphi.fourMom[0] - fKchboost.fourMom[0];
   fKnereclor.fourMom[1] = fphi.fourMom[1] - fKchboost.fourMom[1];

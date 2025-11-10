@@ -122,6 +122,15 @@ namespace KLOE
     const std::vector<Float_t> &GetCurv() const;
     const std::vector<Float_t> &GetPhiv() const;
     const std::vector<Float_t> &GetCotv() const;
+    const std::vector<Float_t> &GetPxtv() const;
+    const std::vector<Float_t> &GetPytv() const;
+    const std::vector<Float_t> &GetPztv() const;
+    const std::vector<Float_t> &GetVtxCov1() const;
+    const std::vector<Float_t> &GetVtxCov2() const;
+    const std::vector<Float_t> &GetVtxCov3() const;
+    const std::vector<Float_t> &GetVtxCov4() const;
+    const std::vector<Float_t> &GetVtxCov5() const;
+    const std::vector<Float_t> &GetVtxCov6() const;
     const std::vector<Float_t> &GetXv() const;
     const std::vector<Float_t> &GetYv() const;
     const std::vector<Float_t> &GetZv() const;

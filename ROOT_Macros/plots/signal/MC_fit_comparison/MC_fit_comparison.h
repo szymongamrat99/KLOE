@@ -41,6 +41,8 @@ public:
   TTreeReaderValue<Int_t> ntv = {fReader, "ntv"};
   TTreeReaderValue<Int_t> nv = {fReader, "nv"};
   TTreeReaderValue<Int_t> nvtxmc = {fReader, "nvtxmc"};
+  TTreeReaderValue<Int_t> muonAlertPlus = {fReader, "muonAlertPlus"};
+  TTreeReaderValue<Int_t> muonAlertMinus = {fReader, "muonAlertMinus"};
   TTreeReaderValue<Float_t> Bpx = {fReader, "Bpx"};
   TTreeReaderValue<Float_t> Bpy = {fReader, "Bpy"};
   TTreeReaderValue<Float_t> Bpz = {fReader, "Bpz"};
@@ -192,6 +194,8 @@ public:
   TTreeReaderArray<float> trk1KLmc = {fReader, "trk1KLmc"};
   TTreeReaderArray<float> trk1KS = {fReader, "trk1KS"};
   TTreeReaderArray<float> trk1KSmc = {fReader, "trk1KSmc"};
+  TTreeReaderArray<float> trk1MC = {fReader, "trk1MC"};
+  TTreeReaderArray<float> trk2MC = {fReader, "trk2MC"};
   TTreeReaderArray<float> trk2 = {fReader, "trk2"};
   TTreeReaderArray<float> trk2Closest = {fReader, "trk2Closest"};
   TTreeReaderArray<float> trk2Fit = {fReader, "trk2Fit"};

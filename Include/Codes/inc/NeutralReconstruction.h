@@ -101,7 +101,7 @@ namespace KLOE
     void PhotonPairingToPi0();
     void PhotonPairingToPi0(std::vector<neutralParticle> &photons, std::vector<Int_t> &bestPairingIndex);
 
-    void PhotonPairingToPi0WithOmega(std::vector<neutralParticle> &photons, std::vector<chargedParticle> &pions, std::vector<Int_t> &bestPairingIndexNeutral, std::vector<Int_t> &bestPairingIndexCharged, neutralParticle &omega);
+    void PhotonPairingToPi0WithOmega(std::vector<neutralParticle> &photons, std::vector<chargedParticle> &pions, std::vector<Int_t> &bestPairingIndexNeutral, std::vector<Int_t> &bestPairingIndexCharged, neutralParticle &omega, std::vector<neutralParticle> &neutralPions);
 
     void Pi0Reconstruction();
     void Pi0Reconstruction(std::vector<neutralParticle> &pions);

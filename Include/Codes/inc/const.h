@@ -240,7 +240,11 @@ namespace KLOE
                        pi02(6, 0.0),
                        pi01Fit(6, 0.0),
                        pi02Fit(6, 0.0),
-                       cut(0) {};
+                       cut(0),
+                       trk1MC(4),
+                       trk2MC(4),
+                       muonAlertPlus(0),
+                       muonAlertMinus(0) {};
 
     Float_t
         Kchboost[9],
@@ -332,7 +336,9 @@ namespace KLOE
         errorCode,
         doneTriKinFit,
         mcflag,
-        cut;
+        cut,
+        muonAlertPlus,
+        muonAlertMinus;
 
     std::vector<Float_t>
         Kchrecnew,
@@ -373,6 +379,8 @@ namespace KLOE
         Knemc,
         Kchmc,
         trkMC[2],
+        trk1MC,
+        trk2MC,
         trkKSmc[2],
         trkKLmc[2],
         Kchrecsmeared,
@@ -426,7 +434,11 @@ namespace KLOE
         trkOmegaFit[2],
         Knerec,
         Knereclor,
-        ipOmegaFit;
+        ipOmegaFit,
+        pxtv,
+        pytv,
+        pztv,
+        vtxcov[6];
 
     std::vector<Int_t>
         vtaken,
@@ -543,6 +555,8 @@ namespace KLOE
       vtakenKS.resize(3, 0);
       vtakenKL.resize(3, 0);
       vtakenClosest.resize(3, 0);
+      trk1MC.resize(4, 0.0);
+      trk2MC.resize(4, 0.0);
     };
 
     /**
@@ -627,6 +641,10 @@ namespace KLOE
       vtakenKS.clear();
       vtakenKL.clear();
       vtakenClosest.clear();
+      trk1MC.clear();
+      trk2MC.clear();
+      muonAlertMinus = 0;
+      muonAlertPlus = 0;
     }
   };
 }

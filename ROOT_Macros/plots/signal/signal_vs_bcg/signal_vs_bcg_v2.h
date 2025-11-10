@@ -79,6 +79,8 @@ public:
   TTreeReaderValue<Int_t> nv = {fReader, "nv"};
   TTreeReaderValue<Int_t> nvtxmc = {fReader, "nvtxmc"};
   TTreeReaderValue<Int_t> cutApplied = {fReader, "cutApplied"};
+  TTreeReaderValue<Int_t> muonAlertPlus = {fReader, "muonAlertPlus"};
+  TTreeReaderValue<Int_t> muonAlertMinus = {fReader, "muonAlertMinus"};
   TTreeReaderValue<Float_t> Bpx = {fReader, "Bpx"};
   TTreeReaderValue<Float_t> Bpy = {fReader, "Bpy"};
   TTreeReaderValue<Float_t> Bpz = {fReader, "Bpz"};

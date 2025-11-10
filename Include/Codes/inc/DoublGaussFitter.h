@@ -17,24 +17,21 @@ namespace KLOE {
 
 /**
  * @class DoublGaussFitter
- * @brief Klasa do fitowania podwójnego Gaussa (ze wspólną średnią) do histogramów
- * 
- * Klasa umożliwia łatwe dopasowanie funkcji double_gaus do histogramów,
- * wyświetlanie statystyk fitu oraz wizualizację wyników.
- * 
- * Parametry: [A1, sigma1, A2, sigma2, mean]
- * - A1, A2: amplitudy gaussów
- * - sigma1, sigma2: szerokości gaussów
- * - mean: wspólna średnia
+ * @brief Klasa do fitowania Gaussa (pojedynczego lub podwójnego) do histogramów
  */
 class DoublGaussFitter {
 public:
+    enum FitType {
+        kSingleGauss = 0,
+        kDoubleGauss = 1
+    };
     /**
      * @struct FitParams
      * @brief Parametry fitu podwójnego Gaussa
      */
     struct FitParams {
-        std::vector<Double_t> initialValues;   ///< Wartości początkowe [A1,σ1,A2,σ2,mean]
+        FitType fitType = kDoubleGauss;        ///< Typ fitu (single/double gauss)
+        std::vector<Double_t> initialValues;   ///< Wartości początkowe [A1,σ1,A2,σ2,mean] lub [A,σ,mean]
         std::vector<Double_t> lowerBounds;     ///< Dolne granice parametrów
         std::vector<Double_t> upperBounds;     ///< Górne granice parametrów
         Double_t fitRangeMin = -999;           ///< Dolna granica fitu (-999 = auto)
@@ -151,10 +148,29 @@ public:
     /// Destruktor
     ~DoublGaussFitter();
 
+    /**
+     * @brief Ustawia typ fitu (single/double gauss)
+     */
+    void SetFitType(FitType type) { fFitType = type; }
+    
+    /**
+     * @brief Pobiera ustawiony typ fitu
+     */
+    FitType GetFitType() const { return fFitType; }
+
+    /**
+     * @brief Fituje gaussa do histogramu z automatycznymi parametrami
+     * @param hist Histogram do fitowania
+     * @param fitType Typ fitu (single/double gauss)
+     * @param setTitle Opcjonalny tytuł dla wyników
+     * @return true jeśli fit się udał
+     */
+    Bool_t FitHistogram(TH1* hist, FitType fitType, const TString& setTitle = "");
+
     // ==================== GŁÓWNE METODY FITOWANIA ====================
     
     /**
-     * @brief Fituje podwójnego Gaussa do histogramu z automatycznymi parametrami
+     * @brief Fituje Gaussa do histogramu z automatycznymi parametrami
      * @param hist Histogram do fitowania
      * @param setTitle Opcjonalny tytuł dla wyników
      * @return true jeśli fit się udał
@@ -162,7 +178,7 @@ public:
     Bool_t FitHistogram(TH1* hist, const TString& setTitle = "");
     
     /**
-     * @brief Fituje podwójnego Gaussa do histogramu z niestandardowymi parametrami
+     * @brief Fituje Gaussa do histogramu z niestandardowymi parametrami
      * @param hist Histogram do fitowania
      * @param params Parametry fitu
      * @param setTitle Opcjonalny tytuł dla wyników
@@ -173,9 +189,10 @@ public:
     /**
      * @brief Przygotowuje domyślne parametry na podstawie histogramu
      * @param hist Histogram do analizy
+     * @param fitType Typ fitu (single/double gauss)
      * @return Struktura z domyślnymi parametrami
      */
-    FitParams PrepareDefaultParams(TH1* hist);
+    FitParams PrepareDefaultParams(TH1* hist, FitType fitType);
 
     // ==================== DOSTĘP DO WYNIKÓW ====================
     
@@ -299,6 +316,7 @@ private:
     FitResult fLastResult;
     TH1* fLastHistogram = nullptr;           ///< Ostatnio fitowany histogram
     TString fLastTitle;                      ///< Tytuł ostatniego fitu
+    FitType fFitType = kDoubleGauss;         ///< Typ fitowanego rozkładu
     
     // Ustawienia graficzne
     Color_t fMainColor = kRed;

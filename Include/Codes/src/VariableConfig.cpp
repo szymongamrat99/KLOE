@@ -131,10 +131,19 @@ void VariableConfig::InitializeDefaultMappings()
   AddVariable("pnum2", VariableInfo("PNum2", "PNum2", "Int_t", true, "nclumc"));
   AddVariable("pnum3", VariableInfo("PNum3", "PNum3", "Int_t", true, "nclumc"));
 
-  // Tablice Float_t - tracki
+  // Tablice Float_t - tracki i pędy
   AddVariable("curv", VariableInfo("CurV", "CurV", "Float_t", true, "ntv"));
   AddVariable("phiv", VariableInfo("PhiV", "PhiV", "Float_t", true, "ntv"));
   AddVariable("cotv", VariableInfo("CoTv", "CoTv", "Float_t", true, "ntv"));
+  AddVariable("pxtv", VariableInfo("PxTv", "PxTv", "Float_t", true, "ntv"));
+  AddVariable("pytv", VariableInfo("PyTv", "PyTv", "Float_t", true, "ntv"));
+  AddVariable("pztv", VariableInfo("PzTv", "PzTv", "Float_t", true, "ntv"));
+  AddVariable("vtxcov1", VariableInfo("VTXCov1", "VTXCov1", "Float_t", true, "ntv"));
+  AddVariable("vtxcov2", VariableInfo("VTXCov2", "VTXCov2", "Float_t", true, "ntv"));
+  AddVariable("vtxcov3", VariableInfo("VTXCov3", "VTXCov3", "Float_t", true, "ntv"));
+  AddVariable("vtxcov4", VariableInfo("VTXCov4", "VTXCov4", "Float_t", true, "ntv"));
+  AddVariable("vtxcov5", VariableInfo("VTXCov5", "VTXCov5", "Float_t", true, "ntv"));
+  AddVariable("vtxcov6", VariableInfo("VTXCov6", "VTXCov6", "Float_t", true, "ntv"));
 
   // Tablice Float_t - vertex
   AddVariable("xv", VariableInfo("xV", "xV", "Float_t", true, "nv"));

@@ -69,13 +69,13 @@ fi
 root -b <<EOF
 TChain *chain = new TChain("h1");
 
-for (Int_t i = 1; i <= 15; i++)\
+for (Int_t i = 1; i <= 4; i++)\
 {\
-    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-10-26/mk0*all_phys2_SIGNAL_MIXED_%d.root",i));\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-10/mk0*all_phys3_SIGNAL_MIXED_%d.root",i));\
 }\
-for (Int_t i = 1; i <= 8; i++)\
+for (Int_t i = 1; i <= 2; i++)\
 {\
-    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-10-26/dk0*SIGNAL_MIXED_%d.root",i));\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-10/dk0*SIGNAL_MIXED_%d.root",i));\
 }\
 chain->Process("signal_vs_bcg_v2.C", "$opt");
 .q
