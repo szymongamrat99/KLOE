@@ -825,6 +825,15 @@ const std::vector<Float_t> &DataAccessWrapper::GetEneCl() const { return GetArra
 const std::vector<Float_t> &DataAccessWrapper::GetCurv() const { return GetArrayValue<Float_t>("curv"); }
 const std::vector<Float_t> &DataAccessWrapper::GetPhiv() const { return GetArrayValue<Float_t>("phiv"); }
 const std::vector<Float_t> &DataAccessWrapper::GetCotv() const { return GetArrayValue<Float_t>("cotv"); }
+const std::vector<Float_t> &DataAccessWrapper::GetPxtv() const { return GetArrayValue<Float_t>("pxtv"); }
+const std::vector<Float_t> &DataAccessWrapper::GetPytv() const { return GetArrayValue<Float_t>("pytv"); }
+const std::vector<Float_t> &DataAccessWrapper::GetPztv() const { return GetArrayValue<Float_t>("pztv"); }
+const std::vector<Float_t> &DataAccessWrapper::GetVtxCov1() const { return GetArrayValue<Float_t>("vtxcov1"); }
+const std::vector<Float_t> &DataAccessWrapper::GetVtxCov2() const { return GetArrayValue<Float_t>("vtxcov2"); }
+const std::vector<Float_t> &DataAccessWrapper::GetVtxCov3() const { return GetArrayValue<Float_t>("vtxcov3"); }
+const std::vector<Float_t> &DataAccessWrapper::GetVtxCov4() const { return GetArrayValue<Float_t>("vtxcov4"); }
+const std::vector<Float_t> &DataAccessWrapper::GetVtxCov5() const { return GetArrayValue<Float_t>("vtxcov5"); }
+const std::vector<Float_t> &DataAccessWrapper::GetVtxCov6() const { return GetArrayValue<Float_t>("vtxcov6"); }
 const std::vector<Float_t> &DataAccessWrapper::GetXv() const { return GetArrayValue<Float_t>("xv"); }
 const std::vector<Float_t> &DataAccessWrapper::GetYv() const { return GetArrayValue<Float_t>("yv"); }
 const std::vector<Float_t> &DataAccessWrapper::GetZv() const { return GetArrayValue<Float_t>("zv"); }

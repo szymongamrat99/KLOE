@@ -6,6 +6,9 @@ namespace KLOE
   ChargedVtxRec<F, T>::ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PhiV, F *CotV, F *xvOld, F *yvOld, F *zvOld, Int_t &mode) : _iv(ivOld), _nv(nv), _ntv(ntv), _IP(IP), _CurV(CurV), _PhiV(PhiV), _CotV(CotV), _xv(xvOld), _yv(yvOld), _zv(zvOld), _mode(mode){};
 
   template <typename F, typename T>
+  ChargedVtxRec<F, T>::ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PxTv, F *PyTv, F *PzTv, F *xvOld, F *yvOld, F *zvOld, Int_t &mode) : _iv(ivOld), _nv(nv), _ntv(ntv), _IP(IP), _CurV(CurV), _PxTv(PxTv), _PyTv(PyTv), _PzTv(PzTv), _xv(xvOld), _yv(yvOld), _zv(zvOld), _mode(mode){};
+
+  template <typename F, typename T>
   ChargedVtxRec<F, T>::ChargedVtxRec() : _iv(nullptr), _nv(def), _ntv(def), _IP(nullptr), _CurV(nullptr), _PhiV(nullptr), _CotV(nullptr), _xv(nullptr), _yv(nullptr), _zv(nullptr), _mode(def){};
 
   template <typename F, typename T>
@@ -197,8 +200,26 @@ namespace KLOE
             {
               if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
-                ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
-                ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+
+                if (_PxTv != nullptr && _PyTv != nullptr && _PzTv != nullptr)
+                {
+                  mom_vec1Tmp[0] = _PxTv[j1];
+                  mom_vec1Tmp[1] = _PyTv[j1];
+                  mom_vec1Tmp[2] = _PzTv[j1];
+                  mom_vec2Tmp[0] = _PxTv[j2];
+                  mom_vec2Tmp[1] = _PyTv[j2];
+                  mom_vec2Tmp[2] = _PzTv[j2];
+                }
+                else if (_CurV != nullptr && _CotV != nullptr && _PhiV != nullptr)
+                {
+                  ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
+                  ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                }
+                else
+                {
+                  ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NULL_POINTER;
+                  return err;
+                }
 
                 Float_t KchrecSmeared[9], KchboostSmeared[9], energyPion[2];
 
@@ -285,7 +306,6 @@ namespace KLOE
     bool found = false;
     Bool_t distFlag = false;
 
-    
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2));
@@ -365,7 +385,6 @@ namespace KLOE
     bool found = false;
     Bool_t distFlag = false;
 
-
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2));
@@ -393,8 +412,30 @@ namespace KLOE
             {
               if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
-                ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
-                ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                if (_PxTv != nullptr && _PyTv != nullptr && _PzTv != nullptr)
+                {
+                  mom_vec1Tmp[0] = _PxTv[j1];
+                  mom_vec1Tmp[1] = _PyTv[j1];
+                  mom_vec1Tmp[2] = _PzTv[j1];
+                  mom_vec1Tmp[3] = sqrt(pow(mom_vec1Tmp[0], 2) + pow(mom_vec1Tmp[1], 2) + pow(mom_vec1Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+
+
+                  mom_vec2Tmp[0] = _PxTv[j2];
+                  mom_vec2Tmp[1] = _PyTv[j2];
+                  mom_vec2Tmp[2] = _PzTv[j2];
+                  mom_vec2Tmp[3] = sqrt(pow(mom_vec2Tmp[0], 2) + pow(mom_vec2Tmp[1], 2) + pow(mom_vec2Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+                }
+                else if (_CurV != nullptr && _CotV != nullptr &&_PhiV != nullptr)
+                {
+                  ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
+                  ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                }
+                else
+                {
+                  ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NULL_POINTER;
+                  return err;
+                }
+
                 for (Int_t k = 0; k < 4; k++)
                   KchTmp[k] = mom_vec1Tmp[k] + mom_vec2Tmp[k];
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
@@ -520,8 +561,30 @@ namespace KLOE
             {
               if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
-                ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
-                ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                if (_PxTv != nullptr && _PyTv != nullptr && _PzTv != nullptr)
+                {
+                  mom_vec1Tmp[0] = _PxTv[j1];
+                  mom_vec1Tmp[1] = _PyTv[j1];
+                  mom_vec1Tmp[2] = _PzTv[j1];
+                  mom_vec1Tmp[3] = sqrt(pow(mom_vec1Tmp[0], 2) + pow(mom_vec1Tmp[1], 2) + pow(mom_vec1Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+
+
+                  mom_vec2Tmp[0] = _PxTv[j2];
+                  mom_vec2Tmp[1] = _PyTv[j2];
+                  mom_vec2Tmp[2] = _PzTv[j2];
+                  mom_vec2Tmp[3] = sqrt(pow(mom_vec2Tmp[0], 2) + pow(mom_vec2Tmp[1], 2) + pow(mom_vec2Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+                }
+                else if (_CurV != nullptr && _CotV != nullptr && _PhiV != nullptr)
+                {
+                  ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
+                  ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                }
+                else
+                {
+                  ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NULL_POINTER;
+                  return err;
+                }
+                
                 for (Int_t k = 0; k < 4; k++)
                   KchTmp[k] = mom_vec1Tmp[k] + mom_vec2Tmp[k];
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);

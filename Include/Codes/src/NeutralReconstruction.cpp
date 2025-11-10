@@ -38,7 +38,7 @@ namespace KLOE
     bestPairingIndex = _bestPairingIndex;
   }
 
-  void NeutralReconstruction::PhotonPairingToPi0WithOmega(std::vector<neutralParticle> &photons, std::vector<chargedParticle> &pions, std::vector<Int_t> &bestPairingIndexNeutral, std::vector<Int_t> &bestPairingIndexOmega, neutralParticle &omega)
+  void NeutralReconstruction::PhotonPairingToPi0WithOmega(std::vector<neutralParticle> &photons, std::vector<chargedParticle> &pions, std::vector<Int_t> &bestPairingIndexNeutral, std::vector<Int_t> &bestPairingIndexOmega, neutralParticle &omega, std::vector<neutralParticle> &neutralPions)
   {
     SetPhotonParameters(photons);
 
@@ -48,8 +48,10 @@ namespace KLOE
 
     _Pi0ReconstructionCore();
     _OmegaReconstructionCore(_bestPairingIndexOmega[0]);
-
     _omega.SetTotalVector();
+
+    neutralPions[0] = _Pions[_bestPairingIndexOmega[0]];
+    neutralPions[1] = _Pions[_bestPairingIndexOmega[1]];
 
     photons = _Photons;
     pions = _Charged;
@@ -181,6 +183,8 @@ namespace KLOE
       _Pions[i].CalculateTotalMomentumFromFourMom();
 
       _Pions[i].SetLorentzVectors();
+
+      _Pions[i].SetTotalVector();
     }
 
     for (Int_t i = 0; i < _nPions; i++)

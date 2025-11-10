@@ -48,9 +48,15 @@ void ConstraintsOmega::SetParameters(Double_t *p)
 
   for (Int_t i = 0; i < 2; i++)
   {
-    fpionCh[i].trackParams[0] = p[20 + i * 3];
-    fpionCh[i].trackParams[1] = p[20 + i * 3 + 1];
-    fpionCh[i].trackParams[2] = p[20 + i * 3 + 2];
+    fpionCh[i].fourMom[0] = p[20 + i * 3];
+    fpionCh[i].fourMom[1] = p[20 + i * 3 + 1];
+    fpionCh[i].fourMom[2] = p[20 + i * 3 + 2];
+    fpionCh[i].fourMom[3] = sqrt(pow(fpionCh[i].fourMom[0], 2) +
+                                 pow(fpionCh[i].fourMom[1], 2) +
+                                 pow(fpionCh[i].fourMom[2], 2) +
+                                 pow(PhysicsConstants::mPiCh, 2));
+
+    pionCh[i].fourMomFilled = true;
   }
 
   for (Int_t i = 0; i < 4; i++)
@@ -78,13 +84,6 @@ void ConstraintsOmega::IntermediateReconstruction()
 
   phi.SetTotalVector();
 
-  for (Int_t i = 0; i < 2; i++)
-  {
-    charged_mom(pionCh[i].trackParams[0], pionCh[i].trackParams[1], pionCh[i].trackParams[2], pionCh[i].fourMom.data(), 1);
-
-    pionCh[i].fourMomFilled = true;
-  }
-
   for (Int_t i = 0; i < 4; i++)
   {
     neutral_mom(photon[i].clusterParams[0],
@@ -108,7 +107,7 @@ void ConstraintsOmega::IntermediateReconstruction()
 
   std::vector<Int_t> bestPairingIndexNeutral, bestPairingIndexCharged;
 
-  neutRec.PhotonPairingToPi0WithOmega(photon, pionCh, bestPairingIndexNeutral, bestPairingIndexCharged, omega);
+  neutRec.PhotonPairingToPi0WithOmega(photon, pionCh, bestPairingIndexNeutral, bestPairingIndexCharged, omega, pionNe);
 
   neutRec.Pi0Reconstruction(pionNe);
 
@@ -139,10 +138,17 @@ void ConstraintsOmega::IntermediateReconstruction(Double_t *p)
 
   for (Int_t i = 0; i < 2; i++)
   {
-    fpionCh[i].trackParams[0] = p[20 + i * 3];
-    fpionCh[i].trackParams[1] = p[20 + i * 3 + 1];
-    fpionCh[i].trackParams[2] = p[20 + i * 3 + 2];
+    fpionCh[i].fourMom[0] = p[20 + i * 3];
+    fpionCh[i].fourMom[1] = p[20 + i * 3 + 1];
+    fpionCh[i].fourMom[2] = p[20 + i * 3 + 2];
+    fpionCh[i].fourMom[3] = sqrt(pow(fpionCh[i].fourMom[0], 2) +
+                                 pow(fpionCh[i].fourMom[1], 2) +
+                                 pow(fpionCh[i].fourMom[2], 2) +
+                                 pow(PhysicsConstants::mPiCh, 2));
+
+    fpionCh[i].fourMomFilled = true;
   }
+  
 
   for (Int_t i = 0; i < 4; i++)
   {
@@ -156,13 +162,6 @@ void ConstraintsOmega::IntermediateReconstruction(Double_t *p)
   }
 
   fphi.SetTotalVector();
-
-  for (Int_t i = 0; i < 2; i++)
-  {
-    charged_mom(fpionCh[i].trackParams[0], fpionCh[i].trackParams[1], fpionCh[i].trackParams[2], fpionCh[i].fourMom.data(), 1);
-
-    fpionCh[i].fourMomFilled = true;
-  }
 
   for (Int_t i = 0; i < 4; i++)
   {
@@ -190,14 +189,12 @@ void ConstraintsOmega::IntermediateReconstruction(Double_t *p)
   std::vector<chargedParticle> s_pionCh = {fpionCh[0], fpionCh[1]};
   std::vector<neutralParticle> s_photon = {fphoton[0], fphoton[1], fphoton[2], fphoton[3]},
                                s_pionNe(2);
+                               
 
-  neutRec.PhotonPairingToPi0WithOmega(s_photon, s_pionCh, bestPairingIndexNeutral, bestPairingIndexCharged, fomega);
-
-  neutRec.Pi0Reconstruction(s_pionNe);
+  neutRec.PhotonPairingToPi0WithOmega(s_photon, s_pionCh, bestPairingIndexNeutral, bestPairingIndexCharged, fomega, s_pionNe);
 
   for (Int_t i = 0; i < 2; i++)
   {
-    s_pionNe[i].SetTotalVector();
     fpionNe[i] = s_pionNe[i];
   }
 

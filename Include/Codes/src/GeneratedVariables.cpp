@@ -234,7 +234,9 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
     std::vector<Float_t> &PhivMC,
     std::vector<Float_t> &CotvMC,
     std::vector<Int_t> &good_clus_ind,
-    std::vector<std::vector<Float_t>> cluster_rec)
+    std::vector<std::vector<Float_t>> cluster_rec,
+    Int_t &muonAlertPlus,
+    Int_t &muonAlertMinus)
 {
   Float_t
       Ks[9] = {},
@@ -284,13 +286,13 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 
   IPGenerated(nvtxmc, mother, ipmc, xvmc, yvmc, zvmc);
 
-  if (mctruth == 1 || mctruth == 3 || mctruth == 4 || mctruth == 5 || mctruth == 7)
+  if (mctruth == 1 || mctruth == 2 || mctruth == 4 || mctruth == 5 || mctruth == 7)
   {
     KSLGenerated(nvtxmc, mother, Kl, xvmc, yvmc, zvmc, Ks, ntmc, pidmc, pxmc, pymc, pzmc);
 
-    twoTracksFinder(ntmc, mother, vtxmc, pidmc, Knemc, Kl, Kchmc, Ks, trkMC, pxmc, pymc, pzmc, mctruth, CurvMC, PhivMC, CotvMC);
+    twoTracksFinder(ntmc, mother, vtxmc, pidmc, Knemc, Kl, Kchmc, Ks, trkMC, pxmc, pymc, pzmc, mctruth, CurvMC, PhivMC, CotvMC, muonAlertPlus, muonAlertMinus);
 
-    if (mctruth == 1 || mctruth == 3 || mctruth == 4 || mctruth == 5)
+    if (mctruth == 1 || mctruth == 2 || mctruth == 4 || mctruth == 5)
     {
       ClusterVariableFinder(ntmc, mother, vtxmc, pidmc, pgammaMC, count, pxmc, pymc, pzmc, neu_vtx, Knemc, region, CylIndObj, cluster, ipmc);
     }
@@ -396,11 +398,10 @@ void GeneratedVariables::MCvsReconstructedClustersComparator(const std::vector<I
           Int_t kinPi0 = kinmom[vtxmc[i] - 1];
           for (Int_t k = 0; k < ntmc; ++k)
           {
-            if(pidmc[k] == 7 && kine[k] == kinPi0 && (mother[vtxmc[k] - 1] == 10 || mother[vtxmc[k] - 1] == 16))
+            if (pidmc[k] == 7 && kine[k] == kinPi0 && (mother[vtxmc[k] - 1] == 10 || mother[vtxmc[k] - 1] == 16))
             {
               goodCluster.push_back(neuclulist[gtaken[j]]);
 
-              // std::cout << "DEBUG: Found good cluster " << neuclulist[gtaken[j]] << " for pi0 with kine " << kinPi0 << " from mother " << mother[vtxmc[k] - 1] << " and mother's kine " << kinmom[vtxmc[k] - 1] << std::endl;
               break;
             }
           }
@@ -410,8 +411,11 @@ void GeneratedVariables::MCvsReconstructedClustersComparator(const std::vector<I
   }
 }
 
-void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const Int_t *vtxmc, const Int_t *pidmc, std::vector<Float_t> &Knemc, Float_t Kl[9], std::vector<Float_t> &Kchmc, Float_t Ks[9], std::vector<std::vector<Float_t>> &trkMC, const Float_t *pxmc, const Float_t *pymc, const Float_t *pzmc, Int_t mctruth, std::vector<Float_t> &CurvMC, std::vector<Float_t> &PhivMC, std::vector<Float_t> &CotvMC)
+void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const Int_t *vtxmc, const Int_t *pidmc, std::vector<Float_t> &Knemc, Float_t Kl[9], std::vector<Float_t> &Kchmc, Float_t Ks[9], std::vector<std::vector<Float_t>> &trkMC, const Float_t *pxmc, const Float_t *pymc, const Float_t *pzmc, Int_t mctruth, std::vector<Float_t> &CurvMC, std::vector<Float_t> &PhivMC, std::vector<Float_t> &CotvMC, Int_t &muonAlertPlus, Int_t &muonAlertMinus)
 {
+  muonAlertPlus = false;
+  muonAlertMinus = false;
+
   for (Int_t j = 0; j < ntmc; j++)
   {
     if (mother[vtxmc[j] - 1] == 10)
@@ -454,6 +458,19 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
       {
         CurvMC.back() = -CurvMC.back();
       }
+
+      for (Int_t k = 0; k < ntmc; k++)
+      {
+        if ((mother[vtxmc[k] - 1] == 8) && (pidmc[k] == 5 || pidmc[k] == 6))
+        {
+          muonAlertPlus = true;
+        }
+
+        if ((mother[vtxmc[k] - 1] == 9) && (pidmc[k] == 5 || pidmc[k] == 6))
+        {
+          muonAlertMinus = true;
+        }
+      }
     }
 
     if ((mother[vtxmc[j] - 1] == 16) && (pidmc[j] == 8 || pidmc[j] == 9))
@@ -473,6 +490,19 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
       if (pidmc[j] == 9)
       {
         CurvMC.back() = -CurvMC.back();
+      }
+
+      for (Int_t k = 0; k < ntmc; k++)
+      {
+        if ((mother[vtxmc[k] - 1] == 8) && (pidmc[k] == 5 || pidmc[k] == 6))
+        {
+          muonAlertPlus = true;
+        }
+
+        if ((mother[vtxmc[k] - 1] == 9) && (pidmc[k] == 5 || pidmc[k] == 6))
+        {
+          muonAlertMinus = true;
+        }
       }
     }
   }

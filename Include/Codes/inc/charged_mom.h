@@ -25,19 +25,23 @@ namespace KLOE
           *_iv;
 
     F
-        *_CurV,
-        *_PhiV,
-        *_CotV,
-        *_xv,
-        *_yv,
-        *_zv,
-        *_IP,
-        _dist;
+        *_CurV = nullptr,
+        *_PhiV = nullptr,
+        *_CotV = nullptr,
+        *_PxTv = nullptr,
+        *_PyTv = nullptr,
+        *_PzTv = nullptr,
+        *_xv = nullptr,
+        *_yv = nullptr,
+        *_zv = nullptr,
+        *_IP = nullptr,
+        _dist = 0;
 
     void charged_mom(Int_t &i, F *mom_vec);
 
   public:
     ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PhiV, F *CotV, F *xvOld, F *yvOld, F *zvOld, Int_t &mode);
+    ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PxTv, F *PyTv, F *PzTv, F *xvOld, F *yvOld, F *zvOld, Int_t &mode);
     ChargedVtxRec();
 
     static void charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode);

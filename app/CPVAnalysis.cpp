@@ -138,7 +138,7 @@ int main(int argc, char *argv[])
       {
         runs = initObj.getRunStats(path, runRegexPattern);
         initObj.chainInit(chain, logger, path, runRegexPattern,
-                          runs.minRun, runs.minRun);
+                          runs.minRun, runs.maxRun);
       }
 
       break;

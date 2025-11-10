@@ -125,9 +125,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                             filePaths["MC"]["filenameBase"][1],
                                             filePaths["MC"]["filenameBase"][2]},
                            baseFilenamesTot = {"",
-                                            "",
-                                            "",
-                                            ""};
+                                               "",
+                                               "",
+                                               ""};
 
   std::string smearingName = "NoSmearing";
 
@@ -152,7 +152,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   }
 
   // Helper function to convert FileType to string
-  auto fileTypeToString = [](Controls::FileType fileType) -> std::string {
+  auto fileTypeToString = [](Controls::FileType fileType) -> std::string
+  {
     switch (fileType)
     {
     case Controls::FileType::DATA:
@@ -486,6 +487,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     yv_data = dataAccess.GetYv();
     zv_data = dataAccess.GetZv();
 
+    baseKin.pxtv = dataAccess.GetPxtv();
+    baseKin.pytv = dataAccess.GetPytv();
+    baseKin.pztv = dataAccess.GetPztv();
+    baseKin.vtxcov[0] = dataAccess.GetVtxCov1();
+    baseKin.vtxcov[1] = dataAccess.GetVtxCov2();
+    baseKin.vtxcov[2] = dataAccess.GetVtxCov3();
+    baseKin.vtxcov[3] = dataAccess.GetVtxCov4();
+    baseKin.vtxcov[4] = dataAccess.GetVtxCov5();
+    baseKin.vtxcov[5] = dataAccess.GetVtxCov6();
+
     baseKin.bhabha_vtx[0] = dataAccess.GetBx();
     baseKin.bhabha_vtx[1] = dataAccess.GetBy();
     baseKin.bhabha_vtx[2] = dataAccess.GetBz();
@@ -568,7 +579,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                baseKin.PhivMC,
                                baseKin.CotvMC,
                                baseKin.goodClusIndex,
-                               clusterMC);
+                               clusterMC,
+                               baseKin.muonAlertPlus,
+                               baseKin.muonAlertMinus);
 
       std::vector<Float_t> kaonChMom = {baseKin.Kchmc[0], baseKin.Kchmc[1], baseKin.Kchmc[2], baseKin.Kchmc[3]},
                            kaonChPos = {baseKin.Kchmc[6], baseKin.Kchmc[7], baseKin.Kchmc[8]},
@@ -579,6 +592,19 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       kaonTimesMC = Obj.CalculateKaonProperTimes(kaonChMom, kaonChPos, kaonNeMom, kaonNePos, ipPos);
 
       KLOE::channEventCount[mctruth]++;
+
+      if (mctruth == 1)
+      {
+        baseKin.trk1MC[0] = trkMC[0][0];
+        baseKin.trk1MC[1] = trkMC[0][1];
+        baseKin.trk1MC[2] = trkMC[0][2];
+        baseKin.trk1MC[3] = trkMC[0][3];
+
+        baseKin.trk2MC[0] = trkMC[1][0];
+        baseKin.trk2MC[1] = trkMC[1][1];
+        baseKin.trk2MC[2] = trkMC[1][2];
+        baseKin.trk2MC[3] = trkMC[1][3];
+      }
 
       if (mctruth == 7)
       {
@@ -694,7 +720,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       delete eventAnalysis; // Usuń poprzedni obiekt jeśli istnieje
     }
 
-    eventAnalysis = new KLOE::ChargedVtxRec<>(nv_local, ntv_local, iv_data.data(), bhabha_vtx, curv_data.data(), phiv_data.data(), cotv_data.data(), xv_data.data(), yv_data.data(), zv_data.data(), mode_local);
+    // Another constructor to be used for KLOE-2 (including helix parameters)
+    eventAnalysis = new KLOE::ChargedVtxRec<>(nv_local, ntv_local, iv_data.data(), bhabha_vtx, curv_data.data(), baseKin.pxtv.data(), baseKin.pytv.data(), baseKin.pztv.data(), xv_data.data(), yv_data.data(), zv_data.data(), mode_local);
 
     // --------------------------------------------------------------------------------
     if (smearing)
@@ -835,7 +862,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             xB[3] = {baseKin.bhabha_vtx[0],
                      baseKin.bhabha_vtx[1],
                      baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
-            plane_perp[3] = {0.,
+            plane_perp[3] = {baseKin.phi_mom[0],
                              baseKin.phi_mom[1],
                              0.}; // Vector perpendicular to the plane from Bhabha momentum
 
@@ -846,13 +873,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         baseKin.ipKS[0] = baseKin.bhabha_vtx[0];
         baseKin.ipKS[1] = baseKin.bhabha_vtx[1];
         // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
-        if (abs(baseKin.ipKS[2] - baseKin.bhabha_vtx[2]) > 2.0)
+        if (abs(baseKin.ipKS[2] - baseKin.bhabha_vtx[2]) > 2.8)
           baseKin.ipKS[2] = baseKin.bhabha_vtx[2];
 
         baseKin.ipKL[0] = baseKin.bhabha_vtx[0];
         baseKin.ipKL[1] = baseKin.bhabha_vtx[1];
         // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
-        if (abs(baseKin.ipKL[2] - baseKin.bhabha_vtx[2]) > 2.0)
+        if (abs(baseKin.ipKL[2] - baseKin.bhabha_vtx[2]) > 2.8)
           baseKin.ipKL[2] = baseKin.bhabha_vtx[2];
 
         Float_t
@@ -907,7 +934,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           xB[3] = {baseKin.bhabha_vtx[0],
                    baseKin.bhabha_vtx[1],
                    baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
-          plane_perp[3] = {0.,
+          plane_perp[3] = {baseKin.phi_mom[0],
                            baseKin.phi_mom[1],
                            0.}; // Vector perpendicular to the plane from Bhabha momentum
 
@@ -916,7 +943,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       baseKin.ipnew[0] = baseKin.bhabha_vtx[0];
       baseKin.ipnew[1] = baseKin.bhabha_vtx[1];
       // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
-      if (abs(baseKin.ipnew[2] - baseKin.bhabha_vtx[2]) > 2.0)
+      if (abs(baseKin.ipnew[2] - baseKin.bhabha_vtx[2]) > 2.8)
         baseKin.ipnew[2] = baseKin.bhabha_vtx[2];
 
       // ----------------------------------------------------------------------
@@ -1059,24 +1086,20 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
           std::vector<Int_t> bestPairingOmegaNeutral, bestPairingOmegaCharged;
 
-          chargedPions[0].FillFourMom(baseKin.trknew[0][0],
-                                      baseKin.trknew[0][1],
-                                      baseKin.trknew[0][2],
-                                      baseKin.trknew[0][3]);
-          chargedPions[1].FillFourMom(baseKin.trknew[1][0],
-                                      baseKin.trknew[1][1],
-                                      baseKin.trknew[1][2],
-                                      baseKin.trknew[1][3]);
+          chargedPions[0].FillFourMom(baseKin.trkClosest[0][0],
+                                      baseKin.trkClosest[0][1],
+                                      baseKin.trkClosest[0][2],
+                                      baseKin.trkClosest[0][3]);
+          chargedPions[1].FillFourMom(baseKin.trkClosest[1][0],
+                                      baseKin.trkClosest[1][1],
+                                      baseKin.trkClosest[1][2],
+                                      baseKin.trkClosest[1][3]);
 
-          neutRec.PhotonPairingToPi0WithOmega(photons, chargedPions, bestPairingOmegaNeutral, bestPairingOmegaCharged, omega);
-          neutRec.Pi0Reconstruction(pionsOmega);
+          neutRec.PhotonPairingToPi0WithOmega(photons, chargedPions, bestPairingOmegaNeutral, bestPairingOmegaCharged, omega, pionsOmega);
 
-          pionsOmega[0].SetTotalVector();
-          pionsOmega[1].SetTotalVector();
-
-          omega.total[6] = bhabha_vtx[0];
-          omega.total[7] = bhabha_vtx[1];
-          omega.total[8] = baseKin.Kchrec[8]; // Use kaon decay z vertex as omega z vertex - better resolution
+          omega.total[6] = baseKin.KchrecClosest[6];
+          omega.total[7] = baseKin.KchrecClosest[7];
+          omega.total[8] = baseKin.KchrecClosest[8]; // Use kaon decay z vertex as omega z vertex - better resolution
 
           ///////////////////////////////////////////////////////////////////
 
@@ -1092,19 +1115,19 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
               neuVtxErr,
               bhabhaVtxErr;
 
-          trackParameters[0].push_back(baseKin.CurvSmeared1);
-          trackParameters[0].push_back(baseKin.PhivSmeared1);
-          trackParameters[0].push_back(baseKin.CotvSmeared1);
-          trackParameters[1].push_back(baseKin.CurvSmeared2);
-          trackParameters[1].push_back(baseKin.PhivSmeared2);
-          trackParameters[1].push_back(baseKin.CotvSmeared2);
+          trackParameters[0].push_back(baseKin.trknew[0][0]);
+          trackParameters[0].push_back(baseKin.trknew[0][1]);
+          trackParameters[0].push_back(baseKin.trknew[0][2]);
+          trackParameters[1].push_back(baseKin.trknew[1][0]);
+          trackParameters[1].push_back(baseKin.trknew[1][1]);
+          trackParameters[1].push_back(baseKin.trknew[1][2]);
 
-          trackParametersErr[0].push_back(0.018);
-          trackParametersErr[0].push_back(0.005);
-          trackParametersErr[0].push_back(0.005);
-          trackParametersErr[1].push_back(0.016);
-          trackParametersErr[1].push_back(0.005);
-          trackParametersErr[1].push_back(0.005);
+          trackParametersErr[0].push_back(pow(1.5, 2) / 2.0);
+          trackParametersErr[0].push_back(pow(1.5, 2) / 2.0);
+          trackParametersErr[0].push_back(pow(1.8, 2) / 2.0);
+          trackParametersErr[1].push_back(pow(1.5, 2) / 2.0);
+          trackParametersErr[1].push_back(pow(1.5, 2) / 2.0);
+          trackParametersErr[1].push_back(pow(1.8, 2) / 2.0);
 
           for (Int_t k = 0; k < 4; k++)
           {
@@ -1120,9 +1143,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             chargedVtx.push_back(baseKin.Kchboostnew[k]);
           }
 
-          chargedVtxErr.push_back(0.102);
-          chargedVtxErr.push_back(0.104);
-          chargedVtxErr.push_back(0.183);
+          chargedVtxErr.push_back(sqrt(baseKin.vtxcov[0][baseKin.vtaken[0]]));
+          chargedVtxErr.push_back(sqrt(baseKin.vtxcov[3][baseKin.vtaken[0]]));
+          chargedVtxErr.push_back(sqrt(baseKin.vtxcov[5][baseKin.vtaken[0]]));
 
           for (Int_t k = 6; k < 9; k++)
           {
@@ -1155,38 +1178,38 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                        baseKin.KnereclorFit,
                                        baseKin.Chi2SignalKinFit,
                                        baseKin.pullsSignalFit);
+
+            for (Int_t i = 0; i < nPhotons; i++)
+            {
+              photons[i].FillFourMom(baseKin.photonFit[i][0],
+                                     baseKin.photonFit[i][1],
+                                     baseKin.photonFit[i][2],
+                                     baseKin.photonFit[i][3]);
+
+              photons[i].fourPos[0] = baseKin.photonFit[i][4];
+              photons[i].fourPos[1] = baseKin.photonFit[i][5];
+              photons[i].fourPos[2] = baseKin.photonFit[i][6];
+              photons[i].fourPos[3] = baseKin.photonFit[i][7];
+            }
+
+            std::vector<Int_t> bestPairingIndex, bestPairingIndexNeutral, bestPairingIndexCharged;
+
+            neutRec.PhotonPairingToPi0(photons, bestPairingIndex);
+            neutRec.Pi0Reconstruction(pions);
+
+            for (Int_t i = 0; i < 4; i++)
+            {
+              baseKin.pi01Fit[i] = pions[0].fourMom[i];
+              baseKin.pi02Fit[i] = pions[1].fourMom[i];
+            }
+
+            baseKin.pi01Fit[4] = pions[0].totalMomentum;
+            baseKin.pi01Fit[5] = pions[0].mass;
+
+            baseKin.pi02Fit[4] = pions[1].totalMomentum;
+            baseKin.pi02Fit[5] = pions[1].mass;
+            ///////////////////////////////////////////////////////////////////
           }
-
-          for (Int_t i = 0; i < nPhotons; i++)
-          {
-            photons[i].FillFourMom(baseKin.photonFit[i][0],
-                                   baseKin.photonFit[i][1],
-                                   baseKin.photonFit[i][2],
-                                   baseKin.photonFit[i][3]);
-
-            photons[i].fourPos[0] = baseKin.photonFit[i][4];
-            photons[i].fourPos[1] = baseKin.photonFit[i][5];
-            photons[i].fourPos[2] = baseKin.photonFit[i][6];
-            photons[i].fourPos[3] = baseKin.photonFit[i][7];
-          }
-
-          std::vector<Int_t> bestPairingIndex, bestPairingIndexNeutral, bestPairingIndexCharged;
-
-          neutRec.PhotonPairingToPi0(photons, bestPairingIndex);
-          neutRec.Pi0Reconstruction(pions);
-
-          for (Int_t i = 0; i < 4; i++)
-          {
-            baseKin.pi01Fit[i] = pions[0].fourMom[i];
-            baseKin.pi02Fit[i] = pions[1].fourMom[i];
-          }
-
-          baseKin.pi01Fit[4] = pions[0].totalMomentum;
-          baseKin.pi01Fit[5] = pions[0].mass;
-
-          baseKin.pi02Fit[4] = pions[1].totalMomentum;
-          baseKin.pi02Fit[5] = pions[1].mass;
-          ///////////////////////////////////////////////////////////////////
 
           // Go to Kaon CM frame to get the proper time
           baseKin.Knereclor[0] = bhabha_mom[0] - baseKin.Kchboostnew[0];
@@ -1233,13 +1256,36 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           // Additional Omega-Pi0 fit for better bkg rejection
           if (omegaKinFit)
           {
+            trackParameters[0].clear();
+            trackParameters[1].clear();
+            trackParametersErr[0].clear();
+            trackParametersErr[1].clear();
 
-            std::vector<Float_t> omegaVtx = {bhabha_vtx[0],
-                                             bhabha_vtx[1],
-                                             baseKin.Kchrec[8]},
-                                 omegaVtxErr = {bhabhaVtxErr[0],
-                                                bhabhaVtxErr[1],
-                                                0.210};
+            trackParameters[0].resize(0);
+            trackParameters[1].resize(0);
+            trackParametersErr[0].resize(0);
+            trackParametersErr[1].resize(0);
+
+            trackParameters[0].push_back(baseKin.trkClosest[0][0]);
+            trackParameters[0].push_back(baseKin.trkClosest[0][1]);
+            trackParameters[0].push_back(baseKin.trkClosest[0][2]);
+            trackParameters[1].push_back(baseKin.trkClosest[1][0]);
+            trackParameters[1].push_back(baseKin.trkClosest[1][1]);
+            trackParameters[1].push_back(baseKin.trkClosest[1][2]);
+
+            trackParametersErr[0].push_back(pow(1.5, 2) / 2.0);
+            trackParametersErr[0].push_back(pow(1.5, 2) / 2.0);
+            trackParametersErr[0].push_back(pow(1.8, 2) / 2.0);
+            trackParametersErr[1].push_back(pow(1.5, 2) / 2.0);
+            trackParametersErr[1].push_back(pow(1.5, 2) / 2.0);
+            trackParametersErr[1].push_back(pow(1.8, 2) / 2.0);
+
+            std::vector<Float_t> omegaVtx = {baseKin.KchrecClosest[6],
+                                             baseKin.KchrecClosest[7],
+                                             baseKin.KchrecClosest[8]},
+                                 omegaVtxErr = {sqrt(baseKin.vtxcov[0][baseKin.vtakenClosest[0]]),
+                                                sqrt(baseKin.vtxcov[3][baseKin.vtakenClosest[0]]),
+                                                sqrt(baseKin.vtxcov[5][baseKin.vtakenClosest[0]])};
 
             omegaKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, bhabha_mom, bhabha_mom_err, chargedVtx, chargedVtxErr, omegaVtx, omegaVtxErr);
             errorCode = omegaKinFitObj.Reconstruct();
@@ -1437,7 +1483,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"bunchnum", baseKin.bunchnum},
           {"errorcode", baseKin.errorCode},
           {"goodClustersTriKinFitSize", baseKin.goodClustersTriKinFit.size()},
-          {"cutApplied", baseKin.cut}};
+          {"cutApplied", baseKin.cut},
+          {"muonAlertPlus", baseKin.muonAlertPlus},
+          {"muonAlertMinus", baseKin.muonAlertMinus}};
 
       // Float_t zmienne
       std::map<std::string, Float_t> floatVars = {
@@ -1611,7 +1659,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"photonOmegaFit2", baseKin.photonOmegaFit[1]},
           {"photonOmegaFit3", baseKin.photonOmegaFit[2]},
           {"photonOmegaFit4", baseKin.photonOmegaFit[3]},
-          {"ipOmegaFit", baseKin.ipOmegaFit}};
+          {"ipOmegaFit", baseKin.ipOmegaFit},
+          {"trk1MC", baseKin.trk1MC},
+          {"trk2MC", baseKin.trk2MC}};
 
       writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }

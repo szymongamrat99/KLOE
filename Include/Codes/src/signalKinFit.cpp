@@ -170,23 +170,7 @@ namespace KLOE
 
 			KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit, _KchrecFit, _KchboostFit, _ipFit, _photonFit, _KnerecFit, _KnereclorFit);
 
-      Double_t kaonPath = sqrt(pow(_ipFit[0] - _KnerecFit[6], 2) +
-                                   pow(_ipFit[1] - _KnerecFit[7], 2) +
-                                   pow(_ipFit[2] - _KnerecFit[8], 2)),
-               kaonVel = PhysicsConstants::cVel * _KnerecFit[4] / _KnerecFit[3],
-               kaonTime = kaonPath / kaonVel;
-
-      Bool_t condTime = 1;//kaonTime < _X_min[3] &&
-                        // kaonTime < _X_min[8] &&
-                        // kaonTime < _X_min[13] &&
-                        // kaonTime < _X_min[18];
-
-
-
-			if (condTime)
-				_isConverged = 1;
-			else
-				_isConverged = 0;
+			_isConverged = 1;
 		}
 		else
 		{

@@ -38,6 +38,7 @@
 #include <TLegend.h>
 #include <TRegexp.h>
 #include <interf_function.h>
+#include <charged_mom.h>
 
 #include <TFitResult.h>
 #include <TFitResultPtr.h>
@@ -68,6 +69,7 @@ KLOE::TripleGaussFitter *fitter;
 KLOE::DoublGaussFitter *doubleFitter;
 
 KLOE::pm00 Obj;
+KLOE::ChargedVtxRec<> chargedVtxRec;
 
 // Wczytaj konfiguracje histogramów
 auto histogramConfigs1D = KLOE::Histograms::LoadHistogramConfigs1D(Paths::histogramConfig1DPath);
@@ -245,13 +247,13 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                                                                    KchPos,
                                                                    KnerecMom,
                                                                    KnePos,
-                                                                   ipCenter);
+                                                                   ipPos);
 
   KLOE::KaonProperTimes timesSignalFit = Obj.CalculateKaonProperTimes(KchboostFitMom,
                                                                       KchPosFit,
                                                                       KnerecFitMom,
                                                                       KnePosFit,
-                                                                      ipCenter);
+                                                                      ipPosFit);
 
   Float_t Omega1MassTmp = sqrt(pow(trk1[3] + trk2[3] + pi0Omega1[3], 2) -
                                pow(trk1[0] + trk2[0] + pi0Omega1[0], 2) -
@@ -321,13 +323,33 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   else
     T0Omega = Omega1MassTmp - (trk1[3] + trk2[3]) - pi0Omega1[5];
 
-  Float_t deltaTfit = *KaonChTimeCMSignalFit - *KaonNeTimeCMSignalFit,
+  Float_t deltaTfit = timesSignalFit.deltaTimeCM,
           deltaT = timesBoostLor.deltaTimeCM,
           deltaTMC = *KaonChTimeCMMC - *KaonNeTimeCMMC;
 
-  Float_t deltaPhi = *PhivSmeared1 - *PhivSmeared2;
+  Float_t deltaPhi,
+      deltaPhiMC,
+      deltaPhiFit,
+      deltaTheta;
 
-  Float_t deltaPhiFit = abs(ParamSignalFit[27] - ParamSignalFit[24]);
+  TVector3 trk1Vec(ParamSignalFit[23], ParamSignalFit[24], ParamSignalFit[25]),
+      trk2Vec(ParamSignalFit[26], ParamSignalFit[27], ParamSignalFit[28]),
+      trk1VecRec(trk1[0], trk1[1], trk1[2]),
+      trk2VecRec(trk2[0], trk2[1], trk2[2]);
+
+  Float_t Theta1Fit = trk1Vec.Theta(),
+          Theta2Fit = trk2Vec.Theta(),
+          Phi1Fit = trk1Vec.Phi(),
+          Phi2Fit = trk2Vec.Phi(),
+          Theta1Rec = trk1VecRec.Theta(),
+          Theta2Rec = trk2VecRec.Theta(),
+          Phi1Rec = trk1VecRec.Phi(),
+          Phi2Rec = trk2VecRec.Phi();
+
+  deltaPhi = abs(Phi2Rec - Phi1Rec);
+  deltaTheta = abs(Theta2Fit - Theta1Fit);
+  deltaPhiFit = abs(Phi2Fit - Phi1Fit);
+
 
   ///////////////////////////////////////////////////////////////////////////////
   // Analiza Simony cięcie na 3 sigma mas
@@ -337,13 +359,13 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
          condMassPi02 = abs(pi02Fit[5] - 134.745) < 3 * 6.772;
   ///////////////////////////////////////////////////////////////////////////////
 
-  Bool_t simonaCuts = abs(deltaPhiFit - 3.132) > 2 * 0.157 && *Chi2SignalKinFit < 30.,
+  Bool_t simonaCuts = abs(deltaPhiFit - 3.132) > 2 * 0.167 && *Chi2SignalKinFit < 30.,
          simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts;
 
   if (*mctruth == 0 || *mctruth == -1 || *mctruth == 1)
     signal_tot_err++;
 
-  if (*mctruth == 0 || *mctruth == 1)
+  if ((*mctruth == 0 || *mctruth == 1))
     signal_tot++;
 
   Double_t limitRadiusChMC = 25.,
@@ -351,13 +373,11 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
   Double_t
       pathKneMC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
-                       pow(Knemc[7] - ipmc[1], 2) +
-                       pow(Knemc[8] - ipmc[2], 2)),
+                       pow(Knemc[7] - ipmc[1], 2)),
       pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
-                       pow(Kchmc[7] - ipmc[1], 2) +
-                       pow(Kchmc[8] - ipmc[2], 2));
+                       pow(Kchmc[7] - ipmc[1], 2));
 
-  if ((*mctruth == 1 || *mctruth == 0)) // && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC) // && *Chi2SignalKinFit < 30.) // && isInsideFiducialVolume)
+  if (*mctruth == 1 && simonaCuts)// && *Chi2SignalKinFit < 30.) // && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC && *Chi2SignalKinFit < 31.) // && isInsideFiducialVolume)
   {
     Int_t mctruth_tmp = *mctruth;
 
@@ -371,14 +391,36 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     signal_num++;
 
+    Float_t X_line[3] = {Kchboost[6],
+                         Kchboost[7],
+                         Kchboost[8]}, // Vertex laying on the line
+        mom[3] = {Kchboost[0],
+                  Kchboost[1],
+                  Kchboost[2]}, // Direction of the line
+        xB[3] = {*Bx,
+                 *By,
+                 *Bz}, // Bhabha vertex - laying on the plane
+        plane_perp[3] = {*Bpx,
+                         *Bpy,
+                         0.},
+            ip_check[3] = {0., 0., 0.}; // Vector perpendicular to the plane from Bhabha momentum
+
+    // Corrected IP event by event
+    chargedVtxRec.IPBoostCorr(X_line, mom, xB, plane_perp, ip_check);
+
+    ip_check[0] = *Bx;
+    ip_check[1] = *By;
+    if (abs(ip_check[2] - *Bz) > 2.8)
+      ip_check[2] = *Bz;
+
     histsReconstructed["TransvRadius"]->Fill(pathpmMCCenter, weight);
     histsFittedSignal["TransvRadius"]->Fill(path00MCCenter, weight);
 
     // Fill histograms for reconstructed variables
-    histsReconstructed["px_Kch"]->Fill(Kchboost[0] - Kchmc[0], weight);
-    histsReconstructed["py_Kch"]->Fill(Kchboost[1] - Kchmc[1], weight);
-    histsReconstructed["pz_Kch"]->Fill(Kchboost[2] - Kchmc[2], weight);
-    histsReconstructed["Energy_Kch"]->Fill(Kchboost[3] - Kchmc[3], weight);
+    histsReconstructed["px_Kch"]->Fill(Kchrec[0] - Kchmc[0], weight);
+    histsReconstructed["py_Kch"]->Fill(Kchrec[1] - Kchmc[1], weight);
+    histsReconstructed["pz_Kch"]->Fill(Kchrec[2] - Kchmc[2], weight);
+    histsReconstructed["Energy_Kch"]->Fill(Kchrec[3] - Kchmc[3], weight);
     histsReconstructed["mass_Kch"]->Fill(Kchrec[5] - PhysicsConstants::mK0, weight);
 
     histsReconstructed["px_Kne"]->Fill(Knerec[0] - Knemc[0], weight);
@@ -389,6 +431,11 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsReconstructed["mass_pi01"]->Fill(pi01[5] - PhysicsConstants::mPi0, weight);
     histsReconstructed["mass_pi02"]->Fill(pi02[5] - PhysicsConstants::mPi0, weight);
+
+    histsReconstructed["px_Phi"]->Fill(*Bpx - Kchmc[0] - Knemc[0], weight);
+    histsReconstructed["py_Phi"]->Fill(*Bpy - Kchmc[1] - Knemc[1], weight);
+    histsReconstructed["pz_Phi"]->Fill(*Bpz - Kchmc[2] - Knemc[2], weight);
+    histsReconstructed["Energy_Phi"]->Fill(*Broots - Kchmc[3] - Knemc[3], weight);
 
     if (abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
       histsReconstructed["mass_omega"]->Fill(Omega2MassTmp - PhysicsConstants::mOmega, weight);
@@ -408,9 +455,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["vtxCh_y"]->Fill(Kchrec[7] - Kchmc[7], weight);
     histsReconstructed["vtxCh_z"]->Fill(Kchrec[8] - Kchmc[8], weight);
 
-    histsReconstructed["phi_vtx_x"]->Fill(ip[0] - ipmc[0], weight);
-    histsReconstructed["phi_vtx_y"]->Fill(ip[1] - ipmc[1], weight);
-    histsReconstructed["phi_vtx_z"]->Fill(ip[2] - ipmc[2], weight);
+    histsReconstructed["phi_vtx_x"]->Fill(ip_check[0] - ipmc[0], weight);
+    histsReconstructed["phi_vtx_y"]->Fill(ip_check[1] - ipmc[1], weight);
+    histsReconstructed["phi_vtx_z"]->Fill(ip_check[2] - ipmc[2], weight);
 
     histsReconstructed["vtxNeu_x_Fit"]->Fill(Knerec[6] - Knemc[6], weight);
     histsReconstructed["vtxNeu_y_Fit"]->Fill(Knerec[7] - Knemc[7], weight);
@@ -420,7 +467,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsReconstructed["time_neutral_MC"]->Fill(*TrcSum, weight);
 
-    histsReconstructed["delta_t"]->Fill(deltaT - deltaTMC, weight);
+    histsReconstructed["delta_t"]->Fill(timesBoostLor.deltaTimeCM - deltaTMC, weight);
 
     histsReconstructed["combined_mass_pi0"]->Fill(combinedMassPi0, weight);
 
@@ -428,27 +475,27 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     // Decide which reconstructed track corresponds to which MC particle
 
-    Double_t  errorPart10, errorPart20, errorPart11, errorPart21, error1021, error1120; 
+    Double_t errorPart10, errorPart20, errorPart11, errorPart21, error1021, error1120;
 
-    errorPart10 = pow(abs(*CurvSmeared1) - abs(CurvMC[0]), 2) +
-    pow(abs(*PhivSmeared1) - abs(PhivMC[0]), 2) +
-    pow(abs(*CotvSmeared1) - abs(CotvMC[0]), 2);
+    errorPart10 = pow(abs(trk1[0]) - abs(CurvMC[0]), 2) +
+                  pow(abs(*PhivSmeared1) - abs(PhivMC[0]), 2) +
+                  pow(abs(*CotvSmeared1) - abs(CotvMC[0]), 2);
 
     errorPart20 = pow(abs(*CurvSmeared2) - abs(CurvMC[0]), 2) +
-    pow(abs(*PhivSmeared2) - abs(PhivMC[0]), 2) +
-    pow(abs(*CotvSmeared2) - abs(CotvMC[0]), 2);
+                  pow(abs(*PhivSmeared2) - abs(PhivMC[0]), 2) +
+                  pow(abs(*CotvSmeared2) - abs(CotvMC[0]), 2);
 
     errorPart11 = pow(abs(*CurvSmeared1) - abs(CurvMC[1]), 2) +
-    pow(abs(*PhivSmeared1) - abs(PhivMC[1]), 2) +
-    pow(abs(*CotvSmeared1) - abs(CotvMC[1]), 2);
+                  pow(abs(*PhivSmeared1) - abs(PhivMC[1]), 2) +
+                  pow(abs(*CotvSmeared1) - abs(CotvMC[1]), 2);
 
     errorPart21 = pow(abs(*CurvSmeared2) - abs(CurvMC[1]), 2) +
-    pow(abs(*PhivSmeared2) - abs(PhivMC[1]), 2) +
-    pow(abs(*CotvSmeared2) - abs(CotvMC[1]), 2);
+                  pow(abs(*PhivSmeared2) - abs(PhivMC[1]), 2) +
+                  pow(abs(*CotvSmeared2) - abs(CotvMC[1]), 2);
 
     error1021 = sqrt(errorPart10 + errorPart21);
     error1120 = sqrt(errorPart11 + errorPart20);
-    
+
     if (error1021 < error1120)
     {
       histsReconstructed["curv1"]->Fill(abs(*CurvSmeared1) - abs(CurvMC[0]), weight);
@@ -470,17 +517,57 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
       histsReconstructed["cotv2"]->Fill(abs(*CotvSmeared2) - abs(CotvMC[0]), weight);
     }
 
+    errorPart10 = pow(trk1[0] - trk1MC[0], 2) +
+                  pow(trk1[1] - trk1MC[1], 2) +
+                  pow(trk1[2] - trk1MC[2], 2);
+
+    errorPart20 = pow(trk2[0] - trk1MC[0], 2) +
+                  pow(trk2[1] - trk1MC[1], 2) +
+                  pow(trk2[2] - trk1MC[2], 2);
+
+    errorPart11 = pow(trk1[0] - trk2MC[0], 2) +
+                  pow(trk1[1] - trk2MC[1], 2) +
+                  pow(trk1[2] - trk2MC[2], 2);
+
+    errorPart21 = pow(trk2[0] - trk2MC[0], 2) +
+                  pow(trk2[1] - trk2MC[1], 2) +
+                  pow(trk2[2] - trk2MC[2], 2);
+
+    error1021 = sqrt(errorPart10 + errorPart21);
+    error1120 = sqrt(errorPart11 + errorPart20);
+
+    if (error1021 < error1120)
+    {
+      histsReconstructed["trk1x"]->Fill(trk1[0] - trk1MC[0], weight);
+      histsReconstructed["trk1y"]->Fill(trk1[1] - trk1MC[1], weight);
+      histsReconstructed["trk1z"]->Fill(trk1[2] - trk1MC[2], weight);
+
+      histsReconstructed["trk2x"]->Fill(trk2[0] - trk2MC[0], weight);
+      histsReconstructed["trk2y"]->Fill(trk2[1] - trk2MC[1], weight);
+      histsReconstructed["trk2z"]->Fill(trk2[2] - trk2MC[2], weight);
+    }
+    else
+    {
+      histsReconstructed["trk1x"]->Fill(trk1[0] - trk2MC[0], weight);
+      histsReconstructed["trk1y"]->Fill(trk1[1] - trk2MC[1], weight);
+      histsReconstructed["trk1z"]->Fill(trk1[2] - trk2MC[2], weight);
+
+      histsReconstructed["trk2x"]->Fill(trk2[0] - trk1MC[0], weight);
+      histsReconstructed["trk2y"]->Fill(trk2[1] - trk1MC[1], weight);
+      histsReconstructed["trk2z"]->Fill(trk2[2] - trk1MC[2], weight);
+    }
+
     // Fitted signal variables
-    histsFittedSignal["px_Kch"]->Fill(KchboostFit[0] - Kchmc[0], weight);
-    histsFittedSignal["py_Kch"]->Fill(KchboostFit[1] - Kchmc[1], weight);
-    histsFittedSignal["pz_Kch"]->Fill(KchboostFit[2] - Kchmc[2], weight);
-    histsFittedSignal["Energy_Kch"]->Fill(KchboostFit[3] - Kchmc[3], weight);
+    histsFittedSignal["px_Kch"]->Fill(KchrecFit[0] - Kchmc[0], weight);
+    histsFittedSignal["py_Kch"]->Fill(KchrecFit[1] - Kchmc[1], weight);
+    histsFittedSignal["pz_Kch"]->Fill(KchrecFit[2] - Kchmc[2], weight);
+    histsFittedSignal["Energy_Kch"]->Fill(KchrecFit[3] - Kchmc[3], weight);
     histsFittedSignal["mass_Kch"]->Fill(KchrecFit[5], weight);
 
-    histsFittedSignal["px_Kne"]->Fill(KnereclorFit[0] - Knemc[0], weight);
-    histsFittedSignal["py_Kne"]->Fill(KnereclorFit[1] - Knemc[1], weight);
-    histsFittedSignal["pz_Kne"]->Fill(KnereclorFit[2] - Knemc[2], weight);
-    histsFittedSignal["Energy_Kne"]->Fill(KnereclorFit[3] - Knemc[3], weight);
+    histsFittedSignal["px_Kne"]->Fill(KnerecFit[0] - Knemc[0], weight);
+    histsFittedSignal["py_Kne"]->Fill(KnerecFit[1] - Knemc[1], weight);
+    histsFittedSignal["pz_Kne"]->Fill(KnerecFit[2] - Knemc[2], weight);
+    histsFittedSignal["Energy_Kne"]->Fill(KnerecFit[3] - Knemc[3], weight);
     histsFittedSignal["mass_Kne"]->Fill(KnerecFit[5], weight);
 
     histsFittedSignal["mass_pi01"]->Fill(pi01Fit[5] - PhysicsConstants::mPi0, weight);
@@ -488,13 +575,22 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsFittedSignal["mass_omega"]->Fill(omegaFit[5] - PhysicsConstants::mOmega, weight);
 
-    histsFittedSignal["chi2_signalKinFit"]->Fill(*Chi2SignalKinFit / 10., weight);
-    histsFittedSignal["chi2_trilaterationKinFit"]->Fill(*Chi2TriKinFit / 5., weight);
-    histsFittedSignal["prob_signal"]->Fill(TMath::Prob(*Chi2SignalKinFit, 10), weight);
+    histsReconstructed["chi2_signalKinFit"]->Fill(*Chi2SignalKinFit / 10., weight);
+    histsReconstructed["chi2_trilaterationKinFit"]->Fill(*Chi2TriKinFit / 5., weight);
+    histsReconstructed["prob_signal"]->Fill(TMath::Prob(*Chi2SignalKinFit, 10), weight);
 
-    histsFittedSignal["vtxNeu_x_Fit"]->Fill(KnereclorFit[6] - Knemc[6], weight);
-    histsFittedSignal["vtxNeu_y_Fit"]->Fill(KnereclorFit[7] - Knemc[7], weight);
-    histsFittedSignal["vtxNeu_z_Fit"]->Fill(KnereclorFit[8] - Knemc[8], weight);
+    histsFittedSignal["vtxNeu_x_Fit"]->Fill(KnerecFit[6] - Knemc[6], weight);
+    histsFittedSignal["vtxNeu_y_Fit"]->Fill(KnerecFit[7] - Knemc[7], weight);
+    histsFittedSignal["vtxNeu_z_Fit"]->Fill(KnerecFit[8] - Knemc[8], weight);
+
+    histsFittedSignal["px_Phi"]->Fill(ParamSignalFit[32] - Kchmc[0] - Knemc[0], weight);
+    histsFittedSignal["py_Phi"]->Fill(ParamSignalFit[33] - Kchmc[1] - Knemc[1], weight);
+    histsFittedSignal["pz_Phi"]->Fill(ParamSignalFit[34] - Kchmc[2] - Knemc[2], weight);
+    Double_t energyPhiFit = sqrt(pow(ParamSignalFit[32], 2) +
+                                 pow(ParamSignalFit[33], 2) +
+                                 pow(ParamSignalFit[34], 2) +
+                                 pow(PhysicsConstants::mPhi, 2));
+    histsFittedSignal["Energy_Phi"]->Fill(energyPhiFit - Kchmc[3] - Knemc[3], weight);
 
     histsFittedSignal["phi_vtx_x"]->Fill(ipFit[0] - ipmc[0], weight);
     histsFittedSignal["phi_vtx_y"]->Fill(ipFit[1] - ipmc[1], weight);
@@ -506,11 +602,10 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsFittedSignal["combined_mass_pi0"]->Fill(combinedMassPi0Fit, weight);
 
-    histsFittedSignal["pull1"]->Fill(pullsSignalFit[0], weight);
-    histsFittedSignal["pull2"]->Fill(pullsSignalFit[1], weight);
-    histsFittedSignal["pull3"]->Fill(pullsSignalFit[2], weight);
-    histsFittedSignal["pull4"]->Fill(pullsSignalFit[3], weight);
-    histsFittedSignal["pull5"]->Fill(pullsSignalFit[4], weight);
+    for (Int_t i = 0; i < 39; i++)
+    {
+      histsReconstructed["pull" + std::to_string(i + 1)]->Fill(pullsSignalFit[i], weight);
+    }
 
     histsFittedSignal["time_neutral_MC"]->Fill(TrcSumFit, weight);
 
@@ -519,6 +614,11 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
       Double_t chi2inp = pow(ParamSignalFit[i] - ParamSignal[i], 2) / pow(ErrorsSignal[i], 2);
       histsReconstructed["Chi2Comp" + std::to_string(i + 1)]->Fill(chi2inp, weight);
     }
+
+    hists2DFittedSignal["px_ch_res_vs_px_neu_res"]->Fill(ParamSignalFit[32] - Kchmc[0] - Knemc[0], KchboostFit[0] - Kchmc[0], weight);
+    hists2DFittedSignal["py_ch_res_vs_py_neu_res"]->Fill(ParamSignalFit[33] - Kchmc[1] - Knemc[1], KchboostFit[1] - Kchmc[1], weight);
+    hists2DFittedSignal["pz_ch_res_vs_pz_neu_res"]->Fill(ParamSignalFit[34] - Kchmc[2] - Knemc[2], KchboostFit[2] - Kchmc[2], weight);
+    hists2DFittedSignal["E_ch_res_vs_E_neu_res"]->Fill(ParamSignalFit[35] - Kchmc[3] - Knemc[3], KchboostFit[3] - Kchmc[3], weight);
   }
 
   return kTRUE;
@@ -554,11 +654,11 @@ void MC_fit_comparison::Terminate()
   {
     canvas[histName.first]->cd();
 
-    TRegexp pattern("vtxNeu.*Fit"), pattern1("Chi2Comp.*");
+    TRegexp pattern("vtxNeu.*Fit"), pattern1("Chi2Comp.*"), pattern2("trk.*"), patternpull("pull.*"), patternPhi(".*Phi");
 
     if (histName.first.Contains(pattern) || histName.first.Contains(pattern1))
     {
-      histsReconstructed[histName.first]->GetYaxis()->SetRangeUser(0.1, std::max(histsReconstructed[histName.first]->GetMaximum(), histsFittedSignal[histName.first]->GetMaximum()) * 100);
+      histsReconstructed[histName.first]->GetYaxis()->SetRangeUser(1, std::max(histsReconstructed[histName.first]->GetMaximum(), histsFittedSignal[histName.first]->GetMaximum()) * 100);
       canvas[histName.first]->SetLogy(1);
     }
     else
@@ -573,8 +673,7 @@ void MC_fit_comparison::Terminate()
 
     Bool_t fitcond = histName.first == "curv1" || histName.first == "phiv1" || histName.first == "cotv1" ||
                      histName.first == "curv2" || histName.first == "phiv2" || histName.first == "cotv2" ||
-                     histName.first == "vtxNeu_x" || histName.first == "vtxNeu_y" || histName.first == "vtxNeu_z" || histName.first == "delta_t" || histName.first == "phi_vtx_x" || histName.first == "phi_vtx_y" || histName.first == "phi_vtx_z" || histName.first == "vtxCh_x" || histName.first == "vtxCh_y" || histName.first == "vtxCh_z";
-    ;
+                     histName.first == "vtxNeu_x" || histName.first == "vtxNeu_y" || histName.first == "vtxNeu_z" || histName.first == "delta_t" || histName.first == "phi_vtx_x" || histName.first == "phi_vtx_y" || histName.first == "phi_vtx_z" || histName.first == "vtxCh_x" || histName.first == "vtxCh_y" || histName.first == "vtxCh_z" || histName.first.Contains(pattern2) || histName.first.Contains(patternpull) || histName.first.Contains(patternPhi);
 
     if (fitcond)
     {
@@ -586,7 +685,7 @@ void MC_fit_comparison::Terminate()
         std::cout << "\n=== Fitting delta_t with TF1 (proven method) ===" << std::endl;
 
         // Użyj starej, sprawdzonej metody TF1 dla delta_t
-        fitSuccess = doubleFitter->FitHistogram(histsReconstructed[histName.first]);
+        fitSuccess = doubleFitter->FitHistogram(histsFittedSignal[histName.first], KLOE::DoublGaussFitter::FitType::kDoubleGauss);
       }
       else
       {
@@ -677,6 +776,33 @@ void MC_fit_comparison::Terminate()
     canvas[histName.first]->Update();
 
     canvas[histName.first]->SaveAs(Form(folderPath + "/%s_comparison.png", histName.first.Data()));
+  }
+
+  for (const auto &config : histogramConfigs2D)
+  {
+
+      canvas2D[config.first]->cd();
+      canvas2D[config.first]->SetLogz(1);
+
+      hists2DFittedSignal[config.first]->Draw("COLZ");
+
+      // Sprawdź czy JAKIKOLWIEK histogram ma wpisy
+      Bool_t hasEntries = kFALSE;
+
+      // Sprawdź wszystkie kanały
+
+      if (hists2DFittedSignal[config.first]->GetEntries() > 0)
+      {
+        hasEntries = kTRUE;
+      }
+
+      // Jeśli żaden histogram nie ma wpisów - pomiń ten canvas
+      if (!hasEntries)
+      {
+        continue;
+      }
+
+      canvas2D[config.first]->SaveAs(Form("%s/%s_2D.png", folderPath.Data(), config.first.Data()));
   }
 
   Float_t fullyGoodPer = CalculateEfficiency(numberOfAllGood, numberOfAllGood + numberOfAtLeastOneBad) * 100,
