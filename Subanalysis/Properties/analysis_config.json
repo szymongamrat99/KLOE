@@ -17,10 +17,10 @@
     "SIGNAL": {
       "enabled": true,
       "description": "phi -> K0K0 -> pi+pi-pi0pi0",
-      "signal": 3,
+      "signal": 4,
       "modules": {
-        "classifyMCVariables": false,
-        "signalOnly": false,
+        "classifyMCVariables": true,
+        "signalOnly": true,
         "momentumSmearing": true,
         "trilaterationKinFit": true,
         "signalKinFit": true,

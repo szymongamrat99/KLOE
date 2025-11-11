@@ -461,6 +461,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   Float_t limitRadiusNeMC = 25.,
           limitRadiusChMC = 25.;
 
+  Float_t a = 1.24347,
+          b = 589.636,
+          Breal = 4.57298;
+
   Bool_t mcflagCondition = (*mcflag == 1 && *mctruth >= 0) || *mcflag == 0,
          condAnalysisOld = *Chi2SignalKinFit < 40. && combinedMassPi0Fit < 35. && *TrcSum > -1 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && abs(*minv4gam - PhysicsConstants::mK0) < 76. && *Qmiss < 3.75 && openingAngleCharged > acosCutAngle,
          simonaCuts = abs(deltaPhiFit - 3.132) > 2 * 0.167 && *Chi2SignalKinFit < 30.,
@@ -471,15 +475,15 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
          simonaChi2Cut = *Chi2SignalKinFit <= 30,
          simonaPositionLimits = radius00 < radiusLimit && radiuspm < radiusLimit &&
                                 zdist00 < zdistLimit && zdistpm < zdistLimit,
-         omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 132.215) < numSigmaSimona * 31.848 && abs(omega[5] - 776.571) < numSigmaSimona * 28.026 && omega[5] < T0Omega + 649.516 && omega[5] > T0Omega + 640.176)) || !simonaPositionLimits) && simonaKinCuts;
+         omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 155.075) < numSigmaSimona * 5.50648 && abs(omegaFit[5] - 783.321) < numSigmaSimona * 7.3093 && omegaFit[5] < a * T0Omega + b + Breal && omegaFit[5] > a * T0Omega + b - Breal)) || !simonaPositionLimits) && simonaKinCuts;
 
-  if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1)
+  if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1 && shorterKaonPaths)
     signal_tot++;
 
-  if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1)
+  if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1 && shorterKaonPaths)
     signal_wo_err++;
 
-  if ((*mctruth == 1) && *mcflag == 1)
+  if ((*mctruth == 1) && *mcflag == 1 && shorterKaonPaths )
   {
     deltaTSignalTot->Fill(deltaTMC, weight);
   }
@@ -525,7 +529,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     if (!noBlobCut)
       return kTRUE;
 
-  if (mcflagCondition)
+  if (mcflagCondition && shorterKaonPaths)
   {
     Int_t mctruth_tmp = *mctruth;
 
@@ -563,6 +567,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       histsFittedSignal["mass_Kch"][KLOE::channName.at(mctruth_tmp)]->Fill(Kchrec[5], weight);
 
       histsFittedSignal["mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*minv4gam, weight);
+
+      // histsFittedSignal["bestError"][KLOE::channName.at(mctruth_tmp)]->Fill(*bestError, weight);
 
       histsFittedSignal["mass_pi01"][KLOE::channName.at(mctruth_tmp)]->Fill(pi0OmegaFit1[5], weight);
       histsFittedSignal["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi0OmegaFit2[5], weight);
@@ -606,8 +612,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       histsFittedSignal["dist_z_Neu"][KLOE::channName.at(mctruth_tmp)]->Fill(KnerecFit[8] - ipFit[2], weight);
       histsFittedSignal["dist_z_Ch"][KLOE::channName.at(mctruth_tmp)]->Fill(KchrecFit[8] - ipFit[2], weight);
 
-
-      if(*muonAlertPlus > 0 || *muonAlertMinus > 0)
+      if (*muonAlertPlus > 0 || *muonAlertMinus > 0)
         histsFittedSignal["muon_alert"][KLOE::channName.at(mctruth_tmp)]->Fill(1., weight);
       else
         histsFittedSignal["muon_alert"][KLOE::channName.at(mctruth_tmp)]->Fill(0., weight);
@@ -627,7 +632,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       if (*KaonNeTimeCMSignalFit <= *KaonNeTimeCMMC - (KLOE::T0 / 2.))
         hists2DFittedSignal["t_ch_fit_vs_t_neu_fit"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMSignalFit, *KaonNeTimeCMSignalFit, weight);
 
-      hists2DFittedSignal["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, *Chi2OmegaKinFit, weight);
+      hists2DFittedSignal["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., *Chi2OmegaKinFit / 8., weight);
 
       hists2DFittedSignal["t00_tri_vs_t00_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostTriFit, weight);
 
@@ -648,7 +653,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       hists2DFittedSignal["Qmiss_vs_deltaPhi"][KLOE::channName.at(mctruth_tmp)]->Fill(*Qmiss, deltaPhi, weight);
 
       dataPCA[0] = T0Omega;
-      dataPCA[1] = omega[5];
+      dataPCA[1] = omegaFit[5];
 
       AddDataToPCA(dataPCA);
     }
@@ -676,6 +681,12 @@ void signal_vs_bcg_v2::Terminate()
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file
 
+  tot_events = signal_num + bkg_tot;
+
+  Double_t eff = CalculateEfficiency(signal_num, signal_tot);
+  Double_t effAna = CalculateEfficiency(signal_num, signal_wo_err);
+  Double_t purity = CalculatePurity(signal_num, tot_events);
+
   gErrorIgnoreLevel = kFatal;
 
   // MC sum
@@ -696,7 +707,11 @@ void signal_vs_bcg_v2::Terminate()
       {
         histsReconstructed[config.first][channelType.second]->Scale(histsReconstructed[config.first][channelType.second]->GetEntries() / histsReconstructed[config.first][channelType.second]->Integral(0, histsReconstructed[config.first][channelType.second]->GetNbinsX() + 1));
 
+        // histsReconstructed[config.first][channelType.second]->Scale(1 / effAna);
+
         histsFittedSignal[config.first][channelType.second]->Scale(histsFittedSignal[config.first][channelType.second]->GetEntries() / histsFittedSignal[config.first][channelType.second]->Integral(0, histsFittedSignal[config.first][channelType.second]->GetNbinsX() + 1));
+
+        // histsFittedSignal[config.first][channelType.second]->Scale(1 / effAna);
       }
 
       integrals[config.first][channelType.second] = histsFittedSignal[config.first][channelType.second]->GetMaximum();
@@ -758,7 +773,7 @@ void signal_vs_bcg_v2::Terminate()
   {
     Bool_t fitDoubleGaus = (config.first == "mass_Kch" || config.first == "mass_Kne" || config.first == "mass_pi01" || config.first == "mass_pi02"),
            fitOmegaGaus = (config.first == "T0Omega" || config.first == "mass_omega"),
-           fitSignalBadClus = \(config.first == "deltaPhivFit" && fOption == "BAD_CLUS_SIMONA");
+           fitSignalBadClus = (config.first == "deltaPhivFit" && fOption == "BAD_CLUS_SIMONA");
     Bool_t chi2Fit = 0; //(config.first == "chi2_signalKinFit");
 
     Bool_t logCond = (config.first == "time_neutral_MC" || config.first == "Qmiss" || config.first == "prob_signal"), // || config.first == "chi2_signalKinFit"), // || config.first == "TransvRadius"),
@@ -787,8 +802,8 @@ void signal_vs_bcg_v2::Terminate()
 
     for (const auto &channelType : KLOE::channName)
     {
-      // if (channelType.second == "MC sum")
-      //   continue;
+      if (channelType.second == "MC sum")
+        continue;
 
       histsReconstructed[config.first][channelType.second]->SetLineColor(KLOE::channColor.at(channelType.second) + 1);
       histsFittedSignal[config.first][channelType.second]->SetLineColor(KLOE::channColor.at(channelType.second));
@@ -810,19 +825,25 @@ void signal_vs_bcg_v2::Terminate()
         if ((channelType.second == "Signal" && fitDoubleGaus) || (channelType.second == "Omega" && fitOmegaGaus))
         {
           textresultsFitter->Clear();
-          doubleFitter->FitHistogram(histsFittedSignal[config.first][channelType.second], KLOE::DoublGaussFitter::FitType::kSingleGauss);
-          doubleFitter->DrawFitOnCurrentPad(true, false);
 
           if (config.first == "T0Omega")
           {
+            doubleFitter->FitHistogram(histsFittedSignal[config.first][channelType.second], KLOE::DoublGaussFitter::FitType::kDoubleGauss);
             meanT0 = doubleFitter->GetLastResults().mean;
             sigmaT0 = doubleFitter->GetLastResults().coreSigma;
           }
           else if (config.first == "mass_omega")
           {
+            doubleFitter->FitHistogram(histsFittedSignal[config.first][channelType.second], KLOE::DoublGaussFitter::FitType::kSingleGauss);
             meanMass = doubleFitter->GetLastResults().mean;
             sigmaMass = doubleFitter->GetLastResults().coreSigma;
           }
+          else
+          {
+            doubleFitter->FitHistogram(histsFittedSignal[config.first][channelType.second], KLOE::DoublGaussFitter::FitType::kDoubleGauss);
+          }
+
+          doubleFitter->DrawFitOnCurrentPad(true, false);
 
           textresultsFitter->AddText(Form("Fit results:"));
           textresultsFitter->AddText(Form("Chi2 / ndof: %.3f / %d", doubleFitter->GetLastResults().chi2, doubleFitter->GetLastResults().ndf));
@@ -1020,15 +1041,15 @@ void signal_vs_bcg_v2::Terminate()
         Double_t yMin = hists2DFittedSignal[config.first][channelType.second]->GetYaxis()->GetXmin();
         Double_t yMax = hists2DFittedSignal[config.first][channelType.second]->GetYaxis()->GetXmax();
 
-        TLine *pc1_line_cut = new TLine((means[0] + vTransvSigma[0]) - vLong[0] * 100,
-                                        (means[1] + vTransvSigma[1]) - vLong[1] * 100,
-                                        (means[0] + vTransvSigma[0]) + vLong[0] * 100,
-                                        (means[1] + vTransvSigma[1]) + vLong[1] * 100);
+        TLine *pc1_line_cut = new TLine((yMin - b - Breal) / a,
+                                        yMin,
+                                        (yMax - b - Breal) / a,
+                                        yMax);
 
-        TLine *pc2_line_cut = new TLine((means[0] - vTransvSigma[0]) - vLong[0] * 100,
-                                        (means[1] - vTransvSigma[1]) - vLong[1] * 100,
-                                        (means[0] - vTransvSigma[0]) + vLong[0] * 100,
-                                        (means[1] - vTransvSigma[1]) + vLong[1] * 100);
+        TLine *pc2_line_cut = new TLine((yMin - b + Breal) / a,
+                                        yMin,
+                                        (yMax - b + Breal) / a,
+                                        yMax);
 
         TLine *T0_left_cut = new TLine(meanT0 - 3 * sigmaT0, meanMass - 3 * sigmaMass,
                                        meanT0 - 3 * sigmaT0, meanMass + 3 * sigmaMass);
@@ -1039,6 +1060,8 @@ void signal_vs_bcg_v2::Terminate()
                                          meanT0 + 3 * sigmaT0, meanMass - 3 * sigmaMass);
         TLine *Mass_right_cut = new TLine(meanT0 - 3 * sigmaT0, meanMass + 3 * sigmaMass,
                                           meanT0 + 3 * sigmaT0, meanMass + 3 * sigmaMass);
+
+        std::cout << meanT0 << " " << sigmaT0 << " " << meanMass << " " << sigmaMass << std::endl;
 
         pc1_line_cut->SetLineColor(kBlack);
         pc1_line_cut->SetLineWidth(3);
@@ -1160,11 +1183,6 @@ void signal_vs_bcg_v2::Terminate()
   // Double_t mean_pull_err = f_gaus->GetParError(1);
   // Double_t sigma_pull_err = f_gaus->GetParError(2);
 
-  tot_events = signal_num + bkg_tot;
-
-  Double_t eff = CalculateEfficiency(signal_num, signal_tot);
-  Double_t effAna = CalculateEfficiency(signal_num, signal_wo_err);
-  Double_t purity = CalculatePurity(signal_num, tot_events);
   // Double_t metric = sigma_pull / (pow(eff, 2) * purity);
 
   // std::cout << "Pulls Fit Results: Mean = " << mean_pull << " +- " << mean_pull_err << ", Sigma = " << sigma_pull << " +- " << sigma_pull_err << std::endl;
@@ -1294,28 +1312,61 @@ void signal_vs_bcg_v2::AddDataToPCA(Double_t *data)
 void signal_vs_bcg_v2::WidthOfCorrelatedHist(Double_t *means, Double_t *sigmas, Double_t *vLong, Double_t *vTransv)
 {
   pca->MakePrincipals();
-  const TVectorD *principalValues = pca->GetEigenValues();
-  const TMatrixD *principalVectors = pca->GetEigenVectors();
+  const TVectorD *principalValues = pca->GetEigenValues();   // Wariancje λ
+  const TMatrixD *principalVectors = pca->GetEigenVectors(); // Wektory v (znormalizowane)
   const TVectorD *dataMean = pca->GetMeanValues();
   const TVectorD *dataSigma = pca->GetSigmas();
 
-  means[0] = (*dataMean)[0];              // Mean x
-  means[1] = (*dataMean)[1];              // Mean y
-  vLong[0] = (*principalVectors)(0, 0);   // Longitudinal vector
-  vLong[1] = (*principalVectors)(1, 0);   // Longitudinal vector
-  vTransv[0] = (*principalVectors)(0, 1); // Transverse vector
-  vTransv[1] = (*principalVectors)(1, 1); // Transverse vector
+  means[0] = (*dataMean)[0]; // Mean x
+  means[1] = (*dataMean)[1]; // Mean y
 
-  Double_t sigmaTransv = (*dataSigma)(1); //(*principalValues)[1] * (pow(vTransv[0], 2) * pow((*dataSigma)[0], 2) + pow(vTransv[1], 2) * pow((*dataSigma)[1], 2));
+  // Znormalizowane wektory własne
+  Double_t v1x = (*principalVectors)(0, 0); // Pierwsza os (długa)
+  Double_t v1y = (*principalVectors)(1, 0);
+  Double_t v2x = (*principalVectors)(0, 1); // Druga os (poprzeczna)
+  Double_t v2y = (*principalVectors)(1, 1);
 
-  Double_t sigmaLong = (*dataSigma)(0); //(*principalValues)[0] * (pow(vLong[0], 2) * pow((*dataSigma)[0], 2) + pow(vLong[1], 2) * pow((*dataSigma)[1], 2));
+  // Wariancje (eigenvalues)
+  Double_t lambda1 = (*principalValues)[0]; // Większa wariancja
+  Double_t lambda2 = (*principalValues)[1]; // Mniejsza wariancja
 
-  sigmas[0] = TMath::Sqrt(sigmaTransv); // Long Sigma
-  sigmas[1] = TMath::Sqrt(sigmaLong);   // Transv Sigma
+  // Współczynnik kierunkowy z wariancji:
+  // slope = (v1y * sqrt(lambda1)) / (v1x * sqrt(lambda1)) = v1y / v1x
+  // To NIE zmienia wyniku dla znormalizowanych wektorów!
+  //
+  // WŁAŚCIWE użycie wariancji - skalowanie wektora:
+  Double_t scaledV1x = v1x * TMath::Sqrt(lambda1);
+  Double_t scaledV1y = v1y * TMath::Sqrt(lambda1);
 
-  std::cout << "PCA Results:" << std::endl;
+  Double_t slope = scaledV1y / scaledV1x; // Teraz to rzeczywisty slope
+
+  // Normalizuj wektory do długości 1
+  Double_t normLong = TMath::Sqrt(scaledV1x * scaledV1x + scaledV1y * scaledV1y);
+  vLong[0] = scaledV1x / normLong;
+  vLong[1] = scaledV1y / normLong;
+
+  // Wektor prostopadły
+  vTransv[0] = -scaledV1y / normLong;
+  vTransv[1] = scaledV1x / normLong;
+
+  // Sigmy (odchylenia standardowe)
+  Double_t sigmaLong = TMath::Sqrt(lambda1);   // Wzdłuż głównej osi
+  Double_t sigmaTransv = TMath::Sqrt(lambda2); // Prostopadle do osi
+
+  sigmas[0] = sigmaTransv; // Sigma poprzeczna (szerokość)
+  sigmas[1] = sigmaLong;   // Sigma wzdłużna
+
+  std::cout << "\n=== PCA RESULTS WITH VARIANCES ===" << std::endl;
+  std::cout << "Lambda1 (Long variance): " << lambda1 << std::endl;
+  std::cout << "Lambda2 (Transv variance): " << lambda2 << std::endl;
+  std::cout << "Trend line slope: " << slope << std::endl;
   std::cout << "Mean X: " << means[0] << ", Mean Y: " << means[1] << std::endl;
-  std::cout << "Sigma Long: " << sigmas[0] << ", Sigma Transv: " << sigmas[1] << std::endl;
+  std::cout << "Sigma Transverse: " << sigmas[0] << std::endl;
+  std::cout << "Sigma Longitudinal: " << sigmas[1] << std::endl;
+  std::cout << "Long vector: (" << vLong[0] << ", " << vLong[1] << ")" << std::endl;
+  std::cout << "Transv vector: (" << vTransv[0] << ", " << vTransv[1] << ")" << std::endl;
+  std::cout << "===================================\n"
+            << std::endl;
 }
 
 // Funkcja do tworzenia wykresu RMS vs X

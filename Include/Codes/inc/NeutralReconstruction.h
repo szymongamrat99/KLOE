@@ -106,6 +106,14 @@ namespace KLOE
     void Pi0Reconstruction();
     void Pi0Reconstruction(std::vector<neutralParticle> &pions);
 
+    ErrorHandling::ErrorCodes ReconstructSixGammaVertex(
+        const std::vector<Float_t> cluster[5],
+        const std::vector<Int_t> &neu_clu_list,
+        std::vector<Int_t> &bestIndices,
+        Float_t &bestError,
+        kaonNeutral &KnerecSix, 
+        std::vector<neutralParticle> &photonFourMomSix);
+
   private:
     Int_t _nPhotons, _nPions; // Number of photons and pions in the event
     Float_t _invMassDiffMin;
@@ -126,6 +134,10 @@ namespace KLOE
 
     std::vector<Int_t> _bestPairingIndex,
         _bestPairingIndexOmega; // Best pairing index for photons to pions
+
+    Reconstructor _R;
+    Solution _S;
+    std::vector<Int_t> _selected;
 
     Bool_t _checkNPhotons() const
     {
