@@ -152,7 +152,7 @@ int main(int argc, char *argv[])
       // Wykonaj początkową analizę
       infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
       logger.getLog(infoCode, "Initial analysis execution from job list file.");
-      InitAnalysis_main(chain, fileTypeOpt, eventAnalysis);
+      InitAnalysis_main(chain, fileTypeOpt, eventAnalysis, true);
       
       logger.printErrStats();
       return 0;

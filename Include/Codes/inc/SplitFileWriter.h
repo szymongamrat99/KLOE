@@ -35,7 +35,8 @@ public:
                   bool splitByRun = false,
                   const std::string &outputDir = "output",
                   const std::string &logFile = "file_weights.log",
-                  Controls::FileType fileType = Controls::FileType::DATA);
+                  Controls::FileType fileType = Controls::FileType::DATA,
+                  bool singleFile = false);
 
   ~SplitFileWriter();
 
@@ -63,10 +64,12 @@ private:
   void LogFileInfo(const std::string &filename, Long64_t fileSize, Long64_t nEvents);
   std::string FileTypeToString(Controls::FileType fileType) const;
   void WriteFinalSummaryTable();
+  Int_t GetMaxFileNumber() const;
 
   std::string _baseName;
   Long64_t _maxSizeBytes;
   bool _splitByRun;
+  bool _singleFile;
   std::string _outputDir;
   std::string _logFile;
   Controls::FileType _fileType;
