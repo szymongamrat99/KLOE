@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.13)
 project(KLSPM00 CXX Fortran)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# ✅ DODAJ BUILD TYPES I OPTYMALIZACJE
+# DODAJ BUILD TYPES I OPTYMALIZACJE
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
@@ -31,10 +31,7 @@ enable_testing()
 # Inclusion of directories to the project 
 add_subdirectory(Subanalysis/CovarianceMatrix)
 add_subdirectory(Subanalysis/CPFit)
-# add_subdirectory(Subanalysis/EfficiencyAnalysis)
 add_subdirectory(Subanalysis/GeneratedVars)
-# # add_subdirectory(Subanalysis/InterfFunction)
-# # add_subdirectory(Subanalysis/IPRec)
 add_subdirectory(Subanalysis/KchRec)
 add_subdirectory(Subanalysis/OmegaRec)
 add_subdirectory(Subanalysis/Neutrec)
@@ -42,10 +39,6 @@ add_subdirectory(Subanalysis/InitialAnalysis)
 add_subdirectory(Include/Codes)
 add_subdirectory(Include/FortranAnalysis)
 add_subdirectory(Include/MainMenuHandler)
-# add_subdirectory(Subanalysis/Pipi)
-# add_subdirectory(Subanalysis/Plots)
-# add_subdirectory(Subanalysis/RegenerationAnalysis)
-# add_subdirectory(Subanalysis/Semileptonic)
 
 
 # What should be the result of compilation
