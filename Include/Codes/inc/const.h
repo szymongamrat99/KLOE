@@ -13,11 +13,7 @@
 
 namespace Paths
 {
-  extern const std::string kloedataPath;
-  extern const std::string kloeMCPath;
   extern const std::string workdirPath;
-  extern const std::string chainDataFiles;
-  extern const std::string chainMCFiles;
   extern const std::string pdgConstFilePath;
   extern const std::string propertiesPath;
   extern const std::string histogramConfigDir;
@@ -31,7 +27,6 @@ namespace Paths
   extern TString base_path;
   extern TString path_tmp;
   extern TString path_cs;
-  extern TString prod2root_path_v26;
   extern TString ext_root;
   extern TString ext_img;
   extern TString ext_csv;
@@ -50,6 +45,7 @@ namespace Paths
   extern const TString logs_dir;
   extern const TString result_dir;
   extern const TString img_dir;
+  extern const TString initialanalysis_results;
 }
 
 namespace Filenames

@@ -31,7 +31,6 @@ int cp_fit_func(KLOE::interference &event, std::vector<std::vector<Double_t>> &r
 			errValue(2),
 			realValue(2),
 			imaginaryValue(2);
-
 	// ---------------------------------------------------------
 
 	ROOT::Math::Minimizer *minimum =

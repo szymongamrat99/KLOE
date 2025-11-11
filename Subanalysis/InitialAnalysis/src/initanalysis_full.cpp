@@ -172,7 +172,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::string fileTypeStr = fileTypeToString(fileTypeOpt);
 
   std::string
-      dirname = (std::string)Paths::initialanalysis_dir + (std::string)Paths::root_files_dir,
+      dirname = (std::string)Paths::initialanalysis_results,
       dated_folder = Obj.CreateDatedFolder(dirname),
       log_file_writer_lumi = "";
 
