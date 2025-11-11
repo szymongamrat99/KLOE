@@ -14,30 +14,6 @@
 # EXTERNAL cache entries
 ########################
 
-//Path to a library.
-BLAS_flexiblas_LIBRARY:FILEPATH=/usr/lib64/libflexiblas.so
-
-//Path to a library.
-BLAS_goto2_LIBRARY:FILEPATH=BLAS_goto2_LIBRARY-NOTFOUND
-
-//Path to a library.
-BLAS_mkl_LIBRARY:FILEPATH=BLAS_mkl_LIBRARY-NOTFOUND
-
-//Path to a library.
-BLAS_mkl_em64t_LIBRARY:FILEPATH=BLAS_mkl_em64t_LIBRARY-NOTFOUND
-
-//Path to a library.
-BLAS_mkl_gf_LIBRARY:FILEPATH=BLAS_mkl_gf_LIBRARY-NOTFOUND
-
-//Path to a library.
-BLAS_mkl_gf_lp64_LIBRARY:FILEPATH=BLAS_mkl_gf_lp64_LIBRARY-NOTFOUND
-
-//Path to a library.
-BLAS_mkl_ia32_LIBRARY:FILEPATH=BLAS_mkl_ia32_LIBRARY-NOTFOUND
-
-//Path to a library.
-BLAS_mkl_rt_LIBRARY:FILEPATH=BLAS_mkl_rt_LIBRARY-NOTFOUND
-
 //The directory containing a CMake configuration file for Boost.
 Boost_DIR:PATH=/usr/lib64/cmake/Boost-1.75.0
 
@@ -56,8 +32,7 @@ CMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line
 //Path to a program.
 CMAKE_AR:FILEPATH=/usr/bin/ar
 
-//Choose the type of build, options are: None Debug Release RelWithDebInfo
-// MinSizeRel ...
+//Build type
 CMAKE_BUILD_TYPE:STRING=Release
 
 //Enable/Disable color output during build.
@@ -409,26 +384,6 @@ pkgcfg_lib_PC_CURL_curl:FILEPATH=/usr/lib64/libcurl.so
 # INTERNAL cache entries
 ########################
 
-//Have Fortran function sgemm
-BLAS_WORKS:INTERNAL=
-//ADVANCED property for variable: BLAS_flexiblas_LIBRARY
-BLAS_flexiblas_LIBRARY-ADVANCED:INTERNAL=1
-//Have Fortran function sgemm
-BLAS_flexiblas_WORKS:INTERNAL=1
-//ADVANCED property for variable: BLAS_goto2_LIBRARY
-BLAS_goto2_LIBRARY-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: BLAS_mkl_LIBRARY
-BLAS_mkl_LIBRARY-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: BLAS_mkl_em64t_LIBRARY
-BLAS_mkl_em64t_LIBRARY-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: BLAS_mkl_gf_LIBRARY
-BLAS_mkl_gf_LIBRARY-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: BLAS_mkl_gf_lp64_LIBRARY
-BLAS_mkl_gf_lp64_LIBRARY-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: BLAS_mkl_ia32_LIBRARY
-BLAS_mkl_ia32_LIBRARY-ADVANCED:INTERNAL=1
-//ADVANCED property for variable: BLAS_mkl_rt_LIBRARY
-BLAS_mkl_rt_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Boost_DIR
 Boost_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_ADDR2LINE
@@ -511,8 +466,6 @@ CMAKE_GENERATOR_INSTANCE:INTERNAL=
 CMAKE_GENERATOR_PLATFORM:INTERNAL=
 //Name of generator toolset.
 CMAKE_GENERATOR_TOOLSET:INTERNAL=
-//Test CMAKE_HAVE_LIBC_PTHREAD
-CMAKE_HAVE_LIBC_PTHREAD:INTERNAL=1
 //Source directory with the top level CMakeLists.txt file for this
 // project
 CMAKE_HOME_DIRECTORY:INTERNAL=/home/KLOE/gamrat/KLOE
@@ -535,7 +488,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=11
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=10
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -586,20 +539,12 @@ CURL_INCLUDE_DIR-ADVANCED:INTERNAL=1
 CURL_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CURL_LIBRARY_RELEASE
 CURL_LIBRARY_RELEASE-ADVANCED:INTERNAL=1
-//Details about finding BLAS
-FIND_PACKAGE_MESSAGE_DETAILS_BLAS:INTERNAL=[/usr/lib64/libflexiblas.so][v()]
 //Details about finding Boost
 FIND_PACKAGE_MESSAGE_DETAILS_Boost:INTERNAL=[/usr/lib64/cmake/Boost-1.75.0/BoostConfig.cmake][cfound components: system filesystem unit_test_framework ][v1.75.0()]
 //Details about finding CURL
 FIND_PACKAGE_MESSAGE_DETAILS_CURL:INTERNAL=[/usr/lib64/libcurl.so][/usr/include][c ][v7.76.1()]
-//Details about finding LAPACK
-FIND_PACKAGE_MESSAGE_DETAILS_LAPACK:INTERNAL=[/usr/lib64/libflexiblas.so;-lm;-ldl][v()]
-//Details about finding Threads
-FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //Details about finding Vdt
 FIND_PACKAGE_MESSAGE_DETAILS_Vdt:INTERNAL=[/opt/exp_software/kloe/root/root63604_al9_gcc1150/include][/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/libvdt.so][v0.4()]
-//Have Fortran function cheev
-LAPACK_WORKS:INTERNAL=1
 PC_CURL_CFLAGS:INTERNAL=
 PC_CURL_CFLAGS_I:INTERNAL=
 PC_CURL_CFLAGS_OTHER:INTERNAL=

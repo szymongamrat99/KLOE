@@ -15,18 +15,22 @@
 #include <TPrincipal.h>
 
 #include <TGaxis.h>
+#include <iostream>
 
 using json = nlohmann::json;
 
 namespace Paths
 {
-  const std::string kloedataPath = getenv("KLOE_DBV26_DK0");
-  const std::string kloeMCPath = getenv("KLOE_DBV26_MK0");
   const std::string workdirPath = getenv("WORKDIR");
-  const std::string chainDataFiles = kloedataPath + "/*.root";
-  const std::string chainMCFiles = kloeMCPath + "/*.root";
-  const std::string pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json";
+
+  TString base_path = workdirPath + "/KLOE/";
+  TString path_tmp = "";
+  TString path_cs = "";
+  TString prod2root_path_v26 = "/data/k2/DBV-26/DK0";
+
   const std::string propertiesPath = getenv("PROPERTIESKLOE");
+
+  const std::string pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json";
   const std::string histogramConfigDir = propertiesPath + "/histogram_conf";
   const std::string histogramConfig1DPath = histogramConfigDir + "/histogram1D.csv";
   const std::string histogramConfig2DPath = histogramConfigDir + "/histogram2D.csv";
@@ -35,10 +39,6 @@ namespace Paths
   const std::string rootfilesName = propertiesPath + "/root-files.json";
   const std::string cutlimitsName = propertiesPath + "/cut-limits.json";
 
-  TString base_path = workdirPath + "/KLOE/";
-  TString path_tmp = "";
-  TString path_cs = "";
-  TString prod2root_path_v26 = "/data/k2/DBV-26/DK0";
   TString ext_root = ".root";
   TString ext_img = ".png";
   TString ext_csv = ".csv";

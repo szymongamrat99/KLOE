@@ -1,11 +1,10 @@
 {
   "MC": {
     "path": [
-      "/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/",
-      "/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys2/",
+      "/storage/gpfs_data/kloe/dataroot/DBV-26/MC/MK0/all_phys/",
+      "/storage/gpfs_data/kloe/dataroot/DBV-26/MC/MK0/all_phys2/",
       [
-      "/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys3/",
-      "/data/ssd/gamrat/PROD2ROOT/MC/MK0/all_phys3/"      
+      "/storage/gpfs_data/kloe/dataroot/DBV-26/MC/MK0/all_phys3/"
     ]
     ],
     "filenameBase": [
@@ -17,7 +16,7 @@
 
   },
   "Data": {
-    "path": "/data/ssd/gamrat/PROD2ROOT/DK0/",
+    "path": "/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/",
     "filenameBase": "dk0_initial_analysis",
     "extension": ".root"
   }

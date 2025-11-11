@@ -21,8 +21,8 @@ set(CMAKE_INCLUDE_PATH $ENV{CMAKE_INCLUDE_PATH})
 find_package(ROOT REQUIRED COMPONENTS Tree Physics MathCore Matrix TMVA Hist Graf RooFit RooFitCore)
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework)
 find_package(CURL REQUIRED)
-find_package(LAPACK REQUIRED)
-find_package(BLAS REQUIRED)
+# find_package(LAPACK REQUIRED)
+# find_package(BLAS REQUIRED)
 
 # Enable tests for the files
 enable_testing()
@@ -37,7 +37,7 @@ add_subdirectory(Subanalysis/OmegaRec)
 add_subdirectory(Subanalysis/Neutrec)
 add_subdirectory(Subanalysis/InitialAnalysis)
 add_subdirectory(Include/Codes)
-add_subdirectory(Include/FortranAnalysis)
+# add_subdirectory(Include/FortranAnalysis)
 add_subdirectory(Include/MainMenuHandler)
 
 
@@ -73,7 +73,7 @@ target_link_libraries(KLSPM00 PRIVATE
   ${CURL_LIBRARIES}
   ${ROOT_LIBRARIES}
   LibRec
-  LibFort
+  #  LibFort
   )
 
 # Optional output directories

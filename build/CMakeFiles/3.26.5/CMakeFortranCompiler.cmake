@@ -55,7 +55,7 @@ endif()
 
 
 
-set(CMAKE_Fortran_IMPLICIT_INCLUDE_DIRECTORIES "/usr/lib/gcc/x86_64-redhat-linux/11/finclude;/opt/exp_software/kloe/root/root63604_al9_gcc1150/include;/usr/lib/gcc/x86_64-redhat-linux/11/include;/usr/local/include;/usr/include")
+set(CMAKE_Fortran_IMPLICIT_INCLUDE_DIRECTORIES "/usr/lib/gcc/x86_64-redhat-linux/11/finclude;/opt/exp_software/kloe/root/root63604_al9_gcc1150/include;/opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann;/opt/exp_software/kloe/cern/2025_al9/new/include;/usr/lib/gcc/x86_64-redhat-linux/11/include;/usr/local/include;/usr/include")
 set(CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES "gfortran;m;gcc_s;gcc;quadmath;m;c;gcc_s;gcc")
-set(CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES "/usr/lib/gcc/x86_64-redhat-linux/11;/usr/lib64;/lib64;/usr/lib")
+set(CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES "/opt/exp_software/kloe/cern/2025_al9/new/lib64;/usr/lib/gcc/x86_64-redhat-linux/11;/usr/lib64;/lib64;/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib;/usr/lib")
 set(CMAKE_Fortran_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")

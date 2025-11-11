@@ -244,19 +244,6 @@ LibRec/fast:
 .PHONY : LibRec/fast
 
 #=============================================================================
-# Target rules for targets named LibFort
-
-# Build rule for target.
-LibFort: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 LibFort
-.PHONY : LibFort
-
-# fast build rule for target.
-LibFort/fast:
-	$(MAKE) $(MAKESILENT) -f Include/FortranAnalysis/CMakeFiles/LibFort.dir/build.make Include/FortranAnalysis/CMakeFiles/LibFort.dir/build
-.PHONY : LibFort/fast
-
-#=============================================================================
 # Target rules for targets named MainMenuHandler
 
 # Build rule for target.
@@ -308,7 +295,6 @@ help:
 	@echo "... InitialAnalysis"
 	@echo "... KLSPM00"
 	@echo "... KchRec"
-	@echo "... LibFort"
 	@echo "... LibRec"
 	@echo "... MainMenuHandler"
 	@echo "... NeutRec"

@@ -1,1 +1,0 @@
-/usr/bin/gfortran -fPIC -O3 -DNDEBUG -O3 -shared -Wl,-soname,libLibFort.so -o libLibFort.so CMakeFiles/LibFort.dir/src/analysismodule.f.o CMakeFiles/LibFort.dir/src/analysis_library.f.o  -lmathlib -lkernlib -lpacklib -lpawlib -lgraflib -lkernlib -lpacklib -lpawlib -lgraflib 

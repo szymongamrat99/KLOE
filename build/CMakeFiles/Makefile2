@@ -72,7 +72,6 @@ all: Subanalysis/OmegaRec/all
 all: Subanalysis/Neutrec/all
 all: Subanalysis/InitialAnalysis/all
 all: Include/Codes/all
-all: Include/FortranAnalysis/all
 all: Include/MainMenuHandler/all
 .PHONY : all
 
@@ -85,7 +84,6 @@ preinstall: Subanalysis/OmegaRec/preinstall
 preinstall: Subanalysis/Neutrec/preinstall
 preinstall: Subanalysis/InitialAnalysis/preinstall
 preinstall: Include/Codes/preinstall
-preinstall: Include/FortranAnalysis/preinstall
 preinstall: Include/MainMenuHandler/preinstall
 .PHONY : preinstall
 
@@ -99,7 +97,6 @@ clean: Subanalysis/OmegaRec/clean
 clean: Subanalysis/Neutrec/clean
 clean: Subanalysis/InitialAnalysis/clean
 clean: Include/Codes/clean
-clean: Include/FortranAnalysis/clean
 clean: Include/MainMenuHandler/clean
 .PHONY : clean
 
@@ -117,21 +114,6 @@ Include/Codes/preinstall:
 # Recursive "clean" directory target.
 Include/Codes/clean: Include/Codes/CMakeFiles/LibRec.dir/clean
 .PHONY : Include/Codes/clean
-
-#=============================================================================
-# Directory level rules for directory Include/FortranAnalysis
-
-# Recursive "all" directory target.
-Include/FortranAnalysis/all: Include/FortranAnalysis/CMakeFiles/LibFort.dir/all
-.PHONY : Include/FortranAnalysis/all
-
-# Recursive "preinstall" directory target.
-Include/FortranAnalysis/preinstall:
-.PHONY : Include/FortranAnalysis/preinstall
-
-# Recursive "clean" directory target.
-Include/FortranAnalysis/clean: Include/FortranAnalysis/CMakeFiles/LibFort.dir/clean
-.PHONY : Include/FortranAnalysis/clean
 
 #=============================================================================
 # Directory level rules for directory Include/MainMenuHandler
@@ -265,7 +247,6 @@ CMakeFiles/KLSPM00.dir/all: Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/all
 CMakeFiles/KLSPM00.dir/all: Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/all
 CMakeFiles/KLSPM00.dir/all: Subanalysis/InitialAnalysis/CMakeFiles/InitialAnalysis.dir/all
 CMakeFiles/KLSPM00.dir/all: Include/Codes/CMakeFiles/LibRec.dir/all
-CMakeFiles/KLSPM00.dir/all: Include/FortranAnalysis/CMakeFiles/LibFort.dir/all
 CMakeFiles/KLSPM00.dir/all: Include/MainMenuHandler/CMakeFiles/MainMenuHandler.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/KLSPM00.dir/build.make CMakeFiles/KLSPM00.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/KLSPM00.dir/build.make CMakeFiles/KLSPM00.dir/build
@@ -274,7 +255,7 @@ CMakeFiles/KLSPM00.dir/all: Include/MainMenuHandler/CMakeFiles/MainMenuHandler.d
 
 # Build rule for subdir invocation for target.
 CMakeFiles/KLSPM00.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/KLOE/gamrat/KLOE/build/CMakeFiles 84
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/KLOE/gamrat/KLOE/build/CMakeFiles 81
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/KLSPM00.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/KLOE/gamrat/KLOE/build/CMakeFiles 0
 .PHONY : CMakeFiles/KLSPM00.dir/rule
@@ -345,7 +326,6 @@ Subanalysis/CPFit/CMakeFiles/CPFit.dir/clean:
 
 # All Build rule for target.
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/all: Include/Codes/CMakeFiles/LibRec.dir/all
-Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/all: Include/FortranAnalysis/CMakeFiles/LibFort.dir/all
 	$(MAKE) $(MAKESILENT) -f Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/build.make Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/depend
 	$(MAKE) $(MAKESILENT) -f Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/build.make Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/KLOE/gamrat/KLOE/build/CMakeFiles --progress-num=10,11,12,13 "Built target GenVars"
@@ -353,7 +333,7 @@ Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/all: Include/FortranAnalysis/CM
 
 # Build rule for subdir invocation for target.
 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/KLOE/gamrat/KLOE/build/CMakeFiles 54
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/KLOE/gamrat/KLOE/build/CMakeFiles 51
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/KLOE/gamrat/KLOE/build/CMakeFiles 0
 .PHONY : Subanalysis/GeneratedVars/CMakeFiles/GenVars.dir/rule
@@ -400,7 +380,7 @@ Subanalysis/KchRec/CMakeFiles/KchRec.dir/clean:
 Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/all: Include/Codes/CMakeFiles/LibRec.dir/all
 	$(MAKE) $(MAKESILENT) -f Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/build.make Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/depend
 	$(MAKE) $(MAKESILENT) -f Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/build.make Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/KLOE/gamrat/KLOE/build/CMakeFiles --progress-num=81,82,83,84 "Built target OmegaRec"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/KLOE/gamrat/KLOE/build/CMakeFiles --progress-num=78,79,80,81 "Built target OmegaRec"
 .PHONY : Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/all
 
 # Build rule for subdir invocation for target.
@@ -426,7 +406,7 @@ Subanalysis/OmegaRec/CMakeFiles/OmegaRec.dir/clean:
 Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/all: Include/Codes/CMakeFiles/LibRec.dir/all
 	$(MAKE) $(MAKESILENT) -f Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/build.make Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/depend
 	$(MAKE) $(MAKESILENT) -f Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/build.make Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/KLOE/gamrat/KLOE/build/CMakeFiles --progress-num=75,76,77,78,79,80 "Built target NeutRec"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/KLOE/gamrat/KLOE/build/CMakeFiles --progress-num=72,73,74,75,76,77 "Built target NeutRec"
 .PHONY : Subanalysis/Neutrec/CMakeFiles/NeutRec.dir/all
 
 # Build rule for subdir invocation for target.
@@ -478,7 +458,7 @@ Subanalysis/InitialAnalysis/CMakeFiles/InitialAnalysis.dir/clean:
 Include/Codes/CMakeFiles/LibRec.dir/all:
 	$(MAKE) $(MAKESILENT) -f Include/Codes/CMakeFiles/LibRec.dir/build.make Include/Codes/CMakeFiles/LibRec.dir/depend
 	$(MAKE) $(MAKESILENT) -f Include/Codes/CMakeFiles/LibRec.dir/build.make Include/Codes/CMakeFiles/LibRec.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/KLOE/gamrat/KLOE/build/CMakeFiles --progress-num=25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71 "Built target LibRec"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/KLOE/gamrat/KLOE/build/CMakeFiles --progress-num=22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68 "Built target LibRec"
 .PHONY : Include/Codes/CMakeFiles/LibRec.dir/all
 
 # Build rule for subdir invocation for target.
@@ -498,39 +478,13 @@ Include/Codes/CMakeFiles/LibRec.dir/clean:
 .PHONY : Include/Codes/CMakeFiles/LibRec.dir/clean
 
 #=============================================================================
-# Target rules for target Include/FortranAnalysis/CMakeFiles/LibFort.dir
-
-# All Build rule for target.
-Include/FortranAnalysis/CMakeFiles/LibFort.dir/all:
-	$(MAKE) $(MAKESILENT) -f Include/FortranAnalysis/CMakeFiles/LibFort.dir/build.make Include/FortranAnalysis/CMakeFiles/LibFort.dir/depend
-	$(MAKE) $(MAKESILENT) -f Include/FortranAnalysis/CMakeFiles/LibFort.dir/build.make Include/FortranAnalysis/CMakeFiles/LibFort.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/KLOE/gamrat/KLOE/build/CMakeFiles --progress-num=22,23,24 "Built target LibFort"
-.PHONY : Include/FortranAnalysis/CMakeFiles/LibFort.dir/all
-
-# Build rule for subdir invocation for target.
-Include/FortranAnalysis/CMakeFiles/LibFort.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/KLOE/gamrat/KLOE/build/CMakeFiles 3
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 Include/FortranAnalysis/CMakeFiles/LibFort.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/KLOE/gamrat/KLOE/build/CMakeFiles 0
-.PHONY : Include/FortranAnalysis/CMakeFiles/LibFort.dir/rule
-
-# Convenience name for target.
-LibFort: Include/FortranAnalysis/CMakeFiles/LibFort.dir/rule
-.PHONY : LibFort
-
-# clean rule for target.
-Include/FortranAnalysis/CMakeFiles/LibFort.dir/clean:
-	$(MAKE) $(MAKESILENT) -f Include/FortranAnalysis/CMakeFiles/LibFort.dir/build.make Include/FortranAnalysis/CMakeFiles/LibFort.dir/clean
-.PHONY : Include/FortranAnalysis/CMakeFiles/LibFort.dir/clean
-
-#=============================================================================
 # Target rules for target Include/MainMenuHandler/CMakeFiles/MainMenuHandler.dir
 
 # All Build rule for target.
 Include/MainMenuHandler/CMakeFiles/MainMenuHandler.dir/all: Include/Codes/CMakeFiles/LibRec.dir/all
 	$(MAKE) $(MAKESILENT) -f Include/MainMenuHandler/CMakeFiles/MainMenuHandler.dir/build.make Include/MainMenuHandler/CMakeFiles/MainMenuHandler.dir/depend
 	$(MAKE) $(MAKESILENT) -f Include/MainMenuHandler/CMakeFiles/MainMenuHandler.dir/build.make Include/MainMenuHandler/CMakeFiles/MainMenuHandler.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/KLOE/gamrat/KLOE/build/CMakeFiles --progress-num=72,73,74 "Built target MainMenuHandler"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/KLOE/gamrat/KLOE/build/CMakeFiles --progress-num=69,70,71 "Built target MainMenuHandler"
 .PHONY : Include/MainMenuHandler/CMakeFiles/MainMenuHandler.dir/all
 
 # Build rule for subdir invocation for target.

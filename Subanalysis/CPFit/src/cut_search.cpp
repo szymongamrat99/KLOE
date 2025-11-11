@@ -34,6 +34,8 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 			*tree,
 			*tree_mctruth,
 			*tree_omega;
+
+	Float_t ip[3];
 	// =============================================================================
 
 	const TString cpfit_res_dir = Paths::cpfit_dir + Paths::result_dir;
@@ -60,7 +62,7 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 	chain.SetBranchAddress("Kchboost", baseKin.Kchboost);
 	chain.SetBranchAddress("Kchrec", baseKin.Kchrec);
 	chain.SetBranchAddress("Qmiss", &baseKin.Qmiss);
-	chain.SetBranchAddress("ip", interfcommon_.ip);
+	chain.SetBranchAddress("ip", ip);
 
 	Float_t
 			PichFourMom[2][4];
@@ -378,13 +380,13 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 
 			for (Int_t i = 0; i < 3; i++)
 			{
-				radius[0] += pow(baseKin.Knerec.data()[6 + i] - interfcommon_.ip[i], 2);
-				radius_ch[0] += pow(baseKin.Kchboost[6 + i] - interfcommon_.ip[i], 2);
+				radius[0] += pow(baseKin.Knerec.data()[6 + i] - ip[i], 2);
+				radius_ch[0] += pow(baseKin.Kchboost[6 + i] - ip[i], 2);
 
 				if (i < 2)
 				{
-					radius[1] += pow(baseKin.Knerec.data()[6 + i] - interfcommon_.ip[i], 2);
-					radius_ch[1] += pow(baseKin.Kchboost[6 + i] - interfcommon_.ip[i], 2);
+					radius[1] += pow(baseKin.Knerec.data()[6 + i] - ip[i], 2);
+					radius_ch[1] += pow(baseKin.Kchboost[6 + i] - ip[i], 2);
 				}
 			}
 

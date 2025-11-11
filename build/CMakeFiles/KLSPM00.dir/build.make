@@ -124,7 +124,6 @@ bin/KLSPM00: /opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/libTMVA.so
 bin/KLSPM00: /opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/libRooFit.so
 bin/KLSPM00: /opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/libRooFitCore.so
 bin/KLSPM00: Include/Codes/libLibRec.so
-bin/KLSPM00: Include/FortranAnalysis/libLibFort.so
 bin/KLSPM00: /usr/lib64/libboost_system.so.1.75.0
 bin/KLSPM00: /usr/lib64/libboost_filesystem.so.1.75.0
 bin/KLSPM00: /usr/lib64/libboost_unit_test_framework.so.1.75.0

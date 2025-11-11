@@ -57,7 +57,7 @@ events:
       Supported LTO compression algorithms: zlib zstd
       gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) 
       COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'a-'
-       /usr/libexec/gcc/x86_64-redhat-linux/11/f951 CMakeFortranCompilerId.F -ffixed-form -cpp=/tmp/ccLZUwoR.f90 -quiet -v CMakeFortranCompilerId.F -quiet -dumpdir a- -dumpbase CMakeFortranCompilerId.F -dumpbase-ext .F -mtune=generic -march=x86-64-v2 -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-redhat-linux/11/finclude -fpre-include=/usr/include/finclude/math-vector-fortran.h -o /tmp/cc7DW56A.s
+       /usr/libexec/gcc/x86_64-redhat-linux/11/f951 CMakeFortranCompilerId.F -ffixed-form -cpp=/tmp/ccsrgbKJ.f90 -quiet -v CMakeFortranCompilerId.F -quiet -dumpdir a- -dumpbase CMakeFortranCompilerId.F -dumpbase-ext .F -mtune=generic -march=x86-64-v2 -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-redhat-linux/11/finclude -fpre-include=/usr/include/finclude/math-vector-fortran.h -o /tmp/ccDkp8pK.s
       GNU Fortran (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)
       	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5), GMP version 6.2.0, MPFR version 4.1.0-p9, MPC version 1.2.1, isl version none
       GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
@@ -67,6 +67,8 @@ events:
       #include <...> search starts here:
        /usr/lib/gcc/x86_64-redhat-linux/11/finclude
        /opt/exp_software/kloe/root/root63604_al9_gcc1150/include
+       /opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann
+       /opt/exp_software/kloe/cern/2025_al9/new/include
        /usr/lib/gcc/x86_64-redhat-linux/11/include
        /usr/local/include
        /usr/include
@@ -75,15 +77,15 @@ events:
       	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5), GMP version 6.2.0, MPFR version 4.1.0-p9, MPC version 1.2.1, isl version none
       GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
       COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'a-'
-       as -v --64 -o /tmp/cclnAAZB.o /tmp/cc7DW56A.s
+       as -v --64 -o /tmp/cc8UbkRQ.o /tmp/ccDkp8pK.s
       GNU assembler version 2.35.2 (x86_64-redhat-linux) using BFD version version 2.35.2-63.el9
       Reading specs from /usr/lib/gcc/x86_64-redhat-linux/11/libgfortran.spec
       rename spec lib to liborig
       COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'a-'
       COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/
-      LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
+      LIBRARY_PATH=/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/:/opt/exp_software/kloe/cern/2025_al9/new/lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
       COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'a.'
-       /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cc9DyItd.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. /tmp/cclnAAZB.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o
+       /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccqRUyBe.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib -L/opt/exp_software/kloe/cern/2025_al9/new/lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. /tmp/cc8UbkRQ.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o
       COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'a.'
       
       
@@ -101,8 +103,8 @@ events:
     checks:
       - "Detecting CXX compiler ABI info"
     directories:
-      source: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-6d6gwa"
-      binary: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-6d6gwa"
+      source: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xhw6Wl"
+      binary: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xhw6Wl"
     cmakeVariables:
       CMAKE_CXX_FLAGS: ""
       CMAKE_CXX_FLAGS_DEBUG: "-g"
@@ -111,12 +113,12 @@ events:
       variable: "CMAKE_CXX_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-6d6gwa
+        Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xhw6Wl
         
-        Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_cc5e2/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_cc5e2.dir/build.make CMakeFiles/cmTC_cc5e2.dir/build
-        gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-6d6gwa'
-        Building CXX object CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o
-        /usr/bin/c++   -v -o CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp
+        Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_933b2/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_933b2.dir/build.make CMakeFiles/cmTC_933b2.dir/build
+        gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xhw6Wl'
+        Building CXX object CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o
+        /usr/bin/c++   -v -o CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp
         Using built-in specs.
         COLLECT_GCC=/usr/bin/c++
         OFFLOAD_TARGET_NAMES=nvptx-none
@@ -126,8 +128,8 @@ events:
         Thread model: posix
         Supported LTO compression algorithms: zlib zstd
         gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) 
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_cc5e2.dir/'
-         /usr/libexec/gcc/x86_64-redhat-linux/11/cc1plus -quiet -v -D_GNU_SOURCE /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_cc5e2.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64-v2 -version -o /tmp/cchwYODE.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_933b2.dir/'
+         /usr/libexec/gcc/x86_64-redhat-linux/11/cc1plus -quiet -v -D_GNU_SOURCE /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_933b2.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64-v2 -version -o /tmp/cc1aBUCG.s
         GNU C++17 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)
         	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5), GMP version 6.2.0, MPFR version 4.1.0-p9, MPC version 1.2.1, isl version none
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
@@ -136,6 +138,8 @@ events:
         #include "..." search starts here:
         #include <...> search starts here:
          /opt/exp_software/kloe/root/root63604_al9_gcc1150/include
+         /opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann
+         /opt/exp_software/kloe/cern/2025_al9/new/include
          /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11
          /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/x86_64-redhat-linux
          /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/backward
@@ -147,15 +151,15 @@ events:
         	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5), GMP version 6.2.0, MPFR version 4.1.0-p9, MPC version 1.2.1, isl version none
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
         Compiler executable checksum: e93254d940b36bb677eb536fa6c50158
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_cc5e2.dir/'
-         as -v --64 -o CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o /tmp/cchwYODE.s
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_933b2.dir/'
+         as -v --64 -o CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o /tmp/cc1aBUCG.s
         GNU assembler version 2.35.2 (x86_64-redhat-linux) using BFD version version 2.35.2-63.el9
         COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/
-        LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.'
-        Linking CXX executable cmTC_cc5e2
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cc5e2.dir/link.txt --verbose=1
-        /usr/bin/c++  -v CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_cc5e2 
+        LIBRARY_PATH=/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/:/opt/exp_software/kloe/cern/2025_al9/new/lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.'
+        Linking CXX executable cmTC_933b2
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_933b2.dir/link.txt --verbose=1
+        /usr/bin/c++  -v CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_933b2 
         Using built-in specs.
         COLLECT_GCC=/usr/bin/c++
         COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper
@@ -167,11 +171,11 @@ events:
         Supported LTO compression algorithms: zlib zstd
         gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) 
         COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/
-        LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_cc5e2' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_cc5e2.'
-         /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccuRQcaL.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_cc5e2 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_cc5e2' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_cc5e2.'
-        gmake[1]: Leaving directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-6d6gwa'
+        LIBRARY_PATH=/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/:/opt/exp_software/kloe/cern/2025_al9/new/lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_933b2' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_933b2.'
+         /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccspKR25.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_933b2 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib -L/opt/exp_software/kloe/cern/2025_al9/new/lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_933b2' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_933b2.'
+        gmake[1]: Leaving directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xhw6Wl'
         
       exitCode: 0
   -
@@ -185,6 +189,8 @@ events:
         found start of include info
         found start of implicit include info
           add: [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include]
+          add: [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann]
+          add: [/opt/exp_software/kloe/cern/2025_al9/new/include]
           add: [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11]
           add: [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/x86_64-redhat-linux]
           add: [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/backward]
@@ -193,13 +199,15 @@ events:
           add: [/usr/include]
         end of search list found
         collapse include dir [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include] ==> [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include]
+        collapse include dir [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann] ==> [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann]
+        collapse include dir [/opt/exp_software/kloe/cern/2025_al9/new/include] ==> [/opt/exp_software/kloe/cern/2025_al9/new/include]
         collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11] ==> [/usr/include/c++/11]
         collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/x86_64-redhat-linux] ==> [/usr/include/c++/11/x86_64-redhat-linux]
         collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/backward] ==> [/usr/include/c++/11/backward]
         collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/include] ==> [/usr/lib/gcc/x86_64-redhat-linux/11/include]
         collapse include dir [/usr/local/include] ==> [/usr/local/include]
         collapse include dir [/usr/include] ==> [/usr/include]
-        implicit include dirs: [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include;/usr/include/c++/11;/usr/include/c++/11/x86_64-redhat-linux;/usr/include/c++/11/backward;/usr/lib/gcc/x86_64-redhat-linux/11/include;/usr/local/include;/usr/include]
+        implicit include dirs: [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include;/opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann;/opt/exp_software/kloe/cern/2025_al9/new/include;/usr/include/c++/11;/usr/include/c++/11/x86_64-redhat-linux;/usr/include/c++/11/backward;/usr/lib/gcc/x86_64-redhat-linux/11/include;/usr/local/include;/usr/include]
       
       
   -
@@ -211,12 +219,12 @@ events:
     message: |
       Parsed CXX implicit link information:
         link line regex: [^( *|.*[/\\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
-        ignore line: [Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-6d6gwa]
+        ignore line: [Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xhw6Wl]
         ignore line: []
-        ignore line: [Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_cc5e2/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_cc5e2.dir/build.make CMakeFiles/cmTC_cc5e2.dir/build]
-        ignore line: [gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-6d6gwa']
-        ignore line: [Building CXX object CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o]
-        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_933b2/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_933b2.dir/build.make CMakeFiles/cmTC_933b2.dir/build]
+        ignore line: [gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xhw6Wl']
+        ignore line: [Building CXX object CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/usr/bin/c++   -v -o CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/c++]
         ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
@@ -226,8 +234,8 @@ events:
         ignore line: [Thread model: posix]
         ignore line: [Supported LTO compression algorithms: zlib zstd]
         ignore line: [gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_cc5e2.dir/']
-        ignore line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/cc1plus -quiet -v -D_GNU_SOURCE /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_cc5e2.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64-v2 -version -o /tmp/cchwYODE.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_933b2.dir/']
+        ignore line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/cc1plus -quiet -v -D_GNU_SOURCE /usr/share/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_933b2.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64-v2 -version -o /tmp/cc1aBUCG.s]
         ignore line: [GNU C++17 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)]
         ignore line: [	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5)  GMP version 6.2.0  MPFR version 4.1.0-p9  MPC version 1.2.1  isl version none]
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
@@ -236,6 +244,8 @@ events:
         ignore line: [#include "..." search starts here:]
         ignore line: [#include <...> search starts here:]
         ignore line: [ /opt/exp_software/kloe/root/root63604_al9_gcc1150/include]
+        ignore line: [ /opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann]
+        ignore line: [ /opt/exp_software/kloe/cern/2025_al9/new/include]
         ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11]
         ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/x86_64-redhat-linux]
         ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/backward]
@@ -247,15 +257,15 @@ events:
         ignore line: [	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5)  GMP version 6.2.0  MPFR version 4.1.0-p9  MPC version 1.2.1  isl version none]
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
         ignore line: [Compiler executable checksum: e93254d940b36bb677eb536fa6c50158]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_cc5e2.dir/']
-        ignore line: [ as -v --64 -o CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o /tmp/cchwYODE.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_933b2.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o /tmp/cc1aBUCG.s]
         ignore line: [GNU assembler version 2.35.2 (x86_64-redhat-linux) using BFD version version 2.35.2-63.el9]
         ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/]
-        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.']
-        ignore line: [Linking CXX executable cmTC_cc5e2]
-        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_cc5e2.dir/link.txt --verbose=1]
-        ignore line: [/usr/bin/c++  -v CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_cc5e2 ]
+        ignore line: [LIBRARY_PATH=/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/:/opt/exp_software/kloe/cern/2025_al9/new/lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.']
+        ignore line: [Linking CXX executable cmTC_933b2]
+        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_933b2.dir/link.txt --verbose=1]
+        ignore line: [/usr/bin/c++  -v CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_933b2 ]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/c++]
         ignore line: [COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper]
@@ -267,14 +277,14 @@ events:
         ignore line: [Supported LTO compression algorithms: zlib zstd]
         ignore line: [gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) ]
         ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/]
-        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_cc5e2' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_cc5e2.']
-        link line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccuRQcaL.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_cc5e2 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o]
+        ignore line: [LIBRARY_PATH=/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/:/opt/exp_software/kloe/cern/2025_al9/new/lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_933b2' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_933b2.']
+        link line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccspKR25.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_933b2 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib -L/opt/exp_software/kloe/cern/2025_al9/new/lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o]
           arg [/usr/libexec/gcc/x86_64-redhat-linux/11/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/tmp/ccuRQcaL.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/ccspKR25.res] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
           arg [-plugin-opt=-pass-through=-lc] ==> ignore
@@ -289,16 +299,19 @@ events:
           arg [-dynamic-linker] ==> ignore
           arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_cc5e2] ==> ignore
+          arg [cmTC_933b2] ==> ignore
           arg [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o]
           arg [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o]
           arg [/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o]
+          arg [-L/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64] ==> dir [/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64]
           arg [-L/usr/lib/gcc/x86_64-redhat-linux/11] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11]
           arg [-L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64]
           arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
           arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+          arg [-L/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib] ==> dir [/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib]
+          arg [-L/opt/exp_software/kloe/cern/2025_al9/new/lib64] ==> dir [/opt/exp_software/kloe/cern/2025_al9/new/lib64]
           arg [-L/usr/lib/gcc/x86_64-redhat-linux/11/../../..] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../..]
-          arg [CMakeFiles/cmTC_cc5e2.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [CMakeFiles/cmTC_933b2.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
           arg [-lstdc++] ==> lib [stdc++]
           arg [-lm] ==> lib [m]
           arg [-lgcc_s] ==> lib [gcc_s]
@@ -311,14 +324,17 @@ events:
         collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o] ==> [/usr/lib64/crt1.o]
         collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o] ==> [/usr/lib64/crti.o]
         collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o] ==> [/usr/lib64/crtn.o]
+        collapse library dir [/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64] ==> [/opt/exp_software/kloe/cern/2025_al9/new/lib64]
         collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11] ==> [/usr/lib/gcc/x86_64-redhat-linux/11]
         collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64] ==> [/usr/lib64]
         collapse library dir [/lib/../lib64] ==> [/lib64]
         collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+        collapse library dir [/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib] ==> [/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib]
+        collapse library dir [/opt/exp_software/kloe/cern/2025_al9/new/lib64] ==> [/opt/exp_software/kloe/cern/2025_al9/new/lib64]
         collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../..] ==> [/usr/lib]
         implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
         implicit objs: [/usr/lib64/crt1.o;/usr/lib64/crti.o;/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o;/usr/lib/gcc/x86_64-redhat-linux/11/crtend.o;/usr/lib64/crtn.o]
-        implicit dirs: [/usr/lib/gcc/x86_64-redhat-linux/11;/usr/lib64;/lib64;/usr/lib]
+        implicit dirs: [/opt/exp_software/kloe/cern/2025_al9/new/lib64;/usr/lib/gcc/x86_64-redhat-linux/11;/usr/lib64;/lib64;/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib;/usr/lib]
         implicit fwks: []
       
       
@@ -331,8 +347,8 @@ events:
     checks:
       - "Detecting Fortran compiler ABI info"
     directories:
-      source: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-1pO856"
-      binary: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-1pO856"
+      source: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xfrvck"
+      binary: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xfrvck"
     cmakeVariables:
       CMAKE_EXE_LINKER_FLAGS: ""
       CMAKE_Fortran_FLAGS: ""
@@ -341,12 +357,12 @@ events:
       variable: "CMAKE_Fortran_ABI_COMPILED"
       cached: true
       stdout: |
-        Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-1pO856
+        Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xfrvck
         
-        Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_394ed/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_394ed.dir/build.make CMakeFiles/cmTC_394ed.dir/build
-        gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-1pO856'
-        Building Fortran object CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o
-        /usr/bin/gfortran   -v -c /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -o CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o
+        Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_a2a1f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_a2a1f.dir/build.make CMakeFiles/cmTC_a2a1f.dir/build
+        gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xfrvck'
+        Building Fortran object CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o
+        /usr/bin/gfortran   -v -c /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -o CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o
         Using built-in specs.
         COLLECT_GCC=/usr/bin/gfortran
         OFFLOAD_TARGET_NAMES=nvptx-none
@@ -356,8 +372,8 @@ events:
         Thread model: posix
         Supported LTO compression algorithms: zlib zstd
         gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) 
-        COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_394ed.dir/'
-         /usr/libexec/gcc/x86_64-redhat-linux/11/f951 /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -cpp=/tmp/ccV0SeHv.f90 -quiet -v /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -quiet -dumpdir CMakeFiles/cmTC_394ed.dir/ -dumpbase CMakeFortranCompilerABI.F90.F90 -dumpbase-ext .F90 -mtune=generic -march=x86-64-v2 -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-redhat-linux/11/finclude -fpre-include=/usr/include/finclude/math-vector-fortran.h -o /tmp/ccL2gwNH.s
+        COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a2a1f.dir/'
+         /usr/libexec/gcc/x86_64-redhat-linux/11/f951 /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -cpp=/tmp/cci8ofKz.f90 -quiet -v /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -quiet -dumpdir CMakeFiles/cmTC_a2a1f.dir/ -dumpbase CMakeFortranCompilerABI.F90.F90 -dumpbase-ext .F90 -mtune=generic -march=x86-64-v2 -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-redhat-linux/11/finclude -fpre-include=/usr/include/finclude/math-vector-fortran.h -o /tmp/ccffnSDm.s
         GNU Fortran (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)
         	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5), GMP version 6.2.0, MPFR version 4.1.0-p9, MPC version 1.2.1, isl version none
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
@@ -367,6 +383,8 @@ events:
         #include <...> search starts here:
          /usr/lib/gcc/x86_64-redhat-linux/11/finclude
          /opt/exp_software/kloe/root/root63604_al9_gcc1150/include
+         /opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann
+         /opt/exp_software/kloe/cern/2025_al9/new/include
          /usr/lib/gcc/x86_64-redhat-linux/11/include
          /usr/local/include
          /usr/include
@@ -374,16 +392,16 @@ events:
         GNU Fortran2008 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)
         	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5), GMP version 6.2.0, MPFR version 4.1.0-p9, MPC version 1.2.1, isl version none
         GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
-        COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_394ed.dir/'
-         as -v --64 -o CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o /tmp/ccL2gwNH.s
+        COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a2a1f.dir/'
+         as -v --64 -o CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o /tmp/ccffnSDm.s
         GNU assembler version 2.35.2 (x86_64-redhat-linux) using BFD version version 2.35.2-63.el9
         COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/
-        LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.'
-        Linking Fortran executable cmTC_394ed
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_394ed.dir/link.txt --verbose=1
-        /usr/bin/gfortran  -v CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o -o cmTC_394ed 
-        Driving: /usr/bin/gfortran -v CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o -o cmTC_394ed -l gfortran -l m -shared-libgcc
+        LIBRARY_PATH=/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/:/opt/exp_software/kloe/cern/2025_al9/new/lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.'
+        Linking Fortran executable cmTC_a2a1f
+        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a2a1f.dir/link.txt --verbose=1
+        /usr/bin/gfortran  -v CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o -o cmTC_a2a1f 
+        Driving: /usr/bin/gfortran -v CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o -o cmTC_a2a1f -l gfortran -l m -shared-libgcc
         Using built-in specs.
         COLLECT_GCC=/usr/bin/gfortran
         COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper
@@ -396,13 +414,13 @@ events:
         gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) 
         Reading specs from /usr/lib/gcc/x86_64-redhat-linux/11/libgfortran.spec
         rename spec lib to liborig
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_394ed' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_394ed-'
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_a2a1f' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_a2a1f-'
         COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/
-        LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_394ed' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_394ed.'
-         /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccODX2Lz.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_394ed /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o
-        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_394ed' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_394ed.'
-        gmake[1]: Leaving directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-1pO856'
+        LIBRARY_PATH=/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/:/opt/exp_software/kloe/cern/2025_al9/new/lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_a2a1f' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_a2a1f.'
+         /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cc7itrln.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_a2a1f /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib -L/opt/exp_software/kloe/cern/2025_al9/new/lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_a2a1f' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_a2a1f.'
+        gmake[1]: Leaving directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xfrvck'
         
       exitCode: 0
   -
@@ -417,16 +435,20 @@ events:
         found start of implicit include info
           add: [/usr/lib/gcc/x86_64-redhat-linux/11/finclude]
           add: [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include]
+          add: [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann]
+          add: [/opt/exp_software/kloe/cern/2025_al9/new/include]
           add: [/usr/lib/gcc/x86_64-redhat-linux/11/include]
           add: [/usr/local/include]
           add: [/usr/include]
         end of search list found
         collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/finclude] ==> [/usr/lib/gcc/x86_64-redhat-linux/11/finclude]
         collapse include dir [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include] ==> [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include]
+        collapse include dir [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann] ==> [/opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann]
+        collapse include dir [/opt/exp_software/kloe/cern/2025_al9/new/include] ==> [/opt/exp_software/kloe/cern/2025_al9/new/include]
         collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/include] ==> [/usr/lib/gcc/x86_64-redhat-linux/11/include]
         collapse include dir [/usr/local/include] ==> [/usr/local/include]
         collapse include dir [/usr/include] ==> [/usr/include]
-        implicit include dirs: [/usr/lib/gcc/x86_64-redhat-linux/11/finclude;/opt/exp_software/kloe/root/root63604_al9_gcc1150/include;/usr/lib/gcc/x86_64-redhat-linux/11/include;/usr/local/include;/usr/include]
+        implicit include dirs: [/usr/lib/gcc/x86_64-redhat-linux/11/finclude;/opt/exp_software/kloe/root/root63604_al9_gcc1150/include;/opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann;/opt/exp_software/kloe/cern/2025_al9/new/include;/usr/lib/gcc/x86_64-redhat-linux/11/include;/usr/local/include;/usr/include]
       
       
   -
@@ -438,12 +460,12 @@ events:
     message: |
       Parsed Fortran implicit link information:
         link line regex: [^( *|.*[/\\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
-        ignore line: [Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-1pO856]
+        ignore line: [Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xfrvck]
         ignore line: []
-        ignore line: [Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_394ed/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_394ed.dir/build.make CMakeFiles/cmTC_394ed.dir/build]
-        ignore line: [gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-1pO856']
-        ignore line: [Building Fortran object CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o]
-        ignore line: [/usr/bin/gfortran   -v -c /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -o CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o]
+        ignore line: [Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_a2a1f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_a2a1f.dir/build.make CMakeFiles/cmTC_a2a1f.dir/build]
+        ignore line: [gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-xfrvck']
+        ignore line: [Building Fortran object CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o]
+        ignore line: [/usr/bin/gfortran   -v -c /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -o CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/gfortran]
         ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
@@ -453,8 +475,8 @@ events:
         ignore line: [Thread model: posix]
         ignore line: [Supported LTO compression algorithms: zlib zstd]
         ignore line: [gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) ]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_394ed.dir/']
-        ignore line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/f951 /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -cpp=/tmp/ccV0SeHv.f90 -quiet -v /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -quiet -dumpdir CMakeFiles/cmTC_394ed.dir/ -dumpbase CMakeFortranCompilerABI.F90.F90 -dumpbase-ext .F90 -mtune=generic -march=x86-64-v2 -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-redhat-linux/11/finclude -fpre-include=/usr/include/finclude/math-vector-fortran.h -o /tmp/ccL2gwNH.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a2a1f.dir/']
+        ignore line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/f951 /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -cpp=/tmp/cci8ofKz.f90 -quiet -v /usr/share/cmake/Modules/CMakeFortranCompilerABI.F90 -quiet -dumpdir CMakeFiles/cmTC_a2a1f.dir/ -dumpbase CMakeFortranCompilerABI.F90.F90 -dumpbase-ext .F90 -mtune=generic -march=x86-64-v2 -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-redhat-linux/11/finclude -fpre-include=/usr/include/finclude/math-vector-fortran.h -o /tmp/ccffnSDm.s]
         ignore line: [GNU Fortran (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)]
         ignore line: [	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5)  GMP version 6.2.0  MPFR version 4.1.0-p9  MPC version 1.2.1  isl version none]
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
@@ -464,6 +486,8 @@ events:
         ignore line: [#include <...> search starts here:]
         ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/11/finclude]
         ignore line: [ /opt/exp_software/kloe/root/root63604_al9_gcc1150/include]
+        ignore line: [ /opt/exp_software/kloe/root/root63604_al9_gcc1150/include/nlohmann]
+        ignore line: [ /opt/exp_software/kloe/cern/2025_al9/new/include]
         ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/11/include]
         ignore line: [ /usr/local/include]
         ignore line: [ /usr/include]
@@ -471,16 +495,16 @@ events:
         ignore line: [GNU Fortran2008 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)]
         ignore line: [	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5)  GMP version 6.2.0  MPFR version 4.1.0-p9  MPC version 1.2.1  isl version none]
         ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_394ed.dir/']
-        ignore line: [ as -v --64 -o CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o /tmp/ccL2gwNH.s]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a2a1f.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o /tmp/ccffnSDm.s]
         ignore line: [GNU assembler version 2.35.2 (x86_64-redhat-linux) using BFD version version 2.35.2-63.el9]
         ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/]
-        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.']
-        ignore line: [Linking Fortran executable cmTC_394ed]
-        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_394ed.dir/link.txt --verbose=1]
-        ignore line: [/usr/bin/gfortran  -v CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o -o cmTC_394ed ]
-        ignore line: [Driving: /usr/bin/gfortran -v CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o -o cmTC_394ed -l gfortran -l m -shared-libgcc]
+        ignore line: [LIBRARY_PATH=/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/:/opt/exp_software/kloe/cern/2025_al9/new/lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.']
+        ignore line: [Linking Fortran executable cmTC_a2a1f]
+        ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a2a1f.dir/link.txt --verbose=1]
+        ignore line: [/usr/bin/gfortran  -v CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o -o cmTC_a2a1f ]
+        ignore line: [Driving: /usr/bin/gfortran -v CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o -o cmTC_a2a1f -l gfortran -l m -shared-libgcc]
         ignore line: [Using built-in specs.]
         ignore line: [COLLECT_GCC=/usr/bin/gfortran]
         ignore line: [COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper]
@@ -493,16 +517,16 @@ events:
         ignore line: [gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) ]
         ignore line: [Reading specs from /usr/lib/gcc/x86_64-redhat-linux/11/libgfortran.spec]
         ignore line: [rename spec lib to liborig]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_394ed' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_394ed-']
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_a2a1f' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_a2a1f-']
         ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/]
-        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
-        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_394ed' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_394ed.']
-        link line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/ccODX2Lz.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_394ed /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o]
+        ignore line: [LIBRARY_PATH=/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib/:/opt/exp_software/kloe/cern/2025_al9/new/lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_a2a1f' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_a2a1f.']
+        link line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cc7itrln.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_a2a1f /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib -L/opt/exp_software/kloe/cern/2025_al9/new/lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o]
           arg [/usr/libexec/gcc/x86_64-redhat-linux/11/collect2] ==> ignore
           arg [-plugin] ==> ignore
           arg [/usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so] ==> ignore
           arg [-plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper] ==> ignore
-          arg [-plugin-opt=-fresolution=/tmp/ccODX2Lz.res] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/cc7itrln.res] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
           arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
           arg [-plugin-opt=-pass-through=-lquadmath] ==> ignore
@@ -519,16 +543,19 @@ events:
           arg [-dynamic-linker] ==> ignore
           arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
           arg [-o] ==> ignore
-          arg [cmTC_394ed] ==> ignore
+          arg [cmTC_a2a1f] ==> ignore
           arg [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o]
           arg [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o]
           arg [/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o]
+          arg [-L/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64] ==> dir [/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64]
           arg [-L/usr/lib/gcc/x86_64-redhat-linux/11] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11]
           arg [-L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64]
           arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
           arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+          arg [-L/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib] ==> dir [/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib]
+          arg [-L/opt/exp_software/kloe/cern/2025_al9/new/lib64] ==> dir [/opt/exp_software/kloe/cern/2025_al9/new/lib64]
           arg [-L/usr/lib/gcc/x86_64-redhat-linux/11/../../..] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../..]
-          arg [CMakeFiles/cmTC_394ed.dir/CMakeFortranCompilerABI.F90.o] ==> ignore
+          arg [CMakeFiles/cmTC_a2a1f.dir/CMakeFortranCompilerABI.F90.o] ==> ignore
           arg [-lgfortran] ==> lib [gfortran]
           arg [-lm] ==> lib [m]
           arg [-lgcc_s] ==> lib [gcc_s]
@@ -543,160 +570,18 @@ events:
         collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o] ==> [/usr/lib64/crt1.o]
         collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o] ==> [/usr/lib64/crti.o]
         collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o] ==> [/usr/lib64/crtn.o]
+        collapse library dir [/opt/exp_software/kloe/cern/2025_al9/new/lib64/../lib64] ==> [/opt/exp_software/kloe/cern/2025_al9/new/lib64]
         collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11] ==> [/usr/lib/gcc/x86_64-redhat-linux/11]
         collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64] ==> [/usr/lib64]
         collapse library dir [/lib/../lib64] ==> [/lib64]
         collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+        collapse library dir [/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib] ==> [/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib]
+        collapse library dir [/opt/exp_software/kloe/cern/2025_al9/new/lib64] ==> [/opt/exp_software/kloe/cern/2025_al9/new/lib64]
         collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../..] ==> [/usr/lib]
         implicit libs: [gfortran;m;gcc_s;gcc;quadmath;m;c;gcc_s;gcc]
         implicit objs: [/usr/lib64/crt1.o;/usr/lib64/crti.o;/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o;/usr/lib/gcc/x86_64-redhat-linux/11/crtend.o;/usr/lib64/crtn.o]
-        implicit dirs: [/usr/lib/gcc/x86_64-redhat-linux/11;/usr/lib64;/lib64;/usr/lib]
+        implicit dirs: [/opt/exp_software/kloe/cern/2025_al9/new/lib64;/usr/lib/gcc/x86_64-redhat-linux/11;/usr/lib64;/lib64;/opt/exp_software/kloe/root/root63604_al9_gcc1150/lib;/usr/lib]
         implicit fwks: []
       
       
-  -
-    kind: "try_compile-v1"
-    backtrace:
-      - "/usr/share/cmake/Modules/CheckFortranFunctionExists.cmake:69 (try_compile)"
-      - "/usr/share/cmake/Modules/FindBLAS.cmake:365 (check_fortran_function_exists)"
-      - "/usr/share/cmake/Modules/FindBLAS.cmake:411 (check_blas_libraries)"
-      - "/usr/share/cmake/Modules/FindLAPACK.cmake:247 (find_package)"
-      - "/usr/share/cmake/Modules/FindLAPACK.cmake:283 (_lapack_find_dependency)"
-      - "CMakeLists.txt:24 (find_package)"
-    checks:
-      - "Looking for Fortran sgemm"
-    directories:
-      source: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-wVNcWz"
-      binary: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-wVNcWz"
-    cmakeVariables:
-      CMAKE_EXE_LINKER_FLAGS: ""
-      CMAKE_Fortran_FLAGS: ""
-      CMAKE_Fortran_FLAGS_DEBUG: "-g"
-      CMAKE_MODULE_PATH: "/opt/exp_software/kloe/root/root63604_al9_gcc1150/cmake/modules"
-    buildResult:
-      variable: "BLAS_WORKS"
-      cached: true
-      stdout: |
-        Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-wVNcWz
-        
-        Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_bdbd9/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_bdbd9.dir/build.make CMakeFiles/cmTC_bdbd9.dir/build
-        gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-wVNcWz'
-        Building Fortran object CMakeFiles/cmTC_bdbd9.dir/testFortranCompiler.f.o
-        /usr/bin/gfortran    -c /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-wVNcWz/testFortranCompiler.f -o CMakeFiles/cmTC_bdbd9.dir/testFortranCompiler.f.o
-        Linking Fortran executable cmTC_bdbd9
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bdbd9.dir/link.txt --verbose=1
-        /usr/bin/gfortran CMakeFiles/cmTC_bdbd9.dir/testFortranCompiler.f.o -o cmTC_bdbd9 
-        /usr/bin/ld: CMakeFiles/cmTC_bdbd9.dir/testFortranCompiler.f.o: in function `MAIN__':
-        testFortranCompiler.f:(.text+0xa): undefined reference to `sgemm_'
-        collect2: error: ld returned 1 exit status
-        gmake[1]: *** [CMakeFiles/cmTC_bdbd9.dir/build.make:99: cmTC_bdbd9] Error 1
-        gmake[1]: Leaving directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-wVNcWz'
-        gmake: *** [Makefile:127: cmTC_bdbd9/fast] Error 2
-        
-      exitCode: 2
-  -
-    kind: "try_compile-v1"
-    backtrace:
-      - "/usr/share/cmake/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
-      - "/usr/share/cmake/Modules/CheckCXXSourceCompiles.cmake:76 (cmake_check_source_compiles)"
-      - "/usr/share/cmake/Modules/FindThreads.cmake:99 (CHECK_CXX_SOURCE_COMPILES)"
-      - "/usr/share/cmake/Modules/FindThreads.cmake:163 (_threads_check_libc)"
-      - "/usr/share/cmake/Modules/FindBLAS.cmake:465 (find_package)"
-      - "/usr/share/cmake/Modules/FindLAPACK.cmake:247 (find_package)"
-      - "/usr/share/cmake/Modules/FindLAPACK.cmake:283 (_lapack_find_dependency)"
-      - "CMakeLists.txt:24 (find_package)"
-    checks:
-      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
-    directories:
-      source: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-GierMN"
-      binary: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-GierMN"
-    cmakeVariables:
-      CMAKE_CXX_FLAGS: ""
-      CMAKE_CXX_FLAGS_DEBUG: "-O0 -g3 -Wall -Wextra -Wpedantic -fsanitize=address -fsanitize=undefined"
-      CMAKE_EXE_LINKER_FLAGS: ""
-      CMAKE_MODULE_PATH: "/opt/exp_software/kloe/root/root63604_al9_gcc1150/cmake/modules"
-    buildResult:
-      variable: "CMAKE_HAVE_LIBC_PTHREAD"
-      cached: true
-      stdout: |
-        Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-GierMN
-        
-        Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_776bb/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_776bb.dir/build.make CMakeFiles/cmTC_776bb.dir/build
-        gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-GierMN'
-        Building CXX object CMakeFiles/cmTC_776bb.dir/src.cxx.o
-        /usr/bin/c++ -DCMAKE_HAVE_LIBC_PTHREAD  -std=c++14 -o CMakeFiles/cmTC_776bb.dir/src.cxx.o -c /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-GierMN/src.cxx
-        Linking CXX executable cmTC_776bb
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_776bb.dir/link.txt --verbose=1
-        /usr/bin/c++ CMakeFiles/cmTC_776bb.dir/src.cxx.o -o cmTC_776bb 
-        gmake[1]: Leaving directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-GierMN'
-        
-      exitCode: 0
-  -
-    kind: "try_compile-v1"
-    backtrace:
-      - "/usr/share/cmake/Modules/CheckFortranFunctionExists.cmake:69 (try_compile)"
-      - "/usr/share/cmake/Modules/FindBLAS.cmake:365 (check_fortran_function_exists)"
-      - "/usr/share/cmake/Modules/FindBLAS.cmake:724 (check_blas_libraries)"
-      - "/usr/share/cmake/Modules/FindLAPACK.cmake:247 (find_package)"
-      - "/usr/share/cmake/Modules/FindLAPACK.cmake:283 (_lapack_find_dependency)"
-      - "CMakeLists.txt:24 (find_package)"
-    checks:
-      - "Looking for Fortran sgemm"
-    directories:
-      source: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-2uQvhD"
-      binary: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-2uQvhD"
-    cmakeVariables:
-      CMAKE_EXE_LINKER_FLAGS: ""
-      CMAKE_Fortran_FLAGS: ""
-      CMAKE_Fortran_FLAGS_DEBUG: "-g"
-      CMAKE_MODULE_PATH: "/opt/exp_software/kloe/root/root63604_al9_gcc1150/cmake/modules"
-    buildResult:
-      variable: "BLAS_flexiblas_WORKS"
-      cached: true
-      stdout: |
-        Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-2uQvhD
-        
-        Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_9216f/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_9216f.dir/build.make CMakeFiles/cmTC_9216f.dir/build
-        gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-2uQvhD'
-        Building Fortran object CMakeFiles/cmTC_9216f.dir/testFortranCompiler.f.o
-        /usr/bin/gfortran    -c /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-2uQvhD/testFortranCompiler.f -o CMakeFiles/cmTC_9216f.dir/testFortranCompiler.f.o
-        Linking Fortran executable cmTC_9216f
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9216f.dir/link.txt --verbose=1
-        /usr/bin/gfortran CMakeFiles/cmTC_9216f.dir/testFortranCompiler.f.o -o cmTC_9216f  /usr/lib64/libflexiblas.so 
-        gmake[1]: Leaving directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-2uQvhD'
-        
-      exitCode: 0
-  -
-    kind: "try_compile-v1"
-    backtrace:
-      - "/usr/share/cmake/Modules/CheckFortranFunctionExists.cmake:69 (try_compile)"
-      - "/usr/share/cmake/Modules/FindLAPACK.cmake:218 (check_fortran_function_exists)"
-      - "/usr/share/cmake/Modules/FindLAPACK.cmake:395 (check_lapack_libraries)"
-      - "CMakeLists.txt:24 (find_package)"
-    checks:
-      - "Looking for Fortran cheev"
-    directories:
-      source: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-cIEjhW"
-      binary: "/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-cIEjhW"
-    cmakeVariables:
-      CMAKE_EXE_LINKER_FLAGS: ""
-      CMAKE_Fortran_FLAGS: ""
-      CMAKE_Fortran_FLAGS_DEBUG: "-g"
-      CMAKE_MODULE_PATH: "/opt/exp_software/kloe/root/root63604_al9_gcc1150/cmake/modules"
-    buildResult:
-      variable: "LAPACK_WORKS"
-      cached: true
-      stdout: |
-        Change Dir: /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-cIEjhW
-        
-        Run Build Command(s):/usr/bin/cmake -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_0ef01/fast && /usr/bin/gmake  -f CMakeFiles/cmTC_0ef01.dir/build.make CMakeFiles/cmTC_0ef01.dir/build
-        gmake[1]: Entering directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-cIEjhW'
-        Building Fortran object CMakeFiles/cmTC_0ef01.dir/testFortranCompiler.f.o
-        /usr/bin/gfortran    -c /home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-cIEjhW/testFortranCompiler.f -o CMakeFiles/cmTC_0ef01.dir/testFortranCompiler.f.o
-        Linking Fortran executable cmTC_0ef01
-        /usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0ef01.dir/link.txt --verbose=1
-        /usr/bin/gfortran CMakeFiles/cmTC_0ef01.dir/testFortranCompiler.f.o -o cmTC_0ef01  /usr/lib64/libflexiblas.so -lm -ldl 
-        gmake[1]: Leaving directory '/home/KLOE/gamrat/KLOE/build/CMakeFiles/CMakeScratch/TryCompile-cIEjhW'
-        
-      exitCode: 0
 ...
