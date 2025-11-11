@@ -22,7 +22,7 @@ target_include_directories(GenVars PUBLIC
 target_link_libraries(GenVars PRIVATE
     ${ROOT_LIBRARIES}
     LibRec # Jeśli AnalysisALib zależy od SubanalysisLib
-    #    LibFort
+    LibFort
 )
 
 # Możesz tu także zdefiniować lokalny program wykonawczy, np. do testów.

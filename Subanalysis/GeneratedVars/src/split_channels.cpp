@@ -9,11 +9,10 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
 
     KLOE::BaseKinematics baseKin;
 
-    Int_t ntmc, nvtxmc;
     UChar_t pidmcOld[50], vtxmcOld[50], motherOld[50], mctruth, mcflag;
 
-    chain.SetBranchAddress("ntmc", &ntmc);
-    chain.SetBranchAddress("nvtxmc", &nvtxmc);
+    chain.SetBranchAddress("ntmc", &interfcommon_.ntmc);
+    chain.SetBranchAddress("nvtxmc", &interfcommon_.nvtxmc);
 
     chain.SetBranchAddress("pidmcOld", pidmcOld);
     chain.SetBranchAddress("vtxmcOld", vtxmcOld);
@@ -53,7 +52,7 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
 
         if (mcflag == 1 && mctruth != 0)
         {
-            for (Int_t j = 0; j < ntmc; j++)
+            for (Int_t j = 0; j < interfcommon_.ntmc; j++)
             {
                 if (motherOld[vtxmcOld[j] - 1] == 50)
                 {

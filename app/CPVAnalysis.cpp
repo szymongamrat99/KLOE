@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
       DataPath = filePaths["MC"]["path"][0];
       runs = initObj.getRunStats(DataPath, runRegexPattern);
       initObj.chainInit(chain, logger, DataPath, runRegexPattern,
-                        runs.minRun, runs.minRun);
+                        runs.minRun, runs.maxRun);
       break;
     }
     case Controls::FileType::ALL_PHYS2:
