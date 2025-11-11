@@ -1,0 +1,34 @@
+# Example job list file for KLOE analysis
+# Format: job_v1_data_5000_inv_pb_001.txt
+#
+# This file contains absolute paths to ROOT files for the analysis.
+# One path per line. Empty lines and lines starting with # are ignored.
+
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30548.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30549.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30550.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30551.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30552.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30553.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30554.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30555.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30556.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30557.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30560.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30561.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30562.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30563.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30564.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30565.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30566.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30567.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30568.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30569.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30570.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30571.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30572.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30573.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30574.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/DK0/prod2root_dk0_30575.root
+/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/prod2root_mk0_all_phys_37679_v2.root
+/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/prod2root_mk0_all_phys_43904_v2.root
