@@ -287,7 +287,8 @@ namespace KLOE
     };
   };
 
-  struct KaonProperTimes {
+  struct KaonProperTimes
+  {
     Double_t kaon1TimeLAB = 0.;
     Double_t kaon1TimeCM = 0.;
     Double_t kaon2TimeLAB = 0.;
@@ -738,6 +739,32 @@ namespace KLOE
      * @return true jeśli nazwa ma format daty, false w przeciwnym razie
      */
     bool IsValidDateFormat(const std::string &folderName);
+
+    // Weighted mean
+    void WeightedMeanVertex(const std::vector<std::array<Float_t, 4>> &values, const std::vector<Float_t> &weights, std::vector<Float_t> &weightedMean)
+    {
+      if (values.size() != weights.size() || values.empty())
+        return;
+
+      weightedMean.resize(4, 0.0);
+
+      for (size_t i = 0; i < 4; ++i)
+      {
+        Double_t numerator = 0.0;
+        Double_t denominator = 0.0;
+
+        for (size_t j = 0; j < values.size(); ++j)
+        {
+          numerator += values[j][i] * weights[j];
+          denominator += weights[j];
+        }
+
+        if (denominator != 0)
+          weightedMean[i] = numerator / denominator;
+        else
+          weightedMean[i] = 0.0;
+      }
+    };
   };
 }
 

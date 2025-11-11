@@ -44,16 +44,17 @@ namespace ErrorHandling
     NO_TWO_VTX_WITH_TWO_TRACKS = 305,               /*!< No charged vertices or tracks available for analysis*/
     CHARGED_KAON_MASS_PRE = 306,                    /*!< Did not pass charged kaon invariant mass in preselection*/
     TRILATERATION_KIN_FIT = 307,                    /*!< Did not pass the trilateration kin fit*/
-    TRIANGLE_REC = 308,                             /*!< Did not pass the triangle reconstruction*/
-    SIGNAL_KIN_FIT = 309,                           /*!< Did not pass the signal kin fit*/
-    OMEGA_KIN_FIT = 310,                            /*!< Did not pass the omega kin fit*/
+    NO_VALID_SIX_GAMMA_SOLUTION = 308,              /*!< Did not find a valid six photon solution*/
+    TRIANGLE_REC = 309,   /*!< Did not pass the triangle reconstruction*/
+    SIGNAL_KIN_FIT = 310, /*!< Did not pass the signal kin fit*/
+    OMEGA_KIN_FIT = 311,  /*!< Did not pass the omega kin fit*/
 
-    CUT_CHI2_SIGNAL = 400, /*!< Did not pass chi2 cut for signal hypothesis*/
-    CUT_COMB_MPI0 = 401,   /*!< Did not pass combined mpi0 cut*/
-    CUT_TRCV = 402,    /*!< Did not pass TrcSum cut*/
+    CUT_CHI2_SIGNAL = 400,  /*!< Did not pass chi2 cut for signal hypothesis*/
+    CUT_COMB_MPI0 = 401,    /*!< Did not pass combined mpi0 cut*/
+    CUT_TRCV = 402,         /*!< Did not pass TrcSum cut*/
     CUT_INV_MASS_KCH = 403, /*!< Did not pass invariant mass cut for charged kaon*/
     CUT_INV_MASS_KNE = 404, /*!< Did not pass invariant mass cut for neutral kaon*/
-    CUT_QMISS = 405,   /*!< Did not pass Qmiss cut*/
+    CUT_QMISS = 405,        /*!< Did not pass Qmiss cut*/
 
     NOT_RECOGNIZED = 666, /*!< Unexpected exception*/
 
@@ -146,6 +147,8 @@ namespace ErrorHandling
         return "Did not pass charged kaon ivariant mass in preselection.";
       case ErrorCodes::TRILATERATION_KIN_FIT:
         return "Did not pass the trilateration kin fit.";
+      case ErrorCodes::NO_VALID_SIX_GAMMA_SOLUTION:
+        return "Did not find a valid six photon solution.";
       case ErrorCodes::TRIANGLE_REC:
         return "Did not pass the triangle reconstruction.";
       case ErrorCodes::SIGNAL_KIN_FIT:

@@ -405,6 +405,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       kaonTimesTriangleBoostLor,
       kaonTimesSignalKinFit;
 
+  // Auxiliary reconstruction of Kneutral with 6 gammas (for studies)
+  KLOE::kaonNeutral KnerecSix;
+  std::vector<KLOE::neutralParticle> photonFourMomSix(6);
+  Float_t bestError;
+  std::vector<Int_t> bestIndicesSix;
+
   while (dataAccess.Next())
   {
     // Here you would process each entry in the tree.
@@ -1101,6 +1107,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           omega.total[7] = baseKin.KchrecClosest[7];
           omega.total[8] = baseKin.KchrecClosest[8]; // Use kaon decay z vertex as omega z vertex - better resolution
 
+          if (neuclulist.size() >= 6)
+          {
+            neutRec.ReconstructSixGammaVertex(cluster, neuclulist, bestIndicesSix, bestError, KnerecSix, photonFourMomSix);
+          }
+          else
+          {
+            bestError = 999999.;
+            KnerecSix.total = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+            photonFourMomSix = std::vector<KLOE::neutralParticle>(6, KLOE::neutralParticle());
+          }
           ///////////////////////////////////////////////////////////////////
 
           // Signal Global Kinematic Fit
@@ -1546,7 +1562,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"Curv2", baseKin.Curv2},
           {"Phiv2", baseKin.Phiv2},
           {"Cotv2", baseKin.Cotv2},
-          {"Chi2OmegaKinFit", baseKin.Chi2OmegaKinFit}};
+          {"Chi2OmegaKinFit", baseKin.Chi2OmegaKinFit},
+          {"bestErrorSixGamma", bestError}};
 
       // Tablice
       std::map<std::string, std::vector<Int_t>> intArrays = {
@@ -1661,7 +1678,14 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"photonOmegaFit4", baseKin.photonOmegaFit[3]},
           {"ipOmegaFit", baseKin.ipOmegaFit},
           {"trk1MC", baseKin.trk1MC},
-          {"trk2MC", baseKin.trk2MC}};
+          {"trk2MC", baseKin.trk2MC},
+          {"KnerecSix", KnerecSix.total},
+          {"photonSix1", photonFourMomSix[0].total},
+          {"photonSix2", photonFourMomSix[1].total},
+          {"photonSix3", photonFourMomSix[2].total},
+          {"photonSix4", photonFourMomSix[3].total},
+          {"photonSix5", photonFourMomSix[4].total},
+          {"photonSix6", photonFourMomSix[5].total}};
 
       writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }
