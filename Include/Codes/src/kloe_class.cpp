@@ -866,7 +866,7 @@ namespace KLOE
 
       Float_t neu_vtx[4], trc[4];
 
-      // this->neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip.data(), bhabha_mom.data(), Knerec, neu_vtx, trc);
+      neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip.data(), bhabha_mom.data(), Knerec, neu_vtx, trc);
 
       if (sqrt(pow(vtxSigma, 2) + pow(TrcSum, 2)) < sqrt(pow(vtxSigmaMin, 2) + pow(TrcSumMin, 2)))
       {

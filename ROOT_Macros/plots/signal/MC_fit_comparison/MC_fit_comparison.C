@@ -226,10 +226,12 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                        KchrecMom = {Kchrec[0], Kchrec[1], Kchrec[2], Kchrec[3]},
                        KchboostFitMom = {KchrecFit[0], KchrecFit[1], KchrecFit[2], KchrecFit[3]},
                        KnerecMom = {Knerec[0], Knerec[1], Knerec[2], Knerec[3]},
+                       KnemcMom = {Knemc[0], Knemc[1], Knemc[2], Knemc[3]},
                        KnereclorMom = {*Bpx - Kchboost[0], *Bpy - Kchboost[1], *Bpz - Kchboost[2], *Broots - Kchboost[3]},
                        KnerecFitMom = {KnerecFit[0], KnerecFit[1], KnerecFit[2], KnerecFit[3]},
                        KchPos = {Kchboost[6], Kchboost[7], Kchboost[8]},
                        KnePos = {Knerec[6], Knerec[7], Knerec[8]},
+                       KnePosMC = {Knemc[6], Knemc[7], Knemc[8]},
                        KchPosFit = {KchboostFit[6], KchboostFit[7], KchboostFit[8]},
                        KnePosFit = {KnerecFit[6], KnerecFit[7], KnerecFit[8]},
                        ipPos = {ip[0], ip[1], ip[2]},
@@ -253,7 +255,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                                                                       KchPosFit,
                                                                       KnerecFitMom,
                                                                       KnePosFit,
-                                                                      ipPosFit);
+                                                                      ipPos);
 
   Float_t Omega1MassTmp = sqrt(pow(trk1[3] + trk2[3] + pi0Omega1[3], 2) -
                                pow(trk1[0] + trk2[0] + pi0Omega1[0], 2) -
@@ -377,7 +379,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
       pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
                        pow(Kchmc[7] - ipmc[1], 2));
 
-  if (*mctruth == 1 && simonaCuts)// && *Chi2SignalKinFit < 30.) // && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC && *Chi2SignalKinFit < 31.) // && isInsideFiducialVolume)
+  if (*mctruth == 1)// && simonaCuts)// && *Chi2SignalKinFit < 30.) // && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC && *Chi2SignalKinFit < 31.) // && isInsideFiducialVolume)
   {
     Int_t mctruth_tmp = *mctruth;
 
@@ -467,7 +469,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsReconstructed["time_neutral_MC"]->Fill(*TrcSum, weight);
 
-    histsReconstructed["delta_t"]->Fill(timesBoostLor.deltaTimeCM - deltaTMC, weight);
+    histsReconstructed["delta_t"]->Fill(timesRecRec.deltaTimeCM - deltaTMC, weight);
 
     histsReconstructed["combined_mass_pi0"]->Fill(combinedMassPi0, weight);
 

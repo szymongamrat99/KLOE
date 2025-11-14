@@ -19,8 +19,11 @@ delta_t_fit_vs_delta_t_mc; 401; 401; -100.; 100.; -100.; 100.; "#Deltat_{fit} vs
 
 delta_t_mc_vs_delta_t_res; 161; 81; -40.; 40.; -20.; 20.; "#Deltat_{fit} vs. #Deltat_{mc}"; "#Deltat_{MC} [#tau_{S}]"; "(#Deltat_{fit} - #Deltat_{MC}) [#tau_{S}]"; ""
 
-t_ch_fit_vs_t_ch_mc; 52; 81; 0.; 40.; -10.; 20.; "t_{+-,MC} vs. (t_{+-,fit} - t_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(t_{+-,fit} - t_{+-,MC}) [#tau_{S}]"; ""
-t_neu_fit_vs_t_neu_mc; 52; 81; 0.; 40.; -10.; 20.; "t_{00,MC} vs. (t_{00,fit} - t_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(t_{00,fit} - t_{00,MC}) [#tau_{S}]"; ""
+t_ch_fit_vs_t_ch_mc; 101; 81; 0.; 100.; -10.; 20.; "t_{+-,MC} vs. (t_{+-,fit} - t_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(t_{+-,fit} - t_{+-,MC}) [#tau_{S}]"; ""
+t_neu_fit_vs_t_neu_mc; 101; 81; 0.; 100.; -10.; 20.; "t_{00,MC} vs. (t_{00,fit} - t_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(t_{00,fit} - t_{00,MC}) [#tau_{S}]"; ""
+
+t_ch_rec_vs_t_ch_mc; 101.; 81; 0.; 100.; -10.; 20.; "t_{+-,MC} vs. (t_{+-,rec} - t_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(t_{+-,rec} - t_{+-,MC}) [#tau_{S}]"; ""
+t_neu_rec_vs_t_neu_mc; 101.; 81; 0.; 100.; -10.; 20.; "t_{00,MC} vs. (t_{00,rec} - t_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(t_{00,rec} - t_{00,MC}) [#tau_{S}]"; ""
 
 t_ch_fit_MC_vs_t_neu_fit_MC; 10; 10; -10; 10.; -10.; 10.; "(t_{+-,fit} - t_{+-,MC}) vs. (t_{00,fit} - t_{00,MC})"; "(t_{+-,fit} - t_{+-,MC}) [#tau_{S}]"; "(t_{00,fit} - t_{00,MC}) [#tau_{S}]"; ""
 t_ch_fit_vs_t_neu_fit; 150; 150; -10; 150.; -10.; 150.; "t_{+-,fit} vs. t_{00,fit}"; "t_{+-,fit} [#tau_{S}]"; "t_{00,fit}[#tau_{S}]"; ""
@@ -36,6 +39,6 @@ Rkne_vs_Rkch; 100; 100; 0.; 5.; 0.; 5.; "R_{00} vs. R_{+-}"; "Rt_{00} [cm]"; "Rt
 
 chi2_signalKinFit_vs_mass_Kch; 100; 100; 0; 1.5E4.; -150.; 150.; "Chi2 vs Kch mass"; "#chi^{2}_{signal}"; "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]"; ""
 chi2_signalKinFit_vs_mass_Kne; 100; 100; 0; 1.5E4.; -320.; 320.; "Chi2 vs Kne mass"; "#chi^{2}_{signal}"; "m^{inv}_{4#gamma} [MeV/c^{2}]"; ""
-chi2_signalKinFit_vs_delta_t; 100; 121; 0; 1.5E5.; -100.; 100.; "Chi2 vs Delta t"; "#chi^{2}_{signal}"; "#Delta t [#tau_{S}]"; ""
+chi2_signalKinFit_vs_delta_t; 100; 121; 0; 10.; -100.; 100.; "Chi2 vs Delta t"; "#chi^{2}_{signal}"; "#Delta t [#tau_{S}]"; ""
 
 TransvRadius_vs_delta_t; 100; 201; 0; 50.; -100.; 100.; "TransvRadius vs Delta t"; "R [cm]"; "#Delta t [#tau_{S}]"; ""
