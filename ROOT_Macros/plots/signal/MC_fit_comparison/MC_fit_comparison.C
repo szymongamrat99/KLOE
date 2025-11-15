@@ -95,6 +95,8 @@ StatisticalCutter *cutter;
 std::map<std::string, std::function<Float_t()>> cutValues;
 std::map<std::string, Float_t> centralValues;
 
+std::vector<size_t> cutIndices;
+
 void MC_fit_comparison::Begin(TTree * /*tree*/)
 {
   // The Begin() function is called at the start of the query.
@@ -107,7 +109,12 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
 
   if (option.IsNull())
     option = "NO_CUTS";
-  folderPath = "img/" + option;
+
+  InitializeCutSelector(option);
+  cutIndices = GetCutIndicesForOption(option);
+
+  TString folderName = SanitizeFolderName(option);
+  folderPath = "img/" + folderName;
   FolderManagement(folderPath);
 
   KLOE::setGlobalStyle();
@@ -160,42 +167,6 @@ void MC_fit_comparison::SlaveBegin(TTree * /*tree*/)
   // The tree argument is deprecated (on PROOF 0 is passed).
 
   TString option = GetOption();
-
-  ///////////////////////////////////////////////////////////
-  // Initialization of cuts
-  ///////////////////////////////////////////////////////////
-
-  cutter = new StatisticalCutter(Paths::cutlimitsName, 1, KLOE::HypothesisCode::SIMONA_ANALYSIS);
-
-  cutValues = {
-      {"Chi2SignalReduced", [this]()  { return Chi2SignalReduced; }},
-      {"DeltaPhivFit", [this]()  { return deltaPhiFit; }},
-      {"InvMassKch", [this]()  { return Kchrec[5]; }},
-      {"InvMassKne", [this]()  { return (*minv4gam); }},
-      {"InvMassPi01", [this]()  { return pi01Fit[5]; }},
-      {"InvMassPi02", [this]()  { return pi02Fit[5]; } }};
-
-  centralValues = {
-      {"DeltaPhivFit", 3.130},
-      {"InvMassKch", 497.605},
-      {"InvMassKne", 489.467},
-      {"InvMassPi01", 134.954},
-      {"InvMassPi02", 134.841}};
-
-  cutter->SetTree(fChain);
-
-  for (const auto &cutPair : cutValues)
-  {
-    cutter->RegisterVariableGetter(cutPair.first, cutPair.second);
-  }
-
-  for (const auto &centralPair : centralValues)
-  {
-    cutter->RegisterCentralValueGetter(centralPair.first, [&]()
-                                    { return centralPair.second; });
-  }
-
-  //////////////////////////////////////////////////////////////////
 }
 
 Int_t numberOfAllGood = 0,
@@ -220,7 +191,6 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   // The return value is currently not used.
 
   TString option = GetOption();
-  option.ToUpper();
 
   fReader.SetLocalEntry(entry);
 
@@ -427,6 +397,25 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
       pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
                        pow(Kchmc[7] - ipmc[1], 2));
 
+  bool passesCuts = true;
+  if (!cutIndices.empty())
+  {
+    for (size_t cutIdx : cutIndices)
+    {
+      if (!cutter->PassCut(cutIdx))
+      {
+        passesCuts = false;
+        break;
+      }
+    }
+  }
+
+  // Update statistics for all events
+  cutter->UpdateStats(*mctruth);
+
+  if (!passesCuts)
+    return kTRUE;
+
   if (*mctruth == 1)
   {
     Int_t mctruth_tmp = *mctruth;
@@ -441,28 +430,6 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     signal_num++;
 
-    Float_t X_line[3] = {Kchboost[6],
-                         Kchboost[7],
-                         Kchboost[8]}, // Vertex laying on the line
-        mom[3] = {Kchboost[0],
-                  Kchboost[1],
-                  Kchboost[2]}, // Direction of the line
-        xB[3] = {*Bx,
-                 *By,
-                 *Bz}, // Bhabha vertex - laying on the plane
-        plane_perp[3] = {*Bpx,
-                         *Bpy,
-                         0.},
-            ip_check[3] = {0., 0., 0.}; // Vector perpendicular to the plane from Bhabha momentum
-
-    // Corrected IP event by event
-    chargedVtxRec.IPBoostCorr(X_line, mom, xB, plane_perp, ip_check);
-
-    ip_check[0] = *Bx;
-    ip_check[1] = *By;
-    if (abs(ip_check[2] - *Bz) > 2.8)
-      ip_check[2] = *Bz;
-
     histsReconstructed["TransvRadius"]->Fill(pathpmMCCenter, weight);
     histsFittedSignal["TransvRadius"]->Fill(path00MCCenter, weight);
 
@@ -471,16 +438,16 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["py_Kch"]->Fill(Kchrec[1] - Kchmc[1], weight);
     histsReconstructed["pz_Kch"]->Fill(Kchrec[2] - Kchmc[2], weight);
     histsReconstructed["Energy_Kch"]->Fill(Kchrec[3] - Kchmc[3], weight);
-    histsReconstructed["mass_Kch"]->Fill(Kchrec[5] - PhysicsConstants::mK0, weight);
+    histsReconstructed["mass_Kch"]->Fill(Kchrec[5], weight);
 
     histsReconstructed["px_Kne"]->Fill(Knerec[0] - Knemc[0], weight);
     histsReconstructed["py_Kne"]->Fill(Knerec[1] - Knemc[1], weight);
     histsReconstructed["pz_Kne"]->Fill(Knerec[2] - Knemc[2], weight);
     histsReconstructed["Energy_Kne"]->Fill(Knerec[3] - Knemc[3], weight);
-    histsReconstructed["mass_Kne"]->Fill(*minv4gam - PhysicsConstants::mK0, weight);
+    histsReconstructed["mass_Kne"]->Fill(*minv4gam, weight);
 
-    histsReconstructed["mass_pi01"]->Fill(pi01[5] - PhysicsConstants::mPi0, weight);
-    histsReconstructed["mass_pi02"]->Fill(pi02[5] - PhysicsConstants::mPi0, weight);
+    histsReconstructed["mass_pi01"]->Fill(pi01[5], weight);
+    histsReconstructed["mass_pi02"]->Fill(pi02[5], weight);
 
     histsReconstructed["px_Phi"]->Fill(*Bpx - Kchmc[0] - Knemc[0], weight);
     histsReconstructed["py_Phi"]->Fill(*Bpy - Kchmc[1] - Knemc[1], weight);
@@ -488,14 +455,14 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["Energy_Phi"]->Fill(*Broots - Kchmc[3] - Knemc[3], weight);
 
     if (abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
-      histsReconstructed["mass_omega"]->Fill(Omega2MassTmp - PhysicsConstants::mOmega, weight);
+      histsReconstructed["mass_omega"]->Fill(Omega2MassTmp, weight);
     else
-      histsReconstructed["mass_omega"]->Fill(Omega1MassTmp - PhysicsConstants::mOmega, weight);
+      histsReconstructed["mass_omega"]->Fill(Omega1MassTmp, weight);
 
     if (abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
-      histsReconstructed["mass_omega_rec"]->Fill(Omega2MassTmp - PhysicsConstants::mOmega, weight);
+      histsReconstructed["mass_omega_rec"]->Fill(Omega2MassTmp, weight);
     else
-      histsReconstructed["mass_omega_rec"]->Fill(Omega1MassTmp - PhysicsConstants::mOmega, weight);
+      histsReconstructed["mass_omega_rec"]->Fill(Omega1MassTmp, weight);
 
     histsReconstructed["vtxNeu_x"]->Fill(Knerec[6] - Knemc[6], weight);
     histsReconstructed["vtxNeu_y"]->Fill(Knerec[7] - Knemc[7], weight);
@@ -505,9 +472,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["vtxCh_y"]->Fill(Kchrec[7] - Kchmc[7], weight);
     histsReconstructed["vtxCh_z"]->Fill(Kchrec[8] - Kchmc[8], weight);
 
-    histsReconstructed["phi_vtx_x"]->Fill(ip_check[0] - ipmc[0], weight);
-    histsReconstructed["phi_vtx_y"]->Fill(ip_check[1] - ipmc[1], weight);
-    histsReconstructed["phi_vtx_z"]->Fill(ip_check[2] - ipmc[2], weight);
+    histsReconstructed["phi_vtx_x"]->Fill(ip[0] - ipmc[0], weight);
+    histsReconstructed["phi_vtx_y"]->Fill(ip[1] - ipmc[1], weight);
+    histsReconstructed["phi_vtx_z"]->Fill(ip[2] - ipmc[2], weight);
 
     histsReconstructed["vtxNeu_x_Fit"]->Fill(Knerec[6] - Knemc[6], weight);
     histsReconstructed["vtxNeu_y_Fit"]->Fill(Knerec[7] - Knemc[7], weight);
@@ -622,10 +589,10 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsFittedSignal["Energy_Kne"]->Fill(KnerecFit[3] - Knemc[3], weight);
     histsFittedSignal["mass_Kne"]->Fill(KnerecFit[5], weight);
 
-    histsFittedSignal["mass_pi01"]->Fill(pi01Fit[5] - PhysicsConstants::mPi0, weight);
-    histsFittedSignal["mass_pi02"]->Fill(pi02Fit[5] - PhysicsConstants::mPi0, weight);
+    histsFittedSignal["mass_pi01"]->Fill(pi01Fit[5], weight);
+    histsFittedSignal["mass_pi02"]->Fill(pi02Fit[5], weight);
 
-    histsFittedSignal["mass_omega"]->Fill(omegaFit[5] - PhysicsConstants::mOmega, weight);
+    histsFittedSignal["mass_omega"]->Fill(omegaFit[5], weight);
 
     histsReconstructed["chi2_signalKinFit"]->Fill(*Chi2SignalKinFit / 10., weight);
     histsReconstructed["chi2_trilaterationKinFit"]->Fill(*Chi2TriKinFit / 5., weight);
@@ -658,7 +625,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     for (Int_t i = 0; i < 39; i++)
     {
-      histsReconstructed["pull" + std::to_string(i + 1)]->Fill(pullsSignalFit[i], weight);
+      histsFittedSignal["pull" + std::to_string(i + 1)]->Fill(pullsSignalFit[i], weight);
     }
 
     histsFittedSignal["time_neutral_MC"]->Fill(TrcSumFit, weight);
@@ -873,6 +840,15 @@ void MC_fit_comparison::Terminate()
   std::cout << "Signal events after cuts: " << signal_num << " over " << signal_tot << " (" << analysisEff << " %) --> Efficiency of analysis" << std::endl;
 
   std::cout << "Total Efficiency: " << totalEff << " %" << std::endl;
+
+  for (const auto &cutId : cutIndices)
+  {
+    const auto efficiency = cutter->GetEfficiency(cutId);
+
+    std::cout << "Applied cut: " << cutId << " with eff " << efficiency << std::endl;
+  }
+
+  std::cout << "=== MC Fit Comparison Terminated ===" << std::endl;
 }
 
 Double_t MC_fit_comparison::CalculatePurity(Int_t signal, Int_t total) const
@@ -897,4 +873,112 @@ void MC_fit_comparison::FolderManagement(TString folderPath) const
 
   // Utwórz folder
   system(Form("mkdir -p %s", folderPath.Data()));
+}
+
+void MC_fit_comparison::InitializeCutSelector(const TString &option)
+{
+  cutter = new StatisticalCutter(Paths::cutlimitsName, 1, KLOE::HypothesisCode::SIMONA_ANALYSIS);
+
+  cutValues = {
+      {"Chi2SignalReduced", [this]()
+       { return Chi2SignalReduced; }},
+      {"DeltaPhivFit", [this]()
+       { return deltaPhiFit; }},
+      {"InvMassKch", [this]()
+       { return Kchrec[5]; }},
+      {"InvMassKne", [this]()
+       { return (*minv4gam); }},
+      {"InvMassPi01", [this]()
+       { return pi01Fit[5]; }},
+      {"InvMassPi02", [this]()
+       { return pi02Fit[5]; }}};
+
+  centralValues = {
+      {"DeltaPhivFit", 3.130},
+      {"InvMassKch", 497.605},
+      {"InvMassKne", 489.467},
+      {"InvMassPi01", 134.954},
+      {"InvMassPi02", 134.841}};
+
+  cutter->SetTree(fChain);
+
+  for (const auto &cutPair : cutValues)
+  {
+    cutter->RegisterVariableGetter(cutPair.first, cutPair.second);
+  }
+
+  for (const auto &centralPair : centralValues)
+  {
+    Float_t centralValue = centralPair.second;
+    cutter->RegisterCentralValueGetter(centralPair.first, [centralValue]()
+                                       { return centralValue; });
+  }
+
+  const auto &cuts = cutter->GetCuts();
+  for (size_t i = 0; i < cuts.size(); ++i)
+  {
+    cutNameToIndex[cuts[i].cutId] = i;
+  }
+
+  std::cout << "StatisticalCutter initialized with " << cuts.size() << " cuts:" << std::endl;
+  for (size_t i = 0; i < cuts.size(); ++i)
+  {
+    std::cout << "  [" << i << "] " << cuts[i].cutId << std::endl;
+  }
+}
+
+std::vector<size_t> MC_fit_comparison::GetCutIndicesForOption(const TString &option)
+{
+  std::vector<size_t> indices;
+
+  if (option.IsNull() || option == "NO_CUTS")
+  {
+    std::cout << "No cuts applied" << std::endl;
+    return indices;
+  }
+
+  TObjArray *tokens = option.Tokenize("+");
+
+  for (Int_t i = 0; i < tokens->GetEntriesFast(); ++i)
+  {
+    TString token = ((TObjString *)tokens->At(i))->GetString();
+
+    auto it = cutNameToIndex.find(std::string(token.Data()));
+    if (it != cutNameToIndex.end())
+    {
+      indices.push_back(it->second);
+    }
+    else if (token != "")
+    {
+      std::cerr << "Warning: Cut '" << token << "' not found in loaded cuts" << std::endl;
+    }
+  }
+
+  delete tokens;
+
+  std::sort(indices.begin(), indices.end());
+  indices.erase(std::unique(indices.begin(), indices.end()), indices.end());
+
+  std::cout << "Option '" << option << "' uses " << indices.size() << " cuts:" << std::endl;
+  const auto &cuts = cutter->GetCuts();
+  for (size_t idx : indices)
+  {
+    if (idx < cuts.size())
+      std::cout << "  - " << cuts[idx].cutId << std::endl;
+  }
+
+  return indices;
+}
+
+TString MC_fit_comparison::SanitizeFolderName(const TString &option)
+{
+  TString sanitized = option;
+
+  sanitized.ReplaceAll("+", "_");
+  sanitized.ReplaceAll(" ", "_");
+  sanitized.ReplaceAll("-", "_");
+
+  sanitized.ToLower();
+
+  return sanitized;
 }

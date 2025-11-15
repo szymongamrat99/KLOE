@@ -14,6 +14,8 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
+#include <TObjString.h>
+#include <StatisticalCutter.h>
 
 // Headers needed by this particular selector
 #include <vector>
@@ -232,7 +234,15 @@ public:
   Double_t CalculateEfficiency(Int_t signal, Int_t total) const;
   void FolderManagement(TString folderName) const;
 
+  void InitializeCutSelector(const TString &option);
+  std::vector<size_t> GetCutIndicesForOption(const TString &option);
+  TString SanitizeFolderName(const TString &option);
+
   TString folderPath = "NO_CUTS";
+  StatisticalCutter *cutter = nullptr;
+  std::map<std::string, std::function<Float_t()>> cutValues;
+  std::map<std::string, Float_t> centralValues;
+  std::map<std::string, size_t> cutNameToIndex;
 
   ClassDef(MC_fit_comparison, 0);
 };
