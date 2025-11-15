@@ -255,7 +255,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                                                                       KchPosFit,
                                                                       KnerecFitMom,
                                                                       KnePosFit,
-                                                                      ipPos);
+                                                                      ipPosFit);
 
   Float_t Omega1MassTmp = sqrt(pow(trk1[3] + trk2[3] + pi0Omega1[3], 2) -
                                pow(trk1[0] + trk2[0] + pi0Omega1[0], 2) -
@@ -352,7 +352,6 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   deltaTheta = abs(Theta2Fit - Theta1Fit);
   deltaPhiFit = abs(Phi2Fit - Phi1Fit);
 
-
   ///////////////////////////////////////////////////////////////////////////////
   // Analiza Simony cięcie na 3 sigma mas
   Bool_t condMassKch = abs(Kchrec[5] - 497.606) < 3 * 1.099,
@@ -379,7 +378,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
       pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
                        pow(Kchmc[7] - ipmc[1], 2));
 
-  if (*mctruth == 1)// && simonaCuts)// && *Chi2SignalKinFit < 30.) // && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC && *Chi2SignalKinFit < 31.) // && isInsideFiducialVolume)
+  if (*mctruth == 1)// && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC) // && isInsideFiducialVolume)
   {
     Int_t mctruth_tmp = *mctruth;
 
@@ -469,7 +468,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     histsReconstructed["time_neutral_MC"]->Fill(*TrcSum, weight);
 
-    histsReconstructed["delta_t"]->Fill(timesRecRec.deltaTimeCM - deltaTMC, weight);
+    histsReconstructed["delta_t_boostlor_res"]->Fill(timesBoostLor.deltaTimeCM - deltaTMC, weight);
+
+    histsReconstructed["delta_t_rec_res"]->Fill(timesRecRec.deltaTimeCM - deltaTMC, weight);
 
     histsReconstructed["combined_mass_pi0"]->Fill(combinedMassPi0, weight);
 
@@ -600,7 +601,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     // histsFittedSignal["vKne"]->Fill(vKneFit - vKneMC, weight);
 
-    histsFittedSignal["delta_t"]->Fill(deltaTfit - deltaTMC, weight);
+    histsFittedSignal["delta_t_boostlor_res"]->Fill(deltaTfit - deltaTMC, weight);
+
+    histsFittedSignal["delta_t_rec_res"]->Fill(deltaTfit - deltaTMC, weight);
 
     histsFittedSignal["combined_mass_pi0"]->Fill(combinedMassPi0Fit, weight);
 
@@ -675,7 +678,7 @@ void MC_fit_comparison::Terminate()
 
     Bool_t fitcond = histName.first == "curv1" || histName.first == "phiv1" || histName.first == "cotv1" ||
                      histName.first == "curv2" || histName.first == "phiv2" || histName.first == "cotv2" ||
-                     histName.first == "vtxNeu_x" || histName.first == "vtxNeu_y" || histName.first == "vtxNeu_z" || histName.first == "delta_t" || histName.first == "phi_vtx_x" || histName.first == "phi_vtx_y" || histName.first == "phi_vtx_z" || histName.first == "vtxCh_x" || histName.first == "vtxCh_y" || histName.first == "vtxCh_z" || histName.first.Contains(pattern2) || histName.first.Contains(patternpull) || histName.first.Contains(patternPhi);
+                     histName.first == "vtxNeu_x" || histName.first == "vtxNeu_y" || histName.first == "vtxNeu_z" || histName.first == "delta_t_boostlor_res" || histName.first == "delta_t_rec_res" || histName.first == "phi_vtx_x" || histName.first == "phi_vtx_y" || histName.first == "phi_vtx_z" || histName.first == "vtxCh_x" || histName.first == "vtxCh_y" || histName.first == "vtxCh_z" || histName.first.Contains(pattern2) || histName.first.Contains(patternpull) || histName.first.Contains(patternPhi);
 
     if (fitcond)
     {
@@ -748,7 +751,7 @@ void MC_fit_comparison::Terminate()
     }
     else
     {
-      legend = new TLegend(0.15, 0.75, 0.4, 0.9, "", "NDC");
+      legend = new TLegend(0.15, 0.7, 0.45, 0.9, "", "NDC");
       legend->AddEntry(histsReconstructed[histName.first], "Reconstructed", "l");
       legend->AddEntry(histsFittedSignal[histName.first], "Fitted Data", "l");
 
@@ -783,28 +786,28 @@ void MC_fit_comparison::Terminate()
   for (const auto &config : histogramConfigs2D)
   {
 
-      canvas2D[config.first]->cd();
-      canvas2D[config.first]->SetLogz(1);
+    canvas2D[config.first]->cd();
+    canvas2D[config.first]->SetLogz(1);
 
-      hists2DFittedSignal[config.first]->Draw("COLZ");
+    hists2DFittedSignal[config.first]->Draw("COLZ");
 
-      // Sprawdź czy JAKIKOLWIEK histogram ma wpisy
-      Bool_t hasEntries = kFALSE;
+    // Sprawdź czy JAKIKOLWIEK histogram ma wpisy
+    Bool_t hasEntries = kFALSE;
 
-      // Sprawdź wszystkie kanały
+    // Sprawdź wszystkie kanały
 
-      if (hists2DFittedSignal[config.first]->GetEntries() > 0)
-      {
-        hasEntries = kTRUE;
-      }
+    if (hists2DFittedSignal[config.first]->GetEntries() > 0)
+    {
+      hasEntries = kTRUE;
+    }
 
-      // Jeśli żaden histogram nie ma wpisów - pomiń ten canvas
-      if (!hasEntries)
-      {
-        continue;
-      }
+    // Jeśli żaden histogram nie ma wpisów - pomiń ten canvas
+    if (!hasEntries)
+    {
+      continue;
+    }
 
-      canvas2D[config.first]->SaveAs(Form("%s/%s_2D.png", folderPath.Data(), config.first.Data()));
+    canvas2D[config.first]->SaveAs(Form("%s/%s_2D.png", folderPath.Data(), config.first.Data()));
   }
 
   Float_t fullyGoodPer = CalculateEfficiency(numberOfAllGood, numberOfAllGood + numberOfAtLeastOneBad) * 100,

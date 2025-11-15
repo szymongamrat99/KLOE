@@ -11,7 +11,7 @@ mass_Kch_vs_mass_Kne; 50; 50; 480.; 520.; 480.; 520.; "Kaon Mass Correlation"; "
 vtxNeu_x_vs_vtxNeu_y; 100; 100; -20.; 20.; -20.; 20.; "Neutral Vertex Position"; "x [cm]"; "y [cm]"; ""
 vtxNeu_x_vs_vtxNeu_z; 100; 100; -20.; 20.; -50.; 50.; "Neutral Vertex x vs z"; "x [cm]"; "z [cm]"; ""
 Energy_Pi1_vs_mass_pi01; 50; 50; 0.; 1000.; 120.; 150.; "Pion Energy vs #pi^{0} Mass"; "E_{#pi^{#pm}} [MeV]"; "m_{#pi^{0}} [MeV/c^{2}]"; ""
-chi2_signalKinFit_vs_chi2_trilaterationKinFit; 50; 50; 0.; 10.; 0.; 10.; "#chi^{2} Correlation"; "#chi^{2}_{signal}"; "#chi^{2}_{tri}"; ""
+chi2_signalKinFit_vs_chi2_trilaterationKinFit; 50; 50; 0.; 10.; 0.; 10.; "#chi^{2} Correlation"; "#chi^{2}_{signal} / ndof"; "#chi^{2}_{#omega#pi^{0}} / ndof"; ""
 curv1_vs_curv2; 50; 50; -0.01; 0.01; -0.01; 0.01; "Track Curvature Correlation"; "1/p_{T1} [1/MeV]"; "1/p_{T2} [1/MeV]"; ""
 phiv1_vs_phiv2; 50; 50; -TMath::Pi(); TMath::Pi(); -TMath::Pi(); TMath::Pi(); "Track #phi Correlation"; "#phi_{1} [rad]"; "#phi_{2} [rad]"; ""
 delta_t_vs_delta_t_mc; 161; 81; -40.; 40.; -20.; 20.; "#Deltat_{rec} vs. #Deltat_{mc}"; "#Deltat_{MC} [#tau_{S}]"; "(#Deltat_{rec} - #Deltat_{MC}) [#tau_{S}]"; ""
@@ -19,11 +19,11 @@ delta_t_fit_vs_delta_t_mc; 401; 401; -100.; 100.; -100.; 100.; "#Deltat_{fit} vs
 
 delta_t_mc_vs_delta_t_res; 161; 81; -40.; 40.; -20.; 20.; "#Deltat_{fit} vs. #Deltat_{mc}"; "#Deltat_{MC} [#tau_{S}]"; "(#Deltat_{fit} - #Deltat_{MC}) [#tau_{S}]"; ""
 
-t_ch_fit_vs_t_ch_mc; 101; 81; 0.; 100.; -10.; 20.; "t_{+-,MC} vs. (t_{+-,fit} - t_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(t_{+-,fit} - t_{+-,MC}) [#tau_{S}]"; ""
-t_neu_fit_vs_t_neu_mc; 101; 81; 0.; 100.; -10.; 20.; "t_{00,MC} vs. (t_{00,fit} - t_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(t_{00,fit} - t_{00,MC}) [#tau_{S}]"; ""
+t_ch_fit_vs_t_ch_mc; 51; 81; 0.; 40.; -10.; 20.; "t_{+-,MC} vs. (t_{+-,fit} - t_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(t_{+-,fit} - t_{+-,MC}) [#tau_{S}]"; ""
+t_neu_fit_vs_t_neu_mc; 51; 81; 0.; 40.; -10.; 20.; "t_{00,MC} vs. (t_{00,fit} - t_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(t_{00,fit} - t_{00,MC}) [#tau_{S}]"; ""
 
-t_ch_rec_vs_t_ch_mc; 101.; 81; 0.; 100.; -10.; 20.; "t_{+-,MC} vs. (t_{+-,rec} - t_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(t_{+-,rec} - t_{+-,MC}) [#tau_{S}]"; ""
-t_neu_rec_vs_t_neu_mc; 101.; 81; 0.; 100.; -10.; 20.; "t_{00,MC} vs. (t_{00,rec} - t_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(t_{00,rec} - t_{00,MC}) [#tau_{S}]"; ""
+t_ch_rec_vs_t_ch_mc; 51.; 81; 0.;40.; -10.; 20.; "t_{+-,MC} vs. (t_{+-,rec} - t_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(t_{+-,rec} - t_{+-,MC}) [#tau_{S}]"; ""
+t_neu_rec_vs_t_neu_mc; 51.; 81; 0.;40.; -10.; 20.; "t_{00,MC} vs. (t_{00,rec} - t_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(t_{00,rec} - t_{00,MC}) [#tau_{S}]"; ""
 
 t_ch_fit_MC_vs_t_neu_fit_MC; 10; 10; -10; 10.; -10.; 10.; "(t_{+-,fit} - t_{+-,MC}) vs. (t_{00,fit} - t_{00,MC})"; "(t_{+-,fit} - t_{+-,MC}) [#tau_{S}]"; "(t_{00,fit} - t_{00,MC}) [#tau_{S}]"; ""
 t_ch_fit_vs_t_neu_fit; 150; 150; -10; 150.; -10.; 150.; "t_{+-,fit} vs. t_{00,fit}"; "t_{+-,fit} [#tau_{S}]"; "t_{00,fit}[#tau_{S}]"; ""

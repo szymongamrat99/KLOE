@@ -277,6 +277,7 @@ public:
   void DrawLabelOnHisto(std::vector<TString> labels);
 
   void AddDataToPCA(Double_t *data);
+  Double_t GetPCASlope(); // Zwraca slope z PCA
   void WidthOfCorrelatedHist(Double_t *means, Double_t *sigmas, Double_t *vLong, Double_t *vTransv);
 
   TGraphErrors* CreateRMSProfile(TH2 *h2D, const char* name, const char* title);
@@ -286,7 +287,7 @@ public:
 
 
   TString folderPath = "NO_CUTS";
-  TPrincipal *pca = new TPrincipal(2, "D"); // 2 zmienne, bez normalizacji
+  TPrincipal *pca = new TPrincipal(2, "ND"); // 2 zmienne, bez normalizacji
 
   ClassDef(signal_vs_bcg_v2, 0);
 };
