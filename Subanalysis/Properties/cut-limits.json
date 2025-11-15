@@ -116,7 +116,23 @@
     ],
     "SIMONA_ANALYSIS": [
       {
+        "order": 0,
+        "cutDescription": "Fiducial volume cut for the KLOE detector.",
+        "cutId": "RtChLess25",
+        "cutType": "O",
+        "cutValue": 25,
+        "cutCondition": "<="
+      },
+      {
         "order": 1,
+        "cutDescription": "Fiducial volume cut for the KLOE detector.",
+        "cutId": "RtNeuLess25",
+        "cutType": "O",
+        "cutValue": 25,
+        "cutCondition": "<="
+      },
+      {
+        "order": 2,
         "cutDescription": "Chi2/ndof of Kinematic fit for the signal hypothesis.",
         "cutId": "Chi2SignalReduced",
         "cutType": "O",
@@ -124,7 +140,7 @@
         "cutCondition": "<="
       },
       {
-        "order": 2,
+        "order": 3,
         "cutDescription": "Difference in azimuthal angles of tracks at the vertex from kinematic fit.",
         "cutId": "DeltaPhivFit",
         "cutType": "T",
@@ -132,7 +148,7 @@
         "cutCondition": ">="
       },
       {
-        "order": 3,
+        "order": 4,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKch",
         "cutType": "T",
@@ -140,7 +156,7 @@
         "cutCondition": "<="
       },
       {
-        "order": 4,
+        "order": 5,
         "cutDescription": "K->pi0pi0 decay invariant mass.",
         "cutId": "InvMassKne",
         "cutType": "T",
@@ -148,7 +164,7 @@
         "cutCondition": "<="
       },
       {
-        "order": 5,
+        "order": 6,
         "cutDescription": "pi0->gamma gamma 1 decay invariant mass.",
         "cutId": "InvMassPi01",
         "cutType": "T",
@@ -156,7 +172,7 @@
         "cutCondition": "<="
       },
       {
-        "order": 6,
+        "order": 7,
         "cutDescription": "pi0->gamma gamma 2 decay invariant mass.",
         "cutId": "InvMassPi02",
         "cutType": "T",

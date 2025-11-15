@@ -69,6 +69,11 @@ public:
     size_t GetSurvivedSignal(size_t cutIndex) const;
     size_t GetSurvivedBackground(size_t cutIndex) const;
 
+    double GetEfficiencyBetweenCuts(size_t cutIndex1, size_t cutIndex2) const;
+    double GetEfficiencyBetweenCutsExcludingMctruthMinus1(size_t cutIndex1, size_t cutIndex2) const;
+    
+    double GetEfficiencyExcludingMctruthMinus1(size_t cutIndex) const;
+
     const std::vector<Cut>& GetCuts() const { return cuts_; }
 
 private:
@@ -79,6 +84,15 @@ private:
     bool EvaluateExpression(const Cut& cut) const;
     double EvaluateExpressionToDouble(const Cut& cut) const;
 
+    struct CutStats {
+        size_t survivedSignal = 0;
+        size_t survivedBackground = 0;
+        size_t survivedSignalExcludingMinus1 = 0;
+        size_t survivedBackgroundExcludingMinus1 = 0;
+    };
+
+    void UpdateStatsInternal(int mctruth, std::vector<CutStats>& stats);
+
     KLOE::HypothesisCode hypoCode_;
 
     std::vector<Cut> cuts_;
@@ -88,8 +102,12 @@ private:
 
     std::vector<size_t> survivedSignal_;
     std::vector<size_t> survivedBackground_;
+    std::vector<size_t> survivedSignalExcludingMinus1_;
+    std::vector<size_t> survivedBackgroundExcludingMinus1_;
     size_t totalSignal_ = 0;
     size_t totalBackground_ = 0;
+    size_t totalSignalExcludingMinus1_ = 0;
+    size_t totalBackgroundExcludingMinus1_ = 0;
     
     TTree* tree_ = nullptr;
 };

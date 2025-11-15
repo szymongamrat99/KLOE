@@ -9,6 +9,8 @@ StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctr
     LoadCuts(jsonPath);
     survivedSignal_.resize(cuts_.size(), 0);
     survivedBackground_.resize(cuts_.size(), 0);
+    survivedSignalExcludingMinus1_.resize(cuts_.size(), 0);
+    survivedBackgroundExcludingMinus1_.resize(cuts_.size(), 0);
 }
 
 StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode)
@@ -17,6 +19,8 @@ StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const st
     LoadCutsFromFiles(propertiesPath, cutsPath);
     survivedSignal_.resize(cuts_.size(), 0);
     survivedBackground_.resize(cuts_.size(), 0);
+    survivedSignalExcludingMinus1_.resize(cuts_.size(), 0);
+    survivedBackgroundExcludingMinus1_.resize(cuts_.size(), 0);
 }
 
 void StatisticalCutter::SetTree(TTree* tree) {
@@ -259,6 +263,25 @@ void StatisticalCutter::UpdateStats(int mctruth) {
             survived = false;
         }
     }
+
+    if (mctruth != -1) {
+        if (mctruth == signalMctruth_ || mctruth == 0)
+            totalSignalExcludingMinus1_++;
+        else
+            totalBackgroundExcludingMinus1_++;
+
+        survived = true;
+        for (size_t i = 0; i < cuts_.size(); ++i) {
+            if (survived && PassCut(i)) {
+                if (mctruth == signalMctruth_)
+                    survivedSignalExcludingMinus1_[i]++;
+                else
+                    survivedBackgroundExcludingMinus1_[i]++;
+            } else {
+                survived = false;
+            }
+        }
+    }
 }
 
 double StatisticalCutter::GetEfficiency(size_t cutIndex) const {
@@ -350,4 +373,31 @@ std::function<bool()> StatisticalCutter::GetCutCombination(const std::vector<siz
     return [this, cutIndices, logicOperator]() {
         return PassCutsCustom(cutIndices, logicOperator);
     };
+}
+
+double StatisticalCutter::GetEfficiencyBetweenCuts(size_t cutIndex1, size_t cutIndex2) const {
+    if (cutIndex1 >= cuts_.size() || cutIndex2 >= cuts_.size())
+        throw std::out_of_range("Cut index out of range");
+    
+    size_t first = std::min(cutIndex1, cutIndex2);
+    size_t second = std::max(cutIndex1, cutIndex2);
+    
+    if (survivedSignal_[first] == 0) return 0.0;
+    return static_cast<double>(survivedSignal_[second]) / survivedSignal_[first];
+}
+
+double StatisticalCutter::GetEfficiencyBetweenCutsExcludingMctruthMinus1(size_t cutIndex1, size_t cutIndex2) const {
+    if (cutIndex1 >= cuts_.size() || cutIndex2 >= cuts_.size())
+        throw std::out_of_range("Cut index out of range");
+    
+    size_t first = std::min(cutIndex1, cutIndex2);
+    size_t second = std::max(cutIndex1, cutIndex2);
+    
+    if (survivedSignalExcludingMinus1_[first] == 0) return 0.0;
+    return static_cast<double>(survivedSignalExcludingMinus1_[second]) / survivedSignalExcludingMinus1_[first];
+}
+
+double StatisticalCutter::GetEfficiencyExcludingMctruthMinus1(size_t cutIndex) const {
+    if (totalSignalExcludingMinus1_ == 0) return 0.0;
+    return static_cast<double>(survivedSignalExcludingMinus1_[cutIndex]) / totalSignalExcludingMinus1_;
 }

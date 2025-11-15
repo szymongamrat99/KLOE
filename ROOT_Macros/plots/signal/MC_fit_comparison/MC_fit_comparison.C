@@ -658,12 +658,14 @@ void MC_fit_comparison::Terminate()
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
 
+  Bool_t recHasEntries = kFALSE,
+         fitHasEntries = kFALSE;
+
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
   for (const auto &config : histogramConfigs1D)
   {
-
     if (histsFittedSignal[config.first]->GetEntries() > 0)
     {
       histsReconstructed[config.first]->Scale(histsReconstructed[config.first]->GetEntries() / histsReconstructed[config.first]->Integral(0, histsReconstructed[config.first]->GetNbinsX() + 1));
@@ -674,6 +676,15 @@ void MC_fit_comparison::Terminate()
   for (const auto &histName : histogramConfigs1D)
   {
     canvas[histName.first]->cd();
+
+    recHasEntries = histsReconstructed[histName.first]->GetEntries() > 0;
+    fitHasEntries = histsFittedSignal[histName.first]->GetEntries() > 0;
+
+    // Jeśli żaden histogram nie ma wpisów - pomiń ten canvas
+    if (!fitHasEntries && !recHasEntries)
+    {
+      continue;
+    }
 
     TRegexp pattern("vtxNeu.*Fit"), pattern1("Chi2Comp.*"), pattern2("trk.*"), patternpull("pull.*"), patternPhi(".*Phi");
 
@@ -696,23 +707,14 @@ void MC_fit_comparison::Terminate()
                      histName.first == "curv2" || histName.first == "phiv2" || histName.first == "cotv2" ||
                      histName.first == "vtxNeu_x" || histName.first == "vtxNeu_y" || histName.first == "vtxNeu_z" || histName.first == "delta_t_boostlor_res" || histName.first == "delta_t_rec_res" || histName.first == "phi_vtx_x" || histName.first == "phi_vtx_y" || histName.first == "phi_vtx_z" || histName.first == "vtxCh_x" || histName.first == "vtxCh_y" || histName.first == "vtxCh_z" || histName.first.Contains(pattern2) || histName.first.Contains(patternpull) || histName.first.Contains(patternPhi);
 
-    if (fitcond)
+    if (fitcond && fitHasEntries)
     {
       Bool_t fitSuccess = false;
 
-      // ✅ SPECJALNE TRAKTOWANIE DLA delta_t
-      if (1) // histName.first == "delta_t")
-      {
-        std::cout << "\n=== Fitting delta_t with TF1 (proven method) ===" << std::endl;
+      std::cout << "\n=== Fitting delta_t with Double Gaussian ===" << std::endl;
 
-        // Użyj starej, sprawdzonej metody TF1 dla delta_t
-        fitSuccess = doubleFitter->FitHistogram(histsFittedSignal[histName.first], KLOE::DoublGaussFitter::FitType::kDoubleGauss);
-      }
-      else
-      {
-        // ✅ Dla innych zmiennych użyj automatycznych parametrów
-        fitSuccess = doubleFitter->FitHistogram(histsReconstructed[histName.first]);
-      }
+      // Użyj starej, sprawdzonej metody TF1 dla delta_t
+      fitSuccess = doubleFitter->FitHistogram(histsFittedSignal[histName.first], KLOE::DoublGaussFitter::FitType::kDoubleGauss);
 
       if (fitSuccess)
       {
@@ -744,11 +746,18 @@ void MC_fit_comparison::Terminate()
       }
     }
 
-    // histsReconstructed[histName.first]->GetYaxis()->SetRangeUser(0.0, 1.5 * std::max(histsReconstructed[histName.first]->GetMaximum(), histsFittedSignal[histName.first]->GetMaximum()));
-
-    histsReconstructed[histName.first]->Draw();
-    histsFittedSignal[histName.first]->SetLineColor(kRed);
-    histsFittedSignal[histName.first]->Draw("SAME");
+    if (recHasEntries)
+    {
+      histsReconstructed[histName.first]->Draw();
+      histsFittedSignal[histName.first]->SetLineColor(kRed);
+      histsFittedSignal[histName.first]->Draw("SAME");
+    }
+    else if (fitHasEntries)
+    {
+      histsFittedSignal[histName.first]->SetLineColor(kRed);
+      histsFittedSignal[histName.first]->Draw();
+      histsReconstructed[histName.first]->Draw("SAME");
+    }
 
     // DODAJ WŁASNĄ LEGENDĘ W LEWYM GÓRNYM ROGU:
     TLegend *legend;
@@ -756,8 +765,10 @@ void MC_fit_comparison::Terminate()
     if (!fitcond && histName.first != "TransvRadius")
     {
       legend = new TLegend(0.15, 0.75, 0.4, 0.9, "", "NDC");
-      legend->AddEntry(histsReconstructed[histName.first], "Reconstructed", "l");
-      legend->AddEntry(histsFittedSignal[histName.first], "Fitted Signal", "l");
+      if (recHasEntries)
+        legend->AddEntry(histsReconstructed[histName.first], "Reconstructed", "l");
+      if (fitHasEntries)
+        legend->AddEntry(histsFittedSignal[histName.first], "Fitted Signal", "l");
     }
     else if (histName.first == "TransvRadius")
     {
@@ -768,8 +779,10 @@ void MC_fit_comparison::Terminate()
     else
     {
       legend = new TLegend(0.15, 0.7, 0.45, 0.9, "", "NDC");
-      legend->AddEntry(histsReconstructed[histName.first], "Reconstructed", "l");
-      legend->AddEntry(histsFittedSignal[histName.first], "Fitted Data", "l");
+      if (recHasEntries)
+        legend->AddEntry(histsReconstructed[histName.first], "Reconstructed", "l");
+      if (fitHasEntries)
+        legend->AddEntry(histsFittedSignal[histName.first], "Fitted Data", "l");
 
       // Sprawdź czy fit się udał przed użyciem wyników
       if (doubleFitter->IsLastFitSuccessful())
@@ -843,9 +856,10 @@ void MC_fit_comparison::Terminate()
 
   for (const auto &cutId : cutIndices)
   {
-    const auto efficiency = cutter->GetEfficiency(cutId);
+    const auto effTot = cutter->GetEfficiency(cutId);
+    const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutId);
 
-    std::cout << "Applied cut: " << cutId << " with eff " << efficiency << std::endl;
+    std::cout << "Applied cut: " << cutId << " with eff total (including errors): " << effTot << ", analysis efficiency (excluding errors): " << effExclMinus1 << std::endl;
   }
 
   std::cout << "=== MC Fit Comparison Terminated ===" << std::endl;
