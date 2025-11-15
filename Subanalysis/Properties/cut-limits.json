@@ -113,6 +113,56 @@
         "cutValue": 200000,
         "cutCondition": "<="
       }
+    ],
+    "SIMONA_ANALYSIS": [
+      {
+        "order": 1,
+        "cutDescription": "Chi2/ndof of Kinematic fit for the signal hypothesis.",
+        "cutId": "Chi2SignalReduced",
+        "cutType": "O",
+        "cutValue": 3,
+        "cutCondition": "<="
+      },
+      {
+        "order": 2,
+        "cutDescription": "Difference in azimuthal angles of tracks at the vertex from kinematic fit.",
+        "cutId": "DeltaPhivFit",
+        "cutType": "T",
+        "cutValue": 0.324,
+        "cutCondition": ">="
+      },
+      {
+        "order": 3,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "InvMassKch",
+        "cutType": "T",
+        "cutValue": 2.673,
+        "cutCondition": "<="
+      },
+      {
+        "order": 4,
+        "cutDescription": "K->pi0pi0 decay invariant mass.",
+        "cutId": "InvMassKne",
+        "cutType": "T",
+        "cutValue": 117.678,
+        "cutCondition": "<="
+      },
+      {
+        "order": 5,
+        "cutDescription": "pi0->gamma gamma 1 decay invariant mass.",
+        "cutId": "InvMassPi01",
+        "cutType": "T",
+        "cutValue": 9.183,
+        "cutCondition": "<="
+      },
+      {
+        "order": 6,
+        "cutDescription": "pi0->gamma gamma 2 decay invariant mass.",
+        "cutId": "InvMassPi02",
+        "cutType": "T",
+        "cutValue": 8.994,
+        "cutCondition": "<="
+      }
     ]
   }
 }

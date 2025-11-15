@@ -39,6 +39,7 @@
 #include <TRegexp.h>
 #include <interf_function.h>
 #include <charged_mom.h>
+#include <StatisticalCutter.h>
 
 #include <TFitResult.h>
 #include <TFitResultPtr.h>
@@ -78,6 +79,22 @@ auto histogramConfigs2D = KLOE::Histograms::LoadHistogramConfigs2D(Paths::histog
 
 Int_t nbins = 121;
 
+Float_t ndofSignal = 10., ndofOmega = 8.;
+
+Float_t Chi2SignalReduced;
+
+Float_t deltaPhi,
+    deltaPhiMC,
+    deltaPhiFit,
+    deltaTheta;
+
+// Definitions of cuts
+
+StatisticalCutter *cutter;
+
+std::map<std::string, std::function<Float_t()>> cutValues;
+std::map<std::string, Float_t> centralValues;
+
 void MC_fit_comparison::Begin(TTree * /*tree*/)
 {
   // The Begin() function is called at the start of the query.
@@ -92,7 +109,6 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
     option = "NO_CUTS";
   folderPath = "img/" + option;
   FolderManagement(folderPath);
-  /////////////////////////////////////////
 
   KLOE::setGlobalStyle();
 
@@ -144,6 +160,42 @@ void MC_fit_comparison::SlaveBegin(TTree * /*tree*/)
   // The tree argument is deprecated (on PROOF 0 is passed).
 
   TString option = GetOption();
+
+  ///////////////////////////////////////////////////////////
+  // Initialization of cuts
+  ///////////////////////////////////////////////////////////
+
+  cutter = new StatisticalCutter(Paths::cutlimitsName, 1, KLOE::HypothesisCode::SIMONA_ANALYSIS);
+
+  cutValues = {
+      {"Chi2SignalReduced", [this]()  { return Chi2SignalReduced; }},
+      {"DeltaPhivFit", [this]()  { return deltaPhiFit; }},
+      {"InvMassKch", [this]()  { return Kchrec[5]; }},
+      {"InvMassKne", [this]()  { return (*minv4gam); }},
+      {"InvMassPi01", [this]()  { return pi01Fit[5]; }},
+      {"InvMassPi02", [this]()  { return pi02Fit[5]; } }};
+
+  centralValues = {
+      {"DeltaPhivFit", 3.130},
+      {"InvMassKch", 497.605},
+      {"InvMassKne", 489.467},
+      {"InvMassPi01", 134.954},
+      {"InvMassPi02", 134.841}};
+
+  cutter->SetTree(fChain);
+
+  for (const auto &cutPair : cutValues)
+  {
+    cutter->RegisterVariableGetter(cutPair.first, cutPair.second);
+  }
+
+  for (const auto &centralPair : centralValues)
+  {
+    cutter->RegisterCentralValueGetter(centralPair.first, [&]()
+                                    { return centralPair.second; });
+  }
+
+  //////////////////////////////////////////////////////////////////
 }
 
 Int_t numberOfAllGood = 0,
@@ -329,10 +381,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
           deltaT = timesBoostLor.deltaTimeCM,
           deltaTMC = *KaonChTimeCMMC - *KaonNeTimeCMMC;
 
-  Float_t deltaPhi,
-      deltaPhiMC,
-      deltaPhiFit,
-      deltaTheta;
+  Chi2SignalReduced = *Chi2SignalKinFit / ndofSignal;
 
   TVector3 trk1Vec(ParamSignalFit[23], ParamSignalFit[24], ParamSignalFit[25]),
       trk2Vec(ParamSignalFit[26], ParamSignalFit[27], ParamSignalFit[28]),
@@ -378,7 +427,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
       pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
                        pow(Kchmc[7] - ipmc[1], 2));
 
-  if (*mctruth == 1)// && radius00MC < limitRadiusNeMC && radiuspmMC < limitRadiusChMC) // && isInsideFiducialVolume)
+  if (*mctruth == 1)
   {
     Int_t mctruth_tmp = *mctruth;
 

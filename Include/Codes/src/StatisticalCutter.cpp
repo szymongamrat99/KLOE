@@ -19,10 +19,35 @@ StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const st
     survivedBackground_.resize(cuts_.size(), 0);
 }
 
+void StatisticalCutter::SetTree(TTree* tree) {
+    tree_ = tree;
+    
+    // Rekompiluj TreeFormulas z nowym drzewem
+    for (auto& cut : cuts_) {
+        if (cut.isComplexCut && !cut.expression.empty()) {
+            try {
+                cut.treeFormula = std::make_unique<TTreeFormula>(
+                    cut.cutId.c_str(),
+                    cut.expression.c_str(),
+                    tree_
+                );
+                if (cut.treeFormula->GetNdim() <= 0) {
+                    std::cerr << "Warning: TreeFormula for cut " << cut.cutId 
+                              << " has no dimensions. Expression: " << cut.expression << std::endl;
+                }
+            } catch (const std::exception& e) {
+                std::cerr << "Error creating TTreeFormula for cut " << cut.cutId 
+                          << ": " << e.what() << std::endl;
+            }
+        }
+    }
+}
+
 void StatisticalCutter::RegisterVariableGetter(const std::string& varName, std::function<double()> getter) {
     variableGetters_[varName] = getter;
+    // Aktualizuj gettery dla cięć które mogą używać tej zmiennej
     for (auto& cut : cuts_) {
-        if (cut.cutId == varName) {
+        if (cut.cutId == varName && !cut.isComplexCut) {
             cut.valueGetter = getter;
         }
     }
@@ -54,7 +79,6 @@ void StatisticalCutter::LoadCuts(const std::string& jsonPath) {
 void StatisticalCutter::LoadCuts(const json& j) {
     cuts_.clear();
     
-    // Wybierz właściwą listę cięć na podstawie hypoCode_
     std::string cutListKey;
     switch(hypoCode_) {
         case KLOE::HypothesisCode::SIGNAL:
@@ -66,30 +90,43 @@ void StatisticalCutter::LoadCuts(const json& j) {
         case KLOE::HypothesisCode::OMEGAPI:
             cutListKey = "OMEGA";
             break;
+        case KLOE::HypothesisCode::SIMONA_ANALYSIS:
+            cutListKey = "SIMONA_ANALYSIS";
+            break;
         default:
             std::cout << "Warning: Using default cuts for unknown hypothesis code" << std::endl;
             return;
     }
 
-    // Sprawdź czy mamy odpowiednią sekcję w listOfCuts
-    if (!j.contains("listOfCuts") || !j["listOfCuts"].contains(cutListKey)) {
-        std::cout << "Warning: No cuts found for hypothesis " << cutListKey << std::endl;
-        return;
+    const json* listRoot = &j;
+    if (j.contains("listOfCuts")) {
+        if (!j["listOfCuts"].contains(cutListKey)) {
+            std::cout << "Warning: No cuts found for hypothesis " << cutListKey << std::endl;
+            return;
+        }
+        listRoot = &j["listOfCuts"][cutListKey];
     }
 
-    for (const auto& cutj : j["listOfCuts"][cutListKey]) {
+    for (const auto& cutj : *listRoot) {
         Cut cut;
         cut.order = cutj.value("order", 0);
-        cut.cutId = cutj["cutId"];
-        cut.cutType = cutj["cutType"];
-        cut.cutCondition = cutj["cutCondition"];
-        cut.cutValue = cutj["cutValue"];
-        cut.centralValue = cutj.value("centralValue", 0.0);
-        cut.centralValueDynamic = false;
+        cut.cutId = cutj.value("cutId", std::string());
+        
+        if (cutj.contains("expression")) {
+            // Złożone cięcie - wyrażenie na zmiennych
+            cut.isComplexCut = true;
+            cut.expression = cutj["expression"].get<std::string>();
+        } else {
+            // Zwykłe cięcie na pojedynczej zmiennej
+            cut.cutType = cutj.value("cutType", std::string());
+            cut.cutCondition = cutj.value("cutCondition", std::string());
+            cut.cutValue = cutj.value("cutValue", 0.0);
+            cut.centralValue = cutj.value("centralValue", 0.0);
+            cut.centralValueDynamic = false;
+        }
         cuts_.push_back(cut);
     }
     
-    // Sortuj po order malejąco (zmień na rosnąco jeśli wolisz)
     std::sort(cuts_.begin(), cuts_.end(), [](const Cut& a, const Cut& b) {
         return a.order < b.order;
     });
@@ -120,18 +157,20 @@ void StatisticalCutter::LoadCutsFromFiles(const std::string& propertiesPath, con
 }
 
 bool StatisticalCutter::EvaluateCondition(double value, const Cut& cut) const {
+    if (cut.isComplexCut && !cut.expression.empty()) {
+        return EvaluateExpression(cut);
+    }
+
     double central = cut.centralValueDynamic && cut.centralValueGetter
         ? cut.centralValueGetter()
         : cut.centralValue;
 
-    // One-sided cuts ("O")
     if (cut.cutType == "O") {
         if (cut.cutCondition == "<=") return value <= cut.cutValue;
         if (cut.cutCondition == ">=") return value >= cut.cutValue;
         if (cut.cutCondition == "<")  return value < cut.cutValue;
         if (cut.cutCondition == ">")  return value > cut.cutValue;
     }
-    // Two-sided cuts ("T")
     else if (cut.cutType == "T") {
         double deviation = std::abs(value - central);
         if (cut.cutCondition == "<=") return deviation <= cut.cutValue;
@@ -144,14 +183,55 @@ bool StatisticalCutter::EvaluateCondition(double value, const Cut& cut) const {
     throw std::runtime_error("Invalid cut type '" + cut.cutType + "' or condition '" + cut.cutCondition + "'");
 }
 
+double StatisticalCutter::EvaluateExpressionToDouble(const Cut& cut) const {
+    if (!tree_) {
+        std::cerr << "Warning: No TTree set for cut " << cut.cutId << std::endl;
+        return 0.0;
+    }
+
+    if (!cut.treeFormula) {
+        std::cerr << "Warning: No compiled TTreeFormula for cut " << cut.cutId << std::endl;
+        return 0.0;
+    }
+
+    try {
+        return cut.treeFormula->EvalInstance();
+    } catch (const std::exception& e) {
+        std::cerr << "Error evaluating TTreeFormula for cut " << cut.cutId 
+                  << ": " << e.what() << std::endl;
+        return 0.0;
+    }
+}
+
+bool StatisticalCutter::EvaluateExpression(const Cut& cut) const {
+    double result = EvaluateExpressionToDouble(cut);
+    return result != 0.0;
+}
+
 bool StatisticalCutter::PassCut(size_t cutIndex) {
     if (cutIndex >= cuts_.size())
         throw std::out_of_range("Cut index out of range");
+    
     const auto& cut = cuts_[cutIndex];
-    if (!cut.valueGetter)
-        throw std::runtime_error("No getter registered for variable: " + cut.cutId);
-    double value = cut.valueGetter();
-    return EvaluateCondition(value, cut);
+    
+    if (cut.isComplexCut) {
+        return EvaluateExpression(cut);
+    }
+    
+    // Dla zwykłych cięć - szukaj gettera
+    if (cut.valueGetter) {
+        double value = cut.valueGetter();
+        return EvaluateCondition(value, cut);
+    }
+    
+    // Spróbuj znaleźć w mapie getterów
+    auto it = variableGetters_.find(cut.cutId);
+    if (it != variableGetters_.end()) {
+        double value = it->second();
+        return EvaluateCondition(value, cut);
+    }
+    
+    throw std::runtime_error("No getter registered for variable: " + cut.cutId);
 }
 
 bool StatisticalCutter::PassAllCuts() {
@@ -211,7 +291,6 @@ size_t StatisticalCutter::GetSurvivedBackground(size_t cutIndex) const {
 double StatisticalCutter::GetEfficiencyError(size_t cutIndex) const {
     if (totalSignal_ == 0) return 0.0;
     double eff = GetEfficiency(cutIndex);
-    // Niepewność z rozkładu dwumianowego
     return std::sqrt(eff * (1.0 - eff) / totalSignal_);
 }
 
@@ -223,8 +302,7 @@ double StatisticalCutter::GetPurityError(size_t cutIndex) const {
     if (total == 0) return 0.0;
     
     double purity = static_cast<double>(sig) / total;
-    // Propagacja niepewności dla stosunku, zakładając rozkład Poissona
-    if (sig == 0) return 0.0;  // Unikamy dzielenia przez 0
+    if (sig == 0) return 0.0;
     
     return purity * std::sqrt(
         (1.0 - purity) * (1.0 - purity) / sig + 
@@ -236,9 +314,40 @@ double StatisticalCutter::GetSignalToBackgroundError(size_t cutIndex) const {
     size_t sig = survivedSignal_[cutIndex];
     size_t bkg = survivedBackground_[cutIndex];
     
-    if (bkg == 0) return 0.0;  // Unikamy dzielenia przez 0
+    if (bkg == 0) return 0.0;
     
     double sb = static_cast<double>(sig) / bkg;
-    // Propagacja niepewności dla stosunku, zakładając rozkład Poissona
-    return sb * std::sqrt(1.0/sig + 1.0/bkg);
+    return sb * std::sqrt( (sig>0?1.0/sig:0.0) + 1.0/bkg );
+}
+
+bool StatisticalCutter::PassCutsAnd(const std::vector<size_t>& cutIndices) {
+    for (size_t idx : cutIndices) {
+        if (!PassCut(idx))
+            return false;
+    }
+    return true;
+}
+
+bool StatisticalCutter::PassCutsOr(const std::vector<size_t>& cutIndices) {
+    for (size_t idx : cutIndices) {
+        if (PassCut(idx))
+            return true;
+    }
+    return false;
+}
+
+bool StatisticalCutter::PassCutsCustom(const std::vector<size_t>& cutIndices, const std::string& logicOperator) {
+    if (logicOperator == "&&") {
+        return PassCutsAnd(cutIndices);
+    } else if (logicOperator == "||") {
+        return PassCutsOr(cutIndices);
+    }
+    throw std::runtime_error("Unknown logic operator: " + logicOperator);
+}
+
+std::function<bool()> StatisticalCutter::GetCutCombination(const std::vector<size_t>& cutIndices, const std::string& logicOperator) {
+    // Zwróć lambdę która ewaluuje kombinację cięć
+    return [this, cutIndices, logicOperator]() {
+        return PassCutsCustom(cutIndices, logicOperator);
+    };
 }

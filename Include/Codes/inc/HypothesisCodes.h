@@ -7,6 +7,7 @@ namespace KLOE
     SIGNAL = 1,  // For Pi+Pi-Pi0Pi0
     OMEGAPI = 2, // For Omega-Pi0
     FOUR_PI = 3, // For Pi+Pi-Pi+Pi-
+    SIMONA_ANALYSIS = 4, // For Simona's analysis
 
     INVALID_VALUE // For invalid values
   };
