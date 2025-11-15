@@ -28,6 +28,15 @@ struct Cut {
     bool isComplexCut = false;
     std::string expression;
     std::shared_ptr<TTreeFormula> treeFormula;
+    
+    // Flagi dla fiducial volume
+    bool isFiducialVolume = false;  // Oznacza czy to część fiducial volume
+};
+
+// Enum do wyboru metody normalizacji
+enum class NormalizationMode {
+    TOTAL_EVENTS,          // Normalizacja do całkowitej liczby zdarzeń
+    FIDUCIAL_VOLUME       // Normalizacja do liczby zdarzeń w fiducial volume
 };
 
 class StatisticalCutter {
@@ -36,6 +45,10 @@ public:
     StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode);
 
     void SetTree(TTree* tree);
+    
+    // Ustawienie trybu normalizacji
+    void SetNormalizationMode(NormalizationMode mode) { normalizationMode_ = mode; }
+    NormalizationMode GetNormalizationMode() const { return normalizationMode_; }
 
     // Rejestracja zmiennych zwykłych (z TTree lub pochodnych)
     void RegisterVariableGetter(const std::string& varName, std::function<double()> getter);
@@ -51,12 +64,24 @@ public:
     // Alternatywa - zwróć funkcję do ewaluacji
     std::function<bool()> GetCutCombination(const std::vector<size_t>& cutIndices, const std::string& logicOperator = "&&");
 
+    // Metody dla fiducial volume
+    bool PassFiducialVolume() const;
+    size_t GetTotalSignalInFV() const { return totalSignalInFV_; }
+    size_t GetTotalBackgroundInFV() const { return totalBackgroundInFV_; }
+    size_t GetTotalSignalInFVExcludingMinus1() const { return totalSignalInFVExcludingMinus1_; }
+    size_t GetTotalBackgroundInFVExcludingMinus1() const { return totalBackgroundInFVExcludingMinus1_; }
+
+    size_t GetTotalSignal() const { return totalSignal_; }
+    size_t GetTotalBackground() const { return totalBackground_; }
+    size_t GetTotalSignalExcludingMinus1() const { return totalSignalExcludingMinus1_; }
+    size_t GetTotalBackgroundExcludingMinus1() const { return totalBackgroundExcludingMinus1_; }
 
     bool PassCut(size_t cutIndex);
     bool PassAllCuts();
 
     void UpdateStats(int mctruth);
 
+    // Metody z automatyczną normalizacją do FV (jeśli włączony)
     double GetEfficiency(size_t cutIndex) const;
     double GetEfficiencyError(size_t cutIndex) const;
     
@@ -73,6 +98,12 @@ public:
     double GetEfficiencyBetweenCutsExcludingMctruthMinus1(size_t cutIndex1, size_t cutIndex2) const;
     
     double GetEfficiencyExcludingMctruthMinus1(size_t cutIndex) const;
+
+    // Wersje jawne z wybraną normalizacją (ignorują SetNormalizationMode)
+    double GetEfficiencyWithMode(size_t cutIndex, NormalizationMode mode) const;
+    double GetEfficiencyErrorWithMode(size_t cutIndex, NormalizationMode mode) const;
+    double GetPurityWithMode(size_t cutIndex, NormalizationMode mode) const;
+    double GetPurityErrorWithMode(size_t cutIndex, NormalizationMode mode) const;
 
     const std::vector<Cut>& GetCuts() const { return cuts_; }
 
@@ -94,6 +125,7 @@ private:
     void UpdateStatsInternal(int mctruth, std::vector<CutStats>& stats);
 
     KLOE::HypothesisCode hypoCode_;
+    NormalizationMode normalizationMode_ = NormalizationMode::TOTAL_EVENTS;
 
     std::vector<Cut> cuts_;
     int signalMctruth_;
@@ -104,10 +136,23 @@ private:
     std::vector<size_t> survivedBackground_;
     std::vector<size_t> survivedSignalExcludingMinus1_;
     std::vector<size_t> survivedBackgroundExcludingMinus1_;
+    
+    // Oddzielne liczniki dla zdarzeń w fiducial volume
+    std::vector<size_t> survivedSignalInFV_;
+    std::vector<size_t> survivedBackgroundInFV_;
+    std::vector<size_t> survivedSignalInFVExcludingMinus1_;
+    std::vector<size_t> survivedBackgroundInFVExcludingMinus1_;
+    
     size_t totalSignal_ = 0;
     size_t totalBackground_ = 0;
     size_t totalSignalExcludingMinus1_ = 0;
     size_t totalBackgroundExcludingMinus1_ = 0;
+    
+    // Statystyki dla fiducial volume
+    size_t totalSignalInFV_ = 0;
+    size_t totalBackgroundInFV_ = 0;
+    size_t totalSignalInFVExcludingMinus1_ = 0;
+    size_t totalBackgroundInFVExcludingMinus1_ = 0;
     
     TTree* tree_ = nullptr;
 };

@@ -118,18 +118,20 @@
       {
         "order": 0,
         "cutDescription": "Fiducial volume cut for the KLOE detector.",
-        "cutId": "RtChLess25",
+        "cutId": "RtCh",
         "cutType": "O",
         "cutValue": 25,
-        "cutCondition": "<="
+        "cutCondition": "<=",
+        "isFiducialVolume": true
       },
       {
         "order": 1,
         "cutDescription": "Fiducial volume cut for the KLOE detector.",
-        "cutId": "RtNeuLess25",
+        "cutId": "RtNeu",
         "cutType": "O",
         "cutValue": 25,
-        "cutCondition": "<="
+        "cutCondition": "<=",
+        "isFiducialVolume": true
       },
       {
         "order": 2,
@@ -137,7 +139,8 @@
         "cutId": "Chi2SignalReduced",
         "cutType": "O",
         "cutValue": 3,
-        "cutCondition": "<="
+        "cutCondition": "<=",
+        "isFiducialVolume": false
       },
       {
         "order": 3,
@@ -145,7 +148,8 @@
         "cutId": "DeltaPhivFit",
         "cutType": "T",
         "cutValue": 0.324,
-        "cutCondition": ">="
+        "cutCondition": ">=",
+        "isFiducialVolume": false
       },
       {
         "order": 4,
@@ -153,7 +157,8 @@
         "cutId": "InvMassKch",
         "cutType": "T",
         "cutValue": 2.673,
-        "cutCondition": "<="
+        "cutCondition": "<=",
+        "isFiducialVolume": false
       },
       {
         "order": 5,
@@ -161,7 +166,8 @@
         "cutId": "InvMassKne",
         "cutType": "T",
         "cutValue": 117.678,
-        "cutCondition": "<="
+        "cutCondition": "<=",
+        "isFiducialVolume": false
       },
       {
         "order": 6,
@@ -169,7 +175,8 @@
         "cutId": "InvMassPi01",
         "cutType": "T",
         "cutValue": 9.183,
-        "cutCondition": "<="
+        "cutCondition": "<=",
+        "isFiducialVolume": false
       },
       {
         "order": 7,
@@ -177,7 +184,8 @@
         "cutId": "InvMassPi02",
         "cutType": "T",
         "cutValue": 8.994,
-        "cutCondition": "<="
+        "cutCondition": "<=",
+        "isFiducialVolume": false
       }
     ]
   }

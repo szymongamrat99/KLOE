@@ -4,23 +4,31 @@
 using json = nlohmann::json;
 
 StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::HypothesisCode hypoCode)
-    : signalMctruth_(signalMctruth), hypoCode_(hypoCode)
+    : signalMctruth_(signalMctruth), hypoCode_(hypoCode), normalizationMode_(NormalizationMode::TOTAL_EVENTS)
 {
     LoadCuts(jsonPath);
     survivedSignal_.resize(cuts_.size(), 0);
     survivedBackground_.resize(cuts_.size(), 0);
     survivedSignalExcludingMinus1_.resize(cuts_.size(), 0);
     survivedBackgroundExcludingMinus1_.resize(cuts_.size(), 0);
+    survivedSignalInFV_.resize(cuts_.size(), 0);
+    survivedBackgroundInFV_.resize(cuts_.size(), 0);
+    survivedSignalInFVExcludingMinus1_.resize(cuts_.size(), 0);
+    survivedBackgroundInFVExcludingMinus1_.resize(cuts_.size(), 0);
 }
 
 StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode)
-    : hypoCode_(hypoCode)
+    : hypoCode_(hypoCode), normalizationMode_(NormalizationMode::TOTAL_EVENTS)
 {
     LoadCutsFromFiles(propertiesPath, cutsPath);
     survivedSignal_.resize(cuts_.size(), 0);
     survivedBackground_.resize(cuts_.size(), 0);
     survivedSignalExcludingMinus1_.resize(cuts_.size(), 0);
     survivedBackgroundExcludingMinus1_.resize(cuts_.size(), 0);
+    survivedSignalInFV_.resize(cuts_.size(), 0);
+    survivedBackgroundInFV_.resize(cuts_.size(), 0);
+    survivedSignalInFVExcludingMinus1_.resize(cuts_.size(), 0);
+    survivedBackgroundInFVExcludingMinus1_.resize(cuts_.size(), 0);
 }
 
 void StatisticalCutter::SetTree(TTree* tree) {
@@ -128,6 +136,10 @@ void StatisticalCutter::LoadCuts(const json& j) {
             cut.centralValue = cutj.value("centralValue", 0.0);
             cut.centralValueDynamic = false;
         }
+        
+        // Odczytaj flagę fiducial volume
+        cut.isFiducialVolume = cutj.value("isFiducialVolume", false);
+        
         cuts_.push_back(cut);
     }
     
@@ -212,6 +224,32 @@ bool StatisticalCutter::EvaluateExpression(const Cut& cut) const {
     return result != 0.0;
 }
 
+bool StatisticalCutter::PassFiducialVolume() const {
+    // Sprawdź czy zdarzenie przechodzi wszystkie cięcia oznaczone jako FV
+    for (const auto& cut : cuts_) {
+        if (cut.isFiducialVolume) {
+            if (cut.isComplexCut) {
+                if (!EvaluateExpression(cut))
+                    return false;
+            } else {
+                if (cut.valueGetter) {
+                    double value = cut.valueGetter();
+                    if (!EvaluateCondition(value, cut))
+                        return false;
+                } else {
+                    auto it = variableGetters_.find(cut.cutId);
+                    if (it != variableGetters_.end()) {
+                        double value = it->second();
+                        if (!EvaluateCondition(value, cut))
+                            return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
 bool StatisticalCutter::PassCut(size_t cutIndex) {
     if (cutIndex >= cuts_.size())
         throw std::out_of_range("Cut index out of range");
@@ -252,6 +290,16 @@ void StatisticalCutter::UpdateStats(int mctruth) {
     else
         totalBackground_++;
 
+    // Sprawdź czy w fiducial volume
+    bool inFV = PassFiducialVolume();
+    if (inFV) {
+        if (mctruth == signalMctruth_ || mctruth == 0 || mctruth == -1)
+            totalSignalInFV_++;
+        else
+            totalBackgroundInFV_++;
+    }
+
+    // Liczenie dla wszystkich zdarzeń
     bool survived = true;
     for (size_t i = 0; i < cuts_.size(); ++i) {
         if (survived && PassCut(i)) {
@@ -264,11 +312,33 @@ void StatisticalCutter::UpdateStats(int mctruth) {
         }
     }
 
+    // Liczenie dla zdarzeń w fiducial volume
+    if (inFV) {
+        survived = true;
+        for (size_t i = 0; i < cuts_.size(); ++i) {
+            if (survived && PassCut(i)) {
+                if (mctruth == signalMctruth_)
+                    survivedSignalInFV_[i]++;
+                else
+                    survivedBackgroundInFV_[i]++;
+            } else {
+                survived = false;
+            }
+        }
+    }
+
     if (mctruth != -1) {
         if (mctruth == signalMctruth_ || mctruth == 0)
             totalSignalExcludingMinus1_++;
         else
             totalBackgroundExcludingMinus1_++;
+
+        if (inFV) {
+            if (mctruth == signalMctruth_ || mctruth == 0)
+                totalSignalInFVExcludingMinus1_++;
+            else
+                totalBackgroundInFVExcludingMinus1_++;
+        }
 
         survived = true;
         for (size_t i = 0; i < cuts_.size(); ++i) {
@@ -281,15 +351,51 @@ void StatisticalCutter::UpdateStats(int mctruth) {
                 survived = false;
             }
         }
+
+        if (inFV) {
+            survived = true;
+            for (size_t i = 0; i < cuts_.size(); ++i) {
+                if (survived && PassCut(i)) {
+                    if (mctruth == signalMctruth_)
+                        survivedSignalInFVExcludingMinus1_[i]++;
+                    else
+                        survivedBackgroundInFVExcludingMinus1_[i]++;
+                } else {
+                    survived = false;
+                }
+            }
+        }
     }
 }
 
 double StatisticalCutter::GetEfficiency(size_t cutIndex) const {
-    if (totalSignal_ == 0) return 0.0;
-    return static_cast<double>(survivedSignal_[cutIndex]) / totalSignal_;
+    if (normalizationMode_ == NormalizationMode::FIDUCIAL_VOLUME) {
+        if (totalSignalInFV_ == 0) return 0.0;
+        return static_cast<double>(survivedSignalInFV_[cutIndex]) / totalSignalInFV_;
+    } else {
+        if (totalSignal_ == 0) return 0.0;
+        return static_cast<double>(survivedSignal_[cutIndex]) / totalSignal_;
+    }
+}
+
+double StatisticalCutter::GetEfficiencyWithMode(size_t cutIndex, NormalizationMode mode) const {
+    if (mode == NormalizationMode::FIDUCIAL_VOLUME) {
+        if (totalSignalInFV_ == 0) return 0.0;
+        return static_cast<double>(survivedSignalInFV_[cutIndex]) / totalSignalInFV_;
+    } else {
+        if (totalSignal_ == 0) return 0.0;
+        return static_cast<double>(survivedSignal_[cutIndex]) / totalSignal_;
+    }
 }
 
 double StatisticalCutter::GetPurity(size_t cutIndex) const {
+    size_t sig = survivedSignal_[cutIndex];
+    size_t bkg = survivedBackground_[cutIndex];
+    if (sig + bkg == 0) return 0.0;
+    return static_cast<double>(sig) / (sig + bkg);
+}
+
+double StatisticalCutter::GetPurityWithMode(size_t cutIndex, NormalizationMode mode) const {
     size_t sig = survivedSignal_[cutIndex];
     size_t bkg = survivedBackground_[cutIndex];
     if (sig + bkg == 0) return 0.0;
@@ -312,12 +418,40 @@ size_t StatisticalCutter::GetSurvivedBackground(size_t cutIndex) const {
 }
 
 double StatisticalCutter::GetEfficiencyError(size_t cutIndex) const {
-    if (totalSignal_ == 0) return 0.0;
+    double total = (normalizationMode_ == NormalizationMode::FIDUCIAL_VOLUME) 
+        ? totalSignalInFV_ 
+        : totalSignal_;
+    if (total == 0) return 0.0;
     double eff = GetEfficiency(cutIndex);
-    return std::sqrt(eff * (1.0 - eff) / totalSignal_);
+    return std::sqrt(eff * (1.0 - eff) / total);
+}
+
+double StatisticalCutter::GetEfficiencyErrorWithMode(size_t cutIndex, NormalizationMode mode) const {
+    double total = (mode == NormalizationMode::FIDUCIAL_VOLUME) 
+        ? totalSignalInFV_ 
+        : totalSignal_;
+    if (total == 0) return 0.0;
+    double eff = GetEfficiencyWithMode(cutIndex, mode);
+    return std::sqrt(eff * (1.0 - eff) / total);
 }
 
 double StatisticalCutter::GetPurityError(size_t cutIndex) const {
+    size_t sig = survivedSignal_[cutIndex];
+    size_t bkg = survivedBackground_[cutIndex];
+    double total = sig + bkg;
+    
+    if (total == 0) return 0.0;
+    
+    double purity = static_cast<double>(sig) / total;
+    if (sig == 0) return 0.0;
+    
+    return purity * std::sqrt(
+        (1.0 - purity) * (1.0 - purity) / sig + 
+        purity * purity / total
+    );
+}
+
+double StatisticalCutter::GetPurityErrorWithMode(size_t cutIndex, NormalizationMode mode) const {
     size_t sig = survivedSignal_[cutIndex];
     size_t bkg = survivedBackground_[cutIndex];
     double total = sig + bkg;
@@ -382,8 +516,13 @@ double StatisticalCutter::GetEfficiencyBetweenCuts(size_t cutIndex1, size_t cutI
     size_t first = std::min(cutIndex1, cutIndex2);
     size_t second = std::max(cutIndex1, cutIndex2);
     
-    if (survivedSignal_[first] == 0) return 0.0;
-    return static_cast<double>(survivedSignal_[second]) / survivedSignal_[first];
+    if (normalizationMode_ == NormalizationMode::FIDUCIAL_VOLUME) {
+        if (survivedSignalInFV_[first] == 0) return 0.0;
+        return static_cast<double>(survivedSignalInFV_[second]) / survivedSignalInFV_[first];
+    } else {
+        if (survivedSignal_[first] == 0) return 0.0;
+        return static_cast<double>(survivedSignal_[second]) / survivedSignal_[first];
+    }
 }
 
 double StatisticalCutter::GetEfficiencyBetweenCutsExcludingMctruthMinus1(size_t cutIndex1, size_t cutIndex2) const {
@@ -393,11 +532,21 @@ double StatisticalCutter::GetEfficiencyBetweenCutsExcludingMctruthMinus1(size_t 
     size_t first = std::min(cutIndex1, cutIndex2);
     size_t second = std::max(cutIndex1, cutIndex2);
     
-    if (survivedSignalExcludingMinus1_[first] == 0) return 0.0;
-    return static_cast<double>(survivedSignalExcludingMinus1_[second]) / survivedSignalExcludingMinus1_[first];
+    if (normalizationMode_ == NormalizationMode::FIDUCIAL_VOLUME) {
+        if (survivedSignalInFVExcludingMinus1_[first] == 0) return 0.0;
+        return static_cast<double>(survivedSignalInFVExcludingMinus1_[second]) / survivedSignalInFVExcludingMinus1_[first];
+    } else {
+        if (survivedSignalExcludingMinus1_[first] == 0) return 0.0;
+        return static_cast<double>(survivedSignalExcludingMinus1_[second]) / survivedSignalExcludingMinus1_[first];
+    }
 }
 
 double StatisticalCutter::GetEfficiencyExcludingMctruthMinus1(size_t cutIndex) const {
-    if (totalSignalExcludingMinus1_ == 0) return 0.0;
-    return static_cast<double>(survivedSignalExcludingMinus1_[cutIndex]) / totalSignalExcludingMinus1_;
+    if (normalizationMode_ == NormalizationMode::FIDUCIAL_VOLUME) {
+        if (totalSignalInFVExcludingMinus1_ == 0) return 0.0;
+        return static_cast<double>(survivedSignalInFVExcludingMinus1_[cutIndex]) / totalSignalInFVExcludingMinus1_;
+    } else {
+        if (totalSignalExcludingMinus1_ == 0) return 0.0;
+        return static_cast<double>(survivedSignalExcludingMinus1_[cutIndex]) / totalSignalExcludingMinus1_;
+    }
 }

@@ -86,7 +86,9 @@ Float_t Chi2SignalReduced;
 Float_t deltaPhi,
     deltaPhiMC,
     deltaPhiFit,
-    deltaTheta;
+    deltaTheta,
+    RtCh,
+    RtNeu;
 
 // Definitions of cuts
 
@@ -391,11 +393,10 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   Double_t limitRadiusChMC = 25.,
            limitRadiusNeMC = 25.;
 
-  Double_t
-      pathKneMC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
-                       pow(Knemc[7] - ipmc[1], 2)),
-      pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
-                       pow(Kchmc[7] - ipmc[1], 2));
+  RtNeu = sqrt(pow(Knemc[6] - ipmc[0], 2) +
+               pow(Knemc[7] - ipmc[1], 2));
+  RtCh = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
+              pow(Kchmc[7] - ipmc[1], 2));
 
   bool passesCuts = true;
   if (!cutIndices.empty())
@@ -496,7 +497,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     Double_t errorPart10, errorPart20, errorPart11, errorPart21, error1021, error1120;
 
-    errorPart10 = pow(abs(trk1[0]) - abs(CurvMC[0]), 2) +
+    errorPart10 = pow(abs(*CurvSmeared1) - abs(CurvMC[0]), 2) +
                   pow(abs(*PhivSmeared1) - abs(PhivMC[0]), 2) +
                   pow(abs(*CotvSmeared1) - abs(CotvMC[0]), 2);
 
@@ -840,28 +841,40 @@ void MC_fit_comparison::Terminate()
   }
 
   Float_t fullyGoodPer = CalculateEfficiency(numberOfAllGood, numberOfAllGood + numberOfAtLeastOneBad) * 100,
-          preselectionEff = CalculateEfficiency(signal_tot, signal_tot_err) * 100,
-          analysisEff = CalculateEfficiency(signal_num, signal_tot) * 100,
-          totalEff = CalculateEfficiency(signal_num, signal_tot_err) * 100;
+          preselectionEff = CalculateEfficiency(cutter->GetTotalSignalExcludingMinus1(), cutter->GetTotalSignal()) * 100;
 
   std::cout << "How many reconstructed events had all good clusters? " << numberOfAllGood << std::endl;
   std::cout << "How many reconstructed events had at least one bad cluster? " << numberOfAtLeastOneBad << std::endl;
   std::cout << "Percentage of fully good events: " << fullyGoodPer << " %" << std::endl
             << std::endl;
 
-  std::cout << "Signal events without errors: " << signal_tot << " over " << signal_tot_err << " (" << preselectionEff << " %) --> Efficiency of preselection" << std::endl;
-  std::cout << "Signal events after cuts: " << signal_num << " over " << signal_tot << " (" << analysisEff << " %) --> Efficiency of analysis" << std::endl;
+  std::cout << std::endl;
 
-  std::cout << "Total Efficiency: " << totalEff << " %" << std::endl;
+  std::cout << "Signal events without errors (entire space): " << signal_tot << " over " << signal_tot_err << " (" << preselectionEff << " %) --> Efficiency of preselection" << std::endl;
 
+  std::cout << std::endl;
+  std::cout << "Calculations in entire space:" << std::endl;
+  cutter->SetNormalizationMode(NormalizationMode::TOTAL_EVENTS);
   for (const auto &cutId : cutIndices)
   {
     const auto effTot = cutter->GetEfficiency(cutId);
     const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutId);
 
-    std::cout << "Applied cut: " << cutId << " with eff total (including errors): " << effTot << ", analysis efficiency (excluding errors): " << effExclMinus1 << std::endl;
+    std::cout << cutter->GetCuts()[cutId].cutId << " (fiducial volume = " << cutter->GetCuts()[cutId].isFiducialVolume << ") with eff total (including errors): " << effTot * 100 << " %, analysis efficiency (excluding errors): " << effExclMinus1 * 100 << " %" << std::endl;
   }
 
+  std::cout << std::endl;
+  std::cout << "Calculations inside fiducial volume:" << std::endl;
+  cutter->SetNormalizationMode(NormalizationMode::FIDUCIAL_VOLUME);
+  for (const auto &cutId : cutIndices)
+  {
+    const auto effTot = cutter->GetEfficiency(cutId);
+    const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutId);
+
+    std::cout << cutter->GetCuts()[cutId].cutId << " (fiducial volume = " << cutter->GetCuts()[cutId].isFiducialVolume << "),  eff total (including errors): " << effTot * 100 << " %, analysis efficiency (excluding errors): " << effExclMinus1 * 100 << " %" << std::endl;
+  }
+
+  std::cout << std::endl;
   std::cout << "=== MC Fit Comparison Terminated ===" << std::endl;
 }
 
@@ -894,6 +907,10 @@ void MC_fit_comparison::InitializeCutSelector(const TString &option)
   cutter = new StatisticalCutter(Paths::cutlimitsName, 1, KLOE::HypothesisCode::SIMONA_ANALYSIS);
 
   cutValues = {
+      {"RtCh", [this]()
+       { return RtCh; }},
+      {"RtNeu", [this]()
+       { return RtNeu; }},
       {"Chi2SignalReduced", [this]()
        { return Chi2SignalReduced; }},
       {"DeltaPhivFit", [this]()
