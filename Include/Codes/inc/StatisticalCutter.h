@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 #include <functional>
 #include <stdexcept>
 #include <json.hpp>
@@ -33,7 +34,11 @@ struct Cut {
     
     bool isFiducialVolume = false;
     bool isBackgroundRejection = false;
-    std::string channel = "default";  // ← NOWE: kanał dla grup background rejection
+    std::string channel = "default";
+    
+    // Pole dla syntetycznych cięć grupowych
+    bool isSyntheticGroup = false;  // ← NOWE: czy to syntetyczne cięcie grupy
+    std::vector<size_t> groupMembers;  // ← NOWE: indeksy cięć wchodzących w skład grupy
 };
 
 // Enum do wyboru metody normalizacji
@@ -56,10 +61,10 @@ public:
     // Rejestracja zmiennych zwykłych (z TTree lub pochodnych)
     void RegisterVariableGetter(const std::string& varName, std::function<double()> getter);
     
-    // Rejestracja wartości centralnej dla danego cięcia
+    // Rejestracja wartości centralnej dla danego cięcia (sprawdza czy nie syntetyczne)
     void RegisterCentralValueGetter(const std::string& cutId, std::function<double()> getter);
     
-    // Rejestracja limitu cięcia (dynamiczna wartość cutValue)
+    // Rejestracja limitu cięcia (dynamiczna wartość cutValue) - sprawdza czy nie syntetyczne
     void RegisterCutValueGetter(const std::string& cutId, std::function<double()> getter);
 
     // Nowe metody dla kombinacji cięć
@@ -116,11 +121,18 @@ public:
     double GetPurityErrorWithMode(size_t cutIndex, NormalizationMode mode) const;
 
     const std::vector<Cut>& GetCuts() const { return cuts_; }
+    
+    // Zwróć listę cięć pomijając członków grup (zwraca tylko widoczne cięcia i syntetyczne)
+    std::vector<size_t> GetVisibleCuts() const;
 
     // Zarządzanie aktywnymi cięciami
     void SetActiveCuts(const std::vector<size_t>& indices) { activeCutIndices_ = indices; }
     void ClearActiveCuts() { activeCutIndices_.clear(); }
     const std::vector<size_t>& GetActiveCuts() const { return activeCutIndices_; }
+    
+    // Metody pomocnicze do grupowych cięć
+    const std::map<std::string, size_t>& GetGroupChannelToIndexMap() const { return groupChannelToSyntheticIndex_; }
+    bool IsCutInGroup(size_t cutIndex) const;
 
 private:
     void LoadCuts(const nlohmann::json& j);
@@ -129,6 +141,9 @@ private:
     bool EvaluateCondition(double value, const Cut& cut) const;
     bool EvaluateExpression(const Cut& cut) const;
     double EvaluateExpressionToDouble(const Cut& cut) const;
+    
+    // Budowanie syntetycznych cięć dla grup background rejection
+    void BuildSyntheticGroupCuts();
 
     struct CutStats {
         size_t survivedSignal = 0;
@@ -175,6 +190,12 @@ private:
     
     // Indeksy aktywnych cięć (jeśli puste - żadne cięcie nie jest aktywne)
     std::vector<size_t> activeCutIndices_;
+    
+    // Mapowanie channel na indeks syntetycznego cięcia grupy
+    std::map<std::string, size_t> groupChannelToSyntheticIndex_;
+    
+    // Zbiór indeksów cięć które są członkami grup (ukrywamy je z GetCuts)
+    std::set<size_t> groupMemberIndices_;
     
     TTree* tree_ = nullptr;
 };

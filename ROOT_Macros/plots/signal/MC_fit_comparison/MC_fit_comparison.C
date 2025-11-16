@@ -848,23 +848,28 @@ void MC_fit_comparison::Terminate()
   std::cout << std::endl;
   std::cout << "Calculations in entire space:" << std::endl;
   cutter->SetNormalizationMode(NormalizationMode::TOTAL_EVENTS);
-  for (const auto &cutId : cutIndices)
+  
+  // Użyj GetVisibleCuts() aby wypisać tylko widoczne cięcia (nie-członkowie grup)
+  auto visibleCuts = cutter->GetVisibleCuts();
+  for (size_t cutIdx : visibleCuts)
   {
-    const auto effTot = cutter->GetEfficiency(cutId);
-    const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutId);
+    const auto& cut = cutter->GetCuts()[cutIdx];
+    const auto effTot = cutter->GetEfficiency(cutIdx);
+    const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutIdx);
 
-    std::cout << cutter->GetCuts()[cutId].cutId << " (fiducial volume = " << cutter->GetCuts()[cutId].isFiducialVolume << ") with eff total (including errors): " << effTot * 100 << " %, analysis efficiency (excluding errors): " << effExclMinus1 * 100 << " %" << std::endl;
+    std::cout << cut.cutId << " (fiducial volume = " << cut.isFiducialVolume << ") with eff total (including errors): " << effTot * 100 << " %, analysis efficiency (excluding errors): " << effExclMinus1 * 100 << " %" << std::endl;
   }
 
   std::cout << std::endl;
   std::cout << "Calculations inside fiducial volume:" << std::endl;
   cutter->SetNormalizationMode(NormalizationMode::FIDUCIAL_VOLUME);
-  for (const auto &cutId : cutIndices)
+  for (size_t cutIdx : visibleCuts)
   {
-    const auto effTot = cutter->GetEfficiency(cutId);
-    const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutId);
+    const auto& cut = cutter->GetCuts()[cutIdx];
+    const auto effTot = cutter->GetEfficiency(cutIdx);
+    const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutIdx);
 
-    std::cout << cutter->GetCuts()[cutId].cutId << " (fiducial volume = " << cutter->GetCuts()[cutId].isFiducialVolume << "),  eff total (including errors): " << effTot * 100 << " %, analysis efficiency (excluding errors): " << effExclMinus1 * 100 << " %" << std::endl;
+    std::cout << cut.cutId << " (fiducial volume = " << cut.isFiducialVolume << "),  eff total (including errors): " << effTot * 100 << " %, analysis efficiency (excluding errors): " << effExclMinus1 * 100 << " %" << std::endl;
   }
 
   std::cout << std::endl;
@@ -942,6 +947,8 @@ void MC_fit_comparison::InitializeCutSelector(const TString &option)
 
   cutter->SetTree(fChain);
 
+  // Rejestruj gettery tylko dla rzeczywistych (nie-syntetycznych) cięć
+  // Syntetyczne cięcia są obsługiwane automatycznie na podstawie swoich członków
   for (const auto &cutPair : cutValues)
   {
     cutter->RegisterVariableGetter(cutPair.first, cutPair.second);
@@ -966,9 +973,27 @@ void MC_fit_comparison::InitializeCutSelector(const TString &option)
   }
 
   std::cout << "StatisticalCutter initialized with " << cuts.size() << " cuts:" << std::endl;
-  for (size_t i = 0; i < cuts.size(); ++i)
+  auto visibleCuts = cutter->GetVisibleCuts();
+  std::cout << "  Visible cuts: " << visibleCuts.size() << std::endl;
+  for (size_t i : visibleCuts)
   {
-    std::cout << "  [" << i << "] " << cuts[i].cutId << std::endl;
+    const auto& cut = cuts[i];
+    if (cut.isSyntheticGroup) {
+      std::cout << "    [" << i << "] " << cut.cutId << " (SYNTHETIC GROUP with " << cut.groupMembers.size() << " members)" << std::endl;
+    } else {
+      std::cout << "    [" << i << "] " << cut.cutId << std::endl;
+    }
+  }
+  
+  // Pokaż ukryte cięcia (członkowie grup)
+  auto hiddenCount = cuts.size() - visibleCuts.size();
+  if (hiddenCount > 0) {
+    std::cout << "  Hidden cuts (group members): " << hiddenCount << std::endl;
+    for (size_t i = 0; i < cuts.size(); ++i) {
+      if (cutter->IsCutInGroup(i)) {
+        std::cout << "    [" << i << "] " << cuts[i].cutId << " (member of group)" << std::endl;
+      }
+    }
   }
 }
 
