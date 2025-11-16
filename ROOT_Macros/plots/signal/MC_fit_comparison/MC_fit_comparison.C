@@ -395,18 +395,8 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   RtCh = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
               pow(Kchmc[7] - ipmc[1], 2));
 
-  bool passesCuts = true;
-  if (!cutIndices.empty())
-  {
-    for (size_t cutIdx : cutIndices)
-    {
-      if (!cutter->PassCut(cutIdx))
-      {
-        passesCuts = false;
-        break;
-      }
-    }
-  }
+  // Sprawdź czy zdarzenie przechodzi wszystkie aktywne cięcia (z obsługą grup background rejection)
+  bool passesCuts = cutter->PassCuts(cutIndices);
 
   // Update statistics for all events
   cutter->UpdateStats(*mctruth);
@@ -638,6 +628,8 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     hists2DFittedSignal["py_ch_res_vs_py_neu_res"]->Fill(ParamSignalFit[33] - Kchmc[1] - Knemc[1], KchboostFit[1] - Kchmc[1], weight);
     hists2DFittedSignal["pz_ch_res_vs_pz_neu_res"]->Fill(ParamSignalFit[34] - Kchmc[2] - Knemc[2], KchboostFit[2] - Kchmc[2], weight);
     hists2DFittedSignal["E_ch_res_vs_E_neu_res"]->Fill(ParamSignalFit[35] - Kchmc[3] - Knemc[3], KchboostFit[3] - Kchmc[3], weight);
+
+    hists2DFittedSignal["T0_omega_vs_mass_omega"]->Fill(T0Omega, omegaFit[5], weight);
   }
 
   return kTRUE;

@@ -78,6 +78,10 @@ public:
 
     bool PassCut(size_t cutIndex);
     bool PassAllCuts();
+    
+    // Sprawdź czy wszystkie cięcia (z listy lub wszystkie jeśli lista pusta) przechodzą
+    // Automatycznie obsługuje grupy background rejection z negacją całej grupy
+    bool PassCuts(const std::vector<size_t>& cutIndices = std::vector<size_t>());
 
     void UpdateStats(int mctruth);
 
