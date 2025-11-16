@@ -186,6 +186,26 @@
         "cutValue": 8.994,
         "cutCondition": "<=",
         "isFiducialVolume": false
+      },
+      {
+        "order": 8,
+        "cutDescription": "pi0->gamma gamma 1 decay kinetic energy.",
+        "cutId": "Pi01OmegaKineticEnergy",
+        "cutType": "T",
+        "cutValue": 17.073,
+        "cutCondition": "<=",
+        "isFiducialVolume": false,
+        "isBackgroundRejection": true
+      },
+      {
+        "order": 9,
+        "cutDescription": "Mass of omega from pi+pi-pi0 decay.",
+        "cutId": "MassOmega",
+        "cutType": "T",
+        "cutValue": 16.86,
+        "cutCondition": "<=",
+        "isFiducialVolume": false,
+        "isBackgroundRejection": true
       }
     ]
   }

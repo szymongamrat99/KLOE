@@ -90,6 +90,8 @@ Float_t deltaPhi,
     RtCh,
     RtNeu;
 
+Float_t T0Omega = 0;
+
 // Definitions of cuts
 
 StatisticalCutter *cutter;
@@ -342,12 +344,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   Bool_t isInsideFiducialVolume = (radius00 < radiusLimit) && (zdist00 < zdistLimit) &&
                                   (radiuspm < radiusLimit) && (zdistpm < zdistLimit);
 
-  Float_t T0Omega = 0;
-
-  if (abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
-    T0Omega = Omega2MassTmp - (trk1[3] + trk2[3]) - pi0Omega2[5];
-  else
-    T0Omega = Omega1MassTmp - (trk1[3] + trk2[3]) - pi0Omega1[5];
+  T0Omega = pi0OmegaFit1[3] - pi0OmegaFit1[5];
 
   Float_t deltaTfit = timesSignalFit.deltaTimeCM,
           deltaT = timesBoostLor.deltaTimeCM,
@@ -922,14 +919,20 @@ void MC_fit_comparison::InitializeCutSelector(const TString &option)
       {"InvMassPi01", [this]()
        { return pi01Fit[5]; }},
       {"InvMassPi02", [this]()
-       { return pi02Fit[5]; }}};
+       { return pi02Fit[5]; }},
+      {"Pi01OmegaKineticEnergy", [this]()
+       { return T0Omega; }},
+      {"MassOmega", [this]()
+       { return omegaFit[5]; }}};
 
   centralValues = {
       {"DeltaPhivFit", 3.130},
       {"InvMassKch", 497.605},
       {"InvMassKne", 489.467},
       {"InvMassPi01", 134.954},
-      {"InvMassPi02", 134.841}};
+      {"InvMassPi02", 134.841},
+      {"Pi01OmegaKineticEnergy", 155.658},
+      {"MassOmega", 782.994}};
 
   cutter->SetTree(fChain);
 

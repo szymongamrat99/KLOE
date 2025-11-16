@@ -269,7 +269,6 @@ public:
 
   Double_t CalculatePurity(Int_t signal, Int_t total) const;
   Double_t CalculateEfficiency(Int_t signal, Int_t total) const;
-  void FolderManagement(TString folderName) const;
 
   CutCount CountEventsAroundCut(TH1 *hist, Double_t cutValue);
   void PrintCutCount(const TString &histName, Double_t cutValue, const CutCount &count);
@@ -285,9 +284,19 @@ public:
                                      Bool_t drawMeanProfile = kTRUE,
                                      Bool_t drawSigmaProfile = kTRUE);
 
+  TPrincipal *pca = new TPrincipal(2, "ND"); // 2 zmienne, bez normalizacji
+
+  void FolderManagement(TString folderName) const;
+
+  void InitializeCutSelector(const TString &option);
+  std::vector<size_t> GetCutIndicesForOption(const TString &option);
+  TString SanitizeFolderName(const TString &option);
 
   TString folderPath = "NO_CUTS";
-  TPrincipal *pca = new TPrincipal(2, "ND"); // 2 zmienne, bez normalizacji
+  StatisticalCutter *cutter = nullptr;
+  std::map<std::string, std::function<Float_t()>> cutValues;
+  std::map<std::string, Float_t> centralValues;
+  std::map<std::string, size_t> cutNameToIndex;
 
   ClassDef(signal_vs_bcg_v2, 0);
 };

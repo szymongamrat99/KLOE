@@ -125,11 +125,9 @@ void StatisticalCutter::LoadCuts(const json& j) {
         cut.cutId = cutj.value("cutId", std::string());
         
         if (cutj.contains("expression")) {
-            // Złożone cięcie - wyrażenie na zmiennych
             cut.isComplexCut = true;
             cut.expression = cutj["expression"].get<std::string>();
         } else {
-            // Zwykłe cięcie na pojedynczej zmiennej
             cut.cutType = cutj.value("cutType", std::string());
             cut.cutCondition = cutj.value("cutCondition", std::string());
             cut.cutValue = cutj.value("cutValue", 0.0);
@@ -137,8 +135,8 @@ void StatisticalCutter::LoadCuts(const json& j) {
             cut.centralValueDynamic = false;
         }
         
-        // Odczytaj flagę fiducial volume
         cut.isFiducialVolume = cutj.value("isFiducialVolume", false);
+        cut.isBackgroundRejection = cutj.value("isBackgroundRejection", false);  // ← NOWE
         
         cuts_.push_back(cut);
     }
@@ -254,26 +252,31 @@ bool StatisticalCutter::PassCut(size_t cutIndex) {
     if (cutIndex >= cuts_.size())
         throw std::out_of_range("Cut index out of range");
     
-    const auto& cut = cuts_[cutIndex];
+    auto& cut = cuts_[cutIndex];
     
+    // Ewaluuj zwykłe cięcie
+    bool result = false;
     if (cut.isComplexCut) {
-        return EvaluateExpression(cut);
-    }
-    
-    // Dla zwykłych cięć - szukaj gettera
-    if (cut.valueGetter) {
+        result = EvaluateExpression(cut);
+    } else if (cut.valueGetter) {
         double value = cut.valueGetter();
-        return EvaluateCondition(value, cut);
+        result = EvaluateCondition(value, cut);
+    } else {
+        auto it = variableGetters_.find(cut.cutId);
+        if (it != variableGetters_.end()) {
+            double value = it->second();
+            result = EvaluateCondition(value, cut);
+        } else {
+            throw std::runtime_error("No getter registered for variable: " + cut.cutId);
+        }
     }
     
-    // Spróbuj znaleźć w mapie getterów
-    auto it = variableGetters_.find(cut.cutId);
-    if (it != variableGetters_.end()) {
-        double value = it->second();
-        return EvaluateCondition(value, cut);
+    // Jeśli to cięcie odrzucające tło - neguj wynik
+    if (cut.isBackgroundRejection) {
+        result = !result;  // ← KLUCZOWE: negacja!
     }
     
-    throw std::runtime_error("No getter registered for variable: " + cut.cutId);
+    return result;
 }
 
 bool StatisticalCutter::PassAllCuts() {

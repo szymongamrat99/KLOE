@@ -29,8 +29,8 @@ struct Cut {
     std::string expression;
     std::shared_ptr<TTreeFormula> treeFormula;
     
-    // Flagi dla fiducial volume
-    bool isFiducialVolume = false;  // Oznacza czy to część fiducial volume
+    bool isFiducialVolume = false;
+    bool isBackgroundRejection = false;  // ← NOWE
 };
 
 // Enum do wyboru metody normalizacji
