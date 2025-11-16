@@ -968,6 +968,7 @@ std::vector<size_t> MC_fit_comparison::GetCutIndicesForOption(const TString &opt
   if (option.IsNull() || option == "NO_CUTS")
   {
     std::cout << "No cuts applied" << std::endl;
+    cutter->ClearActiveCuts();
     return indices;
   }
 
@@ -1000,6 +1001,9 @@ std::vector<size_t> MC_fit_comparison::GetCutIndicesForOption(const TString &opt
     if (idx < cuts.size())
       std::cout << "  - " << cuts[idx].cutId << std::endl;
   }
+
+  // Ustawić aktywne cięcia w cutter
+  cutter->SetActiveCuts(indices);
 
   return indices;
 }

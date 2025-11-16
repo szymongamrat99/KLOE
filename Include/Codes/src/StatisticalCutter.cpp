@@ -252,6 +252,14 @@ bool StatisticalCutter::PassCut(size_t cutIndex) {
     if (cutIndex >= cuts_.size())
         throw std::out_of_range("Cut index out of range");
     
+    // Jeśli mamy aktywne cięcia - sprawdź czy to cięcie jest wśród nich
+    if (!activeCutIndices_.empty()) {
+        bool isActive = std::find(activeCutIndices_.begin(), activeCutIndices_.end(), cutIndex) != activeCutIndices_.end();
+        if (!isActive) {
+            return true;  // Cięcie nie aktywne - pass (nie filtruj)
+        }
+    }
+    
     auto& cut = cuts_[cutIndex];
     
     // Ewaluuj zwykłe cięcie
@@ -269,11 +277,6 @@ bool StatisticalCutter::PassCut(size_t cutIndex) {
         } else {
             throw std::runtime_error("No getter registered for variable: " + cut.cutId);
         }
-    }
-    
-    // Jeśli to cięcie odrzucające tło - neguj wynik
-    if (cut.isBackgroundRejection) {
-        result = !result;  // ← KLUCZOWE: negacja!
     }
     
     return result;
@@ -304,12 +307,20 @@ void StatisticalCutter::UpdateStats(int mctruth) {
 
     // Liczenie dla wszystkich zdarzeń
     bool survived = true;
-    for (size_t i = 0; i < cuts_.size(); ++i) {
-        if (survived && PassCut(i)) {
+    std::vector<size_t> cutsToProcess;
+    if (!activeCutIndices_.empty()) {
+        cutsToProcess = activeCutIndices_;
+    } else {
+        for (size_t i = 0; i < cuts_.size(); ++i) {
+            cutsToProcess.push_back(i);
+        }
+    }
+    for (size_t idx : cutsToProcess) {
+        if (survived && PassCut(idx)) {
             if (mctruth == signalMctruth_)
-                survivedSignal_[i]++;
+                survivedSignal_[idx]++;
             else
-                survivedBackground_[i]++;
+                survivedBackground_[idx]++;
         } else {
             survived = false;
         }
@@ -318,12 +329,12 @@ void StatisticalCutter::UpdateStats(int mctruth) {
     // Liczenie dla zdarzeń w fiducial volume
     if (inFV) {
         survived = true;
-        for (size_t i = 0; i < cuts_.size(); ++i) {
-            if (survived && PassCut(i)) {
+        for (size_t idx : cutsToProcess) {
+            if (survived && PassCut(idx)) {
                 if (mctruth == signalMctruth_)
-                    survivedSignalInFV_[i]++;
+                    survivedSignalInFV_[idx]++;
                 else
-                    survivedBackgroundInFV_[i]++;
+                    survivedBackgroundInFV_[idx]++;
             } else {
                 survived = false;
             }
@@ -344,12 +355,12 @@ void StatisticalCutter::UpdateStats(int mctruth) {
         }
 
         survived = true;
-        for (size_t i = 0; i < cuts_.size(); ++i) {
-            if (survived && PassCut(i)) {
+        for (size_t idx : cutsToProcess) {
+            if (survived && PassCut(idx)) {
                 if (mctruth == signalMctruth_)
-                    survivedSignalExcludingMinus1_[i]++;
+                    survivedSignalExcludingMinus1_[idx]++;
                 else
-                    survivedBackgroundExcludingMinus1_[i]++;
+                    survivedBackgroundExcludingMinus1_[idx]++;
             } else {
                 survived = false;
             }
@@ -357,12 +368,12 @@ void StatisticalCutter::UpdateStats(int mctruth) {
 
         if (inFV) {
             survived = true;
-            for (size_t i = 0; i < cuts_.size(); ++i) {
-                if (survived && PassCut(i)) {
+            for (size_t idx : cutsToProcess) {
+                if (survived && PassCut(idx)) {
                     if (mctruth == signalMctruth_)
-                        survivedSignalInFVExcludingMinus1_[i]++;
+                        survivedSignalInFVExcludingMinus1_[idx]++;
                     else
-                        survivedBackgroundInFVExcludingMinus1_[i]++;
+                        survivedBackgroundInFVExcludingMinus1_[idx]++;
                 } else {
                     survived = false;
                 }

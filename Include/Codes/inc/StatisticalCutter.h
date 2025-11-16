@@ -107,6 +107,11 @@ public:
 
     const std::vector<Cut>& GetCuts() const { return cuts_; }
 
+    // Zarządzanie aktywnymi cięciami
+    void SetActiveCuts(const std::vector<size_t>& indices) { activeCutIndices_ = indices; }
+    void ClearActiveCuts() { activeCutIndices_.clear(); }
+    const std::vector<size_t>& GetActiveCuts() const { return activeCutIndices_; }
+
 private:
     void LoadCuts(const nlohmann::json& j);
     void LoadCuts(const std::string& jsonPath);
@@ -153,6 +158,9 @@ private:
     size_t totalBackgroundInFV_ = 0;
     size_t totalSignalInFVExcludingMinus1_ = 0;
     size_t totalBackgroundInFVExcludingMinus1_ = 0;
+    
+    // Indeksy aktywnych cięć (jeśli puste - żadne cięcie nie jest aktywne)
+    std::vector<size_t> activeCutIndices_;
     
     TTree* tree_ = nullptr;
 };
