@@ -36,9 +36,14 @@ struct Cut {
     bool isBackgroundRejection = false;
     std::string channel = "default";
     
+    // Specjalne cięcia warunkowe
+    bool conditionCut = false;              // Czy to cięcie warunkowe (inactive -> skip w UpdateStats)
+    std::string condition = "";             // Wyrażenie logiczne na innych conditionCut'ach
+    
     // Pole dla syntetycznych cięć grupowych
     bool isSyntheticGroup = false;  // ← NOWE: czy to syntetyczne cięcie grupy
     std::vector<size_t> groupMembers;  // ← NOWE: indeksy cięć wchodzących w skład grupy
+    std::string groupCondition = "";  // ← NOWE: warunek na całą grupę background rejection
 };
 
 // Enum do wyboru metody normalizacji
@@ -142,8 +147,14 @@ private:
     bool EvaluateExpression(const Cut& cut) const;
     double EvaluateExpressionToDouble(const Cut& cut) const;
     
+    // Ewaluacja warunkowych wyrażeń logicznych
+    bool EvaluateConditionExpression(const std::string& expression) const;
+    
     // Budowanie syntetycznych cięć dla grup background rejection
     void BuildSyntheticGroupCuts();
+    
+    // Sprawdzenie warunku grupy (groupCondition)
+    bool CheckGroupCondition(const Cut& groupCut) const;
 
     struct CutStats {
         size_t survivedSignal = 0;
@@ -196,6 +207,9 @@ private:
     
     // Zbiór indeksów cięć które są członkami grup (ukrywamy je z GetCuts)
     std::set<size_t> groupMemberIndices_;
+    
+    // Mapowanie ID conditionCut na ich indeksy dla szybkiego lookup
+    std::map<std::string, size_t> conditionCutIdToIndex_;
     
     TTree* tree_ = nullptr;
 };

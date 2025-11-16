@@ -152,7 +152,12 @@ void StatisticalCutter::LoadCuts(const json& j) {
         
         cut.isFiducialVolume = cutj.value("isFiducialVolume", false);
         cut.isBackgroundRejection = cutj.value("isBackgroundRejection", false);
-        cut.channel = cutj.value("channel", std::string("default"));  // ← NOWE: kanał dla grup
+        cut.channel = cutj.value("channel", std::string("default"));
+        
+        // NOWE: Parsuj pola warunkowe
+        cut.conditionCut = cutj.value("conditionCut", false);
+        cut.condition = cutj.value("condition", std::string(""));
+        cut.groupCondition = cutj.value("groupCondition", std::string(""));
         
         cuts_.push_back(cut);
     }
@@ -161,8 +166,109 @@ void StatisticalCutter::LoadCuts(const json& j) {
         return a.order < b.order;
     });
     
+    // Buduj mapę conditionCut'ów dla szybkiego lookup
+    conditionCutIdToIndex_.clear();
+    for (size_t i = 0; i < cuts_.size(); ++i) {
+        if (cuts_[i].conditionCut) {
+            conditionCutIdToIndex_[cuts_[i].cutId] = i;
+        }
+    }
+    
     // Buduj syntetyczne cięcia dla grup background rejection
     BuildSyntheticGroupCuts();
+}
+
+bool StatisticalCutter::EvaluateConditionExpression(const std::string& expression) const {
+    // Tokenizuj wyrażenie: "CondCut1 && (CondCut2 || CondCut3)"
+    // Obsługiwane operatory: && (AND), || (OR)
+    // Obsługiwane nawiasy: ( )
+    
+    std::string expr = expression;
+    
+    // Usuń spacje
+    expr.erase(std::remove(expr.begin(), expr.end(), ' '), expr.end());
+    
+    // Funkcja do ewaluacji wyrażenia z obsługą && i ||
+    std::function<bool(std::string)> parseExpression;
+    parseExpression = [this, &parseExpression](std::string s) -> bool {
+        s.erase(std::remove(s.begin(), s.end(), ' '), s.end());
+        
+        if (s.empty()) return true;
+        
+        // Obsłuż || na najwyższym poziomie (najsłabszy priorytet)
+        int level = 0;
+        for (size_t i = 0; i < s.length(); ++i) {
+            if (s[i] == '(') level++;
+            else if (s[i] == ')') level--;
+            else if (level == 0 && i + 1 < s.length() && s[i] == '|' && s[i + 1] == '|') {
+                std::string left = s.substr(0, i);
+                std::string right = s.substr(i + 2);
+                return parseExpression(left) || parseExpression(right);
+            }
+        }
+        
+        // Obsłuż && na drugim poziomie (silniejszy priorytet)
+        level = 0;
+        for (size_t i = 0; i < s.length(); ++i) {
+            if (s[i] == '(') level++;
+            else if (s[i] == ')') level--;
+            else if (level == 0 && i + 1 < s.length() && s[i] == '&' && s[i + 1] == '&') {
+                std::string left = s.substr(0, i);
+                std::string right = s.substr(i + 2);
+                return parseExpression(left) && parseExpression(right);
+            }
+        }
+        
+        // Obsłuż nawiasy
+        if (!s.empty() && s[0] == '(' && s[s.length() - 1] == ')') {
+            level = 0;
+            bool isWrapped = true;
+            for (size_t i = 0; i < s.length() - 1; ++i) {
+                if (s[i] == '(') level++;
+                else if (s[i] == ')') level--;
+                if (level == 0) {
+                    isWrapped = false;
+                    break;
+                }
+            }
+            if (isWrapped) {
+                return parseExpression(s.substr(1, s.length() - 2));
+            }
+        }
+        
+        // To musi być ID cięcia - NOWE: ewaluuj niezależnie od aktywności
+        auto it = conditionCutIdToIndex_.find(s);
+        if (it != conditionCutIdToIndex_.end()) {
+            size_t cutIndex = it->second;
+            // Ewaluuj bezpośrednio - bez sprawdzania activeCutIndices_
+            // Tymczasowo wyłącz check aktywności
+            auto& cut = cuts_[cutIndex];
+            
+            // Ewaluuj cięcie bezpośrednio
+            bool result = false;
+            if (cut.isComplexCut) {
+                result = EvaluateExpression(cut);
+            } else if (cut.valueGetter) {
+                double value = cut.valueGetter();
+                result = EvaluateCondition(value, cut);
+            } else {
+                auto varIt = variableGetters_.find(cut.cutId);
+                if (varIt != variableGetters_.end()) {
+                    double value = varIt->second();
+                    result = EvaluateCondition(value, cut);
+                } else {
+                    std::cerr << "Warning: No getter for condition cut '" << s << "'" << std::endl;
+                    result = false;
+                }
+            }
+            return result;
+        }
+        
+        std::cerr << "Warning: Condition cut '" << s << "' not found" << std::endl;
+        return false;
+    };
+    
+    return parseExpression(expr);
 }
 
 void StatisticalCutter::BuildSyntheticGroupCuts() {
@@ -195,6 +301,9 @@ void StatisticalCutter::BuildSyntheticGroupCuts() {
         syntheticCut.groupMembers = memberIndices;
         syntheticCut.cutType = "SYNTHETIC";
         
+        // Pobierz groupCondition z pierwszego cięcia w grupie
+        syntheticCut.groupCondition = cuts_[memberIndices[0]].groupCondition;
+        
         // Buduj ID: cut1_cut2_cut3...
         syntheticCut.cutId = "";
         for (size_t idx : memberIndices) {
@@ -225,6 +334,16 @@ void StatisticalCutter::BuildSyntheticGroupCuts() {
     survivedBackgroundInFV_.resize(totalCuts, 0);
     survivedSignalInFVExcludingMinus1_.resize(totalCuts, 0);
     survivedBackgroundInFVExcludingMinus1_.resize(totalCuts, 0);
+}
+
+bool StatisticalCutter::CheckGroupCondition(const Cut& groupCut) const {
+    // Jeśli nie ma warunku - zawsze true
+    if (groupCut.groupCondition.empty()) {
+        return true;
+    }
+    
+    // Ewaluuj warunek grupy
+    return EvaluateConditionExpression(groupCut.groupCondition);
 }
 
 bool StatisticalCutter::IsCutInGroup(size_t cutIndex) const {
@@ -353,6 +472,19 @@ bool StatisticalCutter::PassCut(size_t cutIndex) {
     if (cutIndex >= cuts_.size())
         throw std::out_of_range("Cut index out of range");
     
+    auto& cut = cuts_[cutIndex];
+    
+    // Cięcia conditionCut mogą być ewaluowane TYLKO w warunkach
+    // W normalnym przepływie zawsze zwróć true (pass)
+    if (cut.conditionCut) {
+        return true;
+    }
+    
+    // Syntetyczne cięcia nie powinny być ewaluowane tutaj - obsługiwane są w UpdateStats
+    if (cut.isSyntheticGroup) {
+        return true;
+    }
+    
     // Jeśli mamy aktywne cięcia - sprawdź czy to cięcie jest wśród nich
     if (!activeCutIndices_.empty()) {
         bool isActive = std::find(activeCutIndices_.begin(), activeCutIndices_.end(), cutIndex) != activeCutIndices_.end();
@@ -361,11 +493,12 @@ bool StatisticalCutter::PassCut(size_t cutIndex) {
         }
     }
     
-    auto& cut = cuts_[cutIndex];
-    
-    // Syntetyczne cięcia nie powinny być ewaluowane tutaj - obsługiwane są w UpdateStats
-    if (cut.isSyntheticGroup) {
-        return true;
+    // Jeśli ma condition - sprawdź ją najpierw
+    if (!cut.condition.empty()) {
+        bool condResult = EvaluateConditionExpression(cut.condition);
+        if (!condResult) {
+            return true;  // Condition failed -> pass (bypass)
+        }
     }
     
     // Ewaluuj zwykłe cięcie
@@ -398,12 +531,10 @@ bool StatisticalCutter::PassAllCuts() {
 }
 
 bool StatisticalCutter::PassCuts(const std::vector<size_t>& cutIndices) {
-    // Jeśli lista pusta - użyj wszystkich cięć
+    // Jeśli lista pusta - żadne cięcie nie jest aktywne, pass all
     std::vector<size_t> cutsToCheck;
     if (cutIndices.empty()) {
-        for (size_t i = 0; i < cuts_.size(); ++i) {
-            cutsToCheck.push_back(i);
-        }
+        return true;  // Żadne cięcie - wszystko przechodzi
     } else {
         cutsToCheck = cutIndices;
     }
@@ -500,14 +631,13 @@ void StatisticalCutter::UpdateStats(int mctruth) {
     // Liczenie dla wszystkich zdarzeń
     bool survived = true;
     std::vector<size_t> cutsToProcess;
+    
+    // Jeśli activeCutIndices_ jest puste - NIC nie filtrujemy (pass all)
     if (!activeCutIndices_.empty()) {
         cutsToProcess = activeCutIndices_;
     } else {
-        for (size_t i = 0; i < cuts_.size(); ++i) {
-            // Pomiń członków grup - będą policzone na syntetycznym cięciu
-            if (IsCutInGroup(i)) continue;
-            cutsToProcess.push_back(i);
-        }
+        // Puste activeCutIndices_ = żadne cięcie nie jest aktywne = pass all events
+        cutsToProcess.clear();
     }
     
     // Mapy dla grup background rejection per-channel
@@ -521,6 +651,11 @@ void StatisticalCutter::UpdateStats(int mctruth) {
         
         // Jeśli to syntetyczne cięcie grupy background rejection
         if (cut.isSyntheticGroup) {
+            // Sprawdź warunek grupy - jeśli false, pomiń całą grupę
+            if (!CheckGroupCondition(cut)) {
+                continue;
+            }
+            
             inBackgroundRejectionGroup[channel] = true;
             backgroundRejectionGroups[channel] = true;  // Reset do neutral element
             backgroundRejectionGroupSyntheticIdx[channel] = idx;
@@ -597,6 +732,11 @@ void StatisticalCutter::UpdateStats(int mctruth) {
             std::string channel = cut.channel;
             
             if (cut.isSyntheticGroup) {
+                // Sprawdź warunek grupy - jeśli false, pomiń całą grupę
+                if (!CheckGroupCondition(cut)) {
+                    continue;
+                }
+                
                 inBackgroundRejectionGroup[channel] = true;
                 backgroundRejectionGroups[channel] = true;
                 backgroundRejectionGroupSyntheticIdx[channel] = idx;
@@ -681,6 +821,11 @@ void StatisticalCutter::UpdateStats(int mctruth) {
             std::string channel = cut.channel;
             
             if (cut.isSyntheticGroup) {
+                // Sprawdź warunek grupy - jeśli false, pomiń całą grupę
+                if (!CheckGroupCondition(cut)) {
+                    continue;
+                }
+                
                 inBackgroundRejectionGroup[channel] = true;
                 backgroundRejectionGroups[channel] = true;
                 backgroundRejectionGroupSyntheticIdx[channel] = idx;
@@ -925,6 +1070,10 @@ double StatisticalCutter::GetSignalToBackgroundError(size_t cutIndex) const {
 }
 
 bool StatisticalCutter::PassCutsAnd(const std::vector<size_t>& cutIndices) {
+    // Pusta lista = żadne cięcie = pass all
+    if (cutIndices.empty()) {
+        return true;
+    }
     for (size_t idx : cutIndices) {
         if (!PassCut(idx))
             return false;
@@ -933,6 +1082,10 @@ bool StatisticalCutter::PassCutsAnd(const std::vector<size_t>& cutIndices) {
 }
 
 bool StatisticalCutter::PassCutsOr(const std::vector<size_t>& cutIndices) {
+    // Pusta lista = żadne cięcie = pass all
+    if (cutIndices.empty()) {
+        return true;
+    }
     for (size_t idx : cutIndices) {
         if (PassCut(idx))
             return true;

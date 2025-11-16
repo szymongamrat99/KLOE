@@ -135,6 +135,46 @@
       },
       {
         "order": 2,
+        "cutDescription": "Rt ch close to IP.",
+        "cutId": "RtChOmega",
+        "cutType": "O",
+        "cutValue": 25,
+        "cutCondition": "<=",
+        "isFiducialVolume": false,
+        "conditionCut": true
+      },
+      {
+        "order": 3,
+        "cutDescription": "Rt neu close to IP.",
+        "cutId": "RtNeuOmega",
+        "cutType": "O",
+        "cutValue": 25,
+        "cutCondition": "<=",
+        "isFiducialVolume": false,
+        "conditionCut": true
+      },
+      {
+        "order": 4,
+        "cutDescription": "Z ch close to IP.",
+        "cutId": "ZChOmega",
+        "cutType": "O",
+        "cutValue": 0.6,
+        "cutCondition": "<=",
+        "isFiducialVolume": false,
+        "conditionCut": true
+      },
+      {
+        "order": 5,
+        "cutDescription": "Z neu close to IP.",
+        "cutId": "ZNeuOmega",
+        "cutType": "O",
+        "cutValue": 0.6,
+        "cutCondition": "<=",
+        "isFiducialVolume": false,
+        "conditionCut": true
+      },
+      {
+        "order": 6,
         "cutDescription": "Chi2/ndof of Kinematic fit for the signal hypothesis.",
         "cutId": "Chi2SignalReduced",
         "cutType": "O",
@@ -143,7 +183,7 @@
         "isFiducialVolume": false
       },
       {
-        "order": 3,
+        "order": 7,
         "cutDescription": "Difference in azimuthal angles of tracks at the vertex from kinematic fit.",
         "cutId": "DeltaPhivFit",
         "cutType": "T",
@@ -152,7 +192,7 @@
         "isFiducialVolume": false
       },
       {
-        "order": 4,
+        "order": 8,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKch",
         "cutType": "T",
@@ -161,7 +201,7 @@
         "isFiducialVolume": false
       },
       {
-        "order": 5,
+        "order": 9,
         "cutDescription": "K->pi0pi0 decay invariant mass.",
         "cutId": "InvMassKne",
         "cutType": "T",
@@ -170,7 +210,7 @@
         "isFiducialVolume": false
       },
       {
-        "order": 6,
+        "order": 10,
         "cutDescription": "pi0->gamma gamma 1 decay invariant mass.",
         "cutId": "InvMassPi01",
         "cutType": "T",
@@ -179,7 +219,7 @@
         "isFiducialVolume": false
       },
       {
-        "order": 7,
+        "order": 11,
         "cutDescription": "pi0->gamma gamma 2 decay invariant mass.",
         "cutId": "InvMassPi02",
         "cutType": "T",
@@ -188,7 +228,7 @@
         "isFiducialVolume": false
       },
       {
-        "order": 8,
+        "order": 12,
         "cutDescription": "pi0->gamma gamma 1 decay kinetic energy.",
         "cutId": "Pi01OmegaKineticEnergy",
         "cutType": "T",
@@ -196,10 +236,11 @@
         "cutCondition": "<=",
         "isFiducialVolume": false,
         "isBackgroundRejection": true,
-        "channel": "3"
+        "channel": "3",
+        "condition": "RtChOmega && RtNeuOmega && ZChOmega && ZNeuOmega"
       },
       {
-        "order": 9,
+        "order": 13,
         "cutDescription": "Mass of omega from pi+pi-pi0 decay.",
         "cutId": "MassOmega",
         "cutType": "T",
@@ -207,29 +248,30 @@
         "cutCondition": "<=",
         "isFiducialVolume": false,
         "isBackgroundRejection": true,
-        "channel": "3"
+        "channel": "3",
+        "condition": "RtChOmega && RtNeuOmega && ZChOmega && ZNeuOmega"
       },
       {
-        "order": 10,
+        "order": 14,
         "cutDescription": "T0-Omega plane upper limit.",
         "cutId": "T0OmegaUpperLimit",
         "cutType": "O",
-        "cutValue": 16.86,
         "cutCondition": ">=",
         "isFiducialVolume": false,
         "isBackgroundRejection": true,
-        "channel": "3"
+        "channel": "3",
+        "condition": "RtChOmega && RtNeuOmega && ZChOmega && ZNeuOmega"
       },
       {
-        "order": 11,
+        "order": 15,
         "cutDescription": "T0-Omega plane lower limit.",
         "cutId": "T0OmegaLowerLimit",
         "cutType": "O",
-        "cutValue": 16.86,
         "cutCondition": "<=",
         "isFiducialVolume": false,
         "isBackgroundRejection": true,
-        "channel": "3"
+        "channel": "3",
+        "condition": "RtChOmega && RtNeuOmega && ZChOmega && ZNeuOmega"
       }
     ]
   }

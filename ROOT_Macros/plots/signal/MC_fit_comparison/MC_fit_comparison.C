@@ -88,7 +88,11 @@ Float_t deltaPhi,
     deltaPhiFit,
     deltaTheta,
     RtCh,
-    RtNeu;
+    RtNeu,
+    RtChRec,
+    RtNeuRec,
+    ZChRec,
+    ZNeuRec;
 
 Float_t T0Omega = 0;
 
@@ -398,6 +402,14 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                pow(Knemc[7] - ipmc[1], 2));
   RtCh = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
               pow(Kchmc[7] - ipmc[1], 2));
+
+  RtChRec = sqrt(pow(KchrecFit[6] - ipFit[0], 2) +
+                   pow(KchrecFit[7] - ipFit[1], 2));
+  RtNeuRec = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
+                    pow(KnerecFit[7] - ipFit[1], 2));
+
+  ZChRec = abs(KchrecFit[8] - ipFit[2]);
+  ZNeuRec = abs(KnerecFit[8] - ipFit[2]);
 
   // Sprawdź czy zdarzenie przechodzi wszystkie aktywne cięcia (z obsługą grup background rejection)
   bool passesCuts = cutter->PassCuts(cutIndices);
@@ -848,12 +860,12 @@ void MC_fit_comparison::Terminate()
   std::cout << std::endl;
   std::cout << "Calculations in entire space:" << std::endl;
   cutter->SetNormalizationMode(NormalizationMode::TOTAL_EVENTS);
-  
+
   // Użyj GetVisibleCuts() aby wypisać tylko widoczne cięcia (nie-członkowie grup)
   auto visibleCuts = cutter->GetVisibleCuts();
   for (size_t cutIdx : visibleCuts)
   {
-    const auto& cut = cutter->GetCuts()[cutIdx];
+    const auto &cut = cutter->GetCuts()[cutIdx];
     const auto effTot = cutter->GetEfficiency(cutIdx);
     const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutIdx);
 
@@ -865,7 +877,7 @@ void MC_fit_comparison::Terminate()
   cutter->SetNormalizationMode(NormalizationMode::FIDUCIAL_VOLUME);
   for (size_t cutIdx : visibleCuts)
   {
-    const auto& cut = cutter->GetCuts()[cutIdx];
+    const auto &cut = cutter->GetCuts()[cutIdx];
     const auto effTot = cutter->GetEfficiency(cutIdx);
     const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutIdx);
 
@@ -928,7 +940,15 @@ void MC_fit_comparison::InitializeCutSelector(const TString &option)
       {"T0OmegaUpperLimit", [this]()
        { return a * T0Omega + b + Breal; }},
       {"T0OmegaLowerLimit", [this]()
-       { return a * T0Omega + b - Breal; }}};
+       { return a * T0Omega + b - Breal; }},
+      {"RtChOmega", [this]()
+       { return RtChRec; }},
+      {"RtNeuOmega", [this]()
+       { return RtNeuRec; }},
+      {"ZChOmega", [this]()
+       { return ZChRec; }},
+      {"ZNeuOmega", [this]()
+       { return ZNeuRec; }}};
 
   centralValues = {
       {"DeltaPhivFit", 3.130},
@@ -977,20 +997,26 @@ void MC_fit_comparison::InitializeCutSelector(const TString &option)
   std::cout << "  Visible cuts: " << visibleCuts.size() << std::endl;
   for (size_t i : visibleCuts)
   {
-    const auto& cut = cuts[i];
-    if (cut.isSyntheticGroup) {
+    const auto &cut = cuts[i];
+    if (cut.isSyntheticGroup)
+    {
       std::cout << "    [" << i << "] " << cut.cutId << " (SYNTHETIC GROUP with " << cut.groupMembers.size() << " members)" << std::endl;
-    } else {
+    }
+    else
+    {
       std::cout << "    [" << i << "] " << cut.cutId << std::endl;
     }
   }
-  
+
   // Pokaż ukryte cięcia (członkowie grup)
   auto hiddenCount = cuts.size() - visibleCuts.size();
-  if (hiddenCount > 0) {
+  if (hiddenCount > 0)
+  {
     std::cout << "  Hidden cuts (group members): " << hiddenCount << std::endl;
-    for (size_t i = 0; i < cuts.size(); ++i) {
-      if (cutter->IsCutInGroup(i)) {
+    for (size_t i = 0; i < cuts.size(); ++i)
+    {
+      if (cutter->IsCutInGroup(i))
+      {
         std::cout << "    [" << i << "] " << cuts[i].cutId << " (member of group)" << std::endl;
       }
     }
