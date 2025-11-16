@@ -20,9 +20,11 @@ struct Cut {
     std::string cutType;
     std::string cutCondition;
     double cutValue = 0.0;
+    bool cutValueDynamic = false;  // ← NOWE
     double centralValue = 0.0;
     bool centralValueDynamic = false;
     std::function<double()> valueGetter;
+    std::function<double()> cutValueGetter;  // ← NOWE
     std::function<double()> centralValueGetter;
 
     bool isComplexCut = false;
@@ -30,7 +32,7 @@ struct Cut {
     std::shared_ptr<TTreeFormula> treeFormula;
     
     bool isFiducialVolume = false;
-    bool isBackgroundRejection = false;  // ← NOWE
+    bool isBackgroundRejection = false;
 };
 
 // Enum do wyboru metody normalizacji
@@ -55,6 +57,9 @@ public:
     
     // Rejestracja wartości centralnej dla danego cięcia
     void RegisterCentralValueGetter(const std::string& cutId, std::function<double()> getter);
+    
+    // Rejestracja limitu cięcia (dynamiczna wartość cutValue)
+    void RegisterCutValueGetter(const std::string& cutId, std::function<double()> getter);
 
     // Nowe metody dla kombinacji cięć
     bool PassCutsAnd(const std::vector<size_t>& cutIndices);

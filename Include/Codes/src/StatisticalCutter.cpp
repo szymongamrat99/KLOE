@@ -74,6 +74,15 @@ void StatisticalCutter::RegisterCentralValueGetter(const std::string& cutId, std
     }
 }
 
+void StatisticalCutter::RegisterCutValueGetter(const std::string& cutId, std::function<double()> getter) {
+    for (auto& cut : cuts_) {
+        if (cut.cutId == cutId) {
+            cut.cutValueGetter = getter;
+            cut.cutValueDynamic = true;
+        }
+    }
+}
+
 void StatisticalCutter::LoadCuts(const std::string& jsonPath) {
     std::ifstream file(jsonPath);
     if (!file.is_open())
@@ -178,20 +187,25 @@ bool StatisticalCutter::EvaluateCondition(double value, const Cut& cut) const {
     double central = cut.centralValueDynamic && cut.centralValueGetter
         ? cut.centralValueGetter()
         : cut.centralValue;
+    
+    // Pobierz limit cięcia (statyczny lub dynamiczny)
+    double limit = cut.cutValueDynamic && cut.cutValueGetter
+        ? cut.cutValueGetter()
+        : cut.cutValue;
 
     if (cut.cutType == "O") {
-        if (cut.cutCondition == "<=") return value <= cut.cutValue;
-        if (cut.cutCondition == ">=") return value >= cut.cutValue;
-        if (cut.cutCondition == "<")  return value < cut.cutValue;
-        if (cut.cutCondition == ">")  return value > cut.cutValue;
+        if (cut.cutCondition == "<=") return value <= limit;
+        if (cut.cutCondition == ">=") return value >= limit;
+        if (cut.cutCondition == "<")  return value < limit;
+        if (cut.cutCondition == ">")  return value > limit;
     }
     else if (cut.cutType == "T") {
         double deviation = std::abs(value - central);
-        if (cut.cutCondition == "<=") return deviation <= cut.cutValue;
-        if (cut.cutCondition == ">=") return deviation >= cut.cutValue;
-        if (cut.cutCondition == "<")  return deviation < cut.cutValue;
-        if (cut.cutCondition == ">")  return deviation > cut.cutValue;
-        if (cut.cutCondition == "==") return deviation == cut.cutValue;
+        if (cut.cutCondition == "<=") return deviation <= limit;
+        if (cut.cutCondition == ">=") return deviation >= limit;
+        if (cut.cutCondition == "<")  return deviation < limit;
+        if (cut.cutCondition == ">")  return deviation > limit;
+        if (cut.cutCondition == "==") return deviation == limit;
     }
     
     throw std::runtime_error("Invalid cut type '" + cut.cutType + "' or condition '" + cut.cutCondition + "'");

@@ -92,11 +92,15 @@ Float_t deltaPhi,
 
 Float_t T0Omega = 0;
 
+Float_t a = 1,
+        b = 625.091,
+        Breal = 14.1421;
+
 // Definitions of cuts
 
 StatisticalCutter *cutter;
 
-std::map<std::string, std::function<Float_t()>> cutValues;
+std::map<std::string, std::function<Float_t()>> cutValues, cutLimits;
 std::map<std::string, Float_t> centralValues;
 
 std::vector<size_t> cutIndices;
@@ -915,7 +919,11 @@ void MC_fit_comparison::InitializeCutSelector(const TString &option)
       {"Pi01OmegaKineticEnergy", [this]()
        { return T0Omega; }},
       {"MassOmega", [this]()
-       { return omegaFit[5]; }}};
+       { return omegaFit[5]; }},
+      {"T0OmegaUpperLimit", [this]()
+       { return a * T0Omega + b + Breal; }},
+      {"T0OmegaLowerLimit", [this]()
+       { return a * T0Omega + b - Breal; }}};
 
   centralValues = {
       {"DeltaPhivFit", 3.130},
@@ -925,6 +933,12 @@ void MC_fit_comparison::InitializeCutSelector(const TString &option)
       {"InvMassPi02", 134.841},
       {"Pi01OmegaKineticEnergy", 155.658},
       {"MassOmega", 782.994}};
+
+  cutLimits = {
+      {"T0OmegaUpperLimit", [this]()
+       { return omegaFit[5]; }},
+      {"T0OmegaLowerLimit", [this]()
+       { return omegaFit[5]; }}};
 
   cutter->SetTree(fChain);
 
@@ -938,6 +952,11 @@ void MC_fit_comparison::InitializeCutSelector(const TString &option)
     Float_t centralValue = centralPair.second;
     cutter->RegisterCentralValueGetter(centralPair.first, [centralValue]()
                                        { return centralValue; });
+  }
+
+  for (const auto &limitPair : cutLimits)
+  {
+    cutter->RegisterCutValueGetter(limitPair.first, limitPair.second);
   }
 
   const auto &cuts = cutter->GetCuts();

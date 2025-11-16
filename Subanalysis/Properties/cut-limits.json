@@ -206,6 +206,26 @@
         "cutCondition": "<=",
         "isFiducialVolume": false,
         "isBackgroundRejection": true
+      },
+      {
+        "order": 10,
+        "cutDescription": "T0-Omega plane upper limit.",
+        "cutId": "T0OmegaUpperLimit",
+        "cutType": "O",
+        "cutValue": 16.86,
+        "cutCondition": ">=",
+        "isFiducialVolume": false,
+        "isBackgroundRejection": true
+      },
+      {
+        "order": 11,
+        "cutDescription": "T0-Omega plane lower limit.",
+        "cutId": "T0OmegaLowerLimit",
+        "cutType": "O",
+        "cutValue": 16.86,
+        "cutCondition": "<=",
+        "isFiducialVolume": false,
+        "isBackgroundRejection": true
       }
     ]
   }
