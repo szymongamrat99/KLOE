@@ -20,11 +20,11 @@ struct Cut {
     std::string cutType;
     std::string cutCondition;
     double cutValue = 0.0;
-    bool cutValueDynamic = false;  // ← NOWE
+    bool cutValueDynamic = false;
     double centralValue = 0.0;
     bool centralValueDynamic = false;
     std::function<double()> valueGetter;
-    std::function<double()> cutValueGetter;  // ← NOWE
+    std::function<double()> cutValueGetter;
     std::function<double()> centralValueGetter;
 
     bool isComplexCut = false;
@@ -33,6 +33,7 @@ struct Cut {
     
     bool isFiducialVolume = false;
     bool isBackgroundRejection = false;
+    std::string channel = "default";  // ← NOWE: kanał dla grup background rejection
 };
 
 // Enum do wyboru metody normalizacji
@@ -137,6 +138,10 @@ private:
     };
 
     void UpdateStatsInternal(int mctruth, std::vector<CutStats>& stats);
+    
+    // Przetwarzanie cięć z obsługą per-channel grup background rejection
+    bool ProcessCutsLoop(const std::vector<size_t>& cutsToProcess, 
+                         std::vector<size_t>& survived_array, int mctruth);
 
     KLOE::HypothesisCode hypoCode_;
     NormalizationMode normalizationMode_ = NormalizationMode::TOTAL_EVENTS;

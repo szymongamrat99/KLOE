@@ -195,7 +195,8 @@
         "cutValue": 17.073,
         "cutCondition": "<=",
         "isFiducialVolume": false,
-        "isBackgroundRejection": true
+        "isBackgroundRejection": true,
+        "channel": "3"
       },
       {
         "order": 9,
@@ -205,7 +206,8 @@
         "cutValue": 16.86,
         "cutCondition": "<=",
         "isFiducialVolume": false,
-        "isBackgroundRejection": true
+        "isBackgroundRejection": true,
+        "channel": "3"
       },
       {
         "order": 10,
@@ -215,7 +217,8 @@
         "cutValue": 16.86,
         "cutCondition": ">=",
         "isFiducialVolume": false,
-        "isBackgroundRejection": true
+        "isBackgroundRejection": true,
+        "channel": "3"
       },
       {
         "order": 11,
@@ -225,7 +228,8 @@
         "cutValue": 16.86,
         "cutCondition": "<=",
         "isFiducialVolume": false,
-        "isBackgroundRejection": true
+        "isBackgroundRejection": true,
+        "channel": "3"
       }
     ]
   }

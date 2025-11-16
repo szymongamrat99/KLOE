@@ -145,7 +145,8 @@ void StatisticalCutter::LoadCuts(const json& j) {
         }
         
         cut.isFiducialVolume = cutj.value("isFiducialVolume", false);
-        cut.isBackgroundRejection = cutj.value("isBackgroundRejection", false);  // ← NOWE
+        cut.isBackgroundRejection = cutj.value("isBackgroundRejection", false);
+        cut.channel = cutj.value("channel", std::string("default"));  // ← NOWE: kanał dla grup
         
         cuts_.push_back(cut);
     }
@@ -317,36 +318,56 @@ bool StatisticalCutter::PassCuts(const std::vector<size_t>& cutIndices) {
     }
     
     bool result = true;
-    bool inBackgroundRejectionGroup = false;
-    bool backgroundRejectionGroup = true;
+    std::map<std::string, bool> backgroundRejectionGroups;  // channel -> group result
+    std::map<std::string, bool> inBackgroundRejectionGroup;  // channel -> czy w grupie
     
     for (size_t cutIdx : cutsToCheck) {
         auto& cut = cuts_[cutIdx];
+        std::string channel = cut.channel;
         
-        // Wejście do grupy background rejection
-        if (cut.isBackgroundRejection && !inBackgroundRejectionGroup) {
-            inBackgroundRejectionGroup = true;
-            backgroundRejectionGroup = true;  // Reset
-            bool cutResult = PassCut(cutIdx);
-            backgroundRejectionGroup = backgroundRejectionGroup && cutResult;
-            continue;
-        }
-        
-        // Wyjście z grupy - zastosuj negację
-        if (!cut.isBackgroundRejection && inBackgroundRejectionGroup) {
-            bool groupResult = !backgroundRejectionGroup;
-            if (!groupResult) {
-                result = false;
-                break;
+        // Jeśli to cięcie background rejection
+        if (cut.isBackgroundRejection) {
+            // Jeśli pierwsza raz dla tego kanału - inicjalizuj grupę
+            if (inBackgroundRejectionGroup.find(channel) == inBackgroundRejectionGroup.end()) {
+                inBackgroundRejectionGroup[channel] = true;
+                backgroundRejectionGroups[channel] = true;  // Reset do neutral element
             }
-            inBackgroundRejectionGroup = false;
+            
+            bool cutResult = PassCut(cutIdx);
+            backgroundRejectionGroups[channel] = backgroundRejectionGroups[channel] && cutResult;
+            continue;
         }
         
-        // Cięcie w grupie background rejection
-        if (cut.isBackgroundRejection && inBackgroundRejectionGroup) {
-            bool cutResult = PassCut(cutIdx);
-            backgroundRejectionGroup = backgroundRejectionGroup && cutResult;
-            continue;
+        // Jeśli to normalne cięcie i poprzednio byliśmy w grupie background rejection
+        // to musimy zamknąć grupę i zastosować negację
+        if (!cut.isBackgroundRejection && !inBackgroundRejectionGroup.empty()) {
+            // Sprawdź grupy dla innych kanałów które się skończyły
+            std::vector<std::string> channelsToClose;
+            for (auto& pair : inBackgroundRejectionGroup) {
+                std::string groupChannel = pair.first;
+                // Zamknij grupę jeśli to normalne cięcie (niezavisne od kanału)
+                // lub jeśli ten kanał się zmienił
+                bool shouldClose = false;
+                
+                // Zawsze zamykaj grupy, bo przechodzimy do normalnego cięcia
+                shouldClose = true;
+                
+                if (shouldClose) {
+                    bool groupResult = !backgroundRejectionGroups[groupChannel];
+                    if (!groupResult) {
+                        result = false;
+                        break;
+                    }
+                    channelsToClose.push_back(groupChannel);
+                }
+            }
+            
+            for (const auto& ch : channelsToClose) {
+                inBackgroundRejectionGroup.erase(ch);
+                backgroundRejectionGroups.erase(ch);
+            }
+            
+            if (!result) break;
         }
         
         // Normalne cięcie
@@ -356,11 +377,14 @@ bool StatisticalCutter::PassCuts(const std::vector<size_t>& cutIndices) {
         }
     }
     
-    // Koniec pętli - jeśli wciąż w grupie, zastosuj negację
-    if (result && inBackgroundRejectionGroup) {
-        bool groupResult = !backgroundRejectionGroup;
-        if (!groupResult) {
-            result = false;
+    // Koniec pętli - jeśli są jeszcze otwarte grupy, zastosuj negację
+    if (result && !inBackgroundRejectionGroup.empty()) {
+        for (auto& pair : backgroundRejectionGroups) {
+            bool groupResult = !pair.second;
+            if (!groupResult) {
+                result = false;
+                break;
+            }
         }
     }
     
@@ -393,47 +417,53 @@ void StatisticalCutter::UpdateStats(int mctruth) {
         }
     }
     
-    bool inBackgroundRejectionGroup = false;
-    bool backgroundRejectionGroup = true;
-    size_t backgroundRejectionGroupStartIdx = 0;
+    // Mapy dla grup background rejection per-channel
+    std::map<std::string, bool> inBackgroundRejectionGroup;  // channel -> czy w grupie
+    std::map<std::string, bool> backgroundRejectionGroups;   // channel -> wynik grupy
+    std::map<std::string, size_t> backgroundRejectionGroupStartIdx;  // channel -> indeks startu
     
     for (size_t idx : cutsToProcess) {
         auto& cut = cuts_[idx];
+        std::string channel = cut.channel;
         
-        // Wejście do grupy background rejection
-        if (cut.isBackgroundRejection && !inBackgroundRejectionGroup) {
-            inBackgroundRejectionGroup = true;
-            backgroundRejectionGroup = true;  // Reset do neutral element
-            backgroundRejectionGroupStartIdx = idx;
-            bool cutResult = PassCut(idx);
-            backgroundRejectionGroup = backgroundRejectionGroup && cutResult;
-            continue;
-        }
-        
-        // Wyjście z grupy - zastosuj negację i zlicz grupę jako jedno cięcie
-        if (!cut.isBackgroundRejection && inBackgroundRejectionGroup) {
-            // Zaneguj całą grupę
-            bool groupResult = !backgroundRejectionGroup;
-            if (survived && groupResult) {
-                if (mctruth == signalMctruth_)
-                    survivedSignal_[backgroundRejectionGroupStartIdx]++;
-                else
-                    survivedBackground_[backgroundRejectionGroupStartIdx]++;
-            } else {
-                survived = false;
+        // Jeśli to cięcie background rejection
+        if (cut.isBackgroundRejection) {
+            // Inicjalizuj grupę dla tego kanału jeśli nie istnieje
+            if (inBackgroundRejectionGroup.find(channel) == inBackgroundRejectionGroup.end()) {
+                inBackgroundRejectionGroup[channel] = true;
+                backgroundRejectionGroups[channel] = true;  // Reset do neutral element
+                backgroundRejectionGroupStartIdx[channel] = idx;
             }
-            inBackgroundRejectionGroup = false;
-            // Teraz przetworz bieżące cięcie (normalne)
-        }
-        
-        // Cięcie w grupie background rejection
-        if (cut.isBackgroundRejection && inBackgroundRejectionGroup) {
+            
             bool cutResult = PassCut(idx);
-            backgroundRejectionGroup = backgroundRejectionGroup && cutResult;
+            backgroundRejectionGroups[channel] = backgroundRejectionGroups[channel] && cutResult;
             continue;
         }
         
-        // Normalne cięcie
+        // Normalne cięcie - zamknij wszystkie otwarte grupy
+        if (!cut.isBackgroundRejection && !inBackgroundRejectionGroup.empty()) {
+            std::vector<std::string> channelsToClose;
+            for (auto& pair : inBackgroundRejectionGroup) {
+                std::string groupChannel = pair.first;
+                bool groupResult = !backgroundRejectionGroups[groupChannel];
+                if (survived && groupResult) {
+                    if (mctruth == signalMctruth_)
+                        survivedSignal_[backgroundRejectionGroupStartIdx[groupChannel]]++;
+                    else
+                        survivedBackground_[backgroundRejectionGroupStartIdx[groupChannel]]++;
+                } else {
+                    survived = false;
+                }
+                channelsToClose.push_back(groupChannel);
+            }
+            for (const auto& ch : channelsToClose) {
+                inBackgroundRejectionGroup.erase(ch);
+                backgroundRejectionGroups.erase(ch);
+                backgroundRejectionGroupStartIdx.erase(ch);
+            }
+        }
+        
+        // Przetwórz normalne cięcie
         if (survived && PassCut(idx)) {
             if (mctruth == signalMctruth_)
                 survivedSignal_[idx]++;
@@ -444,60 +474,66 @@ void StatisticalCutter::UpdateStats(int mctruth) {
         }
     }
     
-    // Koniec pętli - jeśli wciąż w grupie, zastosuj negację
-    if (inBackgroundRejectionGroup) {
-        bool groupResult = !backgroundRejectionGroup;
-        if (survived && groupResult) {
-            if (mctruth == signalMctruth_)
-                survivedSignal_[backgroundRejectionGroupStartIdx]++;
-            else
-                survivedBackground_[backgroundRejectionGroupStartIdx]++;
-        } else {
-            survived = false;
+    // Koniec pętli - zamknij pozostałe grupy
+    if (!inBackgroundRejectionGroup.empty()) {
+        for (auto& pair : inBackgroundRejectionGroup) {
+            std::string channel = pair.first;
+            bool groupResult = !backgroundRejectionGroups[channel];
+            if (survived && groupResult) {
+                if (mctruth == signalMctruth_)
+                    survivedSignal_[backgroundRejectionGroupStartIdx[channel]]++;
+                else
+                    survivedBackground_[backgroundRejectionGroupStartIdx[channel]]++;
+            } else {
+                survived = false;
+            }
         }
     }
 
     // Liczenie dla zdarzeń w fiducial volume
     if (inFV) {
         survived = true;
-        inBackgroundRejectionGroup = false;
-        backgroundRejectionGroup = true;
+        inBackgroundRejectionGroup.clear();
+        backgroundRejectionGroups.clear();
+        backgroundRejectionGroupStartIdx.clear();
         
         for (size_t idx : cutsToProcess) {
             auto& cut = cuts_[idx];
+            std::string channel = cut.channel;
             
-            // Wejście do grupy background rejection
-            if (cut.isBackgroundRejection && !inBackgroundRejectionGroup) {
-                inBackgroundRejectionGroup = true;
-                backgroundRejectionGroup = true;
-                backgroundRejectionGroupStartIdx = idx;
-                bool cutResult = PassCut(idx);
-                backgroundRejectionGroup = backgroundRejectionGroup && cutResult;
-                continue;
-            }
-            
-            // Wyjście z grupy - zastosuj negację i zlicz grupę
-            if (!cut.isBackgroundRejection && inBackgroundRejectionGroup) {
-                bool groupResult = !backgroundRejectionGroup;
-                if (survived && groupResult) {
-                    if (mctruth == signalMctruth_)
-                        survivedSignalInFV_[backgroundRejectionGroupStartIdx]++;
-                    else
-                        survivedBackgroundInFV_[backgroundRejectionGroupStartIdx]++;
-                } else {
-                    survived = false;
+            if (cut.isBackgroundRejection) {
+                if (inBackgroundRejectionGroup.find(channel) == inBackgroundRejectionGroup.end()) {
+                    inBackgroundRejectionGroup[channel] = true;
+                    backgroundRejectionGroups[channel] = true;
+                    backgroundRejectionGroupStartIdx[channel] = idx;
                 }
-                inBackgroundRejectionGroup = false;
-            }
-            
-            // Cięcie w grupie background rejection
-            if (cut.isBackgroundRejection && inBackgroundRejectionGroup) {
                 bool cutResult = PassCut(idx);
-                backgroundRejectionGroup = backgroundRejectionGroup && cutResult;
+                backgroundRejectionGroups[channel] = backgroundRejectionGroups[channel] && cutResult;
                 continue;
             }
             
-            // Normalne cięcie
+            if (!cut.isBackgroundRejection && !inBackgroundRejectionGroup.empty()) {
+                std::vector<std::string> channelsToClose;
+                for (auto& pair : inBackgroundRejectionGroup) {
+                    std::string groupChannel = pair.first;
+                    bool groupResult = !backgroundRejectionGroups[groupChannel];
+                    if (survived && groupResult) {
+                        if (mctruth == signalMctruth_)
+                            survivedSignalInFV_[backgroundRejectionGroupStartIdx[groupChannel]]++;
+                        else
+                            survivedBackgroundInFV_[backgroundRejectionGroupStartIdx[groupChannel]]++;
+                    } else {
+                        survived = false;
+                    }
+                    channelsToClose.push_back(groupChannel);
+                }
+                for (const auto& ch : channelsToClose) {
+                    inBackgroundRejectionGroup.erase(ch);
+                    backgroundRejectionGroups.erase(ch);
+                    backgroundRejectionGroupStartIdx.erase(ch);
+                }
+            }
+            
             if (survived && PassCut(idx)) {
                 if (mctruth == signalMctruth_)
                     survivedSignalInFV_[idx]++;
@@ -508,16 +544,18 @@ void StatisticalCutter::UpdateStats(int mctruth) {
             }
         }
         
-        // Koniec pętli - jeśli wciąż w grupie, zastosuj negację
-        if (inBackgroundRejectionGroup) {
-            bool groupResult = !backgroundRejectionGroup;
-            if (survived && groupResult) {
-                if (mctruth == signalMctruth_)
-                    survivedSignalInFV_[backgroundRejectionGroupStartIdx]++;
-                else
-                    survivedBackgroundInFV_[backgroundRejectionGroupStartIdx]++;
-            } else {
-                survived = false;
+        if (!inBackgroundRejectionGroup.empty()) {
+            for (auto& pair : inBackgroundRejectionGroup) {
+                std::string channel = pair.first;
+                bool groupResult = !backgroundRejectionGroups[channel];
+                if (survived && groupResult) {
+                    if (mctruth == signalMctruth_)
+                        survivedSignalInFV_[backgroundRejectionGroupStartIdx[channel]]++;
+                    else
+                        survivedBackgroundInFV_[backgroundRejectionGroupStartIdx[channel]]++;
+                } else {
+                    survived = false;
+                }
             }
         }
     }
@@ -536,44 +574,47 @@ void StatisticalCutter::UpdateStats(int mctruth) {
         }
 
         survived = true;
-        inBackgroundRejectionGroup = false;
-        backgroundRejectionGroup = true;
+        inBackgroundRejectionGroup.clear();
+        backgroundRejectionGroups.clear();
+        backgroundRejectionGroupStartIdx.clear();
         
         for (size_t idx : cutsToProcess) {
             auto& cut = cuts_[idx];
+            std::string channel = cut.channel;
             
-            // Wejście do grupy background rejection
-            if (cut.isBackgroundRejection && !inBackgroundRejectionGroup) {
-                inBackgroundRejectionGroup = true;
-                backgroundRejectionGroup = true;
-                backgroundRejectionGroupStartIdx = idx;
-                bool cutResult = PassCut(idx);
-                backgroundRejectionGroup = backgroundRejectionGroup && cutResult;
-                continue;
-            }
-            
-            // Wyjście z grupy - zastosuj negację i zlicz grupę
-            if (!cut.isBackgroundRejection && inBackgroundRejectionGroup) {
-                bool groupResult = !backgroundRejectionGroup;
-                if (survived && groupResult) {
-                    if (mctruth == signalMctruth_)
-                        survivedSignalExcludingMinus1_[backgroundRejectionGroupStartIdx]++;
-                    else
-                        survivedBackgroundExcludingMinus1_[backgroundRejectionGroupStartIdx]++;
-                } else {
-                    survived = false;
+            if (cut.isBackgroundRejection) {
+                if (inBackgroundRejectionGroup.find(channel) == inBackgroundRejectionGroup.end()) {
+                    inBackgroundRejectionGroup[channel] = true;
+                    backgroundRejectionGroups[channel] = true;
+                    backgroundRejectionGroupStartIdx[channel] = idx;
                 }
-                inBackgroundRejectionGroup = false;
-            }
-            
-            // Cięcie w grupie background rejection
-            if (cut.isBackgroundRejection && inBackgroundRejectionGroup) {
                 bool cutResult = PassCut(idx);
-                backgroundRejectionGroup = backgroundRejectionGroup && cutResult;
+                backgroundRejectionGroups[channel] = backgroundRejectionGroups[channel] && cutResult;
                 continue;
             }
             
-            // Normalne cięcie
+            if (!cut.isBackgroundRejection && !inBackgroundRejectionGroup.empty()) {
+                std::vector<std::string> channelsToClose;
+                for (auto& pair : inBackgroundRejectionGroup) {
+                    std::string groupChannel = pair.first;
+                    bool groupResult = !backgroundRejectionGroups[groupChannel];
+                    if (survived && groupResult) {
+                        if (mctruth == signalMctruth_)
+                            survivedSignalExcludingMinus1_[backgroundRejectionGroupStartIdx[groupChannel]]++;
+                        else
+                            survivedBackgroundExcludingMinus1_[backgroundRejectionGroupStartIdx[groupChannel]]++;
+                    } else {
+                        survived = false;
+                    }
+                    channelsToClose.push_back(groupChannel);
+                }
+                for (const auto& ch : channelsToClose) {
+                    inBackgroundRejectionGroup.erase(ch);
+                    backgroundRejectionGroups.erase(ch);
+                    backgroundRejectionGroupStartIdx.erase(ch);
+                }
+            }
+            
             if (survived && PassCut(idx)) {
                 if (mctruth == signalMctruth_)
                     survivedSignalExcludingMinus1_[idx]++;
@@ -584,59 +625,64 @@ void StatisticalCutter::UpdateStats(int mctruth) {
             }
         }
         
-        // Koniec pętli - jeśli wciąż w grupie, zastosuj negację
-        if (inBackgroundRejectionGroup) {
-            bool groupResult = !backgroundRejectionGroup;
-            if (survived && groupResult) {
-                if (mctruth == signalMctruth_)
-                    survivedSignalExcludingMinus1_[backgroundRejectionGroupStartIdx]++;
-                else
-                    survivedBackgroundExcludingMinus1_[backgroundRejectionGroupStartIdx]++;
-            } else {
-                survived = false;
+        if (!inBackgroundRejectionGroup.empty()) {
+            for (auto& pair : inBackgroundRejectionGroup) {
+                std::string channel = pair.first;
+                bool groupResult = !backgroundRejectionGroups[channel];
+                if (survived && groupResult) {
+                    if (mctruth == signalMctruth_)
+                        survivedSignalExcludingMinus1_[backgroundRejectionGroupStartIdx[channel]]++;
+                    else
+                        survivedBackgroundExcludingMinus1_[backgroundRejectionGroupStartIdx[channel]]++;
+                } else {
+                    survived = false;
+                }
             }
         }
 
         if (inFV) {
             survived = true;
-            inBackgroundRejectionGroup = false;
-            backgroundRejectionGroup = true;
+            inBackgroundRejectionGroup.clear();
+            backgroundRejectionGroups.clear();
+            backgroundRejectionGroupStartIdx.clear();
             
             for (size_t idx : cutsToProcess) {
                 auto& cut = cuts_[idx];
+                std::string channel = cut.channel;
                 
-                // Wejście do grupy background rejection
-                if (cut.isBackgroundRejection && !inBackgroundRejectionGroup) {
-                    inBackgroundRejectionGroup = true;
-                    backgroundRejectionGroup = true;
-                    backgroundRejectionGroupStartIdx = idx;
-                    bool cutResult = PassCut(idx);
-                    backgroundRejectionGroup = backgroundRejectionGroup && cutResult;
-                    continue;
-                }
-                
-                // Wyjście z grupy - zastosuj negację i zlicz grupę
-                if (!cut.isBackgroundRejection && inBackgroundRejectionGroup) {
-                    bool groupResult = !backgroundRejectionGroup;
-                    if (survived && groupResult) {
-                        if (mctruth == signalMctruth_)
-                            survivedSignalInFVExcludingMinus1_[backgroundRejectionGroupStartIdx]++;
-                        else
-                            survivedBackgroundInFVExcludingMinus1_[backgroundRejectionGroupStartIdx]++;
-                    } else {
-                        survived = false;
+                if (cut.isBackgroundRejection) {
+                    if (inBackgroundRejectionGroup.find(channel) == inBackgroundRejectionGroup.end()) {
+                        inBackgroundRejectionGroup[channel] = true;
+                        backgroundRejectionGroups[channel] = true;
+                        backgroundRejectionGroupStartIdx[channel] = idx;
                     }
-                    inBackgroundRejectionGroup = false;
-                }
-                
-                // Cięcie w grupie background rejection
-                if (cut.isBackgroundRejection && inBackgroundRejectionGroup) {
                     bool cutResult = PassCut(idx);
-                    backgroundRejectionGroup = backgroundRejectionGroup && cutResult;
+                    backgroundRejectionGroups[channel] = backgroundRejectionGroups[channel] && cutResult;
                     continue;
                 }
                 
-                // Normalne cięcie
+                if (!cut.isBackgroundRejection && !inBackgroundRejectionGroup.empty()) {
+                    std::vector<std::string> channelsToClose;
+                    for (auto& pair : inBackgroundRejectionGroup) {
+                        std::string groupChannel = pair.first;
+                        bool groupResult = !backgroundRejectionGroups[groupChannel];
+                        if (survived && groupResult) {
+                            if (mctruth == signalMctruth_)
+                                survivedSignalInFVExcludingMinus1_[backgroundRejectionGroupStartIdx[groupChannel]]++;
+                            else
+                                survivedBackgroundInFVExcludingMinus1_[backgroundRejectionGroupStartIdx[groupChannel]]++;
+                        } else {
+                            survived = false;
+                        }
+                        channelsToClose.push_back(groupChannel);
+                    }
+                    for (const auto& ch : channelsToClose) {
+                        inBackgroundRejectionGroup.erase(ch);
+                        backgroundRejectionGroups.erase(ch);
+                        backgroundRejectionGroupStartIdx.erase(ch);
+                    }
+                }
+                
                 if (survived && PassCut(idx)) {
                     if (mctruth == signalMctruth_)
                         survivedSignalInFVExcludingMinus1_[idx]++;
@@ -647,16 +693,18 @@ void StatisticalCutter::UpdateStats(int mctruth) {
                 }
             }
             
-            // Koniec pętli - jeśli wciąż w grupie, zastosuj negację
-            if (inBackgroundRejectionGroup) {
-                bool groupResult = !backgroundRejectionGroup;
-                if (survived && groupResult) {
-                    if (mctruth == signalMctruth_)
-                        survivedSignalInFVExcludingMinus1_[backgroundRejectionGroupStartIdx]++;
-                    else
-                        survivedBackgroundInFVExcludingMinus1_[backgroundRejectionGroupStartIdx]++;
-                } else {
-                    survived = false;
+            if (!inBackgroundRejectionGroup.empty()) {
+                for (auto& pair : inBackgroundRejectionGroup) {
+                    std::string channel = pair.first;
+                    bool groupResult = !backgroundRejectionGroups[channel];
+                    if (survived && groupResult) {
+                        if (mctruth == signalMctruth_)
+                            survivedSignalInFVExcludingMinus1_[backgroundRejectionGroupStartIdx[channel]]++;
+                        else
+                            survivedBackgroundInFVExcludingMinus1_[backgroundRejectionGroupStartIdx[channel]]++;
+                    } else {
+                        survived = false;
+                    }
                 }
             }
         }
