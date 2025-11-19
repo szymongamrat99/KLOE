@@ -37,7 +37,7 @@
 #include "../inc/initialanalysis.hpp"
 #include "initialanalysis.hpp"
 
-int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj)
+int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, bool singleFile)
 {
   ConfigManager &config = ConfigManager::getInstance();
   KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();
@@ -185,7 +185,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     log_file_writer_lumi = "file_lumi_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + ".log";
   }
 
-  SplitFileWriter writer(baseFilenamesTot[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024 * 0.01, false, dated_folder, log_file_writer_lumi, fileTypeOpt);
+  SplitFileWriter writer(baseFilenamesTot[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024 * 0.01, false, dated_folder, log_file_writer_lumi, fileTypeOpt, singleFile);
 
   KLOE::FileManager fileManager;
   std::string inputLumiLog = "";

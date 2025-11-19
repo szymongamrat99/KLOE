@@ -16,6 +16,7 @@ namespace Paths
   extern const std::string workdirPath;
   extern const std::string pdgConstFilePath;
   extern const std::string propertiesPath;
+  extern const std::string logsCNAFDir;
   extern const std::string histogramConfigDir;
   extern const std::string histogramConfig1DPath;
   extern const std::string histogramConfig2DPath;

@@ -8,10 +8,12 @@ SplitFileWriter::SplitFileWriter(const std::string &baseName,
                                  bool splitByRun,
                                  const std::string &outputDir,
                                  const std::string &logFile,
-                                 Controls::FileType fileType)
+                                 Controls::FileType fileType,
+                                 bool singleFile)
     : _baseName(baseName),
       _maxSizeBytes(maxSizeBytes),
       _splitByRun(splitByRun),
+      _singleFile(singleFile),
       _outputDir(outputDir),
       _logFile(outputDir + "/" + logFile),
       _fileType(fileType),
@@ -28,6 +30,12 @@ SplitFileWriter::SplitFileWriter(const std::string &baseName,
       _summaryWritten(false)
 {
   EnsureOutputDirExists();
+  
+  // Jeśli włączony jest tryb single file, ustaw _fileCounter na max istniejący numer + 1
+  if (_singleFile)
+  {
+    _fileCounter = GetMaxFileNumber() + 1;
+  }
   
   _logStream.open(_logFile, std::ios::out | std::ios::app);
   if (_logStream.is_open())
@@ -357,6 +365,63 @@ void SplitFileWriter::WriteAndClose()
   }
 }
 
+Int_t SplitFileWriter::GetMaxFileNumber() const
+{
+  Int_t maxNumber = 0;
+  
+  try
+  {
+    boost::filesystem::path outputPath(_outputDir);
+    if (!boost::filesystem::exists(outputPath) || !boost::filesystem::is_directory(outputPath))
+    {
+      return 0; // Brak katalogu lub nie jest katalogiem
+    }
+    
+    // Szukamy plików pasujących do wzorca: baseName_<number>.root
+    std::string pattern = _baseName + "_";
+    
+    for (const auto &entry : boost::filesystem::directory_iterator(outputPath))
+    {
+      if (boost::filesystem::is_regular_file(entry.path()))
+      {
+        std::string filename = entry.path().filename().string();
+        
+        // Sprawdzamy czy plik pasuje do wzorca
+        if (filename.find(pattern) == 0 && filename.find(".root") != std::string::npos)
+        {
+          // Wyodrębniamy numer z nazwy pliku
+          // Format: baseName_<number>.root
+          size_t startPos = pattern.length();
+          size_t endPos = filename.find(".root", startPos);
+          
+          if (endPos != std::string::npos)
+          {
+            std::string numberStr = filename.substr(startPos, endPos - startPos);
+            try
+            {
+              Int_t number = std::stoi(numberStr);
+              if (number > maxNumber)
+              {
+                maxNumber = number;
+              }
+            }
+            catch (const std::exception &)
+            {
+              // Ignore files that don't have valid number format
+            }
+          }
+        }
+      }
+    }
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << "Error in GetMaxFileNumber(): " << e.what() << std::endl;
+  }
+  
+  return maxNumber;
+}
+
 void SplitFileWriter::Fill(const std::map<std::string, Int_t> &intVars,
                            const std::map<std::string, Float_t> &floatVars,
                            const std::map<std::string, std::vector<Int_t>> &intArrays,
@@ -401,17 +466,21 @@ void SplitFileWriter::Fill(const std::map<std::string, Int_t> &intVars,
     AddInputFileLuminosity(_currentInputFile, _currentLuminosityPerEvent);
   }
 
-  if (_splitByRun && _currentRun != -1 && intVars.at("nrun") != _currentRun)
+  // Logika split - pomijana gdy tryb single file jest aktywny
+  if (!_singleFile)
   {
-    WriteAndClose();
-    OpenNewFile();
-    SetBranches();
-  }
-  else if (!_splitByRun && _file->GetSize() >= _maxSizeBytes)
-  {
-    WriteAndClose();
-    OpenNewFile();
-    SetBranches();
+    if (_splitByRun && _currentRun != -1 && intVars.at("nrun") != _currentRun)
+    {
+      WriteAndClose();
+      OpenNewFile();
+      SetBranches();
+    }
+    else if (!_splitByRun && _file->GetSize() >= _maxSizeBytes)
+    {
+      WriteAndClose();
+      OpenNewFile();
+      SetBranches();
+    }
   }
 
   if (_start == 1)

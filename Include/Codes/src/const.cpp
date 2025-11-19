@@ -23,6 +23,7 @@ namespace Paths
   const std::string workdirPath = getenv("WORKDIR");
   const std::string pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json";
   const std::string propertiesPath = getenv("PROPERTIESKLOE");
+  const std::string logsCNAFDir = getenv("LOGSCNAFDIR");
   const std::string histogramConfigDir = propertiesPath + "/histogram_conf";
   const std::string histogramConfig1DPath = histogramConfigDir + "/histogram1D.csv";
   const std::string histogramConfig2DPath = histogramConfigDir + "/histogram2D.csv";

@@ -1,5 +1,6 @@
 #include "../inc/ConfigManager.h"
 #include <iostream>
+#include <const.h>
 
 // Static member definitions - moved here to avoid multiple definition errors
 ConfigManager* ConfigManager::instance = nullptr;
@@ -8,7 +9,7 @@ std::mutex ConfigManager::mutex_;
 // Private constructor implementation
 ConfigManager::ConfigManager() : propertiesLoaded(false), constantsLoaded(false), errorLogger(nullptr) {
     // Initialize error logger with config-specific log file
-    std::string logFileName = "log/config_manager.log";
+    std::string logFileName = Paths::logsCNAFDir + "config_manager.log";
     errorLogger = new ErrorHandling::ErrorLogs(logFileName);
     errorLogger->setPrintToScreen(true);
     

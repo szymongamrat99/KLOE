@@ -402,4 +402,78 @@ namespace KLOE
       chain.Add(kv.second.c_str());
     }
   }
+
+  bool FileManager::ValidateJobListFilename(const std::string& filename)
+  {
+    // Format: job_v{wersja}_{typ}_{luminosity}_inv_pb_{numer}.txt
+    // Przykład: job_v1_data_5000_inv_pb_001.txt
+    
+    std::regex jobFileRegex(R"(^job_v\d+_(data|all_phys|all_phys2|all_phys3)_[\d.]+_inv_pb_\d+\.txt$)");
+    return std::regex_match(filename, jobFileRegex);
+  }
+
+  std::vector<std::string> FileManager::LoadFileListFromFile(const std::string& filePath)
+  {
+    std::vector<std::string> fileList;
+    std::ifstream file(filePath);
+    
+    if (!file.is_open())
+    {
+      throw std::runtime_error("Cannot open file: " + filePath);
+    }
+    
+    std::string line;
+    while (std::getline(file, line))
+    {
+      // Usuń białe znaki z początku i końca linii
+      line.erase(0, line.find_first_not_of(" \t\r\n"));
+      line.erase(line.find_last_not_of(" \t\r\n") + 1);
+      
+      // Pomiń puste linie i komentarze
+      if (line.empty() || line[0] == '#')
+        continue;
+      
+      fileList.push_back(line);
+    }
+    
+    file.close();
+    
+    if (fileList.empty())
+    {
+      throw std::runtime_error("No files found in job list file: " + filePath);
+    }
+    
+    return fileList;
+  }
+
+  void FileManager::chainInit(TChain &chain, ErrorHandling::ErrorLogs &logger,
+                              const std::vector<std::string>& fileList)
+  {
+    ErrorHandling::ErrorCodes errorCode;
+    
+    for (const auto& filepath : fileList)
+    {
+      // Sprawdź czy plik istnieje
+      boost::filesystem::path pathObj(filepath);
+      if (!boost::filesystem::exists(pathObj))
+      {
+        std::cerr << "WARNING: File does not exist: " << filepath << std::endl;
+        errorCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
+        logger.getErrLog(errorCode, "File not found: " + filepath);
+        continue;
+      }
+      
+      // Sprawdź czy to plik ROOT
+      if (pathObj.extension() != ".root")
+      {
+        std::cerr << "WARNING: File is not ROOT file: " << filepath << std::endl;
+        continue;
+      }
+      
+      // Dodaj plik do TChain
+      chain.Add(filepath.c_str());
+      errorCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
+      logger.getErrLog(errorCode, filepath);
+    }
+  }
 } // namespace KLOE

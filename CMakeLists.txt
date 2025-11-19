@@ -11,7 +11,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Optymalizacje kompilaitora
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG -ffast-math")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -ffast-math")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -Wextra -Wpedantic -fsanitize=address -fsanitize=undefined")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG -march=native")
 

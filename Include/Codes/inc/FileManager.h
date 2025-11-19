@@ -87,6 +87,30 @@ public:
      * @param logFile Ścieżka do pliku logu.
      */
     static void LogChainLuminosity(TChain &chain, const std::string &logFile = "input_files.log");
+
+    /**
+     * @brief Wczytaj listę ścieżek plików z pliku tekstowego.
+     * @param filePath Ścieżka do pliku zawierającego listę plików.
+     * @return Wektor ścieżek plików.
+     * @throws std::runtime_error jeśli plik nie może być otwarty.
+     */
+    static std::vector<std::string> LoadFileListFromFile(const std::string& filePath);
+
+    /**
+     * @brief Inicjalizuj TChain z listy ścieżek plików.
+     * @param chain Reference do TChain.
+     * @param logger Reference do ErrorHandling::ErrorLogs.
+     * @param fileList Wektor ścieżek plików.
+     */
+    void chainInit(TChain &chain, ErrorHandling::ErrorLogs &logger,
+                  const std::vector<std::string>& fileList);
+
+    /**
+     * @brief Sprawdź czy nazwa pliku ma odpowiedni format: job_v{wersja}_{typ}_{luminosity}_inv_pb_{numer}.txt
+     * @param filename Nazwa pliku do sprawdzenia.
+     * @return true jeśli plik ma prawidłowy format, false w przeciwnym razie.
+     */
+    static bool ValidateJobListFilename(const std::string& filename);
 };
 }
 
