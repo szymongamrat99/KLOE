@@ -13,7 +13,6 @@
 #include <TFile.h>
 #include <TTree.h>
 
-
 using json = nlohmann::json;
 
 namespace KLOE
@@ -22,29 +21,29 @@ namespace KLOE
   double FileManager::EventsToLuminosity(Long64_t nEvents)
   {
     // Wzór do przeliczenia liczby zdarzeń na luminozność
-    // 
+    //
     // Dla KLOE:
     // - Typowy plik z danymi ma ~N wydarzeń
     // - Odpowiada to ~X nb^-1 luminozności
-    // 
+    //
     // Wzór empiryczny bazujący na liczbie zdarzeń:
     // Luminosity [nb^-1] = nEvents * conversion_factor + displacement
-    
-    const double conversion_factor = 0.000908;  // [nb^-1 / event]
-    const double displacement = 1.38;       // [nb^-1]
+
+    const double conversion_factor = 0.000908; // [nb^-1 / event]
+    const double displacement = 1.38;          // [nb^-1]
     return nEvents * conversion_factor + displacement;
   }
 
   void FileManager::LogChainLuminosity(TChain &chain, const std::string &logFile)
   {
     std::ofstream log(logFile, std::ios::out | std::ios::trunc);
-    
+
     if (!log.is_open())
     {
       std::cerr << "ERROR: Cannot open log file: " << logFile << std::endl;
       return;
     }
-    
+
     // Nagłówek
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
@@ -52,52 +51,53 @@ namespace KLOE
     log << "Timestamp: " << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << std::endl;
     log << "Chain name: " << chain.GetName() << std::endl;
     log << "Total entries: " << chain.GetEntries() << std::endl;
-    log << "==================================\n" << std::endl;
-    
+    log << "==================================\n"
+        << std::endl;
+
     double totalLuminosity = 0.0;
     Long64_t totalEvents = 0;
-    
+
     // Iteruj po plikach w TChain
     TObjArray *fileElements = chain.GetListOfFiles();
     TIter next(fileElements);
     TChainElement *chEl = nullptr;
-    
-    log << std::left << std::setw(50) << "File" 
-        << std::right << std::setw(15) << "Events" 
+
+    log << std::left << std::setw(50) << "File"
+        << std::right << std::setw(15) << "Events"
         << std::setw(15) << "Lumi [nb^-1]" << std::endl;
     log << std::string(80, '-') << std::endl;
-    
-    while ((chEl = (TChainElement*)next()))
+
+    while ((chEl = (TChainElement *)next()))
     {
       std::string filename = chEl->GetTitle();
       boost::filesystem::path p(filename);
-      
+
       // Pobierz liczbę zdarzeń z tego pliku
       Long64_t entries = chEl->GetEntries();
-      
+
       // Przelicz liczbę zdarzeń na luminozność
       double lumi = EventsToLuminosity(entries);
-      
+
       // Loguj
       log << std::left << std::setw(50) << p.filename().string()
           << std::right << std::fixed
           << std::setw(15) << entries
           << std::setw(15) << std::setprecision(4) << lumi << std::endl;
-      
+
       totalLuminosity += lumi;
       totalEvents += entries;
     }
-    
+
     log << std::string(80, '=') << std::endl;
     log << std::left << std::setw(50) << "TOTAL"
         << std::right << std::fixed
         << std::setw(15) << totalEvents
         << std::setw(15) << std::setprecision(4) << totalLuminosity << std::endl;
-    
+
     log.close();
-    
+
     std::cout << "Input files luminosity log saved to: " << logFile << std::endl;
-    std::cout << "Total integrated luminosity: " << std::setprecision(4) 
+    std::cout << "Total integrated luminosity: " << std::setprecision(4)
               << totalLuminosity << " nb^-1 (" << totalEvents << " events)" << std::endl;
   }
 
@@ -138,9 +138,9 @@ namespace KLOE
       stats.minRun = stats.maxRun = -1;
     }
     stats.fileCount = runs.size();
-    stats.totalEvents = 0;  // Będzie policzone przez TChain później
+    stats.totalEvents = 0; // Będzie policzone przez TChain później
     stats.runList.assign(runs.begin(), runs.end());
-    stats.totalLuminosity = 0.0;  // Będzie obliczone później
+    stats.totalLuminosity = 0.0; // Będzie obliczone później
     return stats;
   }
 
@@ -148,7 +148,7 @@ namespace KLOE
   {
     // Oblicz całkowitą liczbę zdarzeń z TChain (już załadowanego)
     stats.totalEvents = chain.GetEntries();
-    
+
     // Oblicz luminozność
     stats.totalLuminosity = EventsToLuminosity(stats.totalEvents);
   }
@@ -349,10 +349,11 @@ namespace KLOE
         {
           runFiles[runNum] = it->path().string();
         }
-        else {
-            // Dodaj tylko jeśli nie ma już v2 dla tego runu
-            if (runFiles.count(runNum) == 0)
-                runFiles[runNum] = it->path().string();
+        else
+        {
+          // Dodaj tylko jeśli nie ma już v2 dla tego runu
+          if (runFiles.count(runNum) == 0)
+            runFiles[runNum] = it->path().string();
         }
       }
     }
@@ -389,9 +390,10 @@ namespace KLOE
         {
           runFiles[runNum] = filePath;
         }
-        else {
-            if (runFiles.count(runNum) == 0)
-                runFiles[runNum] = filePath;
+        else
+        {
+          if (runFiles.count(runNum) == 0)
+            runFiles[runNum] = filePath;
         }
       }
     }
@@ -403,55 +405,55 @@ namespace KLOE
     }
   }
 
-  bool FileManager::ValidateJobListFilename(const std::string& filename)
+  bool FileManager::ValidateJobListFilename(const std::string &filename)
   {
     // Format: job_v{wersja}_{typ}_{luminosity}_inv_pb_{numer}.txt
     // Przykład: job_v1_data_5000_inv_pb_001.txt
-    
+
     std::regex jobFileRegex(R"(^job_v\d+_(data|all_phys|all_phys2|all_phys3)_[\d.]+_inv_pb_\d+\.txt$)");
     return std::regex_match(filename, jobFileRegex);
   }
 
-  std::vector<std::string> FileManager::LoadFileListFromFile(const std::string& filePath)
+  std::vector<std::string> FileManager::LoadFileListFromFile(const std::string &filePath)
   {
     std::vector<std::string> fileList;
     std::ifstream file(filePath);
-    
+
     if (!file.is_open())
     {
       throw std::runtime_error("Cannot open file: " + filePath);
     }
-    
+
     std::string line;
     while (std::getline(file, line))
     {
       // Usuń białe znaki z początku i końca linii
       line.erase(0, line.find_first_not_of(" \t\r\n"));
       line.erase(line.find_last_not_of(" \t\r\n") + 1);
-      
+
       // Pomiń puste linie i komentarze
       if (line.empty() || line[0] == '#')
         continue;
-      
+
       fileList.push_back(line);
     }
-    
+
     file.close();
-    
+
     if (fileList.empty())
     {
       throw std::runtime_error("No files found in job list file: " + filePath);
     }
-    
+
     return fileList;
   }
 
   void FileManager::chainInit(TChain &chain, ErrorHandling::ErrorLogs &logger,
-                              const std::vector<std::string>& fileList)
+                              const std::vector<std::string> &fileList)
   {
     ErrorHandling::ErrorCodes errorCode;
-    
-    for (const auto& filepath : fileList)
+
+    for (const auto &filepath : fileList)
     {
       // Sprawdź czy plik istnieje
       boost::filesystem::path pathObj(filepath);
@@ -462,14 +464,14 @@ namespace KLOE
         logger.getErrLog(errorCode, "File not found: " + filepath);
         continue;
       }
-      
+
       // Sprawdź czy to plik ROOT
       if (pathObj.extension() != ".root")
       {
         std::cerr << "WARNING: File is not ROOT file: " << filepath << std::endl;
         continue;
       }
-      
+
       // Dodaj plik do TChain
       chain.Add(filepath.c_str());
       errorCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;

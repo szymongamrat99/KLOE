@@ -5,6 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include <type_traits>
+#include <regex>
 
 using namespace KLOE;
 
@@ -14,6 +15,33 @@ const Int_t DataAccessWrapper::kMaxArraySize;
 DataAccessWrapper::DataAccessWrapper(TChain &chain, Bool_t useTTreeReader)
     : fChain(chain), fUseTTreeReader(useTTreeReader)
 {
+
+  // Regex do rozpoznania plików Data
+  std::regex dataFileRegex(R"(prod2root_dk0[2]?_\d+(_v[12])?\.root$)");
+
+  // Pobierz listę gałęzi MC z konfiguracji
+  std::vector<TString> mcBranches = fVariableConfig.GetMCBranches();
+
+  // Przejrzyj wszystkie pliki w chain'ie i wyłącz gałęzie MC dla plików Data
+  TObjArray *fileList = fChain.GetListOfFiles();
+  for (Int_t i = 0; i < fileList->GetEntries(); ++i)
+  {
+    TChainElement *element = (TChainElement *)fileList->At(i);
+    TString filename = element->GetTitle();
+    std::string filenameStr = filename.Data();
+
+    // Sprawdź czy to plik Data
+    if (std::regex_search(filenameStr, dataFileRegex))
+    {
+      // Wyłącz gałęzie MC dla tego pliku Data
+      for (const auto &branchName : mcBranches)
+      {
+        fChain.SetBranchStatus(branchName, 0);
+      }
+      std::cout << "INFO: Disabled MC branches for Data file: " << filename << std::endl;
+    }
+  }
+
   // Inicjalizacja map dla v1/v2 arrays (SetBranchAddress)
   for (const auto &key : fVariableConfig.GetAllKeys())
   {

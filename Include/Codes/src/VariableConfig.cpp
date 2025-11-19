@@ -80,12 +80,12 @@ void VariableConfig::InitializeDefaultMappings()
   AddVariable("nrun", VariableInfo("nRun", "nRun", "Int_t"));
   AddVariable("nev", VariableInfo("nEv", "nEv", "Int_t"));
   AddVariable("nclu", VariableInfo("nClu", "nClu", "Int_t"));
-  AddVariable("nclumc", VariableInfo("nCluMC", "nCluMC", "Int_t"));
+  AddVariable("nclumc", VariableInfo("nCluMC", "nCluMC", "Int_t", false, "", true));
   AddVariable("ntcl", VariableInfo("nTcl", "nTcl", "Int_t"));
   AddVariable("nv", VariableInfo("nV", "nV", "Int_t"));
   AddVariable("ntv", VariableInfo("nTv", "nTv", "Int_t"));
-  AddVariable("ntmc", VariableInfo("nTMC", "nTMC", "Int_t"));
-  AddVariable("nvtxmc", VariableInfo("nVtxMC", "nVtxMC", "Int_t"));
+  AddVariable("ntmc", VariableInfo("nTMC", "nTMC", "Int_t", false, "", true));
+  AddVariable("nvtxmc", VariableInfo("nVtxMC", "nVtxMC", "Int_t", false, "", true));
   AddVariable("eclfilfo", VariableInfo("EclFilfo", "EclFilfo", "Int_t"));
   // AddVariable("eclfilfoword", VariableInfo("EclFilfoword", "EclFilfoWord", "Int_t"));
   AddVariable("necls", VariableInfo("NEcls", "NEcls", "Int_t"));
@@ -115,21 +115,20 @@ void VariableConfig::InitializeDefaultMappings()
   AddVariable("iv", VariableInfo("iV", "iV", "Int_t", true, "ntv"));
 
   // Tablice UInt_t (MC)
-  AddVariable("vtxmc", VariableInfo("VtxMC", "VtxMC", "Int_t", true, "ntmc"));
-  AddVariable("pidmc", VariableInfo("PidMC", "PidMC", "Int_t", true, "ntmc"));
-  AddVariable("mother", VariableInfo("Mother", "Mother", "Int_t", true, "nvtxmc"));
-  AddVariable("kine", VariableInfo("Kine", "Kine", "Int_t", true, "ntmc"));
-  AddVariable("kinmom", VariableInfo("KinMom", "KinMom", "Int_t", true, "nvtxmc"));
-
+  AddVariable("vtxmc", VariableInfo("VtxMC", "VtxMC", "Int_t", true, "ntmc", true));
+  AddVariable("pidmc", VariableInfo("PidMC", "PidMC", "Int_t", true, "ntmc", true));
+  AddVariable("mother", VariableInfo("Mother", "Mother", "Int_t", true, "nvtxmc", true));
+  AddVariable("kine", VariableInfo("Kine", "Kine", "Int_t", true, "ntmc", true));
+  AddVariable("kinmom", VariableInfo("KinMom", "KinMom", "Int_t", true, "nvtxmc", true));
   // Tablice Float_t - clustery
   AddVariable("xcl", VariableInfo("XCl", "XCl", "Float_t", true, "nclu"));
   AddVariable("ycl", VariableInfo("YCl", "YCl", "Float_t", true, "nclu"));
   AddVariable("zcl", VariableInfo("ZCl", "ZCl", "Float_t", true, "nclu"));
   AddVariable("tcl", VariableInfo("TCl", "TCl", "Float_t", true, "nclu"));
   AddVariable("enecl", VariableInfo("EneCl", "EneCl", "Float_t", true, "nclu"));
-  AddVariable("pnum1", VariableInfo("PNum1", "PNum1", "Int_t", true, "nclumc"));
-  AddVariable("pnum2", VariableInfo("PNum2", "PNum2", "Int_t", true, "nclumc"));
-  AddVariable("pnum3", VariableInfo("PNum3", "PNum3", "Int_t", true, "nclumc"));
+  AddVariable("pnum1", VariableInfo("PNum1", "PNum1", "Int_t", true, "nclumc", true));
+  AddVariable("pnum2", VariableInfo("PNum2", "PNum2", "Int_t", true, "nclumc", true));
+  AddVariable("pnum3", VariableInfo("PNum3", "PNum3", "Int_t", true, "nclumc", true));
 
   // Tablice Float_t - tracki i pędy
   AddVariable("curv", VariableInfo("CurV", "CurV", "Float_t", true, "ntv"));
@@ -151,12 +150,25 @@ void VariableConfig::InitializeDefaultMappings()
   AddVariable("zv", VariableInfo("zV", "zV", "Float_t", true, "nv"));
 
   // Tablice Float_t - MC vertex
-  AddVariable("xvmc", VariableInfo("xVMC", "xVMC", "Float_t", true, "nvtxmc"));
-  AddVariable("yvmc", VariableInfo("yVMC", "yVMC", "Float_t", true, "nvtxmc"));
-  AddVariable("zvmc", VariableInfo("zVMC", "zVMC", "Float_t", true, "nvtxmc"));
+  AddVariable("xvmc", VariableInfo("xVMC", "xVMC", "Float_t", true, "nvtxmc", true));
+  AddVariable("yvmc", VariableInfo("yVMC", "yVMC", "Float_t", true, "nvtxmc", true));
+  AddVariable("zvmc", VariableInfo("zVMC", "zVMC", "Float_t", true, "nvtxmc", true));
 
   // Tablice Float_t - MC momentum
-  AddVariable("pxmc", VariableInfo("PxMC", "PxMC", "Float_t", true, "ntmc"));
-  AddVariable("pymc", VariableInfo("PyMC", "PyMC", "Float_t", true, "ntmc"));
-  AddVariable("pzmc", VariableInfo("PzMC", "PzMC", "Float_t", true, "ntmc"));
+  AddVariable("pxmc", VariableInfo("PxMC", "PxMC", "Float_t", true, "ntmc", true));
+  AddVariable("pymc", VariableInfo("PyMC", "PyMC", "Float_t", true, "ntmc", true));
+  AddVariable("pzmc", VariableInfo("PzMC", "PzMC", "Float_t", true, "ntmc", true));
+}
+
+std::vector<TString> VariableConfig::GetMCBranches() const
+{
+  std::vector<TString> mcBranches;
+  for (const auto &pair : fVariableMap)
+  {
+    if (pair.second.isMC)
+    {
+      mcBranches.push_back(pair.second.nameV1);  // Lub fNameV2
+    }
+  }
+  return mcBranches;
 }
