@@ -37,7 +37,7 @@
 #include "../inc/initialanalysis.hpp"
 #include "initialanalysis.hpp"
 
-int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, bool singleFile)
+int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, bool singleFile, std::string jobNumber)
 {
   ConfigManager &config = ConfigManager::getInstance();
   KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();
@@ -178,11 +178,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   if (SignalOnly)
   {
-    log_file_writer_lumi = "file_lumi_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + ".log";
+    log_file_writer_lumi = "file_lumi_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + "_" + jobNumber + ".log";
   }
   else
   {
-    log_file_writer_lumi = "file_lumi_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + ".log";
+    log_file_writer_lumi = "file_lumi_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + jobNumber + ".log";
   }
 
   SplitFileWriter writer(baseFilenamesTot[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024 * 0.01, false, dated_folder, log_file_writer_lumi, fileTypeOpt, singleFile);
@@ -192,11 +192,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   if (SignalOnly)
   {
-    inputLumiLog = dated_folder + "/input_luminosity_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + ".log";
+    inputLumiLog = dated_folder + "/input_luminosity_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + "_" + jobNumber + ".log";
   }
   else
   {
-    inputLumiLog = dated_folder + "/input_luminosity_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + ".log";
+    inputLumiLog = dated_folder + "/input_luminosity_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + jobNumber + ".log";
   }
 
   fileManager.LogChainLuminosity(chain, inputLumiLog);

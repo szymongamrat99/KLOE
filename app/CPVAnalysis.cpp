@@ -24,12 +24,13 @@ int main(int argc, char *argv[])
 
   // -------------------------------------------------------------------
   // Check if a job list file was provided as argument
-  std::string jobListFile = "";
+  std::string jobListFile = "", analysisConfigFile = "";
   bool useJobListFile = false;
   
-  if (argc > 1)
+  if (argc > 2)
   {
     jobListFile = argv[1];
+    analysisConfigFile = argv[2];
     
     // Sprawdzenie czy plik istnieje i ma prawidłową nazwę
     boost::filesystem::path jobListPath(jobListFile);
@@ -50,6 +51,15 @@ int main(int argc, char *argv[])
     
     useJobListFile = true;
   }
+  else if (argc == 1)
+  {
+    analysisConfigFile = Paths::analysisConfigPath;
+  }
+  else if (argc == 2)
+  {
+    std::cerr << "ERROR: Please provide both job list file and analysis config file, or neither." << std::endl;
+    return 1;
+  }
 
   // -------------------------------------------------------------------
   // Initialize utility variables
@@ -57,13 +67,13 @@ int main(int argc, char *argv[])
   // -------------------------------------------------------------------
   // Analysis flags and settings
   KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();
-  analysisConfig.LoadFromFile(Paths::analysisConfigPath);
+  analysisConfig.LoadFromFile(analysisConfigFile);
   // -------------------------------------------------------------------
   // Set KLOE class instance
   KLOE::pm00 eventAnalysis;
   // -------------------------------------------------------------------
   // Set logger for error logging
-  std::string logFilename = Paths::logsCNAFDir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
+  std::string logFilename = Paths::logsCNAFDir + "general.prog_" + eventAnalysis.getCurrentTimestamp() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
@@ -81,10 +91,6 @@ int main(int argc, char *argv[])
   // -------------------------------------------------------------------
   // Set global style for histograms
   KLOE::setGlobalStyle();
-  // -------------------------------------------------------------------
-  // Set config file watcher
-  // ConfigWatcher cfgWatcher(Paths::propName);
-  // cfgWatcher.start();
   // -------------------------------------------------------------------
   Controls::DataType dataTypeOpt;
   Controls::FileType fileTypeOpt;
@@ -148,11 +154,29 @@ int main(int argc, char *argv[])
         std::cerr << "ERROR: Cannot determine analysis type from filename." << std::endl;
         return 1;
       }
+
+      // Wyodrębnij numer z nazwy pliku
+      // Format: job_v{version}_{type}_{luminosity}_inv_pb_{number}.txt
+      std::string numberPattern = R"(_inv_pb_(\d+)\.txt$)";
+      std::regex numberRegex(numberPattern);
+      std::smatch match;
+      std::string jobNumber = "unknown";
+      
+      if (std::regex_search(filename, match, numberRegex))
+      {
+        jobNumber = match[1].str();
+        std::cout << "Job number: " << jobNumber << std::endl;
+      }
+      else
+      {
+        std::cerr << "WARNING: Could not extract job number from filename." << std::endl;
+        return 1;
+      }
       
       // Wykonaj początkową analizę
       infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
-      logger.getLog(infoCode, "Initial analysis execution from job list file.");
-      InitAnalysis_main(chain, fileTypeOpt, eventAnalysis, true);
+      logger.getLog(infoCode, "Initial analysis execution from job file nr " + jobNumber + ".");
+      InitAnalysis_main(chain, fileTypeOpt, eventAnalysis, true, jobNumber);
       
       logger.printErrStats();
       return 0;

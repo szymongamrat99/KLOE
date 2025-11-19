@@ -5,10 +5,10 @@
 
 using namespace std;
 
-int InitAnalysis_main(TChain &chain, Controls::FileType &fileTypeOpt, KLOE::pm00 &Obj, bool singleFile)
+int InitAnalysis_main(TChain &chain, Controls::FileType &fileTypeOpt, KLOE::pm00 &Obj, bool singleFile, std::string jobNumber)
 {
   // Set logger for error logging
-  std::string logFilename = Paths::logsCNAFDir + "InitialAnalysis.log";
+  std::string logFilename = Paths::logsCNAFDir + "initial.analysis_" + Obj.getCurrentTimestamp() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
@@ -59,7 +59,7 @@ int InitAnalysis_main(TChain &chain, Controls::FileType &fileTypeOpt, KLOE::pm00
       logger.getLog(infoCode, "Full initial analysis");
 
       Obj.startTimer();
-      InitialAnalysis_full(chain, fileTypeOpt, logger, Obj, singleFile);
+      InitialAnalysis_full(chain, fileTypeOpt, logger, Obj, singleFile, jobNumber);
       
       infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
       logger.getLog(infoCode, Obj.endTimer());

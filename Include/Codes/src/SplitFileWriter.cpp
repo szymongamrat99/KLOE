@@ -47,7 +47,7 @@ SplitFileWriter::SplitFileWriter(const std::string &baseName,
     _logStream << "Start time: " << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << std::endl;
     _logStream << "Base name: " << _baseName << std::endl;
     _logStream << "File type: " << fileTypeStr << std::endl;
-    _logStream << "Max file size: " << _maxSizeBytes / (1024.0 * 1024.0) << " MB" << std::endl;
+    // _logStream << "Max file size: " << _maxSizeBytes / (1024.0 * 1024.0) << " MB" << std::endl;
     _logStream << "Split by run: " << (_splitByRun ? "Yes" : "No") << std::endl;
     _logStream << "=============================\n" << std::endl;
   }
