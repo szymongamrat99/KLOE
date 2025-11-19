@@ -27,6 +27,7 @@ namespace Paths
   extern const std::string analysisConfigPath;
   extern const std::string rootfilesName;
   extern const std::string cutlimitsName;
+  extern const std::string reportConfigPath;
 
   extern TString base_path;
   extern TString path_tmp;

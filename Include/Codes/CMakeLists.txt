@@ -35,6 +35,7 @@ add_library(LibRec SHARED
             src/GeneratedVariables.cpp
             src/FileManager.cpp
             src/StatisticalCutter.cpp
+            src/StatisticalCutter_Report.cpp
             src/HistManager.cpp
             src/TripleGaussFitter.cpp
             src/DoublGaussFitter.cpp

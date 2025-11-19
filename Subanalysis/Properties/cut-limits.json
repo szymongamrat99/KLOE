@@ -138,7 +138,7 @@
         "cutDescription": "Rt ch close to IP.",
         "cutId": "RtChOmega",
         "cutType": "O",
-        "cutValue": 25,
+        "cutValue": 1,
         "cutCondition": "<=",
         "isFiducialVolume": false,
         "conditionCut": true
@@ -148,7 +148,7 @@
         "cutDescription": "Rt neu close to IP.",
         "cutId": "RtNeuOmega",
         "cutType": "O",
-        "cutValue": 25,
+        "cutValue": 1,
         "cutCondition": "<=",
         "isFiducialVolume": false,
         "conditionCut": true
@@ -236,8 +236,7 @@
         "cutCondition": "<=",
         "isFiducialVolume": false,
         "isBackgroundRejection": true,
-        "channel": "3",
-        "condition": "RtChOmega && RtNeuOmega && ZChOmega && ZNeuOmega"
+        "channel": "3"
       },
       {
         "order": 13,
@@ -248,8 +247,7 @@
         "cutCondition": "<=",
         "isFiducialVolume": false,
         "isBackgroundRejection": true,
-        "channel": "3",
-        "condition": "RtChOmega && RtNeuOmega && ZChOmega && ZNeuOmega"
+        "channel": "3"
       },
       {
         "order": 14,
@@ -259,8 +257,7 @@
         "cutCondition": ">=",
         "isFiducialVolume": false,
         "isBackgroundRejection": true,
-        "channel": "3",
-        "condition": "RtChOmega && RtNeuOmega && ZChOmega && ZNeuOmega"
+        "channel": "3"
       },
       {
         "order": 15,
@@ -270,8 +267,7 @@
         "cutCondition": "<=",
         "isFiducialVolume": false,
         "isBackgroundRejection": true,
-        "channel": "3",
-        "condition": "RtChOmega && RtNeuOmega && ZChOmega && ZNeuOmega"
+        "channel": "3"
       }
     ]
   }

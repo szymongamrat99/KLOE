@@ -15,6 +15,10 @@ StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctr
     survivedBackgroundInFV_.resize(cuts_.size(), 0);
     survivedSignalInFVExcludingMinus1_.resize(cuts_.size(), 0);
     survivedBackgroundInFVExcludingMinus1_.resize(cuts_.size(), 0);
+    independentSignal_.resize(cuts_.size(), 0);
+    independentBackground_.resize(cuts_.size(), 0);
+    independentSignalInFV_.resize(cuts_.size(), 0);
+    independentBackgroundInFV_.resize(cuts_.size(), 0);
 }
 
 StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode)
@@ -29,6 +33,10 @@ StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const st
     survivedBackgroundInFV_.resize(cuts_.size(), 0);
     survivedSignalInFVExcludingMinus1_.resize(cuts_.size(), 0);
     survivedBackgroundInFVExcludingMinus1_.resize(cuts_.size(), 0);
+    independentSignal_.resize(cuts_.size(), 0);
+    independentBackground_.resize(cuts_.size(), 0);
+    independentSignalInFV_.resize(cuts_.size(), 0);
+    independentBackgroundInFV_.resize(cuts_.size(), 0);
 }
 
 void StatisticalCutter::SetTree(TTree* tree) {
@@ -635,6 +643,23 @@ void StatisticalCutter::UpdateStats(int mctruth) {
     // Jeśli activeCutIndices_ jest puste - NIC nie filtrujemy (pass all)
     if (!activeCutIndices_.empty()) {
         cutsToProcess = activeCutIndices_;
+        
+        // Dodaj też syntetyczne cięcia których członkowie są w activeCutIndices_
+        std::set<std::string> activeChannels;
+        for (size_t idx : activeCutIndices_) {
+            if (idx < cuts_.size()) {
+                activeChannels.insert(cuts_[idx].channel);
+            }
+        }
+        
+        // Dodaj syntetyczne cięcia dla aktywnych kanałów
+        for (const auto& pair : groupChannelToSyntheticIndex_) {
+            const std::string& channel = pair.first;
+            size_t syntheticIdx = pair.second;
+            if (activeChannels.count(channel)) {
+                cutsToProcess.push_back(syntheticIdx);
+            }
+        }
     } else {
         // Puste activeCutIndices_ = żadne cięcie nie jest aktywne = pass all events
         cutsToProcess.clear();

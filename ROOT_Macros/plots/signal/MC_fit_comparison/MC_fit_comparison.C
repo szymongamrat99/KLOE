@@ -885,6 +885,17 @@ void MC_fit_comparison::Terminate()
   }
 
   std::cout << std::endl;
+  
+  // Generuj raport z cięć
+  std::cout << "Generating cuts report..." << std::endl;
+  try {
+    cutter->GenerateReport(Paths::reportConfigPath, folderPath.Data());
+    std::cout << "Report generated successfully in: " << folderPath << std::endl;
+  } catch (const std::exception& e) {
+    std::cerr << "Error generating report: " << e.what() << std::endl;
+  }
+  
+  std::cout << std::endl;
   std::cout << "=== MC Fit Comparison Terminated ===" << std::endl;
 }
 

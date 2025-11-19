@@ -34,6 +34,7 @@ namespace Paths
   const std::string analysisConfigPath = propertiesPath + "/analysis_config.json";
   const std::string rootfilesName = propertiesPath + "/root-files.json";
   const std::string cutlimitsName = propertiesPath + "/cut-limits.json";
+  const std::string reportConfigPath = propertiesPath + "/report-config.json";
 
   TString base_path = workdirPath + "/KLOE/";
   TString path_tmp = "";

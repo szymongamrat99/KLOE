@@ -139,6 +139,9 @@ public:
     const std::map<std::string, size_t>& GetGroupChannelToIndexMap() const { return groupChannelToSyntheticIndex_; }
     bool IsCutInGroup(size_t cutIndex) const;
 
+    // Generowanie raportu z cięć
+    void GenerateReport(const std::string& reportConfigPath, const std::string& outputDir) const;
+
 private:
     void LoadCuts(const nlohmann::json& j);
     void LoadCuts(const std::string& jsonPath);
@@ -187,6 +190,12 @@ private:
     std::vector<size_t> survivedBackgroundInFV_;
     std::vector<size_t> survivedSignalInFVExcludingMinus1_;
     std::vector<size_t> survivedBackgroundInFVExcludingMinus1_;
+    
+    // NOWE: Liczniki dla NIEZALEŻNEJ ewaluacji każdego aktywnego cięcia (dla raportu)
+    std::vector<size_t> independentSignal_;
+    std::vector<size_t> independentBackground_;
+    std::vector<size_t> independentSignalInFV_;
+    std::vector<size_t> independentBackgroundInFV_;
     
     size_t totalSignal_ = 0;
     size_t totalBackground_ = 0;
