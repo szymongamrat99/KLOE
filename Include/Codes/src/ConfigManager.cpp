@@ -1,6 +1,7 @@
 #include "../inc/ConfigManager.h"
 #include <iostream>
 #include <const.h>
+#include <kloe_class.h>
 
 // Static member definitions - moved here to avoid multiple definition errors
 ConfigManager* ConfigManager::instance = nullptr;
@@ -9,7 +10,9 @@ std::mutex ConfigManager::mutex_;
 // Private constructor implementation
 ConfigManager::ConfigManager() : propertiesLoaded(false), constantsLoaded(false), errorLogger(nullptr) {
     // Initialize error logger with config-specific log file
-    std::string logFileName = Paths::logsCNAFDir + "config_manager.log";
+    KLOE::pm00 Obj;
+
+    std::string logFileName = Paths::logsCNAFDir + "config_manager_" + Obj.getCurrentTimestamp() + ".log";
     errorLogger = new ErrorHandling::ErrorLogs(logFileName);
     errorLogger->setPrintToScreen(true);
     
