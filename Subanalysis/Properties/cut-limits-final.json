@@ -90,27 +90,19 @@
     ],
     "SIGNAL": [
       {
-        "order": 4,
+        "order": 1,
         "cutDescription": "K->pi0pi0 decay invariant mass.",
         "cutId": "InvMassKne",
         "cutType": "T",
-        "cutValue": 76,
+        "cutValue": 117.678,
         "cutCondition": "<="
       },
       {
-        "order": 5,
+        "order": 0,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKch",
         "cutType": "T",
-        "cutValue": 1.2,
-        "cutCondition": "<="
-      },
-      {
-        "order": 6,
-        "cutDescription": "Missing energy in event.",
-        "cutId": "Qmiss",
-        "cutType": "O",
-        "cutValue": 3.2,
+        "cutValue": 2.673,
         "cutCondition": "<="
       }
     ]

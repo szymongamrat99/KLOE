@@ -41,7 +41,7 @@ namespace Paths
   TString path_cs = "";
   TString prod2root_path_v26 = "/data/k2/DBV-26/DK0";
   TString ext_root = ".root";
-  TString ext_img = ".png";
+  TString ext_img = ".pdf";
   TString ext_csv = ".csv";
 
   const TString gen_vars_dir = base_path + "Subanalysis/GeneratedVars/";

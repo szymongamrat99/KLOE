@@ -52,6 +52,12 @@ std::map<TString, TCanvas *>
     canvas;
 
 std::map<TString, TCanvas *>
+    canvasProfiles;
+
+std::map<TString, TProfile *>
+    profiles;
+
+std::map<TString, TCanvas *>
     canvas2D;
 
 std::map<TString, TH1 *>
@@ -150,6 +156,12 @@ void MC_fit_comparison::Begin(TTree * /*tree*/)
     canvas2D[histName.first] = new TCanvas(Form("c_%s", histName.first.Data()), Form("Canvas for %s", histName.first.Data()), 750, 750);
   }
 
+  for (const auto &config : histogramConfigs2D)
+  {
+    canvasProfiles[config.first] = new TCanvas(Form("cProfiles_%s", config.first.Data()),
+                                               Form("Canvas profiles for %s", config.first.Data()), 750, 750);
+  }
+
   // Create histograms
   for (const auto &histName : histogramConfigs1D)
   {
@@ -209,7 +221,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   Float_t weight = 1.0;
 
   if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1)
-    weight = 1; // interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
+    weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
   Float_t vKchFit = PhysicsConstants::cVel * KchboostFit[4] / KchboostFit[3],
           pathKchFit = sqrt(pow(KchboostFit[6] - 0, 2) +
@@ -355,7 +367,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   T0Omega = pi0OmegaFit1[3] - pi0OmegaFit1[5];
 
   Float_t deltaTfit = timesSignalFit.deltaTimeCM,
-          deltaT = timesBoostLor.deltaTimeCM,
+          deltaT = timesRecRec.deltaTimeCM,
           deltaTMC = *KaonChTimeCMMC - *KaonNeTimeCMMC;
 
   Chi2SignalReduced = *Chi2SignalKinFit / ndofSignal;
@@ -404,15 +416,17 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
               pow(Kchmc[7] - ipmc[1], 2));
 
   RtChRec = sqrt(pow(KchrecFit[6] - ipFit[0], 2) +
-                   pow(KchrecFit[7] - ipFit[1], 2));
+                 pow(KchrecFit[7] - ipFit[1], 2));
   RtNeuRec = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
-                    pow(KnerecFit[7] - ipFit[1], 2));
+                  pow(KnerecFit[7] - ipFit[1], 2));
 
   ZChRec = abs(KchrecFit[8] - ipFit[2]);
   ZNeuRec = abs(KnerecFit[8] - ipFit[2]);
 
+  Bool_t lastSimonaCut = (isInsideFiducialVolume && !(cutter->PassCut(12) && cutter->PassCut(13) && cutter->PassCut(14) && cutter->PassCut(15))) || (!isInsideFiducialVolume);
+
   // Sprawdź czy zdarzenie przechodzi wszystkie aktywne cięcia (z obsługą grup background rejection)
-  bool passesCuts = cutter->PassCuts(cutIndices);
+  bool passesCuts = cutter->PassCuts(cutIndices) && lastSimonaCut;
 
   // Update statistics for all events
   cutter->UpdateStats(*mctruth);
@@ -646,6 +660,17 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     hists2DFittedSignal["E_ch_res_vs_E_neu_res"]->Fill(ParamSignalFit[35] - Kchmc[3] - Knemc[3], KchboostFit[3] - Kchmc[3], weight);
 
     hists2DFittedSignal["T0_omega_vs_mass_omega"]->Fill(T0Omega, omegaFit[5], weight);
+
+    hists2DFittedSignal["delta_t_mc_vs_delta_t_res"]->Fill(deltaTMC, deltaTfit - deltaTMC, weight);
+    hists2DFittedSignal["delta_t_vs_delta_t_mc"]->Fill(deltaTMC, deltaT - deltaTMC, weight);
+
+    hists2DFittedSignal["delta_t_fit_vs_delta_t_mc"]->Fill(deltaTMC, deltaTfit, weight);
+
+    hists2DFittedSignal["t_ch_fit_vs_t_ch_mc"]->Fill(*KaonChTimeCMMC, *KaonChTimeCMSignalFit - *KaonChTimeCMMC, weight);
+    hists2DFittedSignal["t_neu_fit_vs_t_neu_mc"]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMSignalFit - *KaonNeTimeCMMC, weight);
+
+    hists2DFittedSignal["t_ch_rec_vs_t_ch_mc"]->Fill(*KaonChTimeCMMC, timesRecRec.kaon1TimeCM - *KaonChTimeCMMC, weight);
+    hists2DFittedSignal["t_neu_rec_vs_t_neu_mc"]->Fill(*KaonNeTimeCMMC, timesRecRec.kaon2TimeCM - *KaonNeTimeCMMC, weight);
   }
 
   return kTRUE;
@@ -815,11 +840,33 @@ void MC_fit_comparison::Terminate()
 
     canvas[histName.first]->Update();
 
-    canvas[histName.first]->SaveAs(Form(folderPath + "/%s_comparison.png", histName.first.Data()));
+    canvas[histName.first]->SaveAs(Form(folderPath + "/%s_comparison%s", histName.first.Data(), Paths::ext_img.Data()));
   }
 
   for (const auto &config : histogramConfigs2D)
   {
+
+    Bool_t withProfile = (config.first == "t_ch_fit_vs_t_ch_mc" || config.first == "t_neu_fit_vs_t_neu_mc" || config.first == "t_ch_rec_vs_t_ch_mc" || config.first == "t_neu_rec_vs_t_neu_mc" || config.first == "delta_t_mc_vs_delta_t_res" || config.first == "delta_t_vs_delta_t_mc");
+
+    TH2 *h2D = hists2DFittedSignal[config.first];
+
+    TCanvas *c;
+
+    if (!withProfile)
+      goto skip_profile;
+
+    // Stwórz canvas z oboma profilami
+    c = CreateCanvasWithProfiles(h2D,
+                                 config.first + "_with_profiles",
+                                 kTRUE,  // Rysuj mean profile
+                                 kTRUE); // Rysuj sigma profile
+
+    c->SaveAs(folderPath + "/" + config.first + "_with_profiles" + Paths::ext_img.Data());
+    canvasProfiles[config.first] = c;
+
+    continue;
+
+  skip_profile: // Go to here if no profiles needed
 
     canvas2D[config.first]->cd();
     canvas2D[config.first]->SetLogz(1);
@@ -842,7 +889,7 @@ void MC_fit_comparison::Terminate()
       continue;
     }
 
-    canvas2D[config.first]->SaveAs(Form("%s/%s_2D.png", folderPath.Data(), config.first.Data()));
+    canvas2D[config.first]->SaveAs(Form("%s/%s_2D%s", folderPath.Data(), config.first.Data(), Paths::ext_img.Data()));
   }
 
   Float_t fullyGoodPer = CalculateEfficiency(numberOfAllGood, numberOfAllGood + numberOfAtLeastOneBad) * 100,
@@ -857,44 +904,18 @@ void MC_fit_comparison::Terminate()
 
   std::cout << "Signal events without errors (entire space): " << signal_tot << " over " << signal_tot_err << " (" << preselectionEff << " %) --> Efficiency of preselection" << std::endl;
 
-  std::cout << std::endl;
-  std::cout << "Calculations in entire space:" << std::endl;
-  cutter->SetNormalizationMode(NormalizationMode::TOTAL_EVENTS);
-
-  // Użyj GetVisibleCuts() aby wypisać tylko widoczne cięcia (nie-członkowie grup)
-  auto visibleCuts = cutter->GetVisibleCuts();
-  for (size_t cutIdx : visibleCuts)
-  {
-    const auto &cut = cutter->GetCuts()[cutIdx];
-    const auto effTot = cutter->GetEfficiency(cutIdx);
-    const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutIdx);
-
-    std::cout << cut.cutId << " (fiducial volume = " << cut.isFiducialVolume << ") with eff total (including errors): " << effTot * 100 << " %, analysis efficiency (excluding errors): " << effExclMinus1 * 100 << " %" << std::endl;
-  }
-
-  std::cout << std::endl;
-  std::cout << "Calculations inside fiducial volume:" << std::endl;
-  cutter->SetNormalizationMode(NormalizationMode::FIDUCIAL_VOLUME);
-  for (size_t cutIdx : visibleCuts)
-  {
-    const auto &cut = cutter->GetCuts()[cutIdx];
-    const auto effTot = cutter->GetEfficiency(cutIdx);
-    const auto effExclMinus1 = cutter->GetEfficiencyExcludingMctruthMinus1(cutIdx);
-
-    std::cout << cut.cutId << " (fiducial volume = " << cut.isFiducialVolume << "),  eff total (including errors): " << effTot * 100 << " %, analysis efficiency (excluding errors): " << effExclMinus1 * 100 << " %" << std::endl;
-  }
-
-  std::cout << std::endl;
-  
   // Generuj raport z cięć
   std::cout << "Generating cuts report..." << std::endl;
-  try {
+  try
+  {
     cutter->GenerateReport(Paths::reportConfigPath, folderPath.Data());
     std::cout << "Report generated successfully in: " << folderPath << std::endl;
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception &e)
+  {
     std::cerr << "Error generating report: " << e.what() << std::endl;
   }
-  
+
   std::cout << std::endl;
   std::cout << "=== MC Fit Comparison Terminated ===" << std::endl;
 }
@@ -1092,4 +1113,254 @@ TString MC_fit_comparison::SanitizeFolderName(const TString &option)
   sanitized.ToLower();
 
   return sanitized;
+}
+
+// Funkcja do tworzenia wykresu RMS vs X
+TGraphErrors *MC_fit_comparison::CreateRMSProfile(TH2 *h2D, const char *name, const char *title)
+{
+  Int_t nbinsX = h2D->GetNbinsX();
+
+  std::vector<Double_t> xPoints, yPoints, xErrors, yErrors;
+
+  // Iteruj po binach X
+  for (Int_t binX = 1; binX <= nbinsX; binX++)
+  {
+    // Weź projekcję Y dla danego binu X (slice)
+    TH1D *projY = h2D->ProjectionY(Form("_py_%d", binX), binX, binX);
+
+    // Pomiń puste biny lub z małą statystyką
+    if (projY->GetEntries() < 10)
+    { // Wymaga minimum 10 wpisów do sensownego fitu
+      delete projY;
+      continue;
+    }
+
+    // Środek binu X
+    Double_t x = h2D->GetXaxis()->GetBinCenter(binX);
+    Double_t xErr = h2D->GetXaxis()->GetBinWidth(binX) / 2.0;
+
+    // Parametry wstępne dla fitu Gaussa
+    Double_t mean = projY->GetMean();
+    Double_t rms = projY->GetRMS();
+    Double_t maxVal = projY->GetMaximum();
+
+    // Definicja funkcji Gaussa
+    TF1 *gausFit = new TF1(Form("gaus_%d", binX), "gaus", mean - 3 * rms, mean + 3 * rms);
+    gausFit->SetParameters(maxVal, mean, rms);
+
+    // Fit z opcją "Q" (quiet), "R" (range), "S" (return fit result)
+    TFitResultPtr fitResult = projY->Fit(gausFit, "QRS");
+
+    Double_t sigma = 0.0;
+    Double_t sigmaError = 0.0;
+
+    // Sprawdź czy fit się powiódł
+    if (fitResult->IsValid() && fitResult->Status() == 0)
+    {
+      sigma = fitResult->Parameter(2);     // Sigma z fitu
+      sigmaError = fitResult->ParError(2); // Błąd sigmy
+
+      // Dodatkowa walidacja: sigma musi być sensowna
+      if (sigma <= 0 || sigma > 10 * rms || sigmaError / sigma > 0.5)
+      {
+        // Jeśli fit jest zły, użyj RMS jako fallback
+        sigma = rms;
+        sigmaError = projY->GetRMSError();
+      }
+    }
+    else
+    {
+      // Jeśli fit się nie powiódł, użyj RMS
+      sigma = rms;
+      sigmaError = projY->GetRMSError();
+    }
+
+    xPoints.push_back(x);
+    yPoints.push_back(sigma);
+    xErrors.push_back(xErr);
+    yErrors.push_back(sigmaError);
+
+    delete gausFit;
+    delete projY;
+  }
+
+  // Stwórz TGraphErrors
+  TGraphErrors *graph = new TGraphErrors(xPoints.size(),
+                                         xPoints.data(),
+                                         yPoints.data(),
+                                         xErrors.data(),
+                                         yErrors.data());
+
+  graph->SetName(name);
+  graph->SetTitle(title);
+  graph->SetMarkerStyle(20);
+  graph->SetMarkerColor(kBlue);
+  graph->SetLineColor(kBlue);
+
+  return graph;
+}
+
+TCanvas *MC_fit_comparison::CreateCanvasWithProfiles(TH2 *h2D, const TString &name,
+                                                    Bool_t drawMeanProfile,
+                                                    Bool_t drawSigmaProfile)
+{
+  // Oblicz liczbę padów
+  Int_t nPads = 1; // Zawsze histogram 2D
+  if (drawMeanProfile)
+    nPads++;
+  if (drawSigmaProfile)
+    nPads++;
+
+  // Oblicz wysokość canvasu
+  Int_t canvasHeight = 400 + (nPads - 1) * 250; // 400 dla 2D, 250 dla każdego profilu
+
+  // Stwórz canvas
+  TCanvas *c = new TCanvas(name, name, 800, canvasHeight);
+
+  // Proporcje padów (od DOŁU do GÓRY)
+  Double_t padBottom = 0.0;
+  Double_t padTop = 0.0;
+
+  TString yTitleh2D = h2D->GetYaxis()->GetTitle();
+  TRegexp pattern("\\[.*\\]"); // Wzorzec dla [cokolwiek]
+
+  TString match = yTitleh2D(pattern);
+
+  TString yTitle2DReplaced = yTitleh2D.ReplaceAll(match, "").ReplaceAll("(", "").ReplaceAll(")", "").Strip(),
+          yTitleProf = Form("#mu(%s) %s", yTitle2DReplaced.Data(), match.Data()),
+          yTitleProfSigma = Form("#sigma(%s) %s", yTitle2DReplaced.Data(), match.Data());
+
+  // === PAD 3 (najniższy): Sigma z fitu Gaussa ===
+  if (drawSigmaProfile)
+  {
+    padBottom = 0.0;
+    padTop = 0.25; // 25% wysokości
+
+    TPad *pad3 = new TPad("pad3", "pad3", 0.0, padBottom, 1.0, padTop);
+    pad3->SetTopMargin(0.02);
+    pad3->SetBottomMargin(0.25); // Miejsce na etykiety
+    pad3->SetRightMargin(0.15);
+    pad3->Draw();
+    pad3->cd();
+
+    TGraphErrors *grRMS = CreateRMSProfile(h2D,
+                                           Form("rms_%s", name.Data()),
+                                           "");
+
+    grRMS->SetMarkerStyle(20);
+    grRMS->SetMarkerColor(kBlue);
+    grRMS->SetLineColor(kBlue);
+    grRMS->SetMarkerSize(0.8);
+
+    grRMS->GetXaxis()->SetTitle(h2D->GetXaxis()->GetTitle());
+    grRMS->GetYaxis()->SetTitle(yTitleProfSigma);
+
+    grRMS->GetXaxis()->SetTitleSize(0.08);
+    grRMS->GetXaxis()->SetLabelSize(0.08);
+    grRMS->GetYaxis()->SetTitleSize(0.08);
+    grRMS->GetYaxis()->SetLabelSize(0.08);
+    grRMS->GetYaxis()->SetTitleOffset(0.5);
+
+    grRMS->GetXaxis()->SetLimits(h2D->GetXaxis()->GetXmin(),
+                                 h2D->GetXaxis()->GetXmax());
+
+    grRMS->Draw("AP");
+
+    c->cd(); // Wróć do głównego canvasu
+  }
+
+  // === PAD 2 (środkowy): TProfile (średnia) ===
+  if (drawMeanProfile)
+  {
+    if (drawSigmaProfile)
+    {
+      padBottom = 0.25; // Zaczyna się gdzie kończy pad3
+      padTop = 0.5;     // 25% wysokości
+    }
+    else
+    {
+      padBottom = 0.0;
+      padTop = 0.3; // 30% jeśli nie ma sigma profile
+    }
+
+    TPad *pad2 = new TPad("pad2", "pad2", 0.0, padBottom, 1.0, padTop);
+    pad2->SetTopMargin(0.02);
+    pad2->SetBottomMargin(drawSigmaProfile ? 0.02 : 0.25);
+    pad2->SetRightMargin(0.15);
+    pad2->Draw();
+    pad2->cd();
+
+    TProfile *prof = h2D->ProfileX("_pfx", 1, -1, "");
+    prof->SetTitle("");
+    prof->SetMarkerStyle(20);
+    prof->SetMarkerColor(kRed);
+    prof->SetLineColor(kRed);
+    prof->SetMarkerSize(0.8);
+
+    prof->GetYaxis()->SetTitle(yTitleProf);
+    prof->GetYaxis()->SetTitleSize(0.08);
+    prof->GetYaxis()->SetLabelSize(0.08);
+    prof->GetYaxis()->SetTitleOffset(0.5);
+
+    if (drawSigmaProfile)
+    {
+      prof->GetXaxis()->SetLabelSize(0);
+      prof->GetXaxis()->SetTitleSize(0);
+    }
+    else
+    {
+      prof->GetXaxis()->SetTitle(h2D->GetXaxis()->GetTitle());
+      prof->GetXaxis()->SetTitleSize(0.08);
+      prof->GetXaxis()->SetLabelSize(0.08);
+    }
+
+    prof->GetXaxis()->SetRangeUser(h2D->GetXaxis()->GetXmin(),
+                                   h2D->GetXaxis()->GetXmax());
+
+    prof->GetYaxis()->SetRangeUser(h2D->GetYaxis()->GetXmin(),
+                                   h2D->GetYaxis()->GetXmax());
+    prof->Draw("E1");
+
+    TLine *line = new TLine(h2D->GetXaxis()->GetXmin(), 0,
+                            h2D->GetXaxis()->GetXmax(), 0);
+    line->SetLineStyle(2);
+    line->SetLineColor(kBlack);
+    line->Draw();
+
+    c->cd(); // Wróć do głównego canvasu
+  }
+
+  // === PAD 1 (najwyższy): Histogram 2D ===
+  if (drawMeanProfile && drawSigmaProfile)
+  {
+    padBottom = 0.5; // Zaczyna się gdzie kończy pad2
+    padTop = 1.0;    // 50% wysokości
+  }
+  else if (drawMeanProfile || drawSigmaProfile)
+  {
+    padBottom = drawMeanProfile ? 0.3 : 0.25;
+    padTop = 1.0; // 70% lub 75%
+  }
+  else
+  {
+    padBottom = 0.0;
+    padTop = 1.0; // 100%
+  }
+
+  TPad *pad1 = new TPad("pad1", "pad1", 0.0, padBottom, 1.0, padTop);
+  pad1->SetBottomMargin(nPads > 1 ? 0.02 : 0.12);
+  pad1->SetRightMargin(0.15);
+  pad1->SetLogz(1);
+  pad1->Draw();
+  pad1->cd();
+
+  h2D->Draw("COLZ");
+  if (nPads > 1)
+  {
+    h2D->GetXaxis()->SetLabelSize(0);
+    h2D->GetXaxis()->SetTitleSize(0);
+  }
+
+  c->cd();
+  return c;
 }

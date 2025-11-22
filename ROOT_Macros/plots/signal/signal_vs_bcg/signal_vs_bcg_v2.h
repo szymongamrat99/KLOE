@@ -17,6 +17,7 @@
 #include <TPrincipal.h>
 #include <TGraphErrors.h>
 #include <TH2.h>
+#include <StatisticalCutter.h>
 
 // Headers needed by this particular selector
 #include <vector>

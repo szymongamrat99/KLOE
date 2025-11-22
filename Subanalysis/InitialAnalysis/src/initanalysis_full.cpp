@@ -318,21 +318,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     cutter.RegisterVariableGetter("InvMassKch", [&]()
                                   { return baseKin.Kchrecnew[5]; });
     cutter.RegisterCentralValueGetter("InvMassKch", [&]()
-                                      { return PhysicsConstants::mK0; });
-
-    cutter.RegisterVariableGetter("Chi2Signal", [&]()
-                                  { return baseKin.Chi2SignalKinFit; });
-
-    cutter.RegisterVariableGetter("TrcSum", [&]()
-                                  { return TrcSum; });
-
-    cutter.RegisterVariableGetter("Qmiss", [&]()
-                                  { return sqrt(pow(Pmiss, 2) + pow(Emiss, 2)); });
+                                      { return 497.605; });
 
     cutter.RegisterVariableGetter("InvMassKne", [&]()
-                                  { return baseKin.Knerec[5]; });
+                                  { return baseKin.minv4gam; });
     cutter.RegisterCentralValueGetter("InvMassKne", [&]()
-                                      { return PhysicsConstants::mK0; });
+                                      { return 489.467; });
   }
 
   // Initialization of momentum smearing
@@ -820,6 +811,14 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
     }
 
+    if (!cutter.PassCut(8))
+    {
+      if (mctruth == 1)
+        mctruth = 0;
+      else
+        continue;
+    }
+
     if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
     {
 
@@ -1029,6 +1028,14 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g4takenTriKinFit, dataAccess.GetPNum1(), dataAccess.GetNTMC(), dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersTriKinFit);
 
         errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.Knerec, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
+
+        if (!cutter.PassCut(9))
+        {
+          if (mctruth == 1)
+            mctruth = 0;
+          else
+            continue;
+        }
 
         if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
         {

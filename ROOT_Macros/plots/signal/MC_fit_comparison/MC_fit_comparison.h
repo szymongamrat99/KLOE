@@ -16,6 +16,10 @@
 #include <TTreeReaderArray.h>
 #include <TObjString.h>
 #include <StatisticalCutter.h>
+#include <TGraphErrors.h>
+#include <TProfile.h>
+#include <TLine.h>
+#include <TH2.h>
 
 // Headers needed by this particular selector
 #include <vector>
@@ -243,6 +247,12 @@ public:
   std::map<std::string, std::function<Float_t()>> cutValues;
   std::map<std::string, Float_t> centralValues;
   std::map<std::string, size_t> cutNameToIndex;
+
+  TCanvas *CreateCanvasWithProfiles(TH2 *h2D, const TString &name,
+                                    Bool_t drawMeanProfile,
+                                    Bool_t drawSigmaProfile);
+
+  TGraphErrors *CreateRMSProfile(TH2 *h2D, const char *name, const char *title);
 
   ClassDef(MC_fit_comparison, 0);
 };

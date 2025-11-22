@@ -551,7 +551,9 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           radiusLimit = 1,
           zdistLimit = 0.6;
 
-  Float_t T0Omega = pi0OmegaFit1[3] - pi0OmegaFit1[5];
+
+
+  Float_t T0Omega = pi01[3] - pi02[5];
 
   Double_t numSigmaSimona = 3;
 
@@ -574,13 +576,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                 zdist00 < zdistLimit && zdistpm < zdistLimit,
          omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 155.658) < numSigmaSimona * 5.691 && abs(omegaFit[5] - 782.994) < numSigmaSimona * 5.620 && omegaFit[5] < a * T0Omega + b + Breal && omegaFit[5] > a * T0Omega + b - Breal)) || !simonaPositionLimits) && simonaKinCuts;
 
-  if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1 && shorterKaonPaths)
+  if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1)// && shorterKaonPaths)
     signal_tot++;
 
-  if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1 && shorterKaonPaths)
+  if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1)// && shorterKaonPaths)
     signal_wo_err++;
 
-  if ((*mctruth == 1) && *mcflag == 1 && shorterKaonPaths)
+  if ((*mctruth == 1) && *mcflag == 1)// && shorterKaonPaths)
   {
     deltaTSignalTot->Fill(deltaTMC, weight);
   }
@@ -628,7 +630,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   
 
-  if (mcflagCondition && shorterKaonPaths)// && simonaPositionLimits)
+  if (mcflagCondition)// && shorterKaonPaths)// && simonaPositionLimits)
   {
     Int_t mctruth_tmp = *mctruth;
 
@@ -904,8 +906,8 @@ void signal_vs_bcg_v2::Terminate()
 
     for (const auto &channelType : KLOE::channName)
     {
-      if (channelType.second == "MC sum")
-        continue;
+      // if (channelType.second == "MC sum")
+      //   continue;
 
       histsReconstructed[config.first][channelType.second]->SetLineColor(KLOE::channColor.at(channelType.second) + 1);
       histsFittedSignal[config.first][channelType.second]->SetLineColor(KLOE::channColor.at(channelType.second));
