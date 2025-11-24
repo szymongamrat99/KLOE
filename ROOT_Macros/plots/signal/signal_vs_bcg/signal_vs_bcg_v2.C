@@ -553,7 +553,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
 
 
-  Float_t T0Omega = pi01[3] - pi02[5];
+  Float_t T0Omega = pi0OmegaFit1[3] - pi0OmegaFit1[5];
 
   Double_t numSigmaSimona = 3;
 
@@ -643,7 +643,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     if (*mctruth > 1 && *mcflag == 1)
       bkg_tot++;
 
-    if ((*mcflag == 1 && *mctruth >= 0) || *mcflag == 0)
+    if ((*mcflag == 1 && *mctruth > 0) || *mcflag == 0)
     {
       if (simonaChi2Cut)
         cutPassed++;

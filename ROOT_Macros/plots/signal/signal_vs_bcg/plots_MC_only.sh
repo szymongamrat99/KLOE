@@ -69,9 +69,25 @@ fi
 root -b <<EOF
 TChain *chain = new TChain("h1");
 
-for (Int_t i = 1; i <= 73; i++)\
+for (Int_t i = 1; i <= 10; i++)\
 {\
-    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-10/mk0*all_phys_SIGNAL_MIXED_Signal_%d.root",i));\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Signal_%d.root",i));\
+}
+for (Int_t i = 1; i <= 10; i++)\
+{\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Regeneration_%d.root",i));\
+}
+for (Int_t i = 1; i <= 9; i++)\
+{\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Semileptonic_%d.root",i));\
+}
+for (Int_t i = 1; i <= 3; i++)\
+{\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_3pi0_%d.root",i));\
+}
+for (Int_t i = 1; i <= 10; i++)\
+{\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Omega_%d.root",i));\
 }
 chain->Process("signal_vs_bcg_v2.C", "$opt");
 .q

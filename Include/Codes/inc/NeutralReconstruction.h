@@ -114,6 +114,8 @@ namespace KLOE
         kaonNeutral &KnerecSix, 
         std::vector<neutralParticle> &photonFourMomSix);
 
+    ErrorHandling::ErrorCodes ReconstructSixGammaVertexWithFourTaken(const std::vector<Float_t> cluster[5], const std::vector<Int_t> &neu_clu_list, const std::vector<Int_t> &g4taken, std::vector<Int_t> &bestIndices, Float_t &bestError, kaonNeutral &KnerecSix, std::vector<neutralParticle> &photonSix);
+
   private:
     Int_t _nPhotons, _nPions; // Number of photons and pions in the event
     Float_t _invMassDiffMin;

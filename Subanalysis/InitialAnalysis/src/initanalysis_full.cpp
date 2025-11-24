@@ -115,7 +115,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::ifstream file(Paths::cutlimitsName);
   json j = json::parse(file);
 
-  StatisticalCutter cutter(Paths::cutlimitsName, 7, hypoCode);
+  StatisticalCutter cutter(Paths::cutlimitsName, mctruthSignal, hypoCode);
 
   std::ifstream rootFiles(Paths::rootfilesName);
   json filePaths = json::parse(rootFiles);
@@ -811,12 +811,19 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
     }
 
-    if (!cutter.PassCut(8))
+    if (!cutter.PassCut(0))
     {
-      if (mctruth == 1)
+      if (mctruth == mctruthSignal)
+      {
         mctruth = 0;
+        passed = true;
+      }
       else
+      {
+        neuclulist.clear();
+        ++show_progress;
         continue;
+      }
     }
 
     if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
@@ -1029,12 +1036,20 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
         errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.Knerec, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
 
-        if (!cutter.PassCut(9))
+
+        if (!cutter.PassCut(1))
         {
-          if (mctruth == 1)
+          if (mctruth == mctruthSignal)
+          {
             mctruth = 0;
+            passed = true;
+          }
           else
+          {
+            neuclulist.clear();
+            ++show_progress;
             continue;
+          }
         }
 
         if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
@@ -1114,9 +1129,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           omega.total[7] = baseKin.KchrecClosest[7];
           omega.total[8] = baseKin.KchrecClosest[8]; // Use kaon decay z vertex as omega z vertex - better resolution
 
+
+
           if (neuclulist.size() >= 6)
           {
-            neutRec.ReconstructSixGammaVertex(cluster, neuclulist, bestIndicesSix, bestError, KnerecSix, photonFourMomSix);
+            // 4 clusters chosen with the trilateration + 2 remaining clusters
+            // To keep the statistical independence of the samples
+            neutRec.ReconstructSixGammaVertexWithFourTaken(cluster, neuclulist, baseKin.g4takenTriKinFit, bestIndicesSix, bestError, KnerecSix, photonFourMomSix);
           }
           else
           {
