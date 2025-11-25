@@ -90,14 +90,6 @@
     ],
     "SIGNAL": [
       {
-        "order": 405,
-        "cutDescription": "Missing energy in event.",
-        "cutId": "Qmiss",
-        "cutType": "O",
-        "cutValue": 2000000,
-        "cutCondition": "<="
-      },
-      {
         "order": 403,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKch",

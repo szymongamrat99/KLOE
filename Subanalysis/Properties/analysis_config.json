@@ -19,8 +19,8 @@
       "description": "phi -> K0K0 -> pi+pi-pi0pi0",
       "signal": 4,
       "modules": {
-        "classifyMCVariables": true,
-        "signalOnly": true,
+        "classifyMCVariables": false,
+        "signalOnly": false,
         "momentumSmearing": true,
         "trilaterationKinFit": true,
         "signalKinFit": true,

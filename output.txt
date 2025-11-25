@@ -1,0 +1,11 @@
+-- Configuring done (0.1s)
+-- Generating done (0.4s)
+-- Build files have been written to: /home/KLOE/gamrat/KLOE/build
+Loading analysis config from: /home/KLOE/gamrat/KLOE/Subanalysis/Properties/analysis_config.json
+Config loaded: SIGNAL (FULL)
+Choose the file type to analyze: 
+Initial Analysis Menu
+1. Initial analysis with all reconstructions and cuts.
+2. Exit.
+Choose the option: Error statistics:
+Error statistics:
