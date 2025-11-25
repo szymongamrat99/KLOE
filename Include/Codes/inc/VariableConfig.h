@@ -31,10 +31,6 @@ public:
         VariableInfo(const TString& v1, const TString& v2, const TString& t, 
                     Bool_t array = false, const TString& sizeVar = "", Bool_t mc = false) 
             : nameV1(v1), nameV2(v2), type(t), isArray(array), sizeVariable(sizeVar), isMC(mc) {}
-
-        VariableInfo(const TString& v1, const TString& v2, const TString& t, 
-                    Bool_t array = false, const TString& sizeVar = "", Bool_t mc = false) 
-            : nameV1(v1), nameV2(v2), type(t), isArray(array), sizeVariable(sizeVar), isMC(mc) {}
     };
 
 private:
