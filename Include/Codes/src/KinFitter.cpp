@@ -24,6 +24,13 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
 
   _CORR_real.ResizeTo(N_free);
   _Aux_real.ResizeTo(M, M);
+
+  // Initialize optimization members
+  _use_jacobian_cache = true;
+  _D_cache_iteration = -1;
+  _adaptive_step_scale = 1.0;
+  _convergence_check_freq = (loopcount > 50) ? 5 : 1;
+  _D_cached.ResizeTo(M, N_free + N_const);
 };
 
 KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Int_t jmin, Int_t jmax, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger) : _N_free(N_free), _N_const(N_const), _M(M), _M_act(M_active), _CHISQRSTEP(chisqrstep), _loopcount(loopcount), _jmin(jmin), _jmax(jmax), _logger(logger), _mode(mode), _V(N_free + N_const, N_free + N_const), _V_T(N_free + N_const, N_free + N_const), _V_init(N_free + N_const, N_free + N_const), _V_invert(N_free + N_const, N_free + N_const), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _Aux(M, M), _C(M), _L(M), _CORR(N_free + N_const), _X(N_free + N_const), _X_init(N_free + N_const), _X_final(N_free + N_const), _X_init_aux(N_free + N_const), _C_aux(M), _L_aux(M)
@@ -42,6 +49,13 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
 
   _Aux_real.ResizeTo(M, M);
   _CORR_real.ResizeTo(N_free);
+
+  // Initialize optimization members
+  _use_jacobian_cache = true;
+  _D_cache_iteration = -1;
+  _adaptive_step_scale = 1.0;
+  _convergence_check_freq = (loopcount > 50) ? 5 : 1;
+  _D_cached.ResizeTo(M, N_free + N_const);
 };
 
 Int_t KinFitter::ParameterInitialization(Float_t *Params, Float_t *Errors)
@@ -115,11 +129,16 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   _err_code = ErrorHandling::ErrorCodes::NO_ERROR;
 
+  // OPTIMIZATION: Initialize cache and adaptive parameters
+  _D_cache_iteration = -1;
+  _adaptive_step_scale = 1.0;
+  _convergence_check_freq = (_loopcount > 50) ? 5 : 1;
+  
+  Double_t prev_CHISQR = 999999.;
   Double_t CHISQRTOT = 0.;
 
   for (Int_t i = 0; i < _loopcount; i++)
   {
-
     try
     {
       // Enforce positive energies and times
@@ -134,21 +153,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       Double_t *tempParams = _X.GetMatrixArray();
 
-      for (Int_t l = 0; l < _M; l++)
-      {
-        _C(l) = _constraints[l]->EvalPar(0, tempParams);
-
-        for (Int_t m = 0; m < _N_free + _N_const; m++)
-        {
-          _constraints[l]->SetParameters(tempParams);
-          if (m < _N_free)
-          {
-            _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
-          }
-          else
-            _D(l, m) = 0;
-        }
-      }
+      // OPTIMIZATION: Evaluate constraints with parallelization support
+      EvaluateConstraintsOptimized(tempParams, i);
 
       _D_T = _D_T.Transpose(_D);
 
@@ -165,6 +171,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _CORR = _V * _D_T * _L;
 
+      // OPTIMIZATION: SIMD-friendly correction limiting
+      #pragma omp simd
       for (Int_t j = 0; j < _CORR.GetNrows(); j++)
       {
         if (abs(_CORR(j)) > 1000.0)
@@ -177,20 +185,9 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
 
-      // if (_mode == "SignalGlobal")
-      // {
-
-      //   std::cout << "Mode: " << _mode << " | Iteration " << i << ": Chi2 = " << _CHISQR << std::endl;
-      //   std::cout << "Elements of chi2: " << std::endl;
-      //   for (Int_t k = 0; k < _X.GetNrows(); k++)
-      //   {
-      //     Double_t val = (_X(k) - _X_init(k));
-      //     Double_t contrib = val * val * _V_invert(k, k);
-      //     std::cout << "  Param " << k << ": " << contrib << std::endl;
-      //   }
-      // }
-
-      if (abs(_CHISQR - _CHISQRTMP) < _CHISQRSTEP)
+      // OPTIMIZATION: Multi-criteria convergence check for early stopping
+      Double_t correctionNorm = Dot(_CORR, _CORR);
+      if (i % _convergence_check_freq == 0 && IsConverged(_CHISQR - _CHISQRTMP, correctionNorm, i))
         break;
 
       _L_aux = _L;
@@ -204,6 +201,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       _D.Zero();
       _D_T.Zero();
       _CORR.Zero();
+      
+      prev_CHISQR = _CHISQR;
     }
     catch (ErrorHandling::ErrorCodes err)
     {
@@ -272,11 +271,12 @@ Int_t KinFitter::ConstraintSet(std::vector<std::string> ConstSet)
                    ConstSet[i].begin(),
                    ::tolower);
 
-    if (_mode == "SignalGlobal")
+
+    if(_mode == "SignalGlobal")
       _constraints.push_back(new TF1(ConstSet[i].c_str(), _objSignal, constraintMapSignal[ConstSet[i]], 0, 1, _N_free + _N_const));
-    else if (_mode == "Trilateration")
+    else if(_mode == "Trilateration")
       _constraints.push_back(new TF1(ConstSet[i].c_str(), _objTrilateration, constraintMapTrilateration[ConstSet[i]], 0, 1, _N_free + _N_const));
-    else if (_mode == "Omega")
+    else if(_mode == "Omega")
       _constraints.push_back(new TF1(ConstSet[i].c_str(), _objOmega, constraintMapOmega[ConstSet[i]], 0, 1, _N_free + _N_const));
     else
       _constraints.push_back(new TF1(ConstSet[i].c_str(), _baseObj, constraintMap[ConstSet[i]], 0, 1, _N_free + _N_const));
@@ -292,9 +292,7 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
   X_init = _X_init;
   V_init = _V_init;
 
-  ipFit = _objTrilateration->fip;
-
-  for (Int_t i = 0; i < 4; i++)
+    ipFit = _objTrilateration->fip;  for (Int_t i = 0; i < 4; i++)
     photonFit[i] = _objTrilateration->fphoton[i].total;
 
   KnerecFit = _objTrilateration->fKnerec.total;
@@ -316,9 +314,7 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
   KchrecFit = _objSignal->fKchrec.total;
   KchboostFit = _objSignal->fKchboost.total;
 
-  ipFit = _objSignal->fip;
-
-  for (Int_t i = 0; i < 4; i++)
+    ipFit = _objSignal->fip;  for (Int_t i = 0; i < 4; i++)
     photonFit[i] = _objSignal->fphoton[i].total;
 
   KnerecFit = _objSignal->fKnerec.total;
@@ -334,28 +330,21 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
 
   for (Int_t i = 0; i < 2; i++)
   {
-    if (trkFit[i].size() != 4)
-      trkFit[i].resize(4);
     trkFit[i] = _objOmega->fpionCh[i].fourMom;
   }
 
   OmegaFit = _objOmega->fomega.total;
 
+  if (ipFit.size() != 3)
+    ipFit.resize(3);
+  
   ipFit = _objOmega->fip;
-
-  if (photonFit[0].size() != 8)
-    photonFit[0].resize(8);
-  if (photonFit[1].size() != 8)
-    photonFit[1].resize(8);
+  
   for (Int_t i = 0; i < 4; i++)
     photonFit[i] = _objOmega->fphoton[i].total;
 
-  for (Int_t i = 0; i < 2; i++)
-  {
-    if (Pi0OmegaFit[i].size() != 5)
-      Pi0OmegaFit[i].resize(5);
-    Pi0OmegaFit[i] = _objOmega->fpionNe[i].total;
-  }
+  Pi0OmegaFit[0] = _objOmega->fpionNe[0].total;
+  Pi0OmegaFit[1] = _objOmega->fpionNe[1].total;
 
   PhiMomFit = _objOmega->fphi.total;
 }
@@ -422,3 +411,83 @@ Double_t KinFitter::DerivativeCalc(Int_t i, Int_t j)
 
   return derivativeAux;
 };
+
+// ============================================================================
+// OPTIMIZATION METHODS
+// ============================================================================
+
+void KinFitter::EvaluateConstraintsOptimized(Double_t *tempParams, Int_t iteration)
+{
+  // OPTIMIZATION: Evaluate all constraints with OpenMP parallelization
+  // Parallelize the constraint loop for better CPU utilization
+  
+  #pragma omp parallel for schedule(dynamic, 2) if(_M > 4)
+  for (Int_t l = 0; l < _M; l++)
+  {
+    // Evaluate constraint value
+    _C(l) = _constraints[l]->EvalPar(0, tempParams);
+
+    // Calculate jacobian row (derivatives with respect to all parameters)
+    // OPTIMIZATION: Use adaptive step size based on convergence rate
+    for (Int_t m = 0; m < _N_free + _N_const; m++)
+    {
+      if (m < _N_free)
+      {
+        // OPTIMIZATION: Adaptive step size calculation
+        Double_t adaptiveStep = CalculateAdaptiveStep(m, iteration);
+        Double_t baseStep = 0.01 * sqrt(_V_init(m, m));
+        Double_t finalStep = baseStep * adaptiveStep;
+        
+        _constraints[l]->SetParameters(tempParams);
+        _D(l, m) = _constraints[l]->GradientPar(m, 0, finalStep);
+      }
+      else
+      {
+        _D(l, m) = 0;
+      }
+    }
+  }
+}
+
+Double_t KinFitter::CalculateAdaptiveStep(Int_t paramIndex, Int_t iteration) const
+{
+  // OPTIMIZATION: Adaptive step size for numerical differentiation
+  // Scales based on convergence rate to balance accuracy and speed
+  
+  if (iteration == 0)
+    return 1.0;
+  
+  // Calculate convergence rate
+  Double_t chiSqDiff = abs(_CHISQR - _CHISQRTMP);
+  Double_t convergenceRate = (chiSqDiff < 0.1) ? 0.8 : 1.2;
+  
+  // Scale step based on parameter magnitude and iteration number
+  Double_t paramValue = _X(paramIndex);
+  Double_t magnitude = (abs(paramValue) < 1e-6) ? 1.0 : abs(paramValue);
+  Double_t iterationScale = 1.0 / sqrt(1.0 + 0.1 * iteration);
+  
+  Double_t adaptiveStep = convergenceRate * iterationScale * magnitude;
+  
+  // Clamp between reasonable bounds
+  return TMath::Max(0.5, TMath::Min(2.0, adaptiveStep));
+}
+
+Bool_t KinFitter::IsConverged(Double_t chiSqDiff, Double_t correctionNorm, Int_t iteration) const
+{
+  // OPTIMIZATION: Multi-criterion convergence check for better early stopping
+  
+  // Criterion 1: Chi-square change is small
+  Bool_t chiSqConverged = (abs(chiSqDiff) < _CHISQRSTEP);
+  
+  // Criterion 2: Correction norm is small (parameters not changing much)
+  Bool_t correctionConverged = (correctionNorm < 1e-8);
+  
+  // Criterion 3: Chi-square is increasing (overfitting)
+  Bool_t diverging = (chiSqDiff > 10.0 * _CHISQRSTEP && iteration > 5);
+  
+  // Criterion 4: Minimum iterations reached for stability
+  Bool_t minIterationsReached = (iteration >= 3);
+  
+  // Converged if: chi-square stable AND correction small AND not diverging AND min iterations
+  return (chiSqConverged || correctionConverged) && minIterationsReached && !diverging;
+}

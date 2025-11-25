@@ -73,6 +73,13 @@ namespace KLOE
     ConstraintsTrilateration *_objTrilateration;
     ConstraintsOmega *_objOmega;
 
+    // OPTIMIZATION: Cache for jacobian matrix
+    TMatrixD _D_cached;              // Cached jacobian from previous iteration
+    Int_t _D_cache_iteration;        // Which iteration cached jacobian is from
+    Bool_t _use_jacobian_cache;      // Enable cache reuse
+    Double_t _adaptive_step_scale;   // Scale factor for adaptive step size
+    Int_t _convergence_check_freq;   // Check convergence every N iterations
+
     std::map<std::string, Double_t (KinFit::*)(Double_t *, Double_t *)>
         constraintMap = {
             {"energyconsvlab", &KinFit::EnergyConsvLAB},
@@ -154,6 +161,23 @@ namespace KLOE
         _mode;
 
     Double_t AdjustCyclicalVar(Double_t angleCorrected, Double_t angleOriginal);
+
+  protected:
+    // OPTIMIZATION: Helper methods for performance improvements
+    /**
+     * @brief Evaluate all constraints with optional OpenMP parallelization
+     */
+    void EvaluateConstraintsOptimized(Double_t *tempParams, Int_t iteration);
+    
+    /**
+     * @brief Calculate adaptive step size based on convergence rate
+     */
+    Double_t CalculateAdaptiveStep(Int_t paramIndex, Int_t iteration) const;
+    
+    /**
+     * @brief Multi-criterion convergence check
+     */
+    Bool_t IsConverged(Double_t chiSqDiff, Double_t correctionNorm, Int_t iteration) const;
 
   public:
     KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger);

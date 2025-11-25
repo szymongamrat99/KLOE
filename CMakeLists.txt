@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 3.13)
 project(KLSPM00 CXX Fortran)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# DODAJ BUILD TYPES I OPTYMALIZACJE
+# ✅ DODAJ BUILD TYPES I OPTYMALIZACJE
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
 # Optymalizacje kompilaitora
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -ffast-math")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG -ffast-math")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -Wextra -Wpedantic -fsanitize=address -fsanitize=undefined")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG -march=native")
 
@@ -21,8 +21,8 @@ set(CMAKE_INCLUDE_PATH $ENV{CMAKE_INCLUDE_PATH})
 find_package(ROOT REQUIRED COMPONENTS Tree Physics MathCore Matrix TMVA Hist Graf RooFit RooFitCore)
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework)
 find_package(CURL REQUIRED)
-#find_package(LAPACK REQUIRED)
-#find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+find_package(BLAS REQUIRED)
 
 # Enable tests for the files
 enable_testing()
@@ -31,14 +31,21 @@ enable_testing()
 # Inclusion of directories to the project 
 add_subdirectory(Subanalysis/CovarianceMatrix)
 add_subdirectory(Subanalysis/CPFit)
+# add_subdirectory(Subanalysis/EfficiencyAnalysis)
 add_subdirectory(Subanalysis/GeneratedVars)
+# # add_subdirectory(Subanalysis/InterfFunction)
+# # add_subdirectory(Subanalysis/IPRec)
 add_subdirectory(Subanalysis/KchRec)
 add_subdirectory(Subanalysis/OmegaRec)
 add_subdirectory(Subanalysis/Neutrec)
 add_subdirectory(Subanalysis/InitialAnalysis)
 add_subdirectory(Include/Codes)
-# add_subdirectory(Include/FortranAnalysis)
+add_subdirectory(Include/FortranAnalysis)
 add_subdirectory(Include/MainMenuHandler)
+# add_subdirectory(Subanalysis/Pipi)
+# add_subdirectory(Subanalysis/Plots)
+# add_subdirectory(Subanalysis/RegenerationAnalysis)
+# add_subdirectory(Subanalysis/Semileptonic)
 
 
 # What should be the result of compilation
@@ -73,7 +80,7 @@ target_link_libraries(KLSPM00 PRIVATE
   ${CURL_LIBRARIES}
   ${ROOT_LIBRARIES}
   LibRec
-  #  LibFort
+  LibFort
   )
 
 # Optional output directories
