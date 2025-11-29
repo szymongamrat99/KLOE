@@ -74,10 +74,10 @@ target_link_libraries(LibRec PRIVATE
     $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>
 )
 
-# ✅ DODAJ definicję _OPENMP jeśli OpenMP jest dostępny
-if(OpenMP_CXX_FOUND)
-    target_compile_definitions(LibRec PRIVATE _OPENMP)
-endif()
+# # ✅ DODAJ definicję _OPENMP jeśli OpenMP jest dostępny
+# if(OpenMP_CXX_FOUND)
+#     target_compile_definitions(LibRec PRIVATE _OPENMP)
+# endif()
 
 # Możesz tu także zdefiniować lokalny program wykonawczy, np. do testów.
 # add_executable(run_analysis_A AnalysisA.cpp)

@@ -134,21 +134,23 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       Double_t *tempParams = _X.GetMatrixArray();
 
-      for (Int_t l = 0; l < _M; l++)
-      {
-        _C(l) = _constraints[l]->EvalPar(0, tempParams);
+      // for (Int_t l = 0; l < _M; l++)
+      // {
+      //   _C(l) = _constraints[l]->EvalPar(0, tempParams);
 
-        for (Int_t m = 0; m < _N_free + _N_const; m++)
-        {
-          _constraints[l]->SetParameters(tempParams);
-          if (m < _N_free)
-          {
-            _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
-          }
-          else
-            _D(l, m) = 0;
-        }
-      }
+      //   for (Int_t m = 0; m < _N_free + _N_const; m++)
+      //   {
+      //     _constraints[l]->SetParameters(tempParams);
+      //     if (m < _N_free)
+      //     {
+      //       _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
+      //     }
+      //     else
+      //       _D(l, m) = 0;
+      //   }
+      // }
+
+      _C = ComputeJacobianParallel(tempParams);
 
       _D_T = _D_T.Transpose(_D);
 
@@ -236,6 +238,49 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   return _CHISQRTMP;
 };
+
+TVectorD KinFitter::ComputeJacobianParallel(Double_t *tempParams)
+{
+    TVectorD C_local(_M);
+    
+    // ==================== PARALELIZACJA - COLLAPSE(2) ====================
+    // collapse(2) - paralelizuje obie pętle
+    // schedule(dynamic, 1) - dynamiczny schedule dla nierównych czasów obliczeń
+    // if() - włącza OMP tylko jeśli problem jest wystarczająco duży
+    
+    #pragma omp parallel for collapse(2) schedule(dynamic, 1) \
+            if(_M > 2 && (_N_free + _N_const) > 4) default(none) \
+            shared(_M, _N_free, _N_const, _constraints, _V_init, _D, tempParams) \
+            private(C_local)
+    for (Int_t l = 0; l < _M; l++)
+    {
+        for (Int_t m = 0; m < _N_free + _N_const; m++)
+        {
+            // ✅ Każdy thread pracuje na swoim (l, m)
+            _constraints[l]->SetParameters(tempParams);
+            
+            if (m < _N_free)
+            {
+                // Adaptive step size - zamiast fixed 0.01
+                Double_t step = 0.01 * sqrt(_V_init(m, m));
+                _D(l, m) = _constraints[l]->GradientPar(m, 0, step);
+            }
+            else
+            {
+                _D(l, m) = 0.0;  // Constrained params
+            }
+        }
+    }
+    
+    // ✅ Oblicz wartości ograniczeń PO pochodnych (nie concurrent z pochodniami)
+    #pragma omp parallel for schedule(static) if(_M > 4)
+    for (Int_t l = 0; l < _M; l++)
+    {
+        C_local(l) = _constraints[l]->EvalPar(0, tempParams);
+    }
+    
+    return C_local;
+}
 
 Double_t KinFitter::EnergyCalc(Double_t *p, Double_t mass)
 {

@@ -459,6 +459,7 @@ namespace KLOE
       {
         std::cerr << "WARNING: File does not exist: " << filepath << std::endl;
         errorCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
+        std::cout << "Dupsko" << std::endl;
         logger.getErrLog(errorCode, "File not found: " + filepath);
         continue;
       }

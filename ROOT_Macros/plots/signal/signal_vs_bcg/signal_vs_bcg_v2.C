@@ -57,6 +57,18 @@
 
 namespace KH = KLOE::Histograms;
 
+std::map<TString, Float_t> channLumi = {
+    {"Data", 4098},
+    {"Signal", 1359592},
+    {"Regeneration", 693089},
+    {"Omega", 360373},
+    {"3pi0", 13606},
+    {"Semileptonic", 51315},
+    {"Other", 20368}};
+
+std::map<TString, Float_t> channFactor;
+std::map<TString, Int_t> channEventsTotal, channEventsCut;
+
 Int_t signal_num = 0, signal_tot = 0, tot_events = 0, bkg_tot = 0, signal_wo_err = 0;
 
 std::map<TString, TCanvas *>
@@ -94,8 +106,6 @@ TEfficiency *efficiency;
 TH1 *histCounts;
 
 TF1 *chi2DistFunc;
-
-Float_t omegaScalingFactor = 885.84/239.48;
 
 // Wczytaj konfiguracje histogramów
 auto histogramConfigs1D = KLOE::Histograms::LoadHistogramConfigs1D(Paths::histogramConfig1DPath);
@@ -186,13 +196,43 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
   }
 }
 
-void signal_vs_bcg_v2::SlaveBegin(TTree * /*tree*/)
+void signal_vs_bcg_v2::SlaveBegin(TTree *tree)
 {
   // The SlaveBegin() function is called after the Begin() function.
   // When running with PROOF SlaveBegin() is called on each slave server.
   // The tree argument is deprecated (on PROOF 0 is passed).
 
   TString option = GetOption();
+
+  fChain = tree;
+
+  TString maxKey;
+  Int_t maxValue = 0;
+
+  for (const auto &lumi : channLumi)
+  {
+    if (lumi.second > maxValue)
+    {
+      maxValue = lumi.second;
+      maxKey = lumi.first;
+    }
+  }
+
+  for (const auto &lumi : channLumi)
+  {
+    channFactor[lumi.first] = channLumi.at(maxKey) / lumi.second;
+
+    channEventsTotal[lumi.first] = 0;
+    channEventsCut[lumi.first] = 0;
+  }
+
+  // ✅ DEBUG - wyświetl dostępne kanały
+  std::cout << "\n=== Available keys in KLOE::channName ===" << std::endl;
+  for (const auto &ch : KLOE::channName)
+  {
+    std::cout << "  Key: " << ch.first << " => \"" << ch.second << "\"" << std::endl;
+  }
+  std::cout << "=========================================\n" << std::endl;
 }
 
 Int_t overflow = 0, cutPassed = 0, cutNPassed = 0;
@@ -220,12 +260,40 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   Double_t dataPCA[2];
 
+  TString fileNameTmp;
+
+  std::map<TString, Int_t> categoryMap = {
+      {"Signal", 1},
+      {"Regeneration", 2},
+      {"Omega", 3},
+      {"3pi0", 4},
+      {"Semileptonic", 5},
+      {"Other", 6}};
+
+  Int_t mctruth_int = 0;
+
   fReader.SetLocalEntry(entry);
+
+  mctruth_int = *mctruth;
+
+  fileNameTmp = (TString)fChain->GetCurrentFile()->GetName();
+
+  if (mctruth_int == 0 && *mcflag == 1)
+  {
+    for (auto const &category : categoryMap)
+    {
+      if (fileNameTmp.Contains(category.first))
+      {
+        mctruth_int = category.second;
+        break;
+      }
+    }
+  }
 
   std::vector<Int_t> asscl(&Asscl[0], &Asscl[0] + *ntcl);
   std::vector<int> neuclulist;
 
-  if (*mctruth == 1 || *mctruth == 0)
+  if (mctruth_int == 1 || mctruth_int == 0)
   {
     genVarClassifier.FindNeutralCluster(*nclu,
                                         *ntcl,
@@ -304,13 +372,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   Float_t KnerecPhotons[9];
 
   KnerecPhotons[0] = gammaMomTriangle1[0] + gammaMomTriangle2[0] +
-              gammaMomTriangle3[0] + gammaMomTriangle4[0];
+                     gammaMomTriangle3[0] + gammaMomTriangle4[0];
   KnerecPhotons[1] = gammaMomTriangle1[1] + gammaMomTriangle2[1] +
-              gammaMomTriangle3[1] + gammaMomTriangle4[1];
+                     gammaMomTriangle3[1] + gammaMomTriangle4[1];
   KnerecPhotons[2] = gammaMomTriangle1[2] + gammaMomTriangle2[2] +
-              gammaMomTriangle3[2] + gammaMomTriangle4[2];
+                     gammaMomTriangle3[2] + gammaMomTriangle4[2];
   KnerecPhotons[3] = gammaMomTriangle1[3] + gammaMomTriangle2[3] +
-              gammaMomTriangle3[3] + gammaMomTriangle4[3];
+                     gammaMomTriangle3[3] + gammaMomTriangle4[3];
 
   KnerecPhotons[4] = sqrt(pow(KnerecPhotons[0], 2) + pow(KnerecPhotons[1], 2) + pow(KnerecPhotons[2], 2));
 
@@ -343,7 +411,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
                            pow(Kchmc[7] - ipmc[1], 2)),
           // pow(Kchmc[8] - ipmc[2], 2)),
-      pathKneMC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
+          pathKneMC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
                        pow(Knemc[7] - ipmc[1], 2));
   //  pow(Knemc[8] - ipmc[2], 2));
 
@@ -364,23 +432,23 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                    Knerec[8],
                                    Knerec[9]},
                        kaonMomFit1 = {KchboostFit[0],
-                                   KchboostFit[1],
-                                   KchboostFit[2],
-                                   KchboostFit[3]},
+                                      KchboostFit[1],
+                                      KchboostFit[2],
+                                      KchboostFit[3]},
                        kaonMomFit2 = {KnerecFit[0],
-                                   KnerecFit[1],
-                                   KnerecFit[2],
-                                   KnerecFit[3]},
+                                      KnerecFit[1],
+                                      KnerecFit[2],
+                                      KnerecFit[3]},
                        kaonPosFit1 = {KchboostFit[6],
-                                   KchboostFit[7],
-                                   KchboostFit[8],
-                                   KchboostFit[9]},
+                                      KchboostFit[7],
+                                      KchboostFit[8],
+                                      KchboostFit[9]},
                        kaonPosFit2 = {KnerecFit[6],
-                                   KnerecFit[7],
-                                   KnerecFit[8],
-                                   KnerecFit[9]},
+                                      KnerecFit[7],
+                                      KnerecFit[8],
+                                      KnerecFit[9]},
                        ipVec = {ip[0], ip[1], ip[2]},
-                        ipVecFit = {ipFit[0], ipFit[1], ipFit[2]};
+                       ipVecFit = {ipFit[0], ipFit[1], ipFit[2]};
 
   KLOE::KaonProperTimes propTimes = Obj.CalculateKaonProperTimes(kaonMom1,
                                                                  kaonPos1,
@@ -389,10 +457,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                                                  ipVec);
 
   KLOE::KaonProperTimes propTimesFit = Obj.CalculateKaonProperTimes(kaonMomFit1,
-                                                                 kaonPosFit1,
-                                                                 kaonMomFit2,
-                                                                 kaonPosFit2,
-                                                                 ipVecFit);
+                                                                    kaonPosFit1,
+                                                                    kaonMomFit2,
+                                                                    kaonPosFit2,
+                                                                    ipVecFit);
   Float_t photon1path = sqrt(pow(photonFit1[4] - KnerecFit[6], 2) +
                              pow(photonFit1[5] - KnerecFit[7], 2) +
                              pow(photonFit1[6] - KnerecFit[8], 2)),
@@ -457,11 +525,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   Float_t weight = 1.0;
 
-  if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1)
+  if ((mctruth_int == 1 || mctruth_int == 0) && *mcflag == 1)
     weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
-
-  if(*mctruth == 3)
-    weight = omegaScalingFactor;
 
   TVector3 z_axis(0., 0., 1.),
       gamma1(gammaMomTriangle1[0], gammaMomTriangle1[1], gammaMomTriangle1[2]),
@@ -510,17 +575,17 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   // Analiza Simony ciecie na phi bad
   const Double_t SLOPE = -10.0 / 9.0;
 
-  Bool_t condGeneral = (deltaTfit - deltaTMC)<-5.0,
+  Bool_t condGeneral = (deltaTfit - deltaTMC)<-3.0,
                                               condLowerLimit = (deltaTfit - deltaTMC)> SLOPE *
                        deltaTMC,
          condUpperLimit = (deltaTfit - deltaTMC) < (SLOPE * (deltaTMC - 2.0)),
-         badClusSimona = condGeneral && *Chi2SignalKinFit < 30.;
+         badClusSimona = condGeneral && condLowerLimit && condUpperLimit && *Chi2SignalKinFit < 30.;
   ///////////////////////////////////////////////////////////////////////////////
   // Analiza Simony cięcie na 3 sigma mas
-  Bool_t condMassKch = abs(Kchrec[5] - 497.605) < 3 * 0.891,
-         condMassKne = abs(*minv4gam - 489.467) < 3 * 39.226,
-         condMassPi01 = abs(pi01Fit[5] - 134.954) < 3 * 3.061,
-         condMassPi02 = abs(pi02Fit[5] - 134.841) < 3 * 2.998;
+  Bool_t condMassKch = abs(Kchrec[5] - 497.605) < 3 * 0.879,
+         condMassKne = abs(*minv4gam - 488.411) < 3 * 41.293,
+         condMassPi01 = abs(pi01Fit[5] - 134.840) < 3 * 3.479,
+         condMassPi02 = abs(pi02Fit[5] - 134.867) < 3 * 3.331;
 
   ///////////////////////////////////////////////////////////////////////////////
 
@@ -551,24 +616,22 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           radiusLimit = 1,
           zdistLimit = 0.6;
 
-
-
   Float_t T0Omega = pi0OmegaFit1[3] - pi0OmegaFit1[5];
 
   Double_t numSigmaSimona = 3;
 
-  Float_t limitRadiusNeMC = 25.,
-          limitRadiusChMC = 25.;
+  Float_t limitRadiusNeMC = 50.,
+          limitRadiusChMC = 50.;
 
   Float_t a = 1,
           b = 625.091,
           Breal = 14.1421;
 
-  Bool_t mcflagCondition = (*mcflag == 1 && *mctruth >= 0) || *mcflag == 0,
+  Bool_t mcflagCondition = (*mcflag == 1 && mctruth_int >= 0) || *mcflag == 0,
          condAnalysisOld = *Chi2SignalKinFit < 40. && combinedMassPi0Fit < 35. && *TrcSum > -1 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && abs(*minv4gam - PhysicsConstants::mK0) < 76. && *Qmiss < 3.75 && openingAngleCharged > acosCutAngle,
-         simonaCuts = abs(deltaPhiFit - 3.130) > 2 * 0.162 && *Chi2SignalKinFit < 30.,
+         simonaCuts = abs(deltaPhiFit - 3.110) > 2 * 0.135 && *Chi2SignalKinFit < 30.,
          simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts,
-         shorterKaonPaths = pathKchMC < limitRadiusChMC && pathKneMC < limitRadiusNeMC,
+         shorterKaonPaths = RKch < limitRadiusChMC && RKne < limitRadiusNeMC,
          blobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor > 75.,
          noBlobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor <= 75.,
          simonaChi2Cut = *Chi2SignalKinFit <= 30,
@@ -576,16 +639,19 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                 zdist00 < zdistLimit && zdistpm < zdistLimit,
          omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 155.658) < numSigmaSimona * 5.691 && abs(omegaFit[5] - 782.994) < numSigmaSimona * 5.620 && omegaFit[5] < a * T0Omega + b + Breal && omegaFit[5] > a * T0Omega + b - Breal)) || !simonaPositionLimits) && simonaKinCuts;
 
-  if ((*mctruth == 1 || *mctruth == -1 || *mctruth == 0) && *mcflag == 1)// && shorterKaonPaths)
+  if ((mctruth_int == 1 || mctruth_int == -1 || mctruth_int == 0) && *mcflag == 1) // && shorterKaonPaths)
     signal_tot++;
 
-  if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1)// && shorterKaonPaths)
+  if ((mctruth_int == 1 || mctruth_int == 0) && *mcflag == 1) // && shorterKaonPaths)
     signal_wo_err++;
 
-  if ((*mctruth == 1) && *mcflag == 1)// && shorterKaonPaths)
+  if ((mctruth_int == 1) && *mcflag == 1) // && shorterKaonPaths)
   {
     deltaTSignalTot->Fill(deltaTMC, weight);
   }
+
+  if(mctruth_int >= 0)
+    channEventsTotal[KLOE::channName.at(mctruth_int)]++;
 
   // Option to use in analysis
   TString option = GetOption();
@@ -628,11 +694,11 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     if (!noBlobCut)
       return kTRUE;
 
-  
-
-  if (mcflagCondition)// && shorterKaonPaths)// && simonaPositionLimits)
+  if (mcflagCondition)// && simonaPositionLimits)
   {
-    Int_t mctruth_tmp = *mctruth;
+    channEventsCut[KLOE::channName.at(mctruth_int)]++;
+
+    Int_t mctruth_tmp = mctruth_int;
 
     if (mctruth_tmp == 0 && *mcflag == 1)
       mctruth_tmp = 1;
@@ -640,10 +706,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     if ((mctruth_tmp == 1) && *mcflag == 1)
       signal_num++;
 
-    if (*mctruth > 1 && *mcflag == 1)
+    if (mctruth_int > 1 && *mcflag == 1)
       bkg_tot++;
 
-    if ((*mcflag == 1 && *mctruth > 0) || *mcflag == 0)
+    if ((*mcflag == 1 && mctruth_int >= 0) || *mcflag == 0)
     {
       if (simonaChi2Cut)
         cutPassed++;
@@ -669,10 +735,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
       histsFittedSignal["mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*minv4gam, weight);
 
-      // histsFittedSignal["bestError"][KLOE::channName.at(mctruth_tmp)]->Fill(*bestError, weight);
+      histsFittedSignal["bestError"][KLOE::channName.at(mctruth_tmp)]->Fill(*bestError, weight);
 
-      histsFittedSignal["mass_pi01"][KLOE::channName.at(mctruth_tmp)]->Fill(pi0OmegaFit1[5], weight);
-      histsFittedSignal["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi0OmegaFit2[5], weight);
+      histsFittedSignal["mass_pi01"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[5], weight);
+      histsFittedSignal["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi02Fit[5], weight);
 
       histsFittedSignal["chi2_signalKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., weight);
       histCounts->Fill(*Chi2SignalKinFit / 10.);
@@ -785,12 +851,7 @@ void signal_vs_bcg_v2::Terminate()
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file
 
-  tot_events = signal_num + bkg_tot;
-
-  Double_t eff = CalculateEfficiency(signal_num, signal_tot);
-  Double_t effAna = CalculateEfficiency(signal_num, signal_wo_err);
-  Double_t purity = CalculatePurity(signal_num, tot_events);
-
+  
   gErrorIgnoreLevel = kFatal;
 
   // MC sum
@@ -802,20 +863,25 @@ void signal_vs_bcg_v2::Terminate()
   std::map<TString, Int_t> maxNum;
   std::map<TString, TString> maxChannel;
 
+  std::map<TString, Float_t> channEventsCutCorr, channEventsTotalCorr;
+
   for (const auto &config : histogramConfigs1D)
   {
     maxNum[config.first] = 0;
     for (const auto &channelType : KLOE::channName)
     {
-      if (histsFittedSignal[config.first][channelType.second]->GetEntries() > 0. && channelType.second != "Data" && channelType.second != "MC sum" && channelType.second == "Signal")
+      if (histsFittedSignal[config.first][channelType.second]->GetEntries() > 0. && channelType.second != "MC sum")
       {
         histsReconstructed[config.first][channelType.second]->Scale(histsReconstructed[config.first][channelType.second]->GetEntries() / histsReconstructed[config.first][channelType.second]->Integral(0, histsReconstructed[config.first][channelType.second]->GetNbinsX() + 1));
 
-        // histsReconstructed[config.first][channelType.second]->Scale(1 / effAna);
+        histsReconstructed[config.first][channelType.second]->Scale(channFactor[channelType.second]);
 
         histsFittedSignal[config.first][channelType.second]->Scale(histsFittedSignal[config.first][channelType.second]->GetEntries() / histsFittedSignal[config.first][channelType.second]->Integral(0, histsFittedSignal[config.first][channelType.second]->GetNbinsX() + 1));
 
-        // histsFittedSignal[config.first][channelType.second]->Scale(1 / effAna);
+        histsFittedSignal[config.first][channelType.second]->Scale(channFactor[channelType.second]);
+
+        channEventsCutCorr[channelType.second] = channEventsCut[channelType.second] * channFactor[channelType.second];
+        channEventsTotalCorr[channelType.second] = channEventsTotal[channelType.second] * channFactor[channelType.second];
       }
 
       integrals[config.first][channelType.second] = histsFittedSignal[config.first][channelType.second]->GetMaximum();
@@ -827,6 +893,23 @@ void signal_vs_bcg_v2::Terminate()
       }
     }
   }
+
+  // Efficiency calculation
+  std::map<TString, Float_t> channEffAna;
+
+  Int_t tot_events_after = 0;
+
+  for (const auto &lumi : channEventsTotal)
+  {
+    if (lumi.first != "Data")
+      tot_events += channEventsCutCorr[lumi.first];
+
+    channEffAna[lumi.first] = CalculateEfficiency(channEventsCutCorr[lumi.first], channEventsTotalCorr[lumi.first]);
+  }
+
+  Double_t eff = CalculateEfficiency(signal_num, signal_tot);
+  Double_t purity = CalculatePurity(channEventsCutCorr["Signal"], tot_events);
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
   TString resultsFitter = "";
   TPaveText *textresultsFitter = new TPaveText(0.6, 0.7, 0.9, 0.9, "NDC");
@@ -842,31 +925,6 @@ void signal_vs_bcg_v2::Terminate()
         histsFittedSignal[config.first][KLOE::channName.at(8)]->Add(histsFittedSignal[config.first][channelType.second]);
       }
     }
-
-    Double_t scalefactorReconstructed = 1.0;
-    Double_t scalefactorFittedSignal = 1.0;
-
-    if (histsReconstructed[config.first]["MC sum"]->GetEntries() > 0 && histsReconstructed[config.first]["Data"]->GetEntries() > 0)
-    {
-      scalefactorReconstructed = histsReconstructed[config.first]["Data"]->GetEntries() / histsReconstructed[config.first]["MC sum"]->GetEntries();
-
-      histsReconstructed[config.first]["MC sum"]->Scale(scalefactorReconstructed);
-    }
-
-    if (histsFittedSignal[config.first]["MC sum"]->GetEntries() > 0 && histsFittedSignal[config.first]["Data"]->GetEntries() > 0)
-    {
-      scalefactorFittedSignal = histsFittedSignal[config.first]["Data"]->GetEntries() / histsFittedSignal[config.first]["MC sum"]->GetEntries();
-      histsFittedSignal[config.first]["MC sum"]->Scale(scalefactorFittedSignal);
-    }
-
-    for (const auto &channelType : KLOE::channName)
-    {
-      if (channelType.second != "Data" && channelType.second != "MC sum")
-      {
-        histsReconstructed[config.first][channelType.second]->Scale(scalefactorReconstructed);
-        histsFittedSignal[config.first][channelType.second]->Scale(scalefactorFittedSignal);
-      }
-    }
   }
 
   Double_t meanMass = 0, sigmaMass = 0, meanT0 = 0, sigmaT0 = 0;
@@ -875,12 +933,12 @@ void signal_vs_bcg_v2::Terminate()
 
   for (const auto &config : histogramConfigs1D)
   {
-    Bool_t fitDoubleGaus = 0, //(config.first == "mass_Kch" || config.first == "mass_Kne" || config.first == "mass_pi01" || config.first == "mass_pi02" || config.first == "time_neutral_MC"),
-           fitOmegaGaus = 0,//(config.first == "T0Omega" || config.first == "mass_omega"),
-           fitSignalBadClus = (config.first == "deltaPhivFit" && fOption == "BAD_CLUS_SIMONA");
+    Bool_t fitDoubleGaus = 0,//(config.first == "mass_Kch" || config.first == "mass_Kne" || config.first == "mass_pi01" || config.first == "mass_pi02" || config.first == "time_neutral_MC"),
+        fitOmegaGaus = 0,//(config.first == "T0Omega" || config.first == "mass_omega"),
+        fitSignalBadClus = (config.first == "deltaPhivFit" && fOption == "BAD_CLUS_SIMONA");
     Bool_t chi2Fit = 0; //(config.first == "chi2_signalKinFit");
 
-    Bool_t logCond = (config.first == "Qmiss" || config.first == "prob_signal"), // || config.first == "chi2_signalKinFit"), // || config.first == "TransvRadius"),
+    Bool_t logCond = (config.first == "Qmiss" || config.first == "prob_signal" || config.first == "Energy_Kne"), // || config.first == "chi2_signalKinFit"), // || config.first == "TransvRadius"),
         logCondX = 0;                                                            //(config.first == "chi2_signalKinFit");
 
     std::vector<TString> labels;
@@ -1061,7 +1119,7 @@ void signal_vs_bcg_v2::Terminate()
     //   chi2->Draw("SAME");
     // }
 
-    labels.push_back(Form("Events: %d", (Int_t)histsFittedSignal[config.first]["MC sum"]->GetEntries()));
+    labels.push_back(Form("Events: %d", tot_events));
 
     // labels.push_back(Form("Chi2 (Data vs. MC Sum): %.3f", histsFittedSignal[config.first]["MC sum"]->Chi2Test(histsFittedSignal[config.first]["Data"], "WU CHI2/NDF")));
 
@@ -1069,8 +1127,8 @@ void signal_vs_bcg_v2::Terminate()
 
     gPad->Update();
 
-    // if (!fitTripleGaus && !fitOmegaGaus && !fitSignalBadClus && !(config.first == "TransvRadius"))
-    //   legend->Draw();
+    if (!fitOmegaGaus && !fitSignalBadClus && !(config.first == "TransvRadius") && channEventsTotal["Omega"] > 0)
+      legend->Draw();
 
     // Sprawdź czy JAKIKOLWIEK histogram ma wpisy
     Bool_t hasEntries = kFALSE;
@@ -1091,7 +1149,7 @@ void signal_vs_bcg_v2::Terminate()
       continue;
     }
 
-    canvas[config.first]->SaveAs(Form("%s/%s_comparison.png", folderPath.Data(), config.first.Data()));
+    canvas[config.first]->SaveAs(Form("%s/%s_comparison%s", folderPath.Data(), config.first.Data(), Paths::ext_img.Data()));
   }
 
   Double_t sigmas[2], means[2] = {154.061, 779.152}, vLong[2], vTransv[2];
@@ -1102,45 +1160,45 @@ void signal_vs_bcg_v2::Terminate()
   sigmaT0 = 5.691;
   sigmaMass = 5.620;
 
-  
   // Calculation of PCA components
   // WidthOfCorrelatedHist(means, sigmas, vLong, vTransv);
 
   // ===== SLOPE z PCA (z skalowanych wektorów) =====
-  Double_t a = 1;//GetPCASlope(); // Pobierz slope bezpośrednio ze skalowanych wektorów
+  Double_t a = 1;                       // GetPCASlope(); // Pobierz slope bezpośrednio ze skalowanych wektorów
   Double_t b = means[1] - a * means[0]; // y - a*x w centrum masowym
-  
+
   std::cout << "\n=== SLOPE FROM PCA (via GetPCASlope) ===" << std::endl;
   std::cout << "Slope a = " << a << std::endl;
   std::cout << "Intercept b = " << b << std::endl;
-  
+
   // ===== HARDCUT Y limits =====
   // Dolna linia na y = 620, górna na y = 640
   Double_t yLowerLimit = 620.0;
   Double_t yUpperLimit = 640.0;
-  
+
   // Średnia wartość między limitami to efektywny "center"
   Double_t yCenterLimit = (yLowerLimit + yUpperLimit) / 2.0;
   Double_t yHalfWidth = (yUpperLimit - yLowerLimit) / 2.0;
-  
+
   // Przelicz to na Breal (odległość prostopadła od linii)
   Double_t normFactor = TMath::Sqrt(1 + a * a);
   Double_t Breal = yHalfWidth * normFactor; // Przekształć różnicę Y na odległość prostopadłą
-  
+
   std::cout << "\n=== HARDCUT Y LIMITS ===" << std::endl;
   std::cout << "Y lower limit: " << yLowerLimit << std::endl;
   std::cout << "Y upper limit: " << yUpperLimit << std::endl;
   std::cout << "Y center: " << yCenterLimit << std::endl;
   std::cout << "Y half-width: " << yHalfWidth << std::endl;
   std::cout << "Breal (perpendicular distance): " << Breal << std::endl;
-  std::cout << "=======================\n" << std::endl;
+  std::cout << "=======================\n"
+            << std::endl;
 
   std::cout << "Trend line: y = " << a << " * x + " << b << std::endl;
 
   for (const auto &config : histogramConfigs2D)
   {
 
-    Bool_t withProfile = (config.first == "t_ch_fit_vs_t_ch_mc" || config.first == "t_neu_fit_vs_t_neu_mc" || config.first == "t_ch_rec_vs_t_ch_mc" || config.first == "t_neu_rec_vs_t_neu_mc" || config.first == "delta_t_fit_vs_delta_t_mc" || config.first == "delta_t_mc_vs_delta_t_res" || config.first == "delta_t_vs_delta_t_mc");
+    Bool_t withProfile = (config.first == "t_ch_fit_vs_t_ch_mc" || config.first == "t_neu_fit_vs_t_neu_mc" || config.first == "t_ch_rec_vs_t_ch_mc" || config.first == "t_neu_rec_vs_t_neu_mc" || config.first == "delta_t_mc_vs_delta_t_res" || config.first == "delta_t_vs_delta_t_mc");
 
     TH2 *h2D = hists2DFittedSignal[config.first]["Signal"];
 
@@ -1155,7 +1213,7 @@ void signal_vs_bcg_v2::Terminate()
                                  kTRUE,  // Rysuj mean profile
                                  kTRUE); // Rysuj sigma profile
 
-    c->SaveAs(folderPath + "/" + config.first + "_with_profiles.png");
+    c->SaveAs(folderPath + "/" + config.first + "_with_profiles" + Paths::ext_img.Data());
     canvasProfiles[config.first] = c;
 
     continue;
@@ -1178,14 +1236,14 @@ void signal_vs_bcg_v2::Terminate()
         Double_t yMax = hists2DFittedSignal[config.first][channelType.second]->GetYaxis()->GetXmax();
 
         TLine *pc1_line_cut = new TLine(xMin,
-                                        a*xMin + b + Breal,
+                                        a * xMin + b + Breal,
                                         xMax,
-                                        a*xMax + b + Breal);
+                                        a * xMax + b + Breal);
 
         TLine *pc2_line_cut = new TLine(xMin,
-                                        a*xMin + b - Breal,
+                                        a * xMin + b - Breal,
                                         xMax,
-                                        a*xMax + b - Breal);
+                                        a * xMax + b - Breal);
 
         TLine *T0_left_cut = new TLine(meanT0 - 3 * sigmaT0, meanMass - 3 * sigmaMass,
                                        meanT0 - 3 * sigmaT0, meanMass + 3 * sigmaMass);
@@ -1245,7 +1303,7 @@ void signal_vs_bcg_v2::Terminate()
         continue;
       }
 
-      canvas2D[config.first][channelType.second]->SaveAs(Form("%s/%s_%s_2D.png", folderPath.Data(), config.first.Data(), channelType.second.Data()));
+      canvas2D[config.first][channelType.second]->SaveAs(Form("%s/%s_%s_2D%s", folderPath.Data(), config.first.Data(), channelType.second.Data(), Paths::ext_img.Data()));
     }
   }
 
@@ -1258,70 +1316,6 @@ void signal_vs_bcg_v2::Terminate()
   efficiency->SetUseWeightedEvents(kTRUE);
 
   efficiency->SetStatisticOption(TEfficiency::kBUniform);
-
-  // TF1 *f_const = new TF1("f_const", "pol0", -30., 30.);
-
-  // f_const->SetParameter(0, 0.1);
-
-  // TFitResultPtr fitResult = efficiency->Fit(f_const, "SR");
-
-  // if (fitResult->IsValid())
-  // {
-  //   std::cout << "Fit results for efficiency:" << std::endl;
-  //   fitResult->Print("V");
-
-  //   fitResult->GetErrors();
-  // }
-  // else
-  // {
-  //   std::cout << "Fit failed!" << std::endl;
-  // }
-
-  // Przy założeniu, że eff i f_const są już zdefiniowane i fit został wykonany
-
-  // // 1. Stworzenie histogramu dla Pulls
-  // TH1F *h_pulls = new TH1F("h_pulls", "Pulls Distribution; (Eps_i - Eps_fit) / sigma_i; Entries", 50, -5.0, 5.0);
-
-  // // 2. Pobranie dopasowanej stałej i jej błędu
-  // Double_t eff_fit = f_const->GetParameter(0);
-  // Double_t eff_fit_error = f_const->GetParError(0);
-
-  // // 3. Iteracja po binach TEfficiency (iterujemy po histogramie mianownika)
-  // TH1 *h_total = (TH1 *)efficiency->GetTotalHistogram();
-  // for (int i = 1; i <= h_total->GetNbinsX(); ++i)
-  // {
-  //   // Sprawdzenie, czy bin jest w zakresie fitowania (opcjonalnie, ale zalecane)
-  //   Double_t x_center = h_total->GetBinCenter(i);
-
-  //   // Wydobycie wartości wydajności i jej błędu z TEfficiency
-  //   Double_t epsilon_i = efficiency->GetEfficiency(i);
-  //   // Użyj większego z błędów dla konserwatywnej analizy (upper/lower error)
-  //   Double_t error_i = efficiency->GetEfficiencyErrorUp(i) > efficiency->GetEfficiencyErrorLow(i) ? efficiency->GetEfficiencyErrorUp(i) : efficiency->GetEfficiencyErrorLow(i);
-
-  //   // Tylko dla binów z niezerową statystyką i błędem
-  //   if (efficiency->GetTotalHistogram()->GetBinContent(i) > 0 && error_i > 0)
-  //   {
-  //     Double_t pull = (epsilon_i - eff_fit) / error_i;
-  //     h_pulls->Fill(pull);
-  //   }
-  // }
-
-  // // 4. Dopasowanie Gaussa do rozkładu Pulls (Test Płaskości)
-  // // Jeśli średnia jest 0, a sigma 1, wydajność jest stała.
-  // TF1 *f_gaus = new TF1("f_gaus", "gaus", -5, 5);
-  // f_gaus->SetParameters(h_pulls->GetMaximum(), 0.0, 1.0); // Wstępne parametry
-  // h_pulls->Fit(f_gaus, "R");
-
-  // // Odczytaj średnią (p1) i odchylenie standardowe (p2) Gaussa
-  // Double_t mean_pull = f_gaus->GetParameter(1);
-  // Double_t sigma_pull = f_gaus->GetParameter(2);
-
-  // Double_t mean_pull_err = f_gaus->GetParError(1);
-  // Double_t sigma_pull_err = f_gaus->GetParError(2);
-
-  // Double_t metric = sigma_pull / (pow(eff, 2) * purity);
-
-  // std::cout << "Pulls Fit Results: Mean = " << mean_pull << " +- " << mean_pull_err << ", Sigma = " << sigma_pull << " +- " << sigma_pull_err << std::endl;
 
   canvaEff->cd();
 
@@ -1338,29 +1332,25 @@ void signal_vs_bcg_v2::Terminate()
   metricsBox->SetTextAlign(12);
   metricsBox->SetTextSize(0.03);
 
-  metricsBox->AddText(Form("Efficiency: %.2f%%", effAna * 100));
-  // metricsBox->AddText(Form("Purity: %.2f%%", purity * 100));
-  // metricsBox->AddText(Form("#sigma_{pull}: %.3f #pm %.3f", sigma_pull, sigma_pull_err));
-  // // metricsBox->AddText(Form("Metric: %.4f", metric));
-  // metricsBox->AddText(Form("#varepsilon_{fit}: (%.3f #pm %.3f)%%", eff_fit * 100, eff_fit_error * 100));
+  metricsBox->AddText(Form("Efficiency: %.2f%%", channEffAna["Signal"] * 100));
 
   metricsBox->Draw();
 
-  canvaEff->SaveAs(folderPath + "/efficiency_delta_t.png");
+  canvaEff->SaveAs(folderPath + "/efficiency_delta_t" + Paths::ext_img.Data());
 
-  std::cout << "Signal events: " << signal_num << std::endl;
-  std::cout << "Signal total events: " << signal_tot << std::endl;
-  std::cout << "Background events: " << bkg_tot << std::endl;
+  // -- REPORT OF THE CUT STATISTICS IN THE ANALYSIS --
 
   std::cout << "Total Efficiency signal: " << 100 * eff << " % (" << signal_num << "/" << signal_tot << ")" << std::endl;
+  
+  for (const auto &entry : channEffAna)
+  {
+    std::cout << "Channel: " << entry.first << ", Efficiency: " << entry.second * 100 << " % (" << channEventsCutCorr[entry.first] << "/" <<  channEventsTotalCorr[entry.first] << "), (" << channEventsCut[entry.first] << "/"  << channEventsTotal[entry.first] << ")" << std::endl;
+  }
+  std::cout << std::endl;
 
-  std::cout << "Analysis Efficiency signal: " << 100 * effAna << " % (" << signal_num << "/" << signal_wo_err << ")" << std::endl;
+  std::cout << "Background events: " << bkg_tot << std::endl;
 
-  std::cout << "Purity: " << 100 * purity << " % (" << signal_num << "/" << tot_events << ")" << std::endl;
-
-  // std::cout << "Metryka: " << sigma_pull / (pow(eff, 2) * purity) << std::endl;
-
-  std::cout << "Topology eff signal: " << 100 * signal_wo_err / (Float_t)signal_tot << " % (" << signal_wo_err << "/" << signal_tot << ")" << std::endl;
+  std::cout << "Purity: " << 100 * purity << " % (" << channEventsCutCorr["Signal"] << "/" << tot_events << ")" << std::endl;
 }
 
 Double_t signal_vs_bcg_v2::CalculatePurity(Int_t signal, Int_t total) const
@@ -1468,10 +1458,10 @@ Double_t signal_vs_bcg_v2::GetPCASlope()
   }
 
   Double_t slope = scaledV1y / scaledV1x;
-  
-  std::cout << "GetPCASlope: v1x=" << v1x << ", v1y=" << v1y 
+
+  std::cout << "GetPCASlope: v1x=" << v1x << ", v1y=" << v1y
             << ", lambda1=" << lambda1 << std::endl;
-  std::cout << "  scaledV1x=" << scaledV1x << ", scaledV1y=" << scaledV1y 
+  std::cout << "  scaledV1x=" << scaledV1x << ", scaledV1y=" << scaledV1y
             << ", slope=" << slope << std::endl;
 
   return slope;

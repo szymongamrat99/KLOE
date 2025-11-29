@@ -218,9 +218,16 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
   fReader.SetLocalEntry(entry);
 
+  Int_t mctruth_int = *mctruth;
+
+  if (mctruth_int == 0 && *mcflag == 1)
+  {
+    mctruth_int = 1;
+  }
+
   Float_t weight = 1.0;
 
-  if ((*mctruth == 1 || *mctruth == 0) && *mcflag == 1)
+  if ((mctruth_int == 1 || mctruth_int == 0) && *mcflag == 1)
     weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
   Float_t vKchFit = PhysicsConstants::cVel * KchboostFit[4] / KchboostFit[3],
@@ -390,21 +397,20 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   deltaTheta = abs(Theta2Fit - Theta1Fit);
   deltaPhiFit = abs(Phi2Fit - Phi1Fit);
 
-  ///////////////////////////////////////////////////////////////////////////////
   // Analiza Simony cięcie na 3 sigma mas
-  Bool_t condMassKch = abs(Kchrec[5] - 497.606) < 3 * 1.099,
-         condMassKne = abs(*minv4gam - 489.718) < 3 * 38.863,
-         condMassPi01 = abs(pi01Fit[5] - 134.894) < 3 * 6.291,
-         condMassPi02 = abs(pi02Fit[5] - 134.745) < 3 * 6.772;
+  Bool_t condMassKch = abs(Kchrec[5] - 497.605) < 3 * 0.879,
+         condMassKne = abs(*minv4gam - 488.411) < 3 * 41.293,
+         condMassPi01 = abs(pi01Fit[5] - 134.840) < 3 * 3.479,
+         condMassPi02 = abs(pi02Fit[5] - 134.867) < 3 * 3.331;
   ///////////////////////////////////////////////////////////////////////////////
 
-  Bool_t simonaCuts = abs(deltaPhiFit - 3.132) > 2 * 0.167 && *Chi2SignalKinFit < 30.,
+  Bool_t simonaCuts = abs(deltaPhiFit - 3.110) > 2 * 0.135 && *Chi2SignalKinFit < 30.,
          simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts;
 
-  if (*mctruth == 0 || *mctruth == -1 || *mctruth == 1)
+  if (mctruth_int == 0 || mctruth_int == -1 || mctruth_int == 1)
     signal_tot_err++;
 
-  if ((*mctruth == 0 || *mctruth == 1))
+  if ((mctruth_int == 0 || mctruth_int == 1))
     signal_tot++;
 
   Double_t limitRadiusChMC = 25.,
@@ -429,19 +435,19 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   bool passesCuts = cutter->PassCuts(cutIndices) && lastSimonaCut;
 
   // Update statistics for all events
-  cutter->UpdateStats(*mctruth);
+  cutter->UpdateStats(mctruth_int);
 
   if (!passesCuts)
     return kTRUE;
 
-  if (*mctruth == 1)
+  if (mctruth_int == 1)
   {
-    Int_t mctruth_tmp = *mctruth;
+    Int_t mctruth_tmp = mctruth_int;
 
-    if (*mctruth == 0)
+    if (mctruth_int == 0)
       mctruth_tmp = 1;
 
-    if (*goodClustersTriKinFitSize < 4)
+    if (*goodClustersTriKinFitSize >= 3)
       numberOfAtLeastOneBad++;
     if (*goodClustersTriKinFitSize >= 4)
       numberOfAllGood++;
@@ -779,21 +785,21 @@ void MC_fit_comparison::Terminate()
 
     if (recHasEntries)
     {
-      histsReconstructed[histName.first]->Draw();
+      histsReconstructed[histName.first]->Draw("HIST");
       histsFittedSignal[histName.first]->SetLineColor(kRed);
-      histsFittedSignal[histName.first]->Draw("SAME");
+      histsFittedSignal[histName.first]->Draw("HIST SAME");
     }
     else if (fitHasEntries)
     {
       histsFittedSignal[histName.first]->SetLineColor(kRed);
-      histsFittedSignal[histName.first]->Draw();
-      histsReconstructed[histName.first]->Draw("SAME");
+      histsFittedSignal[histName.first]->Draw("HIST");
+      histsReconstructed[histName.first]->Draw("HIST SAME");
     }
 
     // DODAJ WŁASNĄ LEGENDĘ W LEWYM GÓRNYM ROGU:
     TLegend *legend;
 
-    if (!fitcond && histName.first != "TransvRadius")
+    if (!fitcond && histName.first != "TransvRadius" && histName.first != "Chi2SignalKinFit" && histName.first != "Chi2TriKinFit" && histName.first != "prob_signal")
     {
       legend = new TLegend(0.15, 0.75, 0.4, 0.9, "", "NDC");
       if (recHasEntries)

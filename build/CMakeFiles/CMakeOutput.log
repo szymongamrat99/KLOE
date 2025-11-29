@@ -1,6 +1,6 @@
 The system is: Linux - 4.19.0-27-amd64 - x86_64
 Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
-Compiler: /usr/bin/clang++ 
+Compiler: /usr/bin/c++ 
 Build flags: 
 Id flags:  
 
@@ -10,18 +10,18 @@ The output was:
 
 Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
 
-The CXX compiler identification is Clang, found in "/data/ssd/gamrat/KLOE/build/CMakeFiles/3.13.4/CompilerIdCXX/a.out"
+The CXX compiler identification is GNU, found in "/data/ssd/gamrat/KLOE/build/CMakeFiles/3.13.4/CompilerIdCXX/a.out"
 
 Compiling the Fortran compiler identification source file "CMakeFortranCompilerId.F" succeeded.
-Compiler: /usr/bin/f95 
+Compiler: /usr/bin/gfortran 
 Build flags: 
 Id flags: -v 
 
 The output was:
 0
-Driving: /usr/bin/f95 -v CMakeFortranCompilerId.F -l gfortran -l m -shared-libgcc
+Driving: /usr/bin/gfortran -v CMakeFortranCompilerId.F -l gfortran -l m -shared-libgcc
 Using built-in specs.
-COLLECT_GCC=/usr/bin/f95
+COLLECT_GCC=/usr/bin/gfortran
 COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper
 OFFLOAD_TARGET_NAMES=nvptx-none
 OFFLOAD_TARGET_DEFAULT=1
@@ -30,7 +30,7 @@ Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-b
 Thread model: posix
 gcc version 8.3.0 (Debian 8.3.0-6) 
 COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
- /usr/lib/gcc/x86_64-linux-gnu/8/f951 CMakeFortranCompilerId.F -ffixed-form -cpp=/tmp/cc2PcemX.f90 -quiet -v -imultiarch x86_64-linux-gnu CMakeFortranCompilerId.F -quiet -dumpbase CMakeFortranCompilerId.F -mtune=generic -march=x86-64 -auxbase CMakeFortranCompilerId -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-linux-gnu/8/finclude -o /tmp/ccD3T7HX.s
+ /usr/lib/gcc/x86_64-linux-gnu/8/f951 CMakeFortranCompilerId.F -ffixed-form -cpp=/tmp/ccYuABgC.f90 -quiet -v -imultiarch x86_64-linux-gnu CMakeFortranCompilerId.F -quiet -dumpbase CMakeFortranCompilerId.F -mtune=generic -march=x86-64 -auxbase CMakeFortranCompilerId -version -fintrinsic-modules-path /usr/lib/gcc/x86_64-linux-gnu/8/finclude -o /tmp/ccNTi7OU.s
 GNU Fortran (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)
 	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP
 
@@ -51,15 +51,15 @@ GNU Fortran2008 (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)
 
 GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
 COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
- as -v --64 -o /tmp/ccnFSQgY.o /tmp/ccD3T7HX.s
+ as -v --64 -o /tmp/ccKK4Prd.o /tmp/ccNTi7OU.s
 GNU assembler version 2.31.1 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.31.1
 Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgfortran.spec
 rename spec lib to liborig
 COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
 COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
-LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
 COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
- /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/cchVtUZY.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. /tmp/ccnFSQgY.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o
+ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccl0Ji6v.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. /tmp/ccKK4Prd.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o
 COLLECT_GCC_OPTIONS='-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
 
 
@@ -70,44 +70,42 @@ The Fortran compiler identification is GNU, found in "/data/ssd/gamrat/KLOE/buil
 Determining if the CXX compiler works passed with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_19393/fast"
-/usr/bin/make -f CMakeFiles/cmTC_19393.dir/build.make CMakeFiles/cmTC_19393.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_b69ab/fast"
+/usr/bin/make -f CMakeFiles/cmTC_b69ab.dir/build.make CMakeFiles/cmTC_b69ab.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_19393.dir/testCXXCompiler.cxx.o
-/usr/bin/clang++     -o CMakeFiles/cmTC_19393.dir/testCXXCompiler.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
-Linking CXX executable cmTC_19393
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_19393.dir/link.txt --verbose=1
-/usr/bin/clang++       CMakeFiles/cmTC_19393.dir/testCXXCompiler.cxx.o  -o cmTC_19393 
+Building CXX object CMakeFiles/cmTC_b69ab.dir/testCXXCompiler.cxx.o
+/usr/bin/c++     -o CMakeFiles/cmTC_b69ab.dir/testCXXCompiler.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/testCXXCompiler.cxx
+Linking CXX executable cmTC_b69ab
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b69ab.dir/link.txt --verbose=1
+/usr/bin/c++       CMakeFiles/cmTC_b69ab.dir/testCXXCompiler.cxx.o  -o cmTC_b69ab 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
 Detecting CXX compiler ABI info compiled with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_36c4d/fast"
-/usr/bin/make -f CMakeFiles/cmTC_36c4d.dir/build.make CMakeFiles/cmTC_36c4d.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_78139/fast"
+/usr/bin/make -f CMakeFiles/cmTC_78139.dir/build.make CMakeFiles/cmTC_78139.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_36c4d.dir/CMakeCXXCompilerABI.cpp.o
-/usr/bin/clang++     -o CMakeFiles/cmTC_36c4d.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.13/Modules/CMakeCXXCompilerABI.cpp
-Linking CXX executable cmTC_36c4d
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_36c4d.dir/link.txt --verbose=1
-/usr/bin/clang++      -v CMakeFiles/cmTC_36c4d.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_36c4d 
-clang version 7.0.1-8+deb10u2 (tags/RELEASE_701/final)
-Target: x86_64-pc-linux-gnu
+Building CXX object CMakeFiles/cmTC_78139.dir/CMakeCXXCompilerABI.cpp.o
+/usr/bin/c++     -o CMakeFiles/cmTC_78139.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.13/Modules/CMakeCXXCompilerABI.cpp
+Linking CXX executable cmTC_78139
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_78139.dir/link.txt --verbose=1
+/usr/bin/c++      -v CMakeFiles/cmTC_78139.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_78139 
+Using built-in specs.
+COLLECT_GCC=/usr/bin/c++
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
 Thread model: posix
-InstalledDir: /usr/bin
-Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7
-Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7.4.0
-Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
-Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7
-Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.4.0
-Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8
-Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8
-Candidate multilib: .;@m64
-Candidate multilib: 32;@m32
-Candidate multilib: x32;@mx32
-Selected multilib: .;@m64
- "/usr/bin/ld" --hash-style=both --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_36c4d /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/8/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/x86_64-linux-gnu/../../lib64 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../.. -L/usr/lib/llvm-7/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_36c4d.dir/CMakeCXXCompilerABI.cpp.o -L. -L/data/ssd/gamrat/KLOE/Include -L/data/ssd/gamrat/KLOE/Include/FortranAnalysis/lib -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/8/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o
+gcc version 8.3.0 (Debian 8.3.0-6) 
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_78139' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccmcJoAZ.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_78139 /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_78139.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_78139' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
@@ -115,67 +113,72 @@ Parsed CXX implicit link information from above output:
   link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
   ignore line: [Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp]
   ignore line: []
-  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_36c4d/fast"]
-  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_36c4d.dir/build.make CMakeFiles/cmTC_36c4d.dir/build]
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_78139/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_78139.dir/build.make CMakeFiles/cmTC_78139.dir/build]
   ignore line: [make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp']
-  ignore line: [Building CXX object CMakeFiles/cmTC_36c4d.dir/CMakeCXXCompilerABI.cpp.o]
-  ignore line: [/usr/bin/clang++     -o CMakeFiles/cmTC_36c4d.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.13/Modules/CMakeCXXCompilerABI.cpp]
-  ignore line: [Linking CXX executable cmTC_36c4d]
-  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_36c4d.dir/link.txt --verbose=1]
-  ignore line: [/usr/bin/clang++      -v CMakeFiles/cmTC_36c4d.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_36c4d ]
-  ignore line: [clang version 7.0.1-8+deb10u2 (tags/RELEASE_701/final)]
-  ignore line: [Target: x86_64-pc-linux-gnu]
+  ignore line: [Building CXX object CMakeFiles/cmTC_78139.dir/CMakeCXXCompilerABI.cpp.o]
+  ignore line: [/usr/bin/c++     -o CMakeFiles/cmTC_78139.dir/CMakeCXXCompilerABI.cpp.o -c /usr/share/cmake-3.13/Modules/CMakeCXXCompilerABI.cpp]
+  ignore line: [Linking CXX executable cmTC_78139]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_78139.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/c++      -v CMakeFiles/cmTC_78139.dir/CMakeCXXCompilerABI.cpp.o  -o cmTC_78139 ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/c++]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
   ignore line: [Thread model: posix]
-  ignore line: [InstalledDir: /usr/bin]
-  ignore line: [Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7]
-  ignore line: [Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/7.4.0]
-  ignore line: [Found candidate GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8]
-  ignore line: [Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7]
-  ignore line: [Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/7.4.0]
-  ignore line: [Found candidate GCC installation: /usr/lib/gcc/x86_64-linux-gnu/8]
-  ignore line: [Selected GCC installation: /usr/bin/../lib/gcc/x86_64-linux-gnu/8]
-  ignore line: [Candidate multilib: .]
-  ignore line: [@m64]
-  ignore line: [Candidate multilib: 32]
-  ignore line: [@m32]
-  ignore line: [Candidate multilib: x32]
-  ignore line: [@mx32]
-  ignore line: [Selected multilib: .]
-  ignore line: [@m64]
-  link line: [ "/usr/bin/ld" --hash-style=both --build-id --eh-frame-hdr -m elf_x86_64 -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_36c4d /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crt1.o /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/bin/../lib/gcc/x86_64-linux-gnu/8/crtbegin.o -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../lib64 -L/lib/x86_64-linux-gnu -L/lib/../lib64 -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib64 -L/usr/lib/x86_64-linux-gnu/../../lib64 -L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../.. -L/usr/lib/llvm-7/bin/../lib -L/lib -L/usr/lib CMakeFiles/cmTC_36c4d.dir/CMakeCXXCompilerABI.cpp.o -L. -L/data/ssd/gamrat/KLOE/Include -L/data/ssd/gamrat/KLOE/Include/FortranAnalysis/lib -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/bin/../lib/gcc/x86_64-linux-gnu/8/crtend.o /usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o]
-    arg [/usr/bin/ld] ==> ignore
-    arg [--hash-style=both] ==> ignore
+  ignore line: [gcc version 8.3.0 (Debian 8.3.0-6) ]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_78139' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccmcJoAZ.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_78139 /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_78139.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccmcJoAZ.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
     arg [--build-id] ==> ignore
     arg [--eh-frame-hdr] ==> ignore
     arg [-m] ==> ignore
     arg [elf_x86_64] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
     arg [-dynamic-linker] ==> ignore
     arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-pie] ==> ignore
     arg [-o] ==> ignore
-    arg [cmTC_36c4d] ==> ignore
-    arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crt1.o] ==> ignore
-    arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o] ==> ignore
-    arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/crtbegin.o] ==> ignore
-    arg [-L/usr/bin/../lib/gcc/x86_64-linux-gnu/8] ==> dir [/usr/bin/../lib/gcc/x86_64-linux-gnu/8]
-    arg [-L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> dir [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu]
-    arg [-L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../lib64] ==> dir [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../lib64]
+    arg [cmTC_78139] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o] ==> ignore
+    arg [-L/data/4/cernlib/new/lib/../lib] ==> dir [/data/4/cernlib/new/lib/../lib]
+    arg [-L/data/4/cernlib/new/lib/../lib] ==> dir [/data/4/cernlib/new/lib/../lib]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib]
     arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
-    arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
     arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
-    arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
-    arg [-L/usr/lib/x86_64-linux-gnu/../../lib64] ==> dir [/usr/lib/x86_64-linux-gnu/../../lib64]
-    arg [-L/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../..] ==> dir [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../..]
-    arg [-L/usr/lib/llvm-7/bin/../lib] ==> dir [/usr/lib/llvm-7/bin/../lib]
-    arg [-L/lib] ==> dir [/lib]
-    arg [-L/usr/lib] ==> dir [/usr/lib]
-    arg [CMakeFiles/cmTC_36c4d.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
     arg [-L.] ==> ignore
     arg [-L/data/ssd/gamrat/KLOE/Include] ==> dir [/data/ssd/gamrat/KLOE/Include]
-    arg [-L/data/ssd/gamrat/KLOE/Include/FortranAnalysis/lib] ==> dir [/data/ssd/gamrat/KLOE/Include/FortranAnalysis/lib]
     arg [-L/data/4/cernlib/new/lib] ==> dir [/data/4/cernlib/new/lib]
     arg [-L/data/4/users/gamrat/external_libs] ==> dir [/data/4/users/gamrat/external_libs]
     arg [-L/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> dir [/data/ssd/gamrat/KLOE/Include/Codes/inc]
     arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/data/ssd/gamrat/KLOE/Include] ==> dir [/data/ssd/gamrat/KLOE/Include]
+    arg [-L/data/4/cernlib/new/lib] ==> dir [/data/4/cernlib/new/lib]
+    arg [-L/data/4/users/gamrat/external_libs] ==> dir [/data/4/users/gamrat/external_libs]
+    arg [-L/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> dir [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..]
+    arg [CMakeFiles/cmTC_78139.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
     arg [-lstdc++] ==> lib [stdc++]
     arg [-lm] ==> lib [m]
     arg [-lgcc_s] ==> lib [gcc_s]
@@ -183,28 +186,30 @@ Parsed CXX implicit link information from above output:
     arg [-lc] ==> lib [c]
     arg [-lgcc_s] ==> lib [gcc_s]
     arg [-lgcc] ==> lib [gcc]
-    arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/crtend.o] ==> ignore
-    arg [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o] ==> ignore
-  collapse library dir [/usr/bin/../lib/gcc/x86_64-linux-gnu/8] ==> [/usr/lib/gcc/x86_64-linux-gnu/8]
-  collapse library dir [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
-  collapse library dir [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../../../lib64] ==> [/usr/lib64]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o] ==> ignore
+  collapse library dir [/data/4/cernlib/new/lib/../lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/cernlib/new/lib/../lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8] ==> [/usr/lib/gcc/x86_64-linux-gnu/8]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> [/usr/lib]
   collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
-  collapse library dir [/lib/../lib64] ==> [/lib64]
+  collapse library dir [/lib/../lib] ==> [/lib]
   collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
-  collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
-  collapse library dir [/usr/lib/x86_64-linux-gnu/../../lib64] ==> [/usr/lib64]
-  collapse library dir [/usr/bin/../lib/gcc/x86_64-linux-gnu/8/../../..] ==> [/usr/lib]
-  collapse library dir [/usr/lib/llvm-7/bin/../lib] ==> [/usr/lib/llvm-7/lib]
-  collapse library dir [/lib] ==> [/lib]
-  collapse library dir [/usr/lib] ==> [/usr/lib]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
   collapse library dir [/data/ssd/gamrat/KLOE/Include] ==> [/data/ssd/gamrat/KLOE/Include]
-  collapse library dir [/data/ssd/gamrat/KLOE/Include/FortranAnalysis/lib] ==> [/data/ssd/gamrat/KLOE/Include/FortranAnalysis/lib]
   collapse library dir [/data/4/cernlib/new/lib] ==> [/data/4/cernlib/new/lib]
   collapse library dir [/data/4/users/gamrat/external_libs] ==> [/data/4/users/gamrat/external_libs]
   collapse library dir [/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> [/data/ssd/gamrat/KLOE/Include/Codes/inc]
   collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include] ==> [/data/ssd/gamrat/KLOE/Include]
+  collapse library dir [/data/4/cernlib/new/lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/users/gamrat/external_libs] ==> [/data/4/users/gamrat/external_libs]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> [/usr/lib]
   implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
-  implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/8;/usr/lib/x86_64-linux-gnu;/usr/lib64;/lib/x86_64-linux-gnu;/lib64;/usr/lib;/usr/lib/llvm-7/lib;/lib;/data/ssd/gamrat/KLOE/Include;/data/ssd/gamrat/KLOE/Include/FortranAnalysis/lib;/data/4/cernlib/new/lib;/data/4/users/gamrat/external_libs;/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  implicit dirs: [/data/4/cernlib/new/lib;/usr/lib/gcc/x86_64-linux-gnu/8;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib;/data/ssd/gamrat/KLOE/Include;/data/4/users/gamrat/external_libs;/data/ssd/gamrat/KLOE/Include/Codes/inc]
   implicit fwks: []
 
 
@@ -213,14 +218,14 @@ Parsed CXX implicit link information from above output:
 Detecting CXX [-std=c++2a] compiler features compiled with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_311fc/fast"
-/usr/bin/make -f CMakeFiles/cmTC_311fc.dir/build.make CMakeFiles/cmTC_311fc.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_18e2b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_18e2b.dir/build.make CMakeFiles/cmTC_18e2b.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_311fc.dir/feature_tests.cxx.o
-/usr/bin/clang++    -std=c++2a -o CMakeFiles/cmTC_311fc.dir/feature_tests.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/feature_tests.cxx
-Linking CXX executable cmTC_311fc
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_311fc.dir/link.txt --verbose=1
-/usr/bin/clang++       CMakeFiles/cmTC_311fc.dir/feature_tests.cxx.o  -o cmTC_311fc 
+Building CXX object CMakeFiles/cmTC_18e2b.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++2a -o CMakeFiles/cmTC_18e2b.dir/feature_tests.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_18e2b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_18e2b.dir/link.txt --verbose=1
+/usr/bin/c++       CMakeFiles/cmTC_18e2b.dir/feature_tests.cxx.o  -o cmTC_18e2b 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
@@ -286,14 +291,14 @@ make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 Detecting CXX [-std=c++17] compiler features compiled with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_06b6c/fast"
-/usr/bin/make -f CMakeFiles/cmTC_06b6c.dir/build.make CMakeFiles/cmTC_06b6c.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_ea027/fast"
+/usr/bin/make -f CMakeFiles/cmTC_ea027.dir/build.make CMakeFiles/cmTC_ea027.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_06b6c.dir/feature_tests.cxx.o
-/usr/bin/clang++    -std=c++17 -o CMakeFiles/cmTC_06b6c.dir/feature_tests.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/feature_tests.cxx
-Linking CXX executable cmTC_06b6c
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_06b6c.dir/link.txt --verbose=1
-/usr/bin/clang++       CMakeFiles/cmTC_06b6c.dir/feature_tests.cxx.o  -o cmTC_06b6c 
+Building CXX object CMakeFiles/cmTC_ea027.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++17 -o CMakeFiles/cmTC_ea027.dir/feature_tests.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_ea027
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ea027.dir/link.txt --verbose=1
+/usr/bin/c++       CMakeFiles/cmTC_ea027.dir/feature_tests.cxx.o  -o cmTC_ea027 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
@@ -359,14 +364,14 @@ make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 Detecting CXX [-std=c++14] compiler features compiled with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_5216d/fast"
-/usr/bin/make -f CMakeFiles/cmTC_5216d.dir/build.make CMakeFiles/cmTC_5216d.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_49ab8/fast"
+/usr/bin/make -f CMakeFiles/cmTC_49ab8.dir/build.make CMakeFiles/cmTC_49ab8.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_5216d.dir/feature_tests.cxx.o
-/usr/bin/clang++    -std=c++14 -o CMakeFiles/cmTC_5216d.dir/feature_tests.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/feature_tests.cxx
-Linking CXX executable cmTC_5216d
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5216d.dir/link.txt --verbose=1
-/usr/bin/clang++       CMakeFiles/cmTC_5216d.dir/feature_tests.cxx.o  -o cmTC_5216d 
+Building CXX object CMakeFiles/cmTC_49ab8.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++14 -o CMakeFiles/cmTC_49ab8.dir/feature_tests.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_49ab8
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_49ab8.dir/link.txt --verbose=1
+/usr/bin/c++       CMakeFiles/cmTC_49ab8.dir/feature_tests.cxx.o  -o cmTC_49ab8 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
@@ -432,14 +437,14 @@ make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 Detecting CXX [-std=c++11] compiler features compiled with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_8071e/fast"
-/usr/bin/make -f CMakeFiles/cmTC_8071e.dir/build.make CMakeFiles/cmTC_8071e.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_3cba7/fast"
+/usr/bin/make -f CMakeFiles/cmTC_3cba7.dir/build.make CMakeFiles/cmTC_3cba7.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_8071e.dir/feature_tests.cxx.o
-/usr/bin/clang++    -std=c++11 -o CMakeFiles/cmTC_8071e.dir/feature_tests.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/feature_tests.cxx
-Linking CXX executable cmTC_8071e
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_8071e.dir/link.txt --verbose=1
-/usr/bin/clang++       CMakeFiles/cmTC_8071e.dir/feature_tests.cxx.o  -o cmTC_8071e 
+Building CXX object CMakeFiles/cmTC_3cba7.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++11 -o CMakeFiles/cmTC_3cba7.dir/feature_tests.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_3cba7
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3cba7.dir/link.txt --verbose=1
+/usr/bin/c++       CMakeFiles/cmTC_3cba7.dir/feature_tests.cxx.o  -o cmTC_3cba7 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
@@ -505,14 +510,14 @@ make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 Detecting CXX [-std=c++98] compiler features compiled with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_baf09/fast"
-/usr/bin/make -f CMakeFiles/cmTC_baf09.dir/build.make CMakeFiles/cmTC_baf09.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_1b4dc/fast"
+/usr/bin/make -f CMakeFiles/cmTC_1b4dc.dir/build.make CMakeFiles/cmTC_1b4dc.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_baf09.dir/feature_tests.cxx.o
-/usr/bin/clang++    -std=c++98 -o CMakeFiles/cmTC_baf09.dir/feature_tests.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/feature_tests.cxx
-Linking CXX executable cmTC_baf09
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_baf09.dir/link.txt --verbose=1
-/usr/bin/clang++       CMakeFiles/cmTC_baf09.dir/feature_tests.cxx.o  -o cmTC_baf09 
+Building CXX object CMakeFiles/cmTC_1b4dc.dir/feature_tests.cxx.o
+/usr/bin/c++    -std=c++98 -o CMakeFiles/cmTC_1b4dc.dir/feature_tests.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/feature_tests.cxx
+Linking CXX executable cmTC_1b4dc
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1b4dc.dir/link.txt --verbose=1
+/usr/bin/c++       CMakeFiles/cmTC_1b4dc.dir/feature_tests.cxx.o  -o cmTC_1b4dc 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
@@ -576,31 +581,31 @@ make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 Determining if the Fortran compiler works passed with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_9f4f8/fast"
-/usr/bin/make -f CMakeFiles/cmTC_9f4f8.dir/build.make CMakeFiles/cmTC_9f4f8.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_ba031/fast"
+/usr/bin/make -f CMakeFiles/cmTC_ba031.dir/build.make CMakeFiles/cmTC_ba031.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building Fortran object CMakeFiles/cmTC_9f4f8.dir/testFortranCompiler.f.o
-/usr/bin/f95    -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTC_9f4f8.dir/testFortranCompiler.f.o
-Linking Fortran executable cmTC_9f4f8
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9f4f8.dir/link.txt --verbose=1
-/usr/bin/f95      CMakeFiles/cmTC_9f4f8.dir/testFortranCompiler.f.o  -o cmTC_9f4f8 
+Building Fortran object CMakeFiles/cmTC_ba031.dir/testFortranCompiler.f.o
+/usr/bin/gfortran    -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTC_ba031.dir/testFortranCompiler.f.o
+Linking Fortran executable cmTC_ba031
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_ba031.dir/link.txt --verbose=1
+/usr/bin/gfortran      CMakeFiles/cmTC_ba031.dir/testFortranCompiler.f.o  -o cmTC_ba031 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
 Detecting Fortran compiler ABI info compiled with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_e3ec9/fast"
-/usr/bin/make -f CMakeFiles/cmTC_e3ec9.dir/build.make CMakeFiles/cmTC_e3ec9.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_14e8e/fast"
+/usr/bin/make -f CMakeFiles/cmTC_14e8e.dir/build.make CMakeFiles/cmTC_14e8e.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building Fortran object CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o
-/usr/bin/f95    -c /usr/share/cmake-3.13/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o
-Linking Fortran executable cmTC_e3ec9
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e3ec9.dir/link.txt --verbose=1
-/usr/bin/f95   -v   CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o  -o cmTC_e3ec9 
-Driving: /usr/bin/f95 -v CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o -o cmTC_e3ec9 -l gfortran -l m -shared-libgcc
+Building Fortran object CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o
+/usr/bin/gfortran    -c /usr/share/cmake-3.13/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o
+Linking Fortran executable cmTC_14e8e
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_14e8e.dir/link.txt --verbose=1
+/usr/bin/gfortran   -v   CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o  -o cmTC_14e8e 
+Driving: /usr/bin/gfortran -v CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o -o cmTC_14e8e -l gfortran -l m -shared-libgcc
 Using built-in specs.
-COLLECT_GCC=/usr/bin/f95
+COLLECT_GCC=/usr/bin/gfortran
 COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper
 OFFLOAD_TARGET_NAMES=nvptx-none
 OFFLOAD_TARGET_DEFAULT=1
@@ -610,12 +615,12 @@ Thread model: posix
 gcc version 8.3.0 (Debian 8.3.0-6) 
 Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgfortran.spec
 rename spec lib to liborig
-COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_e3ec9' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_14e8e' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
 COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
-LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
-COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_e3ec9' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
- /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccG2EgUn.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_e3ec9 /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o
-COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_e3ec9' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_14e8e' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
+ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/cc9qFYZj.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_14e8e /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_14e8e' '-shared-libgcc' '-mtune=generic' '-march=x86-64'
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
@@ -623,17 +628,17 @@ Parsed Fortran implicit link information from above output:
   link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
   ignore line: [Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp]
   ignore line: []
-  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_e3ec9/fast"]
-  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_e3ec9.dir/build.make CMakeFiles/cmTC_e3ec9.dir/build]
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_14e8e/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_14e8e.dir/build.make CMakeFiles/cmTC_14e8e.dir/build]
   ignore line: [make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp']
-  ignore line: [Building Fortran object CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o]
-  ignore line: [/usr/bin/f95    -c /usr/share/cmake-3.13/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o]
-  ignore line: [Linking Fortran executable cmTC_e3ec9]
-  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e3ec9.dir/link.txt --verbose=1]
-  ignore line: [/usr/bin/f95   -v   CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o  -o cmTC_e3ec9 ]
-  ignore line: [Driving: /usr/bin/f95 -v CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o -o cmTC_e3ec9 -l gfortran -l m -shared-libgcc]
+  ignore line: [Building Fortran object CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o]
+  ignore line: [/usr/bin/gfortran    -c /usr/share/cmake-3.13/Modules/CMakeFortranCompilerABI.F -o CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o]
+  ignore line: [Linking Fortran executable cmTC_14e8e]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_14e8e.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/gfortran   -v   CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o  -o cmTC_14e8e ]
+  ignore line: [Driving: /usr/bin/gfortran -v CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o -o cmTC_14e8e -l gfortran -l m -shared-libgcc]
   ignore line: [Using built-in specs.]
-  ignore line: [COLLECT_GCC=/usr/bin/f95]
+  ignore line: [COLLECT_GCC=/usr/bin/gfortran]
   ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper]
   ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
   ignore line: [OFFLOAD_TARGET_DEFAULT=1]
@@ -643,16 +648,16 @@ Parsed Fortran implicit link information from above output:
   ignore line: [gcc version 8.3.0 (Debian 8.3.0-6) ]
   ignore line: [Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgfortran.spec]
   ignore line: [rename spec lib to liborig]
-  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_e3ec9' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_14e8e' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
   ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/]
-  ignore line: [LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
-  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_e3ec9' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
-  link line: [ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccG2EgUn.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_e3ec9 /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o]
+  ignore line: [LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_14e8e' '-shared-libgcc' '-mtune=generic' '-march=x86-64']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/cc9qFYZj.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_14e8e /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o]
     arg [/usr/lib/gcc/x86_64-linux-gnu/8/collect2] ==> ignore
     arg [-plugin] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so] ==> ignore
     arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper] ==> ignore
-    arg [-plugin-opt=-fresolution=/tmp/ccG2EgUn.res] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/cc9qFYZj.res] ==> ignore
     arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
     arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
     arg [-plugin-opt=-pass-through=-lquadmath] ==> ignore
@@ -671,10 +676,11 @@ Parsed Fortran implicit link information from above output:
     arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
     arg [-pie] ==> ignore
     arg [-o] ==> ignore
-    arg [cmTC_e3ec9] ==> ignore
+    arg [cmTC_14e8e] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o] ==> ignore
+    arg [-L/data/4/cernlib/new/lib/../lib] ==> dir [/data/4/cernlib/new/lib/../lib]
     arg [-L/data/4/cernlib/new/lib/../lib] ==> dir [/data/4/cernlib/new/lib/../lib]
     arg [-L/usr/lib/gcc/x86_64-linux-gnu/8] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8]
     arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu]
@@ -689,8 +695,13 @@ Parsed Fortran implicit link information from above output:
     arg [-L/data/4/users/gamrat/external_libs] ==> dir [/data/4/users/gamrat/external_libs]
     arg [-L/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> dir [/data/ssd/gamrat/KLOE/Include/Codes/inc]
     arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/data/ssd/gamrat/KLOE/Include] ==> dir [/data/ssd/gamrat/KLOE/Include]
+    arg [-L/data/4/cernlib/new/lib] ==> dir [/data/4/cernlib/new/lib]
+    arg [-L/data/4/users/gamrat/external_libs] ==> dir [/data/4/users/gamrat/external_libs]
+    arg [-L/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> dir [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
     arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..]
-    arg [CMakeFiles/cmTC_e3ec9.dir/CMakeFortranCompilerABI.F.o] ==> ignore
+    arg [CMakeFiles/cmTC_14e8e.dir/CMakeFortranCompilerABI.F.o] ==> ignore
     arg [-lgfortran] ==> lib [gfortran]
     arg [-lm] ==> lib [m]
     arg [-lgcc_s] ==> lib [gcc_s]
@@ -705,6 +716,7 @@ Parsed Fortran implicit link information from above output:
     arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o] ==> ignore
     arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o] ==> ignore
   collapse library dir [/data/4/cernlib/new/lib/../lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/cernlib/new/lib/../lib] ==> [/data/4/cernlib/new/lib]
   collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8] ==> [/usr/lib/gcc/x86_64-linux-gnu/8]
   collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
   collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> [/usr/lib]
@@ -712,6 +724,11 @@ Parsed Fortran implicit link information from above output:
   collapse library dir [/lib/../lib] ==> [/lib]
   collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
   collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include] ==> [/data/ssd/gamrat/KLOE/Include]
+  collapse library dir [/data/4/cernlib/new/lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/users/gamrat/external_libs] ==> [/data/4/users/gamrat/external_libs]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
   collapse library dir [/data/ssd/gamrat/KLOE/Include] ==> [/data/ssd/gamrat/KLOE/Include]
   collapse library dir [/data/4/cernlib/new/lib] ==> [/data/4/cernlib/new/lib]
   collapse library dir [/data/4/users/gamrat/external_libs] ==> [/data/4/users/gamrat/external_libs]
@@ -726,70 +743,715 @@ Parsed Fortran implicit link information from above output:
 Determining if the Fortran compiler supports Fortran 90 passed with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_a1b00/fast"
-/usr/bin/make -f CMakeFiles/cmTC_a1b00.dir/build.make CMakeFiles/cmTC_a1b00.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_64ca2/fast"
+/usr/bin/make -f CMakeFiles/cmTC_64ca2.dir/build.make CMakeFiles/cmTC_64ca2.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building Fortran object CMakeFiles/cmTC_a1b00.dir/testFortranCompilerF90.f90.o
-/usr/bin/f95    -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/testFortranCompilerF90.f90 -o CMakeFiles/cmTC_a1b00.dir/testFortranCompilerF90.f90.o
-Linking Fortran executable cmTC_a1b00
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a1b00.dir/link.txt --verbose=1
-/usr/bin/f95      CMakeFiles/cmTC_a1b00.dir/testFortranCompilerF90.f90.o  -o cmTC_a1b00 
+Building Fortran object CMakeFiles/cmTC_64ca2.dir/testFortranCompilerF90.f90.o
+/usr/bin/gfortran    -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/testFortranCompilerF90.f90 -o CMakeFiles/cmTC_64ca2.dir/testFortranCompilerF90.f90.o
+Linking Fortran executable cmTC_64ca2
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_64ca2.dir/link.txt --verbose=1
+/usr/bin/gfortran      CMakeFiles/cmTC_64ca2.dir/testFortranCompilerF90.f90.o  -o cmTC_64ca2 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
 Determining if the include file pthread.h exists passed with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_90abf/fast"
-/usr/bin/make -f CMakeFiles/cmTC_90abf.dir/build.make CMakeFiles/cmTC_90abf.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_9fa88/fast"
+/usr/bin/make -f CMakeFiles/cmTC_9fa88.dir/build.make CMakeFiles/cmTC_9fa88.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_90abf.dir/CheckIncludeFile.cxx.o
-/usr/bin/clang++    -std=c++14 -o CMakeFiles/cmTC_90abf.dir/CheckIncludeFile.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
-Linking CXX executable cmTC_90abf
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_90abf.dir/link.txt --verbose=1
-/usr/bin/clang++       CMakeFiles/cmTC_90abf.dir/CheckIncludeFile.cxx.o  -o cmTC_90abf 
+Building CXX object CMakeFiles/cmTC_9fa88.dir/CheckIncludeFile.cxx.o
+/usr/bin/c++    -std=c++14 -o CMakeFiles/cmTC_9fa88.dir/CheckIncludeFile.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/CheckIncludeFile.cxx
+Linking CXX executable cmTC_9fa88
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9fa88.dir/link.txt --verbose=1
+/usr/bin/c++       CMakeFiles/cmTC_9fa88.dir/CheckIncludeFile.cxx.o  -o cmTC_9fa88 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
 Determining if the function pthread_create exists in the pthread passed with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_6ef59/fast"
-/usr/bin/make -f CMakeFiles/cmTC_6ef59.dir/build.make CMakeFiles/cmTC_6ef59.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_95edb/fast"
+/usr/bin/make -f CMakeFiles/cmTC_95edb.dir/build.make CMakeFiles/cmTC_95edb.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building CXX object CMakeFiles/cmTC_6ef59.dir/CheckFunctionExists.cxx.o
-/usr/bin/clang++    -DCHECK_FUNCTION_EXISTS=pthread_create   -std=c++14 -o CMakeFiles/cmTC_6ef59.dir/CheckFunctionExists.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CheckLibraryExists/CheckFunctionExists.cxx
-Linking CXX executable cmTC_6ef59
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6ef59.dir/link.txt --verbose=1
-/usr/bin/clang++   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_6ef59.dir/CheckFunctionExists.cxx.o  -o cmTC_6ef59 -lpthread 
+Building CXX object CMakeFiles/cmTC_95edb.dir/CheckFunctionExists.cxx.o
+/usr/bin/c++    -DCHECK_FUNCTION_EXISTS=pthread_create   -std=c++14 -o CMakeFiles/cmTC_95edb.dir/CheckFunctionExists.cxx.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CheckLibraryExists/CheckFunctionExists.cxx
+Linking CXX executable cmTC_95edb
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_95edb.dir/link.txt --verbose=1
+/usr/bin/c++   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_95edb.dir/CheckFunctionExists.cxx.o  -o cmTC_95edb -lpthread 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
 Determining if the Fortran sgemm exists passed with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_accc6/fast"
-/usr/bin/make -f CMakeFiles/cmTC_accc6.dir/build.make CMakeFiles/cmTC_accc6.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_6d9e4/fast"
+/usr/bin/make -f CMakeFiles/cmTC_6d9e4.dir/build.make CMakeFiles/cmTC_6d9e4.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building Fortran object CMakeFiles/cmTC_accc6.dir/testFortranCompiler.f.o
-/usr/bin/f95    -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTC_accc6.dir/testFortranCompiler.f.o
-Linking Fortran executable cmTC_accc6
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_accc6.dir/link.txt --verbose=1
-/usr/bin/f95      CMakeFiles/cmTC_accc6.dir/testFortranCompiler.f.o  -o cmTC_accc6 /usr/lib/x86_64-linux-gnu/libblas.so 
+Building Fortran object CMakeFiles/cmTC_6d9e4.dir/testFortranCompiler.f.o
+/usr/bin/gfortran    -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTC_6d9e4.dir/testFortranCompiler.f.o
+Linking Fortran executable cmTC_6d9e4
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_6d9e4.dir/link.txt --verbose=1
+/usr/bin/gfortran      CMakeFiles/cmTC_6d9e4.dir/testFortranCompiler.f.o  -o cmTC_6d9e4 /usr/lib/x86_64-linux-gnu/libblas.so 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
 
 
 Determining if the Fortran cheev exists passed with the following output:
 Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_21bb9/fast"
-/usr/bin/make -f CMakeFiles/cmTC_21bb9.dir/build.make CMakeFiles/cmTC_21bb9.dir/build
+Run Build Command:"/usr/bin/make" "cmTC_243b5/fast"
+/usr/bin/make -f CMakeFiles/cmTC_243b5.dir/build.make CMakeFiles/cmTC_243b5.dir/build
 make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
-Building Fortran object CMakeFiles/cmTC_21bb9.dir/testFortranCompiler.f.o
-/usr/bin/f95    -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTC_21bb9.dir/testFortranCompiler.f.o
-Linking Fortran executable cmTC_21bb9
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_21bb9.dir/link.txt --verbose=1
-/usr/bin/f95      CMakeFiles/cmTC_21bb9.dir/testFortranCompiler.f.o  -o cmTC_21bb9 /usr/lib/x86_64-linux-gnu/liblapack.so /usr/lib/x86_64-linux-gnu/libblas.so 
+Building Fortran object CMakeFiles/cmTC_243b5.dir/testFortranCompiler.f.o
+/usr/bin/gfortran    -c /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp/testFortranCompiler.f -o CMakeFiles/cmTC_243b5.dir/testFortranCompiler.f.o
+Linking Fortran executable cmTC_243b5
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_243b5.dir/link.txt --verbose=1
+/usr/bin/gfortran      CMakeFiles/cmTC_243b5.dir/testFortranCompiler.f.o  -o cmTC_243b5 /usr/lib/x86_64-linux-gnu/liblapack.so /usr/lib/x86_64-linux-gnu/libblas.so 
 make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
+
+
+Detecting CXX OpenMP compiler ABI info compiled with the following output:
+Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_1213b/fast"
+/usr/bin/make -f CMakeFiles/cmTC_1213b.dir/build.make CMakeFiles/cmTC_1213b.dir/build
+make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o
+/usr/bin/c++    -fopenmp -v   -std=c++14 -o CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.cpp
+Using built-in specs.
+COLLECT_GCC=/usr/bin/c++
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 8.3.0 (Debian 8.3.0-6) 
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-std=c++14' '-o' 'CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+ /usr/lib/gcc/x86_64-linux-gnu/8/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE -D_REENTRANT /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.cpp -quiet -dumpbase OpenMPTryFlag.cpp -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o -std=c++14 -version -fopenmp -o /tmp/ccTLjy0U.s
+GNU C++14 (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring duplicate directory "/data/ssd/gamrat/KLOE/Include"
+ignoring duplicate directory "/data/ssd/gamrat/KLOE/Include/FortranAnalysis/inc"
+ignoring duplicate directory "/data/ssd/gamrat/KLOE/Include/Codes/inc"
+ignoring duplicate directory "/data/4/users/gamrat/root_dirs/install_root/include"
+ignoring duplicate directory "/data/4/users/gamrat/external_libs"
+ignoring duplicate directory "/usr/include/x86_64-linux-gnu/c++/8"
+ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ .
+ /data/ssd/gamrat/KLOE/Include
+ /data/ssd/gamrat/KLOE/Include/FortranAnalysis/inc
+ /data/ssd/gamrat/KLOE/Include/Codes/inc
+ /data/4/users/gamrat/root_dirs/install_root/include
+ /data/4/users/gamrat/external_libs
+ /usr/include/c++/8
+ /usr/include/x86_64-linux-gnu/c++/8
+ /usr/include/c++/8/backward
+ /usr/lib/gcc/x86_64-linux-gnu/8/include
+ /usr/local/include
+ /usr/lib/gcc/x86_64-linux-gnu/8/include-fixed
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+End of search list.
+GNU C++14 (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: 3c854693d01dc9a844a56a0b1ab1c0f4
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-std=c++14' '-o' 'CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+ as -v --64 -o CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o /tmp/ccTLjy0U.s
+GNU assembler version 2.31.1 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.31.1
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-std=c++14' '-o' 'CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+Linking CXX executable cmTC_1213b
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1213b.dir/link.txt --verbose=1
+/usr/bin/c++   -fopenmp -v    CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o  -o cmTC_1213b -v 
+Using built-in specs.
+COLLECT_GCC=/usr/bin/c++
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 8.3.0 (Debian 8.3.0-6) 
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgomp.spec
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_1213b' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccBZQMkZ.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_1213b /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadbegin.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o -lstdc++ -lm -lgomp -lgcc_s -lgcc -lpthread -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadend.o
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_1213b' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
+
+
+Parsed CXX OpenMP implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_1213b/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_1213b.dir/build.make CMakeFiles/cmTC_1213b.dir/build]
+  ignore line: [make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp']
+  ignore line: [Building CXX object CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o]
+  ignore line: [/usr/bin/c++    -fopenmp -v   -std=c++14 -o CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o -c /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.cpp]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/c++]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.0 (Debian 8.3.0-6) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-std=c++14' '-o' 'CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/8/cc1plus -quiet -v -imultiarch x86_64-linux-gnu -D_GNU_SOURCE -D_REENTRANT /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.cpp -quiet -dumpbase OpenMPTryFlag.cpp -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o -std=c++14 -version -fopenmp -o /tmp/ccTLjy0U.s]
+  ignore line: [GNU C++14 (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)]
+  ignore line: [	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [ignoring duplicate directory "/data/ssd/gamrat/KLOE/Include"]
+  ignore line: [ignoring duplicate directory "/data/ssd/gamrat/KLOE/Include/FortranAnalysis/inc"]
+  ignore line: [ignoring duplicate directory "/data/ssd/gamrat/KLOE/Include/Codes/inc"]
+  ignore line: [ignoring duplicate directory "/data/4/users/gamrat/root_dirs/install_root/include"]
+  ignore line: [ignoring duplicate directory "/data/4/users/gamrat/external_libs"]
+  ignore line: [ignoring duplicate directory "/usr/include/x86_64-linux-gnu/c++/8"]
+  ignore line: [ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"]
+  ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/include"]
+  ignore line: [#include "..." search starts here:]
+  ignore line: [#include <...> search starts here:]
+  ignore line: [ .]
+  ignore line: [ /data/ssd/gamrat/KLOE/Include]
+  ignore line: [ /data/ssd/gamrat/KLOE/Include/FortranAnalysis/inc]
+  ignore line: [ /data/ssd/gamrat/KLOE/Include/Codes/inc]
+  ignore line: [ /data/4/users/gamrat/root_dirs/install_root/include]
+  ignore line: [ /data/4/users/gamrat/external_libs]
+  ignore line: [ /usr/include/c++/8]
+  ignore line: [ /usr/include/x86_64-linux-gnu/c++/8]
+  ignore line: [ /usr/include/c++/8/backward]
+  ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/8/include]
+  ignore line: [ /usr/local/include]
+  ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/8/include-fixed]
+  ignore line: [ /usr/include/x86_64-linux-gnu]
+  ignore line: [ /usr/include]
+  ignore line: [End of search list.]
+  ignore line: [GNU C++14 (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)]
+  ignore line: [	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [Compiler executable checksum: 3c854693d01dc9a844a56a0b1ab1c0f4]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-std=c++14' '-o' 'CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [ as -v --64 -o CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o /tmp/ccTLjy0U.s]
+  ignore line: [GNU assembler version 2.31.1 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.31.1]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-std=c++14' '-o' 'CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [Linking CXX executable cmTC_1213b]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_1213b.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/c++   -fopenmp -v    CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o  -o cmTC_1213b -v ]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/c++]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.0 (Debian 8.3.0-6) ]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
+  ignore line: [Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgomp.spec]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_1213b' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccBZQMkZ.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_1213b /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadbegin.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o -lstdc++ -lm -lgomp -lgcc_s -lgcc -lpthread -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadend.o]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccBZQMkZ.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lpthread] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-pie] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_1213b] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadbegin.o] ==> ignore
+    arg [-L/data/4/cernlib/new/lib/../lib] ==> dir [/data/4/cernlib/new/lib/../lib]
+    arg [-L/data/4/cernlib/new/lib/../lib] ==> dir [/data/4/cernlib/new/lib/../lib]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L.] ==> ignore
+    arg [-L/data/ssd/gamrat/KLOE/Include] ==> dir [/data/ssd/gamrat/KLOE/Include]
+    arg [-L/data/4/cernlib/new/lib] ==> dir [/data/4/cernlib/new/lib]
+    arg [-L/data/4/users/gamrat/external_libs] ==> dir [/data/4/users/gamrat/external_libs]
+    arg [-L/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> dir [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/data/ssd/gamrat/KLOE/Include] ==> dir [/data/ssd/gamrat/KLOE/Include]
+    arg [-L/data/4/cernlib/new/lib] ==> dir [/data/4/cernlib/new/lib]
+    arg [-L/data/4/users/gamrat/external_libs] ==> dir [/data/4/users/gamrat/external_libs]
+    arg [-L/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> dir [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..]
+    arg [CMakeFiles/cmTC_1213b.dir/OpenMPTryFlag.cpp.o] ==> ignore
+    arg [-lstdc++] ==> lib [stdc++]
+    arg [-lm] ==> lib [m]
+    arg [-lgomp] ==> lib [gomp]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lpthread] ==> lib [pthread]
+    arg [-lc] ==> lib [c]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadend.o] ==> ignore
+  collapse library dir [/data/4/cernlib/new/lib/../lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/cernlib/new/lib/../lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8] ==> [/usr/lib/gcc/x86_64-linux-gnu/8]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include] ==> [/data/ssd/gamrat/KLOE/Include]
+  collapse library dir [/data/4/cernlib/new/lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/users/gamrat/external_libs] ==> [/data/4/users/gamrat/external_libs]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include] ==> [/data/ssd/gamrat/KLOE/Include]
+  collapse library dir [/data/4/cernlib/new/lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/users/gamrat/external_libs] ==> [/data/4/users/gamrat/external_libs]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> [/usr/lib]
+  implicit libs: [stdc++;m;gomp;gcc_s;gcc;pthread;c;gcc_s;gcc]
+  implicit dirs: [/data/4/cernlib/new/lib;/usr/lib/gcc/x86_64-linux-gnu/8;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib;/data/ssd/gamrat/KLOE/Include;/data/4/users/gamrat/external_libs;/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  implicit fwks: []
+
+
+Detecting Fortran OpenMP compiler ABI info compiled with the following output:
+Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_d8ed9/fast"
+/usr/bin/make -f CMakeFiles/cmTC_d8ed9.dir/build.make CMakeFiles/cmTC_d8ed9.dir/build
+make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o
+/usr/bin/gfortran   -fopenmp -v   -c /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.f90 -o CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o
+Using built-in specs.
+COLLECT_GCC=/usr/bin/gfortran
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 8.3.0 (Debian 8.3.0-6) 
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread'
+ /usr/lib/gcc/x86_64-linux-gnu/8/f951 /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.f90 -quiet -dumpbase OpenMPTryFlag.f90 -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o -version -fopenmp -fintrinsic-modules-path /usr/lib/gcc/x86_64-linux-gnu/8/finclude -o /tmp/cc5mhLoa.s
+GNU Fortran (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+GNU Fortran2008 (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread'
+ as -v --64 -o CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o /tmp/cc5mhLoa.s
+GNU assembler version 2.31.1 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.31.1
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread'
+Linking Fortran executable cmTC_d8ed9
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d8ed9.dir/link.txt --verbose=1
+/usr/bin/gfortran     -fopenmp -v CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o  -o cmTC_d8ed9 -v 
+Driving: /usr/bin/gfortran -fopenmp -v CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o -o cmTC_d8ed9 -v -l gfortran -l m -shared-libgcc
+Using built-in specs.
+COLLECT_GCC=/usr/bin/gfortran
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 8.3.0 (Debian 8.3.0-6) 
+Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgfortran.spec
+rename spec lib to liborig
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_d8ed9' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgomp.spec
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_d8ed9' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccqbFwnf.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_d8ed9 /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadbegin.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o -lgfortran -lm -lgomp -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lpthread -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadend.o
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_d8ed9' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
+
+
+Parsed Fortran OpenMP implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_d8ed9/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_d8ed9.dir/build.make CMakeFiles/cmTC_d8ed9.dir/build]
+  ignore line: [make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp']
+  ignore line: [Building Fortran object CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o]
+  ignore line: [/usr/bin/gfortran   -fopenmp -v   -c /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.f90 -o CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/gfortran]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.0 (Debian 8.3.0-6) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/8/f951 /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.f90 -quiet -dumpbase OpenMPTryFlag.f90 -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o -version -fopenmp -fintrinsic-modules-path /usr/lib/gcc/x86_64-linux-gnu/8/finclude -o /tmp/cc5mhLoa.s]
+  ignore line: [GNU Fortran (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)]
+  ignore line: [	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [GNU Fortran2008 (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)]
+  ignore line: [	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [ as -v --64 -o CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o /tmp/cc5mhLoa.s]
+  ignore line: [GNU assembler version 2.31.1 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.31.1]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [Linking Fortran executable cmTC_d8ed9]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d8ed9.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/gfortran     -fopenmp -v CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o  -o cmTC_d8ed9 -v ]
+  ignore line: [Driving: /usr/bin/gfortran -fopenmp -v CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o -o cmTC_d8ed9 -v -l gfortran -l m -shared-libgcc]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/gfortran]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.0 (Debian 8.3.0-6) ]
+  ignore line: [Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgfortran.spec]
+  ignore line: [rename spec lib to liborig]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_d8ed9' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
+  ignore line: [Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgomp.spec]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_d8ed9' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccqbFwnf.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_d8ed9 /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadbegin.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o -lgfortran -lm -lgomp -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lpthread -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadend.o]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccqbFwnf.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lquadmath] ==> ignore
+    arg [-plugin-opt=-pass-through=-lm] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lpthread] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-pie] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_d8ed9] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadbegin.o] ==> ignore
+    arg [-L/data/4/cernlib/new/lib/../lib] ==> dir [/data/4/cernlib/new/lib/../lib]
+    arg [-L/data/4/cernlib/new/lib/../lib] ==> dir [/data/4/cernlib/new/lib/../lib]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L.] ==> ignore
+    arg [-L/data/ssd/gamrat/KLOE/Include] ==> dir [/data/ssd/gamrat/KLOE/Include]
+    arg [-L/data/4/cernlib/new/lib] ==> dir [/data/4/cernlib/new/lib]
+    arg [-L/data/4/users/gamrat/external_libs] ==> dir [/data/4/users/gamrat/external_libs]
+    arg [-L/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> dir [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/data/ssd/gamrat/KLOE/Include] ==> dir [/data/ssd/gamrat/KLOE/Include]
+    arg [-L/data/4/cernlib/new/lib] ==> dir [/data/4/cernlib/new/lib]
+    arg [-L/data/4/users/gamrat/external_libs] ==> dir [/data/4/users/gamrat/external_libs]
+    arg [-L/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> dir [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..]
+    arg [CMakeFiles/cmTC_d8ed9.dir/OpenMPTryFlag.f90.o] ==> ignore
+    arg [-lgfortran] ==> lib [gfortran]
+    arg [-lm] ==> lib [m]
+    arg [-lgomp] ==> lib [gomp]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lquadmath] ==> lib [quadmath]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lpthread] ==> lib [pthread]
+    arg [-lc] ==> lib [c]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadend.o] ==> ignore
+  collapse library dir [/data/4/cernlib/new/lib/../lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/cernlib/new/lib/../lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8] ==> [/usr/lib/gcc/x86_64-linux-gnu/8]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include] ==> [/data/ssd/gamrat/KLOE/Include]
+  collapse library dir [/data/4/cernlib/new/lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/users/gamrat/external_libs] ==> [/data/4/users/gamrat/external_libs]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include] ==> [/data/ssd/gamrat/KLOE/Include]
+  collapse library dir [/data/4/cernlib/new/lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/users/gamrat/external_libs] ==> [/data/4/users/gamrat/external_libs]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> [/usr/lib]
+  implicit libs: [gfortran;m;gomp;gcc_s;gcc;quadmath;m;gcc_s;gcc;pthread;c;gcc_s;gcc]
+  implicit dirs: [/data/4/cernlib/new/lib;/usr/lib/gcc/x86_64-linux-gnu/8;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib;/data/ssd/gamrat/KLOE/Include;/data/4/users/gamrat/external_libs;/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  implicit fwks: []
+
+
+Detecting Fortran OpenMP compiler ABI info compiled with the following output:
+Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_2e0d6/fast"
+/usr/bin/make -f CMakeFiles/cmTC_2e0d6.dir/build.make CMakeFiles/cmTC_2e0d6.dir/build
+make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o
+/usr/bin/gfortran   -fopenmp -v   -c /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.f90 -o CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o
+Using built-in specs.
+COLLECT_GCC=/usr/bin/gfortran
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 8.3.0 (Debian 8.3.0-6) 
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread'
+ /usr/lib/gcc/x86_64-linux-gnu/8/f951 /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.f90 -quiet -dumpbase OpenMPTryFlag.f90 -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o -version -fopenmp -fintrinsic-modules-path /usr/lib/gcc/x86_64-linux-gnu/8/finclude -o /tmp/ccy6T0Pl.s
+GNU Fortran (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+GNU Fortran2008 (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)
+	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP
+
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread'
+ as -v --64 -o CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o /tmp/ccy6T0Pl.s
+GNU assembler version 2.31.1 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.31.1
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread'
+Linking Fortran executable cmTC_2e0d6
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2e0d6.dir/link.txt --verbose=1
+/usr/bin/gfortran     -fopenmp -v CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o  -o cmTC_2e0d6 -v 
+Driving: /usr/bin/gfortran -fopenmp -v CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o -o cmTC_2e0d6 -v -l gfortran -l m -shared-libgcc
+Using built-in specs.
+COLLECT_GCC=/usr/bin/gfortran
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper
+OFFLOAD_TARGET_NAMES=nvptx-none
+OFFLOAD_TARGET_DEFAULT=1
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 8.3.0 (Debian 8.3.0-6) 
+Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgfortran.spec
+rename spec lib to liborig
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_2e0d6' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
+LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgomp.spec
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_2e0d6' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccJgyjqq.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_2e0d6 /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadbegin.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o -lgfortran -lm -lgomp -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lpthread -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadend.o
+COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_2e0d6' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread'
+make[1]: Leaving directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp'
+
+
+Parsed Fortran OpenMP implicit link information from above output:
+  link line regex: [^( *|.*[/\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\]+-)?ld|collect2)[^/\]*( |$)]
+  ignore line: [Change Dir: /data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp]
+  ignore line: []
+  ignore line: [Run Build Command:"/usr/bin/make" "cmTC_2e0d6/fast"]
+  ignore line: [/usr/bin/make -f CMakeFiles/cmTC_2e0d6.dir/build.make CMakeFiles/cmTC_2e0d6.dir/build]
+  ignore line: [make[1]: Entering directory '/data/ssd/gamrat/KLOE/build/CMakeFiles/CMakeTmp']
+  ignore line: [Building Fortran object CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o]
+  ignore line: [/usr/bin/gfortran   -fopenmp -v   -c /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.f90 -o CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/gfortran]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.0 (Debian 8.3.0-6) ]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/8/f951 /data/ssd/gamrat/KLOE/build/CMakeFiles/FindOpenMP/OpenMPTryFlag.f90 -quiet -dumpbase OpenMPTryFlag.f90 -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o -version -fopenmp -fintrinsic-modules-path /usr/lib/gcc/x86_64-linux-gnu/8/finclude -o /tmp/ccy6T0Pl.s]
+  ignore line: [GNU Fortran (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)]
+  ignore line: [	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [GNU Fortran2008 (Debian 8.3.0-6) version 8.3.0 (x86_64-linux-gnu)]
+  ignore line: [	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP]
+  ignore line: []
+  ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [ as -v --64 -o CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o /tmp/ccy6T0Pl.s]
+  ignore line: [GNU assembler version 2.31.1 (x86_64-linux-gnu) using BFD version (GNU Binutils for Debian) 2.31.1]
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-c' '-o' 'CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [Linking Fortran executable cmTC_2e0d6]
+  ignore line: [/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2e0d6.dir/link.txt --verbose=1]
+  ignore line: [/usr/bin/gfortran     -fopenmp -v CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o  -o cmTC_2e0d6 -v ]
+  ignore line: [Driving: /usr/bin/gfortran -fopenmp -v CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o -o cmTC_2e0d6 -v -l gfortran -l m -shared-libgcc]
+  ignore line: [Using built-in specs.]
+  ignore line: [COLLECT_GCC=/usr/bin/gfortran]
+  ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper]
+  ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+  ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+  ignore line: [Target: x86_64-linux-gnu]
+  ignore line: [Configured with: ../src/configure -v --with-pkgversion='Debian 8.3.0-6' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --enable-default-pie --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+  ignore line: [Thread model: posix]
+  ignore line: [gcc version 8.3.0 (Debian 8.3.0-6) ]
+  ignore line: [Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgfortran.spec]
+  ignore line: [rename spec lib to liborig]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_2e0d6' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread']
+  ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/]
+  ignore line: [LIBRARY_PATH=/data/4/cernlib/new/lib/../lib/:/data/4/cernlib/new/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:./:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/data/ssd/gamrat/KLOE/Include/:/data/4/cernlib/new/lib/:/data/4/users/gamrat/external_libs/:/data/ssd/gamrat/KLOE/Include/Codes/inc/:/lib/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
+  ignore line: [Reading specs from /usr/lib/gcc/x86_64-linux-gnu/8/libgomp.spec]
+  ignore line: [COLLECT_GCC_OPTIONS='-fopenmp' '-v' '-o' 'cmTC_2e0d6' '-v' '-shared-libgcc' '-mtune=generic' '-march=x86-64' '-pthread']
+  link line: [ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/ccJgyjqq.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lquadmath -plugin-opt=-pass-through=-lm -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lpthread -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -dynamic-linker /lib64/ld-linux-x86-64.so.2 -pie -o cmTC_2e0d6 /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadbegin.o -L/data/4/cernlib/new/lib/../lib -L/data/4/cernlib/new/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L. -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/data/ssd/gamrat/KLOE/Include -L/data/4/cernlib/new/lib -L/data/4/users/gamrat/external_libs -L/data/ssd/gamrat/KLOE/Include/Codes/inc -L/lib/x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o -lgfortran -lm -lgomp -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lpthread -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o /usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadend.o]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/collect2] ==> ignore
+    arg [-plugin] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so] ==> ignore
+    arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper] ==> ignore
+    arg [-plugin-opt=-fresolution=/tmp/ccJgyjqq.res] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lquadmath] ==> ignore
+    arg [-plugin-opt=-pass-through=-lm] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lpthread] ==> ignore
+    arg [-plugin-opt=-pass-through=-lc] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+    arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+    arg [--build-id] ==> ignore
+    arg [--eh-frame-hdr] ==> ignore
+    arg [-m] ==> ignore
+    arg [elf_x86_64] ==> ignore
+    arg [--hash-style=gnu] ==> ignore
+    arg [-dynamic-linker] ==> ignore
+    arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+    arg [-pie] ==> ignore
+    arg [-o] ==> ignore
+    arg [cmTC_2e0d6] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/Scrt1.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtbeginS.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadbegin.o] ==> ignore
+    arg [-L/data/4/cernlib/new/lib/../lib] ==> dir [/data/4/cernlib/new/lib/../lib]
+    arg [-L/data/4/cernlib/new/lib/../lib] ==> dir [/data/4/cernlib/new/lib/../lib]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/lib/../lib] ==> dir [/lib/../lib]
+    arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+    arg [-L.] ==> ignore
+    arg [-L/data/ssd/gamrat/KLOE/Include] ==> dir [/data/ssd/gamrat/KLOE/Include]
+    arg [-L/data/4/cernlib/new/lib] ==> dir [/data/4/cernlib/new/lib]
+    arg [-L/data/4/users/gamrat/external_libs] ==> dir [/data/4/users/gamrat/external_libs]
+    arg [-L/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> dir [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/data/ssd/gamrat/KLOE/Include] ==> dir [/data/ssd/gamrat/KLOE/Include]
+    arg [-L/data/4/cernlib/new/lib] ==> dir [/data/4/cernlib/new/lib]
+    arg [-L/data/4/users/gamrat/external_libs] ==> dir [/data/4/users/gamrat/external_libs]
+    arg [-L/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> dir [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+    arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+    arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..]
+    arg [CMakeFiles/cmTC_2e0d6.dir/OpenMPTryFlag.f90.o] ==> ignore
+    arg [-lgfortran] ==> lib [gfortran]
+    arg [-lm] ==> lib [m]
+    arg [-lgomp] ==> lib [gomp]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lquadmath] ==> lib [quadmath]
+    arg [-lm] ==> lib [m]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [-lpthread] ==> lib [pthread]
+    arg [-lc] ==> lib [c]
+    arg [-lgcc_s] ==> lib [gcc_s]
+    arg [-lgcc] ==> lib [gcc]
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtendS.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o] ==> ignore
+    arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtoffloadend.o] ==> ignore
+  collapse library dir [/data/4/cernlib/new/lib/../lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/cernlib/new/lib/../lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8] ==> [/usr/lib/gcc/x86_64-linux-gnu/8]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> [/usr/lib]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/lib/../lib] ==> [/lib]
+  collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include] ==> [/data/ssd/gamrat/KLOE/Include]
+  collapse library dir [/data/4/cernlib/new/lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/users/gamrat/external_libs] ==> [/data/4/users/gamrat/external_libs]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include] ==> [/data/ssd/gamrat/KLOE/Include]
+  collapse library dir [/data/4/cernlib/new/lib] ==> [/data/4/cernlib/new/lib]
+  collapse library dir [/data/4/users/gamrat/external_libs] ==> [/data/4/users/gamrat/external_libs]
+  collapse library dir [/data/ssd/gamrat/KLOE/Include/Codes/inc] ==> [/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+  collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> [/usr/lib]
+  implicit libs: [gfortran;m;gomp;gcc_s;gcc;quadmath;m;gcc_s;gcc;pthread;c;gcc_s;gcc]
+  implicit dirs: [/data/4/cernlib/new/lib;/usr/lib/gcc/x86_64-linux-gnu/8;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib;/data/ssd/gamrat/KLOE/Include;/data/4/users/gamrat/external_libs;/data/ssd/gamrat/KLOE/Include/Codes/inc]
+  implicit fwks: []
 
 

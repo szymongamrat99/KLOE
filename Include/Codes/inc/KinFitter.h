@@ -180,6 +180,8 @@ namespace KLOE
     Double_t EnergyCalc(TLorentzVector p, Double_t mass);
 
     ErrorHandling::ErrorCodes GetErrorCode() { return _err_code; }
+
+    TVectorD ComputeJacobianParallel(Double_t *tempParams);
   };
 
 }

@@ -140,7 +140,7 @@ public:
   TTreeReaderValue<Float_t> T0step1 = {fReader, "T0step1"};
   TTreeReaderValue<Float_t> TrcSum = {fReader, "TrcSum"};
   TTreeReaderValue<Float_t> minv4gam = {fReader, "minv4gam"};
-  // TTreeReaderValue<Float_t> bestError = {fReader, "bestErrorSixGamma"};
+  TTreeReaderValue<Float_t> bestError = {fReader, "bestErrorSixGamma"};
 
   TTreeReaderArray<int> Asscl = {fReader, "Asscl"};
   // TTreeReaderArray<int> cutsApplied = {fReader, "cutsApplied"};
@@ -250,7 +250,7 @@ public:
   TTreeReaderArray<float> yvmc = {fReader, "yvmc"};
   TTreeReaderArray<float> zv = {fReader, "zv"};
   TTreeReaderArray<float> zvmc = {fReader, "zvmc"};
-  // TTreeReaderArray<float> KnerecSix = {fReader, "KnerecSix"};
+  TTreeReaderArray<float> KnerecSix = {fReader, "KnerecSix"};
 
   signal_vs_bcg_v2(TTree * /*tree*/ = 0) {}
   virtual ~signal_vs_bcg_v2() {}
