@@ -181,7 +181,6 @@ namespace KLOE
 
     ErrorHandling::ErrorCodes GetErrorCode() { return _err_code; }
 
-    TVectorD ComputeJacobianParallel(Double_t *tempParams);
   };
 
 }

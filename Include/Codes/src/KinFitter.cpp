@@ -3,6 +3,7 @@
 // Author: Szymon Gamrat
 
 #include <KinFitter.h>
+#include <TROOT.h>
 
 #include <chrono>
 
@@ -10,6 +11,9 @@ using namespace KLOE;
 
 KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger) : _N_free(N_free), _N_const(N_const), _M(M), _M_act(M_active), _loopcount(loopcount), _jmin(0), _jmax(0), _CHISQRSTEP(chisqrstep), _logger(logger), _mode(mode), _V(N_free + N_const, N_free + N_const), _V_T(N_free + N_const, N_free + N_const), _V_init(N_free + N_const, N_free + N_const), _V_invert(N_free + N_const, N_free + N_const), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _Aux(M, M), _C(M), _L(M), _CORR(N_free + N_const), _X(N_free + N_const), _X_init(N_free + N_const), _X_final(N_free + N_const), _X_init_aux(N_free + N_const), _C_aux(M), _L_aux(M)
 {
+  ROOT::EnableThreadSafety();
+  ROOT::EnableImplicitMT();
+
   if (_mode == "Omega")
     _objOmega = new ConstraintsOmega();
   else if (_mode == "SignalGlobal")
@@ -28,6 +32,9 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
 
 KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Int_t jmin, Int_t jmax, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger) : _N_free(N_free), _N_const(N_const), _M(M), _M_act(M_active), _CHISQRSTEP(chisqrstep), _loopcount(loopcount), _jmin(jmin), _jmax(jmax), _logger(logger), _mode(mode), _V(N_free + N_const, N_free + N_const), _V_T(N_free + N_const, N_free + N_const), _V_init(N_free + N_const, N_free + N_const), _V_invert(N_free + N_const, N_free + N_const), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _Aux(M, M), _C(M), _L(M), _CORR(N_free + N_const), _X(N_free + N_const), _X_init(N_free + N_const), _X_final(N_free + N_const), _X_init_aux(N_free + N_const), _C_aux(M), _L_aux(M)
 {
+  ROOT::EnableThreadSafety();
+  ROOT::EnableImplicitMT();
+
   if (_mode == "Omega")
     _objOmega = new ConstraintsOmega();
   else if (_mode == "SignalGlobal")
@@ -134,23 +141,21 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       Double_t *tempParams = _X.GetMatrixArray();
 
-      // for (Int_t l = 0; l < _M; l++)
-      // {
-      //   _C(l) = _constraints[l]->EvalPar(0, tempParams);
+      for (Int_t l = 0; l < _M; l++)
+      {
+        _C(l) = _constraints[l]->EvalPar(0, tempParams);
 
-      //   for (Int_t m = 0; m < _N_free + _N_const; m++)
-      //   {
-      //     _constraints[l]->SetParameters(tempParams);
-      //     if (m < _N_free)
-      //     {
-      //       _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
-      //     }
-      //     else
-      //       _D(l, m) = 0;
-      //   }
-      // }
-
-      _C = ComputeJacobianParallel(tempParams);
+        for (Int_t m = 0; m < _N_free + _N_const; m++)
+        {
+          _constraints[l]->SetParameters(tempParams);
+          if (m < _N_free)
+          {
+            _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
+          }
+          else
+            _D(l, m) = 0;
+        }
+      }
 
       _D_T = _D_T.Transpose(_D);
 
@@ -239,48 +244,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
   return _CHISQRTMP;
 };
 
-TVectorD KinFitter::ComputeJacobianParallel(Double_t *tempParams)
-{
-    TVectorD C_local(_M);
-    
-    // ==================== PARALELIZACJA - COLLAPSE(2) ====================
-    // collapse(2) - paralelizuje obie pętle
-    // schedule(dynamic, 1) - dynamiczny schedule dla nierównych czasów obliczeń
-    // if() - włącza OMP tylko jeśli problem jest wystarczająco duży
-    
-    #pragma omp parallel for collapse(2) schedule(dynamic, 1) \
-            if(_M > 2 && (_N_free + _N_const) > 4) default(none) \
-            shared(_M, _N_free, _N_const, _constraints, _V_init, _D, tempParams) \
-            private(C_local)
-    for (Int_t l = 0; l < _M; l++)
-    {
-        for (Int_t m = 0; m < _N_free + _N_const; m++)
-        {
-            // ✅ Każdy thread pracuje na swoim (l, m)
-            _constraints[l]->SetParameters(tempParams);
-            
-            if (m < _N_free)
-            {
-                // Adaptive step size - zamiast fixed 0.01
-                Double_t step = 0.01 * sqrt(_V_init(m, m));
-                _D(l, m) = _constraints[l]->GradientPar(m, 0, step);
-            }
-            else
-            {
-                _D(l, m) = 0.0;  // Constrained params
-            }
-        }
-    }
-    
-    // ✅ Oblicz wartości ograniczeń PO pochodnych (nie concurrent z pochodniami)
-    #pragma omp parallel for schedule(static) if(_M > 4)
-    for (Int_t l = 0; l < _M; l++)
-    {
-        C_local(l) = _constraints[l]->EvalPar(0, tempParams);
-    }
-    
-    return C_local;
-}
 
 Double_t KinFitter::EnergyCalc(Double_t *p, Double_t mass)
 {
