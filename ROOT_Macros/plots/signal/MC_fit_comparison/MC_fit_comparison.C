@@ -231,14 +231,14 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
   Float_t vKchFit = PhysicsConstants::cVel * KchboostFit[4] / KchboostFit[3],
-          pathKchFit = sqrt(pow(KchboostFit[6] - 0, 2) +
-                            pow(KchboostFit[7] - 0, 2) +
-                            pow(KchboostFit[8] - 0, 2)),
+          pathKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
+                            pow(KchboostFit[7] - ipFit[1], 2) +
+                            pow(KchboostFit[8] - ipFit[2], 2)),
           tKchFit = KchboostFit[9] / (0.0895),
           vKneFit = PhysicsConstants::cVel * KnereclorFit[4] / KnereclorFit[3],
-          pathKneFit = sqrt(pow(KnereclorFit[6] - 0, 2) +
-                            pow(KnereclorFit[7] - 0, 2) +
-                            pow(KnereclorFit[8] - 0, 2)),
+          pathKneFit = sqrt(pow(KnereclorFit[6] - ipFit[0], 2) +
+                            pow(KnereclorFit[7] - ipFit[1], 2) +
+                            pow(KnereclorFit[8] - ipFit[2], 2)),
           tKneFit = KnerecFit[9] / (0.0895),
           vKneMC = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
           vKchMC = PhysicsConstants::cVel * Kchmc[4] / Kchmc[3],
@@ -404,8 +404,38 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
          condMassPi02 = abs(pi02Fit[5] - 134.867) < 3 * 3.331;
   ///////////////////////////////////////////////////////////////////////////////
 
+  Float_t kaonChPath = sqrt(pow(Kchrec[6] - ip[0], 2) +
+                            pow(Kchrec[7] - ip[1], 2) +
+                            pow(Kchrec[8] - ip[2], 2)),
+          kaonChMom[3] = {(Kchrec[6] - ip[0]) / kaonChPath * Kchboost[4],
+                          (Kchrec[7] - ip[1]) / kaonChPath * Kchboost[4],
+                          (Kchrec[8] - ip[2]) / kaonChPath * Kchboost[4]};
+
+  TVector3 boostNeutralKaon(-Knerec[0] / Knerec[3],
+                            -Knerec[1] / Knerec[3],
+                            -Knerec[2] / Knerec[3]),
+      boostChargedKaon(-kaonChMom[0] / Kchboost[3],
+                       -kaonChMom[1] / Kchboost[3],
+                       -kaonChMom[2] / Kchboost[3]);
+
+  TLorentzVector pi1(trk1[0], trk1[1], trk1[2], trk1[3]);
+  TLorentzVector pi2(trk2[0], trk2[1], trk2[2], trk2[3]);
+
+  TLorentzVector pi01Vec(pi01[0], pi01[1], pi01[2], pi01[3]);
+  TLorentzVector pi02Vec(pi02[0], pi02[1], pi02[2], pi02[3]);
+
+  pi1.Boost(boostChargedKaon);
+  pi2.Boost(boostChargedKaon);
+  pi01Vec.Boost(boostNeutralKaon);
+  pi02Vec.Boost(boostNeutralKaon);
+
+  Float_t openingAngleCharged = pi1.Angle(pi2.Vect()) * 180.0 / TMath::Pi(),
+          openingAngleNeutral = pi01Vec.Angle(pi02Vec.Vect()) * 180.0 / TMath::Pi(),
+          acosCutAngle = acos(-0.8) * 180.0 / TMath::Pi();
+
   Bool_t simonaCuts = abs(deltaPhiFit - 3.110) > 2 * 0.135 && *Chi2SignalKinFit < 30.,
-         simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts;
+         simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts,
+         condAnalysisOld = *Chi2SignalKinFit < 40. && combinedMassPi0Fit < 35. && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && abs(*minv4gam - PhysicsConstants::mK0) < 76. && *Qmiss < 3.75 && *TrcSum > -1. && openingAngleCharged > acosCutAngle;
 
   if (mctruth_int == 0 || mctruth_int == -1 || mctruth_int == 1)
     signal_tot_err++;
@@ -413,8 +443,8 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   if ((mctruth_int == 0 || mctruth_int == 1))
     signal_tot++;
 
-  Double_t limitRadiusChMC = 25.,
-           limitRadiusNeMC = 25.;
+  Double_t limitRadiusChMC = 50.,
+           limitRadiusNeMC = 50.;
 
   RtNeu = sqrt(pow(Knemc[6] - ipmc[0], 2) +
                pow(Knemc[7] - ipmc[1], 2));
@@ -440,7 +470,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   if (!passesCuts)
     return kTRUE;
 
-  if (mctruth_int == 1)
+  if (mctruth_int == 1 && abs(deltaTfit) < 20)// && pathKchFit <= limitRadiusChMC && pathKneFit <= limitRadiusNeMC)
   {
     Int_t mctruth_tmp = mctruth_int;
 
@@ -723,10 +753,16 @@ void MC_fit_comparison::Terminate()
       continue;
     }
 
-    TRegexp pattern("vtxNeu.*Fit"), pattern1("Chi2Comp.*"), pattern2("trk.*"), patternpull("pull.*"), patternPhi(".*Phi");
+    TRegexp pattern("vtxNeu.*Fit"), pattern1("Chi2Comp.*"), pattern2("trk.*"), patternpull("pull.*"), patternPhi(".*Phi"), patternEnergy("Energy.*"), patternpx("px.*"), patternpy("py.*"), patternpz("pz.*");
 
-    if (histName.first.Contains(pattern) || histName.first.Contains(pattern1))
+    if (histName.first.Contains(pattern) || histName.first.Contains(pattern1) || histName.first.Contains(patternpx) || histName.first.Contains(patternpy) || histName.first.Contains(patternpz))
     {
+      if (histName.first.Contains(patternEnergy) || histName.first.Contains(patternpx) || histName.first.Contains(patternpy) || histName.first.Contains(patternpz))
+      {
+        std::cout << histName.first << " Reconstructed: " << histsReconstructed[histName.first]->Integral() << std::endl;
+        std::cout << histName.first << " Fitted: " << histsFittedSignal[histName.first]->Integral() << std::endl;
+      }
+
       histsReconstructed[histName.first]->GetYaxis()->SetRangeUser(1, std::max(histsReconstructed[histName.first]->GetMaximum(), histsFittedSignal[histName.first]->GetMaximum()) * 100);
       canvas[histName.first]->SetLogy(1);
     }
@@ -1207,8 +1243,8 @@ TGraphErrors *MC_fit_comparison::CreateRMSProfile(TH2 *h2D, const char *name, co
 }
 
 TCanvas *MC_fit_comparison::CreateCanvasWithProfiles(TH2 *h2D, const TString &name,
-                                                    Bool_t drawMeanProfile,
-                                                    Bool_t drawSigmaProfile)
+                                                     Bool_t drawMeanProfile,
+                                                     Bool_t drawSigmaProfile)
 {
   // Oblicz liczbę padów
   Int_t nPads = 1; // Zawsze histogram 2D

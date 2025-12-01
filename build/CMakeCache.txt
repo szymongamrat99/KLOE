@@ -110,23 +110,20 @@ Boost_UNIT_TEST_FRAMEWORK_LIBRARY_RELEASE:FILEPATH=/usr/lib/x86_64-linux-gnu/lib
 //Path to a program.
 CMAKE_AR:FILEPATH=/usr/bin/ar
 
-//Choose the type of build, options are: None Debug Release RelWithDebInfo
-// MinSizeRel ...
-CMAKE_BUILD_TYPE:STRING=Release
+//No help, variable specified on the command line.
+CMAKE_BUILD_TYPE:STRING=Debug
 
 //Enable/Disable color output during build.
 CMAKE_COLOR_MAKEFILE:BOOL=ON
 
-//CXX compiler
-CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/c++
+//No help, variable specified on the command line.
+CMAKE_CXX_COMPILER:FILEPATH=/usr/bin/clang++
 
-//A wrapper around 'ar' adding the appropriate '--plugin' option
-// for the GCC compiler
-CMAKE_CXX_COMPILER_AR:FILEPATH=/usr/bin/gcc-ar-8
+//LLVM archiver
+CMAKE_CXX_COMPILER_AR:FILEPATH=/usr/lib/llvm-7/bin/llvm-ar
 
-//A wrapper around 'ranlib' adding the appropriate '--plugin' option
-// for the GCC compiler
-CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/bin/gcc-ranlib-8
+//Generate index for LLVM archive
+CMAKE_CXX_COMPILER_RANLIB:FILEPATH=/usr/lib/llvm-7/bin/llvm-ranlib
 
 //Flags used by the CXX compiler during all build types.
 CMAKE_CXX_FLAGS:STRING=
@@ -143,6 +140,9 @@ CMAKE_CXX_FLAGS_RELEASE:STRING=-O3 -DNDEBUG
 //Flags used by the CXX compiler during RELWITHDEBINFO builds.
 CMAKE_CXX_FLAGS_RELWITHDEBINFO:STRING=-O2 -g -DNDEBUG
 
+//No help, variable specified on the command line.
+CMAKE_C_COMPILER:FILEPATH=/usr/bin/clang
+
 //Flags used by the linker during all build types.
 CMAKE_EXE_LINKER_FLAGS:STRING=
 
@@ -158,11 +158,11 @@ CMAKE_EXE_LINKER_FLAGS_RELEASE:STRING=
 //Flags used by the linker during RELWITHDEBINFO builds.
 CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 
-//Enable/Disable output of compile commands during generation.
-CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=OFF
+//No help, variable specified on the command line.
+CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
 
 //Fortran compiler
-CMAKE_Fortran_COMPILER:FILEPATH=/usr/bin/gfortran
+CMAKE_Fortran_COMPILER:FILEPATH=/usr/bin/f95
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
@@ -327,10 +327,10 @@ LAPACK_openblas_LIBRARY:FILEPATH=LAPACK_openblas_LIBRARY-NOTFOUND
 LAPACK_vecLib_LIBRARY:FILEPATH=LAPACK_vecLib_LIBRARY-NOTFOUND
 
 //CXX compiler flags for OpenMP parallelization
-OpenMP_CXX_FLAGS:STRING=-fopenmp
+OpenMP_CXX_FLAGS:STRING=-fopenmp=libomp
 
 //CXX compiler libraries for OpenMP parallelization
-OpenMP_CXX_LIB_NAMES:STRING=gomp;pthread
+OpenMP_CXX_LIB_NAMES:STRING=omp;pthread
 
 //Fortran compiler flags for OpenMP parallelization
 OpenMP_Fortran_FLAGS:STRING=-fopenmp
@@ -340,6 +340,9 @@ OpenMP_Fortran_LIB_NAMES:STRING=gomp;pthread
 
 //Path to the gomp library for OpenMP
 OpenMP_gomp_LIBRARY:FILEPATH=/usr/lib/gcc/x86_64-linux-gnu/8/libgomp.so
+
+//Path to the omp library for OpenMP
+OpenMP_omp_LIBRARY:FILEPATH=/usr/lib/llvm-7/lib/libomp.so
 
 //Path to the pthread library for OpenMP
 OpenMP_pthread_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/libpthread.so
@@ -687,7 +690,7 @@ FIND_PACKAGE_MESSAGE_DETAILS_CURL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libcurl.so
 //Details about finding OpenMP
 FIND_PACKAGE_MESSAGE_DETAILS_OpenMP:INTERNAL=[TRUE][TRUE][c ][v()]
 //Details about finding OpenMP_CXX
-FIND_PACKAGE_MESSAGE_DETAILS_OpenMP_CXX:INTERNAL=[-fopenmp][/usr/lib/gcc/x86_64-linux-gnu/8/libgomp.so][/usr/lib/x86_64-linux-gnu/libpthread.so][v()]
+FIND_PACKAGE_MESSAGE_DETAILS_OpenMP_CXX:INTERNAL=[-fopenmp=libomp][/usr/lib/llvm-7/lib/libomp.so][/usr/lib/x86_64-linux-gnu/libpthread.so][v()]
 //Details about finding OpenMP_Fortran
 FIND_PACKAGE_MESSAGE_DETAILS_OpenMP_Fortran:INTERNAL=[-fopenmp][/usr/lib/gcc/x86_64-linux-gnu/8/libgomp.so][/usr/lib/x86_64-linux-gnu/libpthread.so][v()]
 //Details about finding Threads
@@ -709,7 +712,7 @@ LAPACK_openblas_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: LAPACK_vecLib_LIBRARY
 LAPACK_vecLib_LIBRARY-ADVANCED:INTERNAL=1
 //Result of TRY_COMPILE
-OpenMP_COMPILE_RESULT_CXX_fopenmp:INTERNAL=TRUE
+OpenMP_COMPILE_RESULT_CXX_fopenmplibomp:INTERNAL=TRUE
 //Result of TRY_COMPILE
 OpenMP_COMPILE_RESULT_FortranHeader_fopenmp:INTERNAL=TRUE
 //Result of TRY_COMPILE
@@ -719,7 +722,7 @@ OpenMP_CXX_FLAGS-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OpenMP_CXX_LIB_NAMES
 OpenMP_CXX_LIB_NAMES-ADVANCED:INTERNAL=1
 //CXX compiler's OpenMP specification date
-OpenMP_CXX_SPEC_DATE:INTERNAL=201511
+OpenMP_CXX_SPEC_DATE:INTERNAL=201107
 //ADVANCED property for variable: OpenMP_Fortran_FLAGS
 OpenMP_Fortran_FLAGS-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OpenMP_Fortran_LIB_NAMES
@@ -732,6 +735,8 @@ OpenMP_SPECTEST_CXX_:INTERNAL=TRUE
 OpenMP_SPECTEST_Fortran_:INTERNAL=TRUE
 //ADVANCED property for variable: OpenMP_gomp_LIBRARY
 OpenMP_gomp_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: OpenMP_omp_LIBRARY
+OpenMP_omp_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: OpenMP_pthread_LIBRARY
 OpenMP_pthread_LIBRARY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: ROOT_Core_LIBRARY

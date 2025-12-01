@@ -5,6 +5,8 @@
 #include <FileManager.h>
 #include <event_data.h>
 #include <AnalysisManager.h>
+#include <TROOT.h>
+
 
 #include <const.h>
 #include <boost/filesystem.hpp>
@@ -14,6 +16,8 @@ using namespace std::chrono;
 
 int main(int argc, char *argv[])
 {
+  ROOT::EnableImplicitMT(16); // Użyj do 16 wątków
+
   bool
       firstFileRangeErr,
       lastFileRangeErr,

@@ -91,6 +91,9 @@
     "cp_fit.C": "cpp",
     "histos.C": "cpp",
     "dupa.C": "cpp",
-    "signal_vs_bcg_v3.C": "cpp"
+    "signal_vs_bcg_v3.C": "cpp",
+    "data_fit_interference.C": "cpp",
+    "histos_1.C": "cpp",
+    "neutral_vtx_resolutions.C": "cpp"
   }
 }

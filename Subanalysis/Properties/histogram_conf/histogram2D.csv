@@ -33,7 +33,7 @@ t00_tri_vs_t00_mc; 100; 100; -5.; 300.; 0.; 300.; "t^{00}_{tri} vs. t^{00}_{MC}"
 t00_triangle_vs_t00_mc; 100; 100; -5.; 300.; 0.; 300.; "t^{00}_{triangle} vs. t^{00}_{MC}"; "t^{00}_{MC} [#tau_{S}]"; "t^{00}_{triangle} [#tau_{S}]"; ""
 t00_triangle_vs_t00_tri; 100; 100; -5.; 300.; 0.; 300.; "t^{00}_{triangle} vs. t^{00}_{tri}"; "t^{00}_{triangle} [#tau_{S}]"; "t^{00}_{tri} [#tau_{S}]"; ""
 
-T0_omega_vs_mass_omega; 100; 100; 0.; 350.; 600.; 1000.; "T_{0} vs. m^{inv}_{#pi^{+}#pi^{-}#pi^{0}}"; "T_{0} [MeV]"; "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]"; ""
+T0_omega_vs_mass_omega; 100; 100; 0.; 350.; 600.; 1000.; "E^{kin}_{#pi^{0}} vs. m^{inv}_{#pi^{+}#pi^{-}#pi^{0}}"; "E^{kin}_{#pi^{0}} [MeV]"; "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]"; ""
 
 Rkne_vs_Rkch; 100; 100; 0.; 5.; 0.; 5.; "R_{00} vs. R_{+-}"; "Rt_{00} [cm]"; "Rt_{+-} [cm]"; ""
 

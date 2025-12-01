@@ -17,7 +17,7 @@ Energy_Kch; 100; -10.0; 10.0; "Kch Energy"; "E [MeV]"; "Counts"
 px_Kne; 100; -100.; 100.; "Kne p_{x}"; "p_{x} [MeV/c]"; "Counts"
 py_Kne; 100; -100.; 100.; "Kne p_{y}"; "p_{y} [MeV/c]"; "Counts"
 pz_Kne; 100; -100.; 100.; "Kne p_{z}"; "p_{z} [MeV/c]"; "Counts"
-Energy_Kne; 100; -10.0; 10.0; "Kne Energy"; "E [MeV]"; "Counts"
+Energy_Kne; 100; -200.0; 200.0; "Kne Energy"; "E [MeV]"; "Counts"
 
 px_Phi; 100; -10.0; 10.0; "Phi p_{x}"; "p_{x} [MeV/c]"; "Counts"
 py_Phi; 100; -10.0; 10.0; "Phi p_{y}"; "p_{y} [MeV/c]"; "Counts"
@@ -57,7 +57,7 @@ vtxNeu_z_Fit; 100; -10.; 10.; "Neutral Vertex z Fit"; "V^{K_{ne}}_{z} [cm]"; "Co
 
 TransvRadius; 150; 0.; 50.; "Transversal Radius of Kaons"; "3D distance from (0,0,0) [cm]"; "Counts"
 
-T0Omega; 100; 0.; 350.; "T0 from Omega"; "T0 [MeV]"; "Counts"
+T0Omega; 100; 0.; 350.; "T0 from Omega"; "E^{kin}_{#pi^{0}} [MeV]"; "Counts"
 
 pull1; 100; -15.; 15.; "Pull 1 Signal Fit"; "Pull"; "Counts"
 pull2; 100; -15.; 15.; "Pull 2 Signal Fit"; "Pull"; "Counts"
@@ -142,15 +142,15 @@ Chi2Comp39; 100; -5.0; 1E5; "Chi2Comp 39 Signal Fit"; "Chi2Comp"; "Counts"
 TrackErrComb; 100; 0.0; 200.; "Track Error Combination"; "Track Error"; "Counts"
 
 time_neutral_MC; 100; -20.; 20.; "Neutral Kaon Time (MC)"; "Trc_{sum} [ns]"; "Counts"
-delta_t; 201; -100.; 100.; "Time Difference"; "#Deltat [#tau_{S}]"; "Counts"
-delta_t_MC; 201; -100.; 100.; "Time Difference MC"; "#Deltat_{MC} [#tau_{S}]"; "Counts"
+delta_t; 201; -50.; 50.; "Time Difference"; "#Deltat [#tau_{S}]"; "Counts"
+delta_t_MC; 201; -50.; 50.; "Time Difference MC"; "#Deltat_{MC} [#tau_{S}]"; "Counts"
 
 delta_t_rec_res; 201; -20.; 20.; "Time rec res"; "(#Deltat - #Deltat_{MC}) [#tau_{S}]"; "Counts"
 delta_t_boostlor_res; 201; -20.; 20.; "Time boostlor res"; "(#Deltat - #Deltat_{MC}) [#tau_{S}]"; "Counts"
 
 openingAngleCharged; 100; 0.; 180.; "Charged Particles Opening Angle"; "#alpha [deg]"; "Counts"
 openingAngleNeutral; 100; 0.; 180.; "Neutral Particles Opening Angle"; "#alpha [deg]"; "Counts"
-Qmiss; 100; 0; 400.; "Missing 4-momentum"; "Q_{miss} [MeV]"; "Counts"
+Qmiss; 100; 0; 10.; "Missing 4-momentum"; "Q_{miss} [MeV]"; "Counts"
 
 curv1; 400; -0.17; 0.17; "Track 1 Curvature"; "1/p_{T} [1/MeV]"; "Counts"
 phiv1; 400; -0.05; 0.05; "Track 1 #phi"; "#phi [rad]"; "Counts"

@@ -148,7 +148,6 @@ void ConstraintsOmega::IntermediateReconstruction(Double_t *p)
 
     fpionCh[i].fourMomFilled = true;
   }
-  
 
   for (Int_t i = 0; i < 4; i++)
   {
@@ -189,9 +188,11 @@ void ConstraintsOmega::IntermediateReconstruction(Double_t *p)
   std::vector<chargedParticle> s_pionCh = {fpionCh[0], fpionCh[1]};
   std::vector<neutralParticle> s_photon = {fphoton[0], fphoton[1], fphoton[2], fphoton[3]},
                                s_pionNe(2);
-                               
 
+#pragma omp critical
+{
   neutRec.PhotonPairingToPi0WithOmega(s_photon, s_pionCh, bestPairingIndexNeutral, bestPairingIndexCharged, fomega, s_pionNe);
+}
 
   for (Int_t i = 0; i < 2; i++)
   {

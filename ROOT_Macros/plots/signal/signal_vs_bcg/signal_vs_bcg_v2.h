@@ -49,6 +49,15 @@ struct Cuts
   }
 };
 
+// Struktura przechowująca wyniki czystości dla podzbiorów
+struct PuritySubset {
+  Double_t deltaT_limit;
+  Int_t signal_events;
+  Int_t total_events;
+  Double_t purity;
+  Double_t purity_error;
+};
+
 struct CutCount
 {
   Int_t eventsBelow; // Zdarzenia < cutValue

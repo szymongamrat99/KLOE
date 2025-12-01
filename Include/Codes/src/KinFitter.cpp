@@ -11,9 +11,6 @@ using namespace KLOE;
 
 KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger) : _N_free(N_free), _N_const(N_const), _M(M), _M_act(M_active), _loopcount(loopcount), _jmin(0), _jmax(0), _CHISQRSTEP(chisqrstep), _logger(logger), _mode(mode), _V(N_free + N_const, N_free + N_const), _V_T(N_free + N_const, N_free + N_const), _V_init(N_free + N_const, N_free + N_const), _V_invert(N_free + N_const, N_free + N_const), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _Aux(M, M), _C(M), _L(M), _CORR(N_free + N_const), _X(N_free + N_const), _X_init(N_free + N_const), _X_final(N_free + N_const), _X_init_aux(N_free + N_const), _C_aux(M), _L_aux(M)
 {
-  ROOT::EnableThreadSafety();
-  ROOT::EnableImplicitMT();
-
   if (_mode == "Omega")
     _objOmega = new ConstraintsOmega();
   else if (_mode == "SignalGlobal")
@@ -32,8 +29,6 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
 
 KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Int_t jmin, Int_t jmax, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger) : _N_free(N_free), _N_const(N_const), _M(M), _M_act(M_active), _CHISQRSTEP(chisqrstep), _loopcount(loopcount), _jmin(jmin), _jmax(jmax), _logger(logger), _mode(mode), _V(N_free + N_const, N_free + N_const), _V_T(N_free + N_const, N_free + N_const), _V_init(N_free + N_const, N_free + N_const), _V_invert(N_free + N_const, N_free + N_const), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _Aux(M, M), _C(M), _L(M), _CORR(N_free + N_const), _X(N_free + N_const), _X_init(N_free + N_const), _X_final(N_free + N_const), _X_init_aux(N_free + N_const), _C_aux(M), _L_aux(M)
 {
-  ROOT::EnableThreadSafety();
-  ROOT::EnableImplicitMT();
 
   if (_mode == "Omega")
     _objOmega = new ConstraintsOmega();
@@ -105,6 +100,9 @@ Int_t KinFitter::ParameterInitialization(Double_t *Params, Double_t *Errors)
 
 Double_t KinFitter::FitFunction(Double_t bunchCorr)
 {
+  ROOT::EnableThreadSafety();
+  ROOT::EnableImplicitMT(8);
+
   pm00 objAux;
 
   _CHISQR = 999999.;
@@ -139,22 +137,42 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       if (_X(19) < 0)
         _X(19) = MIN_CLU_ENE;
 
-      Double_t *tempParams = _X.GetMatrixArray();
-
-      for (Int_t l = 0; l < _M; l++)
+#pragma omp parallel
       {
-        _C(l) = _constraints[l]->EvalPar(0, tempParams);
+        Double_t *tempParams = new Double_t[_X.GetNrows()];
 
-        for (Int_t m = 0; m < _N_free + _N_const; m++)
+        std::copy(_X.GetMatrixArray(), _X.GetMatrixArray() + _X.GetNrows(), tempParams);
+
+        std::vector<TF1 *> constraint;
+
+        for (const auto &func_ptr : _constraints)
         {
-          _constraints[l]->SetParameters(tempParams);
-          if (m < _N_free)
-          {
-            _D(l, m) = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
-          }
-          else
-            _D(l, m) = 0;
+          // Tworzymy NOWY, PRYWATNY obiekt TF1 dla tego wątku
+          constraint.push_back(new TF1(*func_ptr));
         }
+
+
+#pragma omp for
+        for (Int_t l = 0; l < _M; l++)
+        {
+          constraint[l]->SetParameters(tempParams);
+          _C(l) = constraint[l]->EvalPar(0, tempParams);
+          for (Int_t m = 0; m < _N_free + _N_const; m++)
+          {
+            if (m < _N_free)
+            {
+              _D(l, m) = constraint[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
+            }
+            else
+              _D(l, m) = 0;
+          }
+        }
+
+        for (const auto &func_ptr : constraint)
+        {
+          func_ptr->Delete();
+        }
+        delete[] tempParams;
       }
 
       _D_T = _D_T.Transpose(_D);
@@ -172,6 +190,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _CORR = _V * _D_T * _L;
 
+#pragma omp parallel for
       for (Int_t j = 0; j < _CORR.GetNrows(); j++)
       {
         if (abs(_CORR(j)) > 1000.0)
@@ -183,19 +202,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       _V_final = _V - _V * _D_T * _Aux * _D * _V;
 
       _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
-
-      // if (_mode == "SignalGlobal")
-      // {
-
-      //   std::cout << "Mode: " << _mode << " | Iteration " << i << ": Chi2 = " << _CHISQR << std::endl;
-      //   std::cout << "Elements of chi2: " << std::endl;
-      //   for (Int_t k = 0; k < _X.GetNrows(); k++)
-      //   {
-      //     Double_t val = (_X(k) - _X_init(k));
-      //     Double_t contrib = val * val * _V_invert(k, k);
-      //     std::cout << "  Param " << k << ": " << contrib << std::endl;
-      //   }
-      // }
 
       if (abs(_CHISQR - _CHISQRTMP) < _CHISQRSTEP)
         break;
@@ -243,7 +249,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   return _CHISQRTMP;
 };
-
 
 Double_t KinFitter::EnergyCalc(Double_t *p, Double_t mass)
 {
