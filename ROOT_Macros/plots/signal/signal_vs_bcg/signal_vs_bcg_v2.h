@@ -52,6 +52,7 @@ struct Cuts
 // Struktura przechowująca wyniki czystości dla podzbiorów
 struct PuritySubset {
   Double_t deltaT_limit;
+  Double_t deltaT_limit_error;
   Int_t signal_events;
   Int_t total_events;
   Double_t purity;
@@ -307,6 +308,21 @@ public:
   std::map<std::string, std::function<Float_t()>> cutValues;
   std::map<std::string, Float_t> centralValues;
   std::map<std::string, size_t> cutNameToIndex;
+
+  std::vector<PuritySubset> CalculatePurityInSubsets(
+    TH1 *hist_signal,
+    TH1 *hist_total,
+    Double_t max_limit,
+    Int_t n_subsets);
+  
+  TCanvas *DrawPuritySubsets(
+    const std::vector<PuritySubset> &subsets,
+    const TString &name);
+
+  std::map<Double_t, Double_t> ComparePuritySymmetric(
+    TH1 *hist_signal,
+    TH1 *hist_total,
+    const std::vector<Double_t> &limits);
 
   ClassDef(signal_vs_bcg_v2, 0);
 };

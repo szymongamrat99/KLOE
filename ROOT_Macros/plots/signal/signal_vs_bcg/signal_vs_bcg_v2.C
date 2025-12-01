@@ -58,13 +58,13 @@
 namespace KH = KLOE::Histograms;
 
 std::map<TString, Float_t> channLumi = {
-    {"Data", 4098},
-    {"Signal", 1359592},
-    {"Regeneration", 693089},
-    {"Omega", 360373},
-    {"3pi0", 13606},
-    {"Semileptonic", 51315},
-    {"Other", 20368}};
+    {"Data", 8876},
+    {"Signal", 1549784},
+    {"Regeneration", 1180120},
+    {"Omega", 735724},
+    {"3pi0", 28701},
+    {"Semileptonic", 104630},
+    {"Other", 42747}};
 
 std::map<TString, Float_t> channFactor;
 std::map<TString, Int_t> channEventsTotal, channEventsCut;
@@ -238,7 +238,8 @@ void signal_vs_bcg_v2::SlaveBegin(TTree *tree)
   {
     std::cout << "  Key: " << ch.first << " => \"" << ch.second << "\"" << std::endl;
   }
-  std::cout << "=========================================\n" << std::endl;
+  std::cout << "=========================================\n"
+            << std::endl;
 }
 
 Int_t overflow = 0, cutPassed = 0, cutNPassed = 0;
@@ -420,7 +421,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           pathKchMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
                            pow(Kchmc[7] - ipmc[1], 2)),
           // pow(Kchmc[8] - ipmc[2], 2)),
-          pathKneMC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
+      pathKneMC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
                        pow(Knemc[7] - ipmc[1], 2));
   //  pow(Knemc[8] - ipmc[2], 2));
 
@@ -648,18 +649,18 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                 zdist00 < zdistLimit && zdistpm < zdistLimit,
          omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 155.658) < numSigmaSimona * 5.691 && abs(omegaFit[5] - 782.994) < numSigmaSimona * 5.620 && omegaFit[5] < a * T0Omega + b + Breal && omegaFit[5] > a * T0Omega + b - Breal)) || !simonaPositionLimits) && simonaKinCuts;
 
-  if ((mctruth_int == 1 || mctruth_int == -1 || mctruth_int == 0) && *mcflag == 1)// && shorterKaonPaths)
+  if ((mctruth_int == 1 || mctruth_int == -1 || mctruth_int == 0) && *mcflag == 1) // && shorterKaonPaths)
     signal_tot++;
 
-  if ((mctruth_int == 1 || mctruth_int == 0) && *mcflag == 1)// && shorterKaonPaths)
+  if ((mctruth_int == 1 || mctruth_int == 0) && *mcflag == 1) // && shorterKaonPaths)
     signal_wo_err++;
 
-  if ((mctruth_int == 1) && *mcflag == 1)// && shorterKaonPaths)
+  if ((mctruth_int == 1) && *mcflag == 1) // && shorterKaonPaths)
   {
     deltaTSignalTot->Fill(deltaTMC, weight);
   }
 
-  if(mctruth_int >= 0)// && shorterKaonPaths)
+  if (mctruth_int >= 0) // && shorterKaonPaths)
     channEventsTotal[KLOE::channName.at(mctruth_int)]++;
 
   // Option to use in analysis
@@ -703,7 +704,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     if (!noBlobCut)
       return kTRUE;
 
-  if (mcflagCondition)// && abs(deltaTfit) <= 20 && shorterKaonPaths)
+  if (mcflagCondition && *bestError > 2000) // && abs(deltaTfit) <= 20 && shorterKaonPaths)
   {
     channEventsCut[KLOE::channName.at(mctruth_int)]++;
 
@@ -860,7 +861,6 @@ void signal_vs_bcg_v2::Terminate()
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file
 
-  
   gErrorIgnoreLevel = kFatal;
 
   // MC sum
@@ -944,13 +944,13 @@ void signal_vs_bcg_v2::Terminate()
 
   for (const auto &config : histogramConfigs1D)
   {
-    Bool_t fitDoubleGaus = 0,//(config.first == "mass_Kch" || config.first == "mass_Kne" || config.first == "mass_pi01" || config.first == "mass_pi02" || config.first == "time_neutral_MC"),
+    Bool_t fitDoubleGaus = 0, //(config.first == "mass_Kch" || config.first == "mass_Kne" || config.first == "mass_pi01" || config.first == "mass_pi02" || config.first == "time_neutral_MC"),
         fitOmegaGaus = (config.first == "T0Omega" || config.first == "mass_omega"),
-        fitSignalBadClus = (config.first == "deltaPhivFit" && fOption == "BAD_CLUS_SIMONA");
+           fitSignalBadClus = (config.first == "deltaPhivFit" && fOption == "BAD_CLUS_SIMONA");
     Bool_t chi2Fit = 0; //(config.first == "chi2_signalKinFit");
 
     Bool_t logCond = (config.first == "Qmiss" || config.first == "prob_signal" || config.first == "Energy_Kne"), // || config.first == "chi2_signalKinFit"), // || config.first == "TransvRadius"),
-        logCondX = 0;                                                            //(config.first == "chi2_signalKinFit");
+        logCondX = 0;                                                                                            //(config.first == "chi2_signalKinFit");
 
     std::vector<TString> labels;
 
@@ -1365,7 +1365,6 @@ void signal_vs_bcg_v2::Terminate()
   efficiency->Draw();
   gPad->Update();
 
-
   efficiency->GetPaintedGraph()->GetYaxis()->SetRangeUser(0, 1.0);
 
   // Dodaj box z metrykami
@@ -1381,13 +1380,27 @@ void signal_vs_bcg_v2::Terminate()
   metricsBox->Draw();
 
   canvaPurity->SaveAs(folderPath + "/purity_delta_t" + Paths::ext_img.Data());
+
+  //////////////////////////////////////////////////////////////////////////////////
+
+  // === Analiza czystości w podzbiorach |ΔT| ===
+  std::vector<PuritySubset> purity_subsets = CalculatePurityInSubsets(
+      histsFittedSignal["delta_t"]["Signal"], // Histogram sygnału
+      histsFittedSignal["delta_t"]["MC sum"], // Histogram całkowitego
+      300.0,                                      // max limit [ns]
+      60                                         // liczba podzbiorów
+  );
+
+  TCanvas *canvas_purity_subsets = DrawPuritySubsets(purity_subsets, "delta_t");
+  canvas_purity_subsets->SaveAs(folderPath + "/purity_subsets_delta_t" + Paths::ext_img.Data());
+
   // -- REPORT OF THE CUT STATISTICS IN THE ANALYSIS --
 
   std::cout << "Total Efficiency signal: " << 100 * eff << " % (" << signal_num << "/" << signal_tot << ")" << std::endl;
-  
+
   for (const auto &entry : channEffAna)
   {
-    std::cout << "Channel: " << entry.first << ", Efficiency: " << entry.second * 100 << " % (" << channEventsCutCorr[entry.first] << "/" <<  channEventsTotalCorr[entry.first] << "), (" << channEventsCut[entry.first] << "/"  << channEventsTotal[entry.first] << ")" << std::endl;
+    std::cout << "Channel: " << entry.first << ", Efficiency: " << entry.second * 100 << " % (" << channEventsCutCorr[entry.first] << "/" << channEventsTotalCorr[entry.first] << "), (" << channEventsCut[entry.first] << "/" << channEventsTotal[entry.first] << ")" << std::endl;
   }
   std::cout << std::endl;
 
@@ -1816,4 +1829,205 @@ TCanvas *signal_vs_bcg_v2::CreateCanvasWithProfiles(TH2 *h2D, const TString &nam
 
   c->cd();
   return c;
+}
+
+// Funkcja główna - oblicza czystość w podzbiorach |ΔT| < limit
+std::vector<PuritySubset> signal_vs_bcg_v2::CalculatePurityInSubsets(
+    TH1 *hist_signal,
+    TH1 *hist_total,
+    Double_t max_limit,
+    Int_t n_subsets)
+{
+  if (!hist_signal || !hist_total || hist_signal->GetEntries() == 0)
+  {
+    std::cerr << "ERROR: Invalid histograms in CalculatePurityInSubsets" << std::endl;
+    return {};
+  }
+
+  std::vector<PuritySubset> results;
+
+  // Oblicz limity dla podzbiorów (np. 2, 4, 6, 8, 10 ps)
+  Double_t limit_step = max_limit / n_subsets;
+
+  for (Int_t i = 1; i <= n_subsets; i++)
+  {
+    Double_t current_limit = i * limit_step;
+    Double_t previous_limit = (i - 1) * limit_step;
+
+    // Oblicz gęstość obserwowaną w przedziale |ΔT| < limit
+    Int_t bin_low = hist_signal->FindBin(-current_limit);
+    Int_t bin_low_right = hist_signal->FindBin(-previous_limit);
+    Int_t bin_high_left = hist_signal->FindBin(previous_limit);
+    Int_t bin_high = hist_signal->FindBin(current_limit);
+
+    // Integrate od -limit do +limit
+    Int_t signal_count_low = static_cast<Int_t>(
+        hist_signal->Integral(bin_low, bin_low_right));
+    Int_t signal_count_high = static_cast<Int_t>(
+        hist_signal->Integral(bin_high_left, bin_high));
+
+    Int_t signal_count = signal_count_low + signal_count_high;
+    
+    Int_t total_count_low = static_cast<Int_t>(
+        hist_total->Integral(bin_low, bin_low_right));
+    Int_t total_count_high = static_cast<Int_t>(
+        hist_total->Integral(bin_high_left, bin_high));
+
+    Int_t total_count = total_count_low + total_count_high;
+
+    Double_t purity = 0.0;
+    Double_t purity_error = 0.0;
+
+    if (total_count > 0)
+    {
+      purity = static_cast<Double_t>(signal_count) / total_count;
+
+      // Błąd Bayesowski dla czystości (binomial)
+      // σ_purity = sqrt(p*(1-p)/N)
+      if (total_count > 1)
+      {
+        purity_error = TMath::Sqrt(purity * (1.0 - purity) / total_count);
+      }
+    }
+
+    PuritySubset subset;
+    subset.deltaT_limit = (current_limit + previous_limit) / 2.;
+    subset.deltaT_limit_error = (current_limit - previous_limit) / 2.;
+    subset.signal_events = signal_count;
+    subset.total_events = total_count;
+    subset.purity = purity;
+    subset.purity_error = purity_error;
+
+    results.push_back(subset);
+
+    std::cout << "Subset |ΔT| < " << current_limit << " ps: "
+              << "Signal=" << signal_count << ", Total=" << total_count
+              << ", Purity=" << (purity * 100.0) << "% ± "
+              << (purity_error * 100.0) << "%" << std::endl;
+  }
+
+  return results;
+}
+
+// Funkcja do rysowania wykresu czystości vs |ΔT| limit
+TCanvas *signal_vs_bcg_v2::DrawPuritySubsets(
+    const std::vector<PuritySubset> &subsets,
+    const TString &name)
+{
+  if (subsets.empty())
+  {
+    std::cerr << "ERROR: Empty subsets in DrawPuritySubsets" << std::endl;
+    return nullptr;
+  }
+
+  // Przygotuj dane do TGraphErrors
+  std::vector<Double_t> limits, purities, limit_errors, purity_errors;
+
+  for (const auto &subset : subsets)
+  {
+    limits.push_back(subset.deltaT_limit);
+    purities.push_back(subset.purity);
+    limit_errors.push_back(subset.deltaT_limit_error);
+    purity_errors.push_back(subset.purity_error);
+  }
+
+  // Stwórz TGraphErrors
+  TGraphErrors *graph_purity = new TGraphErrors(
+      limits.size(),
+      limits.data(),
+      purities.data(),
+      limit_errors.data(),
+      purity_errors.data());
+
+  graph_purity->SetName(Form("purity_%s", name.Data()));
+  graph_purity->SetTitle("Purity in |#Deltat| regions");
+  graph_purity->SetMarkerStyle(20);
+  graph_purity->SetMarkerColor(kBlue);
+  graph_purity->SetMarkerSize(1.0);
+  graph_purity->SetLineColor(kBlue);
+  graph_purity->SetLineWidth(2);
+
+  // Sformułuj osie
+  graph_purity->GetXaxis()->SetTitle("|#Deltat| regions [#tau_{S}]");
+  graph_purity->GetYaxis()->SetTitle("Purity");
+  graph_purity->GetXaxis()->SetTitleSize(0.05);
+  graph_purity->GetYaxis()->SetTitleSize(0.05);
+  graph_purity->GetXaxis()->SetLabelSize(0.04);
+  graph_purity->GetYaxis()->SetLabelSize(0.04);
+
+  // Stwórz canvas
+  TCanvas *canvas = new TCanvas(Form("c_purity_%s", name.Data()),
+                                Form("Purity subsets: %s", name.Data()),
+                                800, 600);
+  canvas->SetLeftMargin(0.12);
+  canvas->SetRightMargin(0.05);
+  canvas->SetBottomMargin(0.12);
+
+  // Rysuj
+  graph_purity->Draw("APL");
+  graph_purity->GetYaxis()->SetRangeUser(0, 1.0);
+  gPad->Update();
+
+  // Dodaj siatkę
+  gPad->SetGrid(1, 1);
+
+  // Dodaj linię referencyjną na 100%
+  TLine *line_max = new TLine(
+      limits.front(), 1.0,
+      limits.back(), 1.0);
+  line_max->SetLineStyle(2);
+  line_max->SetLineColor(kGray);
+  line_max->Draw("SAME");
+
+  // Dodaj tabelkę z liczbami
+  // TPaveText *stats_box = new TPaveText(0.15, 0.15, 0.55, 0.5, "NDC");
+  // stats_box->SetFillColor(kWhite);
+  // stats_box->SetBorderSize(1);
+  // stats_box->SetTextAlign(12);
+  // stats_box->SetTextSize(0.03);
+  // stats_box->SetTextFont(42);
+
+  // stats_box->AddText("Purity per |#Delta t| subset:");
+  // stats_box->AddText("");
+
+  // for (size_t i = 0; i < subsets.size(); i++)
+  // {
+  //   stats_box->AddText(Form(
+  //       "|#Delta t| < %.1f ps: %.2f%% (%d/%d)",
+  //       subsets[i].deltaT_limit,
+  //       subsets[i].purity * 100.0,
+  //       subsets[i].signal_events,
+  //       subsets[i].total_events));
+  // }
+
+  // stats_box->Draw();
+  // gPad->Update();
+
+  return canvas;
+}
+
+// Dodatkowo: Funkcja do porównania purity w podzbiorach symetrycznych
+std::map<Double_t, Double_t> signal_vs_bcg_v2::ComparePuritySymmetric(
+    TH1 *hist_signal,
+    TH1 *hist_total,
+    const std::vector<Double_t> &limits)
+{
+  std::map<Double_t, Double_t> purity_map;
+
+  for (Double_t limit : limits)
+  {
+    Int_t bin_low = hist_signal->FindBin(-limit);
+    Int_t bin_high = hist_signal->FindBin(limit);
+
+    Int_t signal_count = static_cast<Int_t>(hist_signal->Integral(bin_low, bin_high));
+    Int_t total_count = static_cast<Int_t>(hist_total->Integral(bin_low, bin_high));
+
+    Double_t purity = (total_count > 0)
+                          ? static_cast<Double_t>(signal_count) / total_count
+                          : 0.0;
+
+    purity_map[limit] = purity;
+  }
+
+  return purity_map;
 }
