@@ -24,9 +24,9 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 	chain.SetBranchAddress("ntmc", &ntmc);
 	chain.SetBranchAddress("nvtxmc", &nvtxmc);
 
-	chain.SetBranchAddress("pidmcOld", pidmcOld);
-	chain.SetBranchAddress("vtxmcOld", vtxmcOld);
-	chain.SetBranchAddress("motherOld", motherOld);
+	chain.SetBranchAddress("pidmc", pidmcOld);
+	chain.SetBranchAddress("vtxmc", vtxmcOld);
+	chain.SetBranchAddress("mother", motherOld);
 
 	chain.SetBranchAddress("xvmc", pos_mc[0]);
 	chain.SetBranchAddress("yvmc", pos_mc[1]);
@@ -36,7 +36,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 	chain.SetBranchAddress("pymc", mom_mc[1]);
 	chain.SetBranchAddress("pzmc", mom_mc[2]);
 
-	chain.SetBranchAddress("KnemcOld", KnemcOld);
+	chain.SetBranchAddress("Knemc", KnemcOld);
 
 	chain.SetBranchAddress("nclu", &nclu);
 	chain.SetBranchAddress("Xcl", cluster_rec[0]);
@@ -45,7 +45,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 
 	chain.SetBranchAddress("mctruth", &mctruth);
 	chain.SetBranchAddress("mcflag", &mcflag);
-	chain.SetBranchAddress("ipmcOld", ipmcOld);
+	chain.SetBranchAddress("ipmc", ipmcOld);
 
 	Int_t nentries = (Int_t)chain.GetEntries();
 
@@ -82,6 +82,10 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 	for (Int_t i = 0; i < nentries; i++)
 	{
 		chain.GetEntry(i);
+
+    std::cout << "Processing entry: " << i + 1 << " / " << nentries << "\r";
+    std::cout.flush();
+    std::cout << "mctruth: " << (int)mctruth << std::endl;
 
 		clus_diff_min = 999999.;
 

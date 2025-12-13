@@ -20,21 +20,21 @@ using json = nlohmann::json;
 
 namespace Paths
 {
-  const std::string kloedataPath = getenv("KLOE_DBV26_DK0");
-  const std::string kloeMCPath = getenv("KLOE_DBV26_MK0");
-  const std::string workdirPath = getenv("WORKDIR");
-  const std::string chainDataFiles = kloedataPath + "/*.root";
-  const std::string chainMCFiles = kloeMCPath + "/*.root";
-  const std::string pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json";
-  const std::string propertiesPath = getenv("PROPERTIESKLOE");
-  const std::string histogramConfigDir = propertiesPath + "/histogram_conf";
-  const std::string histogramConfig1DPath = histogramConfigDir + "/histogram1D.csv";
-  const std::string histogramConfig2DPath = histogramConfigDir + "/histogram2D.csv";
-  const std::string propName = propertiesPath + "/properties.json";
-  const std::string analysisConfigPath = propertiesPath + "/analysis_config.json";
-  const std::string rootfilesName = propertiesPath + "/root-files.json";
-  const std::string cutlimitsName = propertiesPath + "/cut-limits.json";
-  const std::string reportConfigPath = propertiesPath + "/report-config.json";
+  std::string kloedataPath = getenv("KLOE_DBV26_DK0");
+  std::string kloeMCPath = getenv("KLOE_DBV26_MK0");
+  std::string workdirPath = getenv("WORKDIR");
+  std::string chainDataFiles = kloedataPath + "/*.root";
+  std::string chainMCFiles = kloeMCPath + "/*.root";
+  std::string pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json";
+  std::string propertiesPath = getenv("PROPERTIESKLOE");
+  std::string histogramConfigDir = propertiesPath + "/histogram_conf";
+  std::string histogramConfig1DPath = histogramConfigDir + "/histogram1D.csv";
+  std::string histogramConfig2DPath = histogramConfigDir + "/histogram2D.csv";
+  std::string propName = propertiesPath + "/properties.json";
+  std::string analysisConfigPath = propertiesPath + "/analysis_config.json";
+  std::string rootfilesName = propertiesPath + "/root-files.json";
+  std::string cutlimitsName = propertiesPath + "/cut-limits.json";
+  std::string reportConfigPath = propertiesPath + "/report-config.json";
 
   TString base_path = workdirPath + "/KLOE/";
   TString path_tmp = "";
@@ -44,20 +44,20 @@ namespace Paths
   TString ext_img = ".pdf";
   TString ext_csv = ".csv";
 
-  const TString gen_vars_dir = base_path + "Subanalysis/GeneratedVars/";
-  const TString neutrec_dir = base_path + "Subanalysis/Neutrec/";
-  const TString cpfit_dir = base_path + "Subanalysis/CPFit/";
-  const TString covmatrix_dir = base_path + "Subanalysis/CovarianceMatrix/";
-  const TString initialanalysis_dir = base_path + "Subanalysis/InitialAnalysis/";
-  const TString omegarec_dir = base_path + "Subanalysis/OmegaRec/";
-  const TString efficiency_dir = base_path + "Subanalysis/EfficiencyAnalysis/";
-  const TString charged_dir = base_path + "Subanalysis/KchRec/";
-  const TString plots_dir = base_path + "Subanalysis/Plots/";
-  const TString root_files_dir = "root_files/";
-  const TString input_dir = "input/";
-  const TString logs_dir = "log/";
-  const TString result_dir = "results/";
-  const TString img_dir = "img/";
+  TString gen_vars_dir = base_path + "Subanalysis/GeneratedVars/";
+  TString neutrec_dir = base_path + "Subanalysis/Neutrec/";
+  TString cpfit_dir = base_path + "Subanalysis/CPFit/";
+  TString covmatrix_dir = base_path + "Subanalysis/CovarianceMatrix/";
+  TString initialanalysis_dir = base_path + "Subanalysis/InitialAnalysis/";
+  TString omegarec_dir = base_path + "Subanalysis/OmegaRec/";
+  TString efficiency_dir = base_path + "Subanalysis/EfficiencyAnalysis/";
+  TString charged_dir = base_path + "Subanalysis/KchRec/";
+  TString plots_dir = base_path + "Subanalysis/Plots/";
+  TString root_files_dir = "root_files/";
+  TString input_dir = "input/";
+  TString logs_dir = "log/";
+  TString result_dir = "results/";
+  TString img_dir = "img/";
 }
 
 namespace Filenames
@@ -393,7 +393,7 @@ namespace KLOE
     TString RemoveQuotes(const TString &str)
     {
       TString result = str;
-      if(result = "")
+      if (result = "")
         return result;
       // Usuń cudzysłowy z początku
       if (result.BeginsWith("\""))
@@ -498,7 +498,7 @@ namespace KLOE
         TString xLabel = TString(((TObjString *)tokens->At(8))->String()).Strip(TString::kBoth);
         xLabel.ReplaceAll("\"", "");
         TString yLabel = TString(((TObjString *)tokens->At(9))->String()).Strip(TString::kBoth);
-        yLabel.ReplaceAll("\"", "");  
+        yLabel.ReplaceAll("\"", "");
         TString zLabel = "";
         if (tokens->GetEntries() > 10)
         {
@@ -647,6 +647,8 @@ namespace KLOE
 
     gStyle->SetHistLineWidth(3);
     gStyle->SetLineWidth(2);
+    gStyle->SetFrameLineWidth(2);
+    gStyle->SetTitleFont(62, "XYZ");
 
     gStyle->SetLabelSize(0.04, "X");
     gStyle->SetLabelSize(0.04, "Y");
@@ -680,6 +682,7 @@ namespace Utils
 {
   json properties;
   json constants;
+  json paths;
 
   TString elapsedTimeHMS(double totalSeconds)
   {
@@ -698,6 +701,27 @@ namespace Utils
 
   void InitializeVariables()
   {
+
+    // Parsing of paths
+    std::string pathsFilePath = Paths::propertiesPath + "/paths-extensions.json";
+    std::ifstream fpath(pathsFilePath.c_str());
+    if (fpath.is_open())
+    {
+      paths = json::parse(fpath);
+
+      Paths::propName = (std::string)paths["analysisProperties"]["properties"];
+      Paths::pdgConstFilePath = (std::string)paths["analysisProperties"]["PDGConst"];
+      Paths::analysisConfigPath = (std::string)paths["analysisProperties"]["analysisConfig"];
+
+      Paths::ext_img = (std::string)paths["extensions"]["img"];
+      Paths::ext_root = (std::string)paths["extensions"]["root"];
+      Paths::cutlimitsName = (std::string)paths["cutLimits"];
+
+      std::cout << "Paths initialized from: " << pathsFilePath << std::endl;
+      
+    }
+
+
     // Parsing of constants from PDG JSON file
     std::ifstream fconst(Paths::pdgConstFilePath.c_str());
     if (fconst.is_open())

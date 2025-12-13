@@ -14,9 +14,9 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
     chain.SetBranchAddress("ntmc", &interfcommon_.ntmc);
     chain.SetBranchAddress("nvtxmc", &interfcommon_.nvtxmc);
 
-    chain.SetBranchAddress("pidmcOld", pidmcOld);
-    chain.SetBranchAddress("vtxmcOld", vtxmcOld);
-    chain.SetBranchAddress("motherOld", motherOld);
+    chain.SetBranchAddress("pidmc", pidmcOld);
+    chain.SetBranchAddress("vtxmc", vtxmcOld);
+    chain.SetBranchAddress("mother", motherOld);
     chain.SetBranchAddress("mctruth", &mctruth);
     chain.SetBranchAddress("mcflag", &mcflag);
 
@@ -29,7 +29,7 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
         datestamp = Obj.getCurrentDate(),
         name = "";
 
-    name = Paths::base_path + Paths::root_files_dir + Filenames::mctruth_filename + datestamp + "_" + int(data_type) + Paths::ext_root;
+    name = Paths::gen_vars_dir + Paths::root_files_dir + Filenames::mctruth_filename + datestamp + "_" + int(data_type) + Paths::ext_root;
     // -----------------------------------------------------------------------------------------
 
     file = new TFile(name.c_str(), "recreate");

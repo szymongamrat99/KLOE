@@ -142,8 +142,8 @@ Chi2Comp39; 100; -5.0; 1E5; "Chi2Comp 39 Signal Fit"; "Chi2Comp"; "Counts"
 TrackErrComb; 100; 0.0; 200.; "Track Error Combination"; "Track Error"; "Counts"
 
 time_neutral_MC; 100; -20.; 20.; "Neutral Kaon Time (MC)"; "Trc_{sum} [ns]"; "Counts"
-delta_t; 1201; -300.; 300.; "Time Difference"; "#Deltat [#tau_{S}]"; "Counts"
-delta_t_MC; 1201; -300.; 300.; "Time Difference MC"; "#Deltat_{MC} [#tau_{S}]"; "Counts"
+delta_t; 80; -20.; 20.; "Time Difference"; "#Deltat [#tau_{S}]"; "Counts"
+delta_t_MC; 80; -20.; 20.; "Time Difference MC"; "#Deltat_{MC} [#tau_{S}]"; "Counts"
 
 delta_t_rec_res; 201; -20.; 20.; "Time rec res"; "(#Deltat - #Deltat_{MC}) [#tau_{S}]"; "Counts"
 delta_t_boostlor_res; 201; -20.; 20.; "Time boostlor res"; "(#Deltat - #Deltat_{MC}) [#tau_{S}]"; "Counts"

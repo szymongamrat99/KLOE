@@ -13,21 +13,21 @@
 
 namespace Paths
 {
-  extern const std::string kloedataPath;
-  extern const std::string kloeMCPath;
-  extern const std::string workdirPath;
-  extern const std::string chainDataFiles;
-  extern const std::string chainMCFiles;
-  extern const std::string pdgConstFilePath;
-  extern const std::string propertiesPath;
-  extern const std::string histogramConfigDir;
-  extern const std::string histogramConfig1DPath;
-  extern const std::string histogramConfig2DPath;
-  extern const std::string propName;
-  extern const std::string analysisConfigPath;
-  extern const std::string rootfilesName;
-  extern const std::string cutlimitsName;
-  extern const std::string reportConfigPath;
+  extern std::string kloedataPath;
+  extern std::string kloeMCPath;
+  extern std::string workdirPath;
+  extern std::string chainDataFiles;
+  extern std::string chainMCFiles;
+  extern std::string pdgConstFilePath;
+  extern std::string propertiesPath;
+  extern std::string histogramConfigDir;
+  extern std::string histogramConfig1DPath;
+  extern std::string histogramConfig2DPath;
+  extern std::string propName;
+  extern std::string analysisConfigPath;
+  extern std::string rootfilesName;
+  extern std::string cutlimitsName;
+  extern std::string reportConfigPath;
 
   extern TString base_path;
   extern TString path_tmp;
@@ -37,20 +37,20 @@ namespace Paths
   extern TString ext_img;
   extern TString ext_csv;
 
-  extern const TString gen_vars_dir;
-  extern const TString neutrec_dir;
-  extern const TString cpfit_dir;
-  extern const TString covmatrix_dir;
-  extern const TString initialanalysis_dir;
-  extern const TString omegarec_dir;
-  extern const TString efficiency_dir;
-  extern const TString charged_dir;
-  extern const TString plots_dir;
-  extern const TString root_files_dir;
-  extern const TString input_dir;
-  extern const TString logs_dir;
-  extern const TString result_dir;
-  extern const TString img_dir;
+  extern TString gen_vars_dir;
+  extern TString neutrec_dir;
+  extern TString cpfit_dir;
+  extern TString covmatrix_dir;
+  extern TString initialanalysis_dir;
+  extern TString omegarec_dir;
+  extern TString efficiency_dir;
+  extern TString charged_dir;
+  extern TString plots_dir;
+  extern TString root_files_dir;
+  extern TString input_dir;
+  extern TString logs_dir;
+  extern TString result_dir;
+  extern TString img_dir;
 }
 
 namespace Filenames

@@ -1,11 +1,11 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Fri Oct 17 09:20:37 2025 by ROOT version 6.24/07
+// Mon Dec  1 21:27:39 2025 by ROOT version 6.24/07
 // from TChain h1/
 //////////////////////////////////////////////////////////
 
-#ifndef signal_vs_bcg_v2_h
-#define signal_vs_bcg_v2_h
+#ifndef SignalCutOptimizer_h
+#define SignalCutOptimizer_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -14,62 +14,46 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
-#include <TPrincipal.h>
-#include <TGraphErrors.h>
-#include <TH2.h>
-#include <StatisticalCutter.h>
 
 // Headers needed by this particular selector
 #include <vector>
+#include <TTree.h>
+#include <TCutG.h>
+#include <TMath.h>
+#include <TString.h>
 
-struct Cuts
-{
-  const TString oldCuts = "OLD_CUTS";
-  const TString simonaChi2Cuts = "SIMONA_CHI2_CUT";
-  const TString badClusSimona = "BAD_CLUS_SIMONA";
-  const TString simonaAllCuts = "SIMONA_ALL_CUTS";
-  const TString shorterKaonPaths = "SHORTER_KAON_PATHS";
-  const TString blobCut = "BLOB";
-  const TString noBlobCut = "NO_BLOB";
-  const TString simonaKinCuts = "SIMONA_KIN_CUTS";
-  const TString omegaMassT0Cut = "OMEGA_MASS_T0_CUT";
-
-  // Zbiór wszystkich cięć
-  std::set<TString> GetAllCutsSet() const
-  {
-    return {oldCuts, simonaChi2Cuts, badClusSimona, simonaAllCuts,
-            shorterKaonPaths, blobCut, noBlobCut, simonaKinCuts, omegaMassT0Cut};
-  }
-
-  // Sprawdzanie w zbiorze
-  Bool_t Contains(const TString &cutName) const
-  {
-    static const std::set<TString> allCuts = GetAllCutsSet();
-    return allCuts.find(cutName) != allCuts.end();
-  }
-};
-
-// Struktura przechowująca wyniki czystości dla podzbiorów
-struct PuritySubset
-{
-  Double_t deltaT_limit;
-  Double_t deltaT_limit_error;
-  Int_t signal_events;
-  Int_t total_events;
-  Double_t purity;
-  Double_t purity_error;
-};
-
-struct CutCount
-{
-  Int_t eventsBelow; // Zdarzenia < cutValue
-  Int_t eventsAbove; // Zdarzenia >= cutValue
-  Int_t totalEvents; // Wszystkie zdarzenia
-};
-
-class signal_vs_bcg_v2 : public TSelector
+class SignalCutOptimizer : public TSelector
 {
 public:
+  // Enumeracja do określenia trybu cięcia (niezależne cięcie)
+  enum ECutType
+  {
+    kSquareOneSided = 0, // Cięcie jednostronne (np. VarX < P)
+    kSquareSymmetric,    // Cięcie symetryczne (np. |VarX - Nominal| < P)
+    kGeometric           // Cięcie TCutG na płaszczyźnie (VarX, VarY)
+  };
+
+  // Parametry wejściowe przekazane z makra sterującego
+  ECutType fCutType;      // Wybrany typ cięcia
+  TCutG *fCurrentCutG;    // Wskaźnik do obiektu TCutG (używany tylko dla kGeometric)
+  TString fVarXName;      // Nazwa zmiennej X (np. "Minv")
+  TString fVarYName;      // Nazwa zmiennej Y (np. "DeltaChi2")
+  Double_t fParamP;       // Główny parametr cięcia (np. próg, sigma, itp.)
+  Double_t fNominalValue; // Wartość nominalna dla cięcia symetrycznego (np. masa wzorcowa)
+
+  std::map<TString, Int_t> categoryMap = {
+      {"Signal", 1},
+      {"Regeneration", 2},
+      {"Omega", 3},
+      {"3pi0", 4},
+      {"Semileptonic", 5},
+      {"Other", 6}};
+
+  Int_t fmctruth = 0;
+
+  // Wyniki
+  Long64_t fNCut; // Licznik zdarzeń, które przeszły cięcie
+
   TTreeReader fReader; //! the tree reader
   TTree *fChain = 0;   //! pointer to the analyzed TTree or TChain
 
@@ -77,10 +61,13 @@ public:
   TTreeReaderValue<Int_t> Eclfilfo = {fReader, "Eclfilfo"};
   TTreeReaderValue<Int_t> Eclfilfoword = {fReader, "Eclfilfoword"};
   TTreeReaderValue<Int_t> bunchnum = {fReader, "bunchnum"};
+  TTreeReaderValue<Int_t> cutApplied = {fReader, "cutApplied"};
   TTreeReaderValue<Int_t> errorcode = {fReader, "errorcode"};
   TTreeReaderValue<Int_t> goodClustersTriKinFitSize = {fReader, "goodClustersTriKinFitSize"};
   TTreeReaderValue<Int_t> mcflag = {fReader, "mcflag"};
   TTreeReaderValue<Int_t> mctruth = {fReader, "mctruth"};
+  TTreeReaderValue<Int_t> muonAlertMinus = {fReader, "muonAlertMinus"};
+  TTreeReaderValue<Int_t> muonAlertPlus = {fReader, "muonAlertPlus"};
   TTreeReaderValue<Int_t> nclu = {fReader, "nclu"};
   TTreeReaderValue<Int_t> necls = {fReader, "necls"};
   TTreeReaderValue<Int_t> nev = {fReader, "nev"};
@@ -90,9 +77,6 @@ public:
   TTreeReaderValue<Int_t> ntv = {fReader, "ntv"};
   TTreeReaderValue<Int_t> nv = {fReader, "nv"};
   TTreeReaderValue<Int_t> nvtxmc = {fReader, "nvtxmc"};
-  TTreeReaderValue<Int_t> cutApplied = {fReader, "cutApplied"};
-  TTreeReaderValue<Int_t> muonAlertPlus = {fReader, "muonAlertPlus"};
-  TTreeReaderValue<Int_t> muonAlertMinus = {fReader, "muonAlertMinus"};
   TTreeReaderValue<Float_t> Bpx = {fReader, "Bpx"};
   TTreeReaderValue<Float_t> Bpy = {fReader, "Bpy"};
   TTreeReaderValue<Float_t> Bpz = {fReader, "Bpz"};
@@ -150,11 +134,9 @@ public:
   TTreeReaderValue<Float_t> Qmiss = {fReader, "Qmiss"};
   TTreeReaderValue<Float_t> T0step1 = {fReader, "T0step1"};
   TTreeReaderValue<Float_t> TrcSum = {fReader, "TrcSum"};
+  TTreeReaderValue<Float_t> bestErrorSixGamma = {fReader, "bestErrorSixGamma"};
   TTreeReaderValue<Float_t> minv4gam = {fReader, "minv4gam"};
-  TTreeReaderValue<Float_t> bestError = {fReader, "bestErrorSixGamma"};
-
   TTreeReaderArray<int> Asscl = {fReader, "Asscl"};
-  // TTreeReaderArray<int> cutsApplied = {fReader, "cutsApplied"};
   TTreeReaderArray<int> eclstream = {fReader, "eclstream"};
   TTreeReaderArray<int> g4takenTriKinFit = {fReader, "g4takenTriKinFit"};
   TTreeReaderArray<int> goodClustersTriKinFit = {fReader, "goodClustersTriKinFit"};
@@ -186,6 +168,8 @@ public:
   TTreeReaderArray<float> Knemc = {fReader, "Knemc"};
   TTreeReaderArray<float> Knerec = {fReader, "Knerec"};
   TTreeReaderArray<float> KnerecFit = {fReader, "KnerecFit"};
+  TTreeReaderArray<float> KnerecSix = {fReader, "KnerecSix"};
+  TTreeReaderArray<float> Knereclor = {fReader, "Knereclor"};
   TTreeReaderArray<float> KnereclorFit = {fReader, "KnereclorFit"};
   TTreeReaderArray<float> KnetriKinFit = {fReader, "KnetriKinFit"};
   TTreeReaderArray<float> ParamOmega = {fReader, "ParamOmega"};
@@ -225,6 +209,12 @@ public:
   TTreeReaderArray<float> photonOmegaFit2 = {fReader, "photonOmegaFit2"};
   TTreeReaderArray<float> photonOmegaFit3 = {fReader, "photonOmegaFit3"};
   TTreeReaderArray<float> photonOmegaFit4 = {fReader, "photonOmegaFit4"};
+  TTreeReaderArray<float> photonSix1 = {fReader, "photonSix1"};
+  TTreeReaderArray<float> photonSix2 = {fReader, "photonSix2"};
+  TTreeReaderArray<float> photonSix3 = {fReader, "photonSix3"};
+  TTreeReaderArray<float> photonSix4 = {fReader, "photonSix4"};
+  TTreeReaderArray<float> photonSix5 = {fReader, "photonSix5"};
+  TTreeReaderArray<float> photonSix6 = {fReader, "photonSix6"};
   TTreeReaderArray<float> pi01 = {fReader, "pi01"};
   TTreeReaderArray<float> pi01Fit = {fReader, "pi01Fit"};
   TTreeReaderArray<float> pi02 = {fReader, "pi02"};
@@ -247,7 +237,6 @@ public:
   TTreeReaderArray<float> trk1KS = {fReader, "trk1KS"};
   TTreeReaderArray<float> trk1KSmc = {fReader, "trk1KSmc"};
   TTreeReaderArray<float> trk1MC = {fReader, "trk1MC"};
-  TTreeReaderArray<float> trk2MC = {fReader, "trk2MC"};
   TTreeReaderArray<float> trk2 = {fReader, "trk2"};
   TTreeReaderArray<float> trk2Closest = {fReader, "trk2Closest"};
   TTreeReaderArray<float> trk2Fit = {fReader, "trk2Fit"};
@@ -255,6 +244,7 @@ public:
   TTreeReaderArray<float> trk2KLmc = {fReader, "trk2KLmc"};
   TTreeReaderArray<float> trk2KS = {fReader, "trk2KS"};
   TTreeReaderArray<float> trk2KSmc = {fReader, "trk2KSmc"};
+  TTreeReaderArray<float> trk2MC = {fReader, "trk2MC"};
   TTreeReaderArray<float> trkOmegaFit1 = {fReader, "trkOmegaFit1"};
   TTreeReaderArray<float> trkOmegaFit2 = {fReader, "trkOmegaFit2"};
   TTreeReaderArray<float> xv = {fReader, "xv"};
@@ -263,10 +253,12 @@ public:
   TTreeReaderArray<float> yvmc = {fReader, "yvmc"};
   TTreeReaderArray<float> zv = {fReader, "zv"};
   TTreeReaderArray<float> zvmc = {fReader, "zvmc"};
-  TTreeReaderArray<float> KnerecSix = {fReader, "KnerecSix"};
 
-  signal_vs_bcg_v2(TTree * /*tree*/ = 0) {}
-  virtual ~signal_vs_bcg_v2() {}
+  SignalCutOptimizer(TChain *chain = 0, Double_t limitCut = 0, Double_t centralValue = 0) : fParamP(limitCut), fNominalValue(centralValue), fNCut(0)
+  {
+  }
+
+  virtual ~SignalCutOptimizer() {}
   virtual Int_t Version() const { return 2; }
   virtual void Begin(TTree *tree);
   virtual void SlaveBegin(TTree *tree);
@@ -281,79 +273,31 @@ public:
   virtual void SlaveTerminate();
   virtual void Terminate();
 
-  Double_t CalculatePurity(Int_t signal, Int_t total) const;
-  Double_t CalculateEfficiency(Int_t signal, Int_t total) const;
+  // Metody do odczytu wyników z makra sterującego
+  Long64_t GetNCut() const { return fNCut; }
 
-  CutCount CountEventsAroundCut(TH1 *hist, Double_t cutValue);
-  void PrintCutCount(const TString &histName, Double_t cutValue, const CutCount &count);
+  std::map<TString, Float_t> channLumi = {
+      {"Data", 8876},
+      {"Signal", 1549784},
+      {"Regeneration", 1180120},
+      {"Omega", 735724},
+      {"3pi0", 28701},
+      {"Semileptonic", 104630},
+      {"Other", 42747}};
 
-  void DrawLabelOnHisto(std::vector<TString> labels);
+  std::map<TString, Float_t> channFactor;
+  std::map<TString, Int_t> channEventsTotal, channEventsCut;
 
-  void AddDataToPCA(Double_t *data);
-  Double_t GetPCASlope(); // Zwraca slope z PCA
-  void WidthOfCorrelatedHist(Double_t *means, Double_t *sigmas, Double_t *vLong, Double_t *vTransv);
+  ClassDef(SignalCutOptimizer, 0);
 
-  TGraphErrors *CreateRMSProfile(TH2 *h2D, const char *name, const char *title);
-  TCanvas *CreateCanvasWithProfiles(TH2 *h2D, const TString &name,
-                                    Bool_t drawMeanProfile = kTRUE,
-                                    Bool_t drawSigmaProfile = kTRUE);
+  private:
+    std::function<bool(Double_t cutValue)> defaultFunc = [](Double_t) { return true; };
 
-  TPrincipal *pca = new TPrincipal(2, "ND"); // 2 zmienne, bez normalizacji
-
-  void FolderManagement(TString folderName) const;
-
-  void InitializeCutSelector(const TString &option);
-  std::vector<size_t> GetCutIndicesForOption(const TString &option);
-  TString SanitizeFolderName(const TString &option);
-
-  TString folderPath = "NO_CUTS";
-  StatisticalCutter *cutter = nullptr;
-  std::map<std::string, std::function<Float_t()>> cutValues;
-  std::map<std::string, Float_t> centralValues;
-  std::map<std::string, size_t> cutNameToIndex;
-
-  std::vector<PuritySubset> CalculatePurityInSubsets(
-      TH1 *hist_signal,
-      TH1 *hist_total,
-      Double_t max_limit,
-      Int_t n_subsets);
-
-  TCanvas *DrawPuritySubsets(
-      const std::vector<PuritySubset> &subsets,
-      const TString &name);
-
-  std::map<Double_t, Double_t> ComparePuritySymmetric(
-      TH1 *hist_signal,
-      TH1 *hist_total,
-      const std::vector<Double_t> &limits);
-
-  ClassDef(signal_vs_bcg_v2, 0);
+    std::map<TString, std::function<bool(Double_t cutValue)>> 
+      fCutsOneSided = {
+        {"Chi2SignalKinFit", defaultFunc},
+        {"CombinedPi0MassErr", defaultFunc}
+      }, 
+      fCutsSymmetric;
 };
-
 #endif
-
-#ifdef signal_vs_bcg_v2_cxx
-void signal_vs_bcg_v2::Init(TTree *tree)
-{
-  // The Init() function is called when the selector needs to initialize
-  // a new tree or chain. Typically here the reader is initialized.
-  // It is normally not necessary to make changes to the generated
-  // code, but the routine can be extended by the user if needed.
-  // Init() will be called many times when running on PROOF
-  // (once per file to be processed).
-
-  fReader.SetTree(tree);
-}
-
-Bool_t signal_vs_bcg_v2::Notify()
-{
-  // The Notify() function is called when a new file is opened. This
-  // can be either for a new TTree in a TChain or when when a new TTree
-  // is started when using PROOF. It is normally not necessary to make changes
-  // to the generated code, but the routine can be extended by the
-  // user if needed. The return value is currently not used.
-
-  return kTRUE;
-}
-
-#endif // #ifdef signal_vs_bcg_v2_cxx

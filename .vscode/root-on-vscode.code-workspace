@@ -98,7 +98,8 @@
     "C_Cpp.default.includePath": [
       "${default}",
       "/internal/big_one/4/users/gamrat/root_dirs/install_root/include",
-      "/internal/big_one/4/users/gamrat/scripts/Include"
+      "/internal/big_one/4/users/gamrat/scripts/Include",
+      "${env:ROOTSYS}/include"
     ]
   },
   "extensions": {

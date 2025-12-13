@@ -16,6 +16,7 @@
 #include <TEfficiency.h>
 #include <TLegend.h>
 #include <TBufferJSON.h>
+#include <boost/progress.hpp>
 
 #include "../inc/cpfit.hpp"
 
@@ -36,9 +37,6 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
       *tree_mctruth,
       *tree_omega;
   // =============================================================================
-
-  Utils::properties = cfgWatcher.getConfig();
-
   const TString cpfit_res_dir = Paths::cpfit_dir + Paths::result_dir;
 
   Double_t *eff_vals;
@@ -54,7 +52,9 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
   // ===========================================================================
 
-  chain.SetBranchAddress("mcflag", &baseKin.mcflag);
+  UChar_t mctruth, mcflag;
+
+  chain.SetBranchAddress("mcflag", &mcflag);
 
   chain.SetBranchAddress("Dtmc", &baseKin.Dtmc);
 
@@ -74,7 +74,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
   chain.SetBranchAddress("Xcl", baseKin.cluster[0]);
   chain.SetBranchAddress("Ycl", baseKin.cluster[1]);
   chain.SetBranchAddress("Zcl", baseKin.cluster[2]);
-  chain.SetBranchAddress("TclOld", baseKin.cluster[3]);
+  chain.SetBranchAddress("Tcl", baseKin.cluster[3]);
   chain.SetBranchAddress("Enecl", baseKin.cluster[4]);
 
   chain.SetBranchAddress("ip", baseKin.ip);
@@ -142,15 +142,15 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     if (tree->IsZombie())
       throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
 
-    file_omega = new TFile(filename_omega);
+    // file_omega = new TFile(filename_omega);
 
-    if (file_omega->IsZombie())
-      throw(ErrorHandling::ErrorCodes::FILE_NOT_EXIST);
+    // if (file_omega->IsZombie())
+    //   throw(ErrorHandling::ErrorCodes::FILE_NOT_EXIST);
 
-    tree_omega = (TTree *)file_omega->Get(treename_omega);
+    // tree_omega = (TTree *)file_omega->Get(treename_omega);
 
-    if (tree_omega->IsZombie())
-      throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
+    // if (tree_omega->IsZombie())
+    //   throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
 
     file_mctruth = new TFile(filename_mctruth);
 
@@ -209,41 +209,41 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
       neu_vtx_avg[3],
       chi2min;
 
-  tree_omega->SetBranchAddress("gamma1omega", gammaomega[0]);
-  tree_omega->SetBranchAddress("gamma2omega", gammaomega[1]);
-  tree_omega->SetBranchAddress("gamma3omega", gammaomega[2]);
-  tree_omega->SetBranchAddress("gamma4omega", gammaomega[3]);
+  // tree_omega->SetBranchAddress("gamma1omega", gammaomega[0]);
+  // tree_omega->SetBranchAddress("gamma2omega", gammaomega[1]);
+  // tree_omega->SetBranchAddress("gamma3omega", gammaomega[2]);
+  // tree_omega->SetBranchAddress("gamma4omega", gammaomega[3]);
 
-  tree_omega->SetBranchAddress("pich1", PichFourMom1[0]);
-  tree_omega->SetBranchAddress("pich2", PichFourMom1[1]);
+  // tree_omega->SetBranchAddress("pich1", PichFourMom1[0]);
+  // tree_omega->SetBranchAddress("pich2", PichFourMom1[1]);
 
-  tree_omega->SetBranchAddress("omegapi0", Omegapi0);
-  tree_omega->SetBranchAddress("pi0", Pi0);
+  // tree_omega->SetBranchAddress("omegapi0", Omegapi0);
+  // tree_omega->SetBranchAddress("pi0", Pi0);
 
-  tree_omega->SetBranchAddress("omega", Omegarec);
+  // tree_omega->SetBranchAddress("omega", Omegarec);
 
-  tree_omega->SetBranchAddress("doneomega", &doneOmega);
+  // tree_omega->SetBranchAddress("doneomega", &doneOmega);
 
-  tree_omega->SetBranchAddress("g4takenomega", g4takenomega);
+  // tree_omega->SetBranchAddress("g4takenomega", g4takenomega);
 
-  tree_omega->SetBranchAddress("lengthphoton", lengthPhotonMin);
+  // tree_omega->SetBranchAddress("lengthphoton", lengthPhotonMin);
 
-  tree_omega->SetBranchAddress("lengthKch", &lengthKch);
+  // tree_omega->SetBranchAddress("lengthKch", &lengthKch);
 
-  tree_omega->SetBranchAddress("NeuVtxAvg", neu_vtx_avg);
+  // tree_omega->SetBranchAddress("NeuVtxAvg", neu_vtx_avg);
 
-  tree_omega->SetBranchAddress("rho_00", &rho_00);
-  tree_omega->SetBranchAddress("rho_00_IP", &rho_00_IP);
-  tree_omega->SetBranchAddress("rho_pm_IP", &rho_pm_IP);
-  tree_omega->SetBranchAddress("rho", &rho);
-  tree_omega->SetBranchAddress("anglePi0KaonCM", &anglePi0KaonCM);
-  tree_omega->SetBranchAddress("anglePichKaonCM", &anglePichKaonCM);
-  tree_omega->SetBranchAddress("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM);
+  // tree_omega->SetBranchAddress("rho_00", &rho_00);
+  // tree_omega->SetBranchAddress("rho_00_IP", &rho_00_IP);
+  // tree_omega->SetBranchAddress("rho_pm_IP", &rho_pm_IP);
+  // tree_omega->SetBranchAddress("rho", &rho);
+  // tree_omega->SetBranchAddress("anglePi0KaonCM", &anglePi0KaonCM);
+  // tree_omega->SetBranchAddress("anglePichKaonCM", &anglePichKaonCM);
+  // tree_omega->SetBranchAddress("anglePi0OmegaPhiCM", &anglePi0OmegaPhiCM);
 
   tree_mctruth->SetBranchAddress("mctruth", &baseKin.mctruth_int);
 
   chain.AddFriend(tree_mctruth);
-  chain.AddFriend(tree_omega);
+  // chain.AddFriend(tree_omega);
   chain.AddFriend(tree);
 
   UInt_t nentries = chain.GetEntries();
@@ -381,14 +381,10 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     {
       Double_t
           meanInvMass = Utils::properties["variables"]["OmegaRec"]["invMass"]["mean"]["value"],
-          // meanInvMassErr = Utils::properties["variables"]["OmegaRec"]["invMass"]["mean"]["error"],
           stdInvMass = Utils::properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["value"],
-          // stdInvMassErr = Utils::properties["variables"]["OmegaRec"]["invMass"]["stdDev"]["error"],
           InvMass[2] = {meanInvMass, 3 * stdInvMass},
           meanKinEne = Utils::properties["variables"]["OmegaRec"]["kinEne"]["mean"]["value"],
-          // meanKinEneErr = Utils::properties["variables"]["OmegaRec"]["kinEne"]["mean"]["error"],
           stdKinEne = Utils::properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["value"],
-          // stdKinEneErr = Utils::properties["variables"]["OmegaRec"]["kinEne"]["stdDev"]["error"],
           KinEne[2] = {meanKinEne, 3 * stdKinEne};
 
       a = Utils::properties["variables"]["OmegaRec"]["combined"]["line"]["slope"],
@@ -429,10 +425,10 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
         momVecMC(numberOfMomenta * 3),
         momVecSmeared(numberOfMomenta * 3);
 
-    std::vector<double> elems = Utils::properties["momSmearing"]["covarianceMatrix"]["fElements"].get<std::vector<Double_t>>();
+    std::vector<double> elems = Utils::properties["momSmearing"]["covarianceMatrixMIXED"]["fElements"].get<std::vector<Double_t>>();
 
-    Int_t nRows = Utils::properties["momSmearing"]["covarianceMatrix"]["fNrows"],
-          nCols = Utils::properties["momSmearing"]["covarianceMatrix"]["fNcols"];
+    Int_t nRows = Utils::properties["momSmearing"]["covarianceMatrixMIXED"]["fNrows"],
+          nCols = Utils::properties["momSmearing"]["covarianceMatrixMIXED"]["fNcols"];
 
     TMatrixT<Double_t>
         covMatrix(nRows, nCols, elems.data());
@@ -440,15 +436,17 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
     KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj;
 
+    boost::progress_display display(nentries);
+
     for (UInt_t i = 0; i < nentries; i++)
     {
       chain.GetEntry(i);
 
       Float_t KchrecSmeared[4], KchboostSmeared[4], energyPion[2];
 
-      if (baseKin.doneTriKinFit == 1 && doneOmega == 1)
+      if (baseKin.doneTriKinFit == 1)// && doneOmega == 1)
       {
-        if (baseKin.mcflag == 1)
+        if (mcflag == 1)
         {
           momVecMC[0] = PichFourMom[0][0];
           momVecMC[1] = PichFourMom[0][1];
@@ -457,16 +455,16 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
           momVecMC[4] = PichFourMom[1][1];
           momVecMC[5] = PichFourMom[1][2];
 
-          CovMatrixCalcObj.SetMCVector(momVecMC);
-          CovMatrixCalcObj.SmearMomentum();
-          CovMatrixCalcObj.GetSmearedMomentum(momVecSmeared);
+          // CovMatrixCalcObj.SetMCVector(momVecMC);
+          // CovMatrixCalcObj.SmearMomentum();
+          // CovMatrixCalcObj.GetSmearedMomentum(momVecSmeared);
 
-          // momVecSmeared[0] = momVecMC[0];
-          // momVecSmeared[1] = momVecMC[1];
-          // momVecSmeared[2] = momVecMC[2];
-          // momVecSmeared[3] = momVecMC[3];
-          // momVecSmeared[4] = momVecMC[4];
-          // momVecSmeared[5] = momVecMC[5];
+          momVecSmeared[0] = momVecMC[0];
+          momVecSmeared[1] = momVecMC[1];
+          momVecSmeared[2] = momVecMC[2];
+          momVecSmeared[3] = momVecMC[3];
+          momVecSmeared[4] = momVecMC[4];
+          momVecSmeared[5] = momVecMC[5];
 
           KchrecSmeared[0] = momVecSmeared[0] + momVecSmeared[3];
           KchrecSmeared[1] = momVecSmeared[1] + momVecSmeared[4];
@@ -654,7 +652,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
           cuts[5] = 1;
         }
 
-        if (baseKin.mcflag == 1)
+        if (mcflag == 1)
         {
           if (baseKin.mctruth_int == 1 || baseKin.mctruth_int == 2)
           {
@@ -662,46 +660,48 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
             no_cuts_sig[1].push_back(baseKin.Dtboostlor);
           }
 
-          if (cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] || cuts[5] || cut_line_up || cut_line_down))
+          if (1)//cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] || cuts[5] || cut_line_up || cut_line_down))
           {
             if (baseKin.mctruth_int == 1)
             {
               event.time_diff_gen.push_back(baseKin.Dtmc);
-              event.time_diff[0].push_back(baseKin.Dtboostlor);
+              event.time_diff["Signal"].push_back(baseKin.Dtboostlor);
             }
 
             if (baseKin.mctruth_int == 3)
             {
-              event.time_diff[1].push_back(baseKin.Dtboostlor);
+              event.time_diff["Regeneration"].push_back(baseKin.Dtboostlor);
             }
 
             if (baseKin.mctruth_int == 4)
             {
-              event.time_diff[2].push_back(baseKin.Dtboostlor);
+              event.time_diff["Omega"].push_back(baseKin.Dtboostlor);
             }
 
             if (baseKin.mctruth_int == 5)
             {
-              event.time_diff[3].push_back(baseKin.Dtboostlor);
+              event.time_diff["3pi0"].push_back(baseKin.Dtboostlor);
             }
 
             if (baseKin.mctruth_int == 6)
             {
-              event.time_diff[4].push_back(baseKin.Dtboostlor);
+              event.time_diff["Semileptonic"].push_back(baseKin.Dtboostlor);
             }
 
             if (baseKin.mctruth_int == 7)
             {
-              event.time_diff[5].push_back(baseKin.Dtboostlor);
+              event.time_diff["Other"].push_back(baseKin.Dtboostlor);
             }
           }
         }
 
-        if (baseKin.mcflag == 0 && cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] || cuts[5] || cut_line_up || cut_line_down))
+        if (mcflag == 0)// && cuts[0] && cuts[1] && cuts[2] && cuts[3] && (cuts[4] || cuts[5] || cut_line_up || cut_line_down))
         {
-          event.time_diff_data.push_back(baseKin.Dtboostlor);
+          event.time_diff["Data"].push_back(baseKin.Dtboostlor);
         }
       }
+
+      ++display;
     }
 
     ROOT::Math::Minimizer *minimum =
@@ -731,7 +731,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
         Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Threepi0"],
         Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Semileptonic"],
         Utils::properties["variables"]["CPFit"]["initParams"]["Norm"]["Other"]},
-                   step[num_of_vars] = {Utils::properties["variables"]["CPFit"]["step"]["PhysicsConstants::Re"], Utils::properties["variables"]["CPFit"]["step"]["Im"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Signal"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["FarLeft"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["CloseLeft"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["CloseRight"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["FarRight"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Omegapi0"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Threepi0"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Semileptonic"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Other"]};
+                   step[num_of_vars] = {Utils::properties["variables"]["CPFit"]["step"]["Re"], Utils::properties["variables"]["CPFit"]["step"]["Im"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Signal"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["FarLeft"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["CloseLeft"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["CloseRight"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Regeneration"]["FarRight"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Omegapi0"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Threepi0"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Semileptonic"], Utils::properties["variables"]["CPFit"]["step"]["Norm"]["Other"]};
 
     Double_t
         limit_upper = Utils::properties["variables"]["CPFit"]["limitPer"]["upper"],
@@ -774,24 +774,24 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
       imaginaryValue[0].push_back(abs(minimum->X()[1]));
       imaginaryValue[1].push_back(abs(minimum->Errors()[1]));
 
-      event.time_diff[0].clear();
-      event.time_diff[1].clear();
-      event.time_diff[2].clear();
-      event.time_diff[3].clear();
-      event.time_diff[4].clear();
-      event.time_diff[5].clear();
-      event.time_diff_data.clear();
+      event.time_diff["Signal"].clear();
+      event.time_diff["Regeneration"].clear();
+      event.time_diff["Omega"].clear();
+      event.time_diff["3pi0"].clear();
+      event.time_diff["Semileptonic"].clear();
+      event.time_diff["Other"].clear();
+      event.time_diff["Data"].clear();
       event.time_diff_gen.clear();
       no_cuts_sig[0].clear();
       no_cuts_sig[1].clear();
 
-      event.time_diff[0].shrink_to_fit();
-      event.time_diff[1].shrink_to_fit();
-      event.time_diff[2].shrink_to_fit();
-      event.time_diff[3].shrink_to_fit();
-      event.time_diff[4].shrink_to_fit();
-      event.time_diff[5].shrink_to_fit();
-      event.time_diff_data.shrink_to_fit();
+      event.time_diff["Signal"].shrink_to_fit();
+      event.time_diff["Regeneration"].shrink_to_fit();
+      event.time_diff["Omega"].shrink_to_fit();
+      event.time_diff["3pi0"].shrink_to_fit();
+      event.time_diff["Semileptonic"].shrink_to_fit();
+      event.time_diff["Other"].shrink_to_fit();
+      event.time_diff["Data"].shrink_to_fit();
       event.time_diff_gen.shrink_to_fit();
       no_cuts_sig[0].shrink_to_fit();
       no_cuts_sig[1].shrink_to_fit();
@@ -824,25 +824,28 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     }
   }
 
+  std::cout << "---------------------------------" << std::endl;
+  std::cout << "Dupa minimizacji:" << std::endl;
+
   if (!scanFlag)
   {
-    Double_t sum_of_events = 0., fractions[6] = {0.};
+    Double_t sum_of_events = 0.; 
+    std::map<TString, Double_t> fractions;
 
-    for (Int_t i = 0; i < KLOE::channNum; i++)
-      sum_of_events += event.time_diff[i].size();
+    for (const auto &c : KLOE::channName)
+      sum_of_events += event.time_diff[c.second].size();
 
-    for (Int_t i = 0; i < KLOE::channNum; i++)
-      fractions[i] = 100 * event.time_diff[i].size() / sum_of_events;
-
+    for (const auto &c : KLOE::channName)
+      fractions[c.second] = 100 * event.time_diff[c.second].size() / sum_of_events;
     std::ofstream myfile_num;
     myfile_num.open(cpfit_res_dir + "num_of_events.csv");
     myfile_num << "Channel,Number of events,Fraction\n";
-    myfile_num << "Signal," << event.time_diff[0].size() << "," << fractions[0] << "%,\n";
-    myfile_num << "Regeneration," << event.time_diff[1].size() << "," << fractions[1] << "%,\n";
-    myfile_num << "Omega," << event.time_diff[2].size() << "," << fractions[2] << "%,\n";
-    myfile_num << "Three," << event.time_diff[3].size() << "," << fractions[3] << "%,\n";
-    myfile_num << "Semi," << event.time_diff[4].size() << "," << fractions[4] << "%,\n";
-    myfile_num << "Other bcg," << event.time_diff[5].size() << "," << fractions[5] << "%,\n";
+    myfile_num << "Signal," << event.time_diff["Signal"].size() << "," << fractions["Signal"] << "%,\n";
+    myfile_num << "Regeneration," << event.time_diff["Regeneration"].size() << "," << fractions["Regeneration"] << "%,\n";
+    myfile_num << "Omega," << event.time_diff["Omega"].size() << "," << fractions["Omega"] << "%,\n";
+    myfile_num << "Three," << event.time_diff["3pi0"].size() << "," << fractions["3pi0"] << "%,\n";
+    myfile_num << "Semi," << event.time_diff["Semileptonic"].size() << "," << fractions["Semileptonic"] << "%,\n";
+    myfile_num << "Other bcg," << event.time_diff["Other"].size() << "," << fractions["Other"] << "%,\n";
     myfile_num.close();
 
     for (UInt_t i = 0; i < no_cuts_sig[1].size(); i++)
@@ -850,72 +853,63 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
       sig_total->Fill(no_cuts_sig[1][i]);
     }
 
-    for (UInt_t i = 0; i < KLOE::channNum; i++)
+    for (auto const &name : KLOE::channName)
     {
-      for (UInt_t j = 0; j < event.time_diff[i].size(); j++)
-      {
-        if (i == 0)
-        {
-          sig_pass->Fill(event.time_diff[i][j]);
+      if (name.second == "Data" || name.second == "MC sum")
+        continue;
 
-          event.frac[i]->Fill(event.time_diff[i][j], event.interf_function(event.time_diff_gen[j], 0, par.data()));
-        }
-        else if (i == 1)
+      for (UInt_t j = 0; j < event.time_diff[name.second].size(); j++)
+      {
+        if (name.second == "Signal")
         {
-          if (event.time_diff[i][j] < event.left_x_split)
-            event.frac[i]->Fill(event.time_diff[i][j], par[3]);
-          else if (event.time_diff[i][j] > event.left_x_split && event.time_diff[i][j] < event.center_x_split)
-            event.frac[i]->Fill(event.time_diff[i][j], par[4]);
-          else if (event.time_diff[i][j] > event.center_x_split && event.time_diff[i][j] < event.right_x_split)
-            event.frac[i]->Fill(event.time_diff[i][j], par[5]);
-          else if (event.time_diff[i][j] > event.right_x_split)
-            event.frac[i]->Fill(event.time_diff[i][j], par[6]);
+          sig_pass->Fill(event.time_diff["Signal"][j]);
+
+          event.getFracHistogram("Signal")->Fill(event.time_diff["Signal"][j], event.interf_function(event.time_diff_gen[j], 0, par.data()));
+        }
+        else if (name.second == "Regeneration")
+        {
+          if (event.time_diff["Regeneration"][j] < event.left_x_split)
+            event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[3]);
+          else if (event.time_diff["Regeneration"][j] > event.left_x_split && event.time_diff["Regeneration"][j] < event.center_x_split)
+            event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[4]);
+          else if (event.time_diff["Regeneration"][j] > event.center_x_split && event.time_diff["Regeneration"][j] < event.right_x_split)
+            event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[5]);
+          else if (event.time_diff["Regeneration"][j] > event.right_x_split)
+            event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[6]);
         }
         else
         {
-          event.frac[i]->Fill(event.time_diff[i][j]);
+          event.getFracHistogram(name.second)->Fill(event.time_diff[name.second][j]);
         }
       }
     }
 
-    for (UInt_t j = 0; j < event.time_diff_data.size(); j++)
+    for (UInt_t j = 0; j < event.time_diff["Data"].size(); j++)
     {
-      event.data->Fill(event.time_diff_data[j]);
+      event.getFracHistogram("Data")->Fill(event.time_diff["Data"][j]);
     }
 
-    event.frac[0]->Scale(par[2] * event.frac[0]->GetEntries() / event.frac[0]->Integral(0, nbins + 1));
+    event.getFracHistogram("Signal")->Scale(par[2] * event.getFracHistogram("Signal")->GetEntries() / event.getFracHistogram("Signal")->Integral(0, nbins + 1));
 
     if (check_corr == true)
     {
       for (Int_t i = 0; i < nbins; i++)
       {
-        event.frac[0]->SetBinContent(i + 1, event.frac[0]->GetBinContent(i + 1) * event.corr_vals[i]);
+        event.getFracHistogram("Signal")->SetBinContent(i + 1, event.getFracHistogram("Signal")->GetBinContent(i + 1) * event.corr_vals[i]);
       }
     }
 
-    event.frac[2]->Scale(par[7] * event.frac[2]->GetEntries() / event.frac[2]->Integral(0, nbins + 1));
-    event.frac[3]->Scale(par[8] * event.frac[3]->GetEntries() / event.frac[3]->Integral(0, nbins + 1));
-    event.frac[4]->Scale(par[9] * event.frac[4]->GetEntries() / event.frac[4]->Integral(0, nbins + 1));
-    event.frac[5]->Scale(par[10] * event.frac[5]->GetEntries() / event.frac[5]->Integral(0, nbins + 1));
+    event.getFracHistogram("Omega")->Scale(par[7] * event.getFracHistogram("Omega")->GetEntries() / event.getFracHistogram("Omega")->Integral(0, nbins + 1));
+    event.getFracHistogram("3pi0")->Scale(par[8] * event.getFracHistogram("3pi0")->GetEntries() / event.getFracHistogram("3pi0")->Integral(0, nbins + 1));
+    event.getFracHistogram("Semileptonic")->Scale(par[9] * event.getFracHistogram("Semileptonic")->GetEntries() / event.getFracHistogram("Semileptonic")->Integral(0, nbins + 1));
+    event.getFracHistogram("Other")->Scale(par[10] * event.getFracHistogram("Other")->GetEntries() / event.getFracHistogram("Other")->Integral(0, nbins + 1));
 
-    for (const auto name : KLOE::channName)
+    for (auto const &name : KLOE::channName)
     {
-      if (name.second != "Data" && name.second != "MC Sum")
-      {
-        event.mc_sum->Add(event.frac[name.first]);
-        event.frac[name.first]->SetLineWidth(3);
-        event.frac[name.first]->SetLineColor(KLOE::channColor.at(name.second));
-      }
-      else if (name.second == "MC Sum")
-      {
-        event.mc_sum->SetLineWidth(3);
-        event.mc_sum->SetLineColor(KLOE::channColor.at(name.second));
-      }
-      else
-      {
-        event.data->SetLineWidth(3);
-        event.data->SetLineColor(KLOE::channColor.at(name.second));
-      }
+      if (name.second == "Data" || name.second == "MC sum")
+        continue;
+
+      event.getFracHistogram("MC sum")->Add(event.getFracHistogram(name.second));
     }
 
     TCanvas *c1 = new TCanvas("c1", "", 790, 1200);
@@ -987,12 +981,12 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     lineDown->Draw("SAME");
     lineUp->Draw("SAME");
 
-    event.data->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
-    event.mc_sum->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
+    event.getFracHistogram("Data")->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
+    event.getFracHistogram("MC sum")->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
 
-    event.frac[0]->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
+    event.getFracHistogram("Signal")->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
 
-    TRatioPlot *rp = new TRatioPlot(event.mc_sum, event.data, "diffsig");
+    TRatioPlot *rp = new TRatioPlot(event.getFracHistogram("MC sum"), event.getFracHistogram("Data"), "diffsig");
 
     c1->cd();
     padup_c1->Draw();
@@ -1012,7 +1006,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     rp->GetLowerRefYaxis()->SetLabelSize(0.02);
     rp->GetLowerRefXaxis()->SetLabelSize(0.0);
 
-    Double_t max_height = event.data->GetMaximum();
+    Double_t max_height = event.getFracHistogram("Data")->GetMaximum();
 
     rp->GetUpperRefYaxis()->SetRangeUser(0.0, 2 * max_height);
     rp->GetUpperRefYaxis()->SetTitle("Counts/2#tau_{S}");
@@ -1024,21 +1018,13 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
     TLegend *legend_chann = new TLegend(0.6, 0.7, 0.9, 0.9);
     legend_chann->SetFillColor(kWhite);
-    for (const auto &name : KLOE::channName)
+    for (auto const &name : KLOE::channName)
     {
-      if (name.second != "Data" && name.second != "MC Sum")
-      {
-        legend_chann->AddEntry(event.frac[name.first], KLOE::channTitle.at(name.second), "l");
-        event.frac[name.first]->Draw("HISTSAME");
-      }
-      else if (name.second == "MC Sum")
-      {
-        legend_chann->AddEntry(event.frac[name.first], KLOE::channTitle.at(name.second), "l");
-      }
-      else
-      {
-        legend_chann->AddEntry(event.data, KLOE::channTitle.at(name.second), "le");
-      }
+      if (name.second == "Data" || name.second == "MC sum" || name.second == "pi+pi-pi+pi-")
+        continue;
+
+        legend_chann->AddEntry(event.getFracHistogram(name.second), name.second, "l");
+        event.getFracHistogram(name.second)->Draw("HISTSAME");
     }
 
     legend_chann->Draw();
@@ -1051,7 +1037,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
     event.resi_vals = rp->GetLowerRefGraph()->GetY();
 
-    for (Int_t i = 0; i < event.bin_number; i++)
+    for (Int_t i = 0; i < event.getBinNumber(); i++)
     {
       residuals_hist->Fill(event.resi_vals[i]);
     }
@@ -1097,8 +1083,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Semileptonic"] = parErr[9];
     Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Other"] = parErr[10];
 
-    Utils::properties["variables"]["CPFit"]["result"]["chi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2");
-    Utils::properties["variables"]["CPFit"]["result"]["normChi2"] = event.data->Chi2Test(event.mc_sum, "UW CHI2/NDF");
+    Utils::properties["variables"]["CPFit"]["result"]["chi2"] = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "UW CHI2");
+    Utils::properties["variables"]["CPFit"]["result"]["normChi2"] = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "UW CHI2/NDF");
 
     delete residuals_hist;
     delete c1;

@@ -23,7 +23,6 @@ find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework)
 find_package(CURL REQUIRED)
 find_package(LAPACK REQUIRED)
 find_package(BLAS REQUIRED)
-find_package(OpenMP REQUIRED)
 
 
 # Enable tests for the files
@@ -35,7 +34,7 @@ add_subdirectory(Subanalysis/CovarianceMatrix)
 add_subdirectory(Subanalysis/CPFit)
 # add_subdirectory(Subanalysis/EfficiencyAnalysis)
 add_subdirectory(Subanalysis/GeneratedVars)
-# # add_subdirectory(Subanalysis/InterfFunction)
+# add_subdirectory(Subanalysis/InterfFunction)
 # # add_subdirectory(Subanalysis/IPRec)
 add_subdirectory(Subanalysis/KchRec)
 add_subdirectory(Subanalysis/OmegaRec)

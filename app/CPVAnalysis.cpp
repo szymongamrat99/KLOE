@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
     auto callParams = InputParamsHandler::getParams(
         Utils::properties, KLOE::lastFileMax, Paths::propName, logger, dataType);
 
-    initObj.chainInit(chain, callParams.dataTypeOpt, callParams.firstFile, callParams.lastFile, callParams.firstFile, callParams.lastFile, logger, callParams.csFlag);
+    initObj.chainInit(chain, callParams.dataTypeOpt, callParams.firstFile, callParams.lastFile, callParams.firstFile, callParams.lastFile, logger, callParams.csFlag, 1);
 
     mainMenuHandler.runMenuLoop(
         callParams.csFlag,

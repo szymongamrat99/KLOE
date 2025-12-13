@@ -470,7 +470,22 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   if (!passesCuts)
     return kTRUE;
 
-  if (mctruth_int == 1 && abs(deltaTfit) < 20)// && pathKchFit <= limitRadiusChMC && pathKneFit <= limitRadiusNeMC)
+  TVector3 phiMeson = {ParamSignalFit[32], ParamSignalFit[33], ParamSignalFit[34]};
+  TVector3 KchrecVec = {KchrecFit[0], KchrecFit[1], KchrecFit[2]};
+  TVector3 KchrecVecMC = {Kchmc[0], Kchmc[1], Kchmc[2]};
+  TVector3 trk1VecMC = {trk1MC[0], trk1MC[1], trk1MC[2]};
+  TVector3 trk2VecMC = {trk2MC[0], trk2MC[1], trk2MC[2]};
+
+  Double_t phiTrk1Angle = trk1Vec.Angle(KchrecVec) * 180.0 / TMath::Pi(),
+           phiTrk2Angle = trk2Vec.Angle(KchrecVec) * 180.0 / TMath::Pi(),
+           phiTrk1AngleMC = trk1VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi(),
+           phiTrk2AngleMC = trk2VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi();
+
+  Bool_t corrPosLimit = (radius00 < 1.5 && radiuspm < 1.5 && zdist00 < 1.0 && zdistpm < 1.0);
+  Bool_t phivLimit = abs(deltaPhiFit - 3.110) < 2 * 0.135;
+  Bool_t condResCorr = (phivLimit && !(cos(phiTrk1Angle * TMath::Pi() / 180.0) > 0.9 || cos(phiTrk2Angle * TMath::Pi() / 180.0) > 0.9)) || !phivLimit;
+
+  if (mctruth_int == 1 && condMassKch && condMassKne && combinedMassPi0Fit < 15 && *Chi2SignalKinFit / 10. < 3 && condResCorr) // && pathKchFit <= limitRadiusChMC && pathKneFit <= limitRadiusNeMC)
   {
     Int_t mctruth_tmp = mctruth_int;
 

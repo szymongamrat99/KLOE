@@ -94,6 +94,9 @@
     "signal_vs_bcg_v3.C": "cpp",
     "data_fit_interference.C": "cpp",
     "histos_1.C": "cpp",
-    "neutral_vtx_resolutions.C": "cpp"
+    "neutral_vtx_resolutions.C": "cpp",
+    "cut_optimizer.C": "cpp",
+    "SignalCutOptimizer.C": "cpp",
+    "run_optimizer.C": "cpp"
   }
 }

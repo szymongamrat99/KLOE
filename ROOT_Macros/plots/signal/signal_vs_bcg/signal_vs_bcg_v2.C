@@ -58,13 +58,13 @@
 namespace KH = KLOE::Histograms;
 
 std::map<TString, Float_t> channLumi = {
-    {"Data", 8876},
+    {"Data", 24843},
     {"Signal", 1549784},
-    {"Regeneration", 1180120},
-    {"Omega", 735724},
-    {"3pi0", 28701},
-    {"Semileptonic", 104630},
-    {"Other", 42747}};
+    {"Regeneration", 1574577},
+    {"Omega", 1403268},
+    {"3pi0", 77224},
+    {"Semileptonic", 277717},
+    {"Other", 113840}};
 
 std::map<TString, Float_t> channFactor;
 std::map<TString, Int_t> channEventsTotal, channEventsCut;
@@ -297,71 +297,71 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     }
   }
 
-  std::vector<Int_t> asscl(&Asscl[0], &Asscl[0] + *ntcl);
-  std::vector<int> neuclulist;
+  // std::vector<Int_t> asscl(&Asscl[0], &Asscl[0] + *ntcl);
+  // std::vector<int> neuclulist;
 
-  if (mctruth_int == 1 || mctruth_int == 0)
-  {
-    genVarClassifier.FindNeutralCluster(*nclu,
-                                        *ntcl,
-                                        asscl.data(),
-                                        4,
-                                        logger,
-                                        neuclulist);
+  // if (mctruth_int == 1 || mctruth_int == 0)
+  // {
+  //   genVarClassifier.FindNeutralCluster(*nclu,
+  //                                       *ntcl,
+  //                                       asscl.data(),
+  //                                       4,
+  //                                       logger,
+  //                                       neuclulist);
 
-    std::vector<Float_t> cluster[5],
-        bhabha_mom = {*Bpx, *Bpy, *Bpz, *Broots},
-        Knetriangle(9),
-        gammatriangle[4],
-        trcfinal(4),
-        Kchboostnew(&Kchboost[0], &Kchboost[0] + 10),
-        ipnew(&ip[0], &ip[0] + 3);
+  //   std::vector<Float_t> cluster[5],
+  //       bhabha_mom = {*Bpx, *Bpy, *Bpz, *Broots},
+  //       Knetriangle(9),
+  //       gammatriangle[4],
+  //       trcfinal(4),
+  //       Kchboostnew(&Kchboost[0], &Kchboost[0] + 10),
+  //       ipnew(&ip[0], &ip[0] + 3);
 
-    std::vector<Int_t> g4takenTrila(&g4takenTriKinFit[0], &g4takenTriKinFit[0] + 4);
+  //   std::vector<Int_t> g4takenTrila(&g4takenTriKinFit[0], &g4takenTriKinFit[0] + 4);
 
-    gammatriangle[0].resize(8);
-    gammatriangle[1].resize(8);
-    gammatriangle[2].resize(8);
-    gammatriangle[3].resize(8);
+  //   gammatriangle[0].resize(8);
+  //   gammatriangle[1].resize(8);
+  //   gammatriangle[2].resize(8);
+  //   gammatriangle[3].resize(8);
 
-    Float_t minvgam;
+  //   Float_t minvgam;
 
-    cluster[0].assign(&Xcl[0], &Xcl[0] + *nclu);
-    cluster[1].assign(&Ycl[0], &Ycl[0] + *nclu);
-    cluster[2].assign(&Zcl[0], &Zcl[0] + *nclu);
-    cluster[3].assign(&Tcl[0], &Tcl[0] + *nclu);
-    cluster[4].assign(&Enecl[0], &Enecl[0] + *nclu);
+  //   cluster[0].assign(&Xcl[0], &Xcl[0] + *nclu);
+  //   cluster[1].assign(&Ycl[0], &Ycl[0] + *nclu);
+  //   cluster[2].assign(&Zcl[0], &Zcl[0] + *nclu);
+  //   cluster[3].assign(&Tcl[0], &Tcl[0] + *nclu);
+  //   cluster[4].assign(&Enecl[0], &Enecl[0] + *nclu);
 
-    std::vector<KLOE::neutralParticle> photon(4);
-    KLOE::phiMeson phi;
+  //   std::vector<KLOE::neutralParticle> photon(4);
+  //   KLOE::phiMeson phi;
 
-    phi.fourMom[0] = *Bpx;
-    phi.fourMom[1] = *Bpy;
-    phi.fourMom[2] = *Bpz;
-    phi.fourMom[3] = *Broots;
+  //   phi.fourMom[0] = *Bpx;
+  //   phi.fourMom[1] = *Bpy;
+  //   phi.fourMom[2] = *Bpz;
+  //   phi.fourMom[3] = *Broots;
 
-    KLOE::kaonNeutral Kchboostprop, Knetriangledupa;
+  //   KLOE::kaonNeutral Kchboostprop, Knetriangledupa;
 
-    Kchboostprop.fourMom[0] = Kchboostnew[0];
-    Kchboostprop.fourMom[1] = Kchboostnew[1];
-    Kchboostprop.fourMom[2] = Kchboostnew[2];
-    Kchboostprop.fourMom[3] = Kchboostnew[3];
+  //   Kchboostprop.fourMom[0] = Kchboostnew[0];
+  //   Kchboostprop.fourMom[1] = Kchboostnew[1];
+  //   Kchboostprop.fourMom[2] = Kchboostnew[2];
+  //   Kchboostprop.fourMom[3] = Kchboostnew[3];
 
-    Kchboostprop.fourPos[0] = Kchboostnew[6];
-    Kchboostprop.fourPos[1] = Kchboostnew[7];
-    Kchboostprop.fourPos[2] = Kchboostnew[8];
+  //   Kchboostprop.fourPos[0] = Kchboostnew[6];
+  //   Kchboostprop.fourPos[1] = Kchboostnew[7];
+  //   Kchboostprop.fourPos[2] = Kchboostnew[8];
 
-    for (Int_t i = 0; i < 4; i++)
-    {
-      photon[i].clusterParams[0] = cluster[0][neuclulist[g4takenTrila[i]] - 1];
-      photon[i].clusterParams[1] = cluster[1][neuclulist[g4takenTrila[i]] - 1];
-      photon[i].clusterParams[2] = cluster[2][neuclulist[g4takenTrila[i]] - 1];
-      photon[i].clusterParams[3] = cluster[3][neuclulist[g4takenTrila[i]] - 1];
-      photon[i].clusterParams[4] = cluster[4][neuclulist[g4takenTrila[i]] - 1];
-    }
+  //   for (Int_t i = 0; i < 4; i++)
+  //   {
+  //     photon[i].clusterParams[0] = cluster[0][neuclulist[g4takenTrila[i]] - 1];
+  //     photon[i].clusterParams[1] = cluster[1][neuclulist[g4takenTrila[i]] - 1];
+  //     photon[i].clusterParams[2] = cluster[2][neuclulist[g4takenTrila[i]] - 1];
+  //     photon[i].clusterParams[3] = cluster[3][neuclulist[g4takenTrila[i]] - 1];
+  //     photon[i].clusterParams[4] = cluster[4][neuclulist[g4takenTrila[i]] - 1];
+  //   }
 
-    Obj.triangleReconstruction(photon, phi, Kchboostprop, ipnew.data(), Knetriangledupa);
-  }
+  //   Obj.triangleReconstruction(photon, phi, Kchboostprop, ipnew.data(), Knetriangledupa);
+  // }
 
   Float_t phiv1PhiCM, phivPlusPhiCM, phiv2PhiCM, phivMinusPhiCM, deltaPhiPhiCM;
 
@@ -535,8 +535,11 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   Float_t weight = 1.0;
 
+  Double_t *x = new Double_t(*KaonChTimeCMMC - *KaonNeTimeCMMC),
+           *par = nullptr;
+
   if ((mctruth_int == 1 || mctruth_int == 0) && *mcflag == 1)
-    weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
+    weight = interf_function(x, par);
 
   TVector3 z_axis(0., 0., 1.),
       gamma1(gammaMomTriangle1[0], gammaMomTriangle1[1], gammaMomTriangle1[2]),
@@ -589,7 +592,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                               condLowerLimit = (deltaTfit - deltaTMC)> SLOPE *
                        deltaTMC,
          condUpperLimit = (deltaTfit - deltaTMC) < (SLOPE * (deltaTMC - 2.0)),
-         badClusSimona = condGeneral && condLowerLimit && condUpperLimit && *Chi2SignalKinFit < 30.;
+         badClusSimona = condGeneral && condLowerLimit && condUpperLimit;
   ///////////////////////////////////////////////////////////////////////////////
   // Analiza Simony cięcie na 3 sigma mas
   Bool_t condMassKch = abs(Kchrec[5] - 497.605) < 3 * 0.879,
@@ -601,10 +604,14 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   Float_t radius00 = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
                           pow(KnerecFit[7] - ipFit[1], 2)),
-          radiuspm = sqrt(pow(Kchrec[6] - ip[0], 2) +
-                          pow(Kchrec[7] - ip[1], 2)),
-          zdist00 = abs(KnerecFit[8] - ip[2]),
-          zdistpm = abs(Kchrec[8] - ip[2]),
+          radiuspm = sqrt(pow(KchrecFit[6] - ipFit[0], 2) +
+                          pow(KchrecFit[7] - ipFit[1], 2)),
+          radius00Center = sqrt(pow(KnerecFit[6], 2) +
+                                pow(KnerecFit[7], 2)),
+          radiuspmCenter = sqrt(pow(KchrecFit[6], 2) +
+                                pow(KchrecFit[7], 2)),
+          zdist00 = abs(KnerecFit[8] - ipFit[2]),
+          zdistpm = abs(KchrecFit[8] - ipFit[2]),
           path00 = sqrt(pow(radius00, 2) + pow(zdist00, 2)),
           pathpm = sqrt(pow(radiuspm, 2) + pow(zdistpm, 2)),
           path00MC = sqrt(pow(sqrt(pow(Knemc[6] - ipmc[0], 2) +
@@ -615,6 +622,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                    pow(Kchmc[7] - ipmc[1], 2)),
                               2) +
                           pow(abs(Kchmc[8] - ipmc[2]), 2)),
+          radius00MC = sqrt(pow(Knemc[6], 2) +
+                            pow(Knemc[7], 2)),
+          radiuspmMC = sqrt(pow(Kchmc[6], 2) +
+                            pow(Kchmc[7], 2)),
           path00MCCenter = sqrt(pow(sqrt(pow(Knemc[6], 2) +
                                          pow(Knemc[7], 2)),
                                     2) +
@@ -623,6 +634,9 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                          pow(Kchmc[7], 2)),
                                     2) +
                                 pow(abs(Kchmc[8]), 2)),
+
+          zdist00MC = abs(Knemc[8] - ipmc[2]),
+          zdistpmMC = abs(Kchmc[8] - ipmc[2]),
           radiusLimit = 1,
           zdistLimit = 0.6;
 
@@ -647,7 +661,26 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
          simonaChi2Cut = *Chi2SignalKinFit <= 30,
          simonaPositionLimits = radius00 < radiusLimit && radiuspm < radiusLimit &&
                                 zdist00 < zdistLimit && zdistpm < zdistLimit,
-         omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 155.658) < numSigmaSimona * 5.691 && abs(omegaFit[5] - 782.994) < numSigmaSimona * 5.620 && omegaFit[5] < a * T0Omega + b + Breal && omegaFit[5] > a * T0Omega + b - Breal)) || !simonaPositionLimits) && simonaKinCuts;
+         omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 155.658) < numSigmaSimona * 5.691 && abs(omegaFit[5] - 782.994) < numSigmaSimona * 5.620 && omegaFit[5] < a * T0Omega + b + Breal && omegaFit[5] > a * T0Omega + b - Breal)) || !simonaPositionLimits);// && simonaKinCuts;
+
+  TVector3 phiMeson = {ParamSignalFit[32], ParamSignalFit[33], ParamSignalFit[34]};
+  TVector3 KchrecVec = {KchrecFit[0], KchrecFit[1], KchrecFit[2]};
+  TVector3 KchrecVecMC = {Kchmc[0], Kchmc[1], Kchmc[2]};
+  TVector3 trk1VecMC = {trk1MC[0], trk1MC[1], trk1MC[2]};
+  TVector3 trk2VecMC = {trk2MC[0], trk2MC[1], trk2MC[2]};
+  TVector3 pi01VecMom = {pi01Fit[0], pi01Fit[1], pi01Fit[2]};
+  TVector3 pi02VecMom = {pi02Fit[0], pi02Fit[1], pi02Fit[2]};
+  TVector3 KnerecVec = {KnerecFit[0], KnerecFit[1], KnerecFit[2]};
+
+
+  Double_t phiTrk1Angle = trk1Vec.Angle(KchrecVec) * 180.0 / TMath::Pi(),
+           phiTrk2Angle = trk2Vec.Angle(KchrecVec) * 180.0 / TMath::Pi(),
+           phipi01Angle = pi01VecMom.Angle(KnerecVec) * 180.0 / TMath::Pi(),
+           phipi02Angle = pi02VecMom.Angle(KnerecVec) * 180.0 / TMath::Pi(),
+           phiTrk1AngleMC = trk1VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi(),
+           phiTrk2AngleMC = trk2VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi();
+
+
 
   if ((mctruth_int == 1 || mctruth_int == -1 || mctruth_int == 0) && *mcflag == 1) // && shorterKaonPaths)
     signal_tot++;
@@ -704,7 +737,11 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     if (!noBlobCut)
       return kTRUE;
 
-  if (mcflagCondition && *bestError > 2000) // && abs(deltaTfit) <= 20 && shorterKaonPaths)
+  Bool_t corrPosLimit = (radius00 < 1.5 && radiuspm < 1.5 && zdist00 < 1.0 && zdistpm < 1.0);
+  Bool_t phivLimit = abs(deltaPhiFit - 3.110) < 2 * 0.135;
+  Bool_t condResCorr = (corrPosLimit && !(cos(phiTrk1Angle * TMath::Pi() / 180.0) > 0.9 || cos(phiTrk2Angle * TMath::Pi() / 180.0) > 0.9)) || !corrPosLimit;
+
+  if (mcflagCondition) // && trk2Fit[3] < -trk1Fit[3] + 505) // && abs(deltaTfit) <= 20 && shorterKaonPaths)
   {
     channEventsCut[KLOE::channName.at(mctruth_int)]++;
 
@@ -828,9 +865,36 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
       hists2DFittedSignal["chi2_signalKinFit_vs_delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., deltaTfit, weight);
 
-      hists2DFittedSignal["TransvRadius_vs_delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(path00MCCenter, deltaTMC, weight);
+      hists2DFittedSignal["TransvRadius_vs_delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(pathpm, deltaTfit, weight);
 
       hists2DFittedSignal["Qmiss_vs_deltaPhi"][KLOE::channName.at(mctruth_tmp)]->Fill(*Qmiss, deltaPhi, weight);
+
+      hists2DFittedSignal["mass_pi01_vs_mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[5], pi02Fit[5], weight);
+
+      hists2DFittedSignal["mass_Kch_vs_mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(Kchrec[5], *minv4gam, weight);
+
+      Double_t ppmMC = sqrt(pow(Kchmc[0], 2) + pow(Kchmc[1], 2) + pow(Kchmc[2], 2)),
+               p00MC = sqrt(pow(Knemc[0], 2) + pow(Knemc[1], 2) + pow(Knemc[2], 2)),
+               ppm = sqrt(pow(KchrecFit[0], 2) + pow(KchrecFit[1], 2) + pow(KchrecFit[2], 2)),
+               p00 = sqrt(pow(KnerecFit[0], 2) + pow(KnerecFit[1], 2) + pow(KnerecFit[2], 2)),
+               pTphi = sqrt(pow(ParamSignalFit[33], 2) + pow(ParamSignalFit[34], 2));
+
+      // std::cout << pTphi << std::endl;
+
+      hists2DFittedSignal["pt_ch_fit_vs_pt_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, ppm - ppmMC, weight);
+      hists2DFittedSignal["pt_neu_fit_vs_pt_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, p00 - p00MC, weight);
+
+      hists2DFittedSignal["rt_ch_fit_vs_rt_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, radiuspm - radiuspmMC, weight);
+      hists2DFittedSignal["rt_neu_fit_vs_rt_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, radius00 - radius00MC, weight);
+
+      hists2DFittedSignal["z_ch_fit_vs_z_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, zdistpm - zdistpmMC, weight);
+      hists2DFittedSignal["z_neu_fit_vs_z_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, zdist00 - zdist00MC, weight);
+
+      hists2DFittedSignal["Phi_trk1_angle_vs_Phi_trk2_angle"][KLOE::channName.at(mctruth_tmp)]->Fill(cos(phiTrk1Angle * TMath::Pi() / 180.0), cos(phiTrk2Angle * TMath::Pi() / 180.0), weight);
+      hists2DFittedSignal["Phi_pi01_angle_vs_Phi_pi02_angle"][KLOE::channName.at(mctruth_tmp)]->Fill(cos(phipi01Angle * TMath::Pi() / 180.0), cos(phipi02Angle * TMath::Pi() / 180.0), weight);
+
+      hists2DFittedSignal["Energy_trk1_vs_Energy_trk2"][KLOE::channName.at(mctruth_tmp)]->Fill(trk1Fit[3], trk2Fit[3], weight);
+      hists2DFittedSignal["Energy_pi01_vs_Energy_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[3], pi02Fit[3], weight);
 
       dataPCA[0] = T0Omega;
       dataPCA[1] = omegaFit[5];
@@ -949,8 +1013,8 @@ void signal_vs_bcg_v2::Terminate()
            fitSignalBadClus = (config.first == "deltaPhivFit" && fOption == "BAD_CLUS_SIMONA");
     Bool_t chi2Fit = 0; //(config.first == "chi2_signalKinFit");
 
-    Bool_t logCond = (config.first == "Qmiss" || config.first == "prob_signal" || config.first == "Energy_Kne"), // || config.first == "chi2_signalKinFit"), // || config.first == "TransvRadius"),
-        logCondX = 0;                                                                                            //(config.first == "chi2_signalKinFit");
+    Bool_t logCond = (config.first == "Qmiss" || config.first == "prob_signal" || config.first == "Energy_Kne" || config.first == "bestError"), // || config.first == "chi2_signalKinFit"), // || config.first == "TransvRadius"),
+        logCondX = 0;                                                                                                                           //(config.first == "chi2_signalKinFit");
 
     std::vector<TString> labels;
 
@@ -1387,8 +1451,8 @@ void signal_vs_bcg_v2::Terminate()
   std::vector<PuritySubset> purity_subsets = CalculatePurityInSubsets(
       histsFittedSignal["delta_t"]["Signal"], // Histogram sygnału
       histsFittedSignal["delta_t"]["MC sum"], // Histogram całkowitego
-      300.0,                                      // max limit [ns]
-      60                                         // liczba podzbiorów
+      20.0,                                   // max limit [ns]
+      40                                      // liczba podzbiorów
   );
 
   TCanvas *canvas_purity_subsets = DrawPuritySubsets(purity_subsets, "delta_t");
@@ -1867,7 +1931,7 @@ std::vector<PuritySubset> signal_vs_bcg_v2::CalculatePurityInSubsets(
         hist_signal->Integral(bin_high_left, bin_high));
 
     Int_t signal_count = signal_count_low + signal_count_high;
-    
+
     Int_t total_count_low = static_cast<Int_t>(
         hist_total->Integral(bin_low, bin_low_right));
     Int_t total_count_high = static_cast<Int_t>(

@@ -3,6 +3,11 @@
 
 #include "TMath.h"
 
-Double_t interf_function(const Float_t);
+Double_t interf_function(const Double_t *x, const Double_t *par);
+
+Double_t interf_function_00pm(const Double_t *x, const Double_t *par);
+Double_t interf_function_pm00(const Double_t *x, const Double_t *par);
+Double_t interf_function_pmpm(const Double_t *x, const Double_t *par);
+
 
 #endif

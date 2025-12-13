@@ -13,7 +13,6 @@
 #include <TFile.h>
 #include <TTree.h>
 
-
 using json = nlohmann::json;
 
 namespace KLOE
@@ -22,29 +21,29 @@ namespace KLOE
   double FileManager::EventsToLuminosity(Long64_t nEvents)
   {
     // Wzór do przeliczenia liczby zdarzeń na luminozność
-    // 
+    //
     // Dla KLOE:
     // - Typowy plik z danymi ma ~N wydarzeń
     // - Odpowiada to ~X nb^-1 luminozności
-    // 
+    //
     // Wzór empiryczny bazujący na liczbie zdarzeń:
     // Luminosity [nb^-1] = nEvents * conversion_factor + displacement
-    
-    const double conversion_factor = 0.000908;  // [nb^-1 / event]
-    const double displacement = 1.38;       // [nb^-1]
+
+    const double conversion_factor = 0.000908; // [nb^-1 / event]
+    const double displacement = 1.38;          // [nb^-1]
     return nEvents * conversion_factor + displacement;
   }
 
   void FileManager::LogChainLuminosity(TChain &chain, const std::string &logFile)
   {
     std::ofstream log(logFile, std::ios::out | std::ios::trunc);
-    
+
     if (!log.is_open())
     {
       std::cerr << "ERROR: Cannot open log file: " << logFile << std::endl;
       return;
     }
-    
+
     // Nagłówek
     auto t = std::time(nullptr);
     auto tm = *std::localtime(&t);
@@ -52,52 +51,53 @@ namespace KLOE
     log << "Timestamp: " << std::put_time(&tm, "%Y-%m-%d %H:%M:%S") << std::endl;
     log << "Chain name: " << chain.GetName() << std::endl;
     log << "Total entries: " << chain.GetEntries() << std::endl;
-    log << "==================================\n" << std::endl;
-    
+    log << "==================================\n"
+        << std::endl;
+
     double totalLuminosity = 0.0;
     Long64_t totalEvents = 0;
-    
+
     // Iteruj po plikach w TChain
     TObjArray *fileElements = chain.GetListOfFiles();
     TIter next(fileElements);
     TChainElement *chEl = nullptr;
-    
-    log << std::left << std::setw(50) << "File" 
-        << std::right << std::setw(15) << "Events" 
+
+    log << std::left << std::setw(50) << "File"
+        << std::right << std::setw(15) << "Events"
         << std::setw(15) << "Lumi [nb^-1]" << std::endl;
     log << std::string(80, '-') << std::endl;
-    
-    while ((chEl = (TChainElement*)next()))
+
+    while ((chEl = (TChainElement *)next()))
     {
       std::string filename = chEl->GetTitle();
       boost::filesystem::path p(filename);
-      
+
       // Pobierz liczbę zdarzeń z tego pliku
       Long64_t entries = chEl->GetEntries();
-      
+
       // Przelicz liczbę zdarzeń na luminozność
       double lumi = EventsToLuminosity(entries);
-      
+
       // Loguj
       log << std::left << std::setw(50) << p.filename().string()
           << std::right << std::fixed
           << std::setw(15) << entries
           << std::setw(15) << std::setprecision(4) << lumi << std::endl;
-      
+
       totalLuminosity += lumi;
       totalEvents += entries;
     }
-    
+
     log << std::string(80, '=') << std::endl;
     log << std::left << std::setw(50) << "TOTAL"
         << std::right << std::fixed
         << std::setw(15) << totalEvents
         << std::setw(15) << std::setprecision(4) << totalLuminosity << std::endl;
-    
+
     log.close();
-    
+
     std::cout << "Input files luminosity log saved to: " << logFile << std::endl;
-    std::cout << "Total integrated luminosity: " << std::setprecision(4) 
+    std::cout << "Total integrated luminosity: " << std::setprecision(4)
               << totalLuminosity << " nb^-1 (" << totalEvents << " events)" << std::endl;
   }
 
@@ -138,9 +138,9 @@ namespace KLOE
       stats.minRun = stats.maxRun = -1;
     }
     stats.fileCount = runs.size();
-    stats.totalEvents = 0;  // Będzie policzone przez TChain później
+    stats.totalEvents = 0; // Będzie policzone przez TChain później
     stats.runList.assign(runs.begin(), runs.end());
-    stats.totalLuminosity = 0.0;  // Będzie obliczone później
+    stats.totalLuminosity = 0.0; // Będzie obliczone później
     return stats;
   }
 
@@ -148,12 +148,12 @@ namespace KLOE
   {
     // Oblicz całkowitą liczbę zdarzeń z TChain (już załadowanego)
     stats.totalEvents = chain.GetEntries();
-    
+
     // Oblicz luminozność
     stats.totalLuminosity = EventsToLuminosity(stats.totalEvents);
   }
 
-  void FileManager::chainInit(TChain &chain_init, Controls::DataType &dataTypeOpt, UInt_t &firstData, UInt_t &lastData, UInt_t &firstMC, UInt_t &lastMC, ErrorHandling::ErrorLogs &logger, Int_t csFlag)
+  void FileManager::chainInit(TChain &chain_init, Controls::DataType &dataTypeOpt, UInt_t &firstData, UInt_t &lastData, UInt_t &firstMC, UInt_t &lastMC, ErrorHandling::ErrorLogs &logger, Int_t csFlag, Int_t oldAnaFlag)
   {
     ErrorHandling::InfoCodes infoCode;
 
@@ -168,7 +168,9 @@ namespace KLOE
             extension = Paths::ext_root,
             newestDateStampData = (std::string)Utils::properties["variables"]["rootFiles"]["newestFileDateStampData"],
             newestDateStampMC = (std::string)Utils::properties["variables"]["rootFiles"]["newestFileDateStampMC"],
-            path = (std::string)Utils::properties["variables"]["rootFiles"]["path"];
+            path = (std::string)Utils::properties["variables"]["rootFiles"]["pathOldAna"],
+            mc_dir = "MONTE_CARLO",
+            data_dir = "DATA";
 
     Int_t fileNumData[2] = {Utils::properties["variables"]["rootFiles"]["Data"]["firstFile"],
                             Utils::properties["variables"]["rootFiles"]["Data"]["lastFile"]};
@@ -179,17 +181,24 @@ namespace KLOE
         dirnamemc,
         filenamemc;
 
+    // Przygotuj nazwy plików MC - nowa analiza
     for (Int_t i = 0; i < 3; i++)
     {
-
-      dirnamemc.push_back(path + newestDateStampMC);
-      filenamemc.push_back((std::string)filePaths["MC"]["filenameBase"][i]);
-      fileNumMC[i].push_back(Utils::properties["variables"]["rootFiles"]["MC"][i]["firstFile"]);
-      fileNumMC[i].push_back(Utils::properties["variables"]["rootFiles"]["MC"][i]["lastFile"]);
+      dirnamemc.push_back(path + mc_dir);
+      // filenamemc.push_back((std::string)filePaths["MC"]["filenameBase"][i]);
+      // fileNumMC[i].push_back(Utils::properties["variables"]["rootFiles"]["MC"][i]["firstFile"]);
+      // fileNumMC[i].push_back(Utils::properties["variables"]["rootFiles"]["MC"][i]["lastFile"]);
     }
+    //////////////////////////////////////////////
+    // Przygotuj nazwy plików dla starej analizy
+    TString dirnamemcOld = path + mc_dir;
+    TString filenamemcOld = (std::string)filePaths["MC"]["filenameBaseOldAna"];
+    Int_t fileNumMCOld[2] = {Utils::properties["variables"]["rootFiles"]["firstFileOld"],
+                            Utils::properties["variables"]["rootFiles"]["lastFileOld"]};
+    //////////////////////////////////////////////
 
-    dirnamedata = path + newestDateStampData;
-    filenamedata = (std::string)filePaths["Data"]["filenameBase"];
+    dirnamedata = path + data_dir;
+    filenamedata = (std::string)filePaths["Data"]["filenameBaseOldAna"];
 
     switch (dataTypeOpt)
     {
@@ -202,7 +211,7 @@ namespace KLOE
         // Check if file exists
         boost::filesystem::path pathExist(fullname);
 
-        if (boost::filesystem::exists(pathExist))
+        if (1) // boost::filesystem::exists(pathExist))
         {
           infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
@@ -211,12 +220,37 @@ namespace KLOE
         }
       }
 
-      for (Int_t k = 0; k < dirnamemc.size(); k++)
+      if (oldAnaFlag == false)
       {
-        for (Int_t j = fileNumMC[k][0]; j <= fileNumMC[k][1]; j++)
+
+        for (Int_t k = 0; k < dirnamemc.size(); k++)
+        {
+          for (Int_t j = fileNumMC[k][0]; j <= fileNumMC[k][1]; j++)
+          {
+
+            fullname = dirnamemc[k] + "/" + filenamemc[k] + "_" + std::to_string(j) + extension;
+
+            // Check if file exists
+            boost::filesystem::path pathExist(fullname);
+
+            if (boost::filesystem::exists(pathExist))
+            {
+              infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
+
+              chain_init.Add(fullname);
+              logger.getLog(infoCode, (std::string)filenamemc[k] + "_" + std::to_string(j) + (std::string)extension);
+            }
+          }
+        }
+      }
+      else
+      {
+
+
+        for (Int_t j = fileNumMCOld[0]; j <= fileNumMCOld[1]; j++)
         {
 
-          fullname = dirnamemc[k] + "/" + filenamemc[k] + "_" + std::to_string(j) + extension;
+          fullname = dirnamemcOld + "/" + filenamemcOld + "_" + std::to_string(j) + extension;
 
           // Check if file exists
           boost::filesystem::path pathExist(fullname);
@@ -226,7 +260,9 @@ namespace KLOE
             infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
             chain_init.Add(fullname);
-            logger.getLog(infoCode, (std::string)filenamemc[k] + "_" + std::to_string(j) + (std::string)extension);
+            logger.getLog(infoCode, (std::string)filenamemcOld + "_" + std::to_string(j) + (std::string)extension);
+
+            std::cout << "Added MC file: " << fullname << std::endl;
           }
         }
       }
@@ -349,10 +385,11 @@ namespace KLOE
         {
           runFiles[runNum] = it->path().string();
         }
-        else {
-            // Dodaj tylko jeśli nie ma już v2 dla tego runu
-            if (runFiles.count(runNum) == 0)
-                runFiles[runNum] = it->path().string();
+        else
+        {
+          // Dodaj tylko jeśli nie ma już v2 dla tego runu
+          if (runFiles.count(runNum) == 0)
+            runFiles[runNum] = it->path().string();
         }
       }
     }
@@ -389,9 +426,10 @@ namespace KLOE
         {
           runFiles[runNum] = filePath;
         }
-        else {
-            if (runFiles.count(runNum) == 0)
-                runFiles[runNum] = filePath;
+        else
+        {
+          if (runFiles.count(runNum) == 0)
+            runFiles[runNum] = filePath;
         }
       }
     }
@@ -403,55 +441,55 @@ namespace KLOE
     }
   }
 
-  bool FileManager::ValidateJobListFilename(const std::string& filename)
+  bool FileManager::ValidateJobListFilename(const std::string &filename)
   {
     // Format: job_v{wersja}_{typ}_{luminosity}_inv_pb_{numer}.txt
     // Przykład: job_v1_data_5000_inv_pb_001.txt
-    
+
     std::regex jobFileRegex(R"(^job_v\d+_(data|all_phys|all_phys2|all_phys3)_[\d.]+_inv_pb_\d+\.txt$)");
     return std::regex_match(filename, jobFileRegex);
   }
 
-  std::vector<std::string> FileManager::LoadFileListFromFile(const std::string& filePath)
+  std::vector<std::string> FileManager::LoadFileListFromFile(const std::string &filePath)
   {
     std::vector<std::string> fileList;
     std::ifstream file(filePath);
-    
+
     if (!file.is_open())
     {
       throw std::runtime_error("Cannot open file: " + filePath);
     }
-    
+
     std::string line;
     while (std::getline(file, line))
     {
       // Usuń białe znaki z początku i końca linii
       line.erase(0, line.find_first_not_of(" \t\r\n"));
       line.erase(line.find_last_not_of(" \t\r\n") + 1);
-      
+
       // Pomiń puste linie i komentarze
       if (line.empty() || line[0] == '#')
         continue;
-      
+
       fileList.push_back(line);
     }
-    
+
     file.close();
-    
+
     if (fileList.empty())
     {
       throw std::runtime_error("No files found in job list file: " + filePath);
     }
-    
+
     return fileList;
   }
 
   void FileManager::chainInit(TChain &chain, ErrorHandling::ErrorLogs &logger,
-                              const std::vector<std::string>& fileList)
+                              const std::vector<std::string> &fileList)
   {
     ErrorHandling::ErrorCodes errorCode;
-    
-    for (const auto& filepath : fileList)
+
+    for (const auto &filepath : fileList)
     {
       // Sprawdź czy plik istnieje
       boost::filesystem::path pathObj(filepath);
@@ -463,14 +501,14 @@ namespace KLOE
         logger.getErrLog(errorCode, "File not found: " + filepath);
         continue;
       }
-      
+
       // Sprawdź czy to plik ROOT
       if (pathObj.extension() != ".root")
       {
         std::cerr << "WARNING: File is not ROOT file: " << filepath << std::endl;
         continue;
       }
-      
+
       // Dodaj plik do TChain
       chain.Add(filepath.c_str());
       errorCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;

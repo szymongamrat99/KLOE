@@ -557,33 +557,33 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 						if (ev.mctruth == 1)
 						{
 							event.time_diff_gen.push_back(ev.DeltaTGen);
-							event.time_diff[0].push_back(ev.DeltaTRec);
+							event.time_diff["Signal"].push_back(ev.DeltaTRec);
 						}
 						else if (ev.mctruth == 3)
 						{
-							event.time_diff[1].push_back(ev.DeltaTRec);
+							event.time_diff["Regeneration"].push_back(ev.DeltaTRec);
 						}
 						else if (ev.mctruth == 4)
 						{
-							event.time_diff[2].push_back(ev.DeltaTRec);
+							event.time_diff["Omega"].push_back(ev.DeltaTRec);
 						}
 						else if (ev.mctruth == 5)
 						{
-							event.time_diff[3].push_back(ev.DeltaTRec);
+							event.time_diff["3pi0"].push_back(ev.DeltaTRec);
 						}
 						else if (ev.mctruth == 6)
 						{
-							event.time_diff[4].push_back(ev.DeltaTRec);
+							event.time_diff["Semileptonic"].push_back(ev.DeltaTRec);
 						}
 						else if (ev.mctruth == 7)
 						{
-							event.time_diff[5].push_back(ev.DeltaTRec);
+							event.time_diff["Other"].push_back(ev.DeltaTRec);
 						}
 					}
 
 					if (ev.mcflag == 0)
 					{
-						event.time_diff_data.push_back(ev.DeltaTRec);
+						event.time_diff["Data"].push_back(ev.DeltaTRec);
 					}
 				}
 			}

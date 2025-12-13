@@ -100,9 +100,6 @@ Int_t KinFitter::ParameterInitialization(Double_t *Params, Double_t *Errors)
 
 Double_t KinFitter::FitFunction(Double_t bunchCorr)
 {
-  ROOT::EnableThreadSafety();
-  ROOT::EnableImplicitMT(8);
-
   pm00 objAux;
 
   _CHISQR = 999999.;
@@ -137,8 +134,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       if (_X(19) < 0)
         _X(19) = MIN_CLU_ENE;
 
-#pragma omp parallel
-      {
+
+      
         Double_t *tempParams = new Double_t[_X.GetNrows()];
 
         std::copy(_X.GetMatrixArray(), _X.GetMatrixArray() + _X.GetNrows(), tempParams);
@@ -151,8 +148,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
           constraint.push_back(new TF1(*func_ptr));
         }
 
-
-#pragma omp for
         for (Int_t l = 0; l < _M; l++)
         {
           constraint[l]->SetParameters(tempParams);
@@ -173,7 +168,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
           func_ptr->Delete();
         }
         delete[] tempParams;
-      }
 
       _D_T = _D_T.Transpose(_D);
 
@@ -190,7 +184,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _CORR = _V * _D_T * _L;
 
-#pragma omp parallel for
       for (Int_t j = 0; j < _CORR.GetNrows(); j++)
       {
         if (abs(_CORR(j)) > 1000.0)
@@ -375,7 +368,10 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
 
 void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init)
 {
-  X = _X;
+  for (Int_t i = 0; i < _X.GetNrows(); i++)
+    X[i] = _X[i];
+
+  // X = _X;
   V = _V;
   X_init = _X_init;
   V_init = _V_init;

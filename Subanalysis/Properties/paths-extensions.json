@@ -1,0 +1,21 @@
+{
+  "date": "2025-12-02",
+  "general":
+  {
+    "rootFileDir": "/data/ssd/gamrat/KLOE/Subanalysis/InitAnalysis/root_files",
+    "imgDir": "img",
+    "logDir": "logs"
+  },
+  "analysisProperties":
+  {
+    "PDGConst": "/data/ssd/gamrat/KLOE/Subanalysis/Properties/pdg_const.json",
+    "properties": "/data/ssd/gamrat/KLOE/Subanalysis/Properties/properties.json",
+    "analysisConfig": "/data/ssd/gamrat/KLOE/Subanalysis/Properties/analysis_config.json"
+  },
+  "cutLimits": "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits.json",
+  "extensions":
+  {
+    "img": ".pdf",
+    "root": ".root"
+  }
+}
