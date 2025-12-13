@@ -826,6 +826,21 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
   std::cout << "---------------------------------" << std::endl;
   std::cout << "Dupa minimizacji:" << std::endl;
+  std::cout << "Re(epsilon): " << par[0] << " +/- " << parErr[0] << std::endl;
+  std::cout << "Im(epsilon): " << par[1] << " +/- " << parErr[1] << std::endl;
+  std::cout << "---------------------------------" << std::endl;
+  std::cout << std::endl;
+  std::cout << "Norms of fitted components:" << std::endl;
+  std::cout << "Signal: " << par[2] << " +/- " << parErr[2] << std::endl;
+  std::cout << "Regeneration (far left): " << par[3] << " +/- " << parErr[3] << std::endl;
+  std::cout << "Regeneration (close left): " << par[4] << " +/- " << parErr[4] << std::endl;
+  std::cout << "Regeneration (close right): " << par[5] << " +/- " << parErr[5] << std::endl;
+  std::cout << "Regeneration (far right): " << par[6] << " +/- " << parErr[6] << std::endl;
+  std::cout << "Omega: " << par[7] << " +/- " << parErr[7] << std::endl;
+  std::cout << "3pi0: " << par[8] << " +/- " << parErr[8] << std::endl;
+  std::cout << "Semileptonic: " << par[9] << " +/- " << parErr[9] << std::endl;
+  std::cout << "Other background: " << par[10] << " +/- " << parErr[10] << std::endl;
+  std::cout << "---------------------------------" << std::endl;
 
   if (!scanFlag)
   {
@@ -855,7 +870,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
     for (auto const &name : KLOE::channName)
     {
-      if (name.second == "Data" || name.second == "MC sum")
+      if (name.second == "Data" || name.second == "MC sum" || event.time_diff[name.second].size() == 0)
         continue;
 
       for (UInt_t j = 0; j < event.time_diff[name.second].size(); j++)
@@ -904,6 +919,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     event.getFracHistogram("Semileptonic")->Scale(par[9] * event.getFracHistogram("Semileptonic")->GetEntries() / event.getFracHistogram("Semileptonic")->Integral(0, nbins + 1));
     event.getFracHistogram("Other")->Scale(par[10] * event.getFracHistogram("Other")->GetEntries() / event.getFracHistogram("Other")->Integral(0, nbins + 1));
 
+    // Build MC sum from all channels
     for (auto const &name : KLOE::channName)
     {
       if (name.second == "Data" || name.second == "MC sum")
@@ -983,8 +999,12 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
     event.getFracHistogram("Data")->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
     event.getFracHistogram("MC sum")->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
-
     event.getFracHistogram("Signal")->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
+
+    // Set marker style for Data
+    event.getFracHistogram("Data")->SetMarkerStyle(20);
+    event.getFracHistogram("Data")->SetMarkerSize(0.8);
+    event.getFracHistogram("Data")->SetLineColor(kBlack);
 
     TRatioPlot *rp = new TRatioPlot(event.getFracHistogram("MC sum"), event.getFracHistogram("Data"), "diffsig");
 
@@ -1009,22 +1029,35 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     Double_t max_height = event.getFracHistogram("Data")->GetMaximum();
 
     rp->GetUpperRefYaxis()->SetRangeUser(0.0, 2 * max_height);
-    rp->GetUpperRefYaxis()->SetTitle("Counts/2#tau_{S}");
+    rp->GetUpperRefYaxis()->SetTitle(Form("Counts / %.2f #tau_{S}", res_deltaT));
 
     rp->GetLowerRefYaxis()->SetTitleSize(0.03);
     rp->GetLowerRefYaxis()->SetTitle("Residuals");
 
     rp->GetUpperPad()->cd();
 
-    TLegend *legend_chann = new TLegend(0.6, 0.7, 0.9, 0.9);
-    legend_chann->SetFillColor(kWhite);
+    // Draw Signal as separate line
+    event.getFracHistogram("Signal")->Draw("HIST SAME");
+
+    // Draw other background channels
     for (auto const &name : KLOE::channName)
     {
-      if (name.second == "Data" || name.second == "MC sum" || name.second == "pi+pi-pi+pi-")
+      if (name.second == "Data" || name.second == "MC sum" || name.second == "Signal")
         continue;
 
-        legend_chann->AddEntry(event.getFracHistogram(name.second), name.second, "l");
-        event.getFracHistogram(name.second)->Draw("HISTSAME");
+      event.getFracHistogram(name.second)->Draw("HIST SAME");
+    }
+
+    TLegend *legend_chann = new TLegend(0.58, 0.48, 0.88, 0.88);
+    legend_chann->SetFillColor(kWhite);
+    legend_chann->AddEntry(event.getFracHistogram("Data"), KLOE::channTitle.at("Data"), "pe");
+
+    for (auto const &name : KLOE::channName)
+    {
+      if (name.second == "Data" || name.second == "pi+pi-pi+pi-")
+        continue;
+
+      legend_chann->AddEntry(event.getFracHistogram(name.second), KLOE::channTitle.at(name.second), "l");
     }
 
     legend_chann->Draw();
@@ -1059,7 +1092,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
     c2->Print(Paths::cpfit_dir + Paths::img_dir + "residuals_hist" + Paths::ext_img);
 
-    Utils::properties["variables"]["CPFit"]["result"]["value"]["PhysicsConstants::Re"] = par[0];
+    Utils::properties["variables"]["CPFit"]["result"]["value"]["Re"] = par[0];
     Utils::properties["variables"]["CPFit"]["result"]["value"]["Im"] = par[1];
     Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Signal"] = par[2];
     Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarLeft"] = par[3];

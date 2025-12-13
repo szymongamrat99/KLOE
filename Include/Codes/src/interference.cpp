@@ -213,6 +213,9 @@ namespace KLOE
 
     //! Sum of bins and errors for the fitting further
 
+    b["MC sum"].clear();
+    e["MC sum"].clear();
+
     b["MC sum"].resize(_bin_number, 0.0);
     e["MC sum"].resize(_bin_number, 0.0);
 
@@ -254,7 +257,7 @@ namespace KLOE
         }
       }
     }
-    
+
     for (Int_t i = 0; i < _bin_number; i++)
     {
       value += pow(b["Data"][i] - b["MC sum"][i], 2) / (pow(e["Data"][i], 2) + (e["MC sum"][i]));
