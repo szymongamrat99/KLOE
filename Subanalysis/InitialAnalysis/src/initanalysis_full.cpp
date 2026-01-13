@@ -106,7 +106,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   Int_t nPhotons = 0, nPions = 0;
 
   if (hypoCode == KLOE::HypothesisCode::SIGNAL ||
-      hypoCode == KLOE::HypothesisCode::OMEGAPI)
+      hypoCode == KLOE::HypothesisCode::OMEGAPI || hypoCode == KLOE::HypothesisCode::FOUR_PI)
   {
     nPhotons = 4;
     nPions = 2;
@@ -676,7 +676,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       logger.getErrLog(errorCode, "", mctruth);
       noError = false;
 
-      if (mctruth == 1)
+      if (mctruth == mctruthSignal)
       {
         passed = true;
         mctruth = -1;
@@ -697,7 +697,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       logger.getErrLog(errorCode, "", mctruth);
       noError = false;
 
-      if (mctruth == 1)
+      if (mctruth == mctruthSignal)
       {
         passed = true;
         mctruth = -1;
@@ -771,6 +771,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     // VTX OF KS - FOR PIPIPIPI
     errTmp[0] = eventAnalysis->findKSLRec(16, -1, baseKin.KchrecKS, baseKin.trkKS[0], baseKin.trkKS[1], baseKin.vtakenKS, logger);
 
+    // --------------------------------------------------------------------------------
     if (hasTwo)
     {
       // VTX OF KL - FOR PIPIPIPI
@@ -778,9 +779,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       // --------------------------------------------------------------------------------
     }
     else if (!hasTwo && hypoCode == KLOE::HypothesisCode::FOUR_PI)
-      errTmp[1] = ErrorHandling::ErrorCodes::NO_TWO_VTX_WITH_TWO_TRACKS;
+      errTmp[1] = ErrorHandling::ErrorCodes::NO_TWO_VTX_WITH_TWO_TRACKS; // Special error if looking for 4pi but only one vertex found
     else
-      errTmp[1] = ErrorHandling::ErrorCodes::NO_ERROR;
+      errTmp[1] = ErrorHandling::ErrorCodes::NO_ERROR; // No error for other hypotheses
+
+    // --------------------------------------------------------------------------------
 
     if (errTmp[0] != ErrorHandling::ErrorCodes::NO_ERROR)
       hypoMap[KLOE::HypothesisCode::FOUR_PI] = errTmp[0];
@@ -796,7 +799,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       logger.getErrLog(errorCode, "", mctruth);
       noError = false;
 
-      if (mctruth == 1)
+      if (mctruth == mctruthSignal)
       {
         passed = true;
         mctruth = -1;
@@ -826,12 +829,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
     }
 
+    // Calculation of variables specific to 4pi hypothesis
     if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
     {
-
       if (cutter.PassCut(0) && cutter.PassCut(1))
       {
-
         Float_t
             boostPhi[3] = {
                 -dataAccess.GetBpx() / dataAccess.GetBRoots(),
@@ -881,6 +883,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         // Corrected IP event by event
         eventAnalysis->IPBoostCorr(X_lineKS, pKL, xB, plane_perp, baseKin.ipKS);
         eventAnalysis->IPBoostCorr(X_lineKL, pKL, xB, plane_perp, baseKin.ipKL);
+        // Setting x and y coordinates of the IP to the Bhabha vertex
 
         baseKin.ipKS[0] = baseKin.bhabha_vtx[0];
         baseKin.ipKS[1] = baseKin.bhabha_vtx[1];
@@ -922,7 +925,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {
             baseKin.cuts[iter] = 0;
 
-            if (mctruth == 7)
+            if (mctruth == mctruthSignal)
             {
               passed = true;
               mctruth = 0;
@@ -1016,7 +1019,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         logger.getErrLog(errorCode, "", mctruth);
         noError = false;
 
-        if (mctruth == 1)
+        if (mctruth == mctruthSignal)
         {
           passed = true;
           mctruth = -1;
@@ -1035,7 +1038,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g4takenTriKinFit, dataAccess.GetPNum1(), dataAccess.GetNTMC(), dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersTriKinFit);
 
         errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.Knerec, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
-
 
         if (!cutter.PassCut(1))
         {
@@ -1059,7 +1061,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
           TrcSum = -999.;
 
-          if (mctruth == 1)
+          if (mctruth == mctruthSignal)
           {
             passed = true;
             mctruth = -1;
@@ -1128,8 +1130,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           omega.total[6] = baseKin.KchrecClosest[6];
           omega.total[7] = baseKin.KchrecClosest[7];
           omega.total[8] = baseKin.KchrecClosest[8]; // Use kaon decay z vertex as omega z vertex - better resolution
-
-
 
           if (neuclulist.size() >= 6)
           {
@@ -1352,7 +1352,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
             TrcSum = -999.;
 
-            if (mctruth == 1)
+            if (mctruth == mctruthSignal)
             {
               passed = true;
               mctruth = -1;
@@ -1507,6 +1507,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
       // -------------------------------------------------------------------------------------
 
+
       // Int_t zmienne
       std::map<std::string, Int_t> intVars = {
           {"nrun", baseKin.nrun},                 // Number of run
@@ -1528,6 +1529,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"cutApplied", baseKin.cut},
           {"muonAlertPlus", baseKin.muonAlertPlus},
           {"muonAlertMinus", baseKin.muonAlertMinus}};
+
 
       // Float_t zmienne
       std::map<std::string, Float_t> floatVars = {
@@ -1591,6 +1593,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"Chi2OmegaKinFit", baseKin.Chi2OmegaKinFit},
           {"bestErrorSixGamma", bestError}};
 
+
       // Tablice
       std::map<std::string, std::vector<Int_t>> intArrays = {
           {"eclstream", baseKin.eclstream},
@@ -1603,6 +1606,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"vtaken", baseKin.vtaken},
           {"g4takenTriKinFit", baseKin.g4takenTriKinFit},
           {"goodClustersTriKinFit", baseKin.goodClustersTriKinFit}};
+
 
       std::map<std::string, std::vector<Float_t>> floatArrays = {
           {"Xcl", baseKin.Xcl},
@@ -1712,6 +1716,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"photonSix4", photonFourMomSix[3].total},
           {"photonSix5", photonFourMomSix[4].total},
           {"photonSix6", photonFourMomSix[5].total}};
+
 
       writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }

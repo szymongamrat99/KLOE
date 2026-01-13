@@ -44,7 +44,7 @@ Double_t interf_function(const Double_t *x, const Double_t *par)
                  3. * ImPart * sin(DMass * abs(dt)));
   }
 
-  return (pow(Epsilon, 2) / (2. * Gamma)) * Value * 0.1061874 * 1000000;
+  return (pow(Epsilon, 2) / (2. * Gamma)) * Value * 0.01735 * 10000000;
 }
 
 Double_t interf_function_00pm(const Double_t *x, const Double_t *par)
@@ -65,8 +65,8 @@ Double_t interf_function_00pm(const Double_t *x, const Double_t *par)
   TauKl = PhysicsConstants::tau_L * 1E-9;                                   // Kl mean life (s)
   MassDiff = PhysicsConstants::delta_mass_nonCPT;                           // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
                                                                             // PDG fit not assuming CPT
-  RePart = PhysicsConstants::Re;
-  ImPart = PhysicsConstants::Im_nonCPT; // Im(epsilon'/epsilon) = Dphi/3;
+  RePart = par[0];  //PhysicsConstants::Re;
+  ImPart = par[1];  //PhysicsConstants::Im_nonCPT; // Im(epsilon'/epsilon) = Dphi/3;
 
   // All parameters are calculated taking into account that DT is in TauKs units
   GammaKs = 1.;
@@ -80,7 +80,7 @@ Double_t interf_function_00pm(const Double_t *x, const Double_t *par)
               ((1. - RePart) * cos(DMass * dt) +
                3. * ImPart * sin(DMass * dt));
 
-  return 0.5 * pow(Epsilon, 2) * Value * 0.1061874 * 1000000;
+  return 0.5 * pow(Epsilon, 2) * Value * 10000000;
 }
 
 Double_t interf_function_pm00(const Double_t *x, const Double_t *par)
@@ -101,8 +101,8 @@ Double_t interf_function_pm00(const Double_t *x, const Double_t *par)
   TauKl = PhysicsConstants::tau_L * 1E-9;                                   // Kl mean life (s)
   MassDiff = PhysicsConstants::delta_mass_nonCPT;                           // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
                                                                             // PDG fit not assuming CPT
-  RePart = PhysicsConstants::Re;
-  ImPart = PhysicsConstants::Im_nonCPT; // Im(epsilon'/epsilon) = Dphi/3;
+  RePart = par[0]; //PhysicsConstants::Re;
+  ImPart = par[1]; //PhysicsConstants::Im_nonCPT; // Im(epsilon'/epsilon) = Dphi/3;
 
   // All parameters are calculated taking into account that DT is in TauKs units
   GammaKs = 1.;
@@ -116,7 +116,7 @@ Double_t interf_function_pm00(const Double_t *x, const Double_t *par)
               ((1. - RePart) * cos(DMass * dt) -
                3. * ImPart * sin(DMass * dt));
 
-  return 0.5 * pow(Epsilon, 2) * Value * 0.1061874 * 1000000;
+  return 0.5 * pow(Epsilon, 2) * Value * 10000000;
 
 }
 
@@ -138,8 +138,8 @@ Double_t interf_function_pmpm(const Double_t *x, const Double_t *par)
   TauKl = PhysicsConstants::tau_L * 1E-9;                                   // Kl mean life (s)
   MassDiff = PhysicsConstants::delta_mass_nonCPT;                           // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
                                                                             // PDG fit not assuming CPT
-  RePart = PhysicsConstants::Re;
-  ImPart = PhysicsConstants::Im_nonCPT; // Im(epsilon'/epsilon) = Dphi/3;
+  RePart = par[0]; //PhysicsConstants::Re;
+  ImPart = par[1]; //PhysicsConstants::Im_nonCPT; // Im(epsilon'/epsilon) = Dphi/3;
 
   // All parameters are calculated taking into account that DT is in TauKs units
   GammaKs = 1.;
@@ -151,5 +151,5 @@ Double_t interf_function_pmpm(const Double_t *x, const Double_t *par)
                                 exp(-GammaKs * t1 - GammaKl * t2) -
                                 2. * exp(-0.5 * Gamma * (t1 + t2)) * cos(DMass * dt));
 
-  return 0.5 * pow(Epsilon, 2) * Value * 0.239432 * 1000000;
+  return 0.5 * pow(Epsilon, 2) * Value * 10000000;
 }

@@ -245,7 +245,11 @@ namespace KLOE
                        trk1MC(4),
                        trk2MC(4),
                        muonAlertPlus(0),
-                       muonAlertMinus(0) {};
+                       muonAlertMinus(0),
+                       KchboostKS(10, 0),
+                       KchboostKL(10, 0),
+                       ipKS(3, 0),
+                       ipKL(3, 0) {}
 
     Float_t
         Kchboost[9],

@@ -61,10 +61,12 @@ set_target_properties(KLSPM00
 target_include_directories(KLSPM00 PRIVATE
   ${Boost_INCLUDE_DIRS}
   ${CURL_INCLUDE_DIRS}
+  ${ROOT_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/inc
   ${CMAKE_CURRENT_SOURCE_DIR}/Include/Codes/inc
   ${CMAKE_CURRENT_SOURCE_DIR}/Include/FortranAnalysis/inc
   ${CMAKE_CURRENT_SOURCE_DIR}/Include
+  ${ROOT_INCLUDE_DIRS}/nlohmann
   )
 
 link_directories(${CERNLIB_DIR})

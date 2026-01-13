@@ -9,7 +9,7 @@
   "runMode": "FULL",
   
   "hypothesis": {
-    "active": "SIGNAL",
+    "active": "FOUR_PI",
     "enabled": ["SIGNAL", "OMEGA", "FOUR_PI"]
   },
   
@@ -64,14 +64,17 @@
     "FOUR_PI": {
       "enabled": true,
       "description": "phi -> pi+pi-pi0pi0 (direct)",
+      "signal": 7,
       "modules": {
-        "momentumSmearing": true,
-        "trilaterationKinFit": false,
+        "classifyMCVariables": false,
+        "signalOnly": false,
+        "momentumSmearing": false,
+        "trilaterationKinFit": true,
         "signalKinFit": true,
-        "omegaKinFit": false,
+        "omegaKinFit": true,
         "triangleReconstruction": false,
         "photonPairing": true,
-        "kaonProperTimes": false
+        "kaonProperTimes": true
       },
       "cuts": {
         "minMassWindow": 1000.0,

@@ -4,7 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${env:ROOTSYS}/include"
+                "/data/4/users/gamrat/root_dirs/install_root/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

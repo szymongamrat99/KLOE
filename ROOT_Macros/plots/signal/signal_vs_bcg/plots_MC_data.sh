@@ -95,54 +95,54 @@ for (Int_t i = 1; i <= 53; i++)\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Regeneration_%d.root",i));\
 }
 
-for (Int_t i = 1; i <= 329; i++)\
+for (Int_t i = 1; i <= 939; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Semileptonic_%d.root",i));\
 }
-for (Int_t i = 1; i <= 317; i++)\
+for (Int_t i = 1; i <= 917; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys2_SIGNAL_MIXED_Semileptonic_%d.root",i));\
 }
-for (Int_t i = 1; i <= 277; i++)\
+for (Int_t i = 1; i <= 898; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Semileptonic_%d.root",i));\
 }
 
-for (Int_t i = 1; i <= 106; i++)\
+for (Int_t i = 1; i <= 308; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_3pi0_%d.root",i));\
 }
-for (Int_t i = 1; i <= 110; i++)\
+for (Int_t i = 1; i <= 315; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys2_SIGNAL_MIXED_3pi0_%d.root",i));\
 }
-for (Int_t i = 1; i <= 93; i++)\
+for (Int_t i = 1; i <= 303; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_3pi0_%d.root",i));\
 }
 
-for (Int_t i = 1; i <= 240; i++)\
+for (Int_t i = 1; i <= 315; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Omega_%d.root",i));\
 }
-for (Int_t i = 1; i <= 107; i++)\
+for (Int_t i = 1; i <= 108; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys2_SIGNAL_MIXED_Omega_%d.root",i));\
 }
-for (Int_t i = 1; i <= 130; i++)\
+for (Int_t i = 1; i <= 131; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Omega_%d.root",i));\
 }
 
-for (Int_t i = 1; i <= 131; i++)\
+for (Int_t i = 1; i <= 385; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Other_%d.root",i));\
 }
-for (Int_t i = 1; i <= 136; i++)\
+for (Int_t i = 1; i <= 400; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys2_SIGNAL_MIXED_Other_%d.root",i));\
 }
-for (Int_t i = 1; i <= 115; i++)\
+for (Int_t i = 1; i <= 371; i++)\
 {\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Other_%d.root",i));\
 }

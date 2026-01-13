@@ -1,11 +1,11 @@
 {
     "$schema": "./schemas/analysis-schema.json",
     "flags": {
-        "analysisCode": "SIGNAL",
+        "analysisCode": "FOUR_PI",
         "covMatrixType": "MIXED",
         "initialAnalysisExec": {
             "MC": true,
-            "flag": false,
+            "flag": true,
             "parts": {
                 "covMatrixInitialAnalysisExec": false,
                 "omegaInitialAnalysisExec": false,
@@ -14,8 +14,8 @@
         },
         "trilaterationReconstructionMode": "TWO_PI0"
     },
-    "lastScript": "Final CP Parameters normalization",
-    "lastUpdate": "2025-12-13_1554",
+    "lastScript": "Initial analysis",
+    "lastUpdate": "2026-01-14",
     "momSmearing": {
         "bootstrapMeanCovMatrix": {
             "_typename": "TMatrixT<double>",
@@ -571,7 +571,7 @@
     "variables": {
         "CPFit": {
             "cuts": {
-                "chi2KinFit": 40,
+                "chi2KinFit": null,
                 "cutScanMode": {
                     "cutLimits": [
                         0.3,
@@ -622,43 +622,41 @@
                 "upper": 0.3
             },
             "result": {
-                "chi2": 196.30814871521497,
+                "chi2": 404.47813897264325,
                 "error": {
-                    "Im": 0.05131474592462163,
+                    "Im": 0.04972454518195973,
                     "Norm": {
-                        "Omegapi0": 0.04046105226291424,
-                        "Other": 0.5876858052580145,
+                        "Omegapi0": 0.032928623081238895,
+                        "Other": 0.13232184200543484,
                         "Regeneration": {
-                            "CloseLeft": 0.059913879468716624,
-                            "CloseRight": 0.06852784659162725,
-                            "FarLeft": 0.011875424775263044,
-                            "FarRight": 0.01762698017022024
+                            "CloseLeft": 0.17935050465437885,
+                            "CloseRight": 0.17709758248460772,
+                            "FarLeft": 0.014909213488092488,
+                            "FarRight": 0.01940367026355383
                         },
-                        "Semileptonic": 0.12425937607566695,
-                        "Signal": 0.009411485280536536,
-                        "Threepi0": 0.08452483975595054
+                        "Semileptonic": 0.05491139902054859,
+                        "Signal": 0.012050526872268985,
+                        "Threepi0": 0.047835170483148226
                     },
-                    "PhysicsConstants::Re": 0.004247900857817247,
                     "Re": 0.004708532230576797
                 },
-                "normChi2": 1.635901239293458,
+                "normChi2": 4.494201544140481,
                 "value": {
-                    "Im": -0.11097139792921563,
+                    "Im": -0.19737518494337722,
                     "Norm": {
-                        "Omegapi0": 0.7000001807030355,
-                        "Other": 1.2999702657667989,
+                        "Omegapi0": 0.7000000191703611,
+                        "Other": 1.2999983479915813,
                         "Regeneration": {
-                            "CloseLeft": 2.325913093892103,
-                            "CloseRight": 2.2220872662581796,
-                            "FarLeft": 0.455275436859611,
-                            "FarRight": 0.5147351159062279
+                            "CloseLeft": 1.501762569283632,
+                            "CloseRight": 2.166398690403798,
+                            "FarLeft": 0.44534975177940916,
+                            "FarRight": 0.5173633948345615
                         },
-                        "Semileptonic": 1.2999994563729098,
-                        "Signal": 0.8562942653050741,
-                        "Threepi0": 0.7000001068042531
+                        "Semileptonic": 0.7000008394226561,
+                        "Signal": 0.9512336547627689,
+                        "Threepi0": 0.7000000025762243
                     },
-                    "PhysicsConstants::Re": 0.00166,
-                    "Re": -0.03881586759450649
+                    "Re": -0.02908941401765672
                 }
             },
             "step": {
@@ -1054,7 +1052,7 @@
             "sigma": 0.0
         },
         "Resolutions": {
-            "deltaT": 1.5,
+            "deltaT": 2.0,
             "momCharged": [
                 3.6131249318317935,
                 3.593722545313319,
@@ -1126,7 +1124,7 @@
         "rootFiles": {
             "Data": {
                 "firstFile": 1,
-                "lastFile": 56
+                "lastFile": 1
             },
             "MC": [
                 {
@@ -1143,25 +1141,22 @@
                 }
             ],
             "firstFileMax": 1,
-            "firstFileOld": 1,
             "lastFileMax": 569,
-            "lastFileOld": 56,
             "newestFileDateStampData": "2025-08-25",
             "newestFileDateStampMC": "2025-08-23",
             "path": "/data/ssd/gamrat/KLOE/Subanalysis/InitialAnalysis/root_files/",
-            "pathControlSample": "/data/ssd/gamrat/KLOE/Subanalysis/InitialAnalysis/root_files/",
-            "pathOldAna": "/data/4/users/gamrat/old_root_files/"
+            "pathControlSample": "/data/ssd/gamrat/KLOE/Subanalysis/InitialAnalysis/root_files/"
         },
         "tree": {
             "filename": {
                 "generatedvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/gen_vars_2025-06-16_3.root",
-                "mctruth": "/data/ssd/gamrat/KLOE/Subanalysis/GeneratedVars/root_files/mctruth_2025-12-06_3.root",
+                "mctruth": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/GeneratedVars/root_files/mctruth_2025-03-13_3.root",
                 "omegarec": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_2025-04-14_3.root",
                 "omegarecKinFit": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/OmegaRec/root_files/omega_rec_kin_fit_2025-02-07_31_0_8_10_2.root",
                 "selectionvars": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/SelectionVars/root_files/selection_vars.root",
-                "trianglefinal": "/data/ssd/gamrat/KLOE/Subanalysis/Neutrec/root_files/neuvtx_triangle_rec_2025-12-10_24_3_5_20_3.root",
+                "trianglefinal": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_triangle_rec_2025-03-23_24_3_5_20_3.root",
                 "trilateration": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_triangle_rec_1_56_10_5_1_1.root",
-                "trilaterationKinFit": "/data/ssd/gamrat/KLOE/Subanalysis/Neutrec/root_files/neuvtx_tri_kin_fit_2025-12-06_24_3_5_20_3.root"
+                "trilaterationKinFit": "/internal/big_one/4/users/gamrat/scripts/Scripts/Subanalysis/Neutrec/root_files/neuvtx_tri_kin_fit_2025-03-23_24_3_5_20_3.root"
             },
             "filepath": {
                 "Data": {
@@ -1172,7 +1167,7 @@
                 }
             },
             "treename": {
-                "general": "INTERF/h1",
+                "general": "h1",
                 "generatedvars": "h_gen_vars",
                 "mctruth": "h_gen_vars",
                 "omegarec": "h_omega_rec",

@@ -55,11 +55,15 @@ add_library(LibRec SHARED
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
 # PUBLIC: oznacza, że katalog z nagłówkami (tu: bieżący katalog, '.') będzie
 # również widoczny dla celów, które linkują do AnalysisALib.
+
 target_include_directories(LibRec PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../FortranAnalysis/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/..
     ${Boost_INCLUDE_DIRS}
+    ${CURL_INCLUDE_DIRS}
+    ${ROOT_INCLUDE_DIRS}
+    ${ROOT_INCLUDE_DIRS}/nlohmann
     # Jeśli AnalysisA.cpp używa nagłówków z src/ lub Subanalysis/,
     # trzeba je tu również dodać (np. parent_directory/src)
     # Przykład: target_include_directories(AnalysisALib PRIVATE ${CMAKE_SOURCE_DIR}/src)

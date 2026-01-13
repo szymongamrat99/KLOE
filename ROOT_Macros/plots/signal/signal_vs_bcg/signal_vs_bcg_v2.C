@@ -58,13 +58,13 @@
 namespace KH = KLOE::Histograms;
 
 std::map<TString, Float_t> channLumi = {
-    {"Data", 24843},
+    {"Data", 78799},
     {"Signal", 1549784},
     {"Regeneration", 1574577},
-    {"Omega", 1403268},
-    {"3pi0", 77224},
-    {"Semileptonic", 277717},
-    {"Other", 113840}};
+    {"Omega", 1625861},
+    {"3pi0", 230874},
+    {"Semileptonic", 838182},
+    {"Other", 343853}};
 
 std::map<TString, Float_t> channFactor;
 std::map<TString, Int_t> channEventsTotal, channEventsCut;
