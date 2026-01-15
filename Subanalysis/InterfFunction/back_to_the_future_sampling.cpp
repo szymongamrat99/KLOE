@@ -1,12 +1,15 @@
 #include <TCanvas.h>
 #include <TF1.h>
 #include <TF2.h>
+#include <TH1D.h>
+#include <TH2D.h>
 #include <TStyle.h>
 #include <TAxis.h>
 #include <TMath.h>
 #include <TLegend.h>
 #include <TFile.h>
 #include <TDirectory.h>
+#include <TRandom3.h>
 
 #include <boost/filesystem.hpp>
 
@@ -63,157 +66,140 @@ int main(int argc, char *argv[])
   outputFile->mkdir(dirName);
   outputFile->cd(dirName);
 
-  TF2 *func_00pm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_00pm, 0.0, 20, 0.0, 20, 2);
+  TF2 *func_00pm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_00pm, 0.0, 300, 0.0, 300, 2);
   func_00pm->SetParameters(reParam, imParam);
 
-  TF2 *func_pm00 = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pm00, 0.0, 20, 0.0, 20, 2);
+  TF2 *func_pm00 = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pm00, 0.0, 300, 0.0, 300, 2);
   func_pm00->SetParameters(reParam, imParam);
 
-  TF2 *func_pmpm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pmpm, 0.0, 20, 0.0, 20, 2);
+  TF2 *func_pmpm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pmpm, 0.0, 300, 0.0, 300, 2);
   func_pmpm->SetParameters(reParam, imParam);
 
-  Double_t norm00pm = 1; // func_00pm->Integral(0.0, 20, 0.0, 20);
-  Double_t normpm00 = 1; // func_pm00->Integral(0.0, 20, 0.0, 20);
-  Double_t normpmpm = 1; // func_pmpm->Integral(0.0, 20, 0.0, 20);
+  // Sampling functions to create 2D histograms
+  const Float_t sigmaT = 1.0; // Time resolution in tau_S units
+  const Float_t t1Min = 0.0, t1Max = 300.0;
+  const Float_t t2Min = 0.0, t2Max = 300.0;
+  const Int_t nBinst1 = (t1Max - t1Min) / sigmaT, nBinst2 = (t2Max - t2Min) / sigmaT;
+  const Int_t nSamples = 100000000; // Number of samples for MC sampling
+  
+  TH2D *hist_00pm = new TH2D("hist_00pm", "I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}];t_{2} [#tau_{S}]", nBinst1, t1Min, t1Max, nBinst2, t2Min, t2Max);
+  TH2D *hist_pm00 = new TH2D("hist_pm00", "I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}];t_{2} [#tau_{S}]", nBinst1, t1Min, t1Max, nBinst2, t2Min, t2Max);
+  TH2D *hist_pmpm = new TH2D("hist_pmpm", "I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}];t_{2} [#tau_{S}]", nBinst1, t1Min, t1Max, nBinst2, t2Min, t2Max);
+
+  std::cout << "Sampling 2D functions to histograms..." << std::endl;
+  
+  // Sample from functions using accept-reject method
+  TRandom3 rand(0);
+  
+  // Find maximum values for accept-reject
+  Double_t max_00pm = func_00pm->GetMaximum();
+  Double_t max_pm00 = func_pm00->GetMaximum();
+  Double_t max_pmpm = func_pmpm->GetMaximum();
+  
+  // Sample func_00pm
+  for (Int_t i = 0; i < nSamples; ++i) {
+    Double_t t1 = rand.Uniform(0.0, 300.0);
+    Double_t t2 = rand.Uniform(0.0, 300.0);
+    Double_t val = func_00pm->Eval(t1, t2);
+    Double_t test = rand.Uniform(0.0, max_00pm);
+    if (test < val) hist_00pm->Fill(t1, t2);
+  }
+  
+  // Sample func_pm00
+  for (Int_t i = 0; i < nSamples; ++i) {
+    Double_t t1 = rand.Uniform(0.0,300.0);
+    Double_t t2 = rand.Uniform(0.0, 300.0);
+    Double_t val = func_pm00->Eval(t1, t2);
+    Double_t test = rand.Uniform(0.0, max_pm00);
+    if (test < val) hist_pm00->Fill(t1, t2);
+  }
+  
+  // Sample func_pmpm
+  for (Int_t i = 0; i < nSamples; ++i) {
+    Double_t t1 = rand.Uniform(0.0, 300.0);
+    Double_t t2 = rand.Uniform(0.0, 300.0);
+    Double_t val = func_pmpm->Eval(t1, t2);
+    Double_t test = rand.Uniform(0.0, max_pmpm);
+    if (test < val) hist_pmpm->Fill(t1, t2);
+  }
+  
+  std::cout << "Sampling completed." << std::endl;
+  std::cout << "hist_00pm entries: " << hist_00pm->GetEntries() << std::endl;
+  std::cout << "hist_pm00 entries: " << hist_pm00->GetEntries() << std::endl;
+  std::cout << "hist_pmpm entries: " << hist_pmpm->GetEntries() << std::endl;
 
   TCanvas *c_func_00pm = new TCanvas("c_func_00pm", "Interference function 00pm", 800, 600);
   c_func_00pm->SetLogz(1);
-  func_00pm->SetNpx(100);
-  func_00pm->SetNpy(100);
-  func_00pm->Draw("COLZ");
+  hist_00pm->Draw("COLZ");
   c_func_00pm->SaveAs(dir_full_path + "interf_func_00pm.pdf");
 
   TCanvas *c_func_pm00 = new TCanvas("c_func_pm00", "Interference function pm00", 800, 600);
   c_func_pm00->SetLogz(1);
-  func_pm00->SetNpx(100);
-  func_pm00->SetNpy(100);
-  func_pm00->Draw("COLZ");
+  hist_pm00->Draw("COLZ");
   c_func_pm00->SaveAs(dir_full_path + "interf_func_pm00.pdf");
 
   TCanvas *c_func_pmpm = new TCanvas("c_func_pmpm", "Interference function pmpm", 800, 600);
   c_func_pmpm->SetLogz(1);
-  func_pmpm->SetNpx(100);
-  func_pmpm->SetNpy(100);
-  func_pmpm->Draw("COLZ");
+  hist_pmpm->Draw("COLZ");
   c_func_pmpm->SaveAs(dir_full_path + "interf_func_pmpm.pdf");
 
-  auto func_00pm_1D = [&](Double_t *x, Double_t *par)
-  {
-    Double_t current_x = x[0];
-
-    auto temp_f1_lambda = [&](Double_t *t, Double_t *par)
-    {
-      return func_00pm->Eval(current_x, t[0]) / norm00pm;
-    };
-
-    TF1 temp_f1("temp_f1_integral", temp_f1_lambda, 0.0, par[1], 0);
-
-    Double_t integral_result = temp_f1.Integral(0.0, par[1]);
-
-    return integral_result;
+  // Create 1D projections from 2D histograms with cuts
+  // For projection we integrate over y-axis up to a certain limit (par[1] or par[0])
+  
+  auto create_projection_y_cut = [](TH2D* hist, Double_t t_max) -> TH1D* {
+    TString name = TString::Format("%s_projx_tmax%.0f", hist->GetName(), t_max);
+    return hist->ProjectionX(name);
   };
+  
+  // Create projections for different T values
+  TH1D *hist_00pm_1D = create_projection_y_cut(hist_00pm, T00pm);
+  TH1D *hist_pm00_1D = create_projection_y_cut(hist_pm00, Tpm00);
+  TH1D *hist_pmpm_1D_for_RA = create_projection_y_cut(hist_pmpm, Tpmpm1);
+  TH1D *hist_pmpm_1D_for_RB = create_projection_y_cut(hist_pmpm, Tpmpm2);
 
-  auto func_pm00_1D = [&](Double_t *x, Double_t *par)
-  {
-    Double_t current_x = x[0];
-
-    auto temp_f1_lambda = [&](Double_t *t, Double_t *par)
-    {
-      return func_pm00->Eval(current_x, t[0]) / normpm00;
-    };
-
-    // Utwórz tymczasowy TF1 z funkcji temp_f1_lambda
-    // Uwaga: Nowe obiekty TF1 powinny mieć unikalne nazwy!
-    TF1 temp_f1("temp_f1_integral", temp_f1_lambda, 0.0, par[1], 0);
-
-    // Użyj TF1::Integral do obliczenia całki po y (od y_min do y_max)
-    Double_t integral_result = temp_f1.Integral(0.0, par[1]);
-
-    return integral_result;
-  };
-
-  auto func_pmpm_1D = [&](Double_t *x, Double_t *par)
-  {
-    Double_t current_x = x[0];
-
-    auto temp_f1_lambda = [&](Double_t *t, Double_t *par)
-    {
-      // F_xy->GetParameter(i) to wartość p[i]
-      // par[0] to wartość x - używamy, gdyby x było w p
-      return func_pmpm->Eval(current_x, t[0]) / normpmpm;
-    };
-
-    // Utwórz tymczasowy TF1 z funkcji temp_f1_lambda
-    // Uwaga: Nowe obiekty TF1 powinny mieć unikalne nazwy!
-    TF1 temp_f1("temp_f1_integral", temp_f1_lambda, 0.0, par[0], 0);
-
-    // Użyj TF1::Integral do obliczenia całki po y (od y_min do y_max)
-    Double_t integral_result = temp_f1.Integral(0.0, par[0]);
-
-    return integral_result;
-  };
-
-  auto func_pmpm_00pm_1D = [&](Double_t *x, Double_t *par)
-  {
-    return func_pmpm_1D(x, par) / func_00pm_1D(x, par);
-  };
-
-  auto func_pmpm_pm00_1D = [&](Double_t *x, Double_t *par)
-  {
-    return func_pmpm_1D(x, par) / func_pm00_1D(x, par);
-  };
-
-  auto func_RA_RB_1D = [&](Double_t *x, Double_t *par)
-  {
-    return func_pmpm_00pm_1D(x, par) / func_pmpm_pm00_1D(x, par);
-  };
+  hist_00pm_1D->Sumw2();
+  hist_pm00_1D->Sumw2();
+  hist_pmpm_1D_for_RA->Sumw2();
+  hist_pmpm_1D_for_RB->Sumw2();
+  
+  hist_00pm_1D->SetTitle("Projection 00pm;t_{1} [#tau_{S}];Events");
+  hist_pm00_1D->SetTitle("Projection pm00;t_{1} [#tau_{S}];Events");
+  hist_pmpm_1D_for_RA->SetTitle("Projection pmpm (R_{A});t_{1} [#tau_{S}];Events");
+  hist_pmpm_1D_for_RB->SetTitle("Projection pmpm (R_{B});t_{1} [#tau_{S}];Events");
 
   ////////////////////////////////////////////////////////
 
-  TF1 *pm00 = new TF1("pm00", func_pm00_1D, 0, 20, 2);
-
-  pm00->SetParameter(1, Tpm00);
-
-  // 4. Rysowanie wyników
-  TCanvas *c_pm00 = new TCanvas("c_pm00", "Integral of TF2 over y", 800, 600);
-
-  pm00->SetNpx(1000);
-  pm00->Draw();
-
+  // Rysowanie projekcji 1D
+  TCanvas *c_pm00 = new TCanvas("c_pm00", "Projection of pm00", 800, 600);
+  hist_pm00_1D->Draw("PE1");
   c_pm00->SaveAs(dir_full_path + "interf_func_pm001D_draw.pdf");
 
   ///////////////////////////////////////////////////////////////////
 
-  TF1 *oopm = new TF1("00pm", func_00pm_1D, 0, 20, 2);
-  oopm->SetParameter(1, T00pm);
-
-  // 4. Rysowanie wyników
-  TCanvas *c_00pm = new TCanvas("c_00pm", "Integral of TF2 over y", 800, 600);
-
-  oopm->SetNpx(1000);
-  oopm->Draw();
-
+  TCanvas *c_00pm = new TCanvas("c_00pm", "Projection of 00pm", 800, 600);
+  hist_00pm_1D->Draw("PE1");
   c_00pm->SaveAs(dir_full_path + "interf_func_00pm1D_draw.pdf");
 
   ////////////////////////////////////////////////////////////////////
 
-  TF1 *pmpm = new TF1("pmpm", func_pmpm_1D, 0, 20, 2);
-  pmpm->SetParameter(0, Tpmpm1);
-
-  // 4. Rysowanie wyników
-  TCanvas *c_pmpm = new TCanvas("c_pmpm", "Integral of TF2 over y", 800, 600);
-
-  pmpm->SetNpx(1000);
-  pmpm->Draw();
-
+  TCanvas *c_pmpm = new TCanvas("c_pmpm", "Projection of pmpm", 800, 600);
+  hist_pmpm_1D_for_RA->Draw("PE1");
   c_pmpm->SaveAs(dir_full_path + "interf_func_pmpm1D_draw.pdf");
 
   ////////////////////////////////////////////////////////////////////
 
-  Double_t *x = new Double_t[1];
-  Double_t *par = new Double_t[2];
-
-  x[0] = 0;
+  // Create ratio histograms R_A, R_B, R_C from projections
+  TH1D *hist_RA = (TH1D*)hist_pmpm_1D_for_RA->Clone("hist_RA");
+  hist_RA->SetTitle("R_{A}(t_{1});t_{1} [#tau_{S}];R_{A}(t_{1}) [-]");
+  hist_RA->Divide(hist_00pm_1D);
+  
+  TH1D *hist_RB = (TH1D*)hist_pmpm_1D_for_RB->Clone("hist_RB");
+  hist_RB->SetTitle("R_{B}(t_{1});t_{1} [#tau_{S}];R_{B}(t_{1}) [-]");
+  hist_RB->Divide(hist_pm00_1D);
+  
+  TH1D *hist_RC = (TH1D*)hist_RA->Clone("hist_RC");
+  hist_RC->SetTitle("R_{C}(t_{1});t_{1} [#tau_{S}];R_{C}(t_{1}) [-]");
+  hist_RC->Divide(hist_RB);
 
   TF1 *const_line = new TF1("const_line", "1 + 6 * [0]", 0, 20);
   const_line->SetParameter(0, PhysicsConstants::Re);
@@ -221,42 +207,21 @@ int main(int argc, char *argv[])
   const_line->SetLineStyle(2);
   const_line->SetLineWidth(2);
 
-  TF1 *G_x = new TF1("R_{A}(t_{1});t_{1} [#tau_{S}];R_{A}(t_{1}) [-]", func_pmpm_00pm_1D, 0, 20, 2);
-
-  G_x->SetParameter(0, Tpmpm1);
-  G_x->SetParameter(1, T00pm);
-
-  // 4. Rysowanie wyników
-  TCanvas *c = new TCanvas("c", "Integral of TF2 over y", 800, 600);
-
-  G_x->SetNpx(1000);
-  G_x->Draw();
+  // Rysowanie R_A
+  TCanvas *c = new TCanvas("c", "R_A from histogram ratio", 800, 600);
+  hist_RA->Draw("PE1");
   const_line->Draw("SAME");
-
   c->SaveAs(dir_full_path + "interf_func_RA_draw.pdf");
 
-  TCanvas *cg = new TCanvas("cg", "Integral of TF2 over y", 800, 600);
-
-  TF1 *F_x = new TF1("R_{B}(t_{1});t_{1} [#tau_{S}];R_{B}(t_{1}) [-]", func_pmpm_pm00_1D, 0, 20, 2);
-
-  F_x->SetParameter(0, Tpmpm2);
-  F_x->SetParameter(1, Tpm00);
-
-  F_x->SetNpx(1000);
-  F_x->Draw();
+  // Rysowanie R_B
+  TCanvas *cg = new TCanvas("cg", "R_B from histogram ratio", 800, 600);
+  hist_RB->Draw("PE1");
   const_line->Draw("SAME");
-
   cg->SaveAs(dir_full_path + "interf_func_RB_draw.pdf");
 
-  // 4. Rysowanie wyników
-  TCanvas *c1 = new TCanvas("c1", "Integral of TF2 over y", 800, 600);
-  TF1 *E_x = new TF1("R_{C}(t_{1});t_{1} [#tau_{S}];R_{C}(t_{1}) [-]", func_RA_RB_1D, 0, 20, 2);
-
-  E_x->SetParameter(0, Tpmpm1);
-  E_x->SetParameter(1, T00pm);
-
-  E_x->SetNpx(1000);
-  E_x->Draw();
+  // Rysowanie R_C
+  TCanvas *c1 = new TCanvas("c1", "R_C from histogram ratio", 800, 600);
+  hist_RC->Draw("PE1");
 
   TF1 *const_line2 = new TF1("const_line2", "1 + 6 * [0]", 0, 20);
   const_line2->SetParameter(0, PhysicsConstants::Re);
@@ -270,23 +235,25 @@ int main(int argc, char *argv[])
   const_line3->SetLineStyle(2);
   const_line3->SetLineWidth(2);
 
-  // 4. Rysowanie wyników
-  // F_x->SetTitle("F(x) = #int_{-1}^{1} F(x, y) dy");
   const_line2->Draw("SAME");
   const_line3->Draw("SAME");
 
   c1->SaveAs(dir_full_path + "interf_func_RC_double_draw.pdf");
 
-  func_00pm->Write("func2D_00pm");
-  func_pm00->Write("func2D_pm00");
-  func_pmpm->Write("func2D_pmpm");
-  pm00->Write("func1D_pm00");
-  oopm->Write("func1D_00pm");
-  pmpm->Write("func1D_pmpm");
-  G_x->Write("func1D_RA");
-  F_x->Write("func1D_RB");
-  E_x->Write("func1D_RC");
+  // Save histograms to file
+  hist_00pm->Write("hist2D_00pm");
+  hist_pm00->Write("hist2D_pm00");
+  hist_pmpm->Write("hist2D_pmpm");
+  hist_pm00_1D->Write("hist1D_pm00");
+  hist_00pm_1D->Write("hist1D_00pm");
+  hist_pmpm_1D_for_RA->Write("hist1D_pmpm_RA");
+  hist_pmpm_1D_for_RB->Write("hist1D_pmpm_RB");
+  hist_RA->Write("hist1D_RA");
+  hist_RB->Write("hist1D_RB");
+  hist_RC->Write("hist1D_RC");
 
   outputFile->cd();
   outputFile->Close();
+  
+  std::cout << "Results saved to: " << dir_full_path + "interf_func_parameters_theory.root" << std::endl;
 }
