@@ -8,17 +8,34 @@
 #include <const.h>
 #include <interf_function.h>
 
+struct Config
+{
+  Double_t  tMinX = 0.0,
+            tMinY = 0.0,
+            tMaxX = 20.0,
+            tMaxY = 300.0,
+            resT1 = 1.0,
+            resT2 = 1.0;
+
+  Int_t binsX = (tMaxX - tMinX) / resT1,
+        binsY = (tMaxY - tMinY) / resT2;
+
+  Double_t
+          physicsRe = PhysicsConstants::Re,
+          physicsIm = PhysicsConstants::Im_nonCPT;
+};
+
 int main(int argc, char *argv[])
 {
   KLOE::setGlobalStyle();
 
   TRandom3 *rand = new TRandom3(0);
 
-  TString 
-    pm00_dir = Paths::initialanalysis_dir + Paths::root_files_dir + "2025-11-24/" + "mk0_initial_analysis_*_Signal*.root",
-    pm00_dir_all_phys3 = Paths::initialanalysis_dir + Paths::root_files_dir + "2025-11-26/" + "mk0_initial_analysis_*_Signal*.root";
+  TString
+      pm00_dir = Paths::initialanalysis_dir + Paths::root_files_dir + "2025-11-24/" + "mk0_initial_analysis_*_Signal*.root",
+      pm00_dir_all_phys3 = Paths::initialanalysis_dir + Paths::root_files_dir + "2025-11-26/" + "mk0_initial_analysis_*_Signal*.root";
 
-  TString pmpm_dir = Paths::initialanalysis_dir + Paths::root_files_dir + "2025-08-23/" + "mk0_initial_analysis_*.root";
+  TString pmpm_dir = Paths::initialanalysis_dir + Paths::root_files_dir + "2026-01-14/" + "mk0_initial_analysis_*.root";
 
   TChain *chain_pm00 = new TChain("h1");
   chain_pm00->Add(pm00_dir);
@@ -27,24 +44,16 @@ int main(int argc, char *argv[])
   TChain *chain_pmpm = new TChain("h1");
   chain_pmpm->Add(pmpm_dir);
 
-  Double_t
-      tMinX = 0.0,
-      tMinY = 0.0,
-      tMaxX = 20.0,
-      tMaxY = 300.0,
-      resT1 = 1.0,
-      resT2 = 1.0;
-
-  Int_t binsX = (tMaxX - tMinX) / resT1, binsY = (tMaxY - tMinY) / resT2;
+  Int_t binsX = (Config::tMaxX - Config::tMinX) / Config.resT1, binsY = (Config::tMaxY - Config::tMinY) / Config.resT2;
 
   TH2 *h_pm00_2D = new TH2F("h_pm00_2D", ";t_{1} [#tau_{S}];t_{2} [#tau_{S}]", binsX, tMinX, tMaxX, binsY, tMinY, tMaxY);
   TH2 *h_00pm_2D = new TH2F("h_00pm_2D", ";t_{1} [#tau_{S}];t_{2} [#tau_{S}]", binsX, tMinX, tMaxX, binsY, tMinY, tMaxY);
   TH2 *h_pmpm_2D = new TH2F("h_pmpm_2D", ";t_{1} [#tau_{S}];t_{2} [#tau_{S}]", binsX, tMinX, tMaxX, binsY, tMinY, tMaxY);
 
   Double_t resDelta = 1.5,
-      deltaMin = -50.0,
-      deltaMax = 50.0,
-      binsDelta = 1 + (deltaMax - deltaMin) / resDelta;
+           deltaMin = -50.0,
+           deltaMax = 50.0,
+           binsDelta = 1 + (deltaMax - deltaMin) / resDelta;
 
   TH1 *h_delta = new TH1F("h_delta", "t1 vs t2 distribution for K_{S}K_{L}#rightarrow#pi^{0}#pi^{0}#pi^{#pm}", binsDelta, deltaMin, deltaMax);
   TH1 *h_delta_pmpm = new TH1F("h_delta_pmpm", "t1 vs t2 distribution for K_{S}K_{L}#rightarrow#pi^{0}#pi^{0}#pi^{#pm}", binsDelta, deltaMin, deltaMax);
@@ -67,8 +76,32 @@ int main(int argc, char *argv[])
 
   Double_t x[2], par[2];
 
-  par[0] = 0;//PhysicsConstants::Re;
-  par[1] = 0;//PhysicsConstants::Im_nonCPT;
+  Printf("Do You want to use default physics constants values? (1 - yes, 0 - no): ");
+  Int_t useDefault;
+  std::cin >> useDefault;
+
+  switch (useDefault)
+  {
+    case 0:
+    {
+      Printf("Set Re: ");
+      std::cin >> par[0];
+      Printf("Set Im (in rad): ");
+      std::cin >> par[1];
+      break;
+    }
+    case 1:
+    {
+      par[0] = PhysicsConstants::Re;
+      par[1] = PhysicsConstants::Im_nonCPT;
+      break;
+    }
+    default:
+    {
+      Printf("Wrong option selected. Exiting...");
+      return 1;
+    }
+  }
 
   while (reader.Next())
   {

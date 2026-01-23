@@ -627,6 +627,11 @@ namespace KLOE
   {
     // Global Style of histograms, pads, etc.
 
+    gStyle->SetStatX(0.88); // prawy brzeg w NDC
+    gStyle->SetStatY(0.88); // górny brzeg w NDC
+    gStyle->SetStatW(0.23); // szerokość
+    gStyle->SetStatH(0.18); // wysokość
+
     gStyle->SetOptStat("iouMn");
 
     gStyle->SetFitFormat("6.2g");
@@ -718,9 +723,7 @@ namespace Utils
       Paths::cutlimitsName = (std::string)paths["cutLimits"];
 
       std::cout << "Paths initialized from: " << pathsFilePath << std::endl;
-      
     }
-
 
     // Parsing of constants from PDG JSON file
     std::ifstream fconst(Paths::pdgConstFilePath.c_str());
