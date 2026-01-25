@@ -10,13 +10,18 @@
 #include <TFile.h>
 #include <TDirectory.h>
 #include <TRandom3.h>
+#include <TBranch.h>
+#include <TTree.h>
 
 #include <boost/filesystem.hpp>
+#include <boost/progress.hpp>
 
 #include <interf_function.h>
 #include <const.h>
 
-void createDirIfNotExists(const TString& path)
+Double_t evTick = 10000.0;
+
+void createDirIfNotExists(const TString &path)
 {
   boost::filesystem::path dirPath(path.Data());
 
@@ -24,21 +29,132 @@ void createDirIfNotExists(const TString& path)
     boost::filesystem::create_directories(dirPath);
 }
 
+void GenerateHitOrMissSample(TH2D *hist, TF2 *func, Long64_t nSamplesTarget, Double_t &t1Hit, Double_t &t2Hit, TTree *tree)
+{
+  boost::progress_display progress(nSamplesTarget / evTick);
+
+  Double_t t1min, t1max, t2min, t2max;
+  func->GetRange(t1min, t2min, t1max, t2max);
+  Double_t maxFuncVal = func->GetMaximum();
+
+  Long64_t nSamples = 0;
+  TRandom3 randGen(0); // Random generator with seed 0
+
+  while (nSamples < nSamplesTarget)
+  {
+    // Generate random (t1, t2) within histogram range
+    Double_t t1 = randGen.Uniform(t1min, t1max);
+    Double_t t2 = randGen.Uniform(t2min, t2max);
+
+    // Evaluate function value at (t1, t2)
+    Double_t funcValue = func->Eval(t1, t2);
+    // Generate a random number for hit-or-miss
+    Double_t randValue = randGen.Uniform(0, maxFuncVal);
+
+    // Accept or reject the sample
+    if (randValue <= funcValue)
+    {
+      hist->Fill(t1, t2);
+      nSamples++;
+
+      t1Hit = t1;
+      t2Hit = t2;
+
+      tree->Fill();
+
+      if (nSamples % Int_t(evTick) == 0)
+        ++progress;
+    }
+  }
+}
+
+double draw_from_mixed(double ts, double tl)
+{
+  if (gRandom->Uniform() < 0.5)
+  {
+    return gRandom->Exp(ts); // Losuj z KS
+  }
+  else
+  {
+    return gRandom->Exp(tl); // Losuj z KL
+  }
+}
+
+void GenerateImportanceSample(TH2D *hist, TF2 *func, Long64_t nSamplesTarget)
+{
+  boost::progress_display progress(nSamplesTarget / evTick);
+
+  Double_t t1min, t1max, t2min, t2max;
+  func->GetRange(t1min, t2min, t1max, t2max);
+  Double_t maxFuncVal = func->GetMaximum();
+
+  Long64_t nSamples = 0;
+  TRandom3 randGen(0); // Random generator with seed 0
+
+  while (nSamples < nSamplesTarget)
+  {
+    // Generate random (t1, t2) within histogram range
+    Double_t t1 = draw_from_mixed(1, PhysicsConstants::tau_L / PhysicsConstants::tau_S_nonCPT);
+    Double_t t2 = draw_from_mixed(1, PhysicsConstants::tau_L / PhysicsConstants::tau_S_nonCPT);
+
+    if (t1 < t1min || t1 > t1max || t2 < t2min || t2 > t2max)
+      continue;
+
+    auto pdf = [&](double t)
+    {
+      Double_t tau_L = PhysicsConstants::tau_L / PhysicsConstants::tau_S_nonCPT;
+
+      return 0.5 * (exp(-t)) + 0.5 * (1.0 / tau_L * exp(-t / tau_L));
+    };
+
+    // Evaluate function value at (t1, t2)
+    Double_t funcValue = func->Eval(t1, t2);
+    Double_t weight = pdf(t1) * pdf(t2); // Jacobian for exponential sampling
+    // Generate a random number for hit-or-miss
+    Double_t M = 1000.0;
+
+    Double_t randValue = randGen.Uniform(0, M);
+
+    // Accept or reject the sample
+    if (randValue <= funcValue / weight)
+    {
+      hist->Fill(t1, t2);
+      nSamples++;
+
+      if (nSamples % Int_t(evTick) == 0)
+        ++progress;
+    }
+  }
+}
+
+void GenerateRandom2(TH2D *hist, TF2 *func, Long64_t nSamplesTarget)
+{
+  boost::progress_display progress(nSamplesTarget);
+
+  Int_t granularity = 1000;
+
+  func->SetNpx(granularity);
+  func->SetNpy(granularity);
+
+  Long64_t nSamples = 0;
+  Double_t t1, t2;
+
+  TRandom3 *randGen = new TRandom3(0); // Random generator with seed 0
+
+  while (nSamples < nSamplesTarget)
+  {
+    // Generate random (t1, t2) within histogram range
+    func->GetRandom2(t1, t2, randGen);
+    hist->Fill(t1, t2);
+    nSamples++;
+
+    if (nSamples % Int_t(evTick) == 0)
+      ++progress;
+  }
+}
+
 int main(int argc, char *argv[])
 {
-  Float_t Tpmpm1 = 300,
-          Tpmpm2 = 300,
-          Tpm00 = 300,
-          T00pm = 300;
-
-  if (argc >= 5)
-  {
-    Tpmpm1 = atof(argv[1]);
-    Tpmpm2 = atof(argv[2]);
-    Tpm00 = atof(argv[3]);
-    T00pm = atof(argv[4]);
-  }
-
   KLOE::setGlobalStyle();
 
   std::cout << "Do You want to set custom parameters? (1 - yes, 0 - no): ";
@@ -46,7 +162,6 @@ int main(int argc, char *argv[])
   std::cin >> customParams;
 
   Double_t reParam = PhysicsConstants::Re;
-  ;
   Double_t imParam = PhysicsConstants::Im_nonCPT;
 
   if (customParams)
@@ -58,20 +173,21 @@ int main(int argc, char *argv[])
     std::cin >> imParam;
   }
 
-  TF2 *func_00pm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_00pm, 0.0, 300.0, 0.0, 300.0, 2);
-  func_00pm->SetParameters(reParam, imParam);
-
-  TF2 *func_pm00 = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pm00, 0.0, 300.0, 0.0, 300.0, 2);
-  func_pm00->SetParameters(reParam, imParam);
-
-  TF2 *func_pmpm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pmpm, 0.0, 300.0, 0.0, 300.0, 2);
-  func_pmpm->SetParameters(reParam, imParam);
-
   // Sampling functions to create 2D histograms
   const Float_t sigmaT = 1.0; // Time resolution in tau_S units
   const Float_t t1Min = 0.0, t1Max = 300.0;
   const Float_t t2Min = 0.0, t2Max = 300.0;
   const Int_t nBinst1 = (t1Max - t1Min) / sigmaT, nBinst2 = (t2Max - t2Min) / sigmaT;
+
+  TF2 *func_00pm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_00pm, t1Min, t1Max, t2Min, t2Max, 2);
+  func_00pm->SetParameters(reParam, imParam);
+
+  TF2 *func_pm00 = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pm00, t1Min, t1Max, t2Min, t2Max, 2);
+  func_pm00->SetParameters(reParam, imParam);
+
+  TF2 *func_pmpm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pmpm, t1Min, t1Max, t2Min, t2Max, 2);
+  func_pmpm->SetParameters(reParam, imParam);
+
   Long64_t nSamplesTarget = 100000; // Number of samples for MC sampling
   Double_t maxIntegral = 300.0;
 
@@ -87,44 +203,59 @@ int main(int argc, char *argv[])
   TH2D *hist_pm00 = new TH2D("hist_pm00", "I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}];t_{2} [#tau_{S}]", nBinst1, t1Min, t1Max, nBinst2, t2Min, t2Max);
   TH2D *hist_pmpm = new TH2D("hist_pmpm", "I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}];t_{2} [#tau_{S}]", nBinst1, t1Min, t1Max, nBinst2, t2Min, t2Max);
 
-  // Find maximum values for accept-reject
-  Double_t max_00pm = func_00pm->GetMaximum();
-  Double_t max_pm00 = func_pm00->GetMaximum();
-  Double_t max_pmpm = func_pmpm->GetMaximum();
-
-  Int_t granularity = 1000;
-
-  func_00pm->SetNpx(granularity);
-  func_00pm->SetNpy(granularity);
-  func_pm00->SetNpx(granularity);
-  func_pm00->SetNpy(granularity);
-  func_pmpm->SetNpx(granularity);
-  func_pmpm->SetNpy(granularity);
-
-  Double_t t1, t2;
-
-      // Creation of the plot directory if it does not exist
+  // Creation of the plot directory if it does not exist
   // Creation of the plot directory with tmp suffix
   TString plot_dir = "theoretical_plots/";
-  TString dir_name = "integralLimit_" + TString::Format("%.0f", maxIntegral) + "_samples_" + TString::Format("%lld", nSamplesTarget);
+  TString dir_name = "integralLimit_" + TString::Format("%.0f", maxIntegral) + "_samples_" + TString::Format("%lld", nSamplesTarget) + "_Re_" + TString::Format("%.5f", reParam) + "_Im_" + TString::Format("%.5f", imParam);
   TString dir_tmp_path = Paths::img_dir + plot_dir + dir_name + "_tmp/";
   TString dir_final_path = Paths::img_dir + plot_dir + dir_name + "/";
-
   createDirIfNotExists(dir_tmp_path);
 
-  // Sample func_00pm
-  while (nSamples < nSamplesTarget)
+  Double_t t100pm, t200pm, t1pm00, t2pm00, t1pmpm, t2pmpm;
+
+  TFile *outputFile = new TFile(dir_tmp_path + "sampling_results_" + TString::Format("%.0f", maxIntegral) + ".root", "RECREATE");
+  outputFile->cd();
+
+  TTree *tree_00pm = new TTree("00pm", "Tree with sampled events");
+  TTree *tree_pm00 = new TTree("pm00", "Tree with sampled events");
+  TTree *tree_pmpm = new TTree("pmpm", "Tree with sampled events");
+
+  TBranch *branch_t1_00pm = tree_00pm->Branch("t1", &t100pm, "t1/D");
+  TBranch *branch_t2_00pm = tree_00pm->Branch("t2", &t200pm, "t2/D");
+
+  TBranch *branch_t1_pm00 = tree_pm00->Branch("t1", &t1pm00, "t1/D");
+  TBranch *branch_t2_pm00 = tree_pm00->Branch("t2", &t2pm00, "t2/D");
+
+  TBranch *branch_t1_pmpm = tree_pmpm->Branch("t1", &t1pmpm, "t1/D");
+  TBranch *branch_t2_pmpm = tree_pmpm->Branch("t2", &t2pmpm, "t2/D");
+
+  std::cout << "Which method of sampling do You want to use? (1 - Hit or Miss, 2 - GetRandom2, 3 - Importance Sampling): ";
+  int samplingMethod = 2;
+  std::cin >> samplingMethod;
+
+  switch (samplingMethod)
   {
-    func_00pm->GetRandom2(t1, t2);
-    hist_00pm->Fill(t1, t2);
-
-    func_pm00->GetRandom2(t1, t2);
-    hist_pm00->Fill(t1, t2);
-
-    func_pmpm->GetRandom2(t1, t2);
-    hist_pmpm->Fill(t1, t2);
-
-    nSamples++;
+  case 1:
+  {
+    GenerateHitOrMissSample(hist_00pm, func_00pm, nSamplesTarget, t100pm, t200pm, tree_00pm);
+    GenerateHitOrMissSample(hist_pm00, func_pm00, nSamplesTarget, t1pm00, t2pm00, tree_pm00);
+    GenerateHitOrMissSample(hist_pmpm, func_pmpm, nSamplesTarget, t1pmpm, t2pmpm, tree_pmpm);
+    break;
+  }
+  case 2:
+  {
+    GenerateRandom2(hist_00pm, func_00pm, nSamplesTarget);
+    GenerateRandom2(hist_pm00, func_pm00, nSamplesTarget);
+    GenerateRandom2(hist_pmpm, func_pmpm, nSamplesTarget);
+    break;
+  }
+  case 3:
+  {
+    GenerateImportanceSample(hist_00pm, func_00pm, nSamplesTarget);
+    GenerateImportanceSample(hist_pm00, func_pm00, nSamplesTarget);
+    GenerateImportanceSample(hist_pmpm, func_pmpm, nSamplesTarget);
+    break;
+  }
   }
 
   std::cout << "Sampling completed." << std::endl;
@@ -134,22 +265,16 @@ int main(int argc, char *argv[])
 
   TCanvas *c_func_00pm = new TCanvas("c_func_00pm", "Interference function 00pm", 800, 600);
   c_func_00pm->SetLogz(1);
-  hist_00pm->GetXaxis()->SetRangeUser(0, 20);
-  hist_00pm->GetYaxis()->SetRangeUser(0, 20);
   hist_00pm->Draw("COLZ");
   c_func_00pm->SaveAs(dir_tmp_path + "interf_func_00pm.pdf");
 
   TCanvas *c_func_pm00 = new TCanvas("c_func_pm00", "Interference function pm00", 800, 600);
   c_func_pm00->SetLogz(1);
-  hist_pm00->GetXaxis()->SetRangeUser(0, 20);
-  hist_pm00->GetYaxis()->SetRangeUser(0, 20);
   hist_pm00->Draw("COLZ");
   c_func_pm00->SaveAs(dir_tmp_path + "interf_func_pm00.pdf");
 
   TCanvas *c_func_pmpm = new TCanvas("c_func_pmpm", "Interference function pmpm", 800, 600);
   c_func_pmpm->SetLogz(1);
-  hist_pmpm->GetXaxis()->SetRangeUser(0, 20);
-  hist_pmpm->GetYaxis()->SetRangeUser(0, 20);
   hist_pmpm->Draw("COLZ");
   c_func_pmpm->SaveAs(dir_tmp_path + "interf_func_pmpm.pdf");
 
@@ -257,18 +382,37 @@ int main(int argc, char *argv[])
 
   c1->SaveAs(dir_tmp_path + "interf_func_RC_double_draw.pdf");
 
+  hist_00pm->Write();
+  hist_pm00->Write();
+  hist_pmpm->Write();
+
+  hist_00pm_1D->Write();
+  hist_pm00_1D->Write();
+  hist_pmpm_1D_for_RA->Write();
+  hist_pmpm_1D_for_RB->Write();
+
+  hist_RA->Write();
+  hist_RB->Write();
+  hist_RC->Write();
+
+  tree_00pm->Write();
+  tree_pm00->Write();
+  tree_pmpm->Write();
+
+  outputFile->Close();
+
   // Rename temporary directory to final name
   boost::filesystem::path tmp_path(dir_tmp_path.Data());
   boost::filesystem::path final_path(dir_final_path.Data());
-  
+
   // Remove final directory if it exists
   if (boost::filesystem::exists(final_path))
   {
     boost::filesystem::remove_all(final_path);
   }
-  
+
   // Rename tmp to final
   boost::filesystem::rename(tmp_path, final_path);
-  
+
   std::cout << "Results saved to: " << dir_final_path << std::endl;
 }
