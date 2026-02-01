@@ -129,7 +129,7 @@ void GenerateImportanceSample(TH2D *hist, TF2 *func, Long64_t nSamplesTarget)
 
 void GenerateRandom2(TH2D *hist, TF2 *func, Long64_t nSamplesTarget)
 {
-  boost::progress_display progress(nSamplesTarget);
+  boost::progress_display progress(nSamplesTarget / evTick);
 
   Int_t granularity = 1000;
 
@@ -145,11 +145,64 @@ void GenerateRandom2(TH2D *hist, TF2 *func, Long64_t nSamplesTarget)
   {
     // Generate random (t1, t2) within histogram range
     func->GetRandom2(t1, t2, randGen);
-    hist->Fill(t1, t2);
+    hist->Fill(t1, t2); // Weight to account for equal probabilities
     nSamples++;
 
     if (nSamples % Int_t(evTick) == 0)
       ++progress;
+  }
+}
+
+void GenerateRandom21D(TH1 *hist, TF2 *func, Long64_t nSamplesTarget)
+{
+  boost::progress_display progress(nSamplesTarget / evTick);
+
+  Int_t granularity = 1000;
+
+  func->SetNpx(granularity);
+  func->SetNpy(granularity);
+
+  Long64_t nSamples = 0;
+  Double_t t1, t2;
+
+  TRandom3 *randGen = new TRandom3(0); // Random generator with seed 0
+
+  while (nSamples < nSamplesTarget)
+  {
+    // Generate random (t1, t2) within histogram range
+    func->GetRandom2(t1, t2, randGen);
+    hist->Fill(t1); // Weight to account for equal probabilities
+    nSamples++;
+
+    if (nSamples % Int_t(evTick) == 0)
+      ++progress;
+  }
+}
+
+static TRandom3 gRand(0);
+
+void generate_t1_t2(double &t1, double &t2, bool equalProb)
+{
+  Double_t weightA = PhysicsConstants::br_ks_pi0pi0 * PhysicsConstants::br_kl_pippim,
+           weightB = PhysicsConstants::br_ks_pippim * PhysicsConstants::br_kl_pi0pi0,
+           totalWeight = weightA + weightB,
+           probA = weightA / totalWeight;
+
+  if (equalProb)
+    probA = 0.5;
+
+  Double_t u = gRand.Uniform();
+  Double_t u1 = gRand.Uniform(), u2 = gRand.Uniform();
+
+  if (u < probA)
+  {
+    t1 = -TMath::Log(1 - u1);
+    t2 = -PhysicsConstants::tau_L / PhysicsConstants::tau_S_nonCPT * TMath::Log(1 - u2);
+  }
+  else
+  {
+    t1 = -PhysicsConstants::tau_L / PhysicsConstants::tau_S_nonCPT * TMath::Log(1 - u1);
+    t2 = -TMath::Log(1 - u2);
   }
 }
 
@@ -174,7 +227,7 @@ int main(int argc, char *argv[])
   }
 
   // Sampling functions to create 2D histograms
-  const Float_t sigmaT = 1.0; // Time resolution in tau_S units
+  const Float_t sigmaT = 1; // Time resolution in tau_S units
   const Float_t t1Min = 0.0, t1Max = 300.0;
   const Float_t t2Min = 0.0, t2Max = 300.0;
   const Int_t nBinst1 = (t1Max - t1Min) / sigmaT, nBinst2 = (t2Max - t2Min) / sigmaT;
@@ -211,35 +264,31 @@ int main(int argc, char *argv[])
   TString dir_final_path = Paths::img_dir + plot_dir + dir_name + "/";
   createDirIfNotExists(dir_tmp_path);
 
-  Double_t t100pm, t200pm, t1pm00, t2pm00, t1pmpm, t2pmpm;
+  Double_t tne, tch, t1, t2;
 
   TFile *outputFile = new TFile(dir_tmp_path + "sampling_results_" + TString::Format("%.0f", maxIntegral) + ".root", "RECREATE");
   outputFile->cd();
 
   TTree *tree_00pm = new TTree("00pm", "Tree with sampled events");
-  TTree *tree_pm00 = new TTree("pm00", "Tree with sampled events");
   TTree *tree_pmpm = new TTree("pmpm", "Tree with sampled events");
 
-  TBranch *branch_t1_00pm = tree_00pm->Branch("t1", &t100pm, "t1/D");
-  TBranch *branch_t2_00pm = tree_00pm->Branch("t2", &t200pm, "t2/D");
+  TBranch *branch_t1_00pm = tree_00pm->Branch("tne", &tne, "tne/D");
+  TBranch *branch_t2_00pm = tree_00pm->Branch("tch", &tch, "tch/D");
 
-  TBranch *branch_t1_pm00 = tree_pm00->Branch("t1", &t1pm00, "t1/D");
-  TBranch *branch_t2_pm00 = tree_pm00->Branch("t2", &t2pm00, "t2/D");
+  TBranch *branch_t1_pmpm = tree_pmpm->Branch("t1", &t1, "t1/D");
+  TBranch *branch_t2_pmpm = tree_pmpm->Branch("t2", &t2, "t2/D");
 
-  TBranch *branch_t1_pmpm = tree_pmpm->Branch("t1", &t1pmpm, "t1/D");
-  TBranch *branch_t2_pmpm = tree_pmpm->Branch("t2", &t2pmpm, "t2/D");
-
-  std::cout << "Which method of sampling do You want to use? (1 - Hit or Miss, 2 - GetRandom2, 3 - Importance Sampling): ";
-  int samplingMethod = 2;
+  std::cout << "Which method of sampling do You want to use? (1 - Hit or Miss, 2 - GetRandom2, 3 - with weights): ";
+  int samplingMethod = 3;
   std::cin >> samplingMethod;
 
   switch (samplingMethod)
   {
   case 1:
   {
-    GenerateHitOrMissSample(hist_00pm, func_00pm, nSamplesTarget, t100pm, t200pm, tree_00pm);
-    GenerateHitOrMissSample(hist_pm00, func_pm00, nSamplesTarget, t1pm00, t2pm00, tree_pm00);
-    GenerateHitOrMissSample(hist_pmpm, func_pmpm, nSamplesTarget, t1pmpm, t2pmpm, tree_pmpm);
+    GenerateHitOrMissSample(hist_00pm, func_00pm, nSamplesTarget, tne, tch, tree_00pm);
+    GenerateHitOrMissSample(hist_pm00, func_pm00, nSamplesTarget, tch, tne, tree_00pm);
+    GenerateHitOrMissSample(hist_pmpm, func_pmpm, nSamplesTarget, t1, t2, tree_pmpm);
     break;
   }
   case 2:
@@ -247,21 +296,55 @@ int main(int argc, char *argv[])
     GenerateRandom2(hist_00pm, func_00pm, nSamplesTarget);
     GenerateRandom2(hist_pm00, func_pm00, nSamplesTarget);
     GenerateRandom2(hist_pmpm, func_pmpm, nSamplesTarget);
+
     break;
   }
   case 3:
   {
-    GenerateImportanceSample(hist_00pm, func_00pm, nSamplesTarget);
-    GenerateImportanceSample(hist_pm00, func_pm00, nSamplesTarget);
-    GenerateImportanceSample(hist_pmpm, func_pmpm, nSamplesTarget);
+    boost::progress_display progress00pm(nSamplesTarget / evTick);
+
+    Long64_t nSamples = 0;
+    while (nSamples < nSamplesTarget)
+    {
+      generate_t1_t2(tne, tch, true);
+
+      if (tne <= maxIntegral && tch <= maxIntegral)
+      {
+        hist_00pm->Fill(tne, tch, func_00pm->Eval(tne, tch));
+        hist_pm00->Fill(tch, tne, func_pm00->Eval(tch, tne));
+
+        tree_00pm->Fill();
+
+        nSamples++;
+
+        if (nSamples % Int_t(evTick) == 0)
+          ++progress00pm;
+      }
+    }
+
+
+    boost::progress_display progresspmpm(nSamplesTarget / evTick);
+    nSamples = 0;
+
+    while (nSamples < nSamplesTarget)
+    {
+      generate_t1_t2(t1, t2, true);
+
+      if (t1 <= maxIntegral && t2 <= maxIntegral)
+      {
+        hist_pmpm->Fill(t1, t2, func_pmpm->Eval(t1, t2));
+
+        tree_pmpm->Fill();
+
+        nSamples++;
+
+        if (nSamples % Int_t(evTick) == 0)
+          ++progresspmpm;
+      }
+    }
     break;
   }
   }
-
-  std::cout << "Sampling completed." << std::endl;
-  std::cout << "hist_00pm entries: " << hist_00pm->GetEntries() << std::endl;
-  std::cout << "hist_pm00 entries: " << hist_pm00->GetEntries() << std::endl;
-  std::cout << "hist_pmpm entries: " << hist_pmpm->GetEntries() << std::endl;
 
   TCanvas *c_func_00pm = new TCanvas("c_func_00pm", "Interference function 00pm", 800, 600);
   c_func_00pm->SetLogz(1);
@@ -283,8 +366,9 @@ int main(int argc, char *argv[])
 
   auto create_projection_y_cut = [](TH2D *hist, Double_t t_max) -> TH1D *
   {
-    TString name = TString::Format("%s_projx_tmax%.0f", hist->GetName(), t_max);
-    return hist->ProjectionX(name, 0, hist->GetYaxis()->FindBin(t_max));
+    TRandom3 randGen(0);
+    TString name = TString::Format("%s_projx_tmax%.0f_%d", hist->GetName(), t_max, randGen.Integer(400));
+    return hist->ProjectionX(name, -1, hist->GetYaxis()->FindBin(t_max) + 1);
   };
 
   // Create projections for different T values
@@ -307,21 +391,18 @@ int main(int argc, char *argv[])
 
   // Rysowanie projekcji 1D
   TCanvas *c_pm00 = new TCanvas("c_pm00", "Projection of pm00", 800, 600);
-  hist_pm00_1D->GetXaxis()->SetRangeUser(0, 20);
   hist_pm00_1D->Draw("PE1");
   c_pm00->SaveAs(dir_tmp_path + "interf_func_pm001D_draw.pdf");
 
   ///////////////////////////////////////////////////////////////////
 
   TCanvas *c_00pm = new TCanvas("c_00pm", "Projection of 00pm", 800, 600);
-  hist_00pm_1D->GetXaxis()->SetRangeUser(0, 20);
   hist_00pm_1D->Draw("PE1");
   c_00pm->SaveAs(dir_tmp_path + "interf_func_00pm1D_draw.pdf");
 
   ////////////////////////////////////////////////////////////////////
 
   TCanvas *c_pmpm = new TCanvas("c_pmpm", "Projection of pmpm", 800, 600);
-  hist_pmpm_1D_for_RA->GetXaxis()->SetRangeUser(0, 20);
   hist_pmpm_1D_for_RA->Draw("PE1");
   c_pmpm->SaveAs(dir_tmp_path + "interf_func_pmpm1D_draw.pdf");
 
@@ -396,7 +477,6 @@ int main(int argc, char *argv[])
   hist_RC->Write();
 
   tree_00pm->Write();
-  tree_pm00->Write();
   tree_pmpm->Write();
 
   outputFile->Close();

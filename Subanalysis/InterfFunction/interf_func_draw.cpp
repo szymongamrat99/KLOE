@@ -51,6 +51,7 @@ int main()
     // legend->SetTextFont(42);
 
     // legend->Draw();
+    
 
     canva->Print("interf_func" + Paths::ext_img);
 }
