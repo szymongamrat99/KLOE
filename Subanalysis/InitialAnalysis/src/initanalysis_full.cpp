@@ -318,21 +318,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     cutter.RegisterVariableGetter("InvMassKch", [&]()
                                   { return baseKin.Kchrecnew[5]; });
     cutter.RegisterCentralValueGetter("InvMassKch", [&]()
-                                      { return PhysicsConstants::mK0; });
+                                      { return 497.605; });
 
-    cutter.RegisterVariableGetter("Chi2Signal", [&]()
-                                  { return baseKin.Chi2SignalKinFit; });
-
-    cutter.RegisterVariableGetter("TrcSum", [&]()
-                                  { return TrcSum; });
-
-    cutter.RegisterVariableGetter("Qmiss", [&]()
-                                  { return sqrt(pow(Pmiss, 2) + pow(Emiss, 2)); });
 
     cutter.RegisterVariableGetter("InvMassKne", [&]()
-                                  { return baseKin.Knerec[5]; });
+                                  { return baseKin.minv4gam; });
     cutter.RegisterCentralValueGetter("InvMassKne", [&]()
-                                      { return PhysicsConstants::mK0; });
+                                      { return 489.467; });
   }
 
   // Initialization of momentum smearing
@@ -821,6 +813,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         continue;
       }
     }
+    
+    // Cut on the invariant mass of pi+pi-
+    if(!cutter.PassCut(0))
+    {
+        if (mctruth == 1)
+            mctruth = 0;
+        else
+            continue;
+    }
+    //////////////////////////////////////
 
     if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
     {
@@ -1031,6 +1033,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g4takenTriKinFit, dataAccess.GetPNum1(), dataAccess.GetNTMC(), dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersTriKinFit);
 
         errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.Knerec, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
+
+        // Cut on the invariant mass of pi0pi0
+        if(!cutter.PassCut(1))
+        {
+            if (mctruth == 1)
+                mctruth = 0;
+            else
+                continue;
+        }
+        //////////////////////////////////////
 
         if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
         {
@@ -1348,27 +1360,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                 {
                 case 0:
                 {
-                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_CHI2_SIGNAL);
+                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_INV_MASS_KCH);
                   break;
                 }
                 case 1:
                 {
-                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_TRCV);
-                  break;
-                }
-                case 2:
-                {
-                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_INV_MASS_KCH);
-                  break;
-                }
-                case 3:
-                {
                   baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_INV_MASS_KNE);
-                  break;
-                }
-                case 4:
-                {
-                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_QMISS);
                   break;
                 }
                 }
