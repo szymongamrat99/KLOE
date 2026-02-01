@@ -8,7 +8,7 @@ namespace KLOE
   {
   public:
     NeutralReconstruction(Int_t nPhotons);
-    NeutralReconstruction() : ErrorLogs("NeutralReconstruction.log"), _nPhotons(4), _nPions(2) {};
+    NeutralReconstruction() : ErrorLogs((std::string)_logFileName), _nPhotons(4), _nPions(2) {};
     void SetPhotonParameters(const std::vector<neutralParticle> &photons)
     {
       try
@@ -115,6 +115,7 @@ namespace KLOE
         std::vector<neutralParticle> &photonFourMomSix);
 
   private:
+    TString _logFileName = Paths::logsCNAFDir + "NeutralReconstruction_" + pm00::getCurrentDate() + ".log";
     Int_t _nPhotons, _nPions; // Number of photons and pions in the event
     Float_t _invMassDiffMin;
     std::vector<neutralParticle>
