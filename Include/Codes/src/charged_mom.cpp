@@ -626,7 +626,7 @@ namespace KLOE
   {
     std::string
         name = "";
-    name = Paths::logsCNAFDir + "KchFromBoost_" + pm00::getCurrentTimestamp() + ".log";
+    name = Paths::logsCNAFDir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
 
     ErrorHandling::ErrorLogs logger(name);
 
@@ -722,7 +722,7 @@ namespace KLOE
   {
     std::string
         name = "";
-    name = Paths::logsCNAFDir + "KchFromBoost_" + pm00::getCurrentTimestamp() + ".log";
+    name = Paths::logsCNAFDir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
 
     ErrorHandling::ErrorLogs logger(name);
 
@@ -819,7 +819,7 @@ namespace KLOE
   {
     std::string
         name = "";
-    name = Paths::logsCNAFDir + "IPBoostCorrection_" + pm00::getCurrentTimestamp() + ".log";
+    name = Paths::logsCNAFDir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
 
     ErrorHandling::ErrorLogs logger(name);
 
@@ -855,7 +855,7 @@ namespace KLOE
   {
     std::string
         name = "";
-    name = Paths::logsCNAFDir + "IPBoostCorrection_" + pm00::getCurrentTimestamp() + ".log";
+    name = Paths::logsCNAFDir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
 
     ErrorHandling::ErrorLogs logger(name);
 

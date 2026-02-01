@@ -12,7 +12,7 @@ ConfigManager::ConfigManager() : propertiesLoaded(false), constantsLoaded(false)
     // Initialize error logger with config-specific log file
     KLOE::pm00 Obj;
 
-    std::string logFileName = Paths::logsCNAFDir + "config_manager_" + Obj.getCurrentTimestamp() + ".log";
+    std::string logFileName = Paths::logsCNAFDir + "config_manager_" + Obj.getCurrentDate() + ".log";
     errorLogger = new ErrorHandling::ErrorLogs(logFileName);
     errorLogger->setPrintToScreen(true);
     
