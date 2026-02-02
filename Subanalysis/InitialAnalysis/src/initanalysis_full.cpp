@@ -115,7 +115,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::ifstream file(Paths::cutlimitsName);
   json j = json::parse(file);
 
-  StatisticalCutter cutter(Paths::cutlimitsName, 7, hypoCode);
+  StatisticalCutter cutter(Paths::cutlimitsName, int(mctruthSignal), hypoCode);
 
   std::ifstream rootFiles(Paths::rootfilesName);
   json filePaths = json::parse(rootFiles);
