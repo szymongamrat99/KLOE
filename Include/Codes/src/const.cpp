@@ -14,6 +14,8 @@
 #include <TString.h>
 #include <TPrincipal.h>
 
+#include <PdgManager.h>
+
 #include <TGaxis.h>
 
 using json = nlohmann::json;
@@ -710,6 +712,9 @@ namespace Utils
     // Parsing of paths
     std::string pathsFilePath = Paths::propertiesPath + "/paths-extensions.json";
     std::ifstream fpath(pathsFilePath.c_str());
+
+    auto& pdg = PdgManager::getInstance();
+    
     if (fpath.is_open())
     {
       paths = json::parse(fpath);

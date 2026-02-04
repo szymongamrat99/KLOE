@@ -26,7 +26,6 @@ add_library(LibRec SHARED
             src/neutral_mom.cpp
             src/pi0_photon_pair.cpp
             src/plane_intersection.cpp
-            src/RealTimeIntegration.cpp
             src/reconstructor.cpp
             src/SplitFileWriter.cpp
             src/triple_gaus.cpp
@@ -50,6 +49,8 @@ add_library(LibRec SHARED
             src/DataAccessWrapper.cpp
             src/const.cpp
             src/AnalysisManager.cpp
+            src/PdgApiClient.cpp
+            src/PdgManager.cpp
             )
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
