@@ -713,8 +713,6 @@ namespace Utils
     std::string pathsFilePath = Paths::propertiesPath + "/paths-extensions.json";
     std::ifstream fpath(pathsFilePath.c_str());
 
-    auto& pdg = PdgManager::getInstance();
-    
     if (fpath.is_open())
     {
       paths = json::parse(fpath);
@@ -732,6 +730,21 @@ namespace Utils
 
     // Parsing of constants from PDG JSON file
     std::ifstream fconst(Paths::pdgConstFilePath.c_str());
+
+    auto& pdg = PdgManager::getInstance();
+    // auto& k0_summary = pdg.getParticleData("S011", 2025); // K0 summary data for 2025 PDG
+    
+    // for (const auto& prop : k0_summary.get_summaries().get_properties())
+    // {
+    //   if (prop.get_pdgid() == "S011M")
+    //   {
+    //     PhysicsConstants::mK0 = PdgManager::getBestValue(prop, PhysicsConstants::mK0);
+
+    //     std::cout << "K0 Mass set to: " << PhysicsConstants::mK0 << " MeV/c^2 from PDG data." << std::endl;
+    //   }
+    // }
+
+
     if (fconst.is_open())
     {
       constants = json::parse(fconst);

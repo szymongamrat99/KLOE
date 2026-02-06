@@ -149,7 +149,7 @@ int main()
 
   Long64_t nEvents = 0;
 
-  if(customEvents)
+  if (customEvents)
   {
     std::cout << "Set number of events to process: ";
     std::cin >> nEvents;
@@ -186,6 +186,21 @@ int main()
   TH2 *h_pm00 = new TH2D("h_pm00", "(+-,00);t_{+-} [#tau_{S}];t_{00} [#tau_{S}]", nBins, tneMin, tneMax, nBins, tchMin, tchMax);
   TH2 *h_pmpm = new TH2D("h_pmpm", "(+-,+-);t_{1} [#tau_{S}];t_{2} [#tau_{S}]", nBins, t1Min, t1Max, nBins, t2Min, t2Max);
 
+  TH2 *h_00pm_not_weighted = new TH2D("h_00pm_not_weighted", "(00,+-);t_{00} [#tau_{S}];t_{+-} [#tau_{S}]", nBins, tchMin, tchMax, nBins, tneMin, tneMax);
+  TH2 *h_pm00_not_weighted = new TH2D("h_pm00_not_weighted", "(+-,00);t_{+-} [#tau_{S}];t_{00} [#tau_{S}]", nBins, tneMin, tneMax, nBins, tchMin, tchMax);
+  TH2 *h_pmpm_not_weighted = new TH2D("h_pmpm_not_weighted", "(+-,+-);t_{1} [#tau_{S}];t_{2} [#tau_{S}]", nBins, t1Min, t1Max, nBins, t2Min, t2Max);
+
+  TH1 *h_00_not_weighted = new TH1D("h_00_not_weighted", "t_{00}; t_{00} [#tau_{S}];Counts", nBins, tchMin, tchMax);
+  TH1 *h_pm_not_weighted = new TH1D("h_pm_not_weighted", "t_{+-}; t_{+-} [#tau_{S}];Counts", nBins, tneMin, tneMax);
+  TH1 *h_pmpm1_not_weighted = new TH1D("h_pmpm1_not_weighted", "t_{1}; t_{1} [#tau_{S}];Counts", nBins, t1Min, t1Max);
+  TH1 *h_pmpm2_not_weighted = new TH1D("h_pmpm2_not_weighted", "t_{2}; t_{2} [#tau_{S}];;Counts", nBins, t2Min, t2Max);
+
+  TH1 *deltaT_pm00 = new TH1D("deltaT_pm00", "Delta t_{+--00}; #Delta t_{+--00} [#tau_{S}];Counts", 2 * nBins, - (tneMax - tneMin), (tneMax - tneMin));
+  TH1 *deltaT_pmpm = new TH1D("deltaT_pmpm", "Delta t_{1-2}; #Delta t_{1-2} [#tau_{S}];Counts", 2 * nBins, - (t2Max - t2Min), (t2Max - t2Min));
+
+  TH1 *deltaT_pm00_not_weighted = new TH1D("deltaT_pm00_not_weighted", "#Deltat_{+-,00}; #Delta t_{+--00} [#tau_{S}];Counts", 2 * nBins, - (tneMax - tneMin), (tneMax - tneMin));
+  TH1 *deltaT_pmpm_not_weighted = new TH1D("deltaT_pmpm_not_weighted", "Delta t_{1,2}; #Delta t_{1,2} [#tau_{S}];Counts", 2 * nBins, - (t2Max - t2Min), (t2Max - t2Min));
+
   const Long64_t evTick = 1000000;
   Long64_t currentEvent = 0;
 
@@ -197,7 +212,18 @@ int main()
     h_00pm->Fill(*tne, *tch, func_00pm->Eval(*tne, *tch));
     h_pm00->Fill(*tch, *tne, func_pm00->Eval(*tch, *tne));
 
-    if ( currentEvent % evTick == 0 )
+    h_00pm_not_weighted->Fill(*tne, *tch);
+    h_pm00_not_weighted->Fill(*tch, *tne);
+
+    h_00_not_weighted->Fill(*tne);
+    h_pm_not_weighted->Fill(*tch);
+
+    Double_t x[1] = {*tch - *tne};
+
+    deltaT_pm00_not_weighted->Fill(*tch - *tne);
+    deltaT_pm00->Fill(*tch - *tne, interf_function(x, nullptr));
+
+    if (currentEvent % evTick == 0)
       std::cout << "Processing entry: " << currentEvent << "\r";
 
     currentEvent++;
@@ -211,8 +237,17 @@ int main()
       break;
 
     h_pmpm->Fill(*t1, *t2, func_pmpm->Eval(*t1, *t2));
+    h_pmpm_not_weighted->Fill(*t1, *t2);
 
-    if ( currentEvent % evTick == 0 )
+    h_pmpm1_not_weighted->Fill(*t1);
+    h_pmpm2_not_weighted->Fill(*t2);
+
+    Double_t x[1] = {*t1 - *t2};
+
+    deltaT_pmpm_not_weighted->Fill(*t1 - *t2);
+    deltaT_pmpm->Fill(*t1 - *t2, interf_function(x, nullptr));
+
+    if (currentEvent % evTick == 0)
       std::cout << "Processing entry: " << currentEvent << "\r";
 
     currentEvent++;
@@ -226,6 +261,17 @@ int main()
   h_00pm->Write();
   h_pm00->Write();
   h_pmpm->Write();
+  h_00pm_not_weighted->Write();
+  h_pm00_not_weighted->Write();
+  h_pmpm_not_weighted->Write();
+  h_00_not_weighted->Write();
+  h_pm_not_weighted->Write();
+  h_pmpm1_not_weighted->Write();
+  h_pmpm2_not_weighted->Write();
+  deltaT_pm00->Write();
+  deltaT_pmpm->Write();
+  deltaT_pm00_not_weighted->Write();
+  deltaT_pmpm_not_weighted->Write();
   outFile->Close();
 
   return 0;

@@ -18,6 +18,7 @@
 
 #include <TFitResult.h>
 #include <TGraph.h>
+#include <TGraphErrors.h>
 
 namespace fs = boost::filesystem;
 
@@ -164,9 +165,31 @@ int main()
   TH2 *hist_pm002D_base = nullptr;
   TH2 *hist_pmpm2D_base = nullptr;
 
+  TH1 *hist_00 = nullptr;
+  TH1 *hist_pm = nullptr;
+  TH1 *hist_1 = nullptr;
+  TH1 *hist_2 = nullptr;
+
+  TH1 *deltaTpm00_not_weighted = nullptr;
+  TH1 *deltaTpm00_weighted = nullptr;
+
+  TH1 *deltaT12_not_weighted = nullptr;
+  TH1 *deltaT12_weighted = nullptr;
+
   file->GetObject("h_00pm", hist_00pm2D_base);
   file->GetObject("h_pm00", hist_pm002D_base);
   file->GetObject("h_pmpm", hist_pmpm2D_base);
+
+  file->GetObject("h_00_not_weighted", hist_00);
+  file->GetObject("h_pm_not_weighted", hist_pm);
+  file->GetObject("h_pmpm1_not_weighted", hist_1);
+  file->GetObject("h_pmpm2_not_weighted", hist_2);
+
+  file->GetObject("deltaT_pm00_not_weighted", deltaTpm00_not_weighted);
+  file->GetObject("deltaT_pm00", deltaTpm00_weighted);
+  file->GetObject("deltaT_pmpm_not_weighted", deltaT12_not_weighted);
+  file->GetObject("deltaT_pmpm", deltaT12_weighted);
+
 
   if (!hist_00pm2D_base || !hist_pm002D_base || !hist_pmpm2D_base)
   {
@@ -380,16 +403,16 @@ int main()
   fitFunc_RC->SetParLimits(2, 0.0, 310.0);
 
   // Prepare plots for fitted parameters vs t2Max
-  TGraph *graphRe_RA = new TGraph();
+  TGraphErrors *graphRe_RA = new TGraphErrors();
   graphRe_RA->SetTitle("Fitted Re parameter for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
-  TGraph *graphIm_RA = new TGraph();
+  TGraphErrors *graphIm_RA = new TGraphErrors();
   graphIm_RA->SetTitle("Fitted Im parameter for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
   TGraph *graphRange_RA = new TGraph();
   graphRange_RA->SetTitle("Fitted Range parameter for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Range");
 
-  TGraph *graphReError_RA = new TGraph();
+  TGraphErrors *graphReError_RA = new TGraphErrors();
   graphReError_RA->SetTitle("Fitted Re Error for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Re");
-  TGraph *graphImError_RA = new TGraph();
+  TGraphErrors *graphImError_RA = new TGraphErrors();
   graphImError_RA->SetTitle("Fitted Im Error for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
 
   TGraph *graphRe_RB = new TGraph();
@@ -434,7 +457,9 @@ int main()
     if (fitResultRA->IsValid())
     {
       graphRe_RA->SetPoint(graphRe_RA->GetN(), t2Max, fitResultRA->Parameter(0));
+      graphRe_RA->SetPointError(graphRe_RA->GetN() - 1, 0, fitResultRA->Error(0));
       graphIm_RA->SetPoint(graphIm_RA->GetN(), t2Max, fitResultRA->Parameter(1));
+      graphIm_RA->SetPointError(graphIm_RA->GetN() - 1, 0, fitResultRA->Error(1));
       graphRange_RA->SetPoint(graphRange_RA->GetN(), t2Max, fitResultRA->Parameter(2));
 
       graphReError_RA->SetPoint(graphReError_RA->GetN(), t2Max, fitResultRA->Error(0));
@@ -653,6 +678,64 @@ int main()
   legImError->AddEntry(graphImError_RC, "R_C", "lp");
   legImError->Draw();
   cGraphImError_All->SaveAs("img/Fitted_ImError_All_vs_t2Max.svg");
+
+  TCanvas *cSingleTimes00pm = new TCanvas("cSingleTimes00pm", "Single Times Histograms", 1200, 600);
+  cSingleTimes00pm->Divide(2, 1);
+  cSingleTimes00pm->cd(1);
+  gPad->SetLogy();
+  hist_00->SetTitle(Form("t_{00} - %lld events", maxEvents));
+  hist_00->GetYaxis()->SetRangeUser(1, 100.0 * hist_00->GetMaximum());
+  hist_00->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_00->Draw();
+  cSingleTimes00pm->cd(2);
+  gPad->SetLogy();
+  hist_pm->SetTitle(Form("t_{+-} - %lld events", maxEvents));
+  hist_pm->GetYaxis()->SetRangeUser(1, 100.0 * hist_pm->GetMaximum());
+  hist_pm->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_pm->Draw();
+  cSingleTimes00pm->SaveAs(Form("img/single_times_00pm_%lld.svg", maxEvents));
+
+  TCanvas *cSingleTimes12 = new TCanvas("cSingleTimes12", "Single Times Histograms", 1200, 600);
+  cSingleTimes12->Divide(2, 1);
+  cSingleTimes12->cd(1);
+  gPad->SetLogy();
+  hist_1->SetTitle(Form("t_{1} - %lld events", maxEvents));
+  hist_1->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_1->Draw();
+  cSingleTimes12->cd(2);
+  gPad->SetLogy();
+  hist_2->SetTitle(Form("t_{2} - %lld events", maxEvents));
+  hist_2->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_2->Draw();
+  cSingleTimes12->SaveAs(Form("img/single_times_12_%lld.svg", maxEvents));
+
+  TCanvas *cDeltapm00 = new TCanvas("cDeltapm00", "Single Times Histograms", 1200, 600);
+  cDeltapm00->Divide(2, 1);
+  cDeltapm00->cd(1);
+  deltaTpm00_not_weighted->SetTitle(Form("t_{+-} - t_{00} - %lld events", maxEvents));
+  deltaTpm00_not_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaTpm00_not_weighted->GetMaximum());
+  deltaTpm00_not_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
+  deltaTpm00_not_weighted->Draw();
+  cDeltapm00->cd(2);
+  deltaTpm00_weighted->SetTitle(Form("t_{+-} - t_{00} - %lld events", maxEvents));
+  deltaTpm00_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaTpm00_weighted->GetMaximum());
+  deltaTpm00_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
+  deltaTpm00_weighted->Draw();
+  cDeltapm00->SaveAs(Form("img/delta_pm00_%lld.svg", maxEvents));
+
+  TCanvas *cDelta12 = new TCanvas("cDelta12", "Single Times Histograms", 1200, 600);
+  cDelta12->Divide(2, 1);
+  cDelta12->cd(1);
+  deltaT12_not_weighted->SetTitle(Form("t_{1} - t_{2} - %lld events", maxEvents));
+  deltaT12_not_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaT12_not_weighted->GetMaximum());
+  deltaT12_not_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
+  deltaT12_not_weighted->Draw();
+  cDelta12->cd(2);
+  deltaT12_weighted->SetTitle(Form("t_{1} - t_{2} - %lld events", maxEvents));
+  deltaT12_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaT12_weighted->GetMaximum());
+  deltaT12_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
+  deltaT12_weighted->Draw();
+  cDelta12->SaveAs(Form("img/delta_12_%lld.svg", maxEvents));
 
   return 0;
 }
