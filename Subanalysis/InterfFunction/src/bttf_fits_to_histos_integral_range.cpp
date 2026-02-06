@@ -19,6 +19,7 @@
 #include <TFitResult.h>
 #include <TGraph.h>
 #include <TGraphErrors.h>
+#include <cmath>
 
 namespace fs = boost::filesystem;
 
@@ -134,6 +135,22 @@ int main()
 {
   ROOT::EnableImplicitMT(8);
 
+  auto formatExpTitle = [](Long64_t n) -> TString
+  {
+    if (n <= 0)
+      return "0";
+    int exp10 = static_cast<int>(std::round(std::log10(static_cast<double>(n))));
+    return Form("10^{%d}", exp10);
+  };
+
+  auto formatExpFile = [](Long64_t n) -> TString
+  {
+    if (n <= 0)
+      return "0";
+    int exp10 = static_cast<int>(std::round(std::log10(static_cast<double>(n))));
+    return Form("1e%d", exp10);
+  };
+
   std::string rootFolder = "root_files";
   std::map<Long64_t, TString> files = parseHistogramFiles(rootFolder);
 
@@ -148,6 +165,8 @@ int main()
   auto maxEntry = *files.rbegin();
   Long64_t maxEvents = maxEntry.first;
   TString maxFileName = maxEntry.second;
+  TString maxEventsTitle = formatExpTitle(maxEvents);
+  TString maxEventsFile = formatExpFile(maxEvents);
 
   std::cout << "Processing file with max events: " << maxFileName
             << " (" << maxEvents << " events)" << std::endl;
@@ -247,21 +266,21 @@ int main()
   TCanvas *c2D = new TCanvas("c2D", "2D Histograms", 1800, 600);
   c2D->Divide(3, 1);
   c2D->cd(1);
-  hist_00pm2D_base->SetTitle(Form("h_00pm - %lld events", maxEvents));
+  hist_00pm2D_base->SetTitle(Form("h_00pm - %s events", maxEventsTitle.Data()));
   hist_00pm2D_base->GetXaxis()->SetRangeUser(0, 300.0);
   hist_00pm2D_base->GetYaxis()->SetRangeUser(0, 300.0);
   hist_00pm2D_base->Draw("COLZ");
   c2D->cd(2);
-  hist_pm002D_base->SetTitle(Form("h_pm00 - %lld events", maxEvents));
+  hist_pm002D_base->SetTitle(Form("h_pm00 - %s events", maxEventsTitle.Data()));
   hist_pm002D_base->GetXaxis()->SetRangeUser(0, 300.0);
   hist_pm002D_base->GetYaxis()->SetRangeUser(0, 300.0);
   hist_pm002D_base->Draw("COLZ");
   c2D->cd(3);
-  hist_pmpm2D_base->SetTitle(Form("h_pmpm - %lld events", maxEvents));
+  hist_pmpm2D_base->SetTitle(Form("h_pmpm - %s events", maxEventsTitle.Data()));
   hist_pmpm2D_base->GetXaxis()->SetRangeUser(0, 300.0);
   hist_pmpm2D_base->GetYaxis()->SetRangeUser(0, 300.0);
   hist_pmpm2D_base->Draw("COLZ");
-  c2D->SaveAs(Form("img/2D_histograms_%lld.svg", maxEvents));
+  c2D->SaveAs(Form("img/2D_histograms_%s.svg", maxEventsFile.Data()));
 
   // Rysuj projekcje 1D dla różnych t2Max
   TCanvas *cProjX = new TCanvas("cProjX", "1D Projections", 1800, 600);
@@ -683,59 +702,65 @@ int main()
   cSingleTimes00pm->Divide(2, 1);
   cSingleTimes00pm->cd(1);
   gPad->SetLogy();
-  hist_00->SetTitle(Form("t_{00} - %lld events", maxEvents));
+  hist_00->SetTitle(Form("t_{00} - %s events", maxEventsTitle.Data()));
   hist_00->GetYaxis()->SetRangeUser(1, 100.0 * hist_00->GetMaximum());
-  hist_00->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_00->GetXaxis()->SetRangeUser(0, 50.0);
+  hist_00->SetLineColor(kRed);
   hist_00->Draw();
   cSingleTimes00pm->cd(2);
   gPad->SetLogy();
-  hist_pm->SetTitle(Form("t_{+-} - %lld events", maxEvents));
+  hist_pm->SetTitle(Form("t_{+-} - %s events", maxEventsTitle.Data()));
   hist_pm->GetYaxis()->SetRangeUser(1, 100.0 * hist_pm->GetMaximum());
-  hist_pm->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_pm->GetXaxis()->SetRangeUser(0, 50.0);
+  hist_pm->SetLineColor(kRed);
   hist_pm->Draw();
-  cSingleTimes00pm->SaveAs(Form("img/single_times_00pm_%lld.svg", maxEvents));
+  cSingleTimes00pm->SaveAs(Form("img/single_times_00pm_%s.svg", maxEventsFile.Data()));
 
   TCanvas *cSingleTimes12 = new TCanvas("cSingleTimes12", "Single Times Histograms", 1200, 600);
   cSingleTimes12->Divide(2, 1);
   cSingleTimes12->cd(1);
   gPad->SetLogy();
-  hist_1->SetTitle(Form("t_{1} - %lld events", maxEvents));
-  hist_1->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_1->SetTitle(Form("t_{1} - %s events", maxEventsTitle.Data()));
+  hist_1->GetYaxis()->SetRangeUser(1, 100.0 * hist_1->GetMaximum());
+  hist_1->GetXaxis()->SetRangeUser(0, 50.0);
+  hist_1->SetLineColor(kRed);
   hist_1->Draw();
   cSingleTimes12->cd(2);
   gPad->SetLogy();
-  hist_2->SetTitle(Form("t_{2} - %lld events", maxEvents));
-  hist_2->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_2->SetTitle(Form("t_{2} - %s events", maxEventsTitle.Data()));
+  hist_2->GetYaxis()->SetRangeUser(1, 100.0 * hist_2->GetMaximum());
+  hist_2->GetXaxis()->SetRangeUser(0, 50.0);
+  hist_2->SetLineColor(kRed);
   hist_2->Draw();
-  cSingleTimes12->SaveAs(Form("img/single_times_12_%lld.svg", maxEvents));
+  cSingleTimes12->SaveAs(Form("img/single_times_12_%s.svg", maxEventsFile.Data()));
 
   TCanvas *cDeltapm00 = new TCanvas("cDeltapm00", "Single Times Histograms", 1200, 600);
   cDeltapm00->Divide(2, 1);
   cDeltapm00->cd(1);
-  deltaTpm00_not_weighted->SetTitle(Form("t_{+-} - t_{00} - %lld events", maxEvents));
+  deltaTpm00_not_weighted->SetTitle(Form("t_{+-} - t_{00} - %s events", maxEventsTitle.Data()));
   deltaTpm00_not_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaTpm00_not_weighted->GetMaximum());
   deltaTpm00_not_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
   deltaTpm00_not_weighted->Draw();
   cDeltapm00->cd(2);
-  deltaTpm00_weighted->SetTitle(Form("t_{+-} - t_{00} - %lld events", maxEvents));
+  deltaTpm00_weighted->SetTitle(Form("t_{+-} - t_{00} - %s events", maxEventsTitle.Data()));
   deltaTpm00_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaTpm00_weighted->GetMaximum());
   deltaTpm00_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
   deltaTpm00_weighted->Draw();
-  cDeltapm00->SaveAs(Form("img/delta_pm00_%lld.svg", maxEvents));
+  cDeltapm00->SaveAs(Form("img/delta_pm00_%s.svg", maxEventsFile.Data()));
 
   TCanvas *cDelta12 = new TCanvas("cDelta12", "Single Times Histograms", 1200, 600);
   cDelta12->Divide(2, 1);
   cDelta12->cd(1);
-  deltaT12_not_weighted->SetTitle(Form("t_{1} - t_{2} - %lld events", maxEvents));
+  deltaT12_not_weighted->SetTitle(Form("t_{1} - t_{2} - %s events", maxEventsTitle.Data()));
   deltaT12_not_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaT12_not_weighted->GetMaximum());
   deltaT12_not_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
   deltaT12_not_weighted->Draw();
   cDelta12->cd(2);
-  deltaT12_weighted->SetTitle(Form("t_{1} - t_{2} - %lld events", maxEvents));
+  deltaT12_weighted->SetTitle(Form("t_{1} - t_{2} - %s events", maxEventsTitle.Data()));
   deltaT12_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaT12_weighted->GetMaximum());
   deltaT12_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
   deltaT12_weighted->Draw();
-  cDelta12->SaveAs(Form("img/delta_12_%lld.svg", maxEvents));
+  cDelta12->SaveAs(Form("img/delta_12_%s.svg", maxEventsFile.Data()));
 
   return 0;
 }
