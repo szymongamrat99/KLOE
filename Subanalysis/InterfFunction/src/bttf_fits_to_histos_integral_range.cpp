@@ -434,18 +434,18 @@ int main()
   TGraphErrors *graphImError_RA = new TGraphErrors();
   graphImError_RA->SetTitle("Fitted Im Error for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
 
-  TGraph *graphRe_RB = new TGraph();
+  TGraphErrors *graphRe_RB = new TGraphErrors();
   graphRe_RB->SetTitle("Fitted Re parameter for R_B vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
-  TGraph *graphIm_RB = new TGraph();
+  TGraphErrors *graphIm_RB = new TGraphErrors();
   graphIm_RB->SetTitle("Fitted Im parameter for R_B vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
   TGraph *graphReError_RB = new TGraph();
   graphReError_RB->SetTitle("Fitted Re Error for R_B vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Re");
   TGraph *graphImError_RB = new TGraph();
   graphImError_RB->SetTitle("Fitted Im Error for R_B vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
 
-  TGraph *graphRe_RC = new TGraph();
+  TGraphErrors *graphRe_RC = new TGraphErrors();
   graphRe_RC->SetTitle("Fitted Re parameter for R_C vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
-  TGraph *graphIm_RC = new TGraph();
+  TGraphErrors *graphIm_RC = new TGraphErrors();
   graphIm_RC->SetTitle("Fitted Im parameter for R_C vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
   TGraph *graphReError_RC = new TGraph();
   graphReError_RC->SetTitle("Fitted Re Error for R_C vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Re");
@@ -507,7 +507,9 @@ int main()
     if (fitResultRB->IsValid())
     {
       graphRe_RB->SetPoint(graphRe_RB->GetN(), t2Max, fitResultRB->Parameter(0));
+      graphRe_RB->SetPointError(graphRe_RB->GetN() - 1, 0, fitResultRB->Error(0));
       graphIm_RB->SetPoint(graphIm_RB->GetN(), t2Max, fitResultRB->Parameter(1));
+      graphIm_RB->SetPointError(graphIm_RB->GetN() - 1, 0, fitResultRB->Error(1));
 
       graphReError_RB->SetPoint(graphReError_RB->GetN(), t2Max, fitResultRB->Error(0));
       graphImError_RB->SetPoint(graphImError_RB->GetN(), t2Max, fitResultRB->Error(1));
@@ -535,7 +537,9 @@ int main()
     if (fitResultRC->IsValid())
     {
       graphRe_RC->SetPoint(graphRe_RC->GetN(), t2Max, fitResultRC->Parameter(0));
+      graphRe_RC->SetPointError(graphRe_RC->GetN() - 1, 0, fitResultRC->Error(0));
       graphIm_RC->SetPoint(graphIm_RC->GetN(), t2Max, fitResultRC->Parameter(1));
+      graphIm_RC->SetPointError(graphIm_RC->GetN() - 1, 0, fitResultRC->Error(1));
 
       graphReError_RC->SetPoint(graphReError_RC->GetN(), t2Max, fitResultRC->Error(0));
       graphImError_RC->SetPoint(graphImError_RC->GetN(), t2Max, fitResultRC->Error(1));
@@ -631,17 +635,49 @@ int main()
   graphRe_RA->Draw("AP");
   cGraphRe_RA->SaveAs("img/Fitted_Re_RA_vs_t2Max.svg");
 
+  TCanvas *cGraphRe_RB = new TCanvas("cGraphRe_RB", "Fitted Re parameter for R_B vs t2Max", 800, 600);
+  graphRe_RB->Draw("AP");
+  cGraphRe_RB->SaveAs("img/Fitted_Re_RB_vs_t2Max.svg");
+
+  TCanvas *cGraphRe_RC = new TCanvas("cGraphRe_RC", "Fitted Re parameter for R_C vs t2Max", 800, 600);
+  graphRe_RC->Draw("AP");
+  cGraphRe_RC->SaveAs("img/Fitted_Re_RC_vs_t2Max.svg");
+
   TCanvas *cGraphIm_RA = new TCanvas("cGraphIm_RA", "Fitted Im parameter for R_A vs t2Max", 800, 600);
   graphIm_RA->Draw("AP");
   cGraphIm_RA->SaveAs("img/Fitted_Im_RA_vs_t2Max.svg");
+
+  TCanvas *cGraphIm_RB = new TCanvas("cGraphIm_RB", "Fitted Im parameter for R_B vs t2Max", 800, 600);
+  graphIm_RB->Draw("AP");
+  cGraphIm_RB->SaveAs("img/Fitted_Im_RB_vs_t2Max.svg");
+
+  TCanvas *cGraphIm_RC = new TCanvas("cGraphIm_RC", "Fitted Im parameter for R_C vs t2Max", 800, 600);
+  graphIm_RC->Draw("AP");
+  cGraphIm_RC->SaveAs("img/Fitted_Im_RC_vs_t2Max.svg");
 
   TCanvas *cGraphReError_RA = new TCanvas("cGraphReError_RA", "Error on Re parameter for R_A vs t2Max", 800, 600);
   graphReError_RA->Draw("AP");
   cGraphReError_RA->SaveAs("img/Fitted_ReError_RA_vs_t2Max.svg");
 
+  TCanvas *cGraphReError_RB = new TCanvas("cGraphReError_RB", "Error on Re parameter for R_B vs t2Max", 800, 600);
+  graphReError_RB->Draw("AP");
+  cGraphReError_RB->SaveAs("img/Fitted_ReError_RB_vs_t2Max.svg");
+
+  TCanvas *cGraphReError_RC = new TCanvas("cGraphReError_RC", "Error on Re parameter for R_C vs t2Max", 800, 600);
+  graphReError_RC->Draw("AP");
+  cGraphReError_RC->SaveAs("img/Fitted_ReError_RC_vs_t2Max.svg");
+
   TCanvas *cGraphImError_RA = new TCanvas("cGraphImError_RA", "Error on Im parameter for R_A vs t2Max", 800, 600);
   graphImError_RA->Draw("AP");
   cGraphImError_RA->SaveAs("img/Fitted_ImError_RA_vs_t2Max.svg");
+
+  TCanvas *cGraphImError_RB = new TCanvas("cGraphImError_RB", "Error on Im parameter for R_B vs t2Max", 800, 600);
+  graphImError_RB->Draw("AP");
+  cGraphImError_RB->SaveAs("img/Fitted_ImError_RB_vs_t2Max.svg");
+
+  TCanvas *cGraphImError_RC = new TCanvas("cGraphImError_RC", "Error on Im parameter for R_C vs t2Max", 800, 600);
+  graphImError_RC->Draw("AP");
+  cGraphImError_RC->SaveAs("img/Fitted_ImError_RC_vs_t2Max.svg");
 
   // Wykresy zbiorowe - wszystkie Re i Im na jednym wykresie
   TCanvas *cGraphRe_All = new TCanvas("cGraphRe_All", "Fitted Re parameter vs t2Max", 1200, 800);
