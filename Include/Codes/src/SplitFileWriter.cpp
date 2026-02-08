@@ -9,7 +9,8 @@ SplitFileWriter::SplitFileWriter(const std::string &baseName,
                                  const std::string &outputDir,
                                  const std::string &logFile,
                                  Controls::FileType fileType,
-                                 bool singleFile)
+                                 bool singleFile,
+                                 Int_t jobNumber)
     : _baseName(baseName),
       _maxSizeBytes(maxSizeBytes),
       _splitByRun(splitByRun),
@@ -34,7 +35,8 @@ SplitFileWriter::SplitFileWriter(const std::string &baseName,
   // Jeśli włączony jest tryb single file, ustaw _fileCounter na max istniejący numer + 1
   if (_singleFile)
   {
-    _fileCounter = GetMaxFileNumber() + 1;
+    // _fileCounter = GetMaxFileNumber() + 1;
+    _fileCounter = jobNumber; // Używamy jobNumber jako numeru pliku, aby uniknąć konfliktów
   }
   
   _logStream.open(_logFile, std::ios::out | std::ios::app);
