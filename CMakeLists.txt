@@ -80,7 +80,7 @@ target_link_libraries(KLSPM00 PRIVATE
   ${CURL_LIBRARIES}
   ${ROOT_LIBRARIES}
   LibRec
-  LibFort
+  #  LibFort
   )
 
 # Optional output directories
