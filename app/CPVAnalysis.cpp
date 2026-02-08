@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
   KLOE::pm00 eventAnalysis;
   // -------------------------------------------------------------------
   // Set logger for error logging
-  std::string logFilename = Paths::logsCNAFDir + "general.prog_" + eventAnalysis.getCurrentTimestamp() + ".log";
+  std::string logFilename = Paths::logsCNAFDir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
   ErrorHandling::ErrorLogs logger(logFilename);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------

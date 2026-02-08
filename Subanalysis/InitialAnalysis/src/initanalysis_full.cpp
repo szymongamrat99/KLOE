@@ -604,6 +604,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         baseKin.trk2MC[3] = trkMC[1][3];
       }
 
+      // Keeping the time ordering of the kaons
       if (mctruth == 7)
       {
         for (Int_t iter = 0; iter < 4; iter++)
@@ -624,6 +625,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           }
         }
       }
+      //////////////////////////////////////////////////////////////////////////////
     }
     else
     {
@@ -635,7 +637,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       baseKin.Knemc = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
       baseKin.trkMC[0] = {0.0f, 0.0f, 0.0f, 0.0f};
       baseKin.trkMC[1] = {0.0f, 0.0f, 0.0f, 0.0f};
-      // // baseKin.goodClusIndex = {0, 0, 0, 0};
+      // baseKin.goodClusIndex = {0, 0, 0, 0};
       baseKin.trkKSmc[0] = {0.0f, 0.0f, 0.0f, 0.0f};
       baseKin.trkKSmc[1] = {0.0f, 0.0f, 0.0f, 0.0f};
       baseKin.trkKLmc[0] = {0.0f, 0.0f, 0.0f, 0.0f};
