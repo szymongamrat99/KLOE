@@ -9,5 +9,9 @@ Double_t interf_function_00pm(const Double_t *x, const Double_t *par);
 Double_t interf_function_pm00(const Double_t *x, const Double_t *par);
 Double_t interf_function_pmpm(const Double_t *x, const Double_t *par);
 
+Double_t interf_function_00pm_to_fit_mock(const Double_t *x, const Double_t *par);
+Double_t interf_function_pm00_to_fit_mock(const Double_t *x, const Double_t *par);
+Double_t interf_function_pmpm_to_fit_mock(const Double_t *x, const Double_t *par);
+
 
 #endif

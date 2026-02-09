@@ -15,6 +15,7 @@
 #include <boost/progress.hpp>
 #include <TLegend.h>
 #include <TPaveText.h>
+#include <TLine.h>
 
 #include <TFitResult.h>
 #include <TGraph.h>
@@ -209,7 +210,6 @@ int main()
   file->GetObject("deltaT_pmpm_not_weighted", deltaT12_not_weighted);
   file->GetObject("deltaT_pmpm", deltaT12_weighted);
 
-
   if (!hist_00pm2D_base || !hist_pm002D_base || !hist_pmpm2D_base)
   {
     std::cerr << "ERROR: Could not load histograms from file!" << std::endl;
@@ -323,6 +323,24 @@ int main()
 
   TF2 *func_pmpm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pmpm, 0.0, 300, 0.0, 300, 2);
 
+  // Check if the weighting is done properly
+
+  TF2 *func_00pm_mock = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2}) mock;t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_00pm_to_fit_mock, 0.0, 300, 0.0, 300, 4);
+  func_00pm_mock->SetParameters(1 - 4 * reParam, 1 + 2 * reParam, 1 - reParam, 3 * imParam);
+  TF2 *func_pm00_mock = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2}) mock;t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pm00_to_fit_mock, 0.0, 300, 0.0, 300, 4);
+  func_pm00_mock->SetParameters(1 + 2 * reParam, 1 - 4 * reParam, 1 - reParam, 3 * imParam);
+  TF2 *func_pmpm_mock = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2}) mock;t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pmpm_to_fit_mock, 0.0, 300, 0.0, 300, 3);
+  func_pmpm_mock->SetParameters(1 + 2 * reParam, 1 + 2 * reParam, 1 + 2 * reParam);
+
+  std::cout << "Mock function fitting:" << std::endl;
+  hist_00pm2D_base->Fit(func_00pm_mock, "RSEM");
+  hist_pm002D_base->Fit(func_pm00_mock, "RSEM");
+  hist_pmpm2D_base->Fit(func_pmpm_mock, "RSEM");
+
+  std::cout << "Chi2 for 00pm mock fit: " << func_00pm_mock->GetChisquare() << std::endl;
+  std::cout << "Chi2 for pm00 mock fit: " << func_pm00_mock->GetChisquare() << std::endl;
+  std::cout << "Chi2 for pmpm mock fit: " << func_pmpm_mock->GetChisquare() << std::endl;
+
   auto func_00pm_1D = [&](Double_t *x, Double_t *par)
   {
     Double_t current_x = x[0];
@@ -403,23 +421,23 @@ int main()
   TF1 *fitFunc_RA = new TF1("fitFunc_RA", func_pmpm_00pm_1D, 0.0, 20.0, 3);
   fitFunc_RA->SetParameters(reParam, imParam, 300.0);
   fitFunc_RA->SetParNames("Re", "Im", "Range");
-  fitFunc_RA->SetParLimits(0, reParam - 0.005, reParam + 0.005);
-  fitFunc_RA->SetParLimits(1, imParam - 0.005, imParam + 0.005);
-  fitFunc_RA->SetParLimits(2, 0.0, 310.0);
+  fitFunc_RA->SetParLimits(0, reParam - 0.1 * reParam, reParam + 0.1 * reParam);
+  fitFunc_RA->SetParLimits(1, imParam - 0.1 * abs(imParam), imParam + 0.1 * abs(imParam));
+  fitFunc_RA->SetParLimits(2, 0.0, 330.0);
 
   TF1 *fitFunc_RB = new TF1("fitFunc_RB", func_pmpm_pm00_1D, 0.0, 20.0, 3);
   fitFunc_RB->SetParameters(reParam, imParam, 300.0);
   fitFunc_RB->SetParNames("Re", "Im", "Range");
-  fitFunc_RB->SetParLimits(0, reParam - 0.005, reParam + 0.005);
-  fitFunc_RB->SetParLimits(1, imParam - 0.005, imParam + 0.005);
-  fitFunc_RB->SetParLimits(2, 0.0, 310.0);
+  fitFunc_RB->SetParLimits(0, reParam - 0.1 * reParam, reParam + 0.1 * reParam);
+  fitFunc_RB->SetParLimits(1, imParam - 0.1 * abs(imParam), imParam + 0.1 * abs(imParam));
+  fitFunc_RB->SetParLimits(2, 0.0, 330.0);
 
   TF1 *fitFunc_RC = new TF1("fitFunc_RC", func_RA_RB_1D, 0.0, 20.0, 3);
   fitFunc_RC->SetParameters(reParam, imParam, 300.0);
   fitFunc_RC->SetParNames("Re", "Im", "Range");
-  fitFunc_RC->SetParLimits(0, reParam - 0.005, reParam + 0.005);
-  fitFunc_RC->SetParLimits(1, imParam - 0.005, imParam + 0.005);
-  fitFunc_RC->SetParLimits(2, 0.0, 310.0);
+  fitFunc_RC->SetParLimits(0, reParam - 0.1 * reParam, reParam + 0.1 * reParam);
+  fitFunc_RC->SetParLimits(1, imParam - 0.1 * abs(imParam), imParam + 0.1 * abs(imParam));
+  fitFunc_RC->SetParLimits(2, 0.0, 330.0);
 
   // Prepare plots for fitted parameters vs t2Max
   TGraphErrors *graphRe_RA = new TGraphErrors();
@@ -458,6 +476,10 @@ int main()
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
+  TLine *lineZero = new TLine(0, 0, 300., 0);
+  lineZero->SetLineColor(kBlack);
+  lineZero->SetLineStyle(2);
+
   TFitResultPtr fitResultRA, fitResultRB, fitResultRC;
   for (Double_t t2Max : t2MaxValues)
   {
@@ -469,17 +491,16 @@ int main()
     cR->cd(1);
     hist_RA[t2Max]->SetTitle(Form("R_A - t_{2}^{max}=%.0f #tau_{S}", t2Max));
     hist_RA[t2Max]->GetXaxis()->SetRangeUser(0, 20);
-    fitResultRA = hist_RA[t2Max]->Fit(fitFunc_RA, "RSME");
+    fitResultRA = hist_RA[t2Max]->Fit(fitFunc_RA, "RS");
 
     hist_RA[t2Max]->Draw();
-
     if (fitResultRA->IsValid())
     {
-      graphRe_RA->SetPoint(graphRe_RA->GetN(), t2Max, fitResultRA->Parameter(0));
+      graphRe_RA->SetPoint(graphRe_RA->GetN(), t2Max, fitResultRA->Parameter(0) - reParam);
       graphRe_RA->SetPointError(graphRe_RA->GetN() - 1, 0, fitResultRA->Error(0));
-      graphIm_RA->SetPoint(graphIm_RA->GetN(), t2Max, fitResultRA->Parameter(1));
+      graphIm_RA->SetPoint(graphIm_RA->GetN(), t2Max, fitResultRA->Parameter(1) - imParam);
       graphIm_RA->SetPointError(graphIm_RA->GetN() - 1, 0, fitResultRA->Error(1));
-      graphRange_RA->SetPoint(graphRange_RA->GetN(), t2Max, fitResultRA->Parameter(2));
+      graphRange_RA->SetPoint(graphRange_RA->GetN(), t2Max, fitResultRA->Parameter(2) - t2Max);
 
       graphReError_RA->SetPoint(graphReError_RA->GetN(), t2Max, fitResultRA->Error(0));
       graphImError_RA->SetPoint(graphImError_RA->GetN(), t2Max, fitResultRA->Error(1));
@@ -506,9 +527,9 @@ int main()
 
     if (fitResultRB->IsValid())
     {
-      graphRe_RB->SetPoint(graphRe_RB->GetN(), t2Max, fitResultRB->Parameter(0));
+      graphRe_RB->SetPoint(graphRe_RB->GetN(), t2Max, fitResultRB->Parameter(0) - reParam);
       graphRe_RB->SetPointError(graphRe_RB->GetN() - 1, 0, fitResultRB->Error(0));
-      graphIm_RB->SetPoint(graphIm_RB->GetN(), t2Max, fitResultRB->Parameter(1));
+      graphIm_RB->SetPoint(graphIm_RB->GetN(), t2Max, fitResultRB->Parameter(1) - imParam);
       graphIm_RB->SetPointError(graphIm_RB->GetN() - 1, 0, fitResultRB->Error(1));
 
       graphReError_RB->SetPoint(graphReError_RB->GetN(), t2Max, fitResultRB->Error(0));
@@ -536,9 +557,9 @@ int main()
 
     if (fitResultRC->IsValid())
     {
-      graphRe_RC->SetPoint(graphRe_RC->GetN(), t2Max, fitResultRC->Parameter(0));
+      graphRe_RC->SetPoint(graphRe_RC->GetN(), t2Max, fitResultRC->Parameter(0) - reParam);
       graphRe_RC->SetPointError(graphRe_RC->GetN() - 1, 0, fitResultRC->Error(0));
-      graphIm_RC->SetPoint(graphIm_RC->GetN(), t2Max, fitResultRC->Parameter(1));
+      graphIm_RC->SetPoint(graphIm_RC->GetN(), t2Max, fitResultRC->Parameter(1) - imParam);
       graphIm_RC->SetPointError(graphIm_RC->GetN() - 1, 0, fitResultRC->Error(1));
 
       graphReError_RC->SetPoint(graphReError_RC->GetN(), t2Max, fitResultRC->Error(0));
@@ -632,26 +653,32 @@ int main()
 
   // Rysuj wyniki fitów vs t2Max - pojedyncze wykresy dla każdego ratio
   TCanvas *cGraphRe_RA = new TCanvas("cGraphRe_RA", "Fitted Re parameter for R_A vs t2Max", 800, 600);
+  lineZero->Draw();
   graphRe_RA->Draw("AP");
   cGraphRe_RA->SaveAs("img/Fitted_Re_RA_vs_t2Max.svg");
 
   TCanvas *cGraphRe_RB = new TCanvas("cGraphRe_RB", "Fitted Re parameter for R_B vs t2Max", 800, 600);
+  lineZero->Draw();
   graphRe_RB->Draw("AP");
   cGraphRe_RB->SaveAs("img/Fitted_Re_RB_vs_t2Max.svg");
 
   TCanvas *cGraphRe_RC = new TCanvas("cGraphRe_RC", "Fitted Re parameter for R_C vs t2Max", 800, 600);
+  lineZero->Draw();
   graphRe_RC->Draw("AP");
   cGraphRe_RC->SaveAs("img/Fitted_Re_RC_vs_t2Max.svg");
 
   TCanvas *cGraphIm_RA = new TCanvas("cGraphIm_RA", "Fitted Im parameter for R_A vs t2Max", 800, 600);
+  lineZero->Draw();
   graphIm_RA->Draw("AP");
   cGraphIm_RA->SaveAs("img/Fitted_Im_RA_vs_t2Max.svg");
 
   TCanvas *cGraphIm_RB = new TCanvas("cGraphIm_RB", "Fitted Im parameter for R_B vs t2Max", 800, 600);
+  lineZero->Draw();
   graphIm_RB->Draw("AP");
   cGraphIm_RB->SaveAs("img/Fitted_Im_RB_vs_t2Max.svg");
 
   TCanvas *cGraphIm_RC = new TCanvas("cGraphIm_RC", "Fitted Im parameter for R_C vs t2Max", 800, 600);
+  lineZero->Draw();
   graphIm_RC->Draw("AP");
   cGraphIm_RC->SaveAs("img/Fitted_Im_RC_vs_t2Max.svg");
 

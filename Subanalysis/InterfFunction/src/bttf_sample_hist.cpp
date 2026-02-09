@@ -13,6 +13,7 @@
 #include <TTreeReaderValue.h>
 #include <boost/filesystem.hpp>
 #include <boost/progress.hpp>
+#include <TRandom3.h>
 
 namespace fs = boost::filesystem;
 
@@ -204,19 +205,31 @@ int main()
   const Long64_t evTick = 1000000;
   Long64_t currentEvent = 0;
 
+  Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
+  Double_t gammaL = PhysicsConstants::tau_S_nonCPT / PhysicsConstants::tau_L;
+  
+  auto double_exp = [gammaS, gammaL](Double_t t1, Double_t t2) {
+    return exp(-gammaS * t1 - gammaL * t2) + exp(-gammaL * t1 - gammaS * t2);
+  };
+
+  TRandom3 randGen(0); // Inicjalizacja generatora losowego z losowym seedem
+
   while (reader_00pm.Next())
   {
     if (currentEvent >= nEvents)
       break;
 
-    h_00pm->Fill(*tne, *tch, func_00pm->Eval(*tne, *tch));
-    h_pm00->Fill(*tch, *tne, func_pm00->Eval(*tch, *tne));
+    Double_t weight00pm = func_00pm->Eval(*tne, *tch) / (double_exp(*tne, *tch));
+    Double_t weightpm00 = func_pm00->Eval(*tch, *tne) / (double_exp(*tch, *tne));
+
+    h_00pm->Fill(*tne, *tch, weight00pm);
+    h_pm00->Fill(*tch, *tne, weightpm00);
 
     h_00pm_not_weighted->Fill(*tne, *tch);
     h_pm00_not_weighted->Fill(*tch, *tne);
 
-    h_00_not_weighted->Fill(*tne);
-    h_pm_not_weighted->Fill(*tch);
+    h_00_not_weighted->Fill(*tne, weight00pm);
+    h_pm_not_weighted->Fill(*tch, weight00pm);
 
     Double_t x[1] = {*tch - *tne};
 
@@ -236,11 +249,16 @@ int main()
     if (currentEvent >= nEvents)
       break;
 
-    h_pmpm->Fill(*t1, *t2, func_pmpm->Eval(*t1, *t2));
+    // Double_t t1_random = randGen.Uniform(t1Min, t1Max);
+    // Double_t t2_random = randGen.Uniform(t2Min, t2Max);
+
+    Double_t weight = func_pmpm->Eval(*t1, *t2) / (double_exp(*t1, *t2));
+
+    h_pmpm->Fill(*t1, *t2, weight);
     h_pmpm_not_weighted->Fill(*t1, *t2);
 
-    h_pmpm1_not_weighted->Fill(*t1);
-    h_pmpm2_not_weighted->Fill(*t2);
+    h_pmpm1_not_weighted->Fill(*t1, weight);
+    h_pmpm2_not_weighted->Fill(*t2, weight);
 
     Double_t x[1] = {*t1 - *t2};
 
