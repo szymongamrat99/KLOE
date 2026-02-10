@@ -191,7 +191,7 @@ Double_t interf_function_00pm_to_fit_mock(const Double_t *x, const Double_t *par
               (par[2] * cos(DMass * dt) +
                par[3] * sin(DMass * dt));
 
-  return 0.5 * pow(Epsilon, 2) * Value;// * PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pi0pi0;
+  return par[4] * 0.5 * pow(Epsilon, 2) * Value;// * PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pi0pi0;
 }
 
 Double_t interf_function_pm00_to_fit_mock(const Double_t *x, const Double_t *par)
@@ -225,7 +225,7 @@ Double_t interf_function_pm00_to_fit_mock(const Double_t *x, const Double_t *par
               (par[2] * cos(DMass * dt) -
                par[3] * sin(DMass * dt));
 
-  return 0.5 * pow(Epsilon, 2) * Value;// * PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pi0pi0;
+  return par[4] * 0.5 * pow(Epsilon, 2) * Value;// * PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pi0pi0;
 }
 
 Double_t interf_function_pmpm_to_fit_mock(const Double_t *x, const Double_t *par)
@@ -257,5 +257,5 @@ Double_t interf_function_pmpm_to_fit_mock(const Double_t *x, const Double_t *par
           par[1] * exp(-GammaKs * t1 - GammaKl * t2) -
           2. * par[2] * exp(-0.5 * Gamma * (t1 + t2)) * cos(DMass * dt));
 
-  return 0.5 * pow(Epsilon, 2) * Value;// * pow(PhysicsConstants::br_ks_pippim, 2);
+  return par[3] * 0.5 * pow(Epsilon, 2) * Value;// * pow(PhysicsConstants::br_ks_pippim, 2);
 }

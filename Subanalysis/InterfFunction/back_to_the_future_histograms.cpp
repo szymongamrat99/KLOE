@@ -10,19 +10,19 @@
 
 struct Config
 {
-  Double_t  tMinX = 0.0,
-            tMinY = 0.0,
-            tMaxX = 20.0,
-            tMaxY = 300.0,
-            resT1 = 1.0,
-            resT2 = 1.0;
+  Double_t tMinX = 0.0,
+           tMinY = 0.0,
+           tMaxX = 20.0,
+           tMaxY = 300.0,
+           resT1 = 1.0,
+           resT2 = 1.0;
 
   Int_t binsX = (tMaxX - tMinX) / resT1,
         binsY = (tMaxY - tMinY) / resT2;
 
   Double_t
-          physicsRe = PhysicsConstants::Re,
-          physicsIm = PhysicsConstants::Im_nonCPT;
+      physicsRe = PhysicsConstants::Re,
+      physicsIm = PhysicsConstants::Im_nonCPT;
 };
 
 int main(int argc, char *argv[])
@@ -44,11 +44,13 @@ int main(int argc, char *argv[])
   TChain *chain_pmpm = new TChain("h1");
   chain_pmpm->Add(pmpm_dir);
 
-  Int_t binsX = (Config::tMaxX - Config::tMinX) / Config.resT1, binsY = (Config::tMaxY - Config::tMinY) / Config.resT2;
+  Config config;
 
-  TH2 *h_pm00_2D = new TH2F("h_pm00_2D", ";t_{1} [#tau_{S}];t_{2} [#tau_{S}]", binsX, tMinX, tMaxX, binsY, tMinY, tMaxY);
-  TH2 *h_00pm_2D = new TH2F("h_00pm_2D", ";t_{1} [#tau_{S}];t_{2} [#tau_{S}]", binsX, tMinX, tMaxX, binsY, tMinY, tMaxY);
-  TH2 *h_pmpm_2D = new TH2F("h_pmpm_2D", ";t_{1} [#tau_{S}];t_{2} [#tau_{S}]", binsX, tMinX, tMaxX, binsY, tMinY, tMaxY);
+  Int_t binsX = (config.tMaxX - config.tMinX) / config.resT1, binsY = (config.tMaxY - config.tMinY) / config.resT2;
+
+  TH2 *h_pm00_2D = new TH2F("h_pm00_2D", ";t_{1} [#tau_{S}];t_{2} [#tau_{S}]", binsX, config.tMinX, config.tMaxX, binsY, config.tMinY, config.tMaxY);
+  TH2 *h_00pm_2D = new TH2F("h_00pm_2D", ";t_{1} [#tau_{S}];t_{2} [#tau_{S}]", binsX, config.tMinX, config.tMaxX, binsY, config.tMinY, config.tMaxY);
+  TH2 *h_pmpm_2D = new TH2F("h_pmpm_2D", ";t_{1} [#tau_{S}];t_{2} [#tau_{S}]", binsX, config.tMinX, config.tMaxX, binsY, config.tMinY, config.tMaxY);
 
   Double_t resDelta = 1.5,
            deltaMin = -50.0,
@@ -82,26 +84,34 @@ int main(int argc, char *argv[])
 
   switch (useDefault)
   {
-    case 0:
-    {
-      Printf("Set Re: ");
-      std::cin >> par[0];
-      Printf("Set Im (in rad): ");
-      std::cin >> par[1];
-      break;
-    }
-    case 1:
-    {
-      par[0] = PhysicsConstants::Re;
-      par[1] = PhysicsConstants::Im_nonCPT;
-      break;
-    }
-    default:
-    {
-      Printf("Wrong option selected. Exiting...");
-      return 1;
-    }
+  case 0:
+  {
+    Printf("Set Re: ");
+    std::cin >> par[0];
+    Printf("Set Im (in rad): ");
+    std::cin >> par[1];
+    break;
   }
+  case 1:
+  {
+    par[0] = PhysicsConstants::Re;
+    par[1] = PhysicsConstants::Im_nonCPT;
+    break;
+  }
+  default:
+  {
+    Printf("Wrong option selected. Exiting...");
+    return 1;
+  }
+  }
+
+  Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
+  Double_t gammaL = PhysicsConstants::tau_S_nonCPT / PhysicsConstants::tau_L;
+
+  auto double_exp = [gammaS, gammaL](Double_t t1, Double_t t2)
+  {
+    return exp(-gammaS * t1 - gammaL * t2) + exp(-gammaL * t1 - gammaS * t2);
+  };
 
   while (reader.Next())
   {
@@ -120,14 +130,14 @@ int main(int argc, char *argv[])
       x[0] = t1;
       x[1] = t2;
 
-      weight = interf_function_pm00(x, par);
+      weight = interf_function_pm00(x, par) / double_exp(t1, t2);
     }
     else
     {
       x[0] = t2;
       x[1] = t1;
 
-      weight = interf_function_00pm(x, par);
+      weight = interf_function_00pm(x, par) / double_exp(t1, t2);
     }
 
     h_pm00_2D->Fill(t1, t2, weight);
@@ -140,14 +150,14 @@ int main(int argc, char *argv[])
       x[0] = t1;
       x[1] = t2;
 
-      weight = interf_function_00pm(x, par);
+      weight = interf_function_00pm(x, par) / double_exp(t1, t2);
     }
     else
     {
       x[0] = t2;
       x[1] = t1;
 
-      weight = interf_function_pm00(x, par);
+      weight = interf_function_pm00(x, par) / double_exp(t1, t2);
     }
 
     h_delta->Fill(t2 - t1, weight);
@@ -181,14 +191,14 @@ int main(int argc, char *argv[])
       x[0] = t1;
       x[1] = t2;
 
-      weight = interf_function_pmpm(x, par);
+      weight = interf_function_pmpm(x, par) / double_exp(t1, t2);
     }
     else
     {
       x[0] = t2;
       x[1] = t1;
 
-      weight = interf_function_pmpm(x, par);
+      weight = interf_function_pmpm(x, par) / double_exp(t1, t2);
     }
 
     h_delta_pmpm->Fill(t2 - t1, weight);
@@ -202,7 +212,7 @@ int main(int argc, char *argv[])
 
   Int_t binypmpmForpm00 = -1, binypmpmFor00pm = -1, binypm00 = -1, biny00pm = -1;
 
-  Double_t integrationMax = tMaxY; // Set integration max to histogram max y
+  Double_t integrationMax = config.tMaxY; // Set integration max to histogram max y
 
   Bool_t chooseIntegration = kTRUE;
 
@@ -239,11 +249,11 @@ skipIntegrationInput:
   h_pmpm_for00pm_projX->SetTitle(";t_{1} [#tau_{S}];Counts");
   h_00pm_projX->SetTitle(";t_{1} [#tau_{S}];Counts");
 
-  h_pmpm_forpm00_projX->Scale(1 / h_pmpm_forpm00_projX->GetMaximum());
-  h_pm00_projX->Scale(1 / h_pm00_projX->GetMaximum());
+  h_pmpm_forpm00_projX->Scale(1 / h_pmpm_forpm00_projX->Integral(-1, h_pmpm_forpm00_projX->GetNbinsX() + 1));
+  h_pm00_projX->Scale(1 / h_pm00_projX->Integral(-1, h_pm00_projX->GetNbinsX() + 1));
 
-  h_pmpm_for00pm_projX->Scale(1 / h_pmpm_for00pm_projX->GetMaximum());
-  h_00pm_projX->Scale(1 / h_00pm_projX->GetMaximum());
+  h_pmpm_for00pm_projX->Scale(1 / h_pmpm_for00pm_projX->Integral(-1, h_pmpm_for00pm_projX->GetNbinsX() + 1));
+  h_00pm_projX->Scale(1 / h_00pm_projX->Integral(-1, h_00pm_projX->GetNbinsX() + 1));
 
   /////////////////////////////////////////////////////////////////////////
   // Cloning of histograms for BTTF analysis

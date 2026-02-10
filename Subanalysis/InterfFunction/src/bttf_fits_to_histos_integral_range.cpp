@@ -134,6 +134,23 @@ std::map<Long64_t, TString> parseHistogramFiles(const std::string &folderPath)
 
 int main()
 {
+  std::cout << "What addition for the folder name do you want to use? (e.g. 'integral_range' or 'fit_range')" << std::endl;
+  std::string folderAddition = "";
+  std::getline(std::cin, folderAddition);
+
+  TString imgFolderPath = "img/integral_range/" + folderAddition;
+
+  if (folderAddition == "")
+  {
+    imgFolderPath = "img/integral_range";
+  }
+
+  if (!fs::exists((std::string)imgFolderPath))
+  {
+    fs::create_directories((std::string)imgFolderPath);
+    std::cout << "Created directory: " << imgFolderPath << std::endl;
+  }
+
   ROOT::EnableImplicitMT(8);
 
   auto formatExpTitle = [](Long64_t n) -> TString
@@ -152,7 +169,22 @@ int main()
     return Form("1e%d", exp10);
   };
 
-  std::string rootFolder = "root_files";
+  TString fileMethodAddition[3] = {"exp_not_corrected", "exp_corrected", "uniform_weighted"};
+
+  std::cout << "Choose method: " << std::endl;
+  std::cout << "  [0] Use exponentially generated times (no initial weight correction)." << std::endl;
+  std::cout << "  [1] Use exponentially generated times (corrected weight)." << std::endl;
+  std::cout << "  [2] Use unifomly generated times weighted with interference." << std::endl;
+  int methodChoice = 0;
+  std::cin >> methodChoice;
+
+  if(methodChoice < 0 || methodChoice > 2)
+  {
+    std::cerr << "Błąd: nieprawidłowy wybór metody!" << std::endl;
+    return 1;
+  }
+
+  std::string rootFolder = "root_files/" + (std::string)fileMethodAddition[methodChoice];
   std::map<Long64_t, TString> files = parseHistogramFiles(rootFolder);
 
   // Guard clause - sprawdź czy są pliki
@@ -280,7 +312,7 @@ int main()
   hist_pmpm2D_base->GetXaxis()->SetRangeUser(0, 300.0);
   hist_pmpm2D_base->GetYaxis()->SetRangeUser(0, 300.0);
   hist_pmpm2D_base->Draw("COLZ");
-  c2D->SaveAs(Form("img/2D_histograms_%s.svg", maxEventsFile.Data()));
+  c2D->SaveAs(Form(imgFolderPath + "/2D_histograms_%s.svg", maxEventsFile.Data()));
 
   // Rysuj projekcje 1D dla różnych t2Max
   TCanvas *cProjX = new TCanvas("cProjX", "1D Projections", 1800, 600);
@@ -308,38 +340,32 @@ int main()
     hist_pmpmRA2D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 300.0);
     hist_pmpmRA2D_projX[t2Max]->Draw();
 
-    cProjX->SaveAs(Form("img/1DprojX_histograms_t2Max%.0f.svg", t2Max));
+    cProjX->SaveAs(Form(imgFolderPath + "/1DprojX_histograms_t2Max%.0f.svg", t2Max));
   }
 
   /////////////////////////////////////////////////////////////////
-  // Fitting ratios R_A, R_B, R_C
+  // Fitting ratios R_{A}, R_{B}, R_{C}
 
   Double_t reParam = PhysicsConstants::Re;
   Double_t imParam = PhysicsConstants::Im_nonCPT;
 
   TF2 *func_00pm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_00pm, 0.0, 300, 0.0, 300, 2);
+  func_00pm->SetParameters(reParam, imParam);
 
   TF2 *func_pm00 = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pm00, 0.0, 300, 0.0, 300, 2);
+  func_pm00->SetParameters(reParam, imParam);
 
   TF2 *func_pmpm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pmpm, 0.0, 300, 0.0, 300, 2);
-
-  // Check if the weighting is done properly
-
-  TF2 *func_00pm_mock = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2}) mock;t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_00pm_to_fit_mock, 0.0, 300, 0.0, 300, 4);
-  func_00pm_mock->SetParameters(1 - 4 * reParam, 1 + 2 * reParam, 1 - reParam, 3 * imParam);
-  TF2 *func_pm00_mock = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2}) mock;t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pm00_to_fit_mock, 0.0, 300, 0.0, 300, 4);
-  func_pm00_mock->SetParameters(1 + 2 * reParam, 1 - 4 * reParam, 1 - reParam, 3 * imParam);
-  TF2 *func_pmpm_mock = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2}) mock;t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pmpm_to_fit_mock, 0.0, 300, 0.0, 300, 3);
-  func_pmpm_mock->SetParameters(1 + 2 * reParam, 1 + 2 * reParam, 1 + 2 * reParam);
+  func_pmpm->SetParameters(reParam, imParam);
 
   std::cout << "Mock function fitting:" << std::endl;
-  hist_00pm2D_base->Fit(func_00pm_mock, "RSEM");
-  hist_pm002D_base->Fit(func_pm00_mock, "RSEM");
-  hist_pmpm2D_base->Fit(func_pmpm_mock, "RSEM");
+  hist_00pm2D_base->Fit(func_00pm, "RSEM");
+  hist_pm002D_base->Fit(func_pm00, "RSEM");
+  hist_pmpm2D_base->Fit(func_pmpm, "RSEM");
 
-  std::cout << "Chi2 for 00pm mock fit: " << func_00pm_mock->GetChisquare() << std::endl;
-  std::cout << "Chi2 for pm00 mock fit: " << func_pm00_mock->GetChisquare() << std::endl;
-  std::cout << "Chi2 for pmpm mock fit: " << func_pmpm_mock->GetChisquare() << std::endl;
+  std::cout << "Chi2 for 00pm mock fit: " << func_00pm->GetChisquare() << std::endl;
+  std::cout << "Chi2 for pm00 mock fit: " << func_pm00->GetChisquare() << std::endl;
+  std::cout << "Chi2 for pmpm mock fit: " << func_pmpm->GetChisquare() << std::endl;
 
   auto func_00pm_1D = [&](Double_t *x, Double_t *par)
   {
@@ -418,57 +444,65 @@ int main()
     return func_pmpm_00pm_1D(x, par) / func_pmpm_pm00_1D(x, par);
   };
 
+  Double_t imLimitPercentage = 1.0; // 50% od wartości bezwzględnej imParam
+  Double_t reLimitPercentage = 0.1; // 10% od wartości reParam
+
+  std::map<std::string, Double_t *> fitLimits = {
+      {"Re", new Double_t[2]{reParam - reLimitPercentage * reParam, reParam + reLimitPercentage * reParam}},
+      {"Im", new Double_t[2]{imParam - imLimitPercentage * abs(imParam), imParam + imLimitPercentage * abs(imParam)}},
+      {"Range", new Double_t[2]{0.0, 330.0}}};
+
   TF1 *fitFunc_RA = new TF1("fitFunc_RA", func_pmpm_00pm_1D, 0.0, 20.0, 3);
   fitFunc_RA->SetParameters(reParam, imParam, 300.0);
   fitFunc_RA->SetParNames("Re", "Im", "Range");
-  fitFunc_RA->SetParLimits(0, reParam - 0.1 * reParam, reParam + 0.1 * reParam);
-  fitFunc_RA->SetParLimits(1, imParam - 0.1 * abs(imParam), imParam + 0.1 * abs(imParam));
-  fitFunc_RA->SetParLimits(2, 0.0, 330.0);
+  fitFunc_RA->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
+  fitFunc_RA->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
+  fitFunc_RA->SetParLimits(2, fitLimits["Range"][0], fitLimits["Range"][1]);
 
   TF1 *fitFunc_RB = new TF1("fitFunc_RB", func_pmpm_pm00_1D, 0.0, 20.0, 3);
   fitFunc_RB->SetParameters(reParam, imParam, 300.0);
   fitFunc_RB->SetParNames("Re", "Im", "Range");
-  fitFunc_RB->SetParLimits(0, reParam - 0.1 * reParam, reParam + 0.1 * reParam);
-  fitFunc_RB->SetParLimits(1, imParam - 0.1 * abs(imParam), imParam + 0.1 * abs(imParam));
-  fitFunc_RB->SetParLimits(2, 0.0, 330.0);
+  fitFunc_RB->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
+  fitFunc_RB->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
+  fitFunc_RB->SetParLimits(2, fitLimits["Range"][0], fitLimits["Range"][1]);
 
   TF1 *fitFunc_RC = new TF1("fitFunc_RC", func_RA_RB_1D, 0.0, 20.0, 3);
   fitFunc_RC->SetParameters(reParam, imParam, 300.0);
   fitFunc_RC->SetParNames("Re", "Im", "Range");
-  fitFunc_RC->SetParLimits(0, reParam - 0.1 * reParam, reParam + 0.1 * reParam);
-  fitFunc_RC->SetParLimits(1, imParam - 0.1 * abs(imParam), imParam + 0.1 * abs(imParam));
-  fitFunc_RC->SetParLimits(2, 0.0, 330.0);
+  fitFunc_RC->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
+  fitFunc_RC->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
+  fitFunc_RC->SetParLimits(2, fitLimits["Range"][0], fitLimits["Range"][1]);
 
   // Prepare plots for fitted parameters vs t2Max
   TGraphErrors *graphRe_RA = new TGraphErrors();
-  graphRe_RA->SetTitle("Fitted Re parameter for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
+  graphRe_RA->SetTitle("Fitted Re parameter for R_{A} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
   TGraphErrors *graphIm_RA = new TGraphErrors();
-  graphIm_RA->SetTitle("Fitted Im parameter for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
+  graphIm_RA->SetTitle("Fitted Im parameter for R_{A} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
   TGraph *graphRange_RA = new TGraph();
-  graphRange_RA->SetTitle("Fitted Range parameter for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Range");
+  graphRange_RA->SetTitle("Fitted Range parameter for R_{A} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Range");
 
   TGraphErrors *graphReError_RA = new TGraphErrors();
-  graphReError_RA->SetTitle("Fitted Re Error for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Re");
+  graphReError_RA->SetTitle("Fitted Re Error for R_{A} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Re");
   TGraphErrors *graphImError_RA = new TGraphErrors();
-  graphImError_RA->SetTitle("Fitted Im Error for R_A vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
+  graphImError_RA->SetTitle("Fitted Im Error for R_{A} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
 
   TGraphErrors *graphRe_RB = new TGraphErrors();
-  graphRe_RB->SetTitle("Fitted Re parameter for R_B vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
+  graphRe_RB->SetTitle("Fitted Re parameter for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
   TGraphErrors *graphIm_RB = new TGraphErrors();
-  graphIm_RB->SetTitle("Fitted Im parameter for R_B vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
+  graphIm_RB->SetTitle("Fitted Im parameter for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
   TGraph *graphReError_RB = new TGraph();
-  graphReError_RB->SetTitle("Fitted Re Error for R_B vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Re");
+  graphReError_RB->SetTitle("Fitted Re Error for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Re");
   TGraph *graphImError_RB = new TGraph();
-  graphImError_RB->SetTitle("Fitted Im Error for R_B vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
+  graphImError_RB->SetTitle("Fitted Im Error for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
 
   TGraphErrors *graphRe_RC = new TGraphErrors();
-  graphRe_RC->SetTitle("Fitted Re parameter for R_C vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
+  graphRe_RC->SetTitle("Fitted Re parameter for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
   TGraphErrors *graphIm_RC = new TGraphErrors();
-  graphIm_RC->SetTitle("Fitted Im parameter for R_C vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
+  graphIm_RC->SetTitle("Fitted Im parameter for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
   TGraph *graphReError_RC = new TGraph();
-  graphReError_RC->SetTitle("Fitted Re Error for R_C vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Re");
+  graphReError_RC->SetTitle("Fitted Re Error for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Re");
   TGraph *graphImError_RC = new TGraph();
-  graphImError_RC->SetTitle("Fitted Im Error for R_C vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
+  graphImError_RC->SetTitle("Fitted Im Error for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
 
   TCanvas *cR = new TCanvas("cR", "Ratios RA, RB, RC", 1800, 600);
   cR->Divide(3, 1);
@@ -476,9 +510,27 @@ int main()
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  TLine *lineZero = new TLine(0, 0, 300., 0);
+  TLine *lineZero = new TLine(30, 0, 320., 0);
   lineZero->SetLineColor(kBlack);
   lineZero->SetLineStyle(2);
+
+  std::map<std::string, TLine*> linesRe = {
+      {"Min", new TLine(30, fitLimits["Re"][0] - reParam, 320., fitLimits["Re"][0] - reParam)},
+      {"Max", new TLine(30, fitLimits["Re"][1] - reParam, 320., fitLimits["Re"][1] - reParam)}};
+
+  linesRe["Min"]->SetLineColor(kRed);
+  linesRe["Min"]->SetLineStyle(3);
+  linesRe["Max"]->SetLineColor(kRed);
+  linesRe["Max"]->SetLineStyle(3);
+
+  std::map<std::string, TLine*> linesIm = {
+      {"Min", new TLine(30, fitLimits["Im"][0] - imParam, 320., fitLimits["Im"][0] - imParam)},
+      {"Max", new TLine(30, fitLimits["Im"][1] - imParam, 320., fitLimits["Im"][1] - imParam)}};
+
+  linesIm["Min"]->SetLineColor(kRed);
+  linesIm["Min"]->SetLineStyle(3);
+  linesIm["Max"]->SetLineColor(kRed);
+  linesIm["Max"]->SetLineStyle(3);
 
   TFitResultPtr fitResultRA, fitResultRB, fitResultRC;
   for (Double_t t2Max : t2MaxValues)
@@ -489,9 +541,13 @@ int main()
     fitFunc_RC->SetParameter(2, t2Max);
 
     cR->cd(1);
-    hist_RA[t2Max]->SetTitle(Form("R_A - t_{2}^{max}=%.0f #tau_{S}", t2Max));
+    hist_RA[t2Max]->SetTitle(Form("R_{A} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
     hist_RA[t2Max]->GetXaxis()->SetRangeUser(0, 20);
-    fitResultRA = hist_RA[t2Max]->Fit(fitFunc_RA, "RS");
+    fitResultRA = hist_RA[t2Max]->Fit(fitFunc_RA, "RSEM");
+    hist_RA[t2Max]->SetMarkerStyle(20);
+    hist_RA[t2Max]->SetLineWidth(2);
+    hist_RA[t2Max]->SetMarkerColor(kBlack);
+    hist_RA[t2Max]->SetLineColor(kBlack);
 
     hist_RA[t2Max]->Draw();
     if (fitResultRA->IsValid())
@@ -506,7 +562,8 @@ int main()
       graphImError_RA->SetPoint(graphImError_RA->GetN(), t2Max, fitResultRA->Error(1));
 
       // Dodaj box z parametrami w prawym dolnym rogu
-      TPaveText *ptRA = new TPaveText(0.55, 0.15, 0.88, 0.35, "NDC");
+      TPaveText *ptRA = new TPaveText(0.55, 0.15, 0.85, 0.35, "NDC");
+      ptRA->SetLineWidth(1);
       ptRA->SetFillColor(kWhite);
       ptRA->SetBorderSize(1);
       ptRA->AddText(Form("Re = %.2g #pm %.2g", fitResultRA->Parameter(0), fitResultRA->Error(0)));
@@ -516,13 +573,17 @@ int main()
     }
     else
     {
-      std::cout << "Fit for R_A (t2Max=" << t2Max << ") was not valid." << std::endl;
+      std::cout << "Fit for R_{A} (t2Max=" << t2Max << ") was not valid." << std::endl;
     }
 
     cR->cd(2);
-    hist_RB[t2Max]->SetTitle(Form("R_B - t_{2}^{max}=%.0f #tau_{S}", t2Max));
+    hist_RB[t2Max]->SetTitle(Form("R_{B} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
     hist_RB[t2Max]->GetXaxis()->SetRangeUser(0, 20);
-    fitResultRB = hist_RB[t2Max]->Fit(fitFunc_RB, "RSME");
+    fitResultRB = hist_RB[t2Max]->Fit(fitFunc_RB, "RSEM");
+    hist_RB[t2Max]->SetMarkerStyle(20);
+    hist_RB[t2Max]->SetLineWidth(2);
+    hist_RB[t2Max]->SetMarkerColor(kBlack);
+    hist_RB[t2Max]->SetLineColor(kBlack);
     hist_RB[t2Max]->Draw();
 
     if (fitResultRB->IsValid())
@@ -536,7 +597,8 @@ int main()
       graphImError_RB->SetPoint(graphImError_RB->GetN(), t2Max, fitResultRB->Error(1));
 
       // Dodaj box z parametrami w prawym górnym rogu
-      TPaveText *ptRB = new TPaveText(0.55, 0.65, 0.88, 0.85, "NDC");
+      TPaveText *ptRB = new TPaveText(0.55, 0.70, 0.85, 0.90, "NDC");
+      ptRB->SetLineWidth(1);
       ptRB->SetFillColor(kWhite);
       ptRB->SetBorderSize(1);
       ptRB->AddText(Form("Re = %.2g #pm %.2g", fitResultRB->Parameter(0), fitResultRB->Error(0)));
@@ -546,13 +608,17 @@ int main()
     }
     else
     {
-      std::cout << "Fit for R_B (t2Max=" << t2Max << ") was not valid." << std::endl;
+      std::cout << "Fit for R_{B} (t2Max=" << t2Max << ") was not valid." << std::endl;
     }
 
     cR->cd(3);
-    hist_RC[t2Max]->SetTitle(Form("R_C - t_{2}^{max}=%.0f #tau_{S}", t2Max));
+    hist_RC[t2Max]->SetTitle(Form("R_{C} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
     hist_RC[t2Max]->GetXaxis()->SetRangeUser(0, 20);
-    fitResultRC = hist_RC[t2Max]->Fit(fitFunc_RC, "RSME");
+    fitResultRC = hist_RC[t2Max]->Fit(fitFunc_RC, "RSEM");
+    hist_RC[t2Max]->SetMarkerStyle(20);
+    hist_RC[t2Max]->SetLineWidth(2);
+    hist_RC[t2Max]->SetMarkerColor(kBlack);
+    hist_RC[t2Max]->SetLineColor(kBlack);
     hist_RC[t2Max]->Draw();
 
     if (fitResultRC->IsValid())
@@ -566,7 +632,8 @@ int main()
       graphImError_RC->SetPoint(graphImError_RC->GetN(), t2Max, fitResultRC->Error(1));
 
       // Dodaj box z parametrami w prawym dolnym rogu
-      TPaveText *ptRC = new TPaveText(0.55, 0.15, 0.88, 0.35, "NDC");
+      TPaveText *ptRC = new TPaveText(0.55, 0.15, 0.85, 0.35, "NDC");
+      ptRC->SetLineWidth(1);
       ptRC->SetFillColor(kWhite);
       ptRC->SetBorderSize(1);
       ptRC->AddText(Form("Re = %.2g #pm %.2g", fitResultRC->Parameter(0), fitResultRC->Error(0)));
@@ -576,10 +643,10 @@ int main()
     }
     else
     {
-      std::cout << "Fit for R_C (t2Max=" << t2Max << ") was not valid." << std::endl;
+      std::cout << "Fit for R_{C} (t2Max=" << t2Max << ") was not valid." << std::endl;
     }
 
-    cR->SaveAs(Form("img/R_histograms_t2Max%.0f.svg", t2Max));
+    cR->SaveAs(Form(imgFolderPath + "/R_histograms_t2Max%.0f.svg", t2Max));
 
     // Reset parametrów do wartości początkowych
     fitFunc_RA->SetParameter(0, reParam);
@@ -589,6 +656,50 @@ int main()
     fitFunc_RC->SetParameter(0, reParam);
     fitFunc_RC->SetParameter(1, imParam);
   }
+
+  auto getGraphLimit = [](Bool_t maxOrMin, TGraph *graph1, TGraph *graph2, TGraph *graph3) -> Double_t
+  {
+    Double_t extreme = 0.0;
+    Double_t values[3] = {0.0, 0.0, 0.0};
+
+    if (maxOrMin)
+    {
+      for (int i = 0; i < graph1->GetN(); ++i)
+      {
+        Double_t y1, y2, y3;
+        y1 = graph1->GetPointY(i);
+        y2 = graph2->GetPointY(i);
+        y3 = graph3->GetPointY(i);
+
+        values[0] = std::max(values[0], y1);
+        values[1] = std::max(values[1], y2);
+        values[2] = std::max(values[2], y3);
+      }
+
+      extreme = *std::max_element(values, values + 3);
+
+      return extreme + 0.15 * abs(extreme); // Dodaj 15% marginesu powyżej maksimum
+    }
+    else
+    {
+      for (int i = 0; i < graph1->GetN(); ++i)
+      {
+        Double_t y1, y2, y3;
+        y1 = graph1->GetPointY(i);
+        y2 = graph2->GetPointY(i);
+        y3 = graph3->GetPointY(i);
+
+        values[0] = std::min(values[0], y1);
+        values[1] = std::min(values[1], y2);
+        values[2] = std::min(values[2], y3);
+      }
+
+      extreme = *std::min_element(values, values + 3);
+
+      return extreme - 0.15 * abs(extreme); // Dodaj 15% marginesu poniżej minimum
+    }
+  };
+
 
   // Ustaw style dla wykresów
   graphRe_RA->SetMarkerColor(kBlue);
@@ -652,59 +763,114 @@ int main()
   graphImError_RC->SetLineColor(kCyan + 1);
 
   // Rysuj wyniki fitów vs t2Max - pojedyncze wykresy dla każdego ratio
-  TCanvas *cGraphRe_RA = new TCanvas("cGraphRe_RA", "Fitted Re parameter for R_A vs t2Max", 800, 600);
-  lineZero->Draw();
+  TCanvas *cGraphRe_RA = new TCanvas("cGraphRe_RA", "Fitted Re parameter for R_{A} vs t2Max", 800, 600);
+  graphRe_RA->SetMinimum(-1e-4);
+  graphRe_RA->SetMaximum(1e-4);
+  graphRe_RA->GetXaxis()->SetLimits(30, 320);
   graphRe_RA->Draw("AP");
-  cGraphRe_RA->SaveAs("img/Fitted_Re_RA_vs_t2Max.svg");
+  lineZero->Draw("SAME");
+  linesRe["Min"]->Draw("SAME");
+  linesRe["Max"]->Draw("SAME");
+  cGraphRe_RA->SaveAs(Form(imgFolderPath + "/Fitted_Re_RA_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphRe_RB = new TCanvas("cGraphRe_RB", "Fitted Re parameter for R_B vs t2Max", 800, 600);
-  lineZero->Draw();
+  TCanvas *cGraphRe_RB = new TCanvas("cGraphRe_RB", "Fitted Re parameter for R_{B} vs t2Max", 800, 600);
+  graphRe_RB->SetMinimum(-1e-4);
+  graphRe_RB->SetMaximum(1e-4);
+  graphRe_RB->GetXaxis()->SetLimits(30, 320);
   graphRe_RB->Draw("AP");
-  cGraphRe_RB->SaveAs("img/Fitted_Re_RB_vs_t2Max.svg");
+  lineZero->Draw("SAME");
+  linesRe["Min"]->Draw("SAME");
+  linesRe["Max"]->Draw("SAME");
+  cGraphRe_RB->SaveAs(Form(imgFolderPath + "/Fitted_Re_RB_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphRe_RC = new TCanvas("cGraphRe_RC", "Fitted Re parameter for R_C vs t2Max", 800, 600);
-  lineZero->Draw();
+  TCanvas *cGraphRe_RC = new TCanvas("cGraphRe_RC", "Fitted Re parameter for R_{C} vs t2Max", 800, 600);
+  graphRe_RC->SetMinimum(-1e-4);
+  graphRe_RC->SetMaximum(1e-4);
+  graphRe_RC->GetXaxis()->SetLimits(30, 320);
   graphRe_RC->Draw("AP");
-  cGraphRe_RC->SaveAs("img/Fitted_Re_RC_vs_t2Max.svg");
+  lineZero->Draw("SAME");
+  linesRe["Min"]->Draw("SAME");
+  linesRe["Max"]->Draw("SAME");
+  cGraphRe_RC->SaveAs(Form(imgFolderPath + "/Fitted_Re_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphIm_RA = new TCanvas("cGraphIm_RA", "Fitted Im parameter for R_A vs t2Max", 800, 600);
-  lineZero->Draw();
+  TCanvas *cGraphIm_RA = new TCanvas("cGraphIm_RA", "Fitted Im parameter for R_{A} vs t2Max", 800, 600);
+  graphIm_RA->SetMinimum(-0.005);
+  graphIm_RA->SetMaximum(0.005);
+  graphIm_RA->GetXaxis()->SetLimits(30, 320);
   graphIm_RA->Draw("AP");
-  cGraphIm_RA->SaveAs("img/Fitted_Im_RA_vs_t2Max.svg");
+  lineZero->Draw("SAME");
+  linesIm["Min"]->Draw("SAME");
+  linesIm["Max"]->Draw("SAME");
+  cGraphIm_RA->SaveAs(Form(imgFolderPath + "/Fitted_Im_RA_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphIm_RB = new TCanvas("cGraphIm_RB", "Fitted Im parameter for R_B vs t2Max", 800, 600);
-  lineZero->Draw();
+  TCanvas *cGraphIm_RB = new TCanvas("cGraphIm_RB", "Fitted Im parameter for R_{B} vs t2Max", 800, 600);
+  graphIm_RB->SetMinimum(-0.005);
+  graphIm_RB->SetMaximum(0.005);
+  graphIm_RB->GetXaxis()->SetLimits(30, 320);
   graphIm_RB->Draw("AP");
-  cGraphIm_RB->SaveAs("img/Fitted_Im_RB_vs_t2Max.svg");
+  lineZero->Draw("SAME");
+  linesIm["Min"]->Draw("SAME");
+  linesIm["Max"]->Draw("SAME");
+  cGraphIm_RB->SaveAs(Form(imgFolderPath + "/Fitted_Im_RB_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphIm_RC = new TCanvas("cGraphIm_RC", "Fitted Im parameter for R_C vs t2Max", 800, 600);
-  lineZero->Draw();
+  TCanvas *cGraphIm_RC = new TCanvas("cGraphIm_RC", "Fitted Im parameter for R_{C} vs t2Max", 800, 600);
+  graphIm_RC->SetMinimum(-0.005);
+  graphIm_RC->SetMaximum(0.005);
+  graphIm_RC->GetXaxis()->SetLimits(30, 320);
   graphIm_RC->Draw("AP");
-  cGraphIm_RC->SaveAs("img/Fitted_Im_RC_vs_t2Max.svg");
+  lineZero->Draw("SAME");
+  linesIm["Min"]->Draw("SAME");
+  linesIm["Max"]->Draw("SAME");
+  cGraphIm_RC->SaveAs(Form(imgFolderPath + "/Fitted_Im_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphReError_RA = new TCanvas("cGraphReError_RA", "Error on Re parameter for R_A vs t2Max", 800, 600);
+  //
+  Double_t reErrorMax = getGraphLimit(kTRUE, graphReError_RA, graphReError_RB, graphReError_RC);
+  Double_t reErrorMin = getGraphLimit(kFALSE, graphReError_RA, graphReError_RB, graphReError_RC);
+  Double_t imErrorMax = getGraphLimit(kTRUE, graphImError_RA, graphImError_RB, graphImError_RC);
+  Double_t imErrorMin = getGraphLimit(kFALSE, graphImError_RA, graphImError_RB, graphImError_RC);
+  //
+
+  TCanvas *cGraphReError_RA = new TCanvas("cGraphReError_RA", "Error on Re parameter for R_{A} vs t2Max", 800, 600);
+  graphReError_RA->SetMinimum(reErrorMin);
+  graphReError_RA->SetMaximum(reErrorMax);
+  graphReError_RA->GetXaxis()->SetLimits(30, 320);
   graphReError_RA->Draw("AP");
-  cGraphReError_RA->SaveAs("img/Fitted_ReError_RA_vs_t2Max.svg");
+  cGraphReError_RA->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RA_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphReError_RB = new TCanvas("cGraphReError_RB", "Error on Re parameter for R_B vs t2Max", 800, 600);
+  TCanvas *cGraphReError_RB = new TCanvas("cGraphReError_RB", "Error on Re parameter for R_{B} vs t2Max", 800, 600);
+  graphReError_RB->SetMinimum(reErrorMin);
+  graphReError_RB->SetMaximum(reErrorMax);
+  graphReError_RB->GetXaxis()->SetLimits(30, 320);
   graphReError_RB->Draw("AP");
-  cGraphReError_RB->SaveAs("img/Fitted_ReError_RB_vs_t2Max.svg");
+  cGraphReError_RB->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RB_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphReError_RC = new TCanvas("cGraphReError_RC", "Error on Re parameter for R_C vs t2Max", 800, 600);
+  TCanvas *cGraphReError_RC = new TCanvas("cGraphReError_RC", "Error on Re parameter for R_{C} vs t2Max", 800, 600);
+  graphReError_RC->SetMinimum(reErrorMin);
+  graphReError_RC->SetMaximum(reErrorMax);
+  graphReError_RC->GetXaxis()->SetLimits(30, 320);
   graphReError_RC->Draw("AP");
-  cGraphReError_RC->SaveAs("img/Fitted_ReError_RC_vs_t2Max.svg");
+  cGraphReError_RC->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphImError_RA = new TCanvas("cGraphImError_RA", "Error on Im parameter for R_A vs t2Max", 800, 600);
+  TCanvas *cGraphImError_RA = new TCanvas("cGraphImError_RA", "Error on Im parameter for R_{A} vs t2Max", 800, 600);
+  graphImError_RA->SetMinimum(imErrorMin);
+  graphImError_RA->SetMaximum(imErrorMax);
+  graphImError_RA->GetXaxis()->SetLimits(30, 320);
   graphImError_RA->Draw("AP");
-  cGraphImError_RA->SaveAs("img/Fitted_ImError_RA_vs_t2Max.svg");
+  cGraphImError_RA->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RA_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphImError_RB = new TCanvas("cGraphImError_RB", "Error on Im parameter for R_B vs t2Max", 800, 600);
+  TCanvas *cGraphImError_RB = new TCanvas("cGraphImError_RB", "Error on Im parameter for R_{B} vs t2Max", 800, 600);
+  graphImError_RB->SetMinimum(imErrorMin);
+  graphImError_RB->SetMaximum(imErrorMax);
+  graphImError_RB->GetXaxis()->SetLimits(30, 320);
   graphImError_RB->Draw("AP");
-  cGraphImError_RB->SaveAs("img/Fitted_ImError_RB_vs_t2Max.svg");
+  cGraphImError_RB->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RB_vs_t2Max.svg", maxEventsFile.Data()));
 
-  TCanvas *cGraphImError_RC = new TCanvas("cGraphImError_RC", "Error on Im parameter for R_C vs t2Max", 800, 600);
+  TCanvas *cGraphImError_RC = new TCanvas("cGraphImError_RC", "Error on Im parameter for R_{C} vs t2Max", 800, 600);
+  graphImError_RC->SetMinimum(imErrorMin);
+  graphImError_RC->SetMaximum(imErrorMax);
+  graphImError_RC->GetXaxis()->SetLimits(30, 320);
   graphImError_RC->Draw("AP");
-  cGraphImError_RC->SaveAs("img/Fitted_ImError_RC_vs_t2Max.svg");
+  cGraphImError_RC->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
   // Wykresy zbiorowe - wszystkie Re i Im na jednym wykresie
   TCanvas *cGraphRe_All = new TCanvas("cGraphRe_All", "Fitted Re parameter vs t2Max", 1200, 800);
@@ -714,11 +880,11 @@ int main()
   graphRe_RC->Draw("P SAME");
 
   TLegend *legRe = new TLegend(0.7, 0.7, 0.9, 0.9);
-  legRe->AddEntry(graphRe_RA, "R_A", "lp");
-  legRe->AddEntry(graphRe_RB, "R_B", "lp");
-  legRe->AddEntry(graphRe_RC, "R_C", "lp");
+  legRe->AddEntry(graphRe_RA, "R_{A}", "lp");
+  legRe->AddEntry(graphRe_RB, "R_{B}", "lp");
+  legRe->AddEntry(graphRe_RC, "R_{C}", "lp");
   legRe->Draw();
-  cGraphRe_All->SaveAs("img/Fitted_Re_All_vs_t2Max.svg");
+  cGraphRe_All->SaveAs(Form(imgFolderPath + "/Fitted_Re_All_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphIm_All = new TCanvas("cGraphIm_All", "Fitted Im parameter vs t2Max", 1200, 800);
   graphIm_RA->SetTitle("Fitted Im parameter vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
@@ -727,11 +893,11 @@ int main()
   graphIm_RC->Draw("P SAME");
 
   TLegend *legIm = new TLegend(0.7, 0.7, 0.9, 0.9);
-  legIm->AddEntry(graphIm_RA, "R_A", "lp");
-  legIm->AddEntry(graphIm_RB, "R_B", "lp");
-  legIm->AddEntry(graphIm_RC, "R_C", "lp");
+  legIm->AddEntry(graphIm_RA, "R_{A}", "lp");
+  legIm->AddEntry(graphIm_RB, "R_{B}", "lp");
+  legIm->AddEntry(graphIm_RC, "R_{C}", "lp");
   legIm->Draw();
-  cGraphIm_All->SaveAs("img/Fitted_Im_All_vs_t2Max.svg");
+  cGraphIm_All->SaveAs(Form(imgFolderPath + "/Fitted_Im_All_vs_t2Max.svg", maxEventsFile.Data()));
 
   // Wykresy zbiorowe - wszystkie błędy Re na jednym wykresie
   TCanvas *cGraphReError_All = new TCanvas("cGraphReError_All", "Error on Re parameter vs t2Max", 1200, 800);
@@ -741,11 +907,11 @@ int main()
   graphReError_RC->Draw("P SAME");
 
   TLegend *legReError = new TLegend(0.7, 0.7, 0.9, 0.9);
-  legReError->AddEntry(graphReError_RA, "R_A", "lp");
-  legReError->AddEntry(graphReError_RB, "R_B", "lp");
-  legReError->AddEntry(graphReError_RC, "R_C", "lp");
+  legReError->AddEntry(graphReError_RA, "R_{A}", "lp");
+  legReError->AddEntry(graphReError_RB, "R_{B}", "lp");
+  legReError->AddEntry(graphReError_RC, "R_{C}", "lp");
   legReError->Draw();
-  cGraphReError_All->SaveAs("img/Fitted_ReError_All_vs_t2Max.svg");
+  cGraphReError_All->SaveAs(Form(imgFolderPath + "/Fitted_ReError_All_vs_t2Max.svg", maxEventsFile.Data()));
 
   // Wykresy zbiorowe - wszystkie błędy Im na jednym wykresie
   TCanvas *cGraphImError_All = new TCanvas("cGraphImError_All", "Error on Im parameter vs t2Max", 1200, 800);
@@ -755,11 +921,11 @@ int main()
   graphImError_RC->Draw("P SAME");
 
   TLegend *legImError = new TLegend(0.7, 0.7, 0.9, 0.9);
-  legImError->AddEntry(graphImError_RA, "R_A", "lp");
-  legImError->AddEntry(graphImError_RB, "R_B", "lp");
-  legImError->AddEntry(graphImError_RC, "R_C", "lp");
+  legImError->AddEntry(graphImError_RA, "R_{A}", "lp");
+  legImError->AddEntry(graphImError_RB, "R_{B}", "lp");
+  legImError->AddEntry(graphImError_RC, "R_{C}", "lp");
   legImError->Draw();
-  cGraphImError_All->SaveAs("img/Fitted_ImError_All_vs_t2Max.svg");
+  cGraphImError_All->SaveAs(Form(imgFolderPath + "/Fitted_ImError_All_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cSingleTimes00pm = new TCanvas("cSingleTimes00pm", "Single Times Histograms", 1200, 600);
   cSingleTimes00pm->Divide(2, 1);
@@ -777,7 +943,7 @@ int main()
   hist_pm->GetXaxis()->SetRangeUser(0, 50.0);
   hist_pm->SetLineColor(kRed);
   hist_pm->Draw();
-  cSingleTimes00pm->SaveAs(Form("img/single_times_00pm_%s.svg", maxEventsFile.Data()));
+  cSingleTimes00pm->SaveAs(Form(imgFolderPath + "/single_times_00pm_%s.svg", maxEventsFile.Data()));
 
   TCanvas *cSingleTimes12 = new TCanvas("cSingleTimes12", "Single Times Histograms", 1200, 600);
   cSingleTimes12->Divide(2, 1);
@@ -795,35 +961,7 @@ int main()
   hist_2->GetXaxis()->SetRangeUser(0, 50.0);
   hist_2->SetLineColor(kRed);
   hist_2->Draw();
-  cSingleTimes12->SaveAs(Form("img/single_times_12_%s.svg", maxEventsFile.Data()));
-
-  TCanvas *cDeltapm00 = new TCanvas("cDeltapm00", "Single Times Histograms", 1200, 600);
-  cDeltapm00->Divide(2, 1);
-  cDeltapm00->cd(1);
-  deltaTpm00_not_weighted->SetTitle(Form("t_{+-} - t_{00} - %s events", maxEventsTitle.Data()));
-  deltaTpm00_not_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaTpm00_not_weighted->GetMaximum());
-  deltaTpm00_not_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
-  deltaTpm00_not_weighted->Draw();
-  cDeltapm00->cd(2);
-  deltaTpm00_weighted->SetTitle(Form("t_{+-} - t_{00} - %s events", maxEventsTitle.Data()));
-  deltaTpm00_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaTpm00_weighted->GetMaximum());
-  deltaTpm00_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
-  deltaTpm00_weighted->Draw();
-  cDeltapm00->SaveAs(Form("img/delta_pm00_%s.svg", maxEventsFile.Data()));
-
-  TCanvas *cDelta12 = new TCanvas("cDelta12", "Single Times Histograms", 1200, 600);
-  cDelta12->Divide(2, 1);
-  cDelta12->cd(1);
-  deltaT12_not_weighted->SetTitle(Form("t_{1} - t_{2} - %s events", maxEventsTitle.Data()));
-  deltaT12_not_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaT12_not_weighted->GetMaximum());
-  deltaT12_not_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
-  deltaT12_not_weighted->Draw();
-  cDelta12->cd(2);
-  deltaT12_weighted->SetTitle(Form("t_{1} - t_{2} - %s events", maxEventsTitle.Data()));
-  deltaT12_weighted->GetYaxis()->SetRangeUser(0.0, 1.2 * deltaT12_weighted->GetMaximum());
-  deltaT12_weighted->GetXaxis()->SetRangeUser(-50.0, 50.0);
-  deltaT12_weighted->Draw();
-  cDelta12->SaveAs(Form("img/delta_12_%s.svg", maxEventsFile.Data()));
+  cSingleTimes12->SaveAs(Form(imgFolderPath + "/single_times_12_%s.svg", maxEventsFile.Data()));
 
   return 0;
 }

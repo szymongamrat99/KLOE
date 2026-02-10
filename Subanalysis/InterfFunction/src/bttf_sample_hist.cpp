@@ -161,6 +161,21 @@ int main()
     std::cout << "Chosen default number of events: " << nEvents << std::endl;
   }
 
+  TString fileMethodAddition[3] = {"exp_not_corrected", "exp_corrected", "uniform_weighted"};
+
+  std::cout << "Choose method: " << std::endl;
+  std::cout << "  [0] Use exponentially generated times (no initial weight correction)." << std::endl;
+  std::cout << "  [1] Use exponentially generated times (corrected weight)." << std::endl;
+  std::cout << "  [2] Use unifomly generated times weighted with interference." << std::endl;
+  int methodChoice = 0;
+  std::cin >> methodChoice;
+
+  if (methodChoice < 0 || methodChoice > 2)
+  {
+    std::cerr << "Błąd: nieprawidłowy wybór metody!" << std::endl;
+    return 1;
+  }
+
   TTreeReader reader_00pm(chain_00pm);
   TTreeReaderValue<Double_t> tch(reader_00pm, "tch");
   TTreeReaderValue<Double_t> tne(reader_00pm, "tne");
@@ -196,19 +211,14 @@ int main()
   TH1 *h_pmpm1_not_weighted = new TH1D("h_pmpm1_not_weighted", "t_{1}; t_{1} [#tau_{S}];Counts", nBins, t1Min, t1Max);
   TH1 *h_pmpm2_not_weighted = new TH1D("h_pmpm2_not_weighted", "t_{2}; t_{2} [#tau_{S}];;Counts", nBins, t2Min, t2Max);
 
-  TH1 *deltaT_pm00 = new TH1D("deltaT_pm00", "Delta t_{+--00}; #Delta t_{+--00} [#tau_{S}];Counts", 2 * nBins, - (tneMax - tneMin), (tneMax - tneMin));
-  TH1 *deltaT_pmpm = new TH1D("deltaT_pmpm", "Delta t_{1-2}; #Delta t_{1-2} [#tau_{S}];Counts", 2 * nBins, - (t2Max - t2Min), (t2Max - t2Min));
-
-  TH1 *deltaT_pm00_not_weighted = new TH1D("deltaT_pm00_not_weighted", "#Deltat_{+-,00}; #Delta t_{+--00} [#tau_{S}];Counts", 2 * nBins, - (tneMax - tneMin), (tneMax - tneMin));
-  TH1 *deltaT_pmpm_not_weighted = new TH1D("deltaT_pmpm_not_weighted", "Delta t_{1,2}; #Delta t_{1,2} [#tau_{S}];Counts", 2 * nBins, - (t2Max - t2Min), (t2Max - t2Min));
-
   const Long64_t evTick = 1000000;
   Long64_t currentEvent = 0;
 
   Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
   Double_t gammaL = PhysicsConstants::tau_S_nonCPT / PhysicsConstants::tau_L;
-  
-  auto double_exp = [gammaS, gammaL](Double_t t1, Double_t t2) {
+
+  auto double_exp = [gammaS, gammaL](Double_t t1, Double_t t2)
+  {
     return exp(-gammaS * t1 - gammaL * t2) + exp(-gammaL * t1 - gammaS * t2);
   };
 
@@ -219,22 +229,38 @@ int main()
     if (currentEvent >= nEvents)
       break;
 
-    Double_t weight00pm = func_00pm->Eval(*tne, *tch) / (double_exp(*tne, *tch));
-    Double_t weightpm00 = func_pm00->Eval(*tch, *tne) / (double_exp(*tch, *tne));
+    Double_t weight00pm;
+    Double_t weightpm00;
 
-    h_00pm->Fill(*tne, *tch, weight00pm);
-    h_pm00->Fill(*tch, *tne, weightpm00);
+    Double_t tchValue = *tch, tneValue = *tne;
 
-    h_00pm_not_weighted->Fill(*tne, *tch);
-    h_pm00_not_weighted->Fill(*tch, *tne);
+    if (methodChoice == 0)
+    {
+      weight00pm = func_00pm->Eval(tneValue, tchValue);
+      weightpm00 = func_pm00->Eval(tchValue, tneValue);
+    }
+    else if (methodChoice == 1)
+    {
+      weight00pm = func_00pm->Eval(tneValue, tchValue) / (double_exp(tneValue, tchValue));
+      weightpm00 = func_pm00->Eval(tchValue, tneValue) / (double_exp(tchValue, tneValue));
+    }
+    else // methodChoice == 2
+    {
+      tchValue = randGen.Uniform(0.0, 300.0); // Generowanie losowej wartości czasu t1
+      tneValue = randGen.Uniform(0.0, 300.0); // Generowanie losowej wartości czasu t2
 
-    h_00_not_weighted->Fill(*tne, weight00pm);
-    h_pm_not_weighted->Fill(*tch, weight00pm);
+      weight00pm = func_00pm->Eval(tneValue, tchValue);
+      weightpm00 = func_pm00->Eval(tchValue, tneValue);
+    }
 
-    Double_t x[1] = {*tch - *tne};
+    h_00pm->Fill(tneValue, tchValue, weight00pm);
+    h_pm00->Fill(tchValue, tneValue, weightpm00);
 
-    deltaT_pm00_not_weighted->Fill(*tch - *tne);
-    deltaT_pm00->Fill(*tch - *tne, interf_function(x, nullptr));
+    h_00pm_not_weighted->Fill(tneValue, tchValue);
+    h_pm00_not_weighted->Fill(tchValue, tneValue);
+
+    h_00_not_weighted->Fill(tneValue);
+    h_pm_not_weighted->Fill(tchValue);
 
     if (currentEvent % evTick == 0)
       std::cout << "Processing entry: " << currentEvent << "\r";
@@ -249,21 +275,31 @@ int main()
     if (currentEvent >= nEvents)
       break;
 
-    // Double_t t1_random = randGen.Uniform(t1Min, t1Max);
-    // Double_t t2_random = randGen.Uniform(t2Min, t2Max);
+    Double_t weight = 1.0;
 
-    Double_t weight = func_pmpm->Eval(*t1, *t2) / (double_exp(*t1, *t2));
+    Double_t t1Value = *t1, t2Value = *t2;
 
-    h_pmpm->Fill(*t1, *t2, weight);
-    h_pmpm_not_weighted->Fill(*t1, *t2);
+    if (methodChoice == 0)
+    {
+      weight = func_pmpm->Eval(t1Value, t2Value);
+    }
+    else if (methodChoice == 1)
+    {
+      weight = func_pmpm->Eval(t1Value, t2Value) / (double_exp(t1Value, t2Value));
+    }
+    else // methodChoice == 2
+    {
+      t1Value = randGen.Uniform(0.0, 300.0); // Generowanie losowej wartości czasu t1
+      t2Value = randGen.Uniform(0.0, 300.0); // Generowanie losowej wartości czasu t2
 
-    h_pmpm1_not_weighted->Fill(*t1, weight);
-    h_pmpm2_not_weighted->Fill(*t2, weight);
+      weight = func_pmpm->Eval(t1Value, t2Value);
+    }
 
-    Double_t x[1] = {*t1 - *t2};
+    h_pmpm->Fill(t1Value, t2Value, weight);
+    h_pmpm_not_weighted->Fill(t1Value, t2Value);
 
-    deltaT_pmpm_not_weighted->Fill(*t1 - *t2);
-    deltaT_pmpm->Fill(*t1 - *t2, interf_function(x, nullptr));
+    h_pmpm1_not_weighted->Fill(t1Value);
+    h_pmpm2_not_weighted->Fill(t2Value);
 
     if (currentEvent % evTick == 0)
       std::cout << "Processing entry: " << currentEvent << "\r";
@@ -271,7 +307,15 @@ int main()
     currentEvent++;
   }
 
-  TString rootFileName = Form("root_files/histograms2D_%d_%.5f_%.5f.root", nEvents, reParam, imParam);
+  TString rootFolderPath = "root_files/" + fileMethodAddition[methodChoice];
+
+  if (!fs::exists((std::string)rootFolderPath))
+  {
+    fs::create_directories((std::string)rootFolderPath);
+    std::cout << "Created directory: " << rootFolderPath << std::endl;
+  }
+
+  TString rootFileName = Form("%s/histograms2D_%lld_%.5f_%.5f.root", rootFolderPath.Data(), nEvents, reParam, imParam);
 
   TFile *outFile = new TFile(rootFileName, "RECREATE");
 
@@ -286,10 +330,6 @@ int main()
   h_pm_not_weighted->Write();
   h_pmpm1_not_weighted->Write();
   h_pmpm2_not_weighted->Write();
-  deltaT_pm00->Write();
-  deltaT_pmpm->Write();
-  deltaT_pm00_not_weighted->Write();
-  deltaT_pmpm_not_weighted->Write();
   outFile->Close();
 
   return 0;

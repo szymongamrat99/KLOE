@@ -629,8 +629,8 @@ namespace KLOE
   {
     // Global Style of histograms, pads, etc.
 
-    gStyle->SetStatX(0.88); // prawy brzeg w NDC
-    gStyle->SetStatY(0.88); // górny brzeg w NDC
+    gStyle->SetStatX(0.85); // prawy brzeg w NDC
+    gStyle->SetStatY(0.90); // górny brzeg w NDC
     gStyle->SetStatW(0.23); // szerokość
     gStyle->SetStatH(0.18); // wysokość
 
