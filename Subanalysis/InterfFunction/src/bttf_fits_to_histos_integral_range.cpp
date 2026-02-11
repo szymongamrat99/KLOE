@@ -358,10 +358,34 @@ int main()
   TF2 *func_pmpm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pmpm, 0.0, 300, 0.0, 300, 2);
   func_pmpm->SetParameters(reParam, imParam);
 
+  auto func_00pm_normalized = [&](Double_t *x, Double_t *par)
+  {
+    return par[2] * interf_function_00pm(x, par);
+  };
+
+  auto func_pm00_normalized = [&](Double_t *x, Double_t *par)
+  {
+    return par[2] * interf_function_pm00(x, par);
+  };
+
+  auto func_pmpm_normalized = [&](Double_t *x, Double_t *par)
+  {
+    return par[1] * interf_function_pmpm(x, par);
+  };
+
+  TF2 *func_00pm_norm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_00pm_normalized, 0.0, 300, 0.0, 300, 3);
+  func_00pm_norm->SetParameters(reParam, imParam, 4E6);
+
+  TF2 *func_pm00_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pm00_normalized, 0.0, 300, 0.0, 300, 3);
+  func_pm00_norm->SetParameters(reParam, imParam, 4E6);
+
+  TF2 *func_pmpm_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pmpm_normalized, 0.0, 300, 0.0, 300, 2);
+  func_pmpm_norm->SetParameters(reParam, 4E6);
+
   std::cout << "Mock function fitting:" << std::endl;
-  hist_00pm2D_base->Fit(func_00pm, "RSEM");
-  hist_pm002D_base->Fit(func_pm00, "RSEM");
-  hist_pmpm2D_base->Fit(func_pmpm, "RSEM");
+  hist_00pm2D_base->Fit(func_00pm_norm, "RSEM");
+  hist_pm002D_base->Fit(func_pm00_norm, "RSEM");
+  hist_pmpm2D_base->Fit(func_pmpm_norm, "RSEM");
 
   std::cout << "Chi2 for 00pm mock fit: " << func_00pm->GetChisquare() << std::endl;
   std::cout << "Chi2 for pm00 mock fit: " << func_pm00->GetChisquare() << std::endl;
