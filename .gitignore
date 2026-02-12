@@ -1,0 +1,15 @@
+build/
+*.png
+*.svg
+img/
+*.o
+*.so
+*.a
+*.root
+root_files/
+log/
+docs/
+*.log
+*.d
+*.pcm
+*.out
