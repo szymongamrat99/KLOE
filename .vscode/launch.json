@@ -1,0 +1,156 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "KLSPM00 Debug (GDB)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/bin/KLSPM00",
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "LD_LIBRARY_PATH",
+          "value": "/data/4/users/gamrat/root_dirs/install_root/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+        },
+        {
+          "name": "ROOT_INCLUDE_PATH",
+          "value": "/data/4/users/gamrat/root_dirs/install_root/include"
+        },
+        {
+          "name": "BOOST_INCLUDE_PATH",
+          "value": "/usr/include"
+        },
+        {
+          "name": "ASAN_OPTIONS",
+          "value": "abort_on_error=1:detect_leaks=1"
+        }
+      ],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set gdb to break on caught exceptions",
+          "text": "catch throw",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-debug"
+    },
+    {
+      "name": "KLSPM00 Debug (GDB - ROOT pretty-print)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/bin/KLSPM00",
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "LD_LIBRARY_PATH",
+          "value": "/data/4/users/gamrat/root_dirs/install_root/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+        },
+        {
+          "name": "ROOT_INCLUDE_PATH",
+          "value": "/data/4/users/gamrat/root_dirs/install_root/include"
+        },
+        {
+          "name": "BOOST_INCLUDE_PATH",
+          "value": "/usr/include"
+        },
+        {
+          "name": "ASAN_OPTIONS",
+          "value": "abort_on_error=1:detect_leaks=1"
+        }
+      ],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Load ROOT pretty printers",
+          "text": "source /data/4/users/gamrat/root_dirs/install_root/etc/gdb-print.py",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Set gdb to break on caught exceptions",
+          "text": "catch throw",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-debug"
+    },
+    {
+      "name": "KLSPM00 Debug with AddressSanitizer",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/bin/KLSPM00",
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "LD_LIBRARY_PATH",
+          "value": "/data/4/users/gamrat/root_dirs/install_root/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+        },
+        {
+          "name": "ASAN_OPTIONS",
+          "value": "abort_on_error=1:detect_leaks=1:verbosity=2"
+        }
+      ],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        },
+        {
+          "description": "Break on sanitizer errors",
+          "text": "break __asan::ReportGenericError",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-debug"
+    },
+    {
+      "name": "KLSPM00 Release Debug",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/bin/KLSPM00",
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [
+        {
+          "name": "LD_LIBRARY_PATH",
+          "value": "/data/4/users/gamrat/root_dirs/install_root/lib:/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+        }
+      ],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "build-release"
+    }
+  ]
+}
