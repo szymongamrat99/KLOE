@@ -16,6 +16,7 @@
 #include <TLegend.h>
 #include <TPaveText.h>
 #include <TLine.h>
+#include <TPaveStats.h>
 
 #include <TFitResult.h>
 #include <TGraph.h>
@@ -299,18 +300,18 @@ int main()
   c2D->Divide(3, 1);
   c2D->cd(1);
   hist_00pm2D_base->SetTitle(Form("h_00pm - %s events", maxEventsTitle.Data()));
-  hist_00pm2D_base->GetXaxis()->SetRangeUser(0, 300.0);
-  hist_00pm2D_base->GetYaxis()->SetRangeUser(0, 300.0);
+  hist_00pm2D_base->GetXaxis()->SetRangeUser(0, 20.0);
+  hist_00pm2D_base->GetYaxis()->SetRangeUser(0, 20.0);
   hist_00pm2D_base->Draw("COLZ");
   c2D->cd(2);
   hist_pm002D_base->SetTitle(Form("h_pm00 - %s events", maxEventsTitle.Data()));
-  hist_pm002D_base->GetXaxis()->SetRangeUser(0, 300.0);
-  hist_pm002D_base->GetYaxis()->SetRangeUser(0, 300.0);
+  hist_pm002D_base->GetXaxis()->SetRangeUser(0, 20.0);
+  hist_pm002D_base->GetYaxis()->SetRangeUser(0, 20.0);
   hist_pm002D_base->Draw("COLZ");
   c2D->cd(3);
   hist_pmpm2D_base->SetTitle(Form("h_pmpm - %s events", maxEventsTitle.Data()));
-  hist_pmpm2D_base->GetXaxis()->SetRangeUser(0, 300.0);
-  hist_pmpm2D_base->GetYaxis()->SetRangeUser(0, 300.0);
+  hist_pmpm2D_base->GetXaxis()->SetRangeUser(0, 20.0);
+  hist_pmpm2D_base->GetYaxis()->SetRangeUser(0, 20.0);
   hist_pmpm2D_base->Draw("COLZ");
   c2D->SaveAs(Form(imgFolderPath + "/2D_histograms_%s.svg", maxEventsFile.Data()));
 
@@ -323,21 +324,21 @@ int main()
     gPad->SetLogy();
     hist_00pm2D_projX[t2Max]->SetTitle(Form("h_00pm projX - t2Max=%.0f", t2Max));
     hist_00pm2D_projX[t2Max]->SetLineColor(kBlue);
-    hist_00pm2D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 300.0);
+    hist_00pm2D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 20.0);
     hist_00pm2D_projX[t2Max]->Draw();
 
     cProjX->cd(2);
     gPad->SetLogy();
     hist_pm002D_projX[t2Max]->SetTitle(Form("h_pm00 projX - t2Max=%.0f", t2Max));
     hist_pm002D_projX[t2Max]->SetLineColor(kBlue);
-    hist_pm002D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 300.0);
+    hist_pm002D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 20.0);
     hist_pm002D_projX[t2Max]->Draw();
 
     cProjX->cd(3);
     gPad->SetLogy();
     hist_pmpmRA2D_projX[t2Max]->SetTitle(Form("h_pmpmRA projX - t2Max=%.0f", t2Max));
     hist_pmpmRA2D_projX[t2Max]->SetLineColor(kBlue);
-    hist_pmpmRA2D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 300.0);
+    hist_pmpmRA2D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 20.0);
     hist_pmpmRA2D_projX[t2Max]->Draw();
 
     cProjX->SaveAs(Form(imgFolderPath + "/1DprojX_histograms_t2Max%.0f.svg", t2Max));
@@ -374,22 +375,127 @@ int main()
   };
 
   TF2 *func_00pm_norm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_00pm_normalized, 0.0, 300, 0.0, 300, 3);
-  func_00pm_norm->SetParameters(reParam, imParam, 4E6);
+  func_00pm_norm->SetParameters(reParam, imParam, hist_00pm2D_base->Integral());
+
+  func_00pm_norm->FixParameter(0, reParam);
+  func_00pm_norm->FixParameter(1, imParam);
 
   TF2 *func_pm00_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pm00_normalized, 0.0, 300, 0.0, 300, 3);
-  func_pm00_norm->SetParameters(reParam, imParam, 4E6);
+  func_pm00_norm->SetParameters(reParam, imParam, hist_pm002D_base->Integral());
+
+  func_pm00_norm->FixParameter(0, reParam);
+  func_pm00_norm->FixParameter(1, imParam);
 
   TF2 *func_pmpm_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pmpm_normalized, 0.0, 300, 0.0, 300, 2);
-  func_pmpm_norm->SetParameters(reParam, 4E6);
+  func_pmpm_norm->SetParameters(reParam, hist_pmpm2D_base->Integral());
+
+  func_pmpm_norm->FixParameter(0, reParam);
 
   std::cout << "Mock function fitting:" << std::endl;
-  hist_00pm2D_base->Fit(func_00pm_norm, "RSEM");
-  hist_pm002D_base->Fit(func_pm00_norm, "RSEM");
-  hist_pmpm2D_base->Fit(func_pmpm_norm, "RSEM");
+  TFitResultPtr fitResult_00pm = hist_00pm2D_base->Fit(func_00pm_norm, "RSEML");
+  TFitResultPtr fitResult_pm00 = hist_pm002D_base->Fit(func_pm00_norm, "RSEML");
+  TFitResultPtr fitResult_pmpm = hist_pmpm2D_base->Fit(func_pmpm_norm, "RSEML");
 
-  std::cout << "Chi2 for 00pm mock fit: " << func_00pm->GetChisquare() << std::endl;
-  std::cout << "Chi2 for pm00 mock fit: " << func_pm00->GetChisquare() << std::endl;
-  std::cout << "Chi2 for pmpm mock fit: " << func_pmpm->GetChisquare() << std::endl;
+  if (fitResult_00pm->IsValid())
+    std::cout << "Fit 00pm successful: Re = " << func_00pm_norm->GetParameter(0) << ", Im = " << func_00pm_norm->GetParameter(1) << ", Chi2: " << fitResult_00pm->Chi2() << std::endl;
+  else
+    std::cout << "Fit 00pm failed!" << std::endl;
+
+  if (fitResult_pm00->IsValid())
+    std::cout << "Fit pm00 successful: Re = " << func_pm00_norm->GetParameter(0) << ", Im = " << func_pm00_norm->GetParameter(1) << ", Chi2: " << fitResult_pm00->Chi2() << std::endl;
+  else
+    std::cout << "Fit pm00 failed!" << std::endl;
+
+  if (fitResult_pmpm->IsValid())
+    std::cout << "Fit pmpm successful: Re = " << func_pmpm_norm->GetParameter(0) << ", Chi2: " << fitResult_pmpm->Chi2() << std::endl;
+  else
+    std::cout << "Fit pmpm failed!" << std::endl;
+
+  TH1D *hResiduals_00pm = new TH1D("hResiduals_00pm", "Residuals (00pm) (Data-Fit)/#sigma;Residual;Counts", 120, -6, 6);
+  TH1D *hResiduals_pm00 = new TH1D("hResiduals_pm00", "Residuals (pm00) (Data-Fit)/#sigma;Residual;Counts", 120, -6, 6);
+  TH1D *hResiduals_pmpm = new TH1D("hResiduals_pmpm", "Residuals (pmpm) (Data-Fit)/#sigma;Residual;Counts", 120, -6, 6);
+
+  hResiduals_00pm->Sumw2();
+  hResiduals_pm00->Sumw2();
+  hResiduals_pmpm->Sumw2();
+
+  auto fillResiduals2D = [&](TH2 *hist2D, TF2 *func, TH1D *outHist)
+  {
+    if (!hist2D || !func || !outHist)
+      return;
+
+    const int nx = hist2D->GetNbinsX();
+    const int ny = hist2D->GetNbinsY();
+
+    for (int ix = 1; ix <= nx; ++ix)
+    {
+      for (int iy = 1; iy <= ny; ++iy)
+      {
+        const double x = hist2D->GetXaxis()->GetBinCenter(ix);
+        const double y = hist2D->GetYaxis()->GetBinCenter(iy);
+
+        const double data = hist2D->GetBinContent(ix, iy);
+        const double err = hist2D->GetBinError(ix, iy);
+        if (err <= 0.0)
+          continue;
+
+        const double fit = func->Eval(x, y);
+        const double resid = (data - fit) / err;
+
+        outHist->Fill(resid);
+      }
+    }
+  };
+
+  fillResiduals2D(hist_00pm2D_base, func_00pm_norm, hResiduals_00pm);
+  fillResiduals2D(hist_pm002D_base, func_pm00_norm, hResiduals_pm00);
+  fillResiduals2D(hist_pmpm2D_base, func_pmpm_norm, hResiduals_pmpm);
+
+  gStyle->SetOptFit(1);
+
+  TF1 *fitRes00pm = new TF1("fitRes00pm", "gaus", -6, 6);
+  TF1 *fitRespm00 = new TF1("fitRespm00", "gaus", -6, 6);
+  TF1 *fitRespmpm = new TF1("fitRespmpm", "gaus", -6, 6);
+
+  hResiduals_00pm->Fit(fitRes00pm, "RS");
+  hResiduals_pm00->Fit(fitRespm00, "RS");
+  hResiduals_pmpm->Fit(fitRespmpm, "RS");
+
+  TCanvas *cRes00pm = new TCanvas("cRes00pm", "Residuals 00pm", 800, 600);
+  hResiduals_00pm->Draw();
+  gPad->Update();
+  if (auto *st = (TPaveStats *)hResiduals_00pm->FindObject("stats"))
+  {
+    st->SetX1NDC(0.72);
+    st->SetX2NDC(0.93);
+    st->SetY1NDC(0.77);
+    st->SetY2NDC(0.93);
+  }
+  cRes00pm->SaveAs(Form(imgFolderPath + "/residuals_00pm_%s.svg", maxEventsFile.Data()));
+
+  TCanvas *cRespm00 = new TCanvas("cRespm00", "Residuals pm00", 800, 600);
+  hResiduals_pm00->Draw();
+  gPad->Update();
+  if (auto *st = (TPaveStats *)hResiduals_pm00->FindObject("stats"))
+  {
+    st->SetX1NDC(0.72);
+    st->SetX2NDC(0.93);
+    st->SetY1NDC(0.77);
+    st->SetY2NDC(0.93);
+  }
+  cRespm00->SaveAs(Form(imgFolderPath + "/residuals_pm00_%s.svg", maxEventsFile.Data()));
+
+  TCanvas *cRespmpm = new TCanvas("cRespmpm", "Residuals pmpm", 800, 600);
+  hResiduals_pmpm->Draw();
+  gPad->Update();
+  if (auto *st = (TPaveStats *)hResiduals_pmpm->FindObject("stats"))
+  {
+    st->SetX1NDC(0.72);
+    st->SetX2NDC(0.93);
+    st->SetY1NDC(0.77);
+    st->SetY2NDC(0.93);
+  }
+  cRespmpm->SaveAs(Form(imgFolderPath + "/residuals_pmpm_%s.svg", maxEventsFile.Data()));
 
   auto func_00pm_1D = [&](Double_t *x, Double_t *par)
   {
