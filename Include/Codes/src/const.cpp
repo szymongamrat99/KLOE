@@ -97,7 +97,7 @@ namespace PhysicsConstants
 
   // Particles' masses
   Double_t mPhi = 1019.461;     // MeV/c^2
-  Double_t mK0 = 4;       // MeV/c^2
+  Double_t mK0 = 4;             // MeV/c^2
   Double_t mPi0 = 134.9768;     // MeV/c^2
   Double_t mPiCh = 139.57039;   // MeV/c^2
   Double_t mMuon = 105.6583755; // MeV/c^2
@@ -731,43 +731,62 @@ namespace Utils
     // Parsing of constants from PDG JSON file
     std::ifstream fconst(Paths::pdgConstFilePath.c_str());
 
-    auto& pdg = PdgManager::getInstance();
-    auto& k0_summary = pdg.getParticleData("S011", 2025); // K0 summary data for 2025 PDG
+    auto &pdg = PdgManager::getInstance();
+    std::map<TString, PDGProvider::SummaryEdition *> summaryMap;
 
-    auto summaries_opt = k0_summary.get_summaries();
+    summaryMap["K0"] = &pdg.getParticleData("S011", 2025); // K0 summary data for 2025 PDG
+    summaryMap["KS"] = &pdg.getParticleData("S012", 2025); // K0 summary data for 2025 PDG
+    summaryMap["KL"] = &pdg.getParticleData("S013", 2025); // K0 summary data for 2025 PDG
 
-    const auto& summaries = *summaries_opt;
-    auto properties_opt = summaries.get_properties();
-
-    const auto& properties_vec = *properties_opt;
-
-    for (const auto& prop : properties_vec)
+    auto setConstant = [](boost::optional<std::vector<PDGProvider::Property>> &properties_vec, const TString &pdgid, Double_t &constant, Double_t multiplier = 1.)
     {
-      auto pdgid_opt = prop.get_pdgid();
-
-      if (*pdgid_opt == "S011M/2025")
+      for (const auto &prop : *properties_vec)
       {
-        PhysicsConstants::mK0 = PdgManager::getBestValue(prop, PhysicsConstants::mK0);
+        auto pdgid_opt = prop.get_pdgid();
+        auto value_desc = prop.get_description();
 
-        std::cout << "K0 Mass set to: " << PhysicsConstants::mK0 << " MeV/c^2 from PDG data." << std::endl;
+        if (*pdgid_opt == pdgid)
+        {
+          constant = PdgManager::getBestValue(prop, constant) * multiplier;
+          std::cout << "Set " << *value_desc << " to: " << constant << std::endl;
+        }
       }
-    }
+    };
 
-
-    if (fconst.is_open())
+    for (const auto &entry : summaryMap)
     {
-      constants = json::parse(fconst);
+      auto summaries_opt = entry.second->get_summaries();
 
-      PhysicsConstants::mK0 = constants.at("values").at("/S011M").get<Double_t>();
-      PhysicsConstants::tau_S_nonCPT = constants.at("values").at("/S012T").get<Double_t>() * 1E9;
-      PhysicsConstants::tau_L = constants.at("values").at("/S013T").get<Double_t>() * 1E9;
-      PhysicsConstants::delta_mass_nonCPT = constants.at("values").at("/S013D").get<Double_t>();
-      PhysicsConstants::mod_epsilon = constants.at("values").at("/S013EP").get<Double_t>();
-      PhysicsConstants::Re = constants.at("values").at("/S013EPS").get<Double_t>();
-      PhysicsConstants::Im_nonCPT = constants.at("values").at("/S013EPI").get<Double_t>() * (M_PI / 180.);
-      PhysicsConstants::phi_pm_nonCPT = constants.at("values").at("/S013F+-").get<Double_t>();
-      PhysicsConstants::phi_00_nonCPT = constants.at("values").at("/S013FOO").get<Double_t>();
+      const auto &summaries = *summaries_opt;
+      auto properties_opt = summaries.get_properties();
+
+      const auto &properties_vec = *properties_opt;
+
+      setConstant(properties_opt, "S011M/2025", PhysicsConstants::mK0);
+      setConstant(properties_opt, "S012T/2025", PhysicsConstants::tau_S_nonCPT, 1E9);
+      setConstant(properties_opt, "S013T/2025", PhysicsConstants::tau_L, 1E9);
+      setConstant(properties_opt, "S013D/2025", PhysicsConstants::delta_mass_nonCPT);
+      setConstant(properties_opt, "S013EP/2025", PhysicsConstants::mod_epsilon);
+      setConstant(properties_opt, "S013EPS/2025", PhysicsConstants::Re);
+      setConstant(properties_opt, "S013EPI/2025", PhysicsConstants::Im_CPT, M_PI / 180.);
+      setConstant(properties_opt, "S013F+-/2025", PhysicsConstants::phi_pm_nonCPT);
+      setConstant(properties_opt, "S013FOO/2025", PhysicsConstants::phi_00_nonCPT);
     }
+
+    // if (fconst.is_open())
+    // {
+    //   constants = json::parse(fconst);
+
+    //   PhysicsConstants::mK0 = constants.at("values").at("/S011M").get<Double_t>();
+    //   PhysicsConstants::tau_S_nonCPT = constants.at("values").at("/S012T").get<Double_t>() * 1E9;
+    //   PhysicsConstants::tau_L = constants.at("values").at("/S013T").get<Double_t>() * 1E9;
+    //   PhysicsConstants::delta_mass_nonCPT = constants.at("values").at("/S013D").get<Double_t>();
+    //   PhysicsConstants::mod_epsilon = constants.at("values").at("/S013EP").get<Double_t>();
+    //   PhysicsConstants::Re = constants.at("values").at("/S013EPS").get<Double_t>();
+    //   PhysicsConstants::Im_nonCPT = constants.at("values").at("/S013EPI").get<Double_t>() * (M_PI / 180.);
+    //   PhysicsConstants::phi_pm_nonCPT = constants.at("values").at("/S013F+-").get<Double_t>();
+    //   PhysicsConstants::phi_00_nonCPT = constants.at("values").at("/S013FOO").get<Double_t>();
+    // }
 
     // Parsing of the KLOE properties
     std::ifstream fprop(Paths::propName.c_str());
