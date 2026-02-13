@@ -738,7 +738,7 @@ namespace Utils
     summaryMap["KS"] = &pdg.getParticleData("S012", 2025); // K0 summary data for 2025 PDG
     summaryMap["KL"] = &pdg.getParticleData("S013", 2025); // K0 summary data for 2025 PDG
 
-    auto setConstant = [](boost::optional<std::vector<PDGProvider::Property>> &properties_vec, const TString &pdgid, Double_t &constant, Double_t multiplier = 1.)
+    auto setConstant = [](boost::optional<std::vector<PDGProvider::Property>> &properties_vec, const TString &pdgid, Double_t &constant, CPTStatus CPTOrNotCPT = CPTStatus::UNDEFINED, Double_t multiplier = 1.)
     {
       for (const auto &prop : *properties_vec)
       {
@@ -747,7 +747,7 @@ namespace Utils
 
         if (*pdgid_opt == pdgid)
         {
-          constant = PdgManager::getBestValue(prop, constant) * multiplier;
+          constant = PdgManager::getBestValue(prop, 1.0) * multiplier;
           std::cout << "Set " << *value_desc << " to: " << constant << std::endl;
         }
       }
@@ -763,14 +763,16 @@ namespace Utils
       const auto &properties_vec = *properties_opt;
 
       setConstant(properties_opt, "S011M/2025", PhysicsConstants::mK0);
-      setConstant(properties_opt, "S012T/2025", PhysicsConstants::tau_S_nonCPT, 1E9);
-      setConstant(properties_opt, "S013T/2025", PhysicsConstants::tau_L, 1E9);
-      setConstant(properties_opt, "S013D/2025", PhysicsConstants::delta_mass_nonCPT);
+      setConstant(properties_opt, "S012T/2025", PhysicsConstants::tau_S_nonCPT, CPTStatus::NON_CPT);
+      setConstant(properties_opt, "S012T/2025", PhysicsConstants::tau_S_CPT, CPTStatus::CPT);
+      setConstant(properties_opt, "S013T/2025", PhysicsConstants::tau_L, CPTStatus::NON_CPT, 1E9);  
+      setConstant(properties_opt, "S013D/2025", PhysicsConstants::delta_mass_nonCPT, CPTStatus::NON_CPT);
       setConstant(properties_opt, "S013EP/2025", PhysicsConstants::mod_epsilon);
       setConstant(properties_opt, "S013EPS/2025", PhysicsConstants::Re);
-      setConstant(properties_opt, "S013EPI/2025", PhysicsConstants::Im_CPT, M_PI / 180.);
-      setConstant(properties_opt, "S013F+-/2025", PhysicsConstants::phi_pm_nonCPT);
-      setConstant(properties_opt, "S013FOO/2025", PhysicsConstants::phi_00_nonCPT);
+      setConstant(properties_opt, "S013EPI/2025", PhysicsConstants::Im_CPT, CPTStatus::CPT);
+      setConstant(properties_opt, "S013EPI/2025", PhysicsConstants::Im_nonCPT, CPTStatus::NON_CPT);
+      setConstant(properties_opt, "S013F+-/2025", PhysicsConstants::phi_pm_nonCPT, CPTStatus::NON_CPT);
+      setConstant(properties_opt, "S013FOO/2025", PhysicsConstants::phi_00_nonCPT, CPTStatus::NON_CPT);
     }
 
     // if (fconst.is_open())
