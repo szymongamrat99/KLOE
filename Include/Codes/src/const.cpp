@@ -97,7 +97,7 @@ namespace PhysicsConstants
 
   // Particles' masses
   Double_t mPhi = 1019.461;     // MeV/c^2
-  Double_t mK0 = 497.611;       // MeV/c^2
+  Double_t mK0 = 4;       // MeV/c^2
   Double_t mPi0 = 134.9768;     // MeV/c^2
   Double_t mPiCh = 139.57039;   // MeV/c^2
   Double_t mMuon = 105.6583755; // MeV/c^2
@@ -704,7 +704,7 @@ namespace Utils
     elapsedHMS = std::to_string(elapsedHours) + "h " + std::to_string(elapsedMinutes) + "min " + std::to_string(elapsedSeconds) + "s";
 
     return elapsedHMS;
-  };
+  }
 
   void InitializeVariables()
   {
@@ -733,16 +733,25 @@ namespace Utils
 
     auto& pdg = PdgManager::getInstance();
     auto& k0_summary = pdg.getParticleData("S011", 2025); // K0 summary data for 2025 PDG
-    
-    // for (const auto& prop : k0_summary.get_summaries().get_properties())
-    // {
-    //   if (prop.get_pdgid() == "S011M")
-    //   {
-    //     PhysicsConstants::mK0 = PdgManager::getBestValue(prop, PhysicsConstants::mK0);
 
-    //     std::cout << "K0 Mass set to: " << PhysicsConstants::mK0 << " MeV/c^2 from PDG data." << std::endl;
-    //   }
-    // }
+    auto summaries_opt = k0_summary.get_summaries();
+
+    const auto& summaries = *summaries_opt;
+    auto properties_opt = summaries.get_properties();
+
+    const auto& properties_vec = *properties_opt;
+
+    for (const auto& prop : properties_vec)
+    {
+      auto pdgid_opt = prop.get_pdgid();
+
+      if (*pdgid_opt == "S011M/2025")
+      {
+        PhysicsConstants::mK0 = PdgManager::getBestValue(prop, PhysicsConstants::mK0);
+
+        std::cout << "K0 Mass set to: " << PhysicsConstants::mK0 << " MeV/c^2 from PDG data." << std::endl;
+      }
+    }
 
 
     if (fconst.is_open())

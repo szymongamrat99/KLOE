@@ -97,7 +97,7 @@ namespace PDGProvider {
         virtual ~PdgValue() = default;
 
         private:
-        double value;
+        boost::optional<double> value;
         boost::optional<double> error_positive;
         boost::optional<double> error_negative;
         std::string value_text;
@@ -110,9 +110,9 @@ namespace PDGProvider {
         boost::optional<std::string> comment;
 
         public:
-        const double & get_value() const { return value; }
-        double & get_mutable_value() { return value; }
-        void set_value(const double & value) { this->value = value; }
+        const boost::optional<double> & get_value() const { return value; }
+        boost::optional<double> & get_mutable_value() { return value; }
+        void set_value(const boost::optional<double> & value) { this->value = value; }
 
         boost::optional<double> get_error_positive() const { return error_positive; }
         void set_error_positive(boost::optional<double> value) { this->error_positive = value; }
@@ -153,32 +153,27 @@ namespace PDGProvider {
         virtual ~BranchingFraction() = default;
 
         private:
-        std::string pdgid;
-        std::string description;
-        int64_t mode_number;
-        std::string section;
-        std::vector<PdgValue> pdg_values;
+        boost::optional<std::string> pdgid;
+        boost::optional<std::string> description;
+        boost::optional<int64_t> mode_number;
+        boost::optional<std::string> section;
+        boost::optional<std::vector<PdgValue>> pdg_values;
 
         public:
-        const std::string & get_pdgid() const { return pdgid; }
-        std::string & get_mutable_pdgid() { return pdgid; }
-        void set_pdgid(const std::string & value) { this->pdgid = value; }
+        boost::optional<std::string> get_pdgid() const { return pdgid; }
+        void set_pdgid(boost::optional<std::string> value) { this->pdgid = value; }
 
-        const std::string & get_description() const { return description; }
-        std::string & get_mutable_description() { return description; }
-        void set_description(const std::string & value) { this->description = value; }
+        boost::optional<std::string> get_description() const { return description; }
+        void set_description(boost::optional<std::string> value) { this->description = value; }
 
-        const int64_t & get_mode_number() const { return mode_number; }
-        int64_t & get_mutable_mode_number() { return mode_number; }
-        void set_mode_number(const int64_t & value) { this->mode_number = value; }
+        boost::optional<int64_t> get_mode_number() const { return mode_number; }
+        void set_mode_number(boost::optional<int64_t> value) { this->mode_number = value; }
 
-        const std::string & get_section() const { return section; }
-        std::string & get_mutable_section() { return section; }
-        void set_section(const std::string & value) { this->section = value; }
+        boost::optional<std::string> get_section() const { return section; }
+        void set_section(boost::optional<std::string> value) { this->section = value; }
 
-        const std::vector<PdgValue> & get_pdg_values() const { return pdg_values; }
-        std::vector<PdgValue> & get_mutable_pdg_values() { return pdg_values; }
-        void set_pdg_values(const std::vector<PdgValue> & value) { this->pdg_values = value; }
+        boost::optional<std::vector<PdgValue>> get_pdg_values() const { return pdg_values; }
+        void set_pdg_values(boost::optional<std::vector<PdgValue>> value) { this->pdg_values = value; }
     };
 
     class Property {
@@ -187,18 +182,16 @@ namespace PDGProvider {
         virtual ~Property() = default;
 
         private:
-        std::string pdgid;
-        std::string description;
+        boost::optional<std::string> pdgid;
+        boost::optional<std::string> description;
         boost::optional<std::vector<PdgValue>> pdg_values;
 
         public:
-        const std::string & get_pdgid() const { return pdgid; }
-        std::string & get_mutable_pdgid() { return pdgid; }
-        void set_pdgid(const std::string & value) { this->pdgid = value; }
+        boost::optional<std::string> get_pdgid() const { return pdgid; }
+        void set_pdgid(boost::optional<std::string> value) { this->pdgid = value; }
 
-        const std::string & get_description() const { return description; }
-        std::string & get_mutable_description() { return description; }
-        void set_description(const std::string & value) { this->description = value; }
+        boost::optional<std::string> get_description() const { return description; }
+        void set_description(boost::optional<std::string> value) { this->description = value; }
 
         boost::optional<std::vector<PdgValue>> get_pdg_values() const { return pdg_values; }
         void set_pdg_values(boost::optional<std::vector<PdgValue>> value) { this->pdg_values = value; }
@@ -210,17 +203,15 @@ namespace PDGProvider {
         virtual ~Summaries() = default;
 
         private:
-        std::vector<Property> properties;
-        std::vector<BranchingFraction> branching_fractions;
+        boost::optional<std::vector<Property>> properties;
+        boost::optional<std::vector<BranchingFraction>> branching_fractions;
 
         public:
-        const std::vector<Property> & get_properties() const { return properties; }
-        std::vector<Property> & get_mutable_properties() { return properties; }
-        void set_properties(const std::vector<Property> & value) { this->properties = value; }
+        boost::optional<std::vector<Property>> get_properties() const { return properties; }
+        void set_properties(boost::optional<std::vector<Property>> value) { this->properties = value; }
 
-        const std::vector<BranchingFraction> & get_branching_fractions() const { return branching_fractions; }
-        std::vector<BranchingFraction> & get_mutable_branching_fractions() { return branching_fractions; }
-        void set_branching_fractions(const std::vector<BranchingFraction> & value) { this->branching_fractions = value; }
+        boost::optional<std::vector<BranchingFraction>> get_branching_fractions() const { return branching_fractions; }
+        void set_branching_fractions(boost::optional<std::vector<BranchingFraction>> value) { this->branching_fractions = value; }
     };
 
     class SummaryEdition {
@@ -229,52 +220,43 @@ namespace PDGProvider {
         virtual ~SummaryEdition() = default;
 
         private:
-        int64_t status_code;
-        std::string status_message;
-        std::string request_timestamp;
-        std::string request_url;
-        std::string edition;
-        std::string about;
-        std::string pdgid;
-        std::string description;
-        Summaries summaries;
+        boost::optional<int64_t> status_code;
+        boost::optional<std::string> status_message;
+        boost::optional<std::string> request_timestamp;
+        boost::optional<std::string> request_url;
+        boost::optional<std::string> edition;
+        boost::optional<std::string> about;
+        boost::optional<std::string> pdgid;
+        boost::optional<std::string> description;
+        boost::optional<Summaries> summaries;
 
         public:
-        const int64_t & get_status_code() const { return status_code; }
-        int64_t & get_mutable_status_code() { return status_code; }
-        void set_status_code(const int64_t & value) { this->status_code = value; }
+        boost::optional<int64_t> get_status_code() const { return status_code; }
+        void set_status_code(boost::optional<int64_t> value) { this->status_code = value; }
 
-        const std::string & get_status_message() const { return status_message; }
-        std::string & get_mutable_status_message() { return status_message; }
-        void set_status_message(const std::string & value) { this->status_message = value; }
+        boost::optional<std::string> get_status_message() const { return status_message; }
+        void set_status_message(boost::optional<std::string> value) { this->status_message = value; }
 
-        const std::string & get_request_timestamp() const { return request_timestamp; }
-        std::string & get_mutable_request_timestamp() { return request_timestamp; }
-        void set_request_timestamp(const std::string & value) { this->request_timestamp = value; }
+        boost::optional<std::string> get_request_timestamp() const { return request_timestamp; }
+        void set_request_timestamp(boost::optional<std::string> value) { this->request_timestamp = value; }
 
-        const std::string & get_request_url() const { return request_url; }
-        std::string & get_mutable_request_url() { return request_url; }
-        void set_request_url(const std::string & value) { this->request_url = value; }
+        boost::optional<std::string> get_request_url() const { return request_url; }
+        void set_request_url(boost::optional<std::string> value) { this->request_url = value; }
 
-        const std::string & get_edition() const { return edition; }
-        std::string & get_mutable_edition() { return edition; }
-        void set_edition(const std::string & value) { this->edition = value; }
+        boost::optional<std::string> get_edition() const { return edition; }
+        void set_edition(boost::optional<std::string> value) { this->edition = value; }
 
-        const std::string & get_about() const { return about; }
-        std::string & get_mutable_about() { return about; }
-        void set_about(const std::string & value) { this->about = value; }
+        boost::optional<std::string> get_about() const { return about; }
+        void set_about(boost::optional<std::string> value) { this->about = value; }
 
-        const std::string & get_pdgid() const { return pdgid; }
-        std::string & get_mutable_pdgid() { return pdgid; }
-        void set_pdgid(const std::string & value) { this->pdgid = value; }
+        boost::optional<std::string> get_pdgid() const { return pdgid; }
+        void set_pdgid(boost::optional<std::string> value) { this->pdgid = value; }
 
-        const std::string & get_description() const { return description; }
-        std::string & get_mutable_description() { return description; }
-        void set_description(const std::string & value) { this->description = value; }
+        boost::optional<std::string> get_description() const { return description; }
+        void set_description(boost::optional<std::string> value) { this->description = value; }
 
-        const Summaries & get_summaries() const { return summaries; }
-        Summaries & get_mutable_summaries() { return summaries; }
-        void set_summaries(const Summaries & value) { this->summaries = value; }
+        boost::optional<Summaries> get_summaries() const { return summaries; }
+        void set_summaries(boost::optional<Summaries> value) { this->summaries = value; }
     };
 }
 
@@ -327,11 +309,11 @@ namespace PDGProvider {
     }
 
     inline void from_json(const json & j, BranchingFraction& x) {
-        x.set_pdgid(j.at("pdgid").get<std::string>());
-        x.set_description(j.at("description").get<std::string>());
-        x.set_mode_number(j.at("mode_number").get<int64_t>());
-        x.set_section(j.at("section").get<std::string>());
-        x.set_pdg_values(j.at("pdg_values").get<std::vector<PdgValue>>());
+        x.set_pdgid(get_stack_optional<std::string>(j, "pdgid"));
+        x.set_description(get_stack_optional<std::string>(j, "description"));
+        x.set_mode_number(get_stack_optional<int64_t>(j, "mode_number"));
+        x.set_section(get_stack_optional<std::string>(j, "section"));
+        x.set_pdg_values(get_stack_optional<std::vector<PdgValue>>(j, "pdg_values"));
     }
 
     inline void to_json(json & j, const BranchingFraction & x) {
@@ -344,8 +326,8 @@ namespace PDGProvider {
     }
 
     inline void from_json(const json & j, Property& x) {
-        x.set_pdgid(j.at("pdgid").get<std::string>());
-        x.set_description(j.at("description").get<std::string>());
+        x.set_pdgid(get_stack_optional<std::string>(j, "pdgid"));
+        x.set_description(get_stack_optional<std::string>(j, "description"));
         x.set_pdg_values(get_stack_optional<std::vector<PdgValue>>(j, "pdg_values"));
     }
 
@@ -357,8 +339,8 @@ namespace PDGProvider {
     }
 
     inline void from_json(const json & j, Summaries& x) {
-        x.set_properties(j.at("properties").get<std::vector<Property>>());
-        x.set_branching_fractions(j.at("branching_fractions").get<std::vector<BranchingFraction>>());
+        x.set_properties(get_stack_optional<std::vector<Property>>(j, "properties"));
+        x.set_branching_fractions(get_stack_optional<std::vector<BranchingFraction>>(j, "branching_fractions"));
     }
 
     inline void to_json(json & j, const Summaries & x) {
@@ -368,15 +350,15 @@ namespace PDGProvider {
     }
 
     inline void from_json(const json & j, SummaryEdition& x) {
-        x.set_status_code(j.at("status_code").get<int64_t>());
-        x.set_status_message(j.at("status_message").get<std::string>());
-        x.set_request_timestamp(j.at("request_timestamp").get<std::string>());
-        x.set_request_url(j.at("request_url").get<std::string>());
-        x.set_edition(j.at("edition").get<std::string>());
-        x.set_about(j.at("about").get<std::string>());
-        x.set_pdgid(j.at("pdgid").get<std::string>());
-        x.set_description(j.at("description").get<std::string>());
-        x.set_summaries(j.at("summaries").get<Summaries>());
+        x.set_status_code(get_stack_optional<int64_t>(j, "status_code"));
+        x.set_status_message(get_stack_optional<std::string>(j, "status_message"));
+        x.set_request_timestamp(get_stack_optional<std::string>(j, "request_timestamp"));
+        x.set_request_url(get_stack_optional<std::string>(j, "request_url"));
+        x.set_edition(get_stack_optional<std::string>(j, "edition"));
+        x.set_about(get_stack_optional<std::string>(j, "about"));
+        x.set_pdgid(get_stack_optional<std::string>(j, "pdgid"));
+        x.set_description(get_stack_optional<std::string>(j, "description"));
+        x.set_summaries(get_stack_optional<Summaries>(j, "summaries"));
     }
 
     inline void to_json(json & j, const SummaryEdition & x) {

@@ -1,4 +1,6 @@
 #include <PdgManager.h>
+#include <iostream>
+#include <boost/optional/optional_io.hpp>
 
 PdgManager::PdgManager() {
     curl_global_init(CURL_GLOBAL_ALL);
@@ -24,20 +26,19 @@ double PdgManager::getBestValue(const PDGProvider::Property& prop, double hardco
     if (!prop.get_pdg_values() || prop.get_pdg_values()->empty()) {
         return hardcodedFallback;
     }
-
     const auto& values = *prop.get_pdg_values();
 
     // 1. Szukamy OUR AVERAGE
     for (const auto& v : values) {
         if (v.get_type() == PDGProvider::Type::OUR_AVERAGE) {
-            return v.get_value();
+            return v.get_value().value();
         }
     }
 
     // 2. Jeśli nie ma, szukamy OUR FIT
     for (const auto& v : values) {
         if (v.get_type() == PDGProvider::Type::OUR_FIT) {
-            return v.get_value();
+            return v.get_value().value();
         }
     }
 
