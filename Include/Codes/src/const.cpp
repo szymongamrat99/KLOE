@@ -732,7 +732,7 @@ namespace Utils
     std::ifstream fconst(Paths::pdgConstFilePath.c_str());
 
     auto& pdg = PdgManager::getInstance();
-    // auto& k0_summary = pdg.getParticleData("S011", 2025); // K0 summary data for 2025 PDG
+    auto& k0_summary = pdg.getParticleData("S011", 2025); // K0 summary data for 2025 PDG
     
     // for (const auto& prop : k0_summary.get_summaries().get_properties())
     // {

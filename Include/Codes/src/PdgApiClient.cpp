@@ -33,6 +33,8 @@ std::string PdgApiClient::fetchParticleJson(const std::string& pdgid, int year) 
             throw std::runtime_error("CURL failed: " + std::string(curl_easy_strerror(res)));
         }
     }
-    curl_easy_cleanup(curl);
+    else{
+      throw std::runtime_error("Failed to initialize CURL");
+    }
     return response;
 }
