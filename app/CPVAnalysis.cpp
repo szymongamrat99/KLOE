@@ -55,6 +55,12 @@ int main(int argc, char *argv[])
     useJobListFile = true;
   }
 
+  // Set KLOE class instance
+  KLOE::pm00 eventAnalysis;
+  // Set logger for error logging
+  std::string logFilename = (std::string)Paths::base_path + (std::string)Paths::logs_dir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
+  ErrorHandling::ErrorLogs logger(logFilename);
+  ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Initialize utility variables
   Utils::InitializeVariables();
@@ -62,14 +68,6 @@ int main(int argc, char *argv[])
   // Analysis flags and settings
   KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();
   analysisConfig.LoadFromFile(Paths::analysisConfigPath);
-  // -------------------------------------------------------------------
-  // Set KLOE class instance
-  KLOE::pm00 eventAnalysis;
-  // -------------------------------------------------------------------
-  // Set logger for error logging
-  std::string logFilename = (std::string)Paths::base_path + (std::string)Paths::logs_dir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
-  ErrorHandling::ErrorLogs logger(logFilename);
-  ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Set tree name
   const std::string generalTreeName = Utils::properties["variables"]["tree"]["treename"]["general"];

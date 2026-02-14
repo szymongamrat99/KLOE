@@ -38,6 +38,7 @@ namespace Paths
   std::string rootfilesName = propertiesPath + "/root-files.json";
   std::string cutlimitsName = propertiesPath + "/cut-limits.json";
   std::string reportConfigPath = propertiesPath + "/report-config.json";
+  std::string pathsExtensionsPath = propertiesPath + "/paths-extensions.json";
 
   TString base_path = workdirPath + "/KLOE/";
   TString path_tmp = "";
@@ -711,8 +712,7 @@ namespace Utils
   {
 
     // Parsing of paths
-    std::string pathsFilePath = Paths::propertiesPath + "/paths-extensions.json";
-    std::ifstream fpath(pathsFilePath.c_str());
+    std::ifstream fpath(Paths::pathsExtensionsPath);
 
     if (fpath.is_open())
     {
@@ -724,9 +724,10 @@ namespace Utils
 
       Paths::ext_img = (std::string)paths["extensions"]["img"];
       Paths::ext_root = (std::string)paths["extensions"]["root"];
+      Paths::ext_log = (std::string)paths["extensions"]["log"];
       Paths::cutlimitsName = (std::string)paths["cutLimits"];
 
-      std::cout << "Paths initialized from: " << pathsFilePath << std::endl;
+      std::cout << "Paths initialized from: " << Paths::pathsExtensionsPath << std::endl;
     }
 
     // Parsing of the KLOE properties

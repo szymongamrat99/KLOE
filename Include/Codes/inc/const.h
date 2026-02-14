@@ -29,6 +29,7 @@ namespace Paths
   extern std::string rootfilesName;
   extern std::string cutlimitsName;
   extern std::string reportConfigPath;
+  extern std::string pathsExtensionsPath;
 
   extern TString base_path;
   extern TString path_tmp;
@@ -37,6 +38,7 @@ namespace Paths
   extern TString ext_root;
   extern TString ext_img;
   extern TString ext_csv;
+  extern TStrinh ext_log;
 
   extern TString gen_vars_dir;
   extern TString neutrec_dir;

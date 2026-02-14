@@ -1,10 +1,11 @@
 {
-  "date": "2025-12-02",
+  "date": "2026-02-14",
   "general":
   {
     "rootFileDir": "/data/ssd/gamrat/KLOE/Subanalysis/InitAnalysis/root_files",
+    "baseDir": "/data/ssd/gamrat/KLOE/",
     "imgDir": "img",
-    "logDir": "logs"
+    "logDir": "log"
   },
   "analysisProperties":
   {
@@ -16,6 +17,14 @@
   "extensions":
   {
     "img": ".pdf",
-    "root": ".root"
+    "root": ".root",
+    "log": ".log"
+  },
+  "logFilesBaseNames":
+  {
+    "general": "general",
+    "error": "error",
+    "web-service": "rti.web-service",
+    "physics-constants": "constants.loaded"
   }
 }
