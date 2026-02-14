@@ -17,6 +17,7 @@ HypothesisCode JsonToHypothesisCode(const std::string& str) {
     if (str == "SIGNAL")   return HypothesisCode::SIGNAL;
     if (str == "OMEGAPI")  return HypothesisCode::OMEGAPI;
     if (str == "FOUR_PI")  return HypothesisCode::FOUR_PI;
+    if (str == "THREE_PI0") return HypothesisCode::THREE_PI0;
     
     std::cerr << "Unknown hypothesis." << std::endl;
     return HypothesisCode::INVALID_VALUE;
@@ -27,6 +28,7 @@ std::string HypothesisCodeToString(HypothesisCode code) {
         case HypothesisCode::SIGNAL:  return "SIGNAL";
         case HypothesisCode::OMEGAPI: return "OMEGAPI";
         case HypothesisCode::FOUR_PI: return "FOUR_PI";
+        case HypothesisCode::THREE_PI0: return "THREE_PI0";
         default: return "UNKNOWN";
     }
 }

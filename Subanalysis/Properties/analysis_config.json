@@ -10,7 +10,7 @@
   
   "hypothesis": {
     "active": "FOUR_PI",
-    "enabled": ["SIGNAL", "OMEGA", "FOUR_PI"]
+    "enabled": ["SIGNAL", "OMEGAPI", "FOUR_PI", "THREE_PI0"]
   },
   
   "hypothesisConfigs": {
@@ -39,7 +39,7 @@
       }
     },
     
-    "OMEGA": {
+    "OMEGAPI": {
       "enabled": true,
       "description": "phi -> omega pi0 -> pi+pi-pi0pi0",
       "modules": {
