@@ -786,7 +786,8 @@ namespace Utils
       setConstant(properties_opt, "S012T/2025", PhysicsConstants::tau_S_nonCPT, CPTStatus::NON_CPT, 1E9);
       setConstant(properties_opt, "S012T/2025", PhysicsConstants::tau_S_CPT, CPTStatus::CPT, 1E9);
       setConstant(properties_opt, "S013T/2025", PhysicsConstants::tau_L, CPTStatus::UNDEFINED, 1E9);
-      setConstant(properties_opt, "S013D/2025", PhysicsConstants::delta_mass_nonCPT, CPTStatus::NON_CPT);
+      setConstant(properties_opt, "S013D/2025", PhysicsConstants::delta_mass_CPT, CPTStatus::CPT, 1E-9);
+      setConstant(properties_opt, "S013D/2025", PhysicsConstants::delta_mass_nonCPT, CPTStatus::NON_CPT, 1E-9);
       setConstant(properties_opt, "S013EP/2025", PhysicsConstants::mod_epsilon);
       setConstant(properties_opt, "S013EPS/2025", PhysicsConstants::Re);
       setConstant(properties_opt, "S013EPI/2025", PhysicsConstants::Im_CPT, CPTStatus::CPT, M_PI / 180.);

@@ -16,8 +16,8 @@ Double_t interf_function(const Double_t *x, const Double_t *par)
 
   Epsilon = PhysicsConstants::mod_epsilon;
   Dphi = PhysicsConstants::phi_pm_nonCPT - PhysicsConstants::phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
-  TauKs = PhysicsConstants::tau_S_nonCPT * 1E-9;                            // PDG fit not assuming CPT (s)
-  TauKl = PhysicsConstants::tau_L * 1E-9;                                   // Kl mean life (s)
+  TauKs = PhysicsConstants::tau_S_nonCPT;                            // PDG fit not assuming CPT (s)
+  TauKl = PhysicsConstants::tau_L;                                   // Kl mean life (s)
   MassDiff = PhysicsConstants::delta_mass_nonCPT;                           // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
 
   // PDG fit not assuming CPT
@@ -64,8 +64,8 @@ Double_t interf_function_00pm(const Double_t *x, const Double_t *par)
 
   Epsilon = PhysicsConstants::mod_epsilon;
   Dphi = PhysicsConstants::phi_pm_nonCPT - PhysicsConstants::phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
-  TauKs = PhysicsConstants::tau_S_nonCPT * 1E-9;                            // PDG fit not assuming CPT (s)
-  TauKl = PhysicsConstants::tau_L * 1E-9;                                   // Kl mean life (s)
+  TauKs = PhysicsConstants::tau_S_nonCPT;                            // PDG fit not assuming CPT (s)
+  TauKl = PhysicsConstants::tau_L;                                   // Kl mean life (s)
   MassDiff = PhysicsConstants::delta_mass_nonCPT;                           // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
                                                                             // PDG fit not assuming CPT
   RePart = par[0];                                                          // PhysicsConstants::Re;
@@ -100,8 +100,8 @@ Double_t interf_function_pm00(const Double_t *x, const Double_t *par)
 
   Epsilon = PhysicsConstants::mod_epsilon;
   Dphi = PhysicsConstants::phi_pm_nonCPT - PhysicsConstants::phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
-  TauKs = PhysicsConstants::tau_S_nonCPT * 1E-9;                            // PDG fit not assuming CPT (s)
-  TauKl = PhysicsConstants::tau_L * 1E-9;                                   // Kl mean life (s)
+  TauKs = PhysicsConstants::tau_S_nonCPT;                            // PDG fit not assuming CPT (s)
+  TauKl = PhysicsConstants::tau_L;                                   // Kl mean life (s)
   MassDiff = PhysicsConstants::delta_mass_nonCPT;                           // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
                                                                             // PDG fit not assuming CPT
   RePart = par[0];                                                          // PhysicsConstants::Re;
@@ -136,8 +136,8 @@ Double_t interf_function_pmpm(const Double_t *x, const Double_t *par)
 
   Epsilon = PhysicsConstants::mod_epsilon;
   Dphi = PhysicsConstants::phi_pm_nonCPT - PhysicsConstants::phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
-  TauKs = PhysicsConstants::tau_S_nonCPT * 1E-9;                            // PDG fit not assuming CPT (s)
-  TauKl = PhysicsConstants::tau_L * 1E-9;                                   // Kl mean life (s)
+  TauKs = PhysicsConstants::tau_S_nonCPT;                            // PDG fit not assuming CPT (s)
+  TauKl = PhysicsConstants::tau_L;                                   // Kl mean life (s)
   MassDiff = PhysicsConstants::delta_mass_nonCPT;                           // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
                                                                             // PDG fit not assuming CPT
   RePart = par[0];                                                          // PhysicsConstants::Re;                                                       // PhysicsConstants::Im_nonCPT; // Im(epsilon'/epsilon) = Dphi/3;

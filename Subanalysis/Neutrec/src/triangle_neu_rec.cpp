@@ -111,7 +111,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
     Float_t neu_vtx[4] = {0.};
 
     Int_t done, fourg4taken[4], chosen;
-    Float_t gammatriangle[4][4], Knetriangle[10], totalerr, ip_triangle[3], chi2min, trcsum, trcfinal[4], minv4gam;
+    Float_t gammatriangle[4][8], Knetriangle[10], totalerr, ip_triangle[3], chi2min, trcsum, trcfinal[4], minv4gam;
 
     TBranch *b_gamma1triangle = tree->Branch("fourgamma1triangle", gammatriangle[0], "fourgamma1triangle[4]/F");
     TBranch *b_gamma2triangle = tree->Branch("fourgamma2triangle", gammatriangle[1], "fourgamma2triangle[4]/F");
