@@ -28,6 +28,7 @@ namespace Paths
   std::string chainDataFiles = kloedataPath + "/*.root";
   std::string chainMCFiles = kloeMCPath + "/*.root";
   std::string pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json";
+  std::string pdgCachePath = (std::string)getenv("PDGAPI") + "/pdg_cache";
   std::string propertiesPath = getenv("PROPERTIESKLOE");
   std::string histogramConfigDir = propertiesPath + "/histogram_conf";
   std::string histogramConfig1DPath = histogramConfigDir + "/histogram1D.csv";
@@ -755,9 +756,9 @@ namespace Utils
     auto &pdg = PdgManager::getInstance();
     std::map<TString, PDGProvider::SummaryEdition *> summaryMap;
 
-    summaryMap["K0"] = &pdg.getParticleData("S011", 2025); // K0 summary data for 2025 PDG
-    summaryMap["KS"] = &pdg.getParticleData("S012", 2025); // K0 summary data for 2025 PDG
-    summaryMap["KL"] = &pdg.getParticleData("S013", 2025); // K0 summary data for 2025 PDG
+    summaryMap["K0"] = &pdg.getParticleData("S011", 2025, Paths::pdgCachePath); // K0 summary data for 2025 PDG
+    summaryMap["KS"] = &pdg.getParticleData("S012", 2025, Paths::pdgCachePath); // K0 summary data for 2025 PDG
+    summaryMap["KL"] = &pdg.getParticleData("S013", 2025, Paths::pdgCachePath); // K0 summary data for 2025 PDG
 
     auto setConstant = [](boost::optional<std::vector<PDGProvider::Property>> &properties_vec, const TString &pdgid, Double_t &constant, CPTStatus CPTOrNotCPT = CPTStatus::UNDEFINED, Double_t multiplier = 1.)
     {

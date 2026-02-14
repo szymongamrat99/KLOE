@@ -20,7 +20,7 @@ public:
     }
 
     // Główny punkt styku dla Twojej analizy
-    PDGProvider::SummaryEdition& getParticleData(const std::string& pdgid, int year = 2025);
+    PDGProvider::SummaryEdition& getParticleData(const std::string& pdgid, int year = 2025, const std::string &cachePath = "/tmp");
 
     // Nowa metoda logiczna
     static double getBestValue(const PDGProvider::Property& prop, double hardcodedFallback, CPTStatus CPTOrNotCPT = CPTStatus::UNDEFINED);

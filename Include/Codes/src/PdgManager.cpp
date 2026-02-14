@@ -1,6 +1,8 @@
 #include <PdgManager.h>
 #include <iostream>
 #include <boost/optional/optional_io.hpp>
+#include <fstream>
+#include <boost/filesystem.hpp>
 
 PdgManager::PdgManager()
 {
@@ -12,16 +14,37 @@ PdgManager::~PdgManager()
   curl_global_cleanup();
 }
 
-PDGProvider::SummaryEdition &PdgManager::getParticleData(const std::string &pdgid, int year)
+PDGProvider::SummaryEdition &PdgManager::getParticleData(const std::string &pdgid, int year, const std::string &cachePath)
 {
-  std::string key = pdgid + "_" + std::to_string(year);
+  std::string key = pdgid + "_" + std::to_string(year),
+              filename = cachePath + "/pdg_cache_" + key + ".json";
 
-  // Jeśli nie ma w cache, pobierz i sparsuj
+  if(!boost::filesystem::exists(filename))
+  {
+    std::ofstream cacheFileOut(filename);
+
+    if(!cacheFileOut.is_open())
+    {
+      std::cout << "Cache file cannot be created: " << filename << std::endl;
+      return cache[key]; // Zwracamy pusty obiekt, który później i tak będzie uzupełniony
+    }
+
+    std::string jsonStr = client.fetchParticleJson(pdgid, year);
+
+    cacheFileOut << jsonStr;
+    cacheFileOut.flush();
+    cacheFileOut.close();
+  }
+
+  // Jeśli nie ma w cache, wczytujemy z pliku (jeśli jest) i parsujemy do obiektu SummaryEdition
+  std::ifstream cacheFileIn(filename);
   if (cache.find(key) == cache.end())
   {
-    std::string jsonStr = client.fetchParticleJson(pdgid, year);
-    cache[key] = nlohmann::json::parse(jsonStr).get<PDGProvider::SummaryEdition>();
+    nlohmann::json jsonData;
+    cacheFileIn >> jsonData;
+    cache[key] = jsonData.get<PDGProvider::SummaryEdition>();
   }
+  cacheFileIn.close();
 
   return cache[key];
 }

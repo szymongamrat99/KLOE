@@ -19,6 +19,7 @@ namespace Paths
   extern std::string chainDataFiles;
   extern std::string chainMCFiles;
   extern std::string pdgConstFilePath;
+  extern std::string pdgCachePath;
   extern std::string propertiesPath;
   extern std::string histogramConfigDir;
   extern std::string histogramConfig1DPath;
