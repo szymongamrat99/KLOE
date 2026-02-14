@@ -28,7 +28,7 @@ PDGProvider::SummaryEdition &PdgManager::getParticleData(const std::string &pdgi
 
 double PdgManager::getBestValue(const PDGProvider::Property &prop, double hardcodedFallback, CPTStatus CPTOrNotCPT)
 {
-  std::map<CPTStatus, TString> CPTStatusMap = {
+  static std::map<CPTStatus, TString> CPTStatusMap = {
       {CPTStatus::CPT, "Assuming CPT"},
       {CPTStatus::NON_CPT, "Not assuming CPT"},
       {CPTStatus::UNDEFINED, "CPT status undefined"}};
@@ -37,13 +37,15 @@ double PdgManager::getBestValue(const PDGProvider::Property &prop, double hardco
   {
     return hardcodedFallback;
   }
-  const auto &values = *prop.get_pdg_values();
+  const auto values = *prop.get_pdg_values();
 
   // 1. Szukamy OUR AVERAGE
   for (const auto &v : values)
   {
     if (v.get_type() == PDGProvider::Type::OUR_AVERAGE)
     {
+      std::cout << v.get_comment().value_or((std::string)CPTStatusMap[CPTStatus::UNDEFINED]) << std::endl;
+
       if (v.get_comment().value_or((std::string)CPTStatusMap[CPTStatus::UNDEFINED]) == CPTStatusMap[CPTOrNotCPT])
       {
         return v.get_value().value();
