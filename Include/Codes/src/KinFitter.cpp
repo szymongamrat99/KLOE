@@ -12,13 +12,13 @@ using namespace KLOE;
 KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger) : _N_free(N_free), _N_const(N_const), _M(M), _M_act(M_active), _loopcount(loopcount), _jmin(0), _jmax(0), _CHISQRSTEP(chisqrstep), _logger(logger), _mode(mode), _V(N_free + N_const, N_free + N_const), _V_T(N_free + N_const, N_free + N_const), _V_init(N_free + N_const, N_free + N_const), _V_invert(N_free + N_const, N_free + N_const), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _Aux(M, M), _C(M), _L(M), _CORR(N_free + N_const), _X(N_free + N_const), _X_init(N_free + N_const), _X_final(N_free + N_const), _X_init_aux(N_free + N_const), _C_aux(M), _L_aux(M)
 {
   if (_mode == "Omega")
-    _objOmega = new ConstraintsOmega();
+    _objOmega = new ConstraintsOmega(logger);
   else if (_mode == "SignalGlobal")
-    _objSignal = new ConstraintsSignal();
+    _objSignal = new ConstraintsSignal(logger);
   else if (_mode == "Trilateration")
-    _objTrilateration = new ConstraintsTrilateration();
+    _objTrilateration = new ConstraintsTrilateration(logger);
   else if (_mode == "Test")
-    _baseObj = new ConstraintsTest();
+    _baseObj = new ConstraintsTest(logger);
 
   _D_real.ResizeTo(M, N_free);
   _D_T_real.ResizeTo(N_free, M);
@@ -31,13 +31,13 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
 {
 
   if (_mode == "Omega")
-    _objOmega = new ConstraintsOmega();
+    _objOmega = new ConstraintsOmega(logger);
   else if (_mode == "SignalGlobal")
-    _objSignal = new ConstraintsSignal();
+    _objSignal = new ConstraintsSignal(logger);
   else if (_mode == "Trilateration")
-    _objTrilateration = new ConstraintsTrilateration();
+    _objTrilateration = new ConstraintsTrilateration(logger);
   else if (_mode == "Test")
-    _baseObj = new ConstraintsTest();
+    _baseObj = new ConstraintsTest(logger);
 
   _D_real.ResizeTo(M, N_free);
   _D_T_real.ResizeTo(N_free, M);

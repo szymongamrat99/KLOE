@@ -11,7 +11,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 {
   gErrorIgnoreLevel = 6001;
 
-  std::unique_ptr<KLOE::ChargedVtxRec<>> eventAnalysis = std::make_unique<KLOE::ChargedVtxRec<>>();
+  std::unique_ptr<KLOE::ChargedVtxRec<>> eventAnalysis = std::make_unique<KLOE::ChargedVtxRec<>>(logger);
 
   std::vector<std::string> ConstSet = {
       "EnergyConsvCM",

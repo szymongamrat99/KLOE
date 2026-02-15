@@ -328,7 +328,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   // Initialization of momentum smearing
   // -------------------------------------------------------------
-  KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj;
+  KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj(logger);
   // -------------------------------------------------------------
 
   Bool_t
@@ -718,7 +718,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     }
 
     // Another constructor to be used for KLOE-2 (including helix parameters)
-    eventAnalysis = new KLOE::ChargedVtxRec<>(nv_local, ntv_local, iv_data.data(), bhabha_vtx, curv_data.data(), baseKin.pxtv.data(), baseKin.pytv.data(), baseKin.pztv.data(), xv_data.data(), yv_data.data(), zv_data.data(), mode_local);
+    eventAnalysis = new KLOE::ChargedVtxRec<>(nv_local, ntv_local, iv_data.data(), bhabha_vtx, curv_data.data(), baseKin.pxtv.data(), baseKin.pytv.data(), baseKin.pztv.data(), xv_data.data(), yv_data.data(), zv_data.data(), mode_local, logger);
 
     // --------------------------------------------------------------------------------
     if (smearing)

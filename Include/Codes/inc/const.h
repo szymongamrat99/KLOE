@@ -6,6 +6,7 @@
 #include <TStyle.h>
 #include <TH1.h>
 #include <TH2.h>
+#include <ErrorLogs.h>
 
 #include <TMath.h>
 
@@ -38,7 +39,7 @@ namespace Paths
   extern TString ext_root;
   extern TString ext_img;
   extern TString ext_csv;
-  extern TStrinh ext_log;
+  extern TString ext_log;
 
   extern TString gen_vars_dir;
   extern TString neutrec_dir;
@@ -662,6 +663,6 @@ namespace Utils
   extern nlohmann::json constants;  //!< JSON object containing analysis constants
   extern nlohmann::json properties; //!< JSON object containing analysis properties
 
-  void InitializeVariables();
+  void InitializeVariables(ErrorHandling::ErrorLogs &logger);
   TString elapsedTimeHMS(double totalSeconds);
 }

@@ -255,7 +255,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 			// Reconstruction of the charged part of the decay - vtx closest to the IP - to be included
 
 			// Construction of the charged rec class object
-			eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.iv.data(), bhabha_vtx, baseKin.CurvOld, baseKin.PhivOld, baseKin.CotvOld, baseKin.xvOld, baseKin.yvOld, baseKin.zvOld, mode);
+			eventAnalysis.emplace(baseKin.nv, baseKin.ntv, baseKin.iv.data(), bhabha_vtx, baseKin.CurvOld, baseKin.PhivOld, baseKin.CotvOld, baseKin.xvOld, baseKin.yvOld, baseKin.zvOld, mode, logger);
 
 			// // Finding the vtx closest to the interaction point
 			// eventAnalysis->findKClosestRec(baseKin.Kchrec, baseKin.trk[0], baseKin.trk[1], baseKin.vtaken, baseKin.errFlag);

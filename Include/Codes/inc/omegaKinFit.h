@@ -12,7 +12,7 @@
 
 namespace KLOE
 {
-  class OmegaKinFit : public KinFitter, protected ChargedVtxRec<>
+  class OmegaKinFit : public KinFitter
   {
   private:
     TVectorD

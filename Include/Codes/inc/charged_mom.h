@@ -37,12 +37,25 @@ namespace KLOE
         *_IP = nullptr,
         _dist = 0;
 
+    std::array<const std::string, 6> 
+                logMessages = 
+                {
+                    "Error in the KaonMomFromBoost - discriminant is negative.",
+                    "Error in the findKchRec - no vertex with opposite tracks found.",
+                    "Error in the findKSLRec - no vertex with opposite tracks found.",
+                    "Error in the findKSLRec - null pointer encountered.",
+                    "Error in the IPBoostCorr - denominator is zero.",
+                    "Error in the findKClosest - no vertex with opposite tracks found."
+                };
+
+    ErrorHandling::ErrorLogs &_logger;
+
     void charged_mom(Int_t &i, F *mom_vec);
 
   public:
-    ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PhiV, F *CotV, F *xvOld, F *yvOld, F *zvOld, Int_t &mode);
-    ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PxTv, F *PyTv, F *PzTv, F *xvOld, F *yvOld, F *zvOld, Int_t &mode);
-    ChargedVtxRec();
+    ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PhiV, F *CotV, F *xvOld, F *yvOld, F *zvOld, Int_t &mode, ErrorHandling::ErrorLogs &logger);
+    ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PxTv, F *PyTv, F *PzTv, F *xvOld, F *yvOld, F *zvOld, Int_t &mode, ErrorHandling::ErrorLogs &logger);
+    ChargedVtxRec(ErrorHandling::ErrorLogs &logger);
 
     static void charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode);
 

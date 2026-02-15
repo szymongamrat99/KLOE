@@ -114,6 +114,8 @@ namespace KLOE
     kaonNeutral fKchrec, fKchboost, fKnerec, fKnereclor;
     phiMeson fphi;
     std::vector<Float_t> fip;
+
+    ConstraintsOmega(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger) {};
     
     void IntermediateReconstruction(Double_t *p);
 

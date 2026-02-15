@@ -434,7 +434,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
         covMatrix(nRows, nCols, elems.data());
 
     KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
-    KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj;
+    KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj(logger);
 
     boost::progress_display display(nentries);
 

@@ -12,7 +12,7 @@
 
 namespace KLOE
 {
-  class SignalKinFit : public KinFitter, protected ChargedVtxRec<>
+  class SignalKinFit : public KinFitter
   {
   private:
     TVectorD

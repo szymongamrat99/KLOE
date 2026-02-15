@@ -86,7 +86,7 @@ namespace KLOE
 				_recMode;
 
 		ChargedVtxRec<Float_t, Int_t>
-				_chargedVtxRec;
+				*_chargedVtxRec;
 
 		Reconstructor
 				_R;

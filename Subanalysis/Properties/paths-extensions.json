@@ -3,9 +3,7 @@
   "general":
   {
     "rootFileDir": "/data/ssd/gamrat/KLOE/Subanalysis/InitAnalysis/root_files",
-    "baseDir": "/data/ssd/gamrat/KLOE/",
-    "imgDir": "img",
-    "logDir": "log"
+    "imgDir": "img"
   },
   "analysisProperties":
   {
@@ -17,14 +15,6 @@
   "extensions":
   {
     "img": ".pdf",
-    "root": ".root",
-    "log": ".log"
-  },
-  "logFilesBaseNames":
-  {
-    "general": "general",
-    "error": "error",
-    "web-service": "rti.web-service",
-    "physics-constants": "constants.loaded"
+    "root": ".root"
   }
 }

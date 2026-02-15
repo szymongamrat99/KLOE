@@ -9,6 +9,8 @@ namespace KLOE
 {
   OmegaKinFit::OmegaKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger) : KinFitter("Omega", N_free, N_const, M, 0, loopcount, chiSqrStep, logger)
   {
+    
+
     _V.ResizeTo(N_free + N_const, N_free + N_const);
     _D.ResizeTo(M, N_free + N_const);
     _D_T.ResizeTo(N_free + N_const, M);

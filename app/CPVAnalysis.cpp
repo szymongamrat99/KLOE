@@ -58,12 +58,12 @@ int main(int argc, char *argv[])
   // Set KLOE class instance
   KLOE::pm00 eventAnalysis;
   // Set logger for error logging
-  std::string logFilename = (std::string)Paths::base_path + (std::string)Paths::logs_dir + "general.prog_" + eventAnalysis.getCurrentDate() + ".log";
-  ErrorHandling::ErrorLogs logger(logFilename);
+  TString logDirectory = Paths::base_path + Paths::logs_dir;
+  ErrorHandling::ErrorLogs logger((std::string)logDirectory);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Initialize utility variables
-  Utils::InitializeVariables();
+  Utils::InitializeVariables(logger);
   // -------------------------------------------------------------------
   // Analysis flags and settings
   KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();

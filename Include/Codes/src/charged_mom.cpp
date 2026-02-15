@@ -3,13 +3,13 @@
 namespace KLOE
 {
   template <typename F, typename T>
-  ChargedVtxRec<F, T>::ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PhiV, F *CotV, F *xvOld, F *yvOld, F *zvOld, Int_t &mode) : _iv(ivOld), _nv(nv), _ntv(ntv), _IP(IP), _CurV(CurV), _PhiV(PhiV), _CotV(CotV), _xv(xvOld), _yv(yvOld), _zv(zvOld), _mode(mode){};
+  ChargedVtxRec<F, T>::ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PhiV, F *CotV, F *xvOld, F *yvOld, F *zvOld, Int_t &mode, ErrorHandling::ErrorLogs &logger) : _iv(ivOld), _nv(nv), _ntv(ntv), _IP(IP), _CurV(CurV), _PhiV(PhiV), _CotV(CotV), _xv(xvOld), _yv(yvOld), _zv(zvOld), _mode(mode), _logger(logger){};
 
   template <typename F, typename T>
-  ChargedVtxRec<F, T>::ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PxTv, F *PyTv, F *PzTv, F *xvOld, F *yvOld, F *zvOld, Int_t &mode) : _iv(ivOld), _nv(nv), _ntv(ntv), _IP(IP), _CurV(CurV), _PxTv(PxTv), _PyTv(PyTv), _PzTv(PzTv), _xv(xvOld), _yv(yvOld), _zv(zvOld), _mode(mode){};
+  ChargedVtxRec<F, T>::ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PxTv, F *PyTv, F *PzTv, F *xvOld, F *yvOld, F *zvOld, Int_t &mode, ErrorHandling::ErrorLogs &logger) : _iv(ivOld), _nv(nv), _ntv(ntv), _IP(IP), _CurV(CurV), _PxTv(PxTv), _PyTv(PyTv), _PzTv(PzTv), _xv(xvOld), _yv(yvOld), _zv(zvOld), _mode(mode), _logger(logger){};
 
   template <typename F, typename T>
-  ChargedVtxRec<F, T>::ChargedVtxRec() : _iv(nullptr), _nv(def), _ntv(def), _IP(nullptr), _CurV(nullptr), _PhiV(nullptr), _CotV(nullptr), _xv(nullptr), _yv(nullptr), _zv(nullptr), _mode(def){};
+  ChargedVtxRec<F, T>::ChargedVtxRec(ErrorHandling::ErrorLogs &logger) : _iv(nullptr), _nv(def), _ntv(def), _IP(nullptr), _CurV(nullptr), _PhiV(nullptr), _CotV(nullptr), _xv(nullptr), _yv(nullptr), _zv(nullptr), _mode(def), _logger(logger){};
 
   template <typename F, typename T>
   void ChargedVtxRec<F, T>::charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode)
@@ -157,6 +157,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
+      _logger.getErrLog(err, logMessages[1]);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -287,6 +288,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
+      _logger.getErrLog(err, logMessages[1]);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -362,9 +364,11 @@ namespace KLOE
           }
       }
     }
+
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
+      _logger.getErrLog(err, logMessages[2]);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -433,6 +437,7 @@ namespace KLOE
                 else
                 {
                   ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NULL_POINTER;
+                  _logger.getErrLog(err, logMessages[3]);
                   return err;
                 }
 
@@ -466,6 +471,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
+      _logger.getErrLog(err, logMessages[2]);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -529,6 +535,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
+      _logger.getErrLog(err, logMessages[5]);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -582,6 +589,7 @@ namespace KLOE
                 else
                 {
                   ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NULL_POINTER;
+                  _logger.getErrLog(err, logMessages[3]);
                   return err;
                 }
                 
@@ -616,6 +624,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
+      _logger.getErrLog(err, logMessages[5]);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -624,12 +633,6 @@ namespace KLOE
   template <typename F, typename T>
   Int_t ChargedVtxRec<F, T>::KaonMomFromBoost(F *pKaon, F *pboost, F *pKaonBoost) const
   {
-    std::string
-        name = "";
-    name = Paths::base_path + Paths::logs_dir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
-
-    ErrorHandling::ErrorLogs logger(name);
-
     F
         pK_from_boost = 0.,
         pb_mod = 0.,
@@ -720,12 +723,6 @@ namespace KLOE
   template <typename F, typename T>
   Int_t ChargedVtxRec<F, T>::KaonMomFromBoost(std::vector<F> &pKaon, F *pboost, std::vector<F> &pKaonBoost) const
   {
-    std::string
-        name = "";
-    name = Paths::base_path + Paths::logs_dir + "KchFromBoost_" + pm00::getCurrentDate() + ".log";
-
-    ErrorHandling::ErrorLogs logger(name);
-
     F
         pK_from_boost = 0.,
         pb_mod = 0.,
@@ -779,7 +776,7 @@ namespace KLOE
     }
     catch (ErrorHandling::ErrorCodes err)
     {
-
+      _logger.getErrLog(err, logMessages[0]);
       return Int_t(err);
     }
 
@@ -817,12 +814,6 @@ namespace KLOE
   template <typename F, typename T>
   Int_t ChargedVtxRec<F, T>::IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, F *int_point) const
   {
-    std::string
-        name = "";
-    name = Paths::base_path + Paths::logs_dir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
-
-    ErrorHandling::ErrorLogs logger(name);
-
     F dot_prod_up = 0.,
       dot_prod_down = 0.;
 
@@ -846,6 +837,7 @@ namespace KLOE
     }
     catch (ErrorHandling::ErrorCodes err)
     {
+      _logger.getErrLog(err, logMessages[4]);
       return Int_t(err);
     }
   }
@@ -853,12 +845,6 @@ namespace KLOE
   template <typename F, typename T>
   Int_t ChargedVtxRec<F, T>::IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, std::vector<F> &int_point) const
   {
-    std::string
-        name = "";
-    name = Paths::base_path + Paths::logs_dir + "IPBoostCorrection_" + pm00::getCurrentDate() + ".log";
-
-    ErrorHandling::ErrorLogs logger(name);
-
     F dot_prod_up = 0.,
       dot_prod_down = 0.;
 
@@ -882,6 +868,7 @@ namespace KLOE
     }
     catch (ErrorHandling::ErrorCodes err)
     {
+      _logger.getErrLog(err, logMessages[4]);
       return Int_t(err);
     }
   }

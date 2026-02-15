@@ -92,6 +92,8 @@ namespace KLOE
   public:
     /* Specific physical Constraints for trilateration kinematic fit */
 
+    ConstraintsTrilateration(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger) {};
+
     neutralParticle fphoton[4];
     chargedParticle fpionCh[2];
     kaonNeutral fKchrec, fKchboost, fKnerec, fKnerecCMPhi, fKnereclor;

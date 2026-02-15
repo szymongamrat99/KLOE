@@ -5,6 +5,7 @@
 #include <iostream>
 #include <map>
 #include <chrono>
+#include <boost/filesystem.hpp>
 
 #include <TString.h>
 
@@ -20,12 +21,13 @@ namespace ErrorHandling
    */
   enum class ErrorCodes
   {
-    DATA_TYPE = 100,      /*!< Improper data type*/
-    RANGE = 101,          /*!< Number out of range*/
-    MENU_RANGE = 102,     /*!< Choice out of menu range*/
-    FILE_NOT_EXIST = 103, /*!< File does not exist*/
-    TREE_NOT_EXIST = 104, /*!< TTree does not exist*/
-    NULL_POINTER = 105,   /*!< Null Pointer Exception*/
+    DATA_TYPE = 100,             /*!< Improper data type*/
+    RANGE = 101,                 /*!< Number out of range*/
+    MENU_RANGE = 102,            /*!< Choice out of menu range*/
+    FILE_NOT_EXIST = 103,        /*!< File does not exist*/
+    TREE_NOT_EXIST = 104,        /*!< TTree does not exist*/
+    NULL_POINTER = 105,          /*!< Null Pointer Exception*/
+    INITIALIZATION_FAILED = 106, /*!< Initialization failed*/
 
     DELTA_LT_ZERO = 200,         /*!< Negative delta of a quadratic equation*/
     DENOM_EQ_ZERO = 201,         /*!< Denominator of a fraction equal to zero*/
@@ -45,9 +47,9 @@ namespace ErrorHandling
     CHARGED_KAON_MASS_PRE = 306,                    /*!< Did not pass charged kaon invariant mass in preselection*/
     TRILATERATION_KIN_FIT = 307,                    /*!< Did not pass the trilateration kin fit*/
     NO_VALID_SIX_GAMMA_SOLUTION = 308,              /*!< Did not find a valid six photon solution*/
-    TRIANGLE_REC = 309,   /*!< Did not pass the triangle reconstruction*/
-    SIGNAL_KIN_FIT = 310, /*!< Did not pass the signal kin fit*/
-    OMEGA_KIN_FIT = 311,  /*!< Did not pass the omega kin fit*/
+    TRIANGLE_REC = 309,                             /*!< Did not pass the triangle reconstruction*/
+    SIGNAL_KIN_FIT = 310,                           /*!< Did not pass the signal kin fit*/
+    OMEGA_KIN_FIT = 311,                            /*!< Did not pass the omega kin fit*/
 
     CUT_CHI2_SIGNAL = 400,  /*!< Did not pass chi2 cut for signal hypothesis*/
     CUT_COMB_MPI0 = 401,    /*!< Did not pass combined mpi0 cut*/
@@ -69,11 +71,40 @@ namespace ErrorHandling
    */
   enum class InfoCodes
   {
-    FILE_ADDED = 303,     /*!< File added to the chain*/
-    FUNC_EXEC_TIME = 304, /*!< Execution time of a single function*/
-    FUNC_EXECUTED = 305,  /*!< Analysis step of a given kind executed*/
+    FILE_ADDED = 303,            /*!< File added to the chain*/
+    FUNC_EXEC_TIME = 304,        /*!< Execution time of a single function*/
+    FUNC_EXECUTED = 305,         /*!< Analysis step of a given kind executed*/
+    VARIABLES_INITIALIZED = 306, /*!< Variables initialized*/
 
-    NUM_CODES = 3 /*!< Number of codes for loops*/
+    NUM_CODES = 4 /*!< Number of codes for loops*/
+  };
+
+  struct LogFiles
+  {
+    enum class LogType
+    {
+      CUT_LIMITS,
+      GENERAL,
+      ANALYSIS_CONFIG,
+      WEB_SERVICE,
+      ERROR,
+      PHYSICS_CONSTANTS
+    };
+
+    enum class LogLevel
+    {
+      INFO,
+      WARNING,
+      ERROR
+    };
+
+    const std::map<LogType, std::string> logFileNames = {
+        {LogType::CUT_LIMITS, "cut.limits.log"},
+        {LogType::GENERAL, "general.log"},
+        {LogType::ANALYSIS_CONFIG, "analysis.config.log"},
+        {LogType::WEB_SERVICE, "rti.web-service.log"},
+        {LogType::ERROR, "error.log"},
+        {LogType::PHYSICS_CONSTANTS, "physics.constants.log"}};
   };
 
   /**
@@ -89,7 +120,13 @@ namespace ErrorHandling
     std::map<ErrorCodes, int>
         _errCount; /*!< Counter to get the summary of thrown exceptions*/
 
-    std::ofstream
+    std::string
+        _logDirectory,
+        _currentLogDir; /*!< Base name for log files, to which the type-specific suffixes will be added*/
+
+    LogFiles::LogLevel _logLevel; /*!< Log level for screen output*/
+
+    std::map<LogFiles::LogType, std::ofstream>
         _logFile; /*!< Log file object*/
 
     bool _printToScreen = false; /*!< If true, print logs to screen */
@@ -201,10 +238,22 @@ namespace ErrorHandling
         return "Execution time";
       case InfoCodes::FUNC_EXECUTED:
         return "Executed part of the analysis";
+      case InfoCodes::VARIABLES_INITIALIZED:
+        return "Variables initialized";
 
       default:
         return "Improper info code.";
       }
+    }
+
+    std::string _createDatedDir()
+    {
+      auto now = std::chrono::system_clock::now();
+      std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+      char buffer[100];
+      std::strftime(buffer, sizeof(buffer), "%Y-%m-%d", std::localtime(&currentTime));
+      std::string datedDir =  _logDirectory + std::string(buffer) + "/";
+      return datedDir;
     }
 
     /**
@@ -220,23 +269,51 @@ namespace ErrorHandling
       return std::string(buffer);
     }
 
+    void _OpenLogFile(LogFiles::LogType logType)
+    {
+      std::string logFilePath = _currentLogDir + LogFiles().logFileNames.at(logType);
+      if (_logFile.find(logType) == _logFile.end())
+      {
+        _logFile[logType].open(logFilePath, std::ios::out | std::ios::app);
+        if (!_logFile[logType].is_open())
+        {
+          std::cerr << "Failed to open log file: " << logFilePath << std::endl;
+          return;
+        }
+      }
+    }
+
   public:
     // Constructor
-    ErrorLogs(const std::string &logFilename)
+    ErrorLogs(const std::string &logDirectory = "") : _logDirectory(logDirectory)
     {
-      _logFile.open(logFilename, std::ios::app);
-
-      if (!_logFile.is_open())
+      if (_logDirectory.empty())
       {
-        std::cerr << "Failed to open Log file" << std::endl;
+        std::cerr << "Log directory not provided, ending." << std::endl;
+        return;
+      }
+
+      _currentLogDir = _createDatedDir(); /*!< Create a directory with the current date */
+
+      // Create the directory if it does not exist
+      if (!boost::filesystem::exists(_currentLogDir))
+      {
+        if (!boost::filesystem::create_directories(_currentLogDir))
+        {
+          std::cerr << "Failed to create log directory: " << _currentLogDir << std::endl;
+          return;
+        }
       }
     }
 
     ~ErrorLogs()
     {
-      if (_logFile.is_open())
+      for (auto &pair : _logFile)
       {
-        _logFile.close();
+        if (pair.second.is_open())
+        {
+          pair.second.close();
+        }
       }
     }
 
@@ -251,8 +328,10 @@ namespace ErrorHandling
         _physicsErrCountPerMctruth[mctruth][errCode]++;
     }
 
-    void getErrLog(ErrorCodes &errCode, const std::string &additionalInfo = "", int mctruth = -1)
+    void getErrLog(ErrorCodes &errCode, const std::string &additionalInfo = "", int mctruth = -1, LogFiles::LogType logType = LogFiles::LogType::ERROR)
     {
+      _OpenLogFile(logType);
+
       if (errCode == ErrorCodes::NO_ERROR)
         return; // No error, nothing to log
       else
@@ -260,7 +339,12 @@ namespace ErrorHandling
         std::string
             timestamp = _getTimestamp(),
             errorMessage = _getErrorMessage(errCode),
-            concatMessage = "[" + timestamp + "] Error: " + errorMessage + " - " + additionalInfo;
+            concatMessage;
+
+        if (additionalInfo.empty())
+          concatMessage = "[" + timestamp + "] Error: " + errorMessage;
+        else
+          concatMessage = "[" + timestamp + "] Error: " + errorMessage + " - " + additionalInfo;
 
         _errCount[errCode]++;
 
@@ -271,9 +355,9 @@ namespace ErrorHandling
         if (_printToScreen && !isPhysicsError)
           std::cerr << concatMessage << std::endl;
 
-        if (_logFile.is_open() && !isPhysicsError)
+        if (_logFile.at(logType).is_open() && !isPhysicsError)
         {
-          _logFile << concatMessage << std::endl;
+          _logFile.at(logType) << concatMessage << std::endl;
         }
       }
     };
@@ -281,19 +365,26 @@ namespace ErrorHandling
     void setPrintToScreen(bool print) { _printToScreen = print; }
     bool getPrintToScreen() const { return _printToScreen; }
 
-    void getLog(InfoCodes &infoCode, const std::string &additionalInfo = "")
+    void getLog(InfoCodes &infoCode, const std::string &additionalInfo = "", LogFiles::LogType logType = LogFiles::LogType::GENERAL)
     {
+      _OpenLogFile(logType);
+
       std::string
           timestamp = _getTimestamp(),
           infoMessage = _getInfoMessage(infoCode),
-          concatMessage = "[" + timestamp + "] Info: " + infoMessage + " - " + additionalInfo;
+          concatMessage;
+
+      if (additionalInfo.empty())
+        concatMessage = "[" + timestamp + "] Info: " + infoMessage;
+      else
+        concatMessage = "[" + timestamp + "] Info: " + infoMessage + " - " + additionalInfo;
 
       if (_printToScreen)
         std::cerr << concatMessage << std::endl;
 
-      if (_logFile.is_open())
+      if (_logFile.at(logType).is_open())
       {
-        _logFile << concatMessage << std::endl;
+        _logFile.at(logType) << concatMessage << std::endl;
       }
     };
 
@@ -311,25 +402,28 @@ namespace ErrorHandling
      * @brief Print physics-related error statistics per mctruth to the log file and optionally to screen.
      * @param printToScreen If true, also print to screen (default: false)
      */
-    void printPhysicsErrorStatsPerMctruth(bool printToScreen = false)
+    void printPhysicsErrorStatsPerMctruth(bool printToScreen = false, LogFiles::LogType logType = LogFiles::LogType::ERROR)
     {
-      if (!_logFile.is_open())
+      _OpenLogFile(logType);
+
+      if (!_logFile.at(logType).is_open())
         return;
-      _logFile << "Physics-related error statistics per mctruth:\n";
+
+      _logFile.at(logType) << "Physics-related error statistics per mctruth:\n";
       for (const auto &mctruth_pair : _physicsErrCountPerMctruth)
       {
         int mctruth = mctruth_pair.first;
-        _logFile << "mctruth = " << mctruth << ":\n";
+        _logFile.at(logType) << "mctruth = " << mctruth << ":\n";
         if (printToScreen)
           std::cout << "mctruth = " << mctruth << ":\n";
         for (const auto &err_pair : mctruth_pair.second)
         {
-          _logFile << "  " << _getErrorMessage(err_pair.first) << ": " << err_pair.second << " occurrences\n";
+          _logFile.at(logType) << "  " << _getErrorMessage(err_pair.first) << ": " << err_pair.second << " occurrences\n";
           if (printToScreen)
             std::cout << "  " << _getErrorMessage(err_pair.first) << ": " << err_pair.second << " occurrences\n";
         }
       }
-      _logFile.flush();
+      _logFile.at(logType).flush();
     }
 
     /**

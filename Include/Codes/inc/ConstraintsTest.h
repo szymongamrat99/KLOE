@@ -116,6 +116,8 @@ namespace KLOE
   public:
     /* Specific physical Constraints for Test-pi0 hypothesis */
 
+    ConstraintsTest(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger) {};
+
     /**
      * @brief A method used to pair the photons in an event. Needed to get omega and neutral pions' parameters.
      */

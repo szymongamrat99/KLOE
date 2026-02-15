@@ -13,6 +13,7 @@
 #include <TObjString.h>
 #include <TString.h>
 #include <TPrincipal.h>
+#include <ErrorLogs.h>
 
 #include <PdgManager.h>
 
@@ -22,14 +23,16 @@ using json = nlohmann::json;
 
 namespace Paths
 {
+  // Paths dependent of the environment variables
   std::string kloedataPath = getenv("KLOE_DBV26_DK0");
   std::string kloeMCPath = getenv("KLOE_DBV26_MK0");
   std::string workdirPath = getenv("WORKDIR");
-  std::string chainDataFiles = kloedataPath + "/*.root";
-  std::string chainMCFiles = kloeMCPath + "/*.root";
   std::string pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json";
   std::string pdgCachePath = (std::string)getenv("PDGAPI") + "/pdg_cache";
   std::string propertiesPath = getenv("PROPERTIESKLOE");
+
+  std::string chainDataFiles = kloedataPath + "/*.root";
+  std::string chainMCFiles = kloeMCPath + "/*.root";
   std::string histogramConfigDir = propertiesPath + "/histogram_conf";
   std::string histogramConfig1DPath = histogramConfigDir + "/histogram1D.csv";
   std::string histogramConfig2DPath = histogramConfigDir + "/histogram2D.csv";
@@ -693,6 +696,10 @@ namespace Utils
   json constants;
   json paths;
 
+  ErrorHandling::InfoCodes infoCode;
+  ErrorHandling::ErrorCodes errorCode;
+  std::string logMessage;
+
   TString elapsedTimeHMS(double totalSeconds)
   {
     int elapsedMinutes, elapsedHours;
@@ -708,9 +715,8 @@ namespace Utils
     return elapsedHMS;
   }
 
-  void InitializeVariables()
+  void InitializeVariables(ErrorHandling::ErrorLogs &logger)
   {
-
     // Parsing of paths
     std::ifstream fpath(Paths::pathsExtensionsPath);
 
@@ -718,40 +724,65 @@ namespace Utils
     {
       paths = json::parse(fpath);
 
-      Paths::propName = (std::string)paths["analysisProperties"]["properties"];
-      Paths::pdgConstFilePath = (std::string)paths["analysisProperties"]["PDGConst"];
-      Paths::analysisConfigPath = (std::string)paths["analysisProperties"]["analysisConfig"];
+      try
+      {
+        Paths::propName = (std::string)paths.at("analysisProperties").at("properties");
+        Paths::pdgConstFilePath = (std::string)paths.at("analysisProperties").at("PDGConst");
+        Paths::analysisConfigPath = (std::string)paths.at("analysisProperties").at("analysisConfig");
 
-      Paths::ext_img = (std::string)paths["extensions"]["img"];
-      Paths::ext_root = (std::string)paths["extensions"]["root"];
-      Paths::ext_log = (std::string)paths["extensions"]["log"];
-      Paths::cutlimitsName = (std::string)paths["cutLimits"];
+        Paths::ext_img = (std::string)paths.at("extensions").at("img");
+        Paths::ext_root = (std::string)paths.at("extensions").at("root");
+        Paths::cutlimitsName = (std::string)paths.at("cutLimits");
+      }
+      catch (const json::exception &e)
+      {
+        errorCode = ErrorHandling::ErrorCodes::INITIALIZATION_FAILED;
+        logMessage = Form("Failed to initialize paths and filenames from the source %s. Missing or invalid key: %s", Paths::pathsExtensionsPath, e.what());
+        logger.getErrLog(errorCode, logMessage);
+        return;
+      }
 
-      std::cout << "Paths initialized from: " << Paths::pathsExtensionsPath << std::endl;
+      infoCode = ErrorHandling::InfoCodes::VARIABLES_INITIALIZED;
+      logMessage = Form("Paths and filenames initialized successfully from the source %s.", Paths::pathsExtensionsPath);
+      logger.getLog(infoCode, logMessage);
     }
 
     // Parsing of the KLOE properties
-    std::ifstream fprop(Paths::propName.c_str());
+    std::ifstream fprop(Paths::propName);
     if (fprop.is_open())
     {
       properties = json::parse(fprop);
 
-      Paths::path_tmp = (std::string)properties["variables"]["rootFiles"]["path"];
-      Paths::path_cs = (std::string)properties["variables"]["rootFiles"]["pathControlSample"];
+      try
+      {
+        Paths::path_tmp = (std::string)properties.at("variables").at("rootFiles").at("path");
+        Paths::path_cs = (std::string)properties.at("variables").at("rootFiles").at("pathControlSample");
 
-      KLOE::firstFileMax = properties["variables"]["rootFiles"]["firstFileMax"];
-      KLOE::lastFileMax = properties["variables"]["rootFiles"]["lastFileMax"];
-      KLOE::numOfThreads = properties["variables"]["parallelization"]["numOfThreads"];
+        KLOE::firstFileMax = properties.at("variables").at("rootFiles").at("firstFileMax");
+        KLOE::lastFileMax = properties.at("variables").at("rootFiles").at("lastFileMax");
+        KLOE::numOfThreads = properties.at("variables").at("parallelization").at("numOfThreads");
 
-      Filenames::gen_vars_tree = (std::string)properties["variables"]["tree"]["treename"]["mctruth"];
-      Filenames::neutrec_triangle_tree = (std::string)properties["variables"]["tree"]["treename"]["trianglefinal"];
-      Filenames::omegarec_tree = (std::string)properties["variables"]["tree"]["treename"]["omegarec"];
-      Filenames::omegarec_kin_fit_tree = (std::string)properties["variables"]["tree"]["treename"]["omegarec"];
+        Filenames::gen_vars_tree = (std::string)properties.at("variables").at("tree").at("treename").at("mctruth");
+        Filenames::neutrec_triangle_tree = (std::string)properties.at("variables").at("tree").at("treename").at("trianglefinal");
+        Filenames::omegarec_tree = (std::string)properties.at("variables").at("tree").at("treename").at("omegarec");
+        Filenames::omegarec_kin_fit_tree = (std::string)properties.at("variables").at("tree").at("treename").at("omegarec");
 
-      Filenames::omegaRecPath = (std::string)properties["variables"]["tree"]["filename"]["omegarec"];
-      Filenames::mctruthPath = (std::string)properties["variables"]["tree"]["filename"]["mctruth"];
-      Filenames::genvarsPath = (std::string)properties["variables"]["tree"]["filename"]["generatedvars"];
-      Filenames::trianglePath = (std::string)properties["variables"]["tree"]["filename"]["trianglefinal"];
+        Filenames::omegaRecPath = (std::string)properties.at("variables").at("tree").at("filename").at("omegarec");
+        Filenames::mctruthPath = (std::string)properties.at("variables").at("tree").at("filename").at("mctruth");
+        Filenames::genvarsPath = (std::string)properties.at("variables").at("tree").at("filename").at("generatedvars");
+        Filenames::trianglePath = (std::string)properties.at("variables").at("tree").at("filename").at("trianglefinal");
+      }
+      catch (const json::exception &e)
+      {
+        errorCode = ErrorHandling::ErrorCodes::INITIALIZATION_FAILED;
+        logMessage = Form("Failed to initialize paths and filenames from the source %s. Missing or invalid key: %s", Paths::pathsExtensionsPath, e.what());
+        logger.getErrLog(errorCode, logMessage);
+        return;
+      }
+
+      infoCode = ErrorHandling::InfoCodes::VARIABLES_INITIALIZED;
+      logMessage = Form("Paths and filenames initialized successfully from the source %s.", Paths::pathsExtensionsPath);
+      logger.getLog(infoCode, logMessage);
     }
 
     auto &pdg = PdgManager::getInstance();
@@ -761,7 +792,7 @@ namespace Utils
     summaryMap["KS"] = &pdg.getParticleData("S012", 2025, Paths::pdgCachePath); // K0 summary data for 2025 PDG
     summaryMap["KL"] = &pdg.getParticleData("S013", 2025, Paths::pdgCachePath); // K0 summary data for 2025 PDG
 
-    auto setConstant = [](boost::optional<std::vector<PDGProvider::Property>> &properties_vec, const TString &pdgid, Double_t &constant, CPTStatus CPTOrNotCPT = CPTStatus::UNDEFINED, Double_t multiplier = 1.)
+    auto setConstant = [&logger](boost::optional<std::vector<PDGProvider::Property>> &properties_vec, const TString &pdgid, Double_t &constant, CPTStatus CPTOrNotCPT = CPTStatus::UNDEFINED, Double_t multiplier = 1.)
     {
       for (const auto &prop : *properties_vec)
       {
@@ -771,7 +802,9 @@ namespace Utils
         if (*pdgid_opt == pdgid)
         {
           constant = PdgManager::getBestValue(prop, constant, CPTOrNotCPT) * multiplier;
-          std::cout << "Set " << *value_desc << " to: " << constant << std::endl;
+          logMessage = Form("Set constant %s to value %g based on PDG for particle %s.", value_desc, constant, pdgid.Data());
+          infoCode = ErrorHandling::InfoCodes::VARIABLES_INITIALIZED;
+          logger.getLog(infoCode, logMessage, ErrorHandling::LogFiles::LogType::PHYSICS_CONSTANTS);
         }
       }
     };
