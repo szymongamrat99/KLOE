@@ -106,8 +106,10 @@ namespace ErrorHandling
     FUNC_EXEC_TIME = 304,        /*!< Execution time of a single function*/
     FUNC_EXECUTED = 305,         /*!< Analysis step of a given kind executed*/
     VARIABLES_INITIALIZED = 306, /*!< Variables initialized*/
+    CONFIG_LOADED = 307,         /*!< Configuration loaded from file*/
+    PRETTY_PRINTED = 308,       /*!< Pretty print of configuration to screen*/
 
-    NUM_CODES = 4 /*!< Number of codes for loops*/
+    NUM_CODES = 5 /*!< Number of codes for loops*/
   };
 
   struct LogFiles
@@ -274,6 +276,10 @@ namespace ErrorHandling
         return "Executed part of the analysis";
       case InfoCodes::VARIABLES_INITIALIZED:
         return "Variables initialized";
+      case InfoCodes::CONFIG_LOADED:
+        return "Configuration loaded";
+      case InfoCodes::PRETTY_PRINTED:
+        return "";
 
       default:
         return "Improper info code.";
@@ -457,6 +463,8 @@ namespace ErrorHandling
     void setPrintToScreen(bool print) { _printToScreen = print; }
     bool getPrintToScreen() const { return _printToScreen; }
 
+    std::string getCurrentLogDir() const { return _currentLogDir; }
+
     void getLog(InfoCodes &infoCode, const std::string &additionalInfo = "", LogFiles::LogType logType = LogFiles::LogType::GENERAL)
     {
       _OpenLogFile(logType);
@@ -477,6 +485,27 @@ namespace ErrorHandling
       if (_logFile.at(logType).is_open())
       {
         _logFile.at(logType) << concatMessage << std::endl;
+      }
+    };
+
+    void prettyPrint(const std::string &additionalInfo = "", const std::string &beginMsg = "", const std::string &endMsg = "", LogFiles::LogType logType = LogFiles::LogType::ANALYSIS_CONFIG)
+    {
+      _OpenLogFile(logType);
+
+      std::string
+          timestamp = _getTimestamp(),
+          concatMessageBegin,
+          concatMessageEnd;
+
+      concatMessageBegin = "[" + timestamp + "] Info: " + beginMsg + "\n";
+      concatMessageEnd = "\n[" + timestamp + "] Info: " + endMsg;
+
+      if (_printToScreen)
+        std::cerr << concatMessageBegin << additionalInfo << concatMessageEnd << std::endl;
+
+      if (_logFile.at(logType).is_open())
+      {
+        _logFile.at(logType) << concatMessageBegin << additionalInfo << concatMessageEnd << std::endl;
       }
     };
 

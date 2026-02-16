@@ -3,6 +3,7 @@
 #include "../Include/MainMenuHandler/MainMenuHandler.h"
 #include "../Include/MainMenuHandler/InputParamsHandler.h"
 #include <FileManager.h>
+#include <ConfigManager.h>
 #include <event_data.h>
 #include <AnalysisManager.h>
 #include <TROOT.h>
@@ -66,7 +67,11 @@ int main(int argc, char *argv[])
   Utils::InitializeVariables(logger);
   // -------------------------------------------------------------------
   // Analysis flags and settings
+  ConfigManager &config = ConfigManager::getInstance();
+  config.setupLogger(&logger);
+  
   KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();
+  analysisConfig.SetupLogger(&logger);
   analysisConfig.LoadFromFile(Paths::analysisConfigPath);
   // -------------------------------------------------------------------
   // Set tree name

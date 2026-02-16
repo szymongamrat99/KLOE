@@ -4,7 +4,7 @@
 #include <string>
 #include "ErrorLogs.h"
 #include "MainMenu.h"
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 class InputParamsHandler {
 public:

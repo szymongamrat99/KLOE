@@ -1,4 +1,4 @@
-#include "../inc/ConfigManager.h"
+#include <ConfigManager.h>
 #include <iostream>
 
 // Static member definitions - moved here to avoid multiple definition errors
@@ -7,12 +7,6 @@ std::mutex ConfigManager::mutex_;
 
 // Private constructor implementation
 ConfigManager::ConfigManager() : propertiesLoaded(false), constantsLoaded(false), errorLogger(nullptr) {
-    // Initialize error logger with config-specific log file
-    std::string logFileName = "log/config_manager.log";
-    errorLogger = new ErrorHandling::ErrorLogs(logFileName);
-    errorLogger->setPrintToScreen(true);
-    
-    loadConfigurations();
 }
 
 // Destructor implementation
@@ -21,6 +15,10 @@ ConfigManager::~ConfigManager() {
         delete errorLogger;
         errorLogger = nullptr;
     }
+}
+
+void ConfigManager::setupLogger(ErrorHandling::ErrorLogs* logger) {
+    errorLogger = logger;
 }
 
 // Load both properties and constants JSON files
@@ -171,6 +169,13 @@ ConfigManager& ConfigManager::getInstance() {
         instance = new ConfigManager();
     }
     return *instance;
+}
+
+void ConfigManager::loadConfig() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!propertiesLoaded || !constantsLoaded) {
+        loadConfigurations();
+    }
 }
 
 // Cleanup singleton instance (optional, for explicit cleanup)

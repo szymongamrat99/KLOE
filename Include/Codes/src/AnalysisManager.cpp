@@ -33,20 +33,26 @@ std::string HypothesisCodeToString(HypothesisCode code) {
     }
 }
 
-// ===== LOAD FROM JSON =====
+// ===== KONSTRUKTOR I DESTRUKTOR =====
+void AnalysisConfig::SetupLogger(ErrorHandling::ErrorLogs* logger) {
+    _logger = logger;
+}
 
+// ===== LOAD FROM JSON =====
 bool AnalysisConfig::LoadFromFile(const std::string& filename) {
     try {
         std::ifstream file(filename);
         if (!file.is_open()) {
-            std::cerr << "ERROR: Cannot open config file: " << filename << std::endl;
-            return false;
+          _lastErrorCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
+          _logger->getErrLog(_lastErrorCode, "Cannot open config file: " + filename);
+          return false;
         }
         
         nlohmann::json j;
         file >> j;
         
-        std::cout << "Loading analysis config from: " << filename << std::endl;
+        _lastInfoCode = ErrorHandling::InfoCodes::FILE_ADDED;
+        _logger->getLog(_lastInfoCode, "Config file loaded: " + filename);
         
         // 1. Metadata
         if (j.contains("metadata")) {
@@ -138,12 +144,15 @@ bool AnalysisConfig::LoadFromFile(const std::string& filename) {
             validation.checkEnergyMomentum = val.value("checkEnergyMomentum", true);
         }
         
-        std::cout << "Config loaded: " << HypothesisCodeToString(activeHypothesis) 
-                  << " (" << RunModeToString(runMode) << ")" << std::endl;
+        _lastInfoCode = ErrorHandling::InfoCodes::CONFIG_LOADED;
+        _logger->getLog(_lastInfoCode, Form("Hypothesis %s loaded with run mode %s", 
+                  HypothesisCodeToString(activeHypothesis).c_str(), 
+                  RunModeToString(runMode).c_str()));
         return true;
         
     } catch (const std::exception& e) {
-        std::cerr << "ERROR: " << e.what() << std::endl;
+        _lastErrorCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST; // You might want a different code for JSON parsing errors
+        _logger->getErrLog(_lastErrorCode, std::string("Exception while loading config: ") + e.what());
         return false;
     }
 }
@@ -201,7 +210,7 @@ bool AnalysisConfig::IsDebugMode() const {
 
 // ===== PRINT =====
 
-void AnalysisConfig::Print() const {
+void AnalysisConfig::PrintToScreen() const {
     std::cout << "\n╔═══════════════════════════════════════════╗" << std::endl;
     std::cout << "║     KLOE Analysis Configuration           ║" << std::endl;
     std::cout << "╚═══════════════════════════════════════════╝" << std::endl;
@@ -243,6 +252,56 @@ void AnalysisConfig::Print() const {
     std::cout << "   Verbose Level:       " << output.verboseLevel << std::endl;
     
     std::cout << "\n══════════════════════════════════════════════\n" << std::endl;
+}
+
+void AnalysisConfig::Print() const {
+
+    std::string currentConfiguration = "";
+
+    currentConfiguration += "\n╔═══════════════════════════════════════════╗\n";
+    currentConfiguration += "║     KLOE Analysis Configuration           ║\n";
+    currentConfiguration += "╚═══════════════════════════════════════════╝\n";
+
+    if (!metadata.author.empty()) {
+        currentConfiguration += "Metadata:\n";
+        currentConfiguration += "   Author: " + metadata.author + "\n";
+        currentConfiguration += "   Version: " + metadata.version + "\n";
+    }
+
+    currentConfiguration += "Analysis Setup:\n";
+    currentConfiguration += "   Run Mode: " + RunModeToString(runMode) + "\n";
+    currentConfiguration += "   Hypothesis: " + HypothesisCodeToString(activeHypothesis) + "\n";
+    
+    const auto& hypConfig = GetActiveHypothesisConfig();
+    if (!hypConfig.description.empty()) {
+        currentConfiguration += "   (" + hypConfig.description + ")\n";
+    }
+    
+    currentConfiguration += "Modules:\n";
+    currentConfiguration += "   Classify MC variables:       " + std::string(hypConfig.modules.classifyMCVariables ? "true" : "false") + "\n";
+    currentConfiguration += "   Signal only:       " + std::string(hypConfig.modules.signalOnly ? "true" : "false") + "\n";
+    currentConfiguration += "   Momentum Smearing:       " + std::string(hypConfig.modules.momentumSmearing ? "true" : "false") + "\n";
+    currentConfiguration += "   Trilateration KinFit:    " + std::string(hypConfig.modules.trilaterationKinFit ? "true" : "false") + "\n";
+    currentConfiguration += "   Signal KinFit:           " + std::string(hypConfig.modules.signalKinFit ? "true" : "false") + "\n";
+    currentConfiguration += "   Omega KinFit:            " + std::string(hypConfig.modules.omegaKinFit ? "true" : "false") + "\n";
+    currentConfiguration += "   Triangle Reconstruction: " + std::string(hypConfig.modules.triangleReconstruction ? "true" : "false") + "\n";
+    currentConfiguration += "   Photon Pairing:          " + std::string(hypConfig.modules.photonPairing ? "true" : "false") + "\n";
+    currentConfiguration += "   Kaon Proper Times:       " + std::string(hypConfig.modules.kaonProperTimes ? "true" : "false") + "\n";
+
+    currentConfiguration += "Cuts:\n";
+    currentConfiguration += "   Mass window: [" + std::to_string(hypConfig.cuts.minMassWindow) + ", " + std::to_string(hypConfig.cuts.maxMassWindow) + "] MeV\n";
+    currentConfiguration += "   Max χ²: " + std::to_string(hypConfig.cuts.maxChi2) + "\n";
+
+    currentConfiguration += "Output:\n";
+    currentConfiguration += "   Save Pulls:          " + std::string(output.savePulls ? "true" : "false") + "\n";
+    currentConfiguration += "   Save MC Truth:       " + std::string(output.saveMCTruthAlways ? "true" : "false") + "\n";
+    currentConfiguration += "   Verbose Level:       " + std::to_string(output.verboseLevel) + "\n";
+
+    currentConfiguration += "\n══════════════════════════════════════════════\n\n";
+
+    std::string beginMsg = "Current analysis configuration.";
+    std::string endMsg = "End of configuration details.";
+    _logger->prettyPrint(currentConfiguration, beginMsg, endMsg, ErrorHandling::LogFiles::LogType::ANALYSIS_CONFIG);
 }
 
 }  // namespace KLOE

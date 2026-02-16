@@ -43,6 +43,11 @@ inline RunMode StringToRunMode(const std::string& str) {
 
 class AnalysisConfig
 {
+private:
+    ErrorHandling::ErrorLogs* _logger; // Pointer to error logger, can be set up later
+    ErrorHandling::ErrorCodes _lastErrorCode; // To store the last error code for reference
+    ErrorHandling::InfoCodes _lastInfoCode; // To store the last info code for reference
+
 public:
     // Singleton
     static AnalysisConfig& getInstance() {
@@ -133,6 +138,8 @@ public:
     bool IsDebugMode() const;
     
     void Print() const;
+    void PrintToScreen() const;
+    void SetupLogger(ErrorHandling::ErrorLogs* logger);
     
 private:
     AnalysisConfig() = default;

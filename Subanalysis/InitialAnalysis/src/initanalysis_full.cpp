@@ -40,8 +40,9 @@
 int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, bool singleFile)
 {
   ConfigManager &config = ConfigManager::getInstance();
-  KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();
+  config.loadConfig();
 
+  KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();
   analysisConfig.Print();
   // --------------- DataAccessWrapper initialization ----------------
 

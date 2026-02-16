@@ -1,7 +1,7 @@
 #ifndef CONFIG_MANAGER_H
 #define CONFIG_MANAGER_H
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <fstream>
 #include <string>
 #include <mutex>
@@ -87,6 +87,9 @@ public:
      * @brief Cleanup singleton instance (optional, for explicit cleanup)
      */
     static void cleanup();
+
+    void setupLogger(ErrorHandling::ErrorLogs* logger);
+    void loadConfig();
     
     /**
      * @brief Get property value with type conversion and error handling
