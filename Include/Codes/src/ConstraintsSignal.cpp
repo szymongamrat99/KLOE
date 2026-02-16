@@ -90,7 +90,7 @@ void ConstraintsSignal::IntermediateReconstruction()
   // and before calculating the constraints.
   for (Int_t i = 0; i < 2; i++)
   {
-    charged_mom(pionCh[i].trackParams[0], pionCh[i].trackParams[1], pionCh[i].trackParams[2], pionCh[i].fourMom.data(), 1);
+    charged_mom(pionCh[i].trackParams[0], pionCh[i].trackParams[1], pionCh[i].trackParams[2], pionCh[i].fourMom.data(), 1, _logger);
   }
 
   // Setting four momentum for kaon charged

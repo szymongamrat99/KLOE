@@ -107,6 +107,8 @@ namespace KLOE
     std::string
         _minvMode;
 
+    ErrorHandling::ErrorLogs &_logger;
+
   protected:
     void SetParameters(Double_t *p);
     void ResetParameters();
@@ -116,7 +118,7 @@ namespace KLOE
   public:
     /* Specific physical Constraints for Signal-pi0 hypothesis */
 
-    ConstraintsSignal(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger) {};
+    ConstraintsSignal(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger), _logger(logger) {};
 
     neutralParticle fphoton[4];
     chargedParticle fpionCh[2];

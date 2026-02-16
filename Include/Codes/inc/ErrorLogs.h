@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <unordered_map>
 #include <chrono>
 #include <boost/filesystem.hpp>
 
@@ -15,6 +16,36 @@
  */
 namespace ErrorHandling
 {
+
+  // Funkcja pomocnicza do wycinania samej nazwy pliku
+  // Używamy constexpr, aby kompilator mógł to zoptymalizować
+  inline const char *trimFilePath(const char *path)
+  {
+    const char *file = strrchr(path, '/');
+#ifdef _WIN32 // Jeśli pracujesz też na Windowsie
+    if (!file)
+      file = strrchr(path, '\\');
+#endif
+    return file ? file + 1 : path;
+  }
+
+  // Preprocessor macros
+  // 1. Standardowy log (np. do pętli zdarzeń, limit 10)
+#define LOG_EVENT(logger, code, info, logType) \
+  logger.getErrLog(code, info, ErrorHandling::trimFilePath(__FILE__), __LINE__, 10, -1, logType)
+
+// 2. Log modułowy (wyższy limit dla ważniejszych kroków, np. 100)
+#define LOG_MODULE(logger, code, info, logType) \
+  logger.getErrLog(code, info, ErrorHandling::trimFilePath(__FILE__), __LINE__, 100, -1, logType)
+
+// 3. Log krytyczny/zawsze (limit 0 = wyłączony)
+#define LOG_CRITICAL(logger, code, info, logType) \
+  logger.getErrLog(code, info, ErrorHandling::trimFilePath(__FILE__), __LINE__, 0, -1, logType)
+
+// 4. Log błędu fizycznego (zliczany osobno per mctruth)
+#define LOG_PHYSICS_ERROR(logger, code, mctruth, logType) \
+  logger.getErrLog(code, "", ErrorHandling::trimFilePath(__FILE__), __LINE__, 0, mctruth, logType)
+
   /**
    * @enum ErrorCodes
    * @brief Error codes for the analysis. Include technical problems, as well as, the mathematical errors.
@@ -128,6 +159,9 @@ namespace ErrorHandling
 
     std::map<LogFiles::LogType, std::ofstream>
         _logFile; /*!< Log file object*/
+
+    std::unordered_map<std::string, Long64_t>
+        _spamCounter; /*!< Number of errors*/
 
     bool _printToScreen = false; /*!< If true, print logs to screen */
 
@@ -252,7 +286,7 @@ namespace ErrorHandling
       std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
       char buffer[100];
       std::strftime(buffer, sizeof(buffer), "%Y-%m-%d", std::localtime(&currentTime));
-      std::string datedDir =  _logDirectory + std::string(buffer) + "/";
+      std::string datedDir = _logDirectory + std::string(buffer) + "/";
       return datedDir;
     }
 
@@ -283,6 +317,44 @@ namespace ErrorHandling
       }
     }
 
+    void _PrintStatistics()
+    {
+      _OpenLogFile(LogFiles::LogType::ERROR);
+
+      _logFile[LogFiles::LogType::ERROR] << "Physics-related error statistics per mctruth value:" << std::endl;
+      for (const auto &mctruthPair : _physicsErrCountPerMctruth)
+      {
+        int mctruth = mctruthPair.first;
+        const auto &errCounts = mctruthPair.second;
+        _logFile[LogFiles::LogType::ERROR] << "MC Truth Value: " << mctruth << std::endl;
+
+        std::cout << "MC Truth Value: " << mctruth << std::endl;
+        for (const auto &errPair : errCounts)
+        {
+          ErrorCodes errCode = errPair.first;
+          int count = errPair.second;
+          _logFile[LogFiles::LogType::ERROR] << "  " << _getErrorMessage(errCode) << ": " << count << " occurrences" << std::endl
+                                             << std::endl;
+          std::cout << "  " << _getErrorMessage(errCode) << ": " << count << " occurrences" << std::endl;
+        }
+      }
+
+      _logFile[LogFiles::LogType::ERROR] << "Error counts (all):" << std::endl;
+      std::cout << "Error counts (all):" << std::endl;
+      for (const auto &pair : _spamCounter)
+      {
+        _logFile[LogFiles::LogType::ERROR] << "  " << pair.first << ": " << pair.second << " occurrences" << std::endl;
+        std::cout << "  " << pair.first << ": " << pair.second << " occurrences" << std::endl;
+      }
+
+      _logFile[LogFiles::LogType::ERROR].flush();
+
+      _logFile[LogFiles::LogType::ERROR] << "End of error statistics." << std::endl
+                                         << std::endl
+                                         << std::endl;
+      std::cout << "End of error statistics." << std::endl;
+    }
+
   public:
     // Constructor
     ErrorLogs(const std::string &logDirectory = "") : _logDirectory(logDirectory)
@@ -308,6 +380,8 @@ namespace ErrorHandling
 
     ~ErrorLogs()
     {
+      _PrintStatistics();
+
       for (auto &pair : _logFile)
       {
         if (pair.second.is_open())
@@ -324,17 +398,23 @@ namespace ErrorHandling
      */
     void countPhysicsError(ErrorCodes errCode, int mctruth)
     {
-      if (static_cast<int>(errCode) >= 300 && static_cast<int>(errCode) <= 399)
+      if ((Int_t)errCode >= 300 && (Int_t)errCode <= 399)
         _physicsErrCountPerMctruth[mctruth][errCode]++;
     }
 
-    void getErrLog(ErrorCodes &errCode, const std::string &additionalInfo = "", int mctruth = -1, LogFiles::LogType logType = LogFiles::LogType::ERROR)
+    void getErrLog(ErrorCodes &errCode, const std::string &additionalInfo = "", const std::string file = "Unknown", int line = 0, int limit = 10, int mctruth = -1, LogFiles::LogType logType = LogFiles::LogType::ERROR)
     {
-      _OpenLogFile(logType);
-
       if (errCode == ErrorCodes::NO_ERROR)
         return; // No error, nothing to log
-      else
+
+      _OpenLogFile(logType);
+
+      std::string key = file + ":" + std::to_string(line) + ":" + std::to_string((Int_t)errCode);
+      _spamCounter[key]++;
+
+      Bool_t shouldLog = (limit <= 0) || (_spamCounter[key] <= limit);
+
+      if (shouldLog)
       {
         std::string
             timestamp = _getTimestamp(),
@@ -342,22 +422,34 @@ namespace ErrorHandling
             concatMessage;
 
         if (additionalInfo.empty())
-          concatMessage = "[" + timestamp + "] Error: " + errorMessage;
+          concatMessage = "[" + timestamp + "] (" + file + ":" + std::to_string(line) + ") Error: " + errorMessage;
         else
-          concatMessage = "[" + timestamp + "] Error: " + errorMessage + " - " + additionalInfo;
+          concatMessage = "[" + timestamp + "] (" + file + ":" + std::to_string(line) + ") Error: " + errorMessage + " - " + additionalInfo;
 
         _errCount[errCode]++;
 
-        Bool_t isPhysicsError = (static_cast<int>(errCode) >= 300 && static_cast<int>(errCode) <= 399);
+        Bool_t isPhysicsError = ((Int_t)errCode >= 300 && (Int_t)errCode <= 399);
         // Zliczaj błędy fizyczne dla każdego wywołania getErrLog jeśli mctruth podany
         if (mctruth != -1)
           countPhysicsError(errCode, mctruth);
+
         if (_printToScreen && !isPhysicsError)
           std::cerr << concatMessage << std::endl;
 
         if (_logFile.at(logType).is_open() && !isPhysicsError)
         {
           _logFile.at(logType) << concatMessage << std::endl;
+        }
+      }
+      else if (limit > 0 && _spamCounter[key] == limit + 1)
+      {
+        std::string timestamp = _getTimestamp();
+        std::string logMessage = "[" + timestamp + "] (" + file + ":" + std::to_string(line) + ") Error: Further occurrences of this error will be suppressed. Original message: " + _getErrorMessage(errCode);
+        if (_printToScreen)
+          std::cerr << logMessage << std::endl;
+        if (_logFile.at(logType).is_open())
+        {
+          _logFile.at(logType) << logMessage << std::endl;
         }
       }
     };

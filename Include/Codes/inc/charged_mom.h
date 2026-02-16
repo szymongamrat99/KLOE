@@ -50,14 +50,14 @@ namespace KLOE
 
     ErrorHandling::ErrorLogs &_logger;
 
-    void charged_mom(Int_t &i, F *mom_vec);
+    void charged_mom(Int_t &i, F *mom_vec, ErrorHandling::ErrorLogs &logger);
 
   public:
     ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PhiV, F *CotV, F *xvOld, F *yvOld, F *zvOld, Int_t &mode, ErrorHandling::ErrorLogs &logger);
     ChargedVtxRec(Int_t &nv, Int_t &ntv, T *ivOld, F *IP, F *CurV, F *PxTv, F *PyTv, F *PzTv, F *xvOld, F *yvOld, F *zvOld, Int_t &mode, ErrorHandling::ErrorLogs &logger);
     ChargedVtxRec(ErrorHandling::ErrorLogs &logger);
 
-    static void charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode);
+    static void charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode, ErrorHandling::ErrorLogs &logger);
 
     ErrorHandling::ErrorCodes findKchRec(T mcflag, F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger);
     ErrorHandling::ErrorCodes findKchRec(T mcflag, Bool_t smearingFlag, TMatrixT<Double_t> covMatrix, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger);

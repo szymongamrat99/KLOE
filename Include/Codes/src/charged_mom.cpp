@@ -12,8 +12,15 @@ namespace KLOE
   ChargedVtxRec<F, T>::ChargedVtxRec(ErrorHandling::ErrorLogs &logger) : _iv(nullptr), _nv(def), _ntv(def), _IP(nullptr), _CurV(nullptr), _PhiV(nullptr), _CotV(nullptr), _xv(nullptr), _yv(nullptr), _zv(nullptr), _mode(def), _logger(logger){};
 
   template <typename F, typename T>
-  void ChargedVtxRec<F, T>::charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode)
+  void ChargedVtxRec<F, T>::charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode, ErrorHandling::ErrorLogs &logger)
   {
+    if (CurvOld == 0)
+    {
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::DENOM_EQ_ZERO;
+      LOG_EVENT(logger, err, "", ErrorHandling::LogFiles::LogType::ERROR);
+      return;
+    }
+
     mom_vec[0] = cos(PhivOld) * 1000. / abs(CurvOld);
     mom_vec[1] = sin(PhivOld) * 1000. / abs(CurvOld);
     mom_vec[2] = CotvOld * 1000. / abs(CurvOld);
@@ -27,8 +34,15 @@ namespace KLOE
   }
 
   template <typename F, typename T>
-  void ChargedVtxRec<F, T>::charged_mom(Int_t &i, F *mom_vec)
+  void ChargedVtxRec<F, T>::charged_mom(Int_t &i, F *mom_vec, ErrorHandling::ErrorLogs &logger)
   {
+    if (_CurV[i] == 0)
+    {
+      ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::DENOM_EQ_ZERO;
+      LOG_EVENT(logger, err, "", ErrorHandling::LogFiles::LogType::ERROR);
+      return;
+    }
+
     mom_vec[0] = cos(_PhiV[i]) * 1000. / abs(_CurV[i]);
     mom_vec[1] = sin(_PhiV[i]) * 1000. / abs(_CurV[i]);
     mom_vec[2] = _CotV[i] * 1000. / abs(_CurV[i]);
@@ -78,6 +92,7 @@ namespace KLOE
     if (_nv == 0 || _ntv == 0)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
+      LOG_EVENT(_logger, err, logMessages[1], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
 
@@ -92,8 +107,8 @@ namespace KLOE
             {
               if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
-                ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
-                ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                ChargedVtxRec::charged_mom(j1, mom_vec1Tmp, _logger);
+                ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
 
                 Float_t KchrecSmeared[9], KchboostSmeared[9], energyPion[2];
 
@@ -157,7 +172,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      _logger.getErrLog(err, logMessages[1]);
+      LOG_EVENT(_logger, err, logMessages[1], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -213,8 +228,8 @@ namespace KLOE
                 }
                 else if (_CurV != nullptr && _CotV != nullptr && _PhiV != nullptr)
                 {
-                  ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
-                  ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                  ChargedVtxRec::charged_mom(j1, mom_vec1Tmp, _logger);
+                  ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
                 }
                 else
                 {
@@ -288,7 +303,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      _logger.getErrLog(err, logMessages[1]);
+      LOG_EVENT(_logger, err, logMessages[1], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -335,8 +350,8 @@ namespace KLOE
             {
               if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
-                ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
-                ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                ChargedVtxRec::charged_mom(j1, mom_vec1Tmp, _logger);
+                ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
                 for (Int_t k = 0; k < 4; k++)
                   KchTmp[k] = mom_vec1Tmp[k] + mom_vec2Tmp[k];
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
@@ -368,7 +383,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      _logger.getErrLog(err, logMessages[2]);
+      LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -431,8 +446,8 @@ namespace KLOE
                 }
                 else if (_CurV != nullptr && _CotV != nullptr &&_PhiV != nullptr)
                 {
-                  ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
-                  ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                  ChargedVtxRec::charged_mom(j1, mom_vec1Tmp, _logger);
+                  ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
                 }
                 else
                 {
@@ -471,7 +486,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      _logger.getErrLog(err, logMessages[2]);
+      LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -502,8 +517,8 @@ namespace KLOE
             {
               if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
-                ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
-                ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                ChargedVtxRec::charged_mom(j1, mom_vec1Tmp, _logger);
+                ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
                 for (Int_t k = 0; k < 4; k++)
                   KchTmp[k] = mom_vec1Tmp[k] + mom_vec2Tmp[k];
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
@@ -535,7 +550,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      _logger.getErrLog(err, logMessages[5]);
+      LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -583,13 +598,13 @@ namespace KLOE
                 }
                 else if (_CurV != nullptr && _CotV != nullptr && _PhiV != nullptr)
                 {
-                  ChargedVtxRec::charged_mom(j1, mom_vec1Tmp);
-                  ChargedVtxRec::charged_mom(j2, mom_vec2Tmp);
+                  ChargedVtxRec::charged_mom(j1, mom_vec1Tmp, _logger);
+                  ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
                 }
                 else
                 {
                   ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NULL_POINTER;
-                  _logger.getErrLog(err, logMessages[3]);
+                  LOG_EVENT(_logger, err, logMessages[3], ErrorHandling::LogFiles::LogType::ERROR);
                   return err;
                 }
                 
@@ -624,7 +639,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      _logger.getErrLog(err, logMessages[5]);
+      LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -686,7 +701,7 @@ namespace KLOE
     }
     catch (ErrorHandling::ErrorCodes err)
     {
-
+      LOG_EVENT(_logger, err, logMessages[0], ErrorHandling::LogFiles::LogType::ERROR);
       return Int_t(err);
     }
 
@@ -776,7 +791,7 @@ namespace KLOE
     }
     catch (ErrorHandling::ErrorCodes err)
     {
-      _logger.getErrLog(err, logMessages[0]);
+      LOG_EVENT(_logger, err, logMessages[0], ErrorHandling::LogFiles::LogType::ERROR);
       return Int_t(err);
     }
 
@@ -837,7 +852,7 @@ namespace KLOE
     }
     catch (ErrorHandling::ErrorCodes err)
     {
-      _logger.getErrLog(err, logMessages[4]);
+      LOG_EVENT(_logger, err, logMessages[4], ErrorHandling::LogFiles::LogType::ERROR);
       return Int_t(err);
     }
   }
@@ -868,7 +883,7 @@ namespace KLOE
     }
     catch (ErrorHandling::ErrorCodes err)
     {
-      _logger.getErrLog(err, logMessages[4]);
+      LOG_EVENT(_logger, err, logMessages[4], ErrorHandling::LogFiles::LogType::ERROR);
       return Int_t(err);
     }
   }

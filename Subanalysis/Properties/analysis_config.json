@@ -9,7 +9,7 @@
   "runMode": "FULL",
   
   "hypothesis": {
-    "active": "FOUR_PI",
+    "active": "SIGNAL",
     "enabled": ["SIGNAL", "OMEGAPI", "FOUR_PI", "THREE_PI0"]
   },
   

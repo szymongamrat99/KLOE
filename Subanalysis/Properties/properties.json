@@ -1,7 +1,7 @@
 {
     "$schema": "./schemas/analysis-schema.json",
     "flags": {
-        "analysisCode": "FOUR_PI",
+        "analysisCode": "SIGNAL",
         "covMatrixType": "MIXED",
         "initialAnalysisExec": {
             "MC": true,
@@ -15,7 +15,7 @@
         "trilaterationReconstructionMode": "TWO_PI0"
     },
     "lastScript": "Initial analysis",
-    "lastUpdate": "2026-02-12",
+    "lastUpdate": "2026-02-16",
     "momSmearing": {
         "bootstrapMeanCovMatrix": {
             "_typename": "TMatrixT<double>",

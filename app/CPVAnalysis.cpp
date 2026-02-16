@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
       // Wykonaj początkową analizę
       infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
       logger.getLog(infoCode, "Initial analysis execution from job list file.");
-      InitAnalysis_main(chain, fileTypeOpt, eventAnalysis, true);
+      InitAnalysis_main(chain, fileTypeOpt, eventAnalysis, true, logger);
       
       logger.printErrStats();
       return 0;
@@ -256,21 +256,14 @@ int main(int argc, char *argv[])
 
     std::string infoMsg = "Initialized TChain with " + std::to_string(chain.GetEntries()) + " entries.";
     logger.getLog(infoCode, infoMsg);
-    
-    // Opcjonalnie: zaktualizuj statystyki o rzeczywistą liczbę zdarzeń i luminozność
-    // (tylko jeśli potrzebujesz tych informacji)
-    // initObj.UpdateRunStatsFromChain(runs, chain);
-    // std::cout << "Total luminosity: " << runs.totalLuminosity << " nb^-1" << std::endl;
-    
+
     // -------------------------------------------------------
     infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
 
     logger.getLog(infoCode, "Initial analysis execution.");
-    InitAnalysis_main(chain, fileTypeOpt, eventAnalysis);
+    InitAnalysis_main(chain, fileTypeOpt, eventAnalysis, false, logger);
   }
   // -------------------------------------------------------------------
-  logger.printErrStats();
-
   // cfgWatcher.stop();
   return 0;
 }

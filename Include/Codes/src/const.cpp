@@ -743,7 +743,7 @@ namespace Utils
       }
 
       infoCode = ErrorHandling::InfoCodes::VARIABLES_INITIALIZED;
-      logMessage = Form("Paths and filenames initialized successfully from the source %s.", Paths::pathsExtensionsPath);
+      logMessage = Form("Paths and filenames initialized successfully from the source %s.", Paths::pathsExtensionsPath.c_str());
       logger.getLog(infoCode, logMessage);
     }
 
@@ -775,13 +775,13 @@ namespace Utils
       catch (const json::exception &e)
       {
         errorCode = ErrorHandling::ErrorCodes::INITIALIZATION_FAILED;
-        logMessage = Form("Failed to initialize paths and filenames from the source %s. Missing or invalid key: %s", Paths::pathsExtensionsPath, e.what());
+        logMessage = Form("Failed to initialize paths and filenames from the source %s. Missing or invalid key: %s", Paths::propName.c_str(), e.what());
         logger.getErrLog(errorCode, logMessage);
         return;
       }
 
       infoCode = ErrorHandling::InfoCodes::VARIABLES_INITIALIZED;
-      logMessage = Form("Paths and filenames initialized successfully from the source %s.", Paths::pathsExtensionsPath);
+      logMessage = Form("Paths and filenames initialized successfully from the source %s.", Paths::propName.c_str());
       logger.getLog(infoCode, logMessage);
     }
 
@@ -802,7 +802,7 @@ namespace Utils
         if (*pdgid_opt == pdgid)
         {
           constant = PdgManager::getBestValue(prop, constant, CPTOrNotCPT) * multiplier;
-          logMessage = Form("Set constant %s to value %g based on PDG for particle %s.", value_desc, constant, pdgid.Data());
+          logMessage = Form("Set constant %s to value %g based on PDG for particle %s.", value_desc.value().c_str(), constant, pdgid.Data());
           infoCode = ErrorHandling::InfoCodes::VARIABLES_INITIALIZED;
           logger.getLog(infoCode, logMessage, ErrorHandling::LogFiles::LogType::PHYSICS_CONSTANTS);
         }

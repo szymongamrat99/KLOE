@@ -673,7 +673,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
     if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
     {
-      logger.getErrLog(errorCode, "", mctruth);
+      LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
+
       noError = false;
 
       if (mctruth == mctruthSignal)
@@ -694,7 +695,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     if (!hasOne)
     {
       errorCode = ErrorHandling::ErrorCodes::NO_VTX_WITH_TWO_TRACKS;
-      logger.getErrLog(errorCode, "", mctruth);
+      LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
       noError = false;
 
       if (mctruth == mctruthSignal)
@@ -796,7 +797,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
     if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
     {
-      logger.getErrLog(errorCode, "", mctruth);
+      LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
       noError = false;
 
       if (mctruth == mctruthSignal)
@@ -1016,7 +1017,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
       if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
       {
-        logger.getErrLog(errorCode, "", mctruth);
+        LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
         noError = false;
 
         if (mctruth == mctruthSignal)
@@ -1056,7 +1057,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
         if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
         {
-          logger.getErrLog(errorCode, "", mctruth);
+          LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
           noError = false;
 
           TrcSum = -999.;
@@ -1347,7 +1348,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
           if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
           {
-            logger.getErrLog(errorCode, "", mctruth);
+            LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
             noError = false;
 
             TrcSum = -999.;
@@ -1754,8 +1755,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
              efficiencyError = efficiency / sqrt((Float_t)KLOE::channEventCount[i]);
     std::cout << "Mctruth " << i << " count: " << KLOE::channEventCount[i] << " (" << efficiency << " +- " << efficiencyError << ") %\n";
   }
-
-  logger.printPhysicsErrorStatsPerMctruth(false);
 
   writer.Close();
 
