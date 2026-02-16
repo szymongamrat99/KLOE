@@ -57,7 +57,8 @@ Bool_t DataAccessWrapper::Initialize()
   Bool_t branchOK = InitializeBranchAddress();
   if (!branchOK)
   {
-    std::cerr << "ERROR: DataAccessWrapper - Failed to initialize SetBranchAddress" << std::endl;
+    ErrorHandling::ErrorCodes code = ErrorHandling::ErrorCodes::BAD_BRANCH;
+    LOG_EVENT(fLogger, code, "", ErrorHandling::LogFiles::LogType::ERROR);
     return false;
   }
 
@@ -68,16 +69,16 @@ Bool_t DataAccessWrapper::Initialize()
     readerOK = InitializeTreeReader();
     if (!readerOK)
     {
-      std::cerr << "ERROR: DataAccessWrapper - Failed to initialize TTreeReader" << std::endl;
+      ErrorHandling::ErrorCodes code = ErrorHandling::ErrorCodes::TTREEREADER_FAIL;
+      LOG_EVENT(fLogger, code, "", ErrorHandling::LogFiles::LogType::ERROR);
       return false;
     }
   }
 
   fCurrentEntry = -1;
 
-  std::cout << "INFO: DataAccessWrapper initialized successfully" << std::endl;
-  std::cout << "INFO: Using " << (fUseTTreeReader ? "TTreeReader" : "SetBranchAddress")
-            << " for v2 files" << std::endl;
+  fLogger.prettyPrint("DataAccessWrapper initialized successfully. Using " + std::string(fUseTTreeReader ? "TTreeReader" : "SetBranchAddress") + " for v2 files.", "Initialization success", "", ErrorHandling::LogFiles::LogType::GENERAL);
+
   PrintFileTypeStats();
 
   return true;
@@ -100,7 +101,8 @@ Bool_t DataAccessWrapper::Next()
   Int_t bytesRead = fChain.GetEntry(fCurrentEntry);
   if (bytesRead <= 0)
   {
-    std::cerr << "ERROR: Failed to read entry " << fCurrentEntry << " from TChain" << std::endl;
+    ErrorHandling::ErrorCodes code = ErrorHandling::ErrorCodes::ENTRY_READ_FAIL;
+    LOG_EVENT(fLogger, code, "", ErrorHandling::LogFiles::LogType::ERROR);
     return false;
   }
 
@@ -125,7 +127,8 @@ Bool_t DataAccessWrapper::Next()
       // std::cout << "INFO: Reinitializing TTreeReader for v2 file..." << std::endl;
       if (!ReinitializeTreeReader())
       {
-        std::cerr << "ERROR: Failed to reinitialize TTreeReader for entry " << fCurrentEntry << std::endl;
+        ErrorHandling::ErrorCodes code = ErrorHandling::ErrorCodes::TTREEREADER_FAIL;
+        LOG_EVENT(fLogger, code, "", ErrorHandling::LogFiles::LogType::ERROR);
         return false;
       }
       // Ustaw TTreeReader na aktualny entry
@@ -145,8 +148,8 @@ Bool_t DataAccessWrapper::Next()
         fReader->SetEntry(fCurrentEntry);
         if (fReader->GetEntryStatus() != TTreeReader::kEntryValid)
         {
-          std::cerr << "ERROR: TTreeReader entry " << fCurrentEntry << " is not valid. Status: "
-                    << fReader->GetEntryStatus() << std::endl;
+          ErrorHandling::ErrorCodes code = ErrorHandling::ErrorCodes::TTREEREADER_FAIL;
+          LOG_EVENT(fLogger, code, "", ErrorHandling::LogFiles::LogType::ERROR);
           return false;
         }
       }
@@ -203,7 +206,8 @@ Bool_t DataAccessWrapper::InitializeTreeReader()
 {
   if (!fUseTTreeReader)
   {
-    std::cout << "INFO: TTreeReader disabled - using SetBranchAddress for all files" << std::endl;
+    ErrorHandling::InfoCodes code = ErrorHandling::InfoCodes::TTREE_READER_CHOSEN;
+    fLogger.getLog(code, "", ErrorHandling::LogFiles::LogType::GENERAL);
     return true; // Sukces, ale nic nie robimy
   }
 
@@ -258,7 +262,8 @@ Bool_t DataAccessWrapper::InitializeTreeReader()
   }
   catch (const std::exception &e)
   {
-    std::cerr << "ERROR: Failed to initialize TTreeReader: " << e.what() << std::endl;
+    ErrorHandling::ErrorCodes code = ErrorHandling::ErrorCodes::TTREEREADER_FAIL;
+    LOG_EVENT(fLogger, code, "", ErrorHandling::LogFiles::LogType::ERROR);
     return false;
   }
 }
@@ -341,7 +346,8 @@ Bool_t DataAccessWrapper::ReinitializeTreeReader()
   }
   catch (const std::exception &e)
   {
-    std::cerr << "ERROR: Failed to reinitialize TTreeReader: " << e.what() << std::endl;
+    ErrorHandling::ErrorCodes code = ErrorHandling::ErrorCodes::TTREEREADER_FAIL;
+    LOG_EVENT(fLogger, code, "", ErrorHandling::LogFiles::LogType::ERROR);
     return false;
   }
 }
@@ -408,7 +414,8 @@ Bool_t DataAccessWrapper::InitializeBranchAddress()
   }
   catch (const std::exception &e)
   {
-    std::cerr << "ERROR: Failed to initialize SetBranchAddress: " << e.what() << std::endl;
+    ErrorHandling::ErrorCodes code = ErrorHandling::ErrorCodes::BAD_BRANCH;
+    LOG_EVENT(fLogger, code, "", ErrorHandling::LogFiles::LogType::ERROR);
     return false;
   }
 }
@@ -443,8 +450,10 @@ void DataAccessWrapper::UpdateCurrentFileVersion()
 
 void DataAccessWrapper::PrintFileTypeStats() const
 {
-  std::cout << "\n=== DataAccessWrapper Statistics ===" << std::endl;
-  std::cout << "Total files in chain: " << fFileVersionMap.size() << std::endl;
+  std::string messageInfo = "";
+
+  messageInfo += "\n=== DataAccessWrapper Statistics ===\n";
+  messageInfo += "Total files in chain: " + std::to_string(fFileVersionMap.size()) + "\n";
 
   Int_t v1Count = 0, v2Count = 0, unknownCount = 0;
   for (const auto &pair : fFileVersionMap)
@@ -463,15 +472,16 @@ void DataAccessWrapper::PrintFileTypeStats() const
     }
   }
 
-  std::cout << "v1.root files: " << v1Count << std::endl;
-  std::cout << "v2.root files: " << v2Count << std::endl;
-  std::cout << "Unknown files: " << unknownCount << std::endl;
-  std::cout << "Events processed - v1: " << fV1Events << ", v2: " << fV2Events << std::endl;
-  std::cout << "Access method - TTreeReader: " << fTreeReaderEvents
-            << ", SetBranchAddress: " << fSetBranchEvents << std::endl;
-  std::cout << "TTreeReader " << (fUseTTreeReader ? "ENABLED" : "DISABLED")
-            << " for v2 files" << std::endl;
-  std::cout << "======================================" << std::endl;
+  messageInfo += "v1.root files: " + std::to_string(v1Count) + "\n";
+  messageInfo += "v2.root files: " + std::to_string(v2Count) + "\n";
+  messageInfo += "Unknown files: " + std::to_string(unknownCount) + "\n";
+  messageInfo += "Events processed - v1: " + std::to_string(fV1Events) + ", v2: " + std::to_string(fV2Events) + "\n";
+  messageInfo += "Access method - TTreeReader: " + std::to_string(fTreeReaderEvents)
+                 + ", SetBranchAddress: " + std::to_string(fSetBranchEvents) + "\n";
+  messageInfo += "TTreeReader " + std::string(fUseTTreeReader ? "ENABLED" : "DISABLED") + " for v2 files\n";
+  messageInfo += "=====================================\n";
+
+  fLogger.prettyPrint(messageInfo, "Data access log begin", "Data access log end", ErrorHandling::LogFiles::LogType::GENERAL);
 }
 
 // ==================== TEMPLATE IMPLEMENTATIONS ====================

@@ -46,7 +46,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   analysisConfig.Print();
   // --------------- DataAccessWrapper initialization ----------------
 
-  KLOE::DataAccessWrapper dataAccess(chain);
+  KLOE::DataAccessWrapper dataAccess(chain, logger);
 
   // Inicjalizacja wrapper'a
   if (!dataAccess.Initialize())
@@ -188,7 +188,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   SplitFileWriter writer(baseFilenamesTot[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024 * 0.01, false, dated_folder, log_file_writer_lumi, fileTypeOpt, singleFile);
 
-  KLOE::FileManager fileManager;
+  KLOE::FileManager fileManager(logger);
   std::string inputLumiLog = "";
 
   if (SignalOnly)
@@ -200,7 +200,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     inputLumiLog = dated_folder + "/input_luminosity_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + ".log";
   }
 
-  fileManager.LogChainLuminosity(chain, inputLumiLog);
+  fileManager.LogChainLuminosity(chain, logger, inputLumiLog);
 
   // Oblicz całkowitą luminozność
   double totalInputLuminosity = 0.0;

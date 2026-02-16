@@ -60,6 +60,9 @@ namespace ErrorHandling
     NULL_POINTER = 105,          /*!< Null Pointer Exception*/
     INITIALIZATION_FAILED = 106, /*!< Initialization failed*/
     EMPTY_CHAIN = 107,           /*!< TChain is empty*/
+    BAD_BRANCH = 108,              /*!< Branch does not exist or is of wrong type*/
+    TTREEREADER_FAIL = 109,         /*!< Failed to initialize TTreeReader or set entry*/
+    ENTRY_READ_FAIL = 110,           /*!< Failed to read entry from TChain*/
 
     DELTA_LT_ZERO = 200,         /*!< Negative delta of a quadratic equation*/
     DENOM_EQ_ZERO = 201,         /*!< Denominator of a fraction equal to zero*/
@@ -94,7 +97,7 @@ namespace ErrorHandling
 
     NO_ERROR = 0, /*!< No error occurred*/
 
-    NUM_CODES = 16 /*!< Number of codes for loops*/
+    NUM_CODES = 38 /*!< Number of codes for loops*/
   };
 
   /**
@@ -109,8 +112,10 @@ namespace ErrorHandling
     VARIABLES_INITIALIZED = 306, /*!< Variables initialized*/
     CONFIG_LOADED = 307,         /*!< Configuration loaded from file*/
     PRETTY_PRINTED = 308,       /*!< Pretty print of configuration to screen*/
+    TTREE_CHOSEN = 309,          /*!< TTree chosen for analysis*/
+    TTREE_READER_CHOSEN = 310, /*!< TTreeReader initialized for analysis*/
 
-    NUM_CODES = 5 /*!< Number of codes for loops*/
+    NUM_CODES = 8 /*!< Number of codes for loops*/
   };
 
   struct LogFiles
@@ -195,6 +200,12 @@ namespace ErrorHandling
         return "Null pointer exception. Initialize the object.";
       case ErrorCodes::EMPTY_CHAIN:
         return "TChain is empty. Check the input files.";
+      case ErrorCodes::BAD_BRANCH:
+        return "Branch does not exist or is of wrong type. Check the branch name and type.";
+      case ErrorCodes::TTREEREADER_FAIL:
+        return "Failed to initialize TTreeReader or set entry. Check the TTreeReader initialization and entry setting.";
+      case ErrorCodes::ENTRY_READ_FAIL:
+        return "Failed to read entry from TChain. Check the TChain and entry number.";
 
       // Math logs
       case ErrorCodes::DELTA_LT_ZERO:
@@ -283,6 +294,10 @@ namespace ErrorHandling
         return "Configuration loaded";
       case InfoCodes::PRETTY_PRINTED:
         return "";
+      case InfoCodes::TTREE_CHOSEN:
+        return "TTree chosen for analysis";
+      case InfoCodes::TTREE_READER_CHOSEN:
+        return "TTreeReader initialized for analysis";
 
       default:
         return "Improper info code.";
@@ -386,8 +401,12 @@ namespace ErrorHandling
     {
       _PrintStatistics();
 
+      InfoCodes infoCode = InfoCodes::PRETTY_PRINTED;
+
       for (auto &pair : _logFile)
       {
+        getLog(infoCode, "End of analysis\n\n\n", pair.first);
+
         if (pair.second.is_open())
         {
           pair.second.close();

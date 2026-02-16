@@ -34,7 +34,7 @@ namespace KLOE
     return nEvents * conversion_factor + displacement;
   }
 
-  void FileManager::LogChainLuminosity(TChain &chain, const std::string &logFile)
+  void FileManager::LogChainLuminosity(TChain &chain, ErrorHandling::ErrorLogs &logger, const std::string &logFile)
   {
     std::ofstream log(logFile, std::ios::out | std::ios::trunc);
 
@@ -96,9 +96,12 @@ namespace KLOE
 
     log.close();
 
-    std::cout << "Input files luminosity log saved to: " << logFile << std::endl;
-    std::cout << "Total integrated luminosity: " << std::setprecision(4)
-              << totalLuminosity << " nb^-1 (" << totalEvents << " events)" << std::endl;
+    std::string message = "";
+    message += "Input files luminosity log saved to: " + logFile + "\n";
+    message += "Total integrated luminosity: " + std::to_string(totalLuminosity) + " nb^-1 (" + std::to_string(totalEvents) + " events)";
+
+    logger.prettyPrint(message, "", "", ErrorHandling::LogFiles::LogType::GENERAL);
+
   }
 
   RunStats FileManager::getRunStats(const std::string &directory, const std::string &regex_pattern)
@@ -153,7 +156,7 @@ namespace KLOE
     stats.totalLuminosity = EventsToLuminosity(stats.totalEvents);
   }
 
-  void FileManager::chainInit(TChain &chain_init, Controls::DataType &dataTypeOpt, UInt_t &firstData, UInt_t &lastData, UInt_t &firstMC, UInt_t &lastMC, ErrorHandling::ErrorLogs &logger, Int_t csFlag, Int_t oldAnaFlag)
+  void FileManager::chainInit(TChain &chain_init, Controls::DataType &dataTypeOpt, UInt_t &firstData, UInt_t &lastData, UInt_t &firstMC, UInt_t &lastMC, Int_t csFlag, Int_t oldAnaFlag)
   {
     ErrorHandling::InfoCodes infoCode;
 
@@ -216,7 +219,7 @@ namespace KLOE
           infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
           chain_init.Add(fullname);
-          logger.getLog(infoCode, (std::string)filenamedata + "_" + std::to_string(i) + (std::string)extension);
+          _logger.getLog(infoCode, (std::string)filenamedata + "_" + std::to_string(i) + (std::string)extension);
         }
       }
 
@@ -238,7 +241,7 @@ namespace KLOE
               infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
               chain_init.Add(fullname);
-              logger.getLog(infoCode, (std::string)filenamemc[k] + "_" + std::to_string(j) + (std::string)extension);
+              _logger.getLog(infoCode, (std::string)filenamemc[k] + "_" + std::to_string(j) + (std::string)extension);
             }
           }
         }
@@ -260,7 +263,7 @@ namespace KLOE
             infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
             chain_init.Add(fullname);
-            logger.getLog(infoCode, (std::string)filenamemcOld + "_" + std::to_string(j) + (std::string)extension);
+            _logger.getLog(infoCode, (std::string)filenamemcOld + "_" + std::to_string(j) + (std::string)extension);
 
             std::cout << "Added MC file: " << fullname << std::endl;
           }
@@ -286,7 +289,7 @@ namespace KLOE
             infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
             chain_init.Add(fullname);
-            logger.getLog(infoCode, (std::string)filenamemc[k] + "_" + std::to_string(j) + (std::string)extension);
+            _logger.getLog(infoCode, (std::string)filenamemc[k] + "_" + std::to_string(j) + (std::string)extension);
           }
         }
       }
@@ -307,7 +310,7 @@ namespace KLOE
           infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
           chain_init.Add(fullname);
-          logger.getLog(infoCode, (std::string)filenamedata + "_" + std::to_string(i) + (std::string)extension);
+          _logger.getLog(infoCode, (std::string)filenamedata + "_" + std::to_string(i) + (std::string)extension);
         }
       }
 
@@ -336,7 +339,7 @@ namespace KLOE
     }
   }
 
-  void FileManager::chainInit(TChain &chain_init, ErrorHandling::ErrorLogs &logger)
+  void FileManager::chainInit(TChain &chain_init)
   {
     ErrorHandling::InfoCodes infoCode;
 
@@ -357,11 +360,11 @@ namespace KLOE
       infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
       chain_init.Add(fullnameData.c_str());
-      logger.getLog(infoCode, DataFilenameBase + "41618" + DataExtension);
+      _logger.getLog(infoCode, DataFilenameBase + "41618" + DataExtension);
     }
   }
 
-  void FileManager::chainInit(TChain &chain, ErrorHandling::ErrorLogs &logger,
+  void FileManager::chainInit(TChain &chain,
                               const std::string &DataPath, const std::string &runRegexPattern,
                               int minRun, int maxRun)
   {
@@ -401,7 +404,7 @@ namespace KLOE
     }
   }
 
-  void FileManager::chainInit(TChain &chain, ErrorHandling::ErrorLogs &logger,
+  void FileManager::chainInit(TChain &chain,
                               const std::vector<std::string> &fileList, const std::string &runRegexPattern,
                               int minRun, int maxRun)
   {
@@ -484,7 +487,7 @@ namespace KLOE
     return fileList;
   }
 
-  void FileManager::chainInit(TChain &chain, ErrorHandling::ErrorLogs &logger,
+  void FileManager::chainInit(TChain &chain,
                               const std::vector<std::string> &fileList)
   {
     ErrorHandling::ErrorCodes errorCode;
@@ -495,24 +498,23 @@ namespace KLOE
       boost::filesystem::path pathObj(filepath);
       if (!boost::filesystem::exists(pathObj))
       {
-        std::cerr << "WARNING: File does not exist: " << filepath << std::endl;
         errorCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
-        std::cout << "Dupsko" << std::endl;
-        logger.getErrLog(errorCode, "File not found: " + filepath);
+        _logger.getErrLog(errorCode, "File not found: " + filepath);
         continue;
       }
 
       // Sprawdź czy to plik ROOT
       if (pathObj.extension() != ".root")
       {
-        std::cerr << "WARNING: File is not ROOT file: " << filepath << std::endl;
+        errorCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
+        _logger.getErrLog(errorCode, "Not a ROOT file: " + filepath);
         continue;
       }
 
       // Dodaj plik do TChain
       chain.Add(filepath.c_str());
       errorCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
-      logger.getErrLog(errorCode, filepath);
+      _logger.getErrLog(errorCode, filepath);
     }
   }
 } // namespace KLOE

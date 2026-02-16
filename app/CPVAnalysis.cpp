@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
   // Initialize and fill the TChain object
   TChain chain(generalTreeName.c_str());
 
-  KLOE::FileManager initObj;
+  KLOE::FileManager initObj(logger);
   MainMenuHandler mainMenuHandler;
 
   // -------------------------------------------------------------------
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
       std::cout << "Loaded " << fileList.size() << " files from job list: " << jobListFile << std::endl;
       
       // Inicjalizuj TChain z listy plików
-      initObj.chainInit(chain, logger, fileList);
+      initObj.chainInit(chain, fileList);
       
       infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
       std::string infoMsg = "Initialized TChain with " + std::to_string(chain.GetEntries()) + " entries from job list.";
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
     auto callParams = InputParamsHandler::getParams(
         Utils::properties, KLOE::lastFileMax, Paths::propName, logger, dataType);
 
-    initObj.chainInit(chain, callParams.dataTypeOpt, callParams.firstFile, callParams.lastFile, callParams.firstFile, callParams.lastFile, logger, callParams.csFlag, 1);
+    initObj.chainInit(chain, callParams.dataTypeOpt, callParams.firstFile, callParams.lastFile, callParams.firstFile, callParams.lastFile, callParams.csFlag, 1);
 
     mainMenuHandler.runMenuLoop(
         callParams.csFlag,
@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
     {
       DataPath = filePaths["Data"]["path"];
       runs = initObj.getRunStats(DataPath, runRegexPattern);
-      initObj.chainInit(chain, logger, DataPath, runRegexPattern,
+      initObj.chainInit(chain, DataPath, runRegexPattern,
                         runs.minRun, runs.maxRun);
 
       break;
@@ -226,7 +226,7 @@ int main(int argc, char *argv[])
     {
       DataPath = filePaths["MC"]["path"][0];
       runs = initObj.getRunStats(DataPath, runRegexPattern);
-      initObj.chainInit(chain, logger, DataPath, runRegexPattern,
+      initObj.chainInit(chain, DataPath, runRegexPattern,
                         runs.minRun, runs.maxRun);
       break;
     }
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     {
       DataPath = filePaths["MC"]["path"][1];
       runs = initObj.getRunStats(DataPath, runRegexPattern);
-      initObj.chainInit(chain, logger, DataPath, runRegexPattern,
+      initObj.chainInit(chain, DataPath, runRegexPattern,
                         runs.minRun, runs.maxRun);
       break;
     }
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
       for (const auto &path : DataPathList)
       {
         runs = initObj.getRunStats(path, runRegexPattern);
-        initObj.chainInit(chain, logger, path, runRegexPattern,
+        initObj.chainInit(chain, path, runRegexPattern,
                           runs.minRun, runs.minRun);
       }
 
