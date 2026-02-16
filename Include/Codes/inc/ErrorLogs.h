@@ -59,6 +59,7 @@ namespace ErrorHandling
     TREE_NOT_EXIST = 104,        /*!< TTree does not exist*/
     NULL_POINTER = 105,          /*!< Null Pointer Exception*/
     INITIALIZATION_FAILED = 106, /*!< Initialization failed*/
+    EMPTY_CHAIN = 107,           /*!< TChain is empty*/
 
     DELTA_LT_ZERO = 200,         /*!< Negative delta of a quadratic equation*/
     DENOM_EQ_ZERO = 201,         /*!< Denominator of a fraction equal to zero*/
@@ -192,6 +193,8 @@ namespace ErrorHandling
         return "Tree does not exist. Check the name.";
       case ErrorCodes::NULL_POINTER:
         return "Null pointer exception. Initialize the object.";
+      case ErrorCodes::EMPTY_CHAIN:
+        return "TChain is empty. Check the input files.";
 
       // Math logs
       case ErrorCodes::DELTA_LT_ZERO:
@@ -334,23 +337,19 @@ namespace ErrorHandling
         const auto &errCounts = mctruthPair.second;
         _logFile[LogFiles::LogType::ERROR] << "MC Truth Value: " << mctruth << std::endl;
 
-        std::cout << "MC Truth Value: " << mctruth << std::endl;
         for (const auto &errPair : errCounts)
         {
           ErrorCodes errCode = errPair.first;
           int count = errPair.second;
           _logFile[LogFiles::LogType::ERROR] << "  " << _getErrorMessage(errCode) << ": " << count << " occurrences" << std::endl
                                              << std::endl;
-          std::cout << "  " << _getErrorMessage(errCode) << ": " << count << " occurrences" << std::endl;
         }
       }
 
       _logFile[LogFiles::LogType::ERROR] << "Error counts (all):" << std::endl;
-      std::cout << "Error counts (all):" << std::endl;
       for (const auto &pair : _spamCounter)
       {
         _logFile[LogFiles::LogType::ERROR] << "  " << pair.first << ": " << pair.second << " occurrences" << std::endl;
-        std::cout << "  " << pair.first << ": " << pair.second << " occurrences" << std::endl;
       }
 
       _logFile[LogFiles::LogType::ERROR].flush();
@@ -358,7 +357,6 @@ namespace ErrorHandling
       _logFile[LogFiles::LogType::ERROR] << "End of error statistics." << std::endl
                                          << std::endl
                                          << std::endl;
-      std::cout << "End of error statistics." << std::endl;
     }
 
   public:

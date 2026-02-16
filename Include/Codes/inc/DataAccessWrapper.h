@@ -10,6 +10,7 @@
 #include <vector>
 #include <iostream>
 #include <type_traits>
+#include <ErrorLogs.h>
 #include "VariableConfig.h"
 
 namespace KLOE
@@ -37,7 +38,7 @@ namespace KLOE
      * @param chain Referencja do TChain
      * @param useTTreeReader Czy używać TTreeReader dla plików v2 (domyślnie false - używa SetBranchAddress)
      */
-    explicit DataAccessWrapper(TChain &chain, Bool_t useTTreeReader = false);
+    explicit DataAccessWrapper(TChain &chain, ErrorHandling::ErrorLogs &logger, Bool_t useTTreeReader = false);
 
     /// Destruktor
     ~DataAccessWrapper();
@@ -239,6 +240,8 @@ namespace KLOE
     mutable std::map<TString, std::vector<UInt_t>> fUIntVectorCache;
 
   private: // ==================== METODY POMOCNICZE ====================
+
+    ErrorHandling::ErrorLogs &fLogger; ///< Referencja do loggera błędów
     /**
      * @brief Rozpoznaje wersję pliku na podstawie nazwy
      * @param filename Nazwa pliku

@@ -11,8 +11,8 @@ using namespace KLOE;
 // Definicja static const zmiennej
 const Int_t DataAccessWrapper::kMaxArraySize;
 
-DataAccessWrapper::DataAccessWrapper(TChain &chain, Bool_t useTTreeReader)
-    : fChain(chain), fUseTTreeReader(useTTreeReader)
+DataAccessWrapper::DataAccessWrapper(TChain &chain, ErrorHandling::ErrorLogs &logger, Bool_t useTTreeReader)
+    : fChain(chain), fLogger(logger), fUseTTreeReader(useTTreeReader)
 {
   // Inicjalizacja map dla v1/v2 arrays (SetBranchAddress)
   for (const auto &key : fVariableConfig.GetAllKeys())
@@ -45,7 +45,8 @@ Bool_t DataAccessWrapper::Initialize()
 {
   if (fChain.GetEntries() == 0)
   {
-    std::cerr << "ERROR: DataAccessWrapper - Chain is empty!" << std::endl;
+    ErrorHandling::ErrorCodes code = ErrorHandling::ErrorCodes::EMPTY_CHAIN;
+    LOG_EVENT(fLogger, code, "", ErrorHandling::LogFiles::LogType::ERROR);
     return false;
   }
 
