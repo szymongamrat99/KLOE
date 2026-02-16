@@ -150,7 +150,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   Float_t KchrecKLMom = 0.0;
 
   std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
-  StatisticalCutter cutter(cutFileName, 7, KLOE::HypothesisCode::FOUR_PI);
+  StatisticalCutter cutter(cutFileName, 7, KLOE::HypothesisCode::FOUR_PI, logger);
 
   Float_t pKTwoBody = Obj.TwoBodyDecayMass(PhysicsConstants::mPhi, PhysicsConstants::mK0, PhysicsConstants::mK0);
 

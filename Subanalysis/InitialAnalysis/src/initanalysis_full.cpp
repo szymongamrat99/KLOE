@@ -116,7 +116,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::ifstream file(Paths::cutlimitsName);
   json j = json::parse(file);
 
-  StatisticalCutter cutter(Paths::cutlimitsName, mctruthSignal, hypoCode);
+  StatisticalCutter cutter(Paths::cutlimitsName, mctruthSignal, hypoCode, logger);
 
   std::ifstream rootFiles(Paths::rootfilesName);
   json filePaths = json::parse(rootFiles);
@@ -1733,13 +1733,14 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     ++show_progress; // Progress of the loading bar
   }
 
+  // End of event loop
+  totEvents = KLOE::TotalCountMC();
+
+  for (Int_t i = 1; i <= 7; i++)
+    std::cout << "Mctruth " << i << " count: " << KLOE::channEventCount[i] << std::endl;
+
   // Wyniki
-  for (size_t i = 0; i < cutter.GetCuts().size(); ++i)
-  {
-    std::cout << "Cut " << i << ": Eff=" << cutter.GetEfficiency(i) << " +- " << cutter.GetEfficiencyError(i)
-              << " Purity=" << cutter.GetPurity(i) << " +- " << cutter.GetPurityError(i)
-              << " S/B=" << cutter.GetSignalToBackground(i) << " +- " << cutter.GetSignalToBackgroundError(i) << "\n";
-  }
+  cutter.CutSummary();
 
   std::map<ErrorHandling::ErrorCodes, int> physicsErrorCountsPerMctruth[8];
 
@@ -1747,15 +1748,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   {
     physicsErrorCountsPerMctruth[i] = logger.getPhysicsErrorCountsForMctruth(i);
   };
-
-  totEvents = KLOE::TotalCountMC();
-
-  for (Int_t i = 1; i <= 7; i++)
-  {
-    Double_t efficiency = 100 * KLOE::channEventCount[i] / (Float_t)totEvents,
-             efficiencyError = efficiency / sqrt((Float_t)KLOE::channEventCount[i]);
-    std::cout << "Mctruth " << i << " count: " << KLOE::channEventCount[i] << " (" << efficiency << " +- " << efficiencyError << ") %\n";
-  }
 
   writer.Close();
 

@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <memory>
 #include <HypothesisCodes.h>
+#include <ErrorLogs.h>
 
 #include <TFormula.h>
 #include <TTreeFormula.h>
@@ -54,8 +55,8 @@ enum class NormalizationMode {
 
 class StatisticalCutter {
 public:
-    StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::HypothesisCode hypoCode);
-    StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode);
+    StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::HypothesisCode hypoCode, ErrorHandling::ErrorLogs& logger);
+    StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode, ErrorHandling::ErrorLogs& logger);
 
     void SetTree(TTree* tree);
     
@@ -142,6 +143,9 @@ public:
     // Generowanie raportu z cięć
     void GenerateReport(const std::string& reportConfigPath, const std::string& outputDir) const;
 
+    // Pisz do logu
+    void CutSummary(const std::string &beginMessage = "Cut Summary", const std::string &endMessage = "End of Cut Summary");
+
 private:
     void LoadCuts(const nlohmann::json& j);
     void LoadCuts(const std::string& jsonPath);
@@ -221,4 +225,6 @@ private:
     std::map<std::string, size_t> conditionCutIdToIndex_;
     
     TTree* tree_ = nullptr;
+
+    ErrorHandling::ErrorLogs &_logger;
 };

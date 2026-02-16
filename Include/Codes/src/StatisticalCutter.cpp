@@ -3,8 +3,8 @@
 
 using json = nlohmann::json;
 
-StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::HypothesisCode hypoCode)
-    : signalMctruth_(signalMctruth), hypoCode_(hypoCode), normalizationMode_(NormalizationMode::TOTAL_EVENTS)
+StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::HypothesisCode hypoCode, ErrorHandling::ErrorLogs& logger)
+    : signalMctruth_(signalMctruth), hypoCode_(hypoCode), normalizationMode_(NormalizationMode::TOTAL_EVENTS), _logger(logger)
 {
     LoadCuts(jsonPath);
     survivedSignal_.resize(cuts_.size(), 0);
@@ -21,8 +21,8 @@ StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctr
     independentBackgroundInFV_.resize(cuts_.size(), 0);
 }
 
-StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode)
-    : hypoCode_(hypoCode), normalizationMode_(NormalizationMode::TOTAL_EVENTS)
+StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode, ErrorHandling::ErrorLogs& logger)
+    : hypoCode_(hypoCode), normalizationMode_(NormalizationMode::TOTAL_EVENTS), _logger(logger)
 {
     LoadCutsFromFiles(propertiesPath, cutsPath);
     survivedSignal_.resize(cuts_.size(), 0);
@@ -1210,4 +1210,22 @@ double StatisticalCutter::GetEfficiencyExcludingMctruthMinus1(size_t cutIndex) c
         if (totalSignalExcludingMinus1_ == 0) return 0.0;
         return static_cast<double>(survivedSignalExcludingMinus1_[cutIndex]) / totalSignalExcludingMinus1_;
     }
+}
+
+void StatisticalCutter::CutSummary(const std::string &beginMessage, const std::string &endMessage) {
+  std::string message = "";
+
+  message += "Mctruth for signal: " + std::to_string(signalMctruth_) + "\n";
+  message += "Total signal: " + std::to_string(totalSignal_) + ", Total background: " + std::to_string(totalBackground_) + "\n";
+
+  for (size_t i = 0; i < GetCuts().size(); ++i)
+  {
+    message += "Cut " + std::to_string(i) + ": Survived signal = " + std::to_string(GetSurvivedSignal(i)) 
+              + ", Survived background = " + std::to_string(GetSurvivedBackground(i)) + "\n";
+    message += "Cut " + std::to_string(i) + ": Eff=" + std::to_string(GetEfficiency(i)) + " +- " + std::to_string(GetEfficiencyError(i))
+              + " Purity=" + std::to_string(GetPurity(i)) + " +- " + std::to_string(GetPurityError(i))
+              + " S/B=" + std::to_string(GetSignalToBackground(i)) + " +- " + std::to_string(GetSignalToBackgroundError(i)) + "\n";
+  }
+  
+  _logger.prettyPrint(message, beginMessage, endMessage, ErrorHandling::LogFiles::LogType::CUT_ANALYSIS);
 }

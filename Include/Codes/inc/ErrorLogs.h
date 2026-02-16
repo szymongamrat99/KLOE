@@ -122,12 +122,12 @@ namespace ErrorHandling
   {
     enum class LogType
     {
-      CUT_LIMITS,
       GENERAL,
       ANALYSIS_CONFIG,
       WEB_SERVICE,
       ERROR,
-      PHYSICS_CONSTANTS
+      PHYSICS_CONSTANTS,
+      CUT_ANALYSIS
     };
 
     enum class LogLevel
@@ -138,7 +138,7 @@ namespace ErrorHandling
     };
 
     const std::map<LogType, std::string> logFileNames = {
-        {LogType::CUT_LIMITS, "cut.limits.log"},
+        {LogType::CUT_ANALYSIS, "cut.analysis.log"},
         {LogType::GENERAL, "general.log"},
         {LogType::ANALYSIS_CONFIG, "analysis.config.log"},
         {LogType::WEB_SERVICE, "rti.web-service.log"},
@@ -433,6 +433,10 @@ namespace ErrorHandling
       _OpenLogFile(logType);
 
       std::string key = file + ":" + std::to_string(line) + ":" + std::to_string((Int_t)errCode);
+
+      if (_spamCounter.find(key) == _spamCounter.end())
+        _spamCounter[key] = 0;
+
       _spamCounter[key]++;
 
       Bool_t shouldLog = (limit <= 0) || (_spamCounter[key] <= limit);
