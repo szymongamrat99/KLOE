@@ -58,8 +58,8 @@ namespace KLOE
   template <typename F, typename T>
   ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKchRec(T mcflag, F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger)
   {
-    F mom_vec1Tmp[4], mom_vec2Tmp[4], KchTmp[9];
-    std::vector<Int_t> ivTmp(_iv, _iv + MaxNumTrkV);
+    F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {};
+    std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     pm00::Clear1DArray(3, vtaken);
 
@@ -181,7 +181,7 @@ namespace KLOE
   template <typename F, typename T>
   ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKchRec(T mcflag, Bool_t smearingFlag, TMatrixT<Double_t> covMatrix, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger)
   {
-    F mom_vec1Tmp[4], mom_vec2Tmp[4], KchTmp[9];
+    F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {};
     std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     vtaken.clear();
@@ -312,8 +312,8 @@ namespace KLOE
   template <typename F, typename T>
   ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKSLRec(Int_t kaonFlag, Int_t KSvtx, F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger)
   {
-    F mom_vec1Tmp[4], mom_vec2Tmp[4], KchTmp[9], cyl_vol[2];
-    std::vector<Int_t> ivTmp(_iv, _iv + MaxNumTrkV);
+    F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {}, cyl_vol[2] = {};
+    std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     pm00::Clear1DArray(3, vtaken);
     vtaken[0] = -1;
@@ -392,8 +392,8 @@ namespace KLOE
   template <typename F, typename T>
   ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKSLRec(Int_t kaonFlag, Int_t KSvtx, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger)
   {
-    F mom_vec1Tmp[4], mom_vec2Tmp[4], KchTmp[9], cyl_vol[2];
-    std::vector<Int_t> ivTmp(_iv, _iv + MaxNumTrkV);
+    F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {}, cyl_vol[2] = {};
+    std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     vtaken.clear();
     vtaken.resize(3);
@@ -495,8 +495,8 @@ namespace KLOE
   template <typename F, typename T>
   ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKClosestRec(F *KchRec, F *trk1, F *trk2, Int_t *vtaken, ErrorHandling::ErrorLogs &logger)
   {
-    F mom_vec1Tmp[4], mom_vec2Tmp[4], KchTmp[9], cyl_vol[2], distCyl = 999.;
-    std::vector<Int_t> ivTmp(_iv, _iv + MaxNumTrkV);
+    F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {}, cyl_vol[2] = {}, distCyl = 999.;
+    std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     pm00::Clear1DArray(3, vtaken);
     vtaken[0] = -1;
@@ -559,8 +559,8 @@ namespace KLOE
   template <typename F, typename T>
   ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKClosestRec(std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger)
   {
-    F mom_vec1Tmp[4], mom_vec2Tmp[4], KchTmp[9], cyl_vol[2], distCyl = 999.;
-    std::vector<Int_t> ivTmp(_iv, _iv + MaxNumTrkV);
+    F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {}, cyl_vol[2] = {}, distCyl = 999.;
+    std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
     std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     vtaken.clear();
     vtaken.resize(3);

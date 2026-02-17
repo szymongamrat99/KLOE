@@ -319,12 +319,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     cutter.RegisterVariableGetter("InvMassKch", [&]()
                                   { return baseKin.Kchrecnew[5]; });
     cutter.RegisterCentralValueGetter("InvMassKch", [&]()
-                                      { return 497.605; });
+                                      { return PhysicsConstants::mK0; });
 
     cutter.RegisterVariableGetter("InvMassKne", [&]()
                                   { return baseKin.minv4gam; });
     cutter.RegisterCentralValueGetter("InvMassKne", [&]()
-                                      { return 489.467; });
+                                      { return PhysicsConstants::mK0; });
   }
 
   // Initialization of momentum smearing
@@ -745,25 +745,47 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     baseKin.PhivSmeared2 = atan2(baseKin.trknew[1][1], baseKin.trknew[1][0]);
     baseKin.CotvSmeared2 = baseKin.trknew[1][2] / pT2;
 
-    if (std::signbit(dataAccess.GetCurv()[baseKin.vtaken[1]]) != std::signbit(baseKin.CurvSmeared1))
+    if (baseKin.vtaken[1] >= 0 && baseKin.vtaken[2] >= 0)
     {
-      baseKin.CurvSmeared1 = -baseKin.CurvSmeared1;
-    }
+      if (std::signbit(dataAccess.GetCurv()[baseKin.vtaken[1]]) != std::signbit(baseKin.CurvSmeared1))
+      {
+        baseKin.CurvSmeared1 = -baseKin.CurvSmeared1;
+      }
 
-    if (std::signbit(dataAccess.GetCurv()[baseKin.vtaken[2]]) != std::signbit(baseKin.CurvSmeared2))
+      if (std::signbit(dataAccess.GetCurv()[baseKin.vtaken[2]]) != std::signbit(baseKin.CurvSmeared2))
+      {
+        baseKin.CurvSmeared2 = -baseKin.CurvSmeared2;
+      }
+
+      // Unsmeared versions of vtx variables
+      baseKin.Curv1 = dataAccess.GetCurv()[baseKin.vtaken[1]];
+      baseKin.Phiv1 = dataAccess.GetPhiv()[baseKin.vtaken[1]];
+      baseKin.Cotv1 = dataAccess.GetCotv()[baseKin.vtaken[1]];
+
+      baseKin.Curv2 = dataAccess.GetCurv()[baseKin.vtaken[2]];
+      baseKin.Phiv2 = dataAccess.GetPhiv()[baseKin.vtaken[2]];
+      baseKin.Cotv2 = dataAccess.GetCotv()[baseKin.vtaken[2]];
+    }
+    else
     {
-      baseKin.CurvSmeared2 = -baseKin.CurvSmeared2;
+      // If for some reason the track indices are not valid, set smeared variables to 0
+      baseKin.CurvSmeared1 = 0;
+      baseKin.PhivSmeared1 = 0;
+      baseKin.CotvSmeared1 = 0;
+
+      baseKin.CurvSmeared2 = 0;
+      baseKin.PhivSmeared2 = 0;
+      baseKin.CotvSmeared2 = 0;
+
+      // Also set unsmeared versions to 0
+      baseKin.Curv1 = 0;
+      baseKin.Phiv1 = 0;
+      baseKin.Cotv1 = 0;
+
+      baseKin.Curv2 = 0;
+      baseKin.Phiv2 = 0;
+      baseKin.Cotv2 = 0;
     }
-
-    // Unsmeared versions of vtx variables
-
-    baseKin.Curv1 = dataAccess.GetCurv()[baseKin.vtaken[1]];
-    baseKin.Phiv1 = dataAccess.GetPhiv()[baseKin.vtaken[1]];
-    baseKin.Cotv1 = dataAccess.GetCotv()[baseKin.vtaken[1]];
-
-    baseKin.Curv2 = dataAccess.GetCurv()[baseKin.vtaken[2]];
-    baseKin.Phiv2 = dataAccess.GetPhiv()[baseKin.vtaken[2]];
-    baseKin.Cotv2 = dataAccess.GetCotv()[baseKin.vtaken[2]];
 
     // VTX CLOSEST TO BHABHA IP - FOR OMEGAPI
     hypoMap[KLOE::HypothesisCode::OMEGAPI] = eventAnalysis->findKClosestRec(baseKin.KchrecClosest, baseKin.trkClosest[0], baseKin.trkClosest[1], baseKin.vtakenClosest, logger);
@@ -1270,7 +1292,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
               kaonChMomRec = {baseKin.Kchrecnew[0], baseKin.Kchrecnew[1], baseKin.Kchrecnew[2], baseKin.Kchrecnew[3]},
               kaonChMomBoost = {baseKin.Kchboostnew[0], baseKin.Kchboostnew[1], baseKin.Kchboostnew[2], baseKin.Kchboostnew[3]},
               kaonChMomSignalKinFit = {baseKin.KchboostFit[0], baseKin.KchboostFit[1], baseKin.KchboostFit[2], baseKin.KchboostFit[3]},
-              kaonChPos = {baseKin.Kchboost[6], baseKin.Kchboost[7], baseKin.Kchboost[8]},
+              kaonChPos = {baseKin.Kchboostnew[6], baseKin.Kchboostnew[7], baseKin.Kchboostnew[8]},
               kaonChPosSignalKinFit = {baseKin.KchboostFit[6], baseKin.KchboostFit[7], baseKin.KchboostFit[8]},
               kaonNeMomRec = {baseKin.Knerec[0], baseKin.Knerec[1], baseKin.Knerec[2], baseKin.Knerec[3]},
               kaonNeMomLor = {baseKin.Knereclor[0], baseKin.Knereclor[1], baseKin.Knereclor[2], baseKin.Knereclor[3]},
@@ -1509,7 +1531,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
       // -------------------------------------------------------------------------------------
 
-
       // Int_t zmienne
       std::map<std::string, Int_t> intVars = {
           {"nrun", baseKin.nrun},                 // Number of run
@@ -1531,7 +1552,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"cutApplied", baseKin.cut},
           {"muonAlertPlus", baseKin.muonAlertPlus},
           {"muonAlertMinus", baseKin.muonAlertMinus}};
-
 
       // Float_t zmienne
       std::map<std::string, Float_t> floatVars = {
@@ -1595,7 +1615,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"Chi2OmegaKinFit", baseKin.Chi2OmegaKinFit},
           {"bestErrorSixGamma", bestError}};
 
-
       // Tablice
       std::map<std::string, std::vector<Int_t>> intArrays = {
           {"eclstream", baseKin.eclstream},
@@ -1608,7 +1627,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"vtaken", baseKin.vtaken},
           {"g4takenTriKinFit", baseKin.g4takenTriKinFit},
           {"goodClustersTriKinFit", baseKin.goodClustersTriKinFit}};
-
 
       std::map<std::string, std::vector<Float_t>> floatArrays = {
           {"Xcl", baseKin.Xcl},
@@ -1718,7 +1736,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"photonSix4", photonFourMomSix[3].total},
           {"photonSix5", photonFourMomSix[4].total},
           {"photonSix6", photonFourMomSix[5].total}};
-
 
       writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }

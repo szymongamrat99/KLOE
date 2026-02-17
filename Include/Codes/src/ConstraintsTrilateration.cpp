@@ -321,7 +321,7 @@ namespace KLOE
                          fphi.vtxPos[1],
                          fphi.vtxPos[2]},
                 plane_perp[3] = {0.,
-                                 phi.fourMom[1],
+                                 fphi.fourMom[1],
                                  0.};
 
         // Corrected IP event by event

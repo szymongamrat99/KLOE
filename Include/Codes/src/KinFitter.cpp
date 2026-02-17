@@ -4,6 +4,7 @@
 
 #include <KinFitter.h>
 #include <TROOT.h>
+#include <TDecompSVD.h>
 
 #include <chrono>
 
@@ -25,6 +26,12 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
 
   _CORR_real.ResizeTo(N_free);
   _Aux_real.ResizeTo(M, M);
+
+  _Aux.Zero();
+  _D.Zero();
+  _D_T.Zero();
+  _C.Zero();
+  _L.Zero();
 };
 
 KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Int_t jmin, Int_t jmax, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger) : _N_free(N_free), _N_const(N_const), _M(M), _M_act(M_active), _CHISQRSTEP(chisqrstep), _loopcount(loopcount), _jmin(jmin), _jmax(jmax), _logger(logger), _mode(mode), _V(N_free + N_const, N_free + N_const), _V_T(N_free + N_const, N_free + N_const), _V_init(N_free + N_const, N_free + N_const), _V_invert(N_free + N_const, N_free + N_const), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _Aux(M, M), _C(M), _L(M), _CORR(N_free + N_const), _X(N_free + N_const), _X_init(N_free + N_const), _X_final(N_free + N_const), _X_init_aux(N_free + N_const), _C_aux(M), _L_aux(M)
@@ -44,11 +51,18 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
 
   _Aux_real.ResizeTo(M, M);
   _CORR_real.ResizeTo(N_free);
+
+  _Aux.Zero();
+  _D.Zero();
+  _D_T.Zero();
+  _C.Zero();
+  _L.Zero();
 };
 
 Int_t KinFitter::ParameterInitialization(Float_t *Params, Float_t *Errors)
 {
   TMatrixD SubV(_N_free, _N_free);
+  SubV.Zero();
 
   for (Int_t i = 0; i < _N_free + _N_const; i++)
   {
@@ -75,6 +89,7 @@ Int_t KinFitter::ParameterInitialization(Float_t *Params, Float_t *Errors)
 Int_t KinFitter::ParameterInitialization(Double_t *Params, Double_t *Errors)
 {
   TMatrixD SubV(_N_free, _N_free);
+  SubV.Zero();
 
   for (Int_t i = 0; i < _N_free + _N_const; i++)
   {
@@ -104,6 +119,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   _CHISQR = 999999.;
   _CHISQRTMP = 999999.;
+  _Aux.Zero();
 
   // Correction of cluster time - [ns]
   if (bunchCorr != 0 && _mode == "Trilateration")
@@ -121,7 +137,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   for (Int_t i = 0; i < _loopcount; i++)
   {
-
     try
     {
       // Enforce positive energies and times
@@ -134,48 +149,63 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       if (_X(19) < 0)
         _X(19) = MIN_CLU_ENE;
 
+      Double_t *tempParams = new Double_t[_X.GetNoElements()];
 
-      
-        Double_t *tempParams = new Double_t[_X.GetNrows()];
+      std::copy(_X.GetMatrixArray(), _X.GetMatrixArray() + _X.GetNoElements(), tempParams);
 
-        std::copy(_X.GetMatrixArray(), _X.GetMatrixArray() + _X.GetNrows(), tempParams);
+      std::vector<TF1 *> constraint;
 
-        std::vector<TF1 *> constraint;
+      for (const auto &func_ptr : _constraints)
+      {
+        // Tworzymy NOWY, PRYWATNY obiekt TF1 dla tego wątku
+        constraint.push_back(new TF1(*func_ptr));
+      }
 
-        for (const auto &func_ptr : _constraints)
+      for (Int_t l = 0; l < _M; l++)
+      {
+        constraint[l]->SetParameters(tempParams);
+        _C(l) = constraint[l]->EvalPar(0, tempParams);
+        for (Int_t m = 0; m < _N_free + _N_const; m++)
         {
-          // Tworzymy NOWY, PRYWATNY obiekt TF1 dla tego wątku
-          constraint.push_back(new TF1(*func_ptr));
-        }
-
-        for (Int_t l = 0; l < _M; l++)
-        {
-          constraint[l]->SetParameters(tempParams);
-          _C(l) = constraint[l]->EvalPar(0, tempParams);
-          for (Int_t m = 0; m < _N_free + _N_const; m++)
+          if (m < _N_free)
           {
-            if (m < _N_free)
-            {
-              _D(l, m) = constraint[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
-            }
-            else
-              _D(l, m) = 0;
+            Double_t auxVal = constraint[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
+
+            if (std::isnan(auxVal))
+              throw ErrorHandling::ErrorCodes::NAN_VAL;
+
+            _D(l, m) = auxVal;
           }
+          else
+            _D(l, m) = 0;
         }
+      }
 
-        for (const auto &func_ptr : constraint)
-        {
-          func_ptr->Delete();
-        }
-        delete[] tempParams;
+      for (const auto &func_ptr : constraint)
+      {
+        func_ptr->Delete();
+      }
+      delete[] tempParams;
 
-      _D_T = _D_T.Transpose(_D);
+      _D_T.Transpose(_D);
 
       _Aux = (_D * _V * _D_T);
 
-      _Aux = _Aux.Invert(&_det);
+      if (_Aux.IsValid() && !CheckMatrixNan(_Aux))
+      {
+        _det = _Aux.Determinant();
 
-      if (_det == 0)
+        if (abs(_det) > 0 && !TMath::IsNaN(_det))
+        {
+          _Aux = _Aux.Invert();
+        }
+      }
+      else
+      {
+        _det = 0;
+      }
+
+      if (_det == 0 || _det == 1)
         throw ErrorHandling::ErrorCodes::DET_ZERO;
       else if (TMath::IsNaN(_det))
         throw ErrorHandling::ErrorCodes::NAN_VAL;
@@ -431,3 +461,17 @@ Double_t KinFitter::DerivativeCalc(Int_t i, Int_t j)
 
   return derivativeAux;
 };
+
+Bool_t KinFitter::CheckMatrixNan(TMatrixD &matrix)
+{
+  for (Int_t i = 0; i < matrix.GetNrows(); i++)
+  {
+    for (Int_t j = 0; j < matrix.GetNcols(); j++)
+    {
+      if (std::isnan(matrix(i, j)) || std::isinf(matrix(i, j)))
+        return true;
+    }
+  }
+  return false;
+}
+

@@ -7,6 +7,7 @@
 
 #include <TMath.h>
 #include <TMatrixD.h>
+#include <TMatrixDSym.h>
 #include <TVectorD.h>
 #include <TError.h>
 #include <TF1.h>
@@ -178,6 +179,8 @@ namespace KLOE
     Double_t DerivativeCalc(Int_t i, Int_t j);
 
     Double_t EnergyCalc(TLorentzVector p, Double_t mass);
+
+    Bool_t CheckMatrixNan(TMatrixD &matrix);
 
     ErrorHandling::ErrorCodes GetErrorCode() { return _err_code; }
 
