@@ -253,8 +253,23 @@ int main()
   hist_pm002D_base->Sumw2();
   hist_pmpm2D_base->Sumw2();
 
+  Double_t t2MaxMin = 0.0;
+  Double_t t2MaxMax = 300.0;
+  Int_t numSteps = 10;
+  std::cout << "Integral range min: ";
+  std::cin >> t2MaxMin;
+  std::cout << "Integral range max: ";
+  std::cin >> t2MaxMax;
+  std::cout << "Number of steps: ";
+  std::cin >> numSteps;
+
   // Definiuj zakresy t2Max do przeskanowania
-  std::vector<Double_t> t2MaxValues = {50.0, 100.0, 150.0, 200.0, 250.0, 300.0};
+  std::vector<Double_t> t2MaxValues;
+  Double_t step = (t2MaxMax - t2MaxMin) / (Double_t)numSteps;
+  for (Int_t i = 0; i <= numSteps; ++i)
+  {
+    t2MaxValues.push_back(t2MaxMin + i * step);
+  }
 
   std::map<Double_t, TH1 *> hist_00pm2D_projX;
   std::map<Double_t, TH1 *> hist_pm002D_projX;
@@ -273,6 +288,8 @@ int main()
     return hist2D->ProjectionX(name, lowerBin, upperBin);
   };
 
+  ErrorHandling::ErrorLogs logger("log/");
+  Utils::InitializeVariables(logger);
   KLOE::setGlobalStyle();
 
   // Pętla po zakresach t2Max
