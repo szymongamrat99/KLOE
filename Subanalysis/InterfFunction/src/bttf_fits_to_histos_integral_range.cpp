@@ -179,7 +179,7 @@ int main()
   int methodChoice = 0;
   std::cin >> methodChoice;
 
-  if(methodChoice < 0 || methodChoice > 2)
+  if (methodChoice < 0 || methodChoice > 2)
   {
     std::cerr << "Błąd: nieprawidłowy wybór metody!" << std::endl;
     return 1;
@@ -218,6 +218,10 @@ int main()
   TH2 *hist_pm002D_base = nullptr;
   TH2 *hist_pmpm2D_base = nullptr;
 
+  TH2 *hist_00pm2D_base_nw = nullptr;
+  TH2 *hist_pm002D_base_nw = nullptr;
+  TH2 *hist_pmpm2D_base_nw = nullptr;
+
   TH1 *hist_00 = nullptr;
   TH1 *hist_pm = nullptr;
   TH1 *hist_1 = nullptr;
@@ -232,6 +236,10 @@ int main()
   file->GetObject("h_00pm", hist_00pm2D_base);
   file->GetObject("h_pm00", hist_pm002D_base);
   file->GetObject("h_pmpm", hist_pmpm2D_base);
+
+  file->GetObject("h_00pm_not_weighted", hist_00pm2D_base_nw);
+  file->GetObject("h_pm00_not_weighted", hist_pm002D_base_nw);
+  file->GetObject("h_pmpm_not_weighted", hist_pmpm2D_base_nw);
 
   file->GetObject("h_00_not_weighted", hist_00);
   file->GetObject("h_pm_not_weighted", hist_pm);
@@ -317,18 +325,18 @@ int main()
   c2D->Divide(3, 1);
   c2D->cd(1);
   hist_00pm2D_base->SetTitle(Form("h_00pm - %s events", maxEventsTitle.Data()));
-  hist_00pm2D_base->GetXaxis()->SetRangeUser(0, 20.0);
-  hist_00pm2D_base->GetYaxis()->SetRangeUser(0, 20.0);
+  hist_00pm2D_base->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_00pm2D_base->GetYaxis()->SetRangeUser(0, 300.0);
   hist_00pm2D_base->Draw("COLZ");
   c2D->cd(2);
   hist_pm002D_base->SetTitle(Form("h_pm00 - %s events", maxEventsTitle.Data()));
-  hist_pm002D_base->GetXaxis()->SetRangeUser(0, 20.0);
-  hist_pm002D_base->GetYaxis()->SetRangeUser(0, 20.0);
+  hist_pm002D_base->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_pm002D_base->GetYaxis()->SetRangeUser(0, 300.0);
   hist_pm002D_base->Draw("COLZ");
   c2D->cd(3);
   hist_pmpm2D_base->SetTitle(Form("h_pmpm - %s events", maxEventsTitle.Data()));
-  hist_pmpm2D_base->GetXaxis()->SetRangeUser(0, 20.0);
-  hist_pmpm2D_base->GetYaxis()->SetRangeUser(0, 20.0);
+  hist_pmpm2D_base->GetXaxis()->SetRangeUser(0, 300.0);
+  hist_pmpm2D_base->GetYaxis()->SetRangeUser(0, 300.0);
   hist_pmpm2D_base->Draw("COLZ");
   c2D->SaveAs(Form(imgFolderPath + "/2D_histograms_%s.svg", maxEventsFile.Data()));
 
@@ -378,40 +386,79 @@ int main()
 
   auto func_00pm_normalized = [&](Double_t *x, Double_t *par)
   {
+    // Pas poziomy: y jest małe (0-6), x może być dowolne (0-20)
+    Bool_t inHorizontalStrip = (x[1] > 0.0 && x[1] < 6.0);
+
+    // Pas pionowy: x jest małe (0-6), y może być dowolne (0-20)
+    Bool_t inVerticalStrip = (x[0] > 0.0 && x[0] < 6.0);
+
+    // Jeśli punkt nie leży w ŻADNYM z tych pasów, odrzuć go
+    if (!(inHorizontalStrip || inVerticalStrip))
+    {
+      TF2::RejectPoint();
+      return 0.0;
+    }
+
     return par[2] * interf_function_00pm(x, par);
   };
 
   auto func_pm00_normalized = [&](Double_t *x, Double_t *par)
   {
+    // Pas poziomy: y jest małe (0-6), x może być dowolne (0-20)
+    Bool_t inHorizontalStrip = (x[1] > 0.0 && x[1] < 6.0);
+
+    // Pas pionowy: x jest małe (0-6), y może być dowolne (0-20)
+    Bool_t inVerticalStrip = (x[0] > 0.0 && x[0] < 6.0);
+
+    // Jeśli punkt nie leży w ŻADNYM z tych pasów, odrzuć go
+    if (!(inHorizontalStrip || inVerticalStrip))
+    {
+      TF2::RejectPoint();
+      return 0.0;
+    }
+
     return par[2] * interf_function_pm00(x, par);
   };
 
   auto func_pmpm_normalized = [&](Double_t *x, Double_t *par)
   {
+    // Pas poziomy: y jest małe (0-6), x może być dowolne (0-20)
+    Bool_t inHorizontalStrip = (x[1] > 0.0 && x[1] < 6.0);
+
+    // Pas pionowy: x jest małe (0-6), y może być dowolne (0-20)
+    Bool_t inVerticalStrip = (x[0] > 0.0 && x[0] < 6.0);
+
+    // Jeśli punkt nie leży w ŻADNYM z tych pasów, odrzuć go
+    if (!(inHorizontalStrip || inVerticalStrip))
+    {
+      TF2::RejectPoint();
+      return 0.0;
+    }
+
     return par[1] * interf_function_pmpm(x, par);
   };
 
   TF2 *func_00pm_norm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_00pm_normalized, 0.0, 300, 0.0, 300, 3);
-  func_00pm_norm->SetParameters(reParam, imParam, hist_00pm2D_base->Integral());
+  func_00pm_norm->SetParameters(reParam, imParam, 100.0);
 
   func_00pm_norm->FixParameter(0, reParam);
   func_00pm_norm->FixParameter(1, imParam);
 
   TF2 *func_pm00_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pm00_normalized, 0.0, 300, 0.0, 300, 3);
-  func_pm00_norm->SetParameters(reParam, imParam, hist_pm002D_base->Integral());
+  func_pm00_norm->SetParameters(reParam, imParam, 100.0);
 
   func_pm00_norm->FixParameter(0, reParam);
   func_pm00_norm->FixParameter(1, imParam);
 
   TF2 *func_pmpm_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pmpm_normalized, 0.0, 300, 0.0, 300, 2);
-  func_pmpm_norm->SetParameters(reParam, hist_pmpm2D_base->Integral());
+  func_pmpm_norm->SetParameters(reParam, 100.0);
 
   func_pmpm_norm->FixParameter(0, reParam);
 
   std::cout << "Mock function fitting:" << std::endl;
-  TFitResultPtr fitResult_00pm = hist_00pm2D_base->Fit(func_00pm_norm, "RSEML");
-  TFitResultPtr fitResult_pm00 = hist_pm002D_base->Fit(func_pm00_norm, "RSEML");
-  TFitResultPtr fitResult_pmpm = hist_pmpm2D_base->Fit(func_pmpm_norm, "RSEML");
+  TFitResultPtr fitResult_00pm = hist_00pm2D_base->Fit(func_00pm_norm, "RSL");
+  TFitResultPtr fitResult_pm00 = hist_pm002D_base->Fit(func_pm00_norm, "RSL");
+  TFitResultPtr fitResult_pmpm = hist_pmpm2D_base->Fit(func_pmpm_norm, "RSL");
 
   if (fitResult_00pm->IsValid())
     std::cout << "Fit 00pm successful: Re = " << func_00pm_norm->GetParameter(0) << ", Im = " << func_00pm_norm->GetParameter(1) << ", Chi2: " << fitResult_00pm->Chi2() << std::endl;
@@ -436,13 +483,16 @@ int main()
   hResiduals_pm00->Sumw2();
   hResiduals_pmpm->Sumw2();
 
-  auto fillResiduals2D = [&](TH2 *hist2D, TF2 *func, TH1D *outHist)
+  auto fillResiduals2D = [&](TH2 *hist2D, TH2 *hist2DAux, TF2 *func, TH1D *outHist)
   {
     if (!hist2D || !func || !outHist)
       return;
 
     const int nx = hist2D->GetNbinsX();
     const int ny = hist2D->GetNbinsY();
+
+    const double zMax = hist2D->GetMaximum();
+    const double fitMax = func->GetMaximum(0.0, 0.0); // Zakładamy, że maksimum funkcji jest w pobliżu (0,0)
 
     for (int ix = 1; ix <= nx; ++ix)
     {
@@ -451,23 +501,33 @@ int main()
         const double x = hist2D->GetXaxis()->GetBinCenter(ix);
         const double y = hist2D->GetYaxis()->GetBinCenter(iy);
 
-        const double data = hist2D->GetBinContent(ix, iy);
-        const double err = hist2D->GetBinError(ix, iy);
-        if (err <= 0.0)
+        const int entries = hist2DAux->GetBinContent(ix, iy);
+
+        if (entries < 20)
           continue;
 
+        Bool_t inStripH = (y < 6.0) && (y > 0.0);
+        Bool_t inStripV = (x < 6.0) && (x > 0.0);
+
+        if (!(inStripH || inStripV))
+          continue;
+
+        const double data = hist2D->GetBinContent(ix, iy);
+        const double err = hist2D->GetBinError(ix, iy);
+
         const double fit = func->Eval(x, y);
-        const double resid = (data - fit) / err;
+        const double resid = (err > 0) ? (data - fit) / err : 0.0;
 
         outHist->Fill(resid);
       }
     }
   };
 
-  fillResiduals2D(hist_00pm2D_base, func_00pm_norm, hResiduals_00pm);
-  fillResiduals2D(hist_pm002D_base, func_pm00_norm, hResiduals_pm00);
-  fillResiduals2D(hist_pmpm2D_base, func_pmpm_norm, hResiduals_pmpm);
+  fillResiduals2D(hist_00pm2D_base, hist_00pm2D_base_nw, func_00pm_norm, hResiduals_00pm);
+  fillResiduals2D(hist_pm002D_base, hist_pm002D_base_nw, func_pm00_norm, hResiduals_pm00);
+  fillResiduals2D(hist_pmpm2D_base, hist_pmpm2D_base_nw, func_pmpm_norm, hResiduals_pmpm);
 
+  gStyle->SetOptStat(1111); // Entries, Mean, RMS (Entries będą widoczne)
   gStyle->SetOptFit(1);
 
   TF1 *fitRes00pm = new TF1("fitRes00pm", "gaus", -6, 6);
@@ -661,7 +721,7 @@ int main()
   lineZero->SetLineColor(kBlack);
   lineZero->SetLineStyle(2);
 
-  std::map<std::string, TLine*> linesRe = {
+  std::map<std::string, TLine *> linesRe = {
       {"Min", new TLine(30, fitLimits["Re"][0] - reParam, 320., fitLimits["Re"][0] - reParam)},
       {"Max", new TLine(30, fitLimits["Re"][1] - reParam, 320., fitLimits["Re"][1] - reParam)}};
 
@@ -670,7 +730,7 @@ int main()
   linesRe["Max"]->SetLineColor(kRed);
   linesRe["Max"]->SetLineStyle(3);
 
-  std::map<std::string, TLine*> linesIm = {
+  std::map<std::string, TLine *> linesIm = {
       {"Min", new TLine(30, fitLimits["Im"][0] - imParam, 320., fitLimits["Im"][0] - imParam)},
       {"Max", new TLine(30, fitLimits["Im"][1] - imParam, 320., fitLimits["Im"][1] - imParam)}};
 
@@ -846,7 +906,6 @@ int main()
       return extreme - 0.15 * abs(extreme); // Dodaj 15% marginesu poniżej minimum
     }
   };
-
 
   // Ustaw style dla wykresów
   graphRe_RA->SetMarkerColor(kBlue);
