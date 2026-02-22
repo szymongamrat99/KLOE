@@ -523,6 +523,103 @@ int main()
     }
   };
 
+  auto buildSlicePositions = [](double minVal, double maxVal, double stepVal) -> std::vector<double>
+  {
+    std::vector<double> values;
+    if (stepVal <= 0.0 || maxVal < minVal)
+      return values;
+
+    for (double v = minVal; v <= maxVal + 0.5 * stepVal; v += stepVal)
+    {
+      values.push_back(v);
+    }
+
+    return values;
+  };
+
+  auto plotSlicesWithResiduals = [&](TH2 *hist2D, TF2 *func, const TString &tag, bool xSlices,
+                                     const std::vector<double> &slicePositions, int padCols, int padRows)
+  {
+    if (!hist2D || !func || slicePositions.empty())
+      return;
+
+    const int padsPerCanvas = padCols * padRows;
+    const double xMin = hist2D->GetXaxis()->GetXmin();
+    const double xMax = hist2D->GetXaxis()->GetXmax();
+    const double yMin = hist2D->GetYaxis()->GetXmin();
+    const double yMax = hist2D->GetYaxis()->GetXmax();
+
+    int canvasIndex = 0;
+    for (size_t start = 0; start < slicePositions.size(); start += padsPerCanvas)
+    {
+      const size_t end = std::min(slicePositions.size(), start + padsPerCanvas);
+      TCanvas *cSlices = new TCanvas(Form("c_%s_%s_slices_%d", tag.Data(), xSlices ? "x" : "y", canvasIndex),
+                                     Form("%s slices (%s)", tag.Data(), xSlices ? "X" : "Y"), 1600, 1200);
+      cSlices->Divide(padCols, padRows);
+
+      TCanvas *cResiduals = new TCanvas(Form("c_%s_%s_residuals_%d", tag.Data(), xSlices ? "x" : "y", canvasIndex),
+                                        Form("%s residual slices (%s)", tag.Data(), xSlices ? "X" : "Y"), 1600, 1200);
+      cResiduals->Divide(padCols, padRows);
+
+      int padIndex = 1;
+      for (size_t i = start; i < end; ++i, ++padIndex)
+      {
+        const double slicePos = slicePositions[i];
+        const int fixedBin = xSlices ? hist2D->GetYaxis()->FindBin(slicePos)
+                                     : hist2D->GetXaxis()->FindBin(slicePos);
+
+        TH1D *sliceHist = xSlices
+                              ? hist2D->ProjectionX(Form("slice_%s_x_%.0f_%d", tag.Data(), slicePos, canvasIndex), fixedBin, fixedBin)
+                              : hist2D->ProjectionY(Form("slice_%s_y_%.0f_%d", tag.Data(), slicePos, canvasIndex), fixedBin, fixedBin);
+
+        if (!sliceHist)
+          continue;
+
+        const double sliceMin = xSlices ? xMin : yMin;
+        const double sliceMax = xSlices ? xMax : yMax;
+
+        TF1 fitSlice(Form("fit_%s_%s_%.0f_%d", tag.Data(), xSlices ? "x" : "y", slicePos, canvasIndex),
+                     [&](double *x, double *par)
+                     {
+                       return xSlices ? func->Eval(x[0], slicePos) : func->Eval(slicePos, x[0]);
+                     },
+                     sliceMin, sliceMax, 0);
+
+        cSlices->cd(padIndex);
+        sliceHist->SetTitle(Form("%s slice %s=%.0f", tag.Data(), xSlices ? "y" : "x", slicePos));
+        sliceHist->GetXaxis()->SetRangeUser(sliceMin, sliceMax);
+        sliceHist->SetLineColor(kBlack);
+        sliceHist->Draw("E");
+        fitSlice.SetLineColor(kRed);
+        fitSlice.Draw("SAME");
+
+        TH1D *sliceResid = (TH1D *)sliceHist->Clone(Form("resid_%s_%s_%.0f_%d", tag.Data(), xSlices ? "x" : "y", slicePos, canvasIndex));
+        sliceResid->Reset("ICES");
+        const int nBins = sliceHist->GetNbinsX();
+        for (int ib = 1; ib <= nBins; ++ib)
+        {
+          const double x = sliceHist->GetXaxis()->GetBinCenter(ib);
+          const double data = sliceHist->GetBinContent(ib);
+          const double err = sliceHist->GetBinError(ib);
+          const double fit = fitSlice.Eval(x);
+          const double resid = (err > 0.0) ? (data - fit) / err : 0.0;
+          sliceResid->SetBinContent(ib, resid);
+          sliceResid->SetBinError(ib, 0.0);
+        }
+
+        cResiduals->cd(padIndex);
+        sliceResid->SetTitle(Form("Residuals %s %s=%.0f", tag.Data(), xSlices ? "y" : "x", slicePos));
+        sliceResid->GetXaxis()->SetRangeUser(sliceMin, sliceMax);
+        sliceResid->SetLineColor(kBlue + 1);
+        sliceResid->Draw("HIST");
+      }
+
+      cSlices->SaveAs(Form(imgFolderPath + "/%s_slices_%s_%s_%d.svg", tag.Data(), xSlices ? "x" : "y", maxEventsFile.Data(), canvasIndex));
+      cResiduals->SaveAs(Form(imgFolderPath + "/%s_residual_slices_%s_%s_%d.svg", tag.Data(), xSlices ? "x" : "y", maxEventsFile.Data(), canvasIndex));
+      ++canvasIndex;
+    }
+  };
+
   fillResiduals2D(hist_00pm2D_base, hist_00pm2D_base_nw, func_00pm_norm, hResiduals_00pm);
   fillResiduals2D(hist_pm002D_base, hist_pm002D_base_nw, func_pm00_norm, hResiduals_pm00);
   fillResiduals2D(hist_pmpm2D_base, hist_pmpm2D_base_nw, func_pmpm_norm, hResiduals_pmpm);
@@ -573,6 +670,14 @@ int main()
     st->SetY2NDC(0.93);
   }
   cRespmpm->SaveAs(Form(imgFolderPath + "/residuals_pmpm_%s.svg", maxEventsFile.Data()));
+
+  const std::vector<double> slicePositions = buildSlicePositions(0.0, 300.0, 10.0);
+  plotSlicesWithResiduals(hist_00pm2D_base, func_00pm_norm, "00pm", true, slicePositions, 4, 4);
+  plotSlicesWithResiduals(hist_00pm2D_base, func_00pm_norm, "00pm", false, slicePositions, 4, 4);
+  plotSlicesWithResiduals(hist_pm002D_base, func_pm00_norm, "pm00", true, slicePositions, 4, 4);
+  plotSlicesWithResiduals(hist_pm002D_base, func_pm00_norm, "pm00", false, slicePositions, 4, 4);
+  plotSlicesWithResiduals(hist_pmpm2D_base, func_pmpm_norm, "pmpm", true, slicePositions, 4, 4);
+  plotSlicesWithResiduals(hist_pmpm2D_base, func_pmpm_norm, "pmpm", false, slicePositions, 4, 4);
 
   auto func_00pm_1D = [&](Double_t *x, Double_t *par)
   {
