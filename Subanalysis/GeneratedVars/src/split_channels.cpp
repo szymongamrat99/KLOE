@@ -11,8 +11,8 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
 
     UChar_t pidmcOld[50], vtxmcOld[50], motherOld[50], mctruth, mcflag;
 
-    chain.SetBranchAddress("ntmc", &interfcommon_.ntmc);
-    chain.SetBranchAddress("nvtxmc", &interfcommon_.nvtxmc);
+    chain.SetBranchAddress("ntmc", &baseKin.ntmc);
+    chain.SetBranchAddress("nvtxmc", &baseKin.nvtxmc);
 
     chain.SetBranchAddress("pidmc", pidmcOld);
     chain.SetBranchAddress("vtxmc", vtxmcOld);
@@ -52,7 +52,7 @@ Int_t split_channels(TChain &chain, Controls::DataType &data_type, ErrorHandling
 
         if (mcflag == 1 && mctruth != 0)
         {
-            for (Int_t j = 0; j < interfcommon_.ntmc; j++)
+            for (Int_t j = 0; j < baseKin.ntmc; j++)
             {
                 if (motherOld[vtxmcOld[j] - 1] == 50)
                 {
