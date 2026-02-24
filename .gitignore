@@ -19,3 +19,4 @@ cut-limits.json
 properties.json
 report-config.json
 root-files.json
+*.txt
