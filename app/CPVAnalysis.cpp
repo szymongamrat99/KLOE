@@ -270,5 +270,6 @@ int main(int argc, char *argv[])
   }
   // -------------------------------------------------------------------
   // cfgWatcher.stop();
+  delete dataType;
   return 0;
 }

@@ -149,22 +149,21 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       if (_X(19) < 0)
         _X(19) = MIN_CLU_ENE;
 
-      Double_t *tempParams = new Double_t[_X.GetNoElements()];
+      std::vector<Double_t> tempParams(_X.GetNoElements());
+      std::copy(_X.GetMatrixArray(), _X.GetMatrixArray() + _X.GetNoElements(), tempParams.begin());
 
-      std::copy(_X.GetMatrixArray(), _X.GetMatrixArray() + _X.GetNoElements(), tempParams);
-
-      std::vector<TF1 *> constraint;
+      std::vector<std::unique_ptr<TF1>> constraint;
 
       for (const auto &func_ptr : _constraints)
       {
         // Tworzymy NOWY, PRYWATNY obiekt TF1 dla tego wątku
-        constraint.push_back(new TF1(*func_ptr));
+        constraint.push_back(std::make_unique<TF1>(*func_ptr));
       }
 
       for (Int_t l = 0; l < _M; l++)
       {
-        constraint[l]->SetParameters(tempParams);
-        _C(l) = constraint[l]->EvalPar(0, tempParams);
+        constraint[l]->SetParameters(tempParams.data());
+        _C(l) = constraint[l]->EvalPar(0, tempParams.data());
         for (Int_t m = 0; m < _N_free + _N_const; m++)
         {
           if (m < _N_free)
@@ -180,12 +179,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
             _D(l, m) = 0;
         }
       }
-
-      for (const auto &func_ptr : constraint)
-      {
-        func_ptr->Delete();
-      }
-      delete[] tempParams;
 
       _D_T.Transpose(_D);
 

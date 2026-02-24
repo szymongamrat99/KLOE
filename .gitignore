@@ -13,3 +13,9 @@ docs/
 *.d
 *.pcm
 *.out
+paths-extensions.json
+analysis_config.json
+cut-limits.json
+properties.json
+report-config.json
+root-files.json
