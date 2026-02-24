@@ -11,7 +11,7 @@ add_library(GenVars SHARED
 # również widoczny dla celów, które linkują do AnalysisALib.
 target_include_directories(GenVars PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../Include/FortranAnalysis/inc
+#    ${CMAKE_CURRENT_SOURCE_DIR}/../../../Include/FortranAnalysis/inc
     # Jeśli AnalysisA.cpp używa nagłówków z src/ lub Subanalysis/,
     # trzeba je tu również dodać (np. parent_directory/src)
     # Przykład: target_include_directories(AnalysisALib PRIVATE ${CMAKE_SOURCE_DIR}/src)
@@ -22,7 +22,7 @@ target_include_directories(GenVars PUBLIC
 target_link_libraries(GenVars PRIVATE
     ${ROOT_LIBRARIES}
     LibRec # Jeśli AnalysisALib zależy od SubanalysisLib
-    LibFort
+#    LibFort
 )
 
 # Możesz tu także zdefiniować lokalny program wykonawczy, np. do testów.

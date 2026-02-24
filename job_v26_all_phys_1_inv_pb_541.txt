@@ -1,0 +1,4 @@
+/storage/gpfs_data/kloe/dataroot/DBV-26/MC/MK0/all_phys/prod2root_mk0_all_phys_38474_v2.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/MC/MK0/all_phys/prod2root_mk0_all_phys_38480_v2.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/MC/MK0/all_phys/prod2root_mk0_all_phys_38487_v2.root
+/storage/gpfs_data/kloe/dataroot/DBV-26/MC/MK0/all_phys/prod2root_mk0_all_phys_38490_v2.root
