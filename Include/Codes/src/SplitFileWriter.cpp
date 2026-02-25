@@ -35,7 +35,7 @@ SplitFileWriter::SplitFileWriter(const std::string &baseName,
   // Jeśli włączony jest tryb single file, ustaw _fileCounter na max istniejący numer + 1
   if (_singleFile)
   {
-    _fileCounter = GetMaxFileNumber() + 1;
+    _fileCounter = currentFileNumber > 0 ? currentFileNumber : GetMaxFileNumber() + 1;
   }
   
   _logStream.open(_logFile, std::ios::out | std::ios::app);
