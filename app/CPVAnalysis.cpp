@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
       // Wyznacz fileTypeOpt z nazwy pliku
       // Format: job_v{version}_{type}_{luminosity}_inv_pb_{number}.txt
 
-      const std::regex re(R"(^job_v[^_]+_[^_]+_[^_]+_inv_pb_(\d+)\.txt$)");
+      const std::regex re(R"(job_.*_(\d+)\.txt$)");
       std::smatch match;
       int jobNumber = -1;
 
