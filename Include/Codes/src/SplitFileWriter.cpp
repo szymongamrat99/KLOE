@@ -9,7 +9,8 @@ SplitFileWriter::SplitFileWriter(const std::string &baseName,
                                  const std::string &outputDir,
                                  const std::string &logFile,
                                  Controls::FileType fileType,
-                                 bool singleFile)
+                                 bool singleFile,
+                                 Int_t currentFileNumber)
     : _baseName(baseName),
       _maxSizeBytes(maxSizeBytes),
       _splitByRun(splitByRun),
