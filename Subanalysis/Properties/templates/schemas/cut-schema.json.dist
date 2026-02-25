@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft-04/schema#",
+  "title": "Analysis Cut Schema",
+  "type": "object",
+  "properties": {
+    "analysisName": {
+      "description": "Name of the analysis",
+      "type": "string"
+    },
+    "analysisDescription": {
+      "description": "Description of the analysis",
+      "type": "string"
+    },
+    "listOfCuts": {
+      "description": "List of cuts applied in the analysis",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "type": "integer",
+            "description": "Order of the cut in the analysis sequence"
+          },
+          "cutId": {
+            "type": "string",
+            "description": "Identifier of the cut"
+          },
+          "cutDescription": {
+            "type": "string",
+            "description": "Description of the cut"
+          },
+          "cutType": {
+            "type": "string",
+            "enum": ["O", "T"],
+            "description": "Type of the cut, either one-sided (O) or two-sided (T). One-sided cuts are applied in one direction, while two-sided cuts are applied in both directions, symmetrically around the central value."
+          },
+          "cutValue": {
+            "type": "number",
+            "description": "Value of the cut, applicable for numerical cuts. This value is used to determine the threshold for the cut."
+          },
+          "cutCondition": {
+            "type": "string",
+            "enum": [">=", "<=", "==", "!="],
+            "description": "Condition for the cut, applicable for numerical cuts. This defines how the cut value is compared to the data. 'greaterThan' means the cut applies to values greater than the cutValue, 'lessThan' applies to values less than the cutValue, 'equalTo' applies to values equal to the cutValue, and 'notEqualTo' applies to values not equal to the cutValue."
+          },
+          "centralValue": {
+            "type": "number",
+            "description": "Central value for the cut, used in calculations"
+          }
+        },
+        "required": [
+          "cutId",
+          "cutDescription",
+          "cutType",
+          "cutValue",
+          "cutCondition"
+        ],
+        "if": {
+          "properties": {
+            "cutType": { "const": "T" }
+          }
+        },
+        "then": {
+          "required": ["centralValue"]
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["analysisName", "analysisDescription", "listOfCuts"],
+  "additionalProperties": false
+}

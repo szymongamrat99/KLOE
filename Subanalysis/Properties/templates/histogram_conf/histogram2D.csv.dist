@@ -1,0 +1,61 @@
+# Nazwa histogramu; liczba binów X; liczba binów Y; dolny zakres X; górny zakres X; dolny zakres Y; górny zakres Y; tytuł; tytuł osi X; tytuł osi Y; tytuł osi Z
+px_ch_res_vs_px_neu_res; 50; 50; -5.0; 5.0; -10.; 10.; "px ch res vs. px neu res"; "p^{fit}_{x,Ch} - p^{MC}_{x,Ch} [MeV/c]"; "p^{fit}_{x,Neu} - p^{MC}_{x,Neu} [MeV/c]"; ""
+py_ch_res_vs_py_neu_res; 50; 50; -5.0; 5.0; -10.; 10.; "py ch res vs. py neu res"; "p^{fit}_{y,Ch} - p^{MC}_{y,Ch} [MeV/c]"; "p^{fit}_{y,Neu} - p^{MC}_{y,Neu} [MeV/c]"; ""
+pz_ch_res_vs_pz_neu_res; 50; 50; -5.0; 5.0; -10.; 10.; "pz ch res vs. pz neu res"; "p^{fit}_{z,Ch} - p^{MC}_{z,Ch} [MeV/c]"; "p^{fit}_{z,Neu} - p^{MC}_{z,Neu} [MeV/c]"; ""
+E_ch_res_vs_E_neu_res; 50; 50; -5.0; 5.0; -10.; 10.; "E ch res vs. E neu res"; "E^{fit}_{Ch} - E^{MC}_{Ch} [MeV/c]"; "E^{fit}_{Neu} - E^{MC}_{Neu} [MeV/c]"; ""
+
+Qmiss_vs_deltaPhi; 50; 50; 0.0; 500.0; 2.; 4.; "Q_{miss} vs. #Delta #phi"; "Q_{miss} [MeV]"; "#Delta#phi_{+-} [rad]"; ""
+
+mass_pi01_vs_mass_pi02; 50; 50; 120.; 150.; 120.; 150.; "#pi^{0} Mass Correlation"; "m_{#pi^{0}_{1}} [MeV/c^{2}]"; "m_{#pi^{0}_{2}} [MeV/c^{2}]"; ""
+mass_Kch_vs_mass_Kne; 50; 50; 480.; 520.; 300.; 600.; "Kaon Mass Correlation"; "m_{K^{#pm}} [MeV/c^{2}]"; "m_{K^{0}} [MeV/c^{2}]"; ""
+vtxNeu_x_vs_vtxNeu_y; 100; 100; -20.; 20.; -20.; 20.; "Neutral Vertex Position"; "x [cm]"; "y [cm]"; ""
+vtxNeu_x_vs_vtxNeu_z; 100; 100; -20.; 20.; -50.; 50.; "Neutral Vertex x vs z"; "x [cm]"; "z [cm]"; ""
+Energy_Pi1_vs_mass_pi01; 50; 50; 0.; 1000.; 120.; 150.; "Pion Energy vs #pi^{0} Mass"; "E_{#pi^{#pm}} [MeV]"; "m_{#pi^{0}} [MeV/c^{2}]"; ""
+
+Energy_trk1_vs_Energy_trk2; 100; 100; 190.; 310.; 190.; 310.; "Pion Energy vs #pi^{0} Mass"; "E_{trk,1} [MeV]"; "E_{trk,2} [MeV]"; ""
+
+Energy_pi01_vs_Energy_pi02; 100; 100; 190.; 310.; 190.; 310.; ""; "E_{#pi^{0},1} [MeV]"; "E_{#pi^{0},2} [MeV]"; ""
+
+chi2_signalKinFit_vs_chi2_trilaterationKinFit; 50; 50; 0.; 10.; 0.; 10.; "#chi^{2} Correlation"; "#chi^{2}_{signal} / ndof"; "#chi^{2}_{#omega#pi^{0}} / ndof"; ""
+curv1_vs_curv2; 50; 50; -0.01; 0.01; -0.01; 0.01; "Track Curvature Correlation"; "1/p_{T1} [1/MeV]"; "1/p_{T2} [1/MeV]"; ""
+phiv1_vs_phiv2; 50; 50; -TMath::Pi(); TMath::Pi(); -TMath::Pi(); TMath::Pi(); "Track #phi Correlation"; "#phi_{1} [rad]"; "#phi_{2} [rad]"; ""
+delta_t_vs_delta_t_mc; 81; 81; -20.; 20.; -30.; 20.; "#Deltat_{rec} vs. #Deltat_{mc}"; "#Deltat_{MC} [#tau_{S}]"; "(#Deltat_{rec} - #Deltat_{MC}) [#tau_{S}]"; ""
+delta_t_fit_vs_delta_t_mc; 401; 401; -300.; 300.; -300.; 300.; "#Deltat_{fit} vs. #Deltat_{mc}"; "#Deltat_{MC} [#tau_{S}]"; "#Deltat_{fit} [#tau_{S}]"; ""
+
+delta_t_mc_vs_delta_t_res; 81; 81; -20; 20.; -30.; 20.; "#Deltat_{fit} vs. #Deltat_{mc}"; "#Deltat_{MC} [#tau_{S}]"; "(#Deltat_{fit} - #Deltat_{MC}) [#tau_{S}]"; ""
+
+t_ch_fit_vs_t_ch_mc; 1201; 81; 0.; 300.; -20.; 50.; "t_{+-,MC} vs. (t_{+-,fit} - t_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(t_{+-,fit} - t_{+-,MC}) [#tau_{S}]"; ""
+t_neu_fit_vs_t_neu_mc; 1201; 81; 0.; 300.; -20.; 50.; "t_{00,MC} vs. (t_{00,fit} - t_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(t_{00,fit} - t_{00,MC}) [#tau_{S}]"; ""
+
+t_ch_rec_vs_t_ch_mc; 1201; 81; 0.; 20.; -20.; 50.; "t_{+-,MC} vs. (t_{+-,rec} - t_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(t_{+-,rec} - t_{+-,MC}) [#tau_{S}]"; ""
+t_neu_rec_vs_t_neu_mc; 1201; 81; 0.; 20.; -20.; 50.; "t_{00,MC} vs. (t_{00,rec} - t_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(t_{00,rec} - t_{00,MC}) [#tau_{S}]"; ""
+
+rt_ch_fit_vs_rt_ch_mc; 1201; 81; 0; 300.; -20.; 10.; "Rt_{+-,MC} vs. (Rt_{+-,fit} - Rt_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(Rt_{+-,fit} - Rt_{+-,MC}) [cm]"; ""
+rt_neu_fit_vs_rt_neu_mc; 1201; 81; 0.; 300.; -20.; 10.; "Rt_{00,MC} vs. (Rt_{00,fit} - Rt_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(Rt_{00,fit} - Rt_{00,MC}) [cm]"; ""
+
+z_ch_fit_vs_z_ch_mc; 1201; 81; 0; 300.; -20.; 10.; "z_{+-,MC} vs. (z_{+-,fit} - z_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(z_{+-,fit} - z_{+-,MC}) [cm]"; ""
+z_neu_fit_vs_z_neu_mc; 1201; 81; 0.; 300.; -20.; 10.; "z_{00,MC} vs. (z_{00,fit} - z_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(z_{00,fit} - z_{00,MC}) [cm]"; ""
+
+pt_ch_fit_vs_pt_ch_mc; 1201; 81; 0.; 300.; -20.; 10.; "p_{+-,MC} vs. (p_{+-,fit} - p_{+-,MC})"; "t_{+-,MC} [#tau_{S}]"; "(p_{+-,fit} - p_{+-,MC}) [MeV/c]"; ""
+pt_neu_fit_vs_pt_neu_mc; 1201; 81; 0.; 300.; -20.; 10.; "p_{00,MC} vs. (p_{00,fit} - p_{00,MC})"; "t_{00,MC} [#tau_{S}]"; "(p_{00,fit} - p_{00,MC}) [MeV/c]"; ""
+
+t_ch_fit_MC_vs_t_neu_fit_MC; 10; 10; -10; 10.; -10.; 10.; "(t_{+-,fit} - t_{+-,MC}) vs. (t_{00,fit} - t_{00,MC})"; "(t_{+-,fit} - t_{+-,MC}) [#tau_{S}]"; "(t_{00,fit} - t_{00,MC}) [#tau_{S}]"; ""
+t_ch_fit_vs_t_neu_fit; 150; 150; -10; 150.; -10.; 150.; "t_{+-,fit} vs. t_{00,fit}"; "t_{+-,fit} [#tau_{S}]"; "t_{00,fit}[#tau_{S}]"; ""
+
+Phi_trk1_angle_vs_Phi_trk2_angle; 81; 81; -1.; 1.; -1.; 1.; "#alpha(K_{ch},#pi)_{1} vs. #alpha(K_{ch},#pi)_{2}"; "cos(#alpha(K_{ch},#pi)_{1}) [-]"; "cos(#alpha(K_{ch},#pi)_{2}) [-]"; ""
+
+Phi_pi01_angle_vs_Phi_pi02_angle; 81; 81; -1.; 1.; -1.; 1.; "#alpha(K_{ne},#pi^{0})_{1} vs. #alpha(K_{ne},#pi^{0})_{2}"; "cos(#alpha(K_{ne},#pi^{0})_{1}) [-]"; "cos(#alpha(K_{ne},#pi^{0})_{2}) [-]"; ""
+
+t00_tri_vs_t00_mc; 100; 100; -5.; 300.; 0.; 300.; "t^{00}_{tri} vs. t^{00}_{MC}"; "t^{00}_{MC} [#tau_{S}]"; "t^{00}_{tri} [#tau_{S}]"; ""
+t00_triangle_vs_t00_mc; 100; 100; -5.; 300.; 0.; 300.; "t^{00}_{triangle} vs. t^{00}_{MC}"; "t^{00}_{MC} [#tau_{S}]"; "t^{00}_{triangle} [#tau_{S}]"; ""
+t00_triangle_vs_t00_tri; 100; 100; -5.; 300.; 0.; 300.; "t^{00}_{triangle} vs. t^{00}_{tri}"; "t^{00}_{triangle} [#tau_{S}]"; "t^{00}_{tri} [#tau_{S}]"; ""
+
+T0_omega_vs_mass_omega; 100; 100; 0.; 350.; 600.; 1000.; "E^{kin}_{#pi^{0}} vs. m^{inv}_{#pi^{+}#pi^{-}#pi^{0}}"; "E^{kin}_{#pi^{0}} [MeV]"; "m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]"; ""
+
+Rkne_vs_Rkch; 100; 100; 0.; 5.; 0.; 5.; "R_{00} vs. R_{+-}"; "Rt_{00} [cm]"; "Rt_{+-} [cm]"; ""
+
+chi2_signalKinFit_vs_mass_Kch; 100; 100; 0; 1.5E4.; -150.; 150.; "Chi2 vs Kch mass"; "#chi^{2}_{signal}"; "m^{inv}_{#pi^{+}#pi^{-}} [MeV/c^{2}]"; ""
+chi2_signalKinFit_vs_mass_Kne; 100; 100; 0; 1.5E4.; -320.; 320.; "Chi2 vs Kne mass"; "#chi^{2}_{signal}"; "m^{inv}_{4#gamma} [MeV/c^{2}]"; ""
+chi2_signalKinFit_vs_delta_t; 100; 121; 0; 10.; -100.; 100.; "Chi2 vs Delta t"; "#chi^{2}_{signal}"; "#Delta t [#tau_{S}]"; ""
+
+TransvRadius_vs_delta_t; 100; 201; 0; 50.; -100.; 100.; "TransvRadius vs Delta t"; "R [cm]"; "#Delta t [#tau_{S}]"; ""

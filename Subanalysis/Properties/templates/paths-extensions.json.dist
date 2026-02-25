@@ -1,0 +1,20 @@
+{
+  "date": "2026-02-14",
+  "general":
+  {
+    "rootFileDir": "/home/g/gamrat/KLOE/Subanalysis/InitAnalysis/root_files",
+    "imgDir": "img"
+  },
+  "analysisProperties":
+  {
+    "PDGConst": "/home/g/gamrat/KLOE/Subanalysis/Properties/pdg_const.json",
+    "properties": "/home/g/gamrat/KLOE/Subanalysis/Properties/properties.json",
+    "analysisConfig": "/home/g/gamrat/KLOE/Subanalysis/Properties/analysis_config.json"
+  },
+  "cutLimits": "/home/g/gamrat/KLOE/Subanalysis/Properties/cut-limits.json",
+  "extensions":
+  {
+    "img": ".pdf",
+    "root": ".root"
+  }
+}

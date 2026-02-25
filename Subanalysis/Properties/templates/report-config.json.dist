@@ -1,0 +1,12 @@
+{
+  "reportColumns": [
+    "cutId",
+    "survived_signal",
+    "survived_background",
+    "efficiency",
+    "efficiency_error",
+    "purity",
+    "purity_error",
+    "signal_to_bg"
+  ]
+}

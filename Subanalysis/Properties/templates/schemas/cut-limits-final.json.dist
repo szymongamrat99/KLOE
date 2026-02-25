@@ -1,0 +1,142 @@
+{
+  "analysisCode": 7,
+  "analysisDescription": "This analysis applies cuts to select events that match the signal hypothesis.",
+  "listOfCuts": {
+    "FOUR_PI": [
+      {
+        "order": 1,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "InvMassKS",
+        "cutType": "T",
+        "cutValue": 5,
+        "cutCondition": "<=",
+        "centralValue": 497.611
+      },
+      {
+        "order": 2,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "InvMassKL",
+        "cutType": "T",
+        "cutValue": 5,
+        "cutCondition": "<=",
+        "centralValue": 497.611
+      },
+      {
+        "order": 3,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "TwoBodyMomKS",
+        "cutType": "T",
+        "cutValue": 1000,
+        "cutCondition": "<=",
+        "centralValue": 110.493
+      },
+      {
+        "order": 4,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "TwoBodyMomKL",
+        "cutType": "T",
+        "cutValue": 1000,
+        "cutCondition": "<=",
+        "centralValue": 110.493
+      },
+      {
+        "order": 5,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "MissTotKS",
+        "cutType": "O",
+        "cutValue": 10,
+        "cutCondition": "<"
+      },
+      {
+        "order": 6,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "MissTotKL",
+        "cutType": "O",
+        "cutValue": 10,
+        "cutCondition": "<"
+      },
+      {
+        "order": 7,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "MissHigherKS",
+        "cutType": "O",
+        "cutValue": 10,
+        "cutCondition": "<"
+      },
+      {
+        "order": 8,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "MissLowerKS",
+        "cutType": "O",
+        "cutValue": -50,
+        "cutCondition": ">"
+      },
+      {
+        "order": 9,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "MissHigherKL",
+        "cutType": "O",
+        "cutValue": 10,
+        "cutCondition": "<"
+      },
+      {
+        "order": 10,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "MissLowerKL",
+        "cutType": "O",
+        "cutValue": -50,
+        "cutCondition": ">"
+      }
+    ],
+    "SIGNAL": [
+      {
+        "order": 1,
+        "cutDescription": "Chi2 kinematic fit.",
+        "cutId": "Chi2KinFit",
+        "cutType": "O",
+        "cutValue": 40,
+        "cutCondition": "<="
+      },
+      {
+        "order": 2,
+        "cutDescription": "Combined fitted pi0 masses",
+        "cutId": "FittedPi0Masses",
+        "cutType": "O",
+        "cutValue": 35,
+        "cutCondition": "<="
+      },
+      {
+        "order": 3,
+        "cutDescription": "TrcvSum",
+        "cutId": "TrcvSum",
+        "cutType": "O",
+        "cutValue": -1,
+        "cutCondition": ">="
+      },
+      {
+        "order": 4,
+        "cutDescription": "K->pi0pi0 decay invariant mass.",
+        "cutId": "InvMassKne",
+        "cutType": "T",
+        "cutValue": 76,
+        "cutCondition": "<="
+      },
+      {
+        "order": 5,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "InvMassKch",
+        "cutType": "T",
+        "cutValue": 1.2,
+        "cutCondition": "<="
+      },
+      {
+        "order": 6,
+        "cutDescription": "Missing energy in event.",
+        "cutId": "Qmiss",
+        "cutType": "O",
+        "cutValue": 3.75,
+        "cutCondition": "<="
+      }
+    ]
+  }
+}
