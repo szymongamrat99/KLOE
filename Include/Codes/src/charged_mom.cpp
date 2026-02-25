@@ -438,13 +438,12 @@ namespace KLOE
                   mom_vec1Tmp[2] = _PzTv[j1];
                   mom_vec1Tmp[3] = sqrt(pow(mom_vec1Tmp[0], 2) + pow(mom_vec1Tmp[1], 2) + pow(mom_vec1Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
 
-
                   mom_vec2Tmp[0] = _PxTv[j2];
                   mom_vec2Tmp[1] = _PyTv[j2];
                   mom_vec2Tmp[2] = _PzTv[j2];
                   mom_vec2Tmp[3] = sqrt(pow(mom_vec2Tmp[0], 2) + pow(mom_vec2Tmp[1], 2) + pow(mom_vec2Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
                 }
-                else if (_CurV != nullptr && _CotV != nullptr &&_PhiV != nullptr)
+                else if (_CurV != nullptr && _CotV != nullptr && _PhiV != nullptr)
                 {
                   ChargedVtxRec::charged_mom(j1, mom_vec1Tmp, _logger);
                   ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
@@ -590,7 +589,6 @@ namespace KLOE
                   mom_vec1Tmp[2] = _PzTv[j1];
                   mom_vec1Tmp[3] = sqrt(pow(mom_vec1Tmp[0], 2) + pow(mom_vec1Tmp[1], 2) + pow(mom_vec1Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
 
-
                   mom_vec2Tmp[0] = _PxTv[j2];
                   mom_vec2Tmp[1] = _PyTv[j2];
                   mom_vec2Tmp[2] = _PzTv[j2];
@@ -607,7 +605,7 @@ namespace KLOE
                   LOG_EVENT(_logger, err, logMessages[3], ErrorHandling::LogFiles::LogType::ERROR);
                   return err;
                 }
-                
+
                 for (Int_t k = 0; k < 4; k++)
                   KchTmp[k] = mom_vec1Tmp[k] + mom_vec2Tmp[k];
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
@@ -701,6 +699,15 @@ namespace KLOE
     }
     catch (ErrorHandling::ErrorCodes err)
     {
+      std::cout << "Discriminant: " << disc << std::endl;
+      std::cout << "A: " << A << std::endl;
+      std::cout << "B: " << B << std::endl;
+      std::cout << "C: " << C << std::endl;
+      std::cout << "beta_sq: " << beta_sq << std::endl;
+      std::cout << "beta_gamma_sq: " << beta_gamma_sq << std::endl;
+      std::cout << "gamma_sq: " << gamma_sq << std::endl;
+      std::cout << "pcm_sq: " << pcm_sq << std::endl;
+
       LOG_EVENT(_logger, err, logMessages[0], ErrorHandling::LogFiles::LogType::ERROR);
       return Int_t(err);
     }
