@@ -11,7 +11,7 @@ int InitAnalysis_main(TChain &chain, Controls::FileType &fileTypeOpt, KLOE::pm00
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Set Menu instance
-  Controls::Menu *menu = new Controls::Menu(13);
+  std::unique_ptr<Controls::Menu> menu = std::make_unique<Controls::Menu>(13);
   Controls::InitialAnalysisMenu menuOpt;
   // -------------------------------------------------------------------
 

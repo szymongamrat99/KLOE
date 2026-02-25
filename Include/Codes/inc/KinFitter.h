@@ -69,10 +69,10 @@ namespace KLOE
         _X_init_min,
         _X_init_aux;
 
-    KinFit *_baseObj;
-    ConstraintsSignal *_objSignal;
-    ConstraintsTrilateration *_objTrilateration;
-    ConstraintsOmega *_objOmega;
+    std::unique_ptr<KinFit> _baseObj;
+    std::unique_ptr<ConstraintsSignal> _objSignal;
+    std::unique_ptr<ConstraintsTrilateration> _objTrilateration;
+    std::unique_ptr<ConstraintsOmega> _objOmega;
 
     std::map<std::string, Double_t (KinFit::*)(Double_t *, Double_t *)>
         constraintMap = {
@@ -146,7 +146,7 @@ namespace KLOE
 
     ErrorHandling::ErrorCodes _err_code = ErrorHandling::ErrorCodes::NO_ERROR;
 
-    std::vector<TF1 *> _constraints;
+    std::vector<std::unique_ptr<TF1>> _constraints;
     Double_t _value_min;
 
     std::vector<Int_t> _chosen;
@@ -160,6 +160,8 @@ namespace KLOE
     KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger);
 
     KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Int_t jmin, Int_t jmax, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger);
+
+    ~KinFitter();
 
     Int_t ParameterInitialization(Float_t *Params, Float_t *Errors);
     Int_t ParameterInitialization(Double_t *Params, Double_t *Errors);

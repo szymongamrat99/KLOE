@@ -7,35 +7,8 @@
 
 namespace KLOE
 {
-	SignalKinFit::SignalKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger) : KinFitter("SignalGlobal", N_free, N_const, M, 0, loopcount, chiSqrStep, logger)
+	SignalKinFit::SignalKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger) : KinFitter("SignalGlobal", N_free, N_const, M, 0, loopcount, chiSqrStep, logger), _V(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _V_min(N_free + N_const, N_free + N_const), _Aux(M, M), _V_invert(N_free, N_free), _V_init(N_free + N_const, N_free + N_const), _X(N_free + N_const), _C(M), _X_final(N_free + N_const), _L(M), _CORR(N_free + N_const), _X_init(N_free + N_const), _X_min(N_free + N_const), _C_min(M), _L_min(M), _C_aux(M), _L_aux(M), _X_init_min(N_free + N_const), _X_init_aux(N_free + N_const), _Param(N_free + N_const), _Errors(N_free + N_const)
 	{
-		_V.ResizeTo(N_free + N_const, N_free + N_const);
-		_D.ResizeTo(M, N_free + N_const);
-		_D_T.ResizeTo(N_free + N_const, M);
-		_V_final.ResizeTo(N_free + N_const, N_free + N_const);
-		_V_aux.ResizeTo(N_free + N_const, N_free + N_const);
-		_V_min.ResizeTo(N_free + N_const, N_free + N_const);
-		_Aux.ResizeTo(M, M);
-		_V_invert.ResizeTo(N_free, N_free);
-		_V_init.ResizeTo(N_free + N_const, N_free + N_const);
-
-		_X.ResizeTo(N_free + N_const);
-		_C.ResizeTo(M);
-		_X_final.ResizeTo(N_free + N_const);
-		_L.ResizeTo(M);
-		_CORR.ResizeTo(N_free + N_const);
-		_X_init.ResizeTo(N_free + N_const);
-		_X_min.ResizeTo(N_free + N_const);
-		_C_min.ResizeTo(M);
-		_L_min.ResizeTo(M);
-		_C_aux.ResizeTo(M);
-		_L_aux.ResizeTo(M);
-		_X_init_min.ResizeTo(N_free + N_const);
-		_X_init_aux.ResizeTo(N_free + N_const);
-
-		_Param.resize(N_free + N_const);
-		_Errors.resize(N_free + N_const);
-
 		for (Int_t i = 0; i < 4; i++)
 			_photonFit[i].resize(8);
 
@@ -87,7 +60,7 @@ namespace KLOE
 				_cluster[k][2] != 0;
 		}
 
-		Bool_t cond_tot = 1;//cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3] && clusterEnergy;
+		Bool_t cond_tot = 1;
 
 		if (cond_tot)
 		{
@@ -168,7 +141,7 @@ namespace KLOE
 			_CHISQRMIN = KinFitter::FitFunction();
 
 
-			KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit, _KchrecFit, _KchboostFit, _ipFit, _photonFit, _KnerecFit, _KnereclorFit);
+			KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit.data(), _KchrecFit, _KchboostFit, _ipFit, _photonFit.data(), _KnerecFit, _KnereclorFit);
 
 			_isConverged = 1;
 		}

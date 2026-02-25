@@ -85,8 +85,7 @@ namespace KLOE
 		TrilaterationCode
 				_recMode;
 
-		ChargedVtxRec<Float_t, Int_t>
-				*_chargedVtxRec;
+		std::unique_ptr<ChargedVtxRec<Float_t, Int_t>> _chargedVtxRec;
 
 		Reconstructor
 				_R;

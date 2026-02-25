@@ -120,8 +120,8 @@ namespace KLOE
 
     ConstraintsSignal(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger), _logger(logger) {};
 
-    neutralParticle fphoton[4];
-    chargedParticle fpionCh[2];
+    std::array<neutralParticle, 4> fphoton;
+    std::array<chargedParticle, 2> fpionCh;
     kaonNeutral fKchrec, fKchboost, fKnerec, fKnereclor;
     phiMeson fphi;
     std::vector<Float_t> fip;

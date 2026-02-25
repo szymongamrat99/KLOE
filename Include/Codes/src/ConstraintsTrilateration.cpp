@@ -210,13 +210,21 @@ namespace KLOE
         ip[j] = ipTmp[0][j];
     }
 
-    Float_t boostVec[3] = {-phi.fourMom[0] / phi.fourMom[3],
-                           -phi.fourMom[1] / phi.fourMom[3],
-                           -phi.fourMom[2] / phi.fourMom[3]};
+    if (phi.fourMom[3] != 0.)
+    {
+      Float_t boostVec[3] = {-phi.fourMom[0] / phi.fourMom[3],
+                             -phi.fourMom[1] / phi.fourMom[3],
+                             -phi.fourMom[2] / phi.fourMom[3]};
 
-    lorentz_transf(boostVec,
-                   Knerec.fourMom.data(),
-                   KnerecCMPhi.fourMom.data());
+      lorentz_transf(boostVec,
+                     Knerec.fourMom.data(),
+                     KnerecCMPhi.fourMom.data());
+    }
+    else
+    {
+      for (Int_t j = 0; j < 4; j++)
+        KnerecCMPhi.fourMom[j] = 999.;
+    }
   }
 
   void ConstraintsTrilateration::IntermediateReconstruction(Double_t *p)
@@ -226,7 +234,6 @@ namespace KLOE
       fip.clear();
       fip.resize(3);
     }
-
 
     for (Int_t i = 0; i < 4; i++)
     {
@@ -248,7 +255,7 @@ namespace KLOE
 
     fphi.SetTotalVector();
 
-    std::array<kaonNeutral, 2> KnerecTmp = {};        // Temporary kaon neutral objects
+    std::array<kaonNeutral, 2> KnerecTmp = {};                    // Temporary kaon neutral objects
     std::array<std::array<neutralParticle, 4>, 2> photonTmp = {}; // Temporary photon objects
 
     std::array<std::array<Float_t, 3>, 2> ipTmp = {}; // Temporary interaction point
@@ -378,13 +385,22 @@ namespace KLOE
         fip[j] = ipTmp[0][j];
     }
 
-    Float_t boostVec[3] = {-fphi.fourMom[0] / fphi.fourMom[3],
-                           -fphi.fourMom[1] / fphi.fourMom[3],
-                           -fphi.fourMom[2] / fphi.fourMom[3]};
+    if (fphi.fourMom[3] != 0.)
+    {
 
-    lorentz_transf(boostVec,
-                   fKnerec.fourMom.data(),
-                   fKnerecCMPhi.fourMom.data());
+      Float_t boostVec[3] = {-fphi.fourMom[0] / fphi.fourMom[3],
+                             -fphi.fourMom[1] / fphi.fourMom[3],
+                             -fphi.fourMom[2] / fphi.fourMom[3]};
+
+      lorentz_transf(boostVec,
+                     fKnerec.fourMom.data(),
+                     fKnerecCMPhi.fourMom.data());
+    }
+    else
+    {
+      for (Int_t j = 0; j < 4; j++)
+        fKnerecCMPhi.fourMom[j] = 999.;
+    }
   }
 
   Double_t ConstraintsTrilateration::EnergyConsvCM(Double_t *x, Double_t *p)

@@ -204,7 +204,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   // Oblicz całkowitą luminozność
   double totalInputLuminosity = 0.0;
-  TObjArray *fileElements = chain.GetListOfFiles();
+  TObjArray *fileElements = (TObjArray *)chain.GetListOfFiles();
   TIter next(fileElements);
   TChainElement *chEl = nullptr;
 

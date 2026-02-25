@@ -109,11 +109,13 @@ namespace KLOE
   public:
     /* Specific physical Constraints for Omega-pi0 hypothesis */
 
-    neutralParticle fphoton[4], fomega, fpionNe[2];
-    chargedParticle fpionCh[2];
+    std::array<neutralParticle, 4> fphoton = {};
+    neutralParticle fomega;
+    std::array<neutralParticle, 2> fpionNe = {};
+    std::array<chargedParticle, 2> fpionCh = {};
     kaonNeutral fKchrec, fKchboost, fKnerec, fKnereclor;
     phiMeson fphi;
-    std::vector<Float_t> fip;
+    std::vector<Float_t> fip = {0., 0., 0.}; /*!< Interaction point */
 
     ConstraintsOmega(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger) {};
     
