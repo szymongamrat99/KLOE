@@ -248,10 +248,10 @@ namespace KLOE
 
     fphi.SetTotalVector();
 
-    kaonNeutral KnerecTmp[2];        // Temporary kaon neutral objects
-    neutralParticle photonTmp[2][4]; // Temporary photon objects
+    std::array<kaonNeutral, 2> KnerecTmp = {};        // Temporary kaon neutral objects
+    std::array<std::array<neutralParticle, 4>, 2> photonTmp = {}; // Temporary photon objects
 
-    Float_t ipTmp[2][3]; // Temporary interaction point
+    std::array<std::array<Float_t, 3>, 2> ipTmp = {}; // Temporary interaction point
 
     std::array<Double_t, 2> value = {0., 0.};
 
@@ -325,7 +325,7 @@ namespace KLOE
                                  0.};
 
         // Corrected IP event by event
-        IPBoostCorr(X_line, mom, xB, plane_perp, ipTmp[i]);
+        IPBoostCorr(X_line, mom, xB, plane_perp, ipTmp.at(i).data());
 
         ipTmp[i][0] = fphi.vtxPos[0];
         ipTmp[i][1] = fphi.vtxPos[1];
@@ -333,7 +333,7 @@ namespace KLOE
         if (abs(ipTmp[i][2] - fphi.vtxPos[2]) > 2.)
           ipTmp[i][2] = fphi.vtxPos[2];
 
-        KnerecTmp[i].calculatePath(ipTmp[i]);
+        KnerecTmp[i].calculatePath(ipTmp.at(i).data());
         KnerecTmp[i].SetTotalVector();
         KnerecTmp[i].calculateLifetimeLAB();
         KnerecTmp[i].fourPos[3] = S.sol[i][3];

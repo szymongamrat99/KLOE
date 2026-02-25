@@ -696,18 +696,10 @@ namespace KLOE
         disc = 0.;
       else if (disc < -100.)
         throw ErrorHandling::ErrorCodes::DELTA_LT_ZERO;
+      
     }
     catch (ErrorHandling::ErrorCodes err)
     {
-      std::cout << "Discriminant: " << disc << std::endl;
-      std::cout << "A: " << A << std::endl;
-      std::cout << "B: " << B << std::endl;
-      std::cout << "C: " << C << std::endl;
-      std::cout << "beta_sq: " << beta_sq << std::endl;
-      std::cout << "beta_gamma_sq: " << beta_gamma_sq << std::endl;
-      std::cout << "gamma_sq: " << gamma_sq << std::endl;
-      std::cout << "pcm_sq: " << pcm_sq << std::endl;
-
       LOG_EVENT(_logger, err, logMessages[0], ErrorHandling::LogFiles::LogType::ERROR);
       return Int_t(err);
     }
