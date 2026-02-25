@@ -36,7 +36,8 @@ public:
                   const std::string &outputDir = "output",
                   const std::string &logFile = "file_weights.log",
                   Controls::FileType fileType = Controls::FileType::DATA,
-                  bool singleFile = false);
+                  bool singleFile = false,
+                  Int_t currentFileNumber = 1);
 
   ~SplitFileWriter();
 
