@@ -64,6 +64,12 @@ SplitFileWriter::~SplitFileWriter()
   {
     _logStream.close();
   }
+  if (_file)
+  {
+    _file->Close();
+    delete _file;
+    _file = nullptr;
+  }
 }
 
 void SplitFileWriter::EnsureOutputDirExists()
