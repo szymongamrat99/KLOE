@@ -41,7 +41,7 @@ add_subdirectory(Subanalysis/OmegaRec)
 add_subdirectory(Subanalysis/Neutrec)
 add_subdirectory(Subanalysis/InitialAnalysis)
 add_subdirectory(Include/Codes)
-add_subdirectory(Include/FortranAnalysis)
+# add_subdirectory(Include/FortranAnalysis)
 add_subdirectory(Include/MainMenuHandler)
 # add_subdirectory(Subanalysis/Pipi)
 # add_subdirectory(Subanalysis/Plots)
@@ -64,7 +64,7 @@ target_include_directories(KLSPM00 PRIVATE
   ${ROOT_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/inc
   ${CMAKE_CURRENT_SOURCE_DIR}/Include/Codes/inc
-  ${CMAKE_CURRENT_SOURCE_DIR}/Include/FortranAnalysis/inc
+#  ${CMAKE_CURRENT_SOURCE_DIR}/Include/FortranAnalysis/inc
   ${CMAKE_CURRENT_SOURCE_DIR}/Include
   ${ROOT_INCLUDE_DIRS}/nlohmann
   )
@@ -83,7 +83,7 @@ target_link_libraries(KLSPM00 PRIVATE
   ${CURL_LIBRARIES}
   ${ROOT_LIBRARIES}
   LibRec
-  LibFort
+#  LibFort
   )
 
 # Optional output directories

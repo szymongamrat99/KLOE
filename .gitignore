@@ -13,3 +13,14 @@ docs/
 *.d
 *.pcm
 *.out
+Subanalysis/Properties/paths-extensions.json
+Subanalysis/Properties/analysis_config.json
+Subanalysis/Properties/cut-limits.json
+Subanalysis/Properties/properties.json
+Subanalysis/Properties/report-config.json
+Subanalysis/Properties/root-files.json
+Subanalysis/Properties/histogram_conf/
+Subanalysis/Properties/pdg_api/
+Subanalysis/Properties/schemas/
+*.txt
+.vscode/

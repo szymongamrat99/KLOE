@@ -9,7 +9,8 @@ SplitFileWriter::SplitFileWriter(const std::string &baseName,
                                  const std::string &outputDir,
                                  const std::string &logFile,
                                  Controls::FileType fileType,
-                                 bool singleFile)
+                                 bool singleFile,
+                                 Int_t currentFileNumber)
     : _baseName(baseName),
       _maxSizeBytes(maxSizeBytes),
       _splitByRun(splitByRun),
@@ -34,7 +35,7 @@ SplitFileWriter::SplitFileWriter(const std::string &baseName,
   // Jeśli włączony jest tryb single file, ustaw _fileCounter na max istniejący numer + 1
   if (_singleFile)
   {
-    _fileCounter = GetMaxFileNumber() + 1;
+    _fileCounter = currentFileNumber > 0 ? currentFileNumber : GetMaxFileNumber() + 1;
   }
   
   _logStream.open(_logFile, std::ios::out | std::ios::app);
@@ -62,6 +63,12 @@ SplitFileWriter::~SplitFileWriter()
   if (_logStream.is_open())
   {
     _logStream.close();
+  }
+  if (_file)
+  {
+    _file->Close();
+    delete _file;
+    _file = nullptr;
   }
 }
 

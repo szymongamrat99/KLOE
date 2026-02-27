@@ -132,21 +132,21 @@ void ConstraintsOmega::IntermediateReconstruction(Double_t *p)
   {
     for (Int_t j = 0; j < 5; j++)
     {
-      fphoton[i].clusterParams[j] = p[i * 5 + j];
+      fphoton.at(i).clusterParams[j] = p[i * 5 + j];
     }
   }
 
   for (Int_t i = 0; i < 2; i++)
   {
-    fpionCh[i].fourMom[0] = p[20 + i * 3];
-    fpionCh[i].fourMom[1] = p[20 + i * 3 + 1];
-    fpionCh[i].fourMom[2] = p[20 + i * 3 + 2];
-    fpionCh[i].fourMom[3] = sqrt(pow(fpionCh[i].fourMom[0], 2) +
-                                 pow(fpionCh[i].fourMom[1], 2) +
-                                 pow(fpionCh[i].fourMom[2], 2) +
+    fpionCh.at(i).fourMom[0] = p[20 + i * 3];
+    fpionCh.at(i).fourMom[1] = p[20 + i * 3 + 1];
+    fpionCh.at(i).fourMom[2] = p[20 + i * 3 + 2];
+    fpionCh.at(i).fourMom[3] = sqrt(pow(fpionCh.at(i).fourMom[0], 2) +
+                                 pow(fpionCh.at(i).fourMom[1], 2) +
+                                 pow(fpionCh.at(i).fourMom[2], 2) +
                                  pow(PhysicsConstants::mPiCh, 2));
 
-    fpionCh[i].fourMomFilled = true;
+    fpionCh.at(i).fourMomFilled = true;
   }
 
   for (Int_t i = 0; i < 4; i++)
@@ -164,30 +164,30 @@ void ConstraintsOmega::IntermediateReconstruction(Double_t *p)
 
   for (Int_t i = 0; i < 4; i++)
   {
-    neutral_mom(fphoton[i].clusterParams[0],
-                fphoton[i].clusterParams[1],
-                fphoton[i].clusterParams[2],
-                fphoton[i].clusterParams[4],
+    neutral_mom(fphoton.at(i).clusterParams[0],
+                fphoton.at(i).clusterParams[1],
+                fphoton.at(i).clusterParams[2],
+                fphoton.at(i).clusterParams[4],
                 fomega.fourPos.data(),
-                fphoton[i].fourMom.data());
+                fphoton.at(i).fourMom.data());
 
-    fphoton[i].fourPos[0] = fphoton[i].clusterParams[0];
-    fphoton[i].fourPos[1] = fphoton[i].clusterParams[1];
-    fphoton[i].fourPos[2] = fphoton[i].clusterParams[2];
-    fphoton[i].fourPos[3] = fphoton[i].clusterParams[3];
+    fphoton.at(i).fourPos[0] = fphoton.at(i).clusterParams[0];
+    fphoton.at(i).fourPos[1] = fphoton.at(i).clusterParams[1];
+    fphoton.at(i).fourPos[2] = fphoton.at(i).clusterParams[2];
+    fphoton.at(i).fourPos[3] = fphoton.at(i).clusterParams[3];
 
-    fphoton[i].calculatePath(fomega.fourPos.data());
-    fphoton[i].calculateTimeOfFlightPhoton();
-    fphoton[i].SetTotalVectorPhoton();
+    fphoton.at(i).calculatePath(fomega.fourPos.data());
+    fphoton.at(i).calculateTimeOfFlightPhoton();
+    fphoton.at(i).SetTotalVectorPhoton();
 
-    fphoton[i].fourMomFilled = true;
+    fphoton.at(i).fourMomFilled = true;
   }
 
   std::vector<Int_t> bestPairingIndexNeutral, bestPairingIndexCharged;
 
-  std::vector<chargedParticle> s_pionCh = {fpionCh[0], fpionCh[1]};
-  std::vector<neutralParticle> s_photon = {fphoton[0], fphoton[1], fphoton[2], fphoton[3]},
-                               s_pionNe(2);
+  std::vector<chargedParticle> s_pionCh = {fpionCh.at(0), fpionCh.at(1)};
+  std::vector<neutralParticle> s_photon = {fphoton.at(0), fphoton.at(1), fphoton.at(2), fphoton.at(3)},
+                               s_pionNe(2, neutralParticle());
 
 #pragma omp critical
 {
@@ -196,7 +196,7 @@ void ConstraintsOmega::IntermediateReconstruction(Double_t *p)
 
   for (Int_t i = 0; i < 2; i++)
   {
-    fpionNe[i] = s_pionNe[i];
+    fpionNe.at(i) = s_pionNe.at(i);
   }
 
   fomega.total[6] = fphi.vtxPos[0];

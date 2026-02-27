@@ -4,11 +4,11 @@
 
 namespace KLOE
 {
-  class NeutralReconstruction : public pm00, public ErrorHandling::ErrorLogs
+  class NeutralReconstruction : public pm00
   {
   public:
-    NeutralReconstruction(Int_t nPhotons);
-    NeutralReconstruction() : ErrorLogs("NeutralReconstruction.log"), _nPhotons(4), _nPions(2) {};
+    NeutralReconstruction(Int_t nPhotons, ErrorHandling::ErrorLogs &logger);
+    NeutralReconstruction(ErrorHandling::ErrorLogs &logger) : _nPhotons(4), _nPions(2), _errorLogger(logger) {};
     void SetPhotonParameters(const std::vector<neutralParticle> &photons)
     {
       try
@@ -33,7 +33,7 @@ namespace KLOE
       catch (ErrorHandling::ErrorCodes &e)
       {
         std::cout << "DEBUG: Exception caught in SetPhotonParameters" << std::endl;
-        ErrorLogs::getErrLog(e);
+        LOG_EVENT(_errorLogger, e, "Exception caught in SetPhotonParameters", ErrorHandling::LogFiles::LogType::ERROR);
         return;
       }
     }
@@ -58,7 +58,7 @@ namespace KLOE
       catch (ErrorHandling::ErrorCodes &e)
       {
         std::cout << "DEBUG: Exception caught in SetChargedParameters" << std::endl;
-        ErrorLogs::getErrLog(e);
+        LOG_EVENT(_errorLogger, e, "Exception caught in SetChargedParameters", ErrorHandling::LogFiles::LogType::ERROR);
         return;
       }
     }
@@ -122,6 +122,8 @@ namespace KLOE
     std::vector<neutralParticle>
         _Photons, // Vector of photons for each event
         _Pions;   // Vector of pions for each event
+
+    ErrorHandling::ErrorLogs &_errorLogger; // Logger for error handling
 
     neutralParticle _omega; // Omega meson reconstructed from pions
 

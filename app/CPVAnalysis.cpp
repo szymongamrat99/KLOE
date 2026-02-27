@@ -8,7 +8,6 @@
 #include <AnalysisManager.h>
 #include <TROOT.h>
 
-
 #include <const.h>
 #include <boost/filesystem.hpp>
 
@@ -31,11 +30,11 @@ int main(int argc, char *argv[])
   // Check if a job list file was provided as argument
   std::string jobListFile = "";
   bool useJobListFile = false;
-  
+
   if (argc > 1)
   {
     jobListFile = argv[1];
-    
+
     // Sprawdzenie czy plik istnieje i ma prawidłową nazwę
     boost::filesystem::path jobListPath(jobListFile);
     if (!boost::filesystem::exists(jobListPath))
@@ -43,7 +42,7 @@ int main(int argc, char *argv[])
       std::cerr << "ERROR: Job list file does not exist: " << jobListFile << std::endl;
       return 1;
     }
-    
+
     // Walidacja nazwy pliku
     if (!KLOE::FileManager::ValidateJobListFilename(jobListPath.filename().string()))
     {
@@ -52,15 +51,44 @@ int main(int argc, char *argv[])
       std::cerr << "Valid types: data, all_phys, all_phys2, all_phys3" << std::endl;
       return 1;
     }
-    
+
     useJobListFile = true;
+  }
+
+  int jobNumber = -1;
+  std::string analysisType = "";
+
+  if (useJobListFile)
+  {
+    // Pobierz informacje o typie analizy z nazwy pliku
+    boost::filesystem::path jobListPath(jobListFile);
+    std::string filename = jobListPath.filename().string();
+
+    // Wyznacz fileTypeOpt z nazwy pliku
+    // Format: job_v{version}_{type}_{luminosity}_inv_pb_{number}.txt
+
+    const std::regex re(R"(job_.*_(all_phys|all_phys2|all_phys3|data)_.*_(\d+)\.txt)");
+    std::smatch match;
+
+    if (std::regex_match(filename, match, re) && match.size() > 2)
+    {
+      analysisType = match[1].str();
+      jobNumber = std::stoi(match[2].str());
+      std::cout << "Extracted analysis type: " << analysisType << std::endl;
+      std::cout << "Job number: " << jobNumber << std::endl;
+    }
+    else
+    {
+      std::cerr << "ERROR: Cannot extract job number from filename: " << filename << std::endl;
+      return 1;
+    }
   }
 
   // Set KLOE class instance
   KLOE::pm00 eventAnalysis;
   // Set logger for error logging
   TString logDirectory = Paths::base_path + Paths::logs_dir;
-  ErrorHandling::ErrorLogs logger((std::string)logDirectory);
+  ErrorHandling::ErrorLogs logger((std::string)logDirectory, jobNumber, analysisType);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Initialize utility variables
@@ -69,7 +97,7 @@ int main(int argc, char *argv[])
   // Analysis flags and settings
   ConfigManager &config = ConfigManager::getInstance();
   config.setupLogger(&logger);
-  
+
   KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();
   analysisConfig.SetupLogger(&logger);
   analysisConfig.LoadFromFile(Paths::analysisConfigPath);
@@ -114,38 +142,32 @@ int main(int argc, char *argv[])
     {
       // Wczytaj listę plików z pliku
       std::vector<std::string> fileList = KLOE::FileManager::LoadFileListFromFile(jobListFile);
-      
+
       std::cout << "Loaded " << fileList.size() << " files from job list: " << jobListFile << std::endl;
-      
+
       // Inicjalizuj TChain z listy plików
       initObj.chainInit(chain, fileList);
-      
+
       infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
       std::string infoMsg = "Initialized TChain with " + std::to_string(chain.GetEntries()) + " entries from job list.";
       logger.getLog(infoCode, infoMsg);
-      
-      // Pobierz informacje o typie analizy z nazwy pliku
-      boost::filesystem::path jobListPath(jobListFile);
-      std::string filename = jobListPath.filename().string();
-      
-      // Wyznacz fileTypeOpt z nazwy pliku
-      // Format: job_v{version}_{type}_{luminosity}_inv_pb_{number}.txt
-      if (filename.find("_data_") != std::string::npos)
+
+      if (analysisType == "data")
       {
         fileTypeOpt = Controls::FileType::DATA;
         std::cout << "Analysis type: DATA" << std::endl;
       }
-      else if (filename.find("_all_phys3_") != std::string::npos)
+      else if (analysisType == "all_phys3")
       {
         fileTypeOpt = Controls::FileType::ALL_PHYS3;
         std::cout << "Analysis type: ALL_PHYS3" << std::endl;
       }
-      else if (filename.find("_all_phys2_") != std::string::npos)
+      else if (analysisType == "all_phys2")
       {
         fileTypeOpt = Controls::FileType::ALL_PHYS2;
         std::cout << "Analysis type: ALL_PHYS2" << std::endl;
       }
-      else if (filename.find("_all_phys_") != std::string::npos)
+      else if (analysisType == "all_phys")
       {
         fileTypeOpt = Controls::FileType::ALL_PHYS;
         std::cout << "Analysis type: ALL_PHYS" << std::endl;
@@ -155,16 +177,16 @@ int main(int argc, char *argv[])
         std::cerr << "ERROR: Cannot determine analysis type from filename." << std::endl;
         return 1;
       }
-      
+
       // Wykonaj początkową analizę
       infoCode = ErrorHandling::InfoCodes::FUNC_EXECUTED;
       logger.getLog(infoCode, "Initial analysis execution from job list file.");
-      InitAnalysis_main(chain, fileTypeOpt, eventAnalysis, true, logger);
-      
+      InitAnalysis_main(chain, fileTypeOpt, eventAnalysis, true, logger, jobNumber);
+
       logger.printErrStats();
       return 0;
     }
-    catch (const std::exception& e)
+    catch (const std::exception &e)
     {
       std::cerr << "ERROR: " << e.what() << std::endl;
       ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::TREE_NOT_EXIST;
@@ -270,5 +292,6 @@ int main(int argc, char *argv[])
   }
   // -------------------------------------------------------------------
   // cfgWatcher.stop();
+  delete dataType;
   return 0;
 }

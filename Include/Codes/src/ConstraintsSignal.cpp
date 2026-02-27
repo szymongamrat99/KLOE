@@ -188,7 +188,7 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
   {
     for (Int_t j = 0; j < 5; j++)
     {
-      fphoton[i].clusterParams[j] = p[i * 5 + j];
+      fphoton.at(i).clusterParams[j] = p[i * 5 + j];
     }
   }
 
@@ -197,12 +197,12 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
 
   for (Int_t i = 0; i < 2; i++)
   {
-    fpionCh[i].fourMom[0] = p[23 + i * 3];
-    fpionCh[i].fourMom[1] = p[23 + i * 3 + 1];
-    fpionCh[i].fourMom[2] = p[23 + i * 3 + 2];
-    fpionCh[i].fourMom[3] = sqrt(pow(fpionCh[i].fourMom[0], 2) +
-                                 pow(fpionCh[i].fourMom[1], 2) +
-                                 pow(fpionCh[i].fourMom[2], 2) +
+    fpionCh.at(i).fourMom[0] = p[23 + i * 3];
+    fpionCh.at(i).fourMom[1] = p[23 + i * 3 + 1];
+    fpionCh.at(i).fourMom[2] = p[23 + i * 3 + 2];
+    fpionCh.at(i).fourMom[3] = sqrt(pow(fpionCh.at(i).fourMom[0], 2) +
+                                 pow(fpionCh.at(i).fourMom[1], 2) +
+                                 pow(fpionCh.at(i).fourMom[2], 2) +
                                  pow(PhysicsConstants::mPiCh, 2));
   }
 
@@ -219,7 +219,7 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
 
   // Setting four momentum for kaon charged
   for (Int_t i = 0; i < 4; i++)
-    fKchrec.fourMom[i] = fpionCh[0].fourMom[i] + fpionCh[1].fourMom[i];
+    fKchrec.fourMom[i] = fpionCh.at(0).fourMom[i] + fpionCh.at(1).fourMom[i];
 
   // Setting total vector for kaon charged reconstructed from pions
   fKchrec.SetLorentzVectors();
@@ -267,27 +267,27 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
 
   for (Int_t i = 0; i < 4; i++)
   {
-    neutral_mom(fphoton[i].clusterParams[0],
-                fphoton[i].clusterParams[1],
-                fphoton[i].clusterParams[2],
-                fphoton[i].clusterParams[4],
+    neutral_mom(fphoton.at(i).clusterParams[0],
+                fphoton.at(i).clusterParams[1],
+                fphoton.at(i).clusterParams[2],
+                fphoton.at(i).clusterParams[4],
                 fKnereclor.fourPos.data(),
-                fphoton[i].fourMom.data());
+                fphoton.at(i).fourMom.data());
 
-    fphoton[i].fourPos[0] = fphoton[i].clusterParams[0];
-    fphoton[i].fourPos[1] = fphoton[i].clusterParams[1];
-    fphoton[i].fourPos[2] = fphoton[i].clusterParams[2];
-    fphoton[i].fourPos[3] = fphoton[i].clusterParams[3];
+    fphoton.at(i).fourPos[0] = fphoton.at(i).clusterParams[0];
+    fphoton.at(i).fourPos[1] = fphoton.at(i).clusterParams[1];
+    fphoton.at(i).fourPos[2] = fphoton.at(i).clusterParams[2];
+    fphoton.at(i).fourPos[3] = fphoton.at(i).clusterParams[3];
 
-    fphoton[i].calculatePath(fKnereclor.fourPos.data());
-    fphoton[i].calculateTimeOfFlightPhoton();
-    fphoton[i].SetTotalVectorPhoton();
+    fphoton.at(i).calculatePath(fKnereclor.fourPos.data());
+    fphoton.at(i).calculateTimeOfFlightPhoton();
+    fphoton.at(i).SetTotalVectorPhoton();
   }
 
-  fKnerec.fourMom[0] = fphoton[0].fourMom[0] + fphoton[1].fourMom[0] + fphoton[2].fourMom[0] + fphoton[3].fourMom[0];
-  fKnerec.fourMom[1] = fphoton[0].fourMom[1] + fphoton[1].fourMom[1] + fphoton[2].fourMom[1] + fphoton[3].fourMom[1];
-  fKnerec.fourMom[2] = fphoton[0].fourMom[2] + fphoton[1].fourMom[2] + fphoton[2].fourMom[2] + fphoton[3].fourMom[2];
-  fKnerec.fourMom[3] = fphoton[0].fourMom[3] + fphoton[1].fourMom[3] + fphoton[2].fourMom[3] + fphoton[3].fourMom[3];
+  fKnerec.fourMom[0] = fphoton.at(0).fourMom[0] + fphoton.at(1).fourMom[0] + fphoton.at(2).fourMom[0] + fphoton.at(3).fourMom[0];
+  fKnerec.fourMom[1] = fphoton.at(0).fourMom[1] + fphoton.at(1).fourMom[1] + fphoton.at(2).fourMom[1] + fphoton.at(3).fourMom[1];
+  fKnerec.fourMom[2] = fphoton.at(0).fourMom[2] + fphoton.at(1).fourMom[2] + fphoton.at(2).fourMom[2] + fphoton.at(3).fourMom[2];
+  fKnerec.fourMom[3] = fphoton.at(0).fourMom[3] + fphoton.at(1).fourMom[3] + fphoton.at(2).fourMom[3] + fphoton.at(3).fourMom[3];
 
   fKnerec.fourPos[0] = fKnereclor.fourPos[0];
   fKnerec.fourPos[1] = fKnereclor.fourPos[1];
@@ -304,12 +304,12 @@ Double_t ConstraintsSignal::FourMomConsvLAB(Double_t *x, Double_t *p)
   IntermediateReconstruction(p);
 
   return (fphi.fourMom[_chosen4MomComponent] -
-          fpionCh[0].fourMom[_chosen4MomComponent] -
-          fpionCh[1].fourMom[_chosen4MomComponent] -
-          fphoton[0].fourMom[_chosen4MomComponent] -
-          fphoton[1].fourMom[_chosen4MomComponent] -
-          fphoton[2].fourMom[_chosen4MomComponent] -
-          fphoton[3].fourMom[_chosen4MomComponent]);
+          fpionCh.at(0).fourMom[_chosen4MomComponent] -
+          fpionCh.at(1).fourMom[_chosen4MomComponent] -
+          fphoton.at(0).fourMom[_chosen4MomComponent] -
+          fphoton.at(1).fourMom[_chosen4MomComponent] -
+          fphoton.at(2).fourMom[_chosen4MomComponent] -
+          fphoton.at(3).fourMom[_chosen4MomComponent]);
 }
 
 Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
@@ -317,7 +317,7 @@ Double_t ConstraintsSignal::PhotonPathConsvLAB(Double_t *x, Double_t *p)
   // SetParameters(p);
   IntermediateReconstruction(p);
 
-  return fphoton[_chosenPhoton].fourPos[3] - fKnerec.lifetimeLAB - fphoton[_chosenPhoton].timeOfFlight;
+  return fphoton.at(_chosenPhoton).fourPos[3] - fKnerec.lifetimeLAB - fphoton.at(_chosenPhoton).timeOfFlight;
 }
 
 Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)

@@ -1,8 +1,0 @@
-# Example job list file for KLOE analysis
-# Format: job_v1_data_5000_inv_pb_001.txt
-#
-# This file contains absolute paths to ROOT files for the analysis.
-# One path per line. Empty lines and lines starting with # are ignored.
-
-/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/prod2root_mk0_all_phys_37679_v2.root
-/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/prod2root_mk0_all_phys_43904_v2.root

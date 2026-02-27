@@ -94,8 +94,8 @@ namespace KLOE
 
     ConstraintsTrilateration(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger) {};
 
-    neutralParticle fphoton[4];
-    chargedParticle fpionCh[2];
+    std::array<neutralParticle, 4> fphoton;
+    std::array<chargedParticle, 2> fpionCh;
     kaonNeutral fKchrec, fKchboost, fKnerec, fKnerecCMPhi, fKnereclor;
     phiMeson fphi;
     std::vector<Float_t> fip;

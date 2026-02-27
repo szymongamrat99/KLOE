@@ -27,9 +27,9 @@ namespace Paths
   std::string kloedataPath = getenv("KLOE_DBV26_DK0");
   std::string kloeMCPath = getenv("KLOE_DBV26_MK0");
   std::string workdirPath = getenv("WORKDIR");
-  std::string pdgConstFilePath = (std::string)getenv("PDGAPI") + "/pdg_const.json";
-  std::string pdgCachePath = (std::string)getenv("PDGAPI") + "/pdg_cache";
-  std::string propertiesPath = getenv("PROPERTIESKLOE");
+  std::string propertiesPath = workdirPath + "/KLOE/Subanalysis/Properties";
+  std::string pdgConstFilePath = propertiesPath + "/pdg_api/pdg_const.json";
+  std::string pdgCachePath = propertiesPath + "/pdg_api/pdg_cache";
 
   std::string chainDataFiles = kloedataPath + "/*.root";
   std::string chainMCFiles = kloeMCPath + "/*.root";

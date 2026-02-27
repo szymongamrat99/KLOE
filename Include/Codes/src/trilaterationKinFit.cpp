@@ -8,39 +8,8 @@
 
 namespace KLOE
 {
-  TrilaterationReconstructionKinFit::TrilaterationReconstructionKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, Int_t jmin, Int_t jmax, ErrorHandling::ErrorLogs &logger) : KinFitter("Trilateration", N_free, N_const, M, 0, loopcount, chiSqrStep, logger), _jmin(jmin), _jmax(jmax)
+  TrilaterationReconstructionKinFit::TrilaterationReconstructionKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, Int_t jmin, Int_t jmax, ErrorHandling::ErrorLogs &logger) : KinFitter("Trilateration", N_free, N_const, M, 0, loopcount, chiSqrStep, logger), _jmin(jmin), _jmax(jmax), _V(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _V_min(N_free + N_const, N_free + N_const), _Aux(M, M), _V_invert(N_free, N_free), _V_init(N_free + N_const, N_free + N_const), _X(N_free + N_const), _C(M), _X_final(N_free + N_const), _L(M), _CORR(N_free + N_const), _X_init(N_free + N_const), _X_min(N_free + N_const), _C_min(M), _L_min(M), _C_aux(M), _L_aux(M), _X_init_min(N_free + N_const), _X_init_aux(N_free + N_const), _Param(N_free + N_const), _Errors(N_free + N_const), _chargedVtxRec(std::make_unique<ChargedVtxRec<Float_t, Int_t>>(logger)), _recMode(pm00::StringToTrilaterationCode(_config.getProperty<std::string>("flags.trilaterationReconstructionMode")))
   {
-    _chargedVtxRec = new ChargedVtxRec<Float_t, Int_t>(logger);
-
-    _V.ResizeTo(N_free + N_const, N_free + N_const),
-        _D.ResizeTo(M, N_free + N_const),
-        _D_T.ResizeTo(N_free + N_const, M),
-        _V_final.ResizeTo(N_free + N_const, N_free + N_const),
-        _V_aux.ResizeTo(N_free + N_const, N_free + N_const),
-        _V_min.ResizeTo(N_free + N_const, N_free + N_const),
-        _Aux.ResizeTo(M, M),
-        _V_invert.ResizeTo(N_free, N_free),
-        _V_init.ResizeTo(N_free + N_const, N_free + N_const);
-
-    _X.ResizeTo(N_free + N_const);
-    _C.ResizeTo(M);
-    _X_final.ResizeTo(N_free + N_const);
-    _L.ResizeTo(M);
-    _CORR.ResizeTo(N_free + N_const);
-    _X_init.ResizeTo(N_free + N_const);
-    _X_min.ResizeTo(N_free + N_const);
-    _C_min.ResizeTo(M);
-    _L_min.ResizeTo(M);
-    _C_aux.ResizeTo(M);
-    _L_aux.ResizeTo(M);
-    _X_init_min.ResizeTo(N_free + N_const);
-    _X_init_aux.ResizeTo(N_free + N_const);
-
-    _Param.resize(N_free + N_const);
-    _Errors.resize(N_free + N_const);
-
-    _recMode = pm00::StringToTrilaterationCode(_config.getProperty<std::string>("flags.trilaterationReconstructionMode"));
-
     if (_recMode == TrilaterationCode::TWO_PI0)
     {
       _selected.resize(4);
@@ -108,7 +77,7 @@ namespace KLOE
     Float_t neu_vtx[2][4] = {};
     Float_t dist_tmp[2] = {0.};
 
-    _CHISQRMIN = 999999.;
+    _CHISQRMIN = TMath::Limits<Double_t>::Max();
     _isConverged = 0;
 
     Int_t chosenSolution = -1;
@@ -209,6 +178,8 @@ namespace KLOE
 
               CHISQRTMP = KinFitter::FitFunction(Tcorr);
 
+              if (std::isnan(CHISQRTMP) || std::isinf(CHISQRTMP))
+                continue;
 
               KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _ipFitTri, _photonFitTri, _KnerecFitTri, _PhiFitTri);
 

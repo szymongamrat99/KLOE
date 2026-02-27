@@ -49,10 +49,17 @@ namespace KLOE
     Bool_t
         _isConverged;
 
+    std::array<std::vector<Float_t>, 2>
+        _trkFit,
+        _trackParameters,
+        _trackParametersErr,
+        _Pi0OmegaFit;
+
+    std::array<std::vector<Float_t>, 4>
+        _cluster,
+        _photonFit;
+
     std::vector<Float_t>
-        _trackParameters[2],
-        _trackParametersErr[2],
-        _cluster[4],
         _omegaVtx,
         _omegaVtxErr,
         _bhabha_mom,
@@ -63,10 +70,7 @@ namespace KLOE
         _Errors,
         _OmegaFit,
         _ipFit,
-        _Pi0OmegaFit[2],
-        _PhiMomFit,
-        _photonFit[4],
-        _trkFit[2];
+        _PhiMomFit;
 
     Int_t
         _offset;

@@ -36,7 +36,8 @@ public:
                   const std::string &outputDir = "output",
                   const std::string &logFile = "file_weights.log",
                   Controls::FileType fileType = Controls::FileType::DATA,
-                  bool singleFile = false);
+                  bool singleFile = false,
+                  Int_t currentFileNumber = 1);
 
   ~SplitFileWriter();
 
@@ -44,12 +45,12 @@ public:
             const std::map<std::string, Float_t> &floatVars,
             const std::map<std::string, std::vector<Int_t>> &intArrays,
             const std::map<std::string, std::vector<Float_t>> &floatArrays);
-  
+
   void Close();
 
   // Funkcja do aktualizacji luminozności z bieżącego pliku wejściowego
   void AddInputFileLuminosity(const std::string &inputFileName, Double_t luminosityPerEvent);
-  
+
   // Ustawienie aktualnie przetwarzanego pliku wejściowego
   void SetCurrentInputFile(const std::string &inputFileName, Long64_t fileEvents, Double_t luminosityPerEvent);
 
@@ -86,7 +87,7 @@ private:
   std::string _currentInputFile;
   Long64_t _currentInputFileEvents;
   Double_t _currentLuminosityPerEvent;
-  std::map<std::string, Double_t> _inputFilesLuminosity;  // Mapa: nazwa pliku wejściowego -> jego wkład do bieżącego pliku wyjściowego [nb^-1]
+  std::map<std::string, Double_t> _inputFilesLuminosity; // Mapa: nazwa pliku wejściowego -> jego wkład do bieżącego pliku wyjściowego [nb^-1]
   Double_t _totalLuminosityInCurrentFile;
 
   // Tracking all generated files for final summary
@@ -98,7 +99,6 @@ private:
   std::map<std::string, Float_t> _floatVars;                // Zmienne Float_t
   std::map<std::string, std::vector<Int_t>> _intArrays;     // Tablice Int_t
   std::map<std::string, std::vector<Float_t>> _floatArrays; // Tablice Float_t
-
 };
 
 #endif // !SPLITFILEWRITER_H

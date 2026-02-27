@@ -13,13 +13,13 @@ using namespace KLOE;
 KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int_t M_active, Int_t loopcount, Double_t chisqrstep, ErrorHandling::ErrorLogs &logger) : _N_free(N_free), _N_const(N_const), _M(M), _M_act(M_active), _loopcount(loopcount), _jmin(0), _jmax(0), _CHISQRSTEP(chisqrstep), _logger(logger), _mode(mode), _V(N_free + N_const, N_free + N_const), _V_T(N_free + N_const, N_free + N_const), _V_init(N_free + N_const, N_free + N_const), _V_invert(N_free + N_const, N_free + N_const), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _Aux(M, M), _C(M), _L(M), _CORR(N_free + N_const), _X(N_free + N_const), _X_init(N_free + N_const), _X_final(N_free + N_const), _X_init_aux(N_free + N_const), _C_aux(M), _L_aux(M)
 {
   if (_mode == "Omega")
-    _objOmega = new ConstraintsOmega(logger);
+    _objOmega = std::make_unique<ConstraintsOmega>(logger);
   else if (_mode == "SignalGlobal")
-    _objSignal = new ConstraintsSignal(logger);
+    _objSignal = std::make_unique<ConstraintsSignal>(logger);
   else if (_mode == "Trilateration")
-    _objTrilateration = new ConstraintsTrilateration(logger);
+    _objTrilateration = std::make_unique<ConstraintsTrilateration>(logger);
   else if (_mode == "Test")
-    _baseObj = new ConstraintsTest(logger);
+    _baseObj = std::make_unique<ConstraintsTest>(logger);
 
   _D_real.ResizeTo(M, N_free);
   _D_T_real.ResizeTo(N_free, M);
@@ -38,26 +38,25 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
 {
 
   if (_mode == "Omega")
-    _objOmega = new ConstraintsOmega(logger);
+    _objOmega = std::make_unique<ConstraintsOmega>(logger);
   else if (_mode == "SignalGlobal")
-    _objSignal = new ConstraintsSignal(logger);
+    _objSignal = std::make_unique<ConstraintsSignal>(logger);
   else if (_mode == "Trilateration")
-    _objTrilateration = new ConstraintsTrilateration(logger);
+    _objTrilateration = std::make_unique<ConstraintsTrilateration>(logger);
   else if (_mode == "Test")
-    _baseObj = new ConstraintsTest(logger);
+    _baseObj = std::make_unique<ConstraintsTest>(logger);
 
   _D_real.ResizeTo(M, N_free);
   _D_T_real.ResizeTo(N_free, M);
 
   _Aux_real.ResizeTo(M, M);
   _CORR_real.ResizeTo(N_free);
-
-  _Aux.Zero();
-  _D.Zero();
-  _D_T.Zero();
-  _C.Zero();
-  _L.Zero();
 };
+
+KinFitter::~KinFitter()
+{
+  // No need to manually delete unique_ptr objects
+}
 
 Int_t KinFitter::ParameterInitialization(Float_t *Params, Float_t *Errors)
 {
@@ -149,30 +148,31 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       if (_X(19) < 0)
         _X(19) = MIN_CLU_ENE;
 
-      Double_t *tempParams = new Double_t[_X.GetNoElements()];
+      std::vector<Double_t> tempParams(_X.GetNoElements());
+      std::copy(_X.GetMatrixArray(), _X.GetMatrixArray() + _X.GetNoElements(), tempParams.begin());
 
-      std::copy(_X.GetMatrixArray(), _X.GetMatrixArray() + _X.GetNoElements(), tempParams);
-
-      std::vector<TF1 *> constraint;
+      std::vector<std::unique_ptr<TF1>> constraint;
 
       for (const auto &func_ptr : _constraints)
       {
         // Tworzymy NOWY, PRYWATNY obiekt TF1 dla tego wątku
-        constraint.push_back(new TF1(*func_ptr));
+        constraint.push_back(std::make_unique<TF1>(*func_ptr));
       }
 
       for (Int_t l = 0; l < _M; l++)
       {
-        constraint[l]->SetParameters(tempParams);
-        _C(l) = constraint[l]->EvalPar(0, tempParams);
+        constraint[l]->SetParameters(tempParams.data());
+        _C(l) = constraint[l]->EvalPar(0, tempParams.data());
         for (Int_t m = 0; m < _N_free + _N_const; m++)
         {
+          Double_t auxVal = 0.;
+
           if (m < _N_free)
           {
-            Double_t auxVal = constraint[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
+            auxVal = constraint[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
 
-            if (std::isnan(auxVal))
-              throw ErrorHandling::ErrorCodes::NAN_VAL;
+            // if (std::isnan(auxVal))
+            //   throw ErrorHandling::ErrorCodes::NAN_VAL;
 
             _D(l, m) = auxVal;
           }
@@ -180,12 +180,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
             _D(l, m) = 0;
         }
       }
-
-      for (const auto &func_ptr : constraint)
-      {
-        func_ptr->Delete();
-      }
-      delete[] tempParams;
 
       _D_T.Transpose(_D);
 
@@ -309,13 +303,13 @@ Int_t KinFitter::ConstraintSet(std::vector<std::string> ConstSet)
                    ::tolower);
 
     if (_mode == "SignalGlobal")
-      _constraints.push_back(new TF1(ConstSet[i].c_str(), _objSignal, constraintMapSignal[ConstSet[i]], 0, 1, _N_free + _N_const));
+      _constraints.push_back(std::make_unique<TF1>(ConstSet[i].c_str(), _objSignal.get(), constraintMapSignal[ConstSet[i]], 0, 1, _N_free + _N_const));
     else if (_mode == "Trilateration")
-      _constraints.push_back(new TF1(ConstSet[i].c_str(), _objTrilateration, constraintMapTrilateration[ConstSet[i]], 0, 1, _N_free + _N_const));
+      _constraints.push_back(std::make_unique<TF1>(ConstSet[i].c_str(), _objTrilateration.get(), constraintMapTrilateration[ConstSet[i]], 0, 1, _N_free + _N_const));
     else if (_mode == "Omega")
-      _constraints.push_back(new TF1(ConstSet[i].c_str(), _objOmega, constraintMapOmega[ConstSet[i]], 0, 1, _N_free + _N_const));
+      _constraints.push_back(std::make_unique<TF1>(ConstSet[i].c_str(), _objOmega.get(), constraintMapOmega[ConstSet[i]], 0, 1, _N_free + _N_const));
     else
-      _constraints.push_back(new TF1(ConstSet[i].c_str(), _baseObj, constraintMap[ConstSet[i]], 0, 1, _N_free + _N_const));
+      _constraints.push_back(std::make_unique<TF1>(ConstSet[i].c_str(), _baseObj.get(), constraintMap[ConstSet[i]], 0, 1, _N_free + _N_const));
   }
 
   return 0;
