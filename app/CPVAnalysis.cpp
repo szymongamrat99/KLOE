@@ -55,11 +55,40 @@ int main(int argc, char *argv[])
     useJobListFile = true;
   }
 
+  int jobNumber = -1;
+  std::string analysisType = "";
+
+  if (useJobListFile)
+  {
+    // Pobierz informacje o typie analizy z nazwy pliku
+    boost::filesystem::path jobListPath(jobListFile);
+    std::string filename = jobListPath.filename().string();
+
+    // Wyznacz fileTypeOpt z nazwy pliku
+    // Format: job_v{version}_{type}_{luminosity}_inv_pb_{number}.txt
+
+    const std::regex re(R"(job_.*_(all_phys|all_phys2|all_phys3|data)_.*_(\d+)\.txt)");
+    std::smatch match;
+
+    if (std::regex_match(filename, match, re) && match.size() > 2)
+    {
+      analysisType = match[1].str();
+      jobNumber = std::stoi(match[2].str());
+      std::cout << "Extracted analysis type: " << analysisType << std::endl;
+      std::cout << "Job number: " << jobNumber << std::endl;
+    }
+    else
+    {
+      std::cerr << "ERROR: Cannot extract job number from filename: " << filename << std::endl;
+      return 1;
+    }
+  }
+
   // Set KLOE class instance
   KLOE::pm00 eventAnalysis;
   // Set logger for error logging
   TString logDirectory = Paths::base_path + Paths::logs_dir;
-  ErrorHandling::ErrorLogs logger((std::string)logDirectory);
+  ErrorHandling::ErrorLogs logger((std::string)logDirectory, jobNumber, analysisType);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Initialize utility variables
@@ -123,44 +152,22 @@ int main(int argc, char *argv[])
       std::string infoMsg = "Initialized TChain with " + std::to_string(chain.GetEntries()) + " entries from job list.";
       logger.getLog(infoCode, infoMsg);
 
-      // Pobierz informacje o typie analizy z nazwy pliku
-      boost::filesystem::path jobListPath(jobListFile);
-      std::string filename = jobListPath.filename().string();
-
-      // Wyznacz fileTypeOpt z nazwy pliku
-      // Format: job_v{version}_{type}_{luminosity}_inv_pb_{number}.txt
-
-      const std::regex re(R"(job_.*_(\d+)\.txt$)");
-      std::smatch match;
-      int jobNumber = -1;
-
-      if (std::regex_match(filename, match, re) && match.size() > 1)
-      {
-        jobNumber = std::stoi(match[1].str());
-        std::cout << "Job number: " << jobNumber << std::endl;
-      }
-      else
-      {
-        std::cerr << "ERROR: Cannot extract job number from filename: " << filename << std::endl;
-        return 1;
-      }
-
-      if (filename.find("_data_") != std::string::npos)
+      if (analysisType == "data")
       {
         fileTypeOpt = Controls::FileType::DATA;
         std::cout << "Analysis type: DATA" << std::endl;
       }
-      else if (filename.find("_all_phys3_") != std::string::npos)
+      else if (analysisType == "all_phys3")
       {
         fileTypeOpt = Controls::FileType::ALL_PHYS3;
         std::cout << "Analysis type: ALL_PHYS3" << std::endl;
       }
-      else if (filename.find("_all_phys2_") != std::string::npos)
+      else if (analysisType == "all_phys2")
       {
         fileTypeOpt = Controls::FileType::ALL_PHYS2;
         std::cout << "Analysis type: ALL_PHYS2" << std::endl;
       }
-      else if (filename.find("_all_phys_") != std::string::npos)
+      else if (analysisType == "all_phys")
       {
         fileTypeOpt = Controls::FileType::ALL_PHYS;
         std::cout << "Analysis type: ALL_PHYS" << std::endl;

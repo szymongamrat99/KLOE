@@ -376,7 +376,7 @@ namespace ErrorHandling
 
   public:
     // Constructor
-    ErrorLogs(const std::string &logDirectory = "") : _logDirectory(logDirectory)
+    ErrorLogs(const std::string &logDirectory = "", const Int_t jobNum = 0, const std::string jobType = "") : _logDirectory(logDirectory)
     {
       if (_logDirectory.empty())
       {
@@ -384,7 +384,15 @@ namespace ErrorHandling
         return;
       }
 
-      _currentLogDir = _createDatedDir(); /*!< Create a directory with the current date */
+
+      if (jobNum <= 0)
+      {
+        _currentLogDir = _createDatedDir(); /*!< Create a directory with the current date */
+      }
+      else
+      {
+        _currentLogDir = _createDatedDir() + jobType + "/" + std::to_string(jobNum) + "/"; /*!< Create a directory for a given job number and type */
+      }
 
       // Create the directory if it does not exist
       if (!boost::filesystem::exists(_currentLogDir))
