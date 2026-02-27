@@ -23,3 +23,4 @@ Subanalysis/Properties/histogram_conf/
 Subanalysis/Properties/pdg_api/
 Subanalysis/Properties/schemas/
 *.txt
+.vscode/
