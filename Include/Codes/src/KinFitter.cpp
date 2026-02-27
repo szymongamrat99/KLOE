@@ -264,8 +264,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
   _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
   _V = _V_final;
 
-  std::cout << "Final chi2: " << _CHISQR << std::endl;
-
   return _CHISQRTMP;
 };
 
