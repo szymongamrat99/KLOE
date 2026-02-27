@@ -136,7 +136,7 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
 
   fitter = new KLOE::TripleGaussFitter();
   doubleFitter = new KLOE::DoublGaussFitter();
-  neutReconst = new KLOE::NeutralReconstruction(4);
+  neutReconst = new KLOE::NeutralReconstruction(4, logger);
 
   // Create canvases
   for (const auto &config : histogramConfigs1D)

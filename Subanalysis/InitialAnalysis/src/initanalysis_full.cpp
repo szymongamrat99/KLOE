@@ -239,7 +239,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   // -------------------------------------------------------------
 
   // Initialization of Neutral part of decay reconstruction class
-  KLOE::NeutralReconstruction neutRec;
+  KLOE::NeutralReconstruction neutRec(logger);
 
   if (hypoCode == KLOE::HypothesisCode::SIGNAL ||
       hypoCode == KLOE::HypothesisCode::OMEGAPI)

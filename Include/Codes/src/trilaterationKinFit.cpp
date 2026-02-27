@@ -77,7 +77,7 @@ namespace KLOE
     Float_t neu_vtx[2][4] = {};
     Float_t dist_tmp[2] = {0.};
 
-    _CHISQRMIN = 999999.;
+    _CHISQRMIN = TMath::Limits<Double_t>::Max();
     _isConverged = 0;
 
     Int_t chosenSolution = -1;
@@ -178,6 +178,8 @@ namespace KLOE
 
               CHISQRTMP = KinFitter::FitFunction(Tcorr);
 
+              if (std::isnan(CHISQRTMP) || std::isinf(CHISQRTMP))
+                continue;
 
               KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _ipFitTri, _photonFitTri, _KnerecFitTri, _PhiFitTri);
 

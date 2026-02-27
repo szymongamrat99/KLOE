@@ -171,8 +171,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
           {
             auxVal = constraint[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
 
-            if (std::isnan(auxVal))
-              throw ErrorHandling::ErrorCodes::NAN_VAL;
+            // if (std::isnan(auxVal))
+            //   throw ErrorHandling::ErrorCodes::NAN_VAL;
 
             _D(l, m) = auxVal;
           }
@@ -263,6 +263,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
   _V = _V_final;
+
+  std::cout << "Final chi2: " << _CHISQR << std::endl;
 
   return _CHISQRTMP;
 };

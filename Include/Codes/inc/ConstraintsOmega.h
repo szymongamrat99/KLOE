@@ -117,10 +117,10 @@ namespace KLOE
     phiMeson fphi;
     std::vector<Float_t> fip = {0., 0., 0.}; /*!< Interaction point */
 
-    ConstraintsOmega(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger) {};
+    ConstraintsOmega(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger), neutRec(logger) {};
     
     void IntermediateReconstruction(Double_t *p);
-
+      
     /**
      * @brief A method used to pair the photons in an event. Needed to get omega and neutral pions' parameters.
      */

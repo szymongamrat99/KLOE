@@ -2,7 +2,7 @@
 
 namespace KLOE
 {
-  NeutralReconstruction::NeutralReconstruction(Int_t nPhotons) : _nPhotons(nPhotons), _nPions(nPhotons / 2.), ErrorLogs("NeutralReconstruction.log")
+  NeutralReconstruction::NeutralReconstruction(Int_t nPhotons, ErrorHandling::ErrorLogs &logger) : _nPhotons(nPhotons), _nPions(nPhotons / 2.), _errorLogger(logger)
   {
     try
     {
