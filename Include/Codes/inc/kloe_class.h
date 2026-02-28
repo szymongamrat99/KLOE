@@ -479,7 +479,7 @@ namespace KLOE
      * @param arr std::vector<Int_t> where the elements to check are stored
      * @returns The map<Int_t, Int_t> how many times each element is repeated.
      */
-    std::map<Int_t, Int_t> CountRepeatingElements(std::vector<Int_t> &arr);
+    std::unordered_map<Int_t, Int_t> CountRepeatingElements(std::vector<Int_t> &arr);
 
     /**
      * @brief Method check the equality of two tables up to the given size. Equality means, that all the elements are the same for both tables, order does not matter.
