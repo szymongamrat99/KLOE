@@ -831,4 +831,40 @@ namespace Utils
     }
   }
 
+  void JsonFieldLookupString(nlohmann::json &jsonObj, const std::string fieldPath, std::string &value, ErrorHandling::ErrorLogs &logger)
+  {
+    std::string pointerString = "/" + fieldPath;
+
+    try
+    {
+      value = jsonObj.at(nlohmann::json::json_pointer(pointerString)).get<std::string>();
+      ErrorHandling::InfoCodes infoCode = ErrorHandling::InfoCodes::VARIABLES_INITIALIZED;
+      logger.getLog(infoCode, Form("Successfully accessed JSON field: %s. Value: %s", fieldPath.c_str(), value.c_str()));
+    }
+    catch (const nlohmann::json::out_of_range &e)
+    {
+      ErrorHandling::ErrorCodes errorCode = ErrorHandling::ErrorCodes::INITIALIZATION_FAILED;
+      std::string logMessage = Form("Failed to access JSON field: %s. Error: %s", fieldPath.c_str(), e.what());
+      logger.getErrLog(errorCode, logMessage);
+    }
+  }
+
+  void JsonFieldLookupBool(nlohmann::json &jsonObj, const std::string fieldPath, bool &value, ErrorHandling::ErrorLogs &logger)
+  {
+    std::string pointerString = "/" + fieldPath;
+
+    try
+    {
+      value = jsonObj.at(nlohmann::json::json_pointer(pointerString)).get<bool>();
+      ErrorHandling::InfoCodes infoCode = ErrorHandling::InfoCodes::VARIABLES_INITIALIZED;
+      logger.getLog(infoCode, Form("Successfully accessed JSON field: %s. Value: %s", fieldPath.c_str(), value ? "true" : "false"));
+    }
+    catch (const nlohmann::json::out_of_range &e)
+    {
+      ErrorHandling::ErrorCodes errorCode = ErrorHandling::ErrorCodes::INITIALIZATION_FAILED;
+      std::string logMessage = Form("Failed to access JSON field: %s. Error: %s", fieldPath.c_str(), e.what());
+      logger.getErrLog(errorCode, logMessage);
+    }
+  }
+
 }
