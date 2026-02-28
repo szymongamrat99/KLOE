@@ -103,7 +103,8 @@ int main(int argc, char *argv[])
   analysisConfig.LoadFromFile(Paths::analysisConfigPath);
   // -------------------------------------------------------------------
   // Set tree name
-  const std::string generalTreeName = Utils::properties["variables"]["tree"]["treename"]["general"];
+  std::string generalTreeName = "";
+  Utils::JsonFieldLookupString(Utils::properties, "variables/tree/treename/general", generalTreeName, logger);
   // -------------------------------------------------------------------
   // Set Menu instance
   Controls::Menu mainMenu(10); // For analysis options
@@ -125,7 +126,8 @@ int main(int argc, char *argv[])
   Controls::FileType fileTypeOpt;
 
   // Set flag for initial analysis
-  Bool_t initialAnalysisExecution = Utils::properties["flags"]["initialAnalysisExec"]["flag"];
+  Bool_t initialAnalysisExecution = false;
+  Utils::JsonFieldLookupBool(Utils::properties, "flags/initialAnalysisExec/flag", initialAnalysisExecution, logger);
 
   // Initialize and fill the TChain object
   TChain chain(generalTreeName.c_str());
