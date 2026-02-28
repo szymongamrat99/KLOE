@@ -391,7 +391,7 @@ namespace ErrorHandling
       }
       else
       {
-        _currentLogDir = _createDatedDir() + jobType + "/" + std::to_string(jobNum) + "/"; /*!< Create a directory for a given job number and type */
+        _currentLogDir = jobType + "/" + std::to_string(jobNum) + "/"; /*!< Create a directory for a given job number and type */
       }
 
       // Create the directory if it does not exist

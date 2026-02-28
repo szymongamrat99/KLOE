@@ -60,7 +60,7 @@ namespace KLOE
   {
     F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {};
     std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
-    std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
+    std::unordered_map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     pm00::Clear1DArray(3, vtaken);
 
     vtaken[0] = -1;
@@ -183,7 +183,7 @@ namespace KLOE
   {
     F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {};
     std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
-    std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
+    std::unordered_map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     vtaken.clear();
     vtaken.resize(3);
 
@@ -314,7 +314,7 @@ namespace KLOE
   {
     F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {}, cyl_vol[2] = {};
     std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
-    std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
+    std::unordered_map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     pm00::Clear1DArray(3, vtaken);
     vtaken[0] = -1;
     vtaken[1] = -1;
@@ -394,7 +394,7 @@ namespace KLOE
   {
     F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {}, cyl_vol[2] = {};
     std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
-    std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
+    std::unordered_map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     vtaken.clear();
     vtaken.resize(3);
     vtaken[0] = -1;
@@ -496,7 +496,7 @@ namespace KLOE
   {
     F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {}, cyl_vol[2] = {}, distCyl = 999.;
     std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
-    std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
+    std::unordered_map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     pm00::Clear1DArray(3, vtaken);
     vtaken[0] = -1;
     vtaken[1] = -1;
@@ -560,7 +560,7 @@ namespace KLOE
   {
     F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {}, cyl_vol[2] = {}, distCyl = 999.;
     std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
-    std::map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
+    std::unordered_map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     vtaken.clear();
     vtaken.resize(3);
     vtaken[0] = -1;

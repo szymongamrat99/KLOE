@@ -390,7 +390,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       clusterMC;
 
   std::vector<Int_t> ivTmp;
-  std::map<Int_t, Int_t> mapTmp;
+  std::unordered_map<Int_t, Int_t> mapTmp;
 
   // Error codes for different hypotheses
   std::map<KLOE::HypothesisCode, ErrorHandling::ErrorCodes> hypoMap;
