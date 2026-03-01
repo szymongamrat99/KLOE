@@ -474,6 +474,10 @@ int main()
     std::cout << "Fit pmpm successful: Re = " << func_pmpm_norm->GetParameter(0) << ", Chi2: " << fitResult_pmpm->Chi2() << std::endl;
   else
     std::cout << "Fit pmpm failed!" << std::endl;
+  
+  TH2D *hResiduals2D_00pm = (TH2D *)hist_00pm2D_base->Clone("hResiduals2D_00pm");
+  TH2D *hResiduals2D_pm00 = (TH2D *)hist_pm002D_base->Clone("hResiduals2D_pm00");
+  TH2D *hResiduals2D_pmpm = (TH2D *)hist_pmpm2D_base->Clone("hResiduals2D_pmpm");
 
   TH1D *hResiduals_00pm = new TH1D("hResiduals_00pm", "Residuals (00pm) (Data-Fit)/#sigma;Residual;Counts", 120, -6, 6);
   TH1D *hResiduals_pm00 = new TH1D("hResiduals_pm00", "Residuals (pm00) (Data-Fit)/#sigma;Residual;Counts", 120, -6, 6);
@@ -483,7 +487,7 @@ int main()
   hResiduals_pm00->Sumw2();
   hResiduals_pmpm->Sumw2();
 
-  auto fillResiduals2D = [&](TH2 *hist2D, TH2 *hist2DAux, TF2 *func, TH1D *outHist)
+  auto fillResiduals2D = [&](TH2 *hist2D, TH2 *hist2DAux, TF2 *func, TH1D *outHist, TH2D *outResiduals2D)
   {
     if (!hist2D || !func || !outHist)
       return;
@@ -519,6 +523,8 @@ int main()
         const double resid = (err > 0) ? (data - fit) / err : 0.0;
 
         outHist->Fill(resid);
+
+        outResiduals2D->SetBinContent(ix, iy, resid);
       }
     }
   };
@@ -620,9 +626,9 @@ int main()
     }
   };
 
-  fillResiduals2D(hist_00pm2D_base, hist_00pm2D_base_nw, func_00pm_norm, hResiduals_00pm);
-  fillResiduals2D(hist_pm002D_base, hist_pm002D_base_nw, func_pm00_norm, hResiduals_pm00);
-  fillResiduals2D(hist_pmpm2D_base, hist_pmpm2D_base_nw, func_pmpm_norm, hResiduals_pmpm);
+  fillResiduals2D(hist_00pm2D_base, hist_00pm2D_base_nw, func_00pm_norm, hResiduals_00pm, hResiduals2D_00pm);
+  fillResiduals2D(hist_pm002D_base, hist_pm002D_base_nw, func_pm00_norm, hResiduals_pm00, hResiduals2D_pm00);
+  fillResiduals2D(hist_pmpm2D_base, hist_pmpm2D_base_nw, func_pmpm_norm, hResiduals_pmpm, hResiduals2D_pmpm);
 
   gStyle->SetOptStat(1111); // Entries, Mean, RMS (Entries będą widoczne)
   gStyle->SetOptFit(1);
@@ -671,13 +677,23 @@ int main()
   }
   cRespmpm->SaveAs(Form(imgFolderPath + "/residuals_pmpm_%s.svg", maxEventsFile.Data()));
 
-  const std::vector<double> slicePositions = buildSlicePositions(0.0, 300.0, 10.0);
-  plotSlicesWithResiduals(hist_00pm2D_base, func_00pm_norm, "00pm", true, slicePositions, 4, 4);
-  plotSlicesWithResiduals(hist_00pm2D_base, func_00pm_norm, "00pm", false, slicePositions, 4, 4);
-  plotSlicesWithResiduals(hist_pm002D_base, func_pm00_norm, "pm00", true, slicePositions, 4, 4);
-  plotSlicesWithResiduals(hist_pm002D_base, func_pm00_norm, "pm00", false, slicePositions, 4, 4);
-  plotSlicesWithResiduals(hist_pmpm2D_base, func_pmpm_norm, "pmpm", true, slicePositions, 4, 4);
-  plotSlicesWithResiduals(hist_pmpm2D_base, func_pmpm_norm, "pmpm", false, slicePositions, 4, 4);
+  TCanvas *cRes2D_00pm = new TCanvas("cRes2D_00pm", "Residuals 2D 00pm", 800, 600);
+  hResiduals2D_00pm->GetXaxis()->SetRangeUser(0, 20.0);
+  hResiduals2D_00pm->GetYaxis()->SetRangeUser(0, 20.0);
+  hResiduals2D_00pm->Draw("COLZ");
+  cRes2D_00pm->SaveAs(Form(imgFolderPath + "/residuals2D_00pm_%s.svg", maxEventsFile.Data()));
+
+  TCanvas *cRes2D_pm00 = new TCanvas("cRes2D_pm00", "Residuals 2D pm00", 800, 600);
+  hResiduals2D_pm00->GetXaxis()->SetRangeUser(0, 20.0);
+  hResiduals2D_pm00->GetYaxis()->SetRangeUser(0, 20.0);
+  hResiduals2D_pm00->Draw("COLZ");
+  cRes2D_pm00->SaveAs(Form(imgFolderPath + "/residuals2D_pm00_%s.svg", maxEventsFile.Data()));
+
+  TCanvas *cRes2D_pmpm = new TCanvas("cRes2D_pmpm", "Residuals 2D pmpm", 800, 600);
+  hResiduals2D_pmpm->GetXaxis()->SetRangeUser(0, 20.0);
+  hResiduals2D_pmpm->GetYaxis()->SetRangeUser(0, 20.0);
+  hResiduals2D_pmpm->Draw("COLZ");
+  cRes2D_pmpm->SaveAs(Form(imgFolderPath + "/residuals2D_pmpm_%s.svg", maxEventsFile.Data()));
 
   auto func_00pm_1D = [&](Double_t *x, Double_t *par)
   {
