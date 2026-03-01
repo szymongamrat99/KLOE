@@ -814,6 +814,9 @@ int main()
   TGraphErrors *graphImError_RA = new TGraphErrors();
   graphImError_RA->SetTitle("Fitted Im Error for R_{A} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
 
+  TGraph *graphChi2_RA = new TGraph();
+  graphChi2_RA->SetTitle("Chi2/NDF for R_{A} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Chi2/NDF");
+
   TGraphErrors *graphRe_RB = new TGraphErrors();
   graphRe_RB->SetTitle("Fitted Re parameter for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
   TGraphErrors *graphIm_RB = new TGraphErrors();
@@ -823,6 +826,9 @@ int main()
   TGraph *graphImError_RB = new TGraph();
   graphImError_RB->SetTitle("Fitted Im Error for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
 
+  TGraph *graphChi2_RB = new TGraph();
+  graphChi2_RB->SetTitle("Chi2/NDF for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Chi2/NDF");
+
   TGraphErrors *graphRe_RC = new TGraphErrors();
   graphRe_RC->SetTitle("Fitted Re parameter for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
   TGraphErrors *graphIm_RC = new TGraphErrors();
@@ -831,6 +837,9 @@ int main()
   graphReError_RC->SetTitle("Fitted Re Error for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Re");
   TGraph *graphImError_RC = new TGraph();
   graphImError_RC->SetTitle("Fitted Im Error for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Error on Im");
+
+  TGraph *graphChi2_RC = new TGraph();
+  graphChi2_RC->SetTitle("Chi2/NDF for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Chi2/NDF");
 
   TCanvas *cR = new TCanvas("cR", "Ratios RA, RB, RC", 1800, 600);
   cR->Divide(3, 1);
@@ -860,6 +869,8 @@ int main()
   linesIm["Max"]->SetLineColor(kRed);
   linesIm["Max"]->SetLineStyle(3);
 
+  Int_t ndfRA = 0, ndfRB = 0, ndfRC = 0;
+
   TFitResultPtr fitResultRA, fitResultRB, fitResultRC;
   for (Double_t t2Max : t2MaxValues)
   {
@@ -888,6 +899,9 @@ int main()
 
       graphReError_RA->SetPoint(graphReError_RA->GetN(), t2Max, fitResultRA->Error(0));
       graphImError_RA->SetPoint(graphImError_RA->GetN(), t2Max, fitResultRA->Error(1));
+
+      graphChi2_RA->SetPoint(graphChi2_RA->GetN(), t2Max, fitResultRA->Chi2() / fitResultRA->Ndf());
+      ndfRA = fitResultRA->Ndf();
 
       // Dodaj box z parametrami w prawym dolnym rogu
       TPaveText *ptRA = new TPaveText(0.55, 0.15, 0.85, 0.35, "NDC");
@@ -924,6 +938,8 @@ int main()
       graphReError_RB->SetPoint(graphReError_RB->GetN(), t2Max, fitResultRB->Error(0));
       graphImError_RB->SetPoint(graphImError_RB->GetN(), t2Max, fitResultRB->Error(1));
 
+      graphChi2_RB->SetPoint(graphChi2_RB->GetN(), t2Max, fitResultRB->Chi2() / fitResultRB->Ndf());
+      ndfRB = fitResultRB->Ndf();
       // Dodaj box z parametrami w prawym górnym rogu
       TPaveText *ptRB = new TPaveText(0.55, 0.70, 0.85, 0.90, "NDC");
       ptRB->SetLineWidth(1);
@@ -959,6 +975,8 @@ int main()
       graphReError_RC->SetPoint(graphReError_RC->GetN(), t2Max, fitResultRC->Error(0));
       graphImError_RC->SetPoint(graphImError_RC->GetN(), t2Max, fitResultRC->Error(1));
 
+      graphChi2_RC->SetPoint(graphChi2_RC->GetN(), t2Max, fitResultRC->Chi2() / fitResultRC->Ndf());
+      ndfRC = fitResultRC->Ndf();
       // Dodaj box z parametrami w prawym dolnym rogu
       TPaveText *ptRC = new TPaveText(0.55, 0.15, 0.85, 0.35, "NDC");
       ptRC->SetLineWidth(1);
@@ -1089,6 +1107,21 @@ int main()
   graphImError_RC->SetMarkerStyle(22);
   graphImError_RC->SetLineColor(kCyan + 1);
 
+  graphChi2_RA->SetMarkerColor(kBlack);
+  graphChi2_RA->SetMarkerSize(1.2);
+  graphChi2_RA->SetMarkerStyle(20);
+  graphChi2_RA->SetLineColor(kBlack);
+
+  graphChi2_RB->SetMarkerColor(kBlack);
+  graphChi2_RB->SetMarkerSize(1.2);
+  graphChi2_RB->SetMarkerStyle(20);
+  graphChi2_RB->SetLineColor(kBlack);
+
+  graphChi2_RC->SetMarkerColor(kBlack);
+  graphChi2_RC->SetMarkerSize(1.2);
+  graphChi2_RC->SetMarkerStyle(20);
+  graphChi2_RC->SetLineColor(kBlack);
+
   // Rysuj wyniki fitów vs t2Max - pojedyncze wykresy dla każdego ratio
   TCanvas *cGraphRe_RA = new TCanvas("cGraphRe_RA", "Fitted Re parameter for R_{A} vs t2Max", 800, 600);
   graphRe_RA->SetMinimum(-1e-4);
@@ -1199,6 +1232,34 @@ int main()
   graphImError_RC->Draw("AP");
   cGraphImError_RC->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
+  TString chi2TitleRA = Form("Chi2/NDF vs t_{2}^{max} for %d NDF", ndfRA),
+          chi2TitleRB = Form("Chi2/NDF vs t_{2}^{max} for %d NDF", ndfRB),
+          chi2TitleRC = Form("Chi2/NDF vs t_{2}^{max} for %d NDF", ndfRC);
+
+  TCanvas *cGraphChi2_RA = new TCanvas("cGraphChi2_RA", chi2TitleRA, 800, 600);
+  graphChi2_RA->SetTitle(chi2TitleRA);
+  graphChi2_RA->SetMinimum(0);
+  graphChi2_RA->SetMaximum(3); // Ustaw górną granicę na 5, można dostosować w zależności od wyników
+  graphChi2_RA->GetXaxis()->SetLimits(30, 320);
+  graphChi2_RA->Draw("AP");
+  cGraphChi2_RA->SaveAs(Form(imgFolderPath + "/Chi2_RA_vs_t2Max.svg", maxEventsFile.Data()));
+
+  TCanvas *cGraphChi2_RB = new TCanvas("cGraphChi2_RB", chi2TitleRB, 800, 600);
+  graphChi2_RB->SetTitle(chi2TitleRB);
+  graphChi2_RB->SetMinimum(0);
+  graphChi2_RB->SetMaximum(3); // Ustaw górną granicę na 5, można dostosować w zależności od wyników
+  graphChi2_RB->GetXaxis()->SetLimits(30, 320);
+  graphChi2_RB->Draw("AP");
+  cGraphChi2_RB->SaveAs(Form(imgFolderPath + "/Chi2_RB_vs_t2Max.svg", maxEventsFile.Data()));
+
+  TCanvas *cGraphChi2_RC = new TCanvas("cGraphChi2_RC", chi2TitleRC, 800, 600);
+  graphChi2_RC->SetTitle(chi2TitleRC);
+  graphChi2_RC->SetMinimum(0);
+  graphChi2_RC->SetMaximum(3); // Ustaw górną granicę na 5, można dostosować w zależności od wyników
+  graphChi2_RC->GetXaxis()->SetLimits(30, 320);
+  graphChi2_RC->Draw("AP");
+  cGraphChi2_RC->SaveAs(Form(imgFolderPath + "/Chi2_RC_vs_t2Max.svg", maxEventsFile.Data()));
+
   // Wykresy zbiorowe - wszystkie Re i Im na jednym wykresie
   TCanvas *cGraphRe_All = new TCanvas("cGraphRe_All", "Fitted Re parameter vs t2Max", 1200, 800);
   graphRe_RA->SetTitle("Fitted Re parameter vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
@@ -1253,6 +1314,9 @@ int main()
   legImError->AddEntry(graphImError_RC, "R_{C}", "lp");
   legImError->Draw();
   cGraphImError_All->SaveAs(Form(imgFolderPath + "/Fitted_ImError_All_vs_t2Max.svg", maxEventsFile.Data()));
+
+
+
 
   TCanvas *cSingleTimes00pm = new TCanvas("cSingleTimes00pm", "Single Times Histograms", 1200, 600);
   cSingleTimes00pm->Divide(2, 1);
