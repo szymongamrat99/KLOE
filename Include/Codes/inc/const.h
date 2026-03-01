@@ -668,4 +668,7 @@ namespace Utils
 
   void InitializeVariables(ErrorHandling::ErrorLogs &logger);
   TString elapsedTimeHMS(double totalSeconds);
+
+  void JsonFieldLookupString(nlohmann::json &jsonObj, const std::string fieldPath, std::string &value, ErrorHandling::ErrorLogs &logger);
+  void JsonFieldLookupBool(nlohmann::json &jsonObj, const std::string fieldPath, bool &value, ErrorHandling::ErrorLogs &logger);
 }

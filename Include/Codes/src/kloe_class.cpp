@@ -159,9 +159,9 @@ namespace KLOE
     return DeltaT;
   }
 
-  std::map<Int_t, Int_t> pm00::CountRepeatingElements(std::vector<Int_t> &arr)
+  std::unordered_map<Int_t, Int_t> pm00::CountRepeatingElements(std::vector<Int_t> &arr)
   {
-    std::map<Int_t, Int_t> frequencyMap;
+    std::unordered_map<Int_t, Int_t> frequencyMap;
 
     for (Int_t num : arr)
     {

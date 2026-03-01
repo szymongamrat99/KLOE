@@ -1,0 +1,39 @@
+cmake_minimum_required(VERSION 3.13)
+
+find_package(Boost REQUIRED COMPONENTS unit_test_framework system)
+find_package(ROOT REQUIRED COMPONENTS Core RIO Tree Hist Physics)
+find_package(CURL REQUIRED)
+
+add_executable(test_charged_vtx_rec
+  test_charged_vtx_rec.cpp
+)
+
+target_compile_definitions(test_charged_vtx_rec
+  PRIVATE
+    BOOST_TEST_DYN_LINK
+)
+
+target_link_libraries(test_charged_vtx_rec
+  PRIVATE
+    LibRec
+    Boost::unit_test_framework
+    Boost::system
+    Boost::filesystem
+    CURL::libcurl
+    ROOT::Core
+    ROOT::RIO
+    ROOT::Tree
+    ROOT::Hist
+    ROOT::Physics
+)
+
+target_include_directories(test_charged_vtx_rec
+  PRIVATE
+    /data/ssd/gamrat/KLOE/Include/Codes/inc
+)
+
+add_test(NAME test_charged_vtx_rec COMMAND test_charged_vtx_rec)
+
+set_tests_properties(test_charged_vtx_rec PROPERTIES
+  ENVIRONMENT "LD_LIBRARY_PATH=$<TARGET_FILE_DIR:ROOT::Core>:$ENV{LD_LIBRARY_PATH}"
+)
