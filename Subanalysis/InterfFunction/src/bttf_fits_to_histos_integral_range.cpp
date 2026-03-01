@@ -133,8 +133,42 @@ std::map<Long64_t, TString> parseHistogramFiles(const std::string &folderPath)
   return fileParams;
 }
 
+using json = nlohmann::json;
+
 int main()
 {
+  ErrorHandling::ErrorLogs logger("log/");
+
+  TString configPath = "config/config.json";
+  std::ifstream configFile(configPath);
+  if (!configFile.is_open())
+  {
+    std::cerr << "Error opening config file: " << configPath << std::endl;
+    return 1;
+  }
+
+  Bool_t fixRe = false, fixIm = false, isReLimited = false, isImLimited = false;
+  Double_t reLimitPercentage = 1.0, imLimitPercentage = 1.0;
+
+  json config;
+
+  config = json::parse(configFile);
+
+  Utils::JsonFieldLookupBool(config, "integralRange/fixRe", fixRe, logger);
+  Utils::JsonFieldLookupBool(config, "integralRange/fixIm", fixIm, logger);
+  Utils::JsonFieldLookupBool(config, "integralRange/isReLimited", isReLimited, logger);
+  Utils::JsonFieldLookupBool(config, "integralRange/isImLimited", isImLimited, logger);
+
+  if (isReLimited)
+  {
+    Utils::JsonFieldLookupDouble(config, "integralRange/percentageLimits/Re", reLimitPercentage, logger);
+  }
+
+  if (isImLimited)
+  {
+    Utils::JsonFieldLookupDouble(config, "integralRange/percentageLimits/Im", imLimitPercentage, logger);
+  }
+
   std::cout << "What addition for the folder name do you want to use? (e.g. 'integral_range' or 'fit_range')" << std::endl;
   std::string folderAddition = "";
   std::getline(std::cin, folderAddition);
@@ -296,7 +330,6 @@ int main()
     return hist2D->ProjectionX(name, lowerBin, upperBin);
   };
 
-  ErrorHandling::ErrorLogs logger("log/");
   Utils::InitializeVariables(logger);
   KLOE::setGlobalStyle();
 
@@ -349,21 +382,21 @@ int main()
     gPad->SetLogy();
     hist_00pm2D_projX[t2Max]->SetTitle(Form("h_00pm projX - t2Max=%.0f", t2Max));
     hist_00pm2D_projX[t2Max]->SetLineColor(kBlue);
-    hist_00pm2D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 20.0);
+    hist_00pm2D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 300.0);
     hist_00pm2D_projX[t2Max]->Draw();
 
     cProjX->cd(2);
     gPad->SetLogy();
     hist_pm002D_projX[t2Max]->SetTitle(Form("h_pm00 projX - t2Max=%.0f", t2Max));
     hist_pm002D_projX[t2Max]->SetLineColor(kBlue);
-    hist_pm002D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 20.0);
+    hist_pm002D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 300.0);
     hist_pm002D_projX[t2Max]->Draw();
 
     cProjX->cd(3);
     gPad->SetLogy();
     hist_pmpmRA2D_projX[t2Max]->SetTitle(Form("h_pmpmRA projX - t2Max=%.0f", t2Max));
     hist_pmpmRA2D_projX[t2Max]->SetLineColor(kBlue);
-    hist_pmpmRA2D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 20.0);
+    hist_pmpmRA2D_projX[t2Max]->GetXaxis()->SetRangeUser(0, 300.0);
     hist_pmpmRA2D_projX[t2Max]->Draw();
 
     cProjX->SaveAs(Form(imgFolderPath + "/1DprojX_histograms_t2Max%.0f.svg", t2Max));
@@ -474,7 +507,7 @@ int main()
     std::cout << "Fit pmpm successful: Re = " << func_pmpm_norm->GetParameter(0) << ", Chi2: " << fitResult_pmpm->Chi2() << std::endl;
   else
     std::cout << "Fit pmpm failed!" << std::endl;
-  
+
   TH2D *hResiduals2D_00pm = (TH2D *)hist_00pm2D_base->Clone("hResiduals2D_00pm");
   TH2D *hResiduals2D_pm00 = (TH2D *)hist_pm002D_base->Clone("hResiduals2D_pm00");
   TH2D *hResiduals2D_pmpm = (TH2D *)hist_pmpm2D_base->Clone("hResiduals2D_pmpm");
@@ -584,12 +617,8 @@ int main()
         const double sliceMin = xSlices ? xMin : yMin;
         const double sliceMax = xSlices ? xMax : yMax;
 
-        TF1 fitSlice(Form("fit_%s_%s_%.0f_%d", tag.Data(), xSlices ? "x" : "y", slicePos, canvasIndex),
-                     [&](double *x, double *par)
-                     {
-                       return xSlices ? func->Eval(x[0], slicePos) : func->Eval(slicePos, x[0]);
-                     },
-                     sliceMin, sliceMax, 0);
+        TF1 fitSlice(Form("fit_%s_%s_%.0f_%d", tag.Data(), xSlices ? "x" : "y", slicePos, canvasIndex), [&](double *x, double *par)
+                     { return xSlices ? func->Eval(x[0], slicePos) : func->Eval(slicePos, x[0]); }, sliceMin, sliceMax, 0);
 
         cSlices->cd(padIndex);
         sliceHist->SetTitle(Form("%s slice %s=%.0f", tag.Data(), xSlices ? "y" : "x", slicePos));
@@ -772,34 +801,54 @@ int main()
     return func_pmpm_00pm_1D(x, par) / func_pmpm_pm00_1D(x, par);
   };
 
-  Double_t imLimitPercentage = 1.0; // 50% od wartości bezwzględnej imParam
-  Double_t reLimitPercentage = 0.1; // 10% od wartości reParam
-
   std::map<std::string, Double_t *> fitLimits = {
-      {"Re", new Double_t[2]{reParam - reLimitPercentage * reParam, reParam + reLimitPercentage * reParam}},
-      {"Im", new Double_t[2]{imParam - imLimitPercentage * abs(imParam), imParam + imLimitPercentage * abs(imParam)}},
       {"Range", new Double_t[2]{0.0, 330.0}}};
 
   TF1 *fitFunc_RA = new TF1("fitFunc_RA", func_pmpm_00pm_1D, 0.0, 20.0, 3);
   fitFunc_RA->SetParameters(reParam, imParam, 300.0);
   fitFunc_RA->SetParNames("Re", "Im", "Range");
-  fitFunc_RA->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
-  fitFunc_RA->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
-  fitFunc_RA->SetParLimits(2, fitLimits["Range"][0], fitLimits["Range"][1]);
 
   TF1 *fitFunc_RB = new TF1("fitFunc_RB", func_pmpm_pm00_1D, 0.0, 20.0, 3);
   fitFunc_RB->SetParameters(reParam, imParam, 300.0);
   fitFunc_RB->SetParNames("Re", "Im", "Range");
-  fitFunc_RB->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
-  fitFunc_RB->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
-  fitFunc_RB->SetParLimits(2, fitLimits["Range"][0], fitLimits["Range"][1]);
 
   TF1 *fitFunc_RC = new TF1("fitFunc_RC", func_RA_RB_1D, 0.0, 20.0, 3);
   fitFunc_RC->SetParameters(reParam, imParam, 300.0);
   fitFunc_RC->SetParNames("Re", "Im", "Range");
-  fitFunc_RC->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
-  fitFunc_RC->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
-  fitFunc_RC->SetParLimits(2, fitLimits["Range"][0], fitLimits["Range"][1]);
+
+  if (fixRe)
+  {
+    fitFunc_RA->FixParameter(0, reParam);
+    fitFunc_RB->FixParameter(0, reParam);
+    fitFunc_RC->FixParameter(0, reParam);
+  }
+
+  if (fixIm)
+  {
+    fitFunc_RA->FixParameter(1, imParam);
+    fitFunc_RB->FixParameter(1, imParam);
+    fitFunc_RC->FixParameter(1, imParam);
+  }
+
+  if (isReLimited)
+  {
+    fitLimits["Re"][0] = reParam - reLimitPercentage * abs(reParam);
+    fitLimits["Re"][1] = reParam + reLimitPercentage * abs(reParam);
+
+    fitFunc_RA->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
+    fitFunc_RB->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
+    fitFunc_RC->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
+  }
+
+  if (isImLimited)
+  {
+    fitLimits["Im"][0] = imParam - imLimitPercentage * abs(imParam);
+    fitLimits["Im"][1] = imParam + imLimitPercentage * abs(imParam);
+
+    fitFunc_RA->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
+    fitFunc_RB->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
+    fitFunc_RC->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
+  }
 
   // Prepare plots for fitted parameters vs t2Max
   TGraphErrors *graphRe_RA = new TGraphErrors();
@@ -816,6 +865,8 @@ int main()
 
   TGraph *graphChi2_RA = new TGraph();
   graphChi2_RA->SetTitle("Chi2/NDF for R_{A} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Chi2/NDF");
+  TGraph *graphCounts_RA = new TGraph();
+  graphCounts_RA->SetTitle("Entries for R_{A} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Entries");
 
   TGraphErrors *graphRe_RB = new TGraphErrors();
   graphRe_RB->SetTitle("Fitted Re parameter for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
@@ -828,6 +879,8 @@ int main()
 
   TGraph *graphChi2_RB = new TGraph();
   graphChi2_RB->SetTitle("Chi2/NDF for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Chi2/NDF");
+  TGraph *graphCounts_RB = new TGraph();
+  graphCounts_RB->SetTitle("Entries for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Entries");
 
   TGraphErrors *graphRe_RC = new TGraphErrors();
   graphRe_RC->SetTitle("Fitted Re parameter for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
@@ -840,6 +893,8 @@ int main()
 
   TGraph *graphChi2_RC = new TGraph();
   graphChi2_RC->SetTitle("Chi2/NDF for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Chi2/NDF");
+  TGraph *graphCounts_RC = new TGraph();
+  graphCounts_RC->SetTitle("Entries for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Entries");
 
   TCanvas *cR = new TCanvas("cR", "Ratios RA, RB, RC", 1800, 600);
   cR->Divide(3, 1);
@@ -851,23 +906,30 @@ int main()
   lineZero->SetLineColor(kBlack);
   lineZero->SetLineStyle(2);
 
-  std::map<std::string, TLine *> linesRe = {
-      {"Min", new TLine(30, fitLimits["Re"][0] - reParam, 320., fitLimits["Re"][0] - reParam)},
-      {"Max", new TLine(30, fitLimits["Re"][1] - reParam, 320., fitLimits["Re"][1] - reParam)}};
+  std::map<std::string, TLine *> linesRe;
+  std::map<std::string, TLine *> linesIm;
 
-  linesRe["Min"]->SetLineColor(kRed);
-  linesRe["Min"]->SetLineStyle(3);
-  linesRe["Max"]->SetLineColor(kRed);
-  linesRe["Max"]->SetLineStyle(3);
+  if (isReLimited)
+  {
+    linesRe["Min"] = new TLine(30, fitLimits["Re"][0] - reParam, 320., fitLimits["Re"][0] - reParam);
+    linesRe["Max"] = new TLine(30, fitLimits["Re"][1] - reParam, 320., fitLimits["Re"][1] - reParam);
 
-  std::map<std::string, TLine *> linesIm = {
-      {"Min", new TLine(30, fitLimits["Im"][0] - imParam, 320., fitLimits["Im"][0] - imParam)},
-      {"Max", new TLine(30, fitLimits["Im"][1] - imParam, 320., fitLimits["Im"][1] - imParam)}};
+    linesRe["Min"]->SetLineColor(kRed);
+    linesRe["Min"]->SetLineStyle(3);
+    linesRe["Max"]->SetLineColor(kRed);
+    linesRe["Max"]->SetLineStyle(3);
+  }
 
-  linesIm["Min"]->SetLineColor(kRed);
-  linesIm["Min"]->SetLineStyle(3);
-  linesIm["Max"]->SetLineColor(kRed);
-  linesIm["Max"]->SetLineStyle(3);
+  if (isImLimited)
+  {
+    linesIm["Min"] = new TLine(30, fitLimits["Im"][0] - imParam, 320., fitLimits["Im"][0] - imParam);
+    linesIm["Max"] = new TLine(30, fitLimits["Im"][1] - imParam, 320., fitLimits["Im"][1] - imParam);
+
+    linesIm["Min"]->SetLineColor(kRed);
+    linesIm["Min"]->SetLineStyle(3);
+    linesIm["Max"]->SetLineColor(kRed);
+    linesIm["Max"]->SetLineStyle(3);
+  }
 
   Int_t ndfRA = 0, ndfRB = 0, ndfRC = 0;
 
@@ -902,6 +964,8 @@ int main()
 
       graphChi2_RA->SetPoint(graphChi2_RA->GetN(), t2Max, fitResultRA->Chi2() / fitResultRA->Ndf());
       ndfRA = fitResultRA->Ndf();
+
+      graphCounts_RA->SetPoint(graphCounts_RA->GetN(), t2Max, hist_RA[t2Max]->GetEntries());
 
       // Dodaj box z parametrami w prawym dolnym rogu
       TPaveText *ptRA = new TPaveText(0.55, 0.15, 0.85, 0.35, "NDC");
@@ -940,6 +1004,9 @@ int main()
 
       graphChi2_RB->SetPoint(graphChi2_RB->GetN(), t2Max, fitResultRB->Chi2() / fitResultRB->Ndf());
       ndfRB = fitResultRB->Ndf();
+
+      graphCounts_RB->SetPoint(graphCounts_RB->GetN(), t2Max, hist_RB[t2Max]->GetEntries());
+
       // Dodaj box z parametrami w prawym górnym rogu
       TPaveText *ptRB = new TPaveText(0.55, 0.70, 0.85, 0.90, "NDC");
       ptRB->SetLineWidth(1);
@@ -977,6 +1044,9 @@ int main()
 
       graphChi2_RC->SetPoint(graphChi2_RC->GetN(), t2Max, fitResultRC->Chi2() / fitResultRC->Ndf());
       ndfRC = fitResultRC->Ndf();
+
+      graphCounts_RC->SetPoint(graphCounts_RC->GetN(), t2Max, hist_RC[t2Max]->GetEntries());
+
       // Dodaj box z parametrami w prawym dolnym rogu
       TPaveText *ptRC = new TPaveText(0.55, 0.15, 0.85, 0.35, "NDC");
       ptRC->SetLineWidth(1);
@@ -1122,6 +1192,21 @@ int main()
   graphChi2_RC->SetMarkerStyle(20);
   graphChi2_RC->SetLineColor(kBlack);
 
+  graphCounts_RA->SetMarkerColor(kBlack);
+  graphCounts_RA->SetMarkerSize(1.2);
+  graphCounts_RA->SetMarkerStyle(20);
+  graphCounts_RA->SetLineColor(kBlack);
+
+  graphCounts_RB->SetMarkerColor(kBlack);
+  graphCounts_RB->SetMarkerSize(1.2);
+  graphCounts_RB->SetMarkerStyle(20);
+  graphCounts_RB->SetLineColor(kBlack);
+
+  graphCounts_RC->SetMarkerColor(kBlack);
+  graphCounts_RC->SetMarkerSize(1.2);
+  graphCounts_RC->SetMarkerStyle(20);
+  graphCounts_RC->SetLineColor(kBlack);
+
   // Rysuj wyniki fitów vs t2Max - pojedyncze wykresy dla każdego ratio
   TCanvas *cGraphRe_RA = new TCanvas("cGraphRe_RA", "Fitted Re parameter for R_{A} vs t2Max", 800, 600);
   graphRe_RA->SetMinimum(-1e-4);
@@ -1129,8 +1214,13 @@ int main()
   graphRe_RA->GetXaxis()->SetLimits(30, 320);
   graphRe_RA->Draw("AP");
   lineZero->Draw("SAME");
-  linesRe["Min"]->Draw("SAME");
-  linesRe["Max"]->Draw("SAME");
+
+  if (isReLimited)
+  {
+    linesRe["Min"]->Draw("SAME");
+    linesRe["Max"]->Draw("SAME");
+  }
+
   cGraphRe_RA->SaveAs(Form(imgFolderPath + "/Fitted_Re_RA_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphRe_RB = new TCanvas("cGraphRe_RB", "Fitted Re parameter for R_{B} vs t2Max", 800, 600);
@@ -1139,8 +1229,11 @@ int main()
   graphRe_RB->GetXaxis()->SetLimits(30, 320);
   graphRe_RB->Draw("AP");
   lineZero->Draw("SAME");
-  linesRe["Min"]->Draw("SAME");
-  linesRe["Max"]->Draw("SAME");
+  if (isReLimited)
+  {
+    linesRe["Min"]->Draw("SAME");
+    linesRe["Max"]->Draw("SAME");
+  }
   cGraphRe_RB->SaveAs(Form(imgFolderPath + "/Fitted_Re_RB_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphRe_RC = new TCanvas("cGraphRe_RC", "Fitted Re parameter for R_{C} vs t2Max", 800, 600);
@@ -1149,8 +1242,11 @@ int main()
   graphRe_RC->GetXaxis()->SetLimits(30, 320);
   graphRe_RC->Draw("AP");
   lineZero->Draw("SAME");
-  linesRe["Min"]->Draw("SAME");
-  linesRe["Max"]->Draw("SAME");
+  if (isReLimited)
+  {
+    linesRe["Min"]->Draw("SAME");
+    linesRe["Max"]->Draw("SAME");
+  }
   cGraphRe_RC->SaveAs(Form(imgFolderPath + "/Fitted_Re_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphIm_RA = new TCanvas("cGraphIm_RA", "Fitted Im parameter for R_{A} vs t2Max", 800, 600);
@@ -1159,8 +1255,11 @@ int main()
   graphIm_RA->GetXaxis()->SetLimits(30, 320);
   graphIm_RA->Draw("AP");
   lineZero->Draw("SAME");
-  linesIm["Min"]->Draw("SAME");
-  linesIm["Max"]->Draw("SAME");
+  if (isImLimited)
+  {
+    linesIm["Min"]->Draw("SAME");
+    linesIm["Max"]->Draw("SAME");
+  }
   cGraphIm_RA->SaveAs(Form(imgFolderPath + "/Fitted_Im_RA_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphIm_RB = new TCanvas("cGraphIm_RB", "Fitted Im parameter for R_{B} vs t2Max", 800, 600);
@@ -1169,8 +1268,11 @@ int main()
   graphIm_RB->GetXaxis()->SetLimits(30, 320);
   graphIm_RB->Draw("AP");
   lineZero->Draw("SAME");
-  linesIm["Min"]->Draw("SAME");
-  linesIm["Max"]->Draw("SAME");
+  if (isImLimited)
+  {
+    linesIm["Min"]->Draw("SAME");
+    linesIm["Max"]->Draw("SAME");
+  }
   cGraphIm_RB->SaveAs(Form(imgFolderPath + "/Fitted_Im_RB_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphIm_RC = new TCanvas("cGraphIm_RC", "Fitted Im parameter for R_{C} vs t2Max", 800, 600);
@@ -1179,8 +1281,10 @@ int main()
   graphIm_RC->GetXaxis()->SetLimits(30, 320);
   graphIm_RC->Draw("AP");
   lineZero->Draw("SAME");
-  linesIm["Min"]->Draw("SAME");
-  linesIm["Max"]->Draw("SAME");
+  if (isImLimited)  {
+    linesIm["Min"]->Draw("SAME");
+    linesIm["Max"]->Draw("SAME");
+  }
   cGraphIm_RC->SaveAs(Form(imgFolderPath + "/Fitted_Im_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
   //
@@ -1260,6 +1364,24 @@ int main()
   graphChi2_RC->Draw("AP");
   cGraphChi2_RC->SaveAs(Form(imgFolderPath + "/Chi2_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
+  TCanvas *cGraphCounts_RA = new TCanvas("cGraphCounts_RA", "Entries for R_{A} vs t2Max", 800, 600);
+  graphCounts_RA->SetTitle("Entries for R_{A} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Entries");
+  graphCounts_RA->GetXaxis()->SetLimits(30, 320);
+  graphCounts_RA->Draw("AP");
+  cGraphCounts_RA->SaveAs(Form(imgFolderPath + "/Entries_RA_vs_t2Max.svg", maxEventsFile.Data()));
+
+  TCanvas *cGraphCounts_RB = new TCanvas("cGraphCounts_RB", "Entries for R_{B} vs t2Max", 800, 600);
+  graphCounts_RB->SetTitle("Entries for R_{B} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Entries");
+  graphCounts_RB->GetXaxis()->SetLimits(30, 320);
+  graphCounts_RB->Draw("AP");
+  cGraphCounts_RB->SaveAs(Form(imgFolderPath + "/Entries_RB_vs_t2Max.svg", maxEventsFile.Data()));
+
+  TCanvas *cGraphCounts_RC = new TCanvas("cGraphCounts_RC", "Entries for R_{C} vs t2Max", 800, 600);
+  graphCounts_RC->SetTitle("Entries for R_{C} vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Entries");
+  graphCounts_RC->GetXaxis()->SetLimits(30, 320);
+  graphCounts_RC->Draw("AP");
+  cGraphCounts_RC->SaveAs(Form(imgFolderPath + "/Entries_RC_vs_t2Max.svg", maxEventsFile.Data()));
+
   // Wykresy zbiorowe - wszystkie Re i Im na jednym wykresie
   TCanvas *cGraphRe_All = new TCanvas("cGraphRe_All", "Fitted Re parameter vs t2Max", 1200, 800);
   graphRe_RA->SetTitle("Fitted Re parameter vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Re");
@@ -1314,9 +1436,6 @@ int main()
   legImError->AddEntry(graphImError_RC, "R_{C}", "lp");
   legImError->Draw();
   cGraphImError_All->SaveAs(Form(imgFolderPath + "/Fitted_ImError_All_vs_t2Max.svg", maxEventsFile.Data()));
-
-
-
 
   TCanvas *cSingleTimes00pm = new TCanvas("cSingleTimes00pm", "Single Times Histograms", 1200, 600);
   cSingleTimes00pm->Divide(2, 1);
