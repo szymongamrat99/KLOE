@@ -1,13 +1,16 @@
 {
   "integralRange": {
-    "fixRe": true,
+    "fixRe": false,
     "fixIm": false,
+    "fixRange": false,
     "isReLimited": false,
     "isImLimited": false,
+    "isRangeLimited": false,
     "percentageLimits":
     {
       "Re": 1.0,
-      "Im": 1.0
+      "Im": 1.0,
+      "Range": 1.0
     }
   }
 }
