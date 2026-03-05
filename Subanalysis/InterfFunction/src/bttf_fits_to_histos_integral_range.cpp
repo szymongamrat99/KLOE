@@ -17,6 +17,7 @@
 #include <TPaveText.h>
 #include <TLine.h>
 #include <TPaveStats.h>
+#include <TLatex.h>
 
 #include <TFitResult.h>
 #include <TGraph.h>
@@ -487,7 +488,7 @@ int main()
   func_pm00_norm->SetParameters(reParam, imParam, 2.5E7);
 
   TF2 *func_pmpm_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pmpm_normalized, 0.0, 300, 0.0, 300, 2);
-  func_pmpm_norm->SetParameters(reParam, 2.233E7);
+  func_pmpm_norm->SetParameters(reParam, 2.143E7);
 
   auto setErrInf = [](TH2 *hist2D, TH2 *hist2DAux)
   {
@@ -531,8 +532,11 @@ int main()
     std::cout << "Fit pmpm failed!" << std::endl;
 
   TH2D *hResiduals2D_00pm = (TH2D *)hist_00pm2D_base->Clone("hResiduals2D_00pm");
+  hResiduals2D_00pm->Clear();
   TH2D *hResiduals2D_pm00 = (TH2D *)hist_pm002D_base->Clone("hResiduals2D_pm00");
+  hResiduals2D_pm00->Clear();
   TH2D *hResiduals2D_pmpm = (TH2D *)hist_pmpm2D_base->Clone("hResiduals2D_pmpm");
+  hResiduals2D_pmpm->Clear();
 
   TH1D *hResiduals_00pm = new TH1D("hResiduals_00pm", "Residuals (00pm) (Data-Fit)/#sigma;Residual;Counts", 120, -6, 6);
   TH1D *hResiduals_pm00 = new TH1D("hResiduals_pm00", "Residuals (pm00) (Data-Fit)/#sigma;Residual;Counts", 120, -6, 6);
@@ -583,9 +587,11 @@ int main()
 
         const double resid = (err > 0) ? (data - fit) / err : 0.0;
 
-        outHist->Fill(resid);
-
-        outResiduals2D->SetBinContent(ix, iy, resid);
+        if (err > 0.0)
+        {
+          outHist->Fill(resid);
+          outResiduals2D->SetBinContent(ix, iy, resid);
+        }
       }
     }
   };
@@ -687,7 +693,7 @@ int main()
   fillResiduals2D(hist_pm002D_base, hist_pm002D_base_nw, func_pm00_norm, hResiduals_pm00, hResiduals2D_pm00);
   fillResiduals2D(hist_pmpm2D_base, hist_pmpm2D_base_nw, func_pmpm_norm, hResiduals_pmpm, hResiduals2D_pmpm);
 
-  gStyle->SetOptStat(1111); // Entries, Mean, RMS (Entries będą widoczne)
+  gStyle->SetOptStat("eimrsou"); // Entries, Mean, RMS (Entries będą widoczne)
   gStyle->SetOptFit(1);
 
   TF1 *fitRes00pm = new TF1("fitRes00pm", "gaus", -6, 6);
@@ -735,18 +741,21 @@ int main()
   cRespmpm->SaveAs(Form(imgFolderPath + "/residuals_pmpm_%s.svg", maxEventsFile.Data()));
 
   TCanvas *cRes2D_00pm = new TCanvas("cRes2D_00pm", "Residuals 2D 00pm", 800, 600);
+  cRes2D_00pm->SetLogz(0);
   hResiduals2D_00pm->GetXaxis()->SetRangeUser(0, 20.0);
   hResiduals2D_00pm->GetYaxis()->SetRangeUser(0, 20.0);
   hResiduals2D_00pm->Draw("COLZ");
   cRes2D_00pm->SaveAs(Form(imgFolderPath + "/residuals2D_00pm_%s.svg", maxEventsFile.Data()));
 
   TCanvas *cRes2D_pm00 = new TCanvas("cRes2D_pm00", "Residuals 2D pm00", 800, 600);
+  cRes2D_pm00->SetLogz(0);
   hResiduals2D_pm00->GetXaxis()->SetRangeUser(0, 20.0);
   hResiduals2D_pm00->GetYaxis()->SetRangeUser(0, 20.0);
   hResiduals2D_pm00->Draw("COLZ");
   cRes2D_pm00->SaveAs(Form(imgFolderPath + "/residuals2D_pm00_%s.svg", maxEventsFile.Data()));
 
   TCanvas *cRes2D_pmpm = new TCanvas("cRes2D_pmpm", "Residuals 2D pmpm", 800, 600);
+  cRes2D_pmpm->SetLogz(0);
   hResiduals2D_pmpm->GetXaxis()->SetRangeUser(0, 20.0);
   hResiduals2D_pmpm->GetYaxis()->SetRangeUser(0, 20.0);
   hResiduals2D_pmpm->Draw("COLZ");
@@ -830,6 +839,21 @@ int main()
   };
 
   std::map<std::string, Double_t *> fitLimits;
+
+  struct CorrelationPoint
+  {
+    Double_t t2Max;
+    Double_t re;
+    Double_t reErr;
+    Double_t im;
+    Double_t imErr;
+    Double_t range;
+    Double_t rangeErr;
+  };
+
+  std::vector<CorrelationPoint> corrPointsRA;
+  std::vector<CorrelationPoint> corrPointsRB;
+  std::vector<CorrelationPoint> corrPointsRC;
 
   TF1 *fitFunc_RA = new TF1("fitFunc_RA", func_pmpm_00pm_1D, 0.0, 20.0, 3);
   fitFunc_RA->SetParameters(reParam, imParam, 300.0);
@@ -1010,7 +1034,7 @@ int main()
     cR->cd(1);
     hist_RA[t2Max]->SetTitle(Form("R_{A} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
     hist_RA[t2Max]->GetXaxis()->SetRangeUser(0, 20);
-    fitResultRA = hist_RA[t2Max]->Fit(fitFunc_RA, "RSEM");
+    fitResultRA = hist_RA[t2Max]->Fit(fitFunc_RA, "RSEMI");
     hist_RA[t2Max]->SetMarkerStyle(20);
     hist_RA[t2Max]->SetLineWidth(2);
     hist_RA[t2Max]->SetMarkerColor(kBlack);
@@ -1019,6 +1043,11 @@ int main()
     hist_RA[t2Max]->Draw();
     if (fitResultRA->IsValid())
     {
+      corrPointsRA.push_back({t2Max,
+                              fitResultRA->Parameter(0), fitResultRA->Error(0),
+                              fitResultRA->Parameter(1), fitResultRA->Error(1),
+                              fitResultRA->Parameter(2), fitResultRA->Error(2)});
+
       graphRe_RA->SetPoint(graphRe_RA->GetN(), t2Max, fitResultRA->Parameter(0) - reParam);
       graphRe_RA->SetPointError(graphRe_RA->GetN() - 1, 0, fitResultRA->Error(0));
       graphIm_RA->SetPoint(graphIm_RA->GetN(), t2Max, fitResultRA->Parameter(1) - imParam);
@@ -1051,7 +1080,7 @@ int main()
     cR->cd(2);
     hist_RB[t2Max]->SetTitle(Form("R_{B} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
     hist_RB[t2Max]->GetXaxis()->SetRangeUser(0, 20);
-    fitResultRB = hist_RB[t2Max]->Fit(fitFunc_RB, "RSEM");
+    fitResultRB = hist_RB[t2Max]->Fit(fitFunc_RB, "RSEMI");
     hist_RB[t2Max]->SetMarkerStyle(20);
     hist_RB[t2Max]->SetLineWidth(2);
     hist_RB[t2Max]->SetMarkerColor(kBlack);
@@ -1060,6 +1089,11 @@ int main()
 
     if (fitResultRB->IsValid())
     {
+      corrPointsRB.push_back({t2Max,
+                              fitResultRB->Parameter(0), fitResultRB->Error(0),
+                              fitResultRB->Parameter(1), fitResultRB->Error(1),
+                              fitResultRB->Parameter(2), fitResultRB->Error(2)});
+
       graphRe_RB->SetPoint(graphRe_RB->GetN(), t2Max, fitResultRB->Parameter(0) - reParam);
       graphRe_RB->SetPointError(graphRe_RB->GetN() - 1, 0, fitResultRB->Error(0));
       graphIm_RB->SetPoint(graphIm_RB->GetN(), t2Max, fitResultRB->Parameter(1) - imParam);
@@ -1092,7 +1126,7 @@ int main()
     cR->cd(3);
     hist_RC[t2Max]->SetTitle(Form("R_{C} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
     hist_RC[t2Max]->GetXaxis()->SetRangeUser(0, 20);
-    fitResultRC = hist_RC[t2Max]->Fit(fitFunc_RC, "RSEM");
+    fitResultRC = hist_RC[t2Max]->Fit(fitFunc_RC, "RSEMI");
     hist_RC[t2Max]->SetMarkerStyle(20);
     hist_RC[t2Max]->SetLineWidth(2);
     hist_RC[t2Max]->SetMarkerColor(kBlack);
@@ -1101,6 +1135,11 @@ int main()
 
     if (fitResultRC->IsValid())
     {
+      corrPointsRC.push_back({t2Max,
+                              fitResultRC->Parameter(0), fitResultRC->Error(0),
+                              fitResultRC->Parameter(1), fitResultRC->Error(1),
+                              fitResultRC->Parameter(2), fitResultRC->Error(2)});
+
       graphRe_RC->SetPoint(graphRe_RC->GetN(), t2Max, fitResultRC->Parameter(0) - reParam);
       graphRe_RC->SetPointError(graphRe_RC->GetN() - 1, 0, fitResultRC->Error(0));
       graphIm_RC->SetPoint(graphIm_RC->GetN(), t2Max, fitResultRC->Parameter(1) - imParam);
