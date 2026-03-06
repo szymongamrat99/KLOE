@@ -47,7 +47,7 @@ Double_t interf_function(const Double_t *x, const Double_t *par)
                  3. * ImPart * sin(DMass * abs(dt)));
   }
 
-  return (pow(Epsilon, 2) / (2. * Gamma)) * Value * 10000000;
+  return (pow(Epsilon, 2) / (2. * Gamma)) * Value * 1000000;
 }
 
 Double_t interf_function_00pm(const Double_t *x, const Double_t *par)
