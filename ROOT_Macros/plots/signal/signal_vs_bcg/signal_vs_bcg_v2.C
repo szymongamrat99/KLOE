@@ -543,30 +543,12 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
   Double_t gammaL = PhysicsConstants::tau_S_nonCPT / PhysicsConstants::tau_L;
 
-  auto double_exponential = [gammaS, gammaL](Double_t dt)
-  {
-    Double_t value = 0.;
-
-    if (dt >= 0)
-    {
-      value = (1. + 2. * PhysicsConstants::Re) * exp(-gammaL * dt) +
-            (1. - 4. * PhysicsConstants::Re) * exp(-gammaS * dt);
-    }
-    else
-    {
-      value = (1. + 2. * PhysicsConstants::Re) * exp(-gammaS * abs(dt)) +
-            (1. - 4. * PhysicsConstants::Re) * exp(-gammaL * abs(dt));
-    }
-
-    return value;
-  };
-
   Double_t *x = new Double_t(*KaonChTimeCMMC - *KaonNeTimeCMMC),
            *par = nullptr;
 
   if ((mctruth_int == 1 || mctruth_int == 0) && *mcflag == 1)
   {
-    weight = interf_function(x, par) / double_exponential(*x);
+    weight = interf_function(x, par) / double_exponential(x, par);
   }
 
   TVector3 z_axis(0., 0., 1.),

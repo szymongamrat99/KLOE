@@ -154,3 +154,26 @@ Double_t interf_function_pmpm(const Double_t *x, const Double_t *par)
 
   return 0.5 * pow(Epsilon, 2) * Value;// * pow(PhysicsConstants::br_ks_pippim, 2);
 }
+
+Double_t double_exponential(const Double_t *x, const Double_t *par)
+{
+  Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
+  Double_t gammaL = PhysicsConstants::tau_S_nonCPT / PhysicsConstants::tau_L;
+
+  Double_t dt = x[0];
+
+  Double_t value = 0.;
+
+  if (dt >= 0)
+  {
+    value = (1. + 2. * PhysicsConstants::Re) * exp(-gammaL * dt) +
+            (1. - 4. * PhysicsConstants::Re) * exp(-gammaS * dt);
+  }
+  else
+  {
+    value = (1. + 2. * PhysicsConstants::Re) * exp(-gammaS * abs(dt)) +
+            (1. - 4. * PhysicsConstants::Re) * exp(-gammaL * abs(dt));
+  }
+
+  return value;
+}
