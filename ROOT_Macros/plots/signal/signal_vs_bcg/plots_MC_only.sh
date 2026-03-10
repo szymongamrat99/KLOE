@@ -1,70 +1,90 @@
 #!/bin/bash
 
 
-# Ustawia monit, który wyświetla się po menu
-PS3='Wybierz opcję (podaj numer): '
+# Definiuje opcje menu (bez EXIT jako scenariusza fizycznego)
+options=("NO_CUTS" "SHORTER_KAON_PATHS" "OLD_CUTS" "SIMONA_CHI2_CUT" "BAD_CLUS_SIMONA" "SIMONA_KIN_CUTS" "SIMONA_ALL_CUTS" "OMEGA_MASS_T0_CUT" "BLOB" "NO_BLOB")
 
-# Definiuje opcje menu
-options=("NO_CUTS" "SHORTER_KAON_PATHS" "OLD_CUTS" "SIMONA_CHI2_CUT" "BAD_CLUS_SIMONA" "SIMONA_KIN_CUTS" "SIMONA_ALL_CUTS" "OMEGA_MASS_T0_CUT" "BLOB" "NO_BLOB" "EXIT")
-# select wyświetla menu i czeka na wybór
-select opt in "${options[@]}"
-do
-    # case obsługuje wybraną opcję
-    case $opt in
-        "NO_CUTS")
-            echo "Chosen option: NO_CUTS"
-            break
-            ;;
-        "SHORTER_KAON_PATHS")
-            echo "Chosen option: SHORTER_KAON_PATHS"
-            break
-            ;;
-        "OLD_CUTS")
-            echo "Chosen option: OLD_CUTS"
-            break
-            ;;
-        "SIMONA_CHI2_CUT")
-            echo "Chosen option: SIMONA_CHI2_CUT"
-            break
-            ;;
-        "BAD_CLUS_SIMONA")
-            echo "Chosen option: BAD_CLUS_SIMONA"
-            break
-            ;;
-        "SIMONA_KIN_CUTS")
-            echo "Chosen option: SIMONA_KIN_CUTS"
-            break
-            ;;
-        "SIMONA_ALL_CUTS")
-            echo "Chosen option: SIMONA_ALL_CUTS"
-            break
-            ;;
-        "OMEGA_MASS_T0_CUT")
-            echo "Chosen option: OMEGA_MASS_T0_CUT"
-            break
-            ;;
-        "BLOB")
-            echo "Chosen option: BLOB"
-            break
-            ;;
-        "NO_BLOB")
-            echo "Chosen option: NO_BLOB"
-            break
-            ;;
-        "EXIT")
-            echo "Exiting..."
-            break
-            ;;
-        *)
-            echo "Invalid choice: $REPLY" # $REPLY zawiera wpisany numer
-            ;;
-    esac
-    echo # Dodaje pustą linię dla czytelności
+echo "Dostępne scenariusze:"
+for i in "${!options[@]}"; do
+    printf "%2d) %s\n" "$((i + 1))" "${options[$i]}"
 done
+echo ""
+echo "Podaj wiele pozycji naraz:"
+echo "- numery: np. 1 4 8"
+echo "- lub nazwy: np. NO_CUTS SIMONA_CHI2_CUT"
+echo "- możesz mieszać i rozdzielać spacją/przecinkiem"
+echo "- wpisz ALL aby wybrać wszystko, EXIT aby wyjść"
 
-if [ "$opt" == "EXIT" ]; then
+read -r -p "Twój wybór: " selection_raw
+
+if [[ -z "$selection_raw" ]]; then
+    echo "Brak wyboru. Kończę."
+    exit 1
+fi
+
+selection_upper=$(echo "$selection_raw" | tr '[:lower:]' '[:upper:]')
+if [[ "$selection_upper" == "EXIT" ]]; then
+    echo "Exiting..."
     exit 0
 fi
+
+selected=()
+
+append_unique() {
+    local candidate="$1"
+    local existing
+    for existing in "${selected[@]}"; do
+        if [[ "$existing" == "$candidate" ]]; then
+            return
+        fi
+    done
+    selected+=("$candidate")
+}
+
+if [[ "$selection_upper" == "ALL" ]]; then
+    selected=("${options[@]}")
+else
+    normalized=$(echo "$selection_raw" | tr ',' ' ')
+    for token in $normalized; do
+        token_upper=$(echo "$token" | tr '[:lower:]' '[:upper:]')
+
+        if [[ "$token_upper" == "EXIT" ]]; then
+            echo "Exiting..."
+            exit 0
+        fi
+
+        if [[ "$token" =~ ^[0-9]+$ ]]; then
+            idx=$((token - 1))
+            if (( idx >= 0 && idx < ${#options[@]} )); then
+                append_unique "${options[$idx]}"
+            else
+                echo "Pomijam niepoprawny numer: $token"
+            fi
+            continue
+        fi
+
+        matched=0
+        for opt_name in "${options[@]}"; do
+            if [[ "$token_upper" == "$opt_name" ]]; then
+                append_unique "$opt_name"
+                matched=1
+                break
+            fi
+        done
+
+        if [[ $matched -eq 0 ]]; then
+            echo "Pomijam nieznaną opcję: $token"
+        fi
+    done
+fi
+
+if (( ${#selected[@]} == 0 )); then
+    echo "Nie wybrano żadnego poprawnego scenariusza."
+    exit 1
+fi
+
+opt=$(IFS=';'; echo "${selected[*]}")
+echo "Chosen scenarios: $opt"
 
 root -b <<EOF
 TChain *chain = new TChain("h1");

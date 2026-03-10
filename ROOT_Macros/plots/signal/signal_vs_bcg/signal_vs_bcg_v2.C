@@ -55,6 +55,10 @@
 #include <interf_function.h>
 #include <TEfficiency.h>
 #include <const.h>
+#include <TObjArray.h>
+#include <TObjString.h>
+#include <fstream>
+#include <ctime>
 
 namespace KH = KLOE::Histograms;
 
@@ -108,6 +112,193 @@ TH1 *histCounts;
 
 TF1 *chi2DistFunc;
 
+struct ScenarioCounters
+{
+  Int_t signal_num = 0;
+  Int_t signal_tot = 0;
+  Int_t bkg_tot = 0;
+  Int_t passed_events = 0;
+  Int_t sel_mctruth_m1 = 0;
+  Int_t sel_mctruth_0 = 0;
+  Int_t sel_mctruth_1 = 0;
+};
+
+struct ScenarioHistogramState
+{
+  TString folderPath;
+  std::map<TString, std::map<TString, TH1 *>> histsReconstructed;
+  std::map<TString, std::map<TString, TH1 *>> histsFittedSignal;
+  std::map<TString, std::map<TString, TH2 *>> hists2DFittedSignal;
+  std::map<TString, Int_t> channEventsTotal;
+  std::map<TString, Int_t> channEventsCut;
+  TH1 *deltaTSignalTot = nullptr;
+  TH1 *deltaTTot = nullptr;
+  TH1 *histCounts = nullptr;
+  Int_t overflow = 0;
+  Int_t cutPassed = 0;
+  Int_t cutNPassed = 0;
+};
+
+std::vector<TString> g_activeScenarios;
+std::map<TString, ScenarioCounters> g_scenarioCounters;
+std::map<TString, ScenarioHistogramState> g_secondaryScenarioStates;
+
+// Central place for tuning analysis cuts.
+namespace CutDefs
+{
+  constexpr Double_t simonaBadClusSlope = -10.0 / 9.0;
+  constexpr Double_t simonaBadClusDeltaTResMax = -3.0;
+  constexpr Double_t simonaBadClusDeltaTShift = 2.0;
+
+  constexpr Double_t simonaDeltaPhiCenter = 3.110;
+  constexpr Double_t simonaDeltaPhiSigma = 0.135;
+  constexpr Double_t simonaDeltaPhiNSigma = 2.0;
+  constexpr Double_t simonaChi2Max = 30.0;
+
+  constexpr Double_t oldCutsChi2Max = 40.0;
+  constexpr Double_t oldCutsCombinedMassPi0Max = 35.0;
+  constexpr Double_t oldCutsMassKchWindow = 1.2;
+  constexpr Double_t oldCutsMassKneWindow = 76.0;
+  constexpr Double_t oldCutsQmissMax = 3.75;
+  constexpr Double_t oldCutsTrcSumMin = -1.0;
+  constexpr Double_t oldCutsOpeningCosMin = -0.8;
+
+  constexpr Double_t omegaRadiusLimit = 1.0;
+  constexpr Double_t omegaZdistLimit = 0.6;
+  constexpr Double_t omegaT0Center = 155.658;
+  constexpr Double_t omegaT0Sigma = 5.691;
+  constexpr Double_t omegaMassCenter = 782.994;
+  constexpr Double_t omegaMassSigma = 5.620;
+  constexpr Double_t omegaNSigma = 3.0;
+  constexpr Double_t omegaLineA = 1.0;
+  constexpr Double_t omegaLineB = 625.091;
+  constexpr Double_t omegaLineBreal = 14.1421;
+
+  constexpr Double_t kaonPathLimitNeutral = 50.0;
+  constexpr Double_t kaonPathLimitCharged = 50.0;
+  constexpr Double_t blobDeltaTMin = 75.0;
+}
+
+void SaveDeltaTComparisonPlot(const TString &outDir,
+                              const TString &scenarioLabel,
+                              std::map<TString, std::map<TString, TH1 *>> &histsFit,
+                              std::map<TString, std::map<TString, TH1 *>> &histsRec)
+{
+  TH1 *hFit = histsFit["delta_t"]["Signal"];
+  TH1 *hRec = histsRec["delta_t"]["Signal"];
+  TH1 *hMC = histsFit["delta_t_MC"]["Signal"];
+
+  if (!hFit || !hRec || !hMC)
+    return;
+  if (hFit->GetEntries() <= 0 || hRec->GetEntries() <= 0 || hMC->GetEntries() <= 0)
+    return;
+
+  TCanvas *cDt = new TCanvas(Form("c_delta_t_compare_%s", scenarioLabel.Data()),
+                             Form("delta_t comparison (%s)", scenarioLabel.Data()),
+                             900, 750);
+
+  hFit->SetTitle(";#Delta t [#tau_{S}];Events");
+  hFit->SetLineColor(kBlue + 1);
+  hFit->SetLineWidth(3);
+  hRec->SetLineColor(kRed + 1);
+  hRec->SetLineWidth(3);
+  hMC->SetLineColor(kGreen + 2);
+  hMC->SetLineStyle(2);
+  hMC->SetLineWidth(3);
+
+  const Double_t yMax = TMath::Max(hFit->GetMaximum(), TMath::Max(hRec->GetMaximum(), hMC->GetMaximum()));
+  hFit->GetYaxis()->SetRangeUser(0.0, yMax > 0.0 ? 1.25 * yMax : 1.0);
+
+  hFit->Draw("HIST");
+  hRec->Draw("HIST SAME");
+  hMC->Draw("HIST SAME");
+
+  TLegend *dtLegend = new TLegend(0.58, 0.72, 0.9, 0.9, "", "NDC");
+  dtLegend->SetBorderSize(1);
+  dtLegend->SetFillColor(kWhite);
+  dtLegend->SetTextSize(0.032);
+  dtLegend->AddEntry(hFit, "Fitted #Delta t", "l");
+  dtLegend->AddEntry(hRec, "Reconstructed #Delta t", "l");
+  dtLegend->AddEntry(hMC, "MC generated #Delta t", "l");
+  dtLegend->Draw();
+
+  cDt->SaveAs(Form("%s/delta_t_fitted_vs_reconstructed_vs_mc%s", outDir.Data(), Paths::ext_img.Data()));
+  delete cDt;
+}
+
+Double_t ComputeSafeRatio(Int_t num, Int_t den)
+{
+  if (den <= 0)
+    return 0.0;
+  return static_cast<Double_t>(num) / static_cast<Double_t>(den);
+}
+
+std::vector<TString> ParseScenarioList(const TString &option)
+{
+  std::vector<TString> scenarios;
+  Cuts cuts;
+
+  TString opt = option;
+  opt.ToUpper();
+
+  if (opt.IsNull())
+  {
+    scenarios.push_back("NO_CUTS");
+    return scenarios;
+  }
+
+  TObjArray *tokens = opt.Tokenize(";");
+  for (Int_t i = 0; i < tokens->GetEntries(); ++i)
+  {
+    TString token = ((TObjString *)tokens->At(i))->String();
+    token = token.Strip(TString::kBoth);
+    if (!token.IsNull() && (token == "NO_CUTS" || cuts.Contains(token)))
+    {
+      scenarios.push_back(token);
+    }
+  }
+  delete tokens;
+
+  if (scenarios.empty())
+    scenarios.push_back("NO_CUTS");
+
+  return scenarios;
+}
+
+Bool_t PassScenario(const TString &scenario,
+                   Bool_t shorterKaonPaths,
+                   Bool_t condAnalysisOld,
+                   Bool_t simonaChi2Cut,
+                   Bool_t badClusSimona,
+                   Bool_t simonaKinCuts,
+                   Bool_t simonaCuts,
+                   Bool_t omegaMassT0Cut,
+                   Bool_t blobCut,
+                   Bool_t noBlobCut)
+{
+  if (scenario == "NO_CUTS")
+    return kTRUE;
+  if (scenario == "SHORTER_KAON_PATHS")
+    return shorterKaonPaths;
+  if (scenario == "OLD_CUTS")
+    return condAnalysisOld;
+  if (scenario == "SIMONA_CHI2_CUT")
+    return simonaChi2Cut;
+  if (scenario == "BAD_CLUS_SIMONA")
+    return badClusSimona;
+  if (scenario == "SIMONA_KIN_CUTS")
+    return simonaKinCuts;
+  if (scenario == "SIMONA_ALL_CUTS")
+    return simonaCuts;
+  if (scenario == "OMEGA_MASS_T0_CUT")
+    return omegaMassT0Cut;
+  if (scenario == "BLOB")
+    return blobCut;
+  if (scenario == "NO_BLOB")
+    return noBlobCut;
+  return kFALSE;
+}
+
 // Wczytaj konfiguracje histogramów
 auto histogramConfigs1D = KLOE::Histograms::LoadHistogramConfigs1D(Paths::histogramConfig1DPath);
 auto histogramConfigs2D = KLOE::Histograms::LoadHistogramConfigs2D(Paths::histogramConfig2DPath);
@@ -124,13 +315,16 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
 
   // Creation of output folder with cut names
   /////////////////////////////////////////
-  Cuts cuts;
   TString option = GetOption();
-  fOption = option;
+  g_activeScenarios = ParseScenarioList(option);
+  g_scenarioCounters.clear();
+  g_secondaryScenarioStates.clear();
+  for (const auto &scenario : g_activeScenarios)
+    g_scenarioCounters[scenario] = ScenarioCounters{};
 
-  if (option.IsNull() || !cuts.Contains(option))
-    option = "NO_CUTS";
-  folderPath = "img/" + option;
+  // Primary scenario keeps the legacy histogram/canvas workflow.
+  fOption = g_activeScenarios.front();
+  folderPath = "img/" + fOption;
   FolderManagement(folderPath);
   /////////////////////////////////////////
 
@@ -204,6 +398,60 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
       hists2DReconstructed[config.first][name.second] = KH::CreateHist2D(nameRec, config.second);
       hists2DFittedSignal[config.first][name.second] = KH::CreateHist2D(nameFit, config.second);
     }
+  }
+
+  // Prepare independent histogram containers for non-primary scenarios.
+  for (const auto &scenario : g_activeScenarios)
+  {
+    if (scenario == fOption)
+      continue;
+
+    ScenarioHistogramState state;
+    state.folderPath = "img/" + scenario;
+    FolderManagement(state.folderPath);
+
+    for (const auto &config : histogramConfigs1D)
+    {
+      for (const auto &name : KLOE::channName)
+      {
+        TH1 *srcRec = histsReconstructed[config.first][name.second];
+        TH1 *srcFit = histsFittedSignal[config.first][name.second];
+
+        state.histsReconstructed[config.first][name.second] =
+            (TH1 *)srcRec->Clone(Form("%s__%s", srcRec->GetName(), scenario.Data()));
+        state.histsReconstructed[config.first][name.second]->Reset();
+
+        state.histsFittedSignal[config.first][name.second] =
+            (TH1 *)srcFit->Clone(Form("%s__%s", srcFit->GetName(), scenario.Data()));
+        state.histsFittedSignal[config.first][name.second]->Reset();
+      }
+    }
+
+    for (const auto &config : histogramConfigs2D)
+    {
+      for (const auto &name : KLOE::channName)
+      {
+        TH2 *src2D = hists2DFittedSignal[config.first][name.second];
+        state.hists2DFittedSignal[config.first][name.second] =
+            (TH2 *)src2D->Clone(Form("%s__%s", src2D->GetName(), scenario.Data()));
+        state.hists2DFittedSignal[config.first][name.second]->Reset();
+      }
+    }
+
+    state.deltaTSignalTot = (TH1 *)deltaTSignalTot->Clone(Form("%s__%s", deltaTSignalTot->GetName(), scenario.Data()));
+    state.deltaTSignalTot->Reset();
+    state.deltaTTot = (TH1 *)deltaTTot->Clone(Form("%s__%s", deltaTTot->GetName(), scenario.Data()));
+    state.deltaTTot->Reset();
+    state.histCounts = (TH1 *)histCounts->Clone(Form("%s__%s", histCounts->GetName(), scenario.Data()));
+    state.histCounts->Reset();
+
+    for (const auto &lumi : channLumi)
+    {
+      state.channEventsTotal[lumi.first] = 0;
+      state.channEventsCut[lumi.first] = 0;
+    }
+
+    g_secondaryScenarioStates[scenario] = std::move(state);
   }
 }
 
@@ -530,8 +778,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   pi02Vec.Boost(boostNeutralKaon);
 
   Float_t openingAngleCharged = pi1.Angle(pi2.Vect()) * 180.0 / TMath::Pi(),
-          openingAngleNeutral = pi01Vec.Angle(pi02Vec.Vect()) * 180.0 / TMath::Pi(),
-          acosCutAngle = acos(-0.8) * 180.0 / TMath::Pi();
+      openingAngleNeutral = pi01Vec.Angle(pi02Vec.Vect()) * 180.0 / TMath::Pi();
 
   Float_t QmissFit = sqrt(pow(KchboostFit[0] - KchrecFit[0], 2) +
                           pow(KchboostFit[1] - KchrecFit[1], 2) +
@@ -596,12 +843,9 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   deltaPhiFit = abs(Phi2Fit - Phi1Fit);
 
   // Analiza Simony ciecie na phi bad
-  const Double_t SLOPE = -10.0 / 9.0;
-
-  Bool_t condGeneral = (deltaTfit - deltaTMC)<-3.0,
-                                              condLowerLimit = (deltaTfit - deltaTMC)> SLOPE *
-                       deltaTMC,
-         condUpperLimit = (deltaTfit - deltaTMC) < (SLOPE * (deltaTMC - 2.0)),
+    Bool_t condGeneral = (deltaTfit - deltaTMC) < CutDefs::simonaBadClusDeltaTResMax,
+      condLowerLimit = (deltaTfit - deltaTMC) > CutDefs::simonaBadClusSlope * deltaTMC,
+      condUpperLimit = (deltaTfit - deltaTMC) < (CutDefs::simonaBadClusSlope * (deltaTMC - CutDefs::simonaBadClusDeltaTShift)),
          badClusSimona = condGeneral && condLowerLimit && condUpperLimit;
   ///////////////////////////////////////////////////////////////////////////////
   // Analiza Simony cięcie na 3 sigma mas
@@ -646,32 +890,33 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                 pow(abs(Kchmc[8]), 2)),
 
           zdist00MC = abs(Knemc[8] - ipmc[2]),
-          zdistpmMC = abs(Kchmc[8] - ipmc[2]),
-          radiusLimit = 1,
-          zdistLimit = 0.6;
+          zdistpmMC = abs(Kchmc[8] - ipmc[2]);
 
   Float_t T0Omega = pi0OmegaFit1[3] - pi0OmegaFit1[5];
 
-  Double_t numSigmaSimona = 3;
-
-  Float_t limitRadiusNeMC = 50.,
-          limitRadiusChMC = 50.;
-
-  Float_t a = 1,
-          b = 625.091,
-          Breal = 14.1421;
-
   Bool_t mcflagCondition = (*mcflag == 1 && mctruth_int >= 0) || *mcflag == 0,
-         condAnalysisOld = *Chi2SignalKinFit < 40. && combinedMassPi0Fit < 35. && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && abs(*minv4gam - PhysicsConstants::mK0) < 76. && *Qmiss < 3.75 && *TrcSum > -1. && openingAngleCharged > acosCutAngle,
-         simonaCuts = abs(deltaPhiFit - 3.110) > 2 * 0.135 && *Chi2SignalKinFit < 30.,
+     condAnalysisOld = *Chi2SignalKinFit < CutDefs::oldCutsChi2Max &&
+           combinedMassPi0Fit < CutDefs::oldCutsCombinedMassPi0Max &&
+           abs(Kchrec[5] - PhysicsConstants::mK0) < CutDefs::oldCutsMassKchWindow &&
+           abs(*minv4gam - PhysicsConstants::mK0) < CutDefs::oldCutsMassKneWindow &&
+           *Qmiss < CutDefs::oldCutsQmissMax &&
+           *TrcSum > CutDefs::oldCutsTrcSumMin &&
+           openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin),
+     simonaCuts = abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma &&
+            *Chi2SignalKinFit < CutDefs::simonaChi2Max,
          simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts,
-         shorterKaonPaths = pathKch < limitRadiusChMC && pathKne < limitRadiusNeMC,
-         blobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor > 75.,
-         noBlobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor <= 75.,
-         simonaChi2Cut = *Chi2SignalKinFit <= 30,
-         simonaPositionLimits = radius00 < radiusLimit && radiuspm < radiusLimit &&
-                                zdist00 < zdistLimit && zdistpm < zdistLimit,
-         omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 155.658) < numSigmaSimona * 5.691 && abs(omegaFit[5] - 782.994) < numSigmaSimona * 5.620 && omegaFit[5] < a * T0Omega + b + Breal && omegaFit[5] > a * T0Omega + b - Breal)) || !simonaPositionLimits); // && simonaKinCuts;
+     shorterKaonPaths = pathKch < CutDefs::kaonPathLimitCharged && pathKne < CutDefs::kaonPathLimitNeutral,
+     blobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor > CutDefs::blobDeltaTMin,
+     noBlobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor <= CutDefs::blobDeltaTMin,
+     simonaChi2Cut = *Chi2SignalKinFit <= CutDefs::simonaChi2Max,
+         simonaPositionLimits = radius00 < CutDefs::omegaRadiusLimit && radiuspm < CutDefs::omegaRadiusLimit &&
+                                zdist00 < CutDefs::omegaZdistLimit && zdistpm < CutDefs::omegaZdistLimit,
+     omegaMassT0Cut = ((simonaPositionLimits &&
+            !(abs(T0Omega - CutDefs::omegaT0Center) < CutDefs::omegaNSigma * CutDefs::omegaT0Sigma &&
+              abs(omegaFit[5] - CutDefs::omegaMassCenter) < CutDefs::omegaNSigma * CutDefs::omegaMassSigma &&
+              omegaFit[5] < CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB + CutDefs::omegaLineBreal &&
+              omegaFit[5] > CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB - CutDefs::omegaLineBreal)) ||
+           !simonaPositionLimits); // && simonaKinCuts;
 
   TVector3 phiMeson = {ParamSignalFit[32], ParamSignalFit[33], ParamSignalFit[34]};
   TVector3 KchrecVec = {KchrecFit[0], KchrecFit[1], KchrecFit[2]};
@@ -703,211 +948,246 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   if (mctruth_int >= 0) // && shorterKaonPaths)
     channEventsTotal[KLOE::channName.at(mctruth_int)]++;
 
-  // Option to use in analysis
-  TString option = GetOption();
-  option.ToUpper();
-  ////////////////////////////
+  // Evaluate all configured scenarios in a single event loop.
+  Int_t mctruth_tmp = mctruth_int;
+  if (mctruth_tmp == 0 && *mcflag == 1)
+    mctruth_tmp = 1;
 
-  if (option.Contains("SHORTER_KAON_PATHS"))
-    if (!shorterKaonPaths)
-      return kTRUE;
+  for (const auto &scenario : g_activeScenarios)
+  {
+    auto &cnt = g_scenarioCounters[scenario];
 
-  if (option.Contains("OLD_CUTS"))
-    if (!condAnalysisOld)
-      return kTRUE;
+    if ((mctruth_int == 1 || mctruth_int == -1 || mctruth_int == 0) && *mcflag == 1)
+      cnt.signal_tot++;
 
-  if (option.Contains("SIMONA_CHI2_CUT"))
-    if (!simonaChi2Cut)
-      return kTRUE;
+    const Bool_t passScenario = PassScenario(scenario,
+                                             shorterKaonPaths,
+                                             condAnalysisOld,
+                                             simonaChi2Cut,
+                                             badClusSimona,
+                                             simonaKinCuts,
+                                             simonaCuts,
+                                             omegaMassT0Cut,
+                                             blobCut,
+                                             noBlobCut);
 
-  if (option.Contains("BAD_CLUS_SIMONA"))
-    if (!badClusSimona)
-      return kTRUE;
+    if (!passScenario)
+      continue;
 
-  if (option.Contains("SIMONA_KIN_CUTS"))
-    if (!simonaKinCuts)
-      return kTRUE;
+    // For the requested preselection/selection/total efficiencies,
+    // count MC truth classes after scenario cut and before mcflagCondition filtering.
+    if (*mcflag == 1)
+    {
+      if (*mctruth == -1)
+        cnt.sel_mctruth_m1++;
+      else if (*mctruth == 0)
+        cnt.sel_mctruth_0++;
+      else if (*mctruth == 1)
+        cnt.sel_mctruth_1++;
+    }
 
-  if (option.Contains("SIMONA_ALL_CUTS"))
-    if (!simonaCuts)
-      return kTRUE;
+    if (!mcflagCondition)
+      continue;
 
-  if (option.Contains("OMEGA_MASS_T0_CUT"))
-    if (!omegaMassT0Cut)
-      return kTRUE;
+    cnt.passed_events++;
 
-  if (option == "BLOB")
-    if (!blobCut)
-      return kTRUE;
+    if ((mctruth_tmp == 1) && *mcflag == 1)
+      cnt.signal_num++;
 
-  if (option == "NO_BLOB")
-    if (!noBlobCut)
-      return kTRUE;
+    if (mctruth_int > 1 && *mcflag == 1)
+      cnt.bkg_tot++;
+  }
+
+  const Bool_t primaryPass = PassScenario(fOption,
+                                          shorterKaonPaths,
+                                          condAnalysisOld,
+                                          simonaChi2Cut,
+                                          badClusSimona,
+                                          simonaKinCuts,
+                                          simonaCuts,
+                                          omegaMassT0Cut,
+                                          blobCut,
+                                          noBlobCut);
 
   Bool_t corrPosLimit = (radius00 < 1.5 && radiuspm < 1.5 && zdist00 < 1.0 && zdistpm < 1.0);
   Bool_t phivLimit = abs(deltaPhiFit - 3.110) < 2 * 0.135;
   Bool_t condResCorr = (corrPosLimit && !(cos(phiTrk1Angle * TMath::Pi() / 180.0) > 0.9 || cos(phiTrk2Angle * TMath::Pi() / 180.0) > 0.9)) || !corrPosLimit;
 
-  if (mcflagCondition) // && trk2Fit[3] < -trk1Fit[3] + 505) // && abs(deltaTfit) <= 20 && shorterKaonPaths)
+  auto fillAcceptedEvent = [&](std::map<TString, std::map<TString, TH1 *>> &targetHistsReconstructed,
+                               std::map<TString, std::map<TString, TH1 *>> &targetHistsFitted,
+                               std::map<TString, std::map<TString, TH2 *>> &targetHists2DFitted,
+                               std::map<TString, Int_t> &targetEventsCut,
+                               Int_t &targetCutPassed,
+                               Int_t &targetCutNPassed,
+                               Int_t &targetOverflow,
+                               TH1 *targetHistCounts,
+                               Bool_t addToPCA)
   {
-    channEventsCut[KLOE::channName.at(mctruth_int)]++;
+    targetEventsCut[KLOE::channName.at(mctruth_int)]++;
 
-    Int_t mctruth_tmp = mctruth_int;
+    if ((*mcflag == 1 && mctruth_int >= 0) || *mcflag == 0)
+    {
+      if (simonaChi2Cut)
+        targetCutPassed++;
+      else if (!simonaChi2Cut && *Chi2SignalKinFit < 100.)
+        targetCutNPassed++;
+      else if (!simonaChi2Cut && *Chi2SignalKinFit >= 100.)
+        targetOverflow++;
 
-    if (mctruth_tmp == 0 && *mcflag == 1)
-      mctruth_tmp = 1;
+      targetHistsReconstructed["mass_Kch"][KLOE::channName.at(mctruth_tmp)]->Fill(Kchrec[5], weight);
+      targetHistsReconstructed["mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*minv4gam, weight);
+      targetHistsReconstructed["mass_pi01"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01[5], weight);
+      targetHistsReconstructed["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi02[5], weight);
+      targetHistsReconstructed["time_neutral_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(*TrcSum + *T0step1, weight);
+      targetHistsReconstructed["combined_mass_pi0"][KLOE::channName.at(mctruth_tmp)]->Fill(combinedMassPi0Fit, weight);
 
+      targetHistsFitted["mass_Kch"][KLOE::channName.at(mctruth_tmp)]->Fill(Kchrec[5], weight);
+      targetHistsFitted["mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*minv4gam, weight);
+      targetHistsFitted["bestError"][KLOE::channName.at(mctruth_tmp)]->Fill(*bestError, weight);
+      targetHistsFitted["mass_pi01"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[5], weight);
+      targetHistsFitted["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi02Fit[5], weight);
+      targetHistsFitted["chi2_signalKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., weight);
+      targetHistCounts->Fill(*Chi2SignalKinFit / 10.);
+      targetHistsFitted["chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2OmegaKinFit / 8., weight);
+      targetHistsFitted["prob_signal"][KLOE::channName.at(mctruth_tmp)]->Fill(TMath::Prob(*Chi2SignalKinFit, 10), weight);
+      targetHistsFitted["combined_mass_pi0"][KLOE::channName.at(mctruth_tmp)]->Fill(combinedMassPi0Fit, weight);
+
+      for (Int_t i = 0; i < 39; i++)
+      {
+        targetHistsFitted["pull" + std::to_string(i + 1)][KLOE::channName.at(mctruth_tmp)]->Fill(pullsSignalFit[i], weight);
+      }
+
+      targetHistsFitted["time_neutral_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(*TrcSum, weight);
+      targetHistsFitted["openingAngleCharged"][KLOE::channName.at(mctruth_tmp)]->Fill(openingAngleCharged, weight);
+      targetHistsFitted["openingAngleNeutral"][KLOE::channName.at(mctruth_tmp)]->Fill(openingAngleNeutral, weight);
+      targetHistsFitted["Qmiss"][KLOE::channName.at(mctruth_tmp)]->Fill(*Qmiss, weight);
+      targetHistsReconstructed["delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaT, weight);
+      targetHistsFitted["delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTfit, weight);
+      targetHistsFitted["delta_t_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTMC, weight);
+      targetHistsFitted["deltaPhiv"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaPhi, weight);
+      targetHistsFitted["deltaPhivFit"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaPhiFit, weight);
+      targetHistsFitted["deltaTheta"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTheta, weight);
+      targetHistsFitted["TransvRadius"][KLOE::channName.at(mctruth_tmp)]->Fill(path00MCCenter, weight);
+      targetHistsFitted["T0Omega"][KLOE::channName.at(mctruth_tmp)]->Fill(T0Omega, weight);
+      targetHistsFitted["mass_omega"][KLOE::channName.at(mctruth_tmp)]->Fill(omegaFit[5], weight);
+      targetHistsFitted["dist_z_Neu"][KLOE::channName.at(mctruth_tmp)]->Fill(KnerecFit[8] - ipFit[2], weight);
+      targetHistsFitted["dist_z_Ch"][KLOE::channName.at(mctruth_tmp)]->Fill(KchrecFit[8] - ipFit[2], weight);
+
+      if (*muonAlertPlus > 0 || *muonAlertMinus > 0)
+        targetHistsFitted["muon_alert"][KLOE::channName.at(mctruth_tmp)]->Fill(1., weight);
+      else
+        targetHistsFitted["muon_alert"][KLOE::channName.at(mctruth_tmp)]->Fill(0., weight);
+
+      targetHists2DFitted["T0_omega_vs_mass_omega"][KLOE::channName.at(mctruth_tmp)]->Fill(T0Omega, omegaFit[5], weight);
+      targetHists2DFitted["delta_t_mc_vs_delta_t_res"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTMC, deltaTfit - deltaTMC, weight);
+      targetHists2DFitted["delta_t_vs_delta_t_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTMC, deltaT - deltaTMC, weight);
+      targetHists2DFitted["delta_t_fit_vs_delta_t_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTMC, deltaTfit, weight);
+      targetHists2DFitted["t_ch_fit_vs_t_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, *KaonChTimeCMSignalFit - *KaonChTimeCMMC, weight);
+      targetHists2DFitted["t_neu_fit_vs_t_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMSignalFit - *KaonNeTimeCMMC, weight);
+      targetHists2DFitted["t_ch_rec_vs_t_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, propTimes.kaon1TimeCM - *KaonChTimeCMMC, weight);
+      targetHists2DFitted["t_neu_rec_vs_t_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, propTimes.kaon2TimeCM - *KaonNeTimeCMMC, weight);
+      targetHists2DFitted["t_ch_fit_MC_vs_t_neu_fit_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMSignalFit - *KaonChTimeCMMC, *KaonNeTimeCMSignalFit - *KaonNeTimeCMMC, weight);
+
+      if (*KaonNeTimeCMSignalFit <= *KaonNeTimeCMMC - (KLOE::T0 / 2.))
+        targetHists2DFitted["t_ch_fit_vs_t_neu_fit"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMSignalFit, *KaonNeTimeCMSignalFit, weight);
+
+      targetHists2DFitted["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., *Chi2OmegaKinFit / 8., weight);
+      targetHists2DFitted["t00_tri_vs_t00_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostTriFit, weight);
+      targetHists2DFitted["t00_triangle_vs_t00_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostLor, weight);
+      targetHists2DFitted["t00_triangle_vs_t00_tri"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMBoostLor, *KaonNeTimeCMBoostTriFit, weight);
+      targetHists2DFitted["Rkne_vs_Rkch"][KLOE::channName.at(mctruth_tmp)]->Fill(RKne, RKch, weight);
+      targetHists2DFitted["chi2_signalKinFit_vs_mass_Kch"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, Kchrec[5] - PhysicsConstants::mK0, weight);
+      targetHists2DFitted["chi2_signalKinFit_vs_mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, Knerec[5] - PhysicsConstants::mK0, weight);
+      targetHists2DFitted["chi2_signalKinFit_vs_delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., deltaTfit, weight);
+      targetHists2DFitted["TransvRadius_vs_delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(pathpm, deltaTfit, weight);
+      targetHists2DFitted["Qmiss_vs_deltaPhi"][KLOE::channName.at(mctruth_tmp)]->Fill(*Qmiss, deltaPhi, weight);
+      targetHists2DFitted["mass_pi01_vs_mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[5], pi02Fit[5], weight);
+      targetHists2DFitted["mass_Kch_vs_mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(Kchrec[5], *minv4gam, weight);
+
+      Double_t ppmMC = sqrt(pow(Kchmc[0], 2) + pow(Kchmc[1], 2) + pow(Kchmc[2], 2));
+      Double_t p00MC = sqrt(pow(Knemc[0], 2) + pow(Knemc[1], 2) + pow(Knemc[2], 2));
+      Double_t ppm = sqrt(pow(KchrecFit[0], 2) + pow(KchrecFit[1], 2) + pow(KchrecFit[2], 2));
+      Double_t p00 = sqrt(pow(KnerecFit[0], 2) + pow(KnerecFit[1], 2) + pow(KnerecFit[2], 2));
+
+      targetHists2DFitted["pt_ch_fit_vs_pt_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, ppm - ppmMC, weight);
+      targetHists2DFitted["pt_neu_fit_vs_pt_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, p00 - p00MC, weight);
+      targetHists2DFitted["rt_ch_fit_vs_rt_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, radiuspm - radiuspmMC, weight);
+      targetHists2DFitted["rt_neu_fit_vs_rt_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, radius00 - radius00MC, weight);
+      targetHists2DFitted["z_ch_fit_vs_z_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, zdistpm - zdistpmMC, weight);
+      targetHists2DFitted["z_neu_fit_vs_z_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, zdist00 - zdist00MC, weight);
+      targetHists2DFitted["Phi_trk1_angle_vs_Phi_trk2_angle"][KLOE::channName.at(mctruth_tmp)]->Fill(cos(phiTrk1Angle * TMath::Pi() / 180.0), cos(phiTrk2Angle * TMath::Pi() / 180.0), weight);
+      targetHists2DFitted["Phi_pi01_angle_vs_Phi_pi02_angle"][KLOE::channName.at(mctruth_tmp)]->Fill(cos(phipi01Angle * TMath::Pi() / 180.0), cos(phipi02Angle * TMath::Pi() / 180.0), weight);
+      targetHists2DFitted["Energy_trk1_vs_Energy_trk2"][KLOE::channName.at(mctruth_tmp)]->Fill(trk1Fit[3], trk2Fit[3], weight);
+      targetHists2DFitted["Energy_pi01_vs_Energy_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[3], pi02Fit[3], weight);
+
+      if (addToPCA)
+      {
+        dataPCA[0] = T0Omega;
+        dataPCA[1] = omegaFit[5];
+        AddDataToPCA(dataPCA);
+      }
+    }
+  };
+
+  if (primaryPass && mcflagCondition) // && trk2Fit[3] < -trk1Fit[3] + 505) // && abs(deltaTfit) <= 20 && shorterKaonPaths)
+  {
     if ((mctruth_tmp == 1) && *mcflag == 1)
       signal_num++;
 
     if (mctruth_int > 1 && *mcflag == 1)
       bkg_tot++;
 
-    if ((*mcflag == 1 && mctruth_int >= 0) || *mcflag == 0)
-    {
-      if (simonaChi2Cut)
-        cutPassed++;
-      else if (!simonaChi2Cut && *Chi2SignalKinFit < 100.)
-        cutNPassed++;
-      else if (!simonaChi2Cut && *Chi2SignalKinFit >= 100.)
-        overflow++;
+    fillAcceptedEvent(histsReconstructed,
+                      histsFittedSignal,
+                      hists2DFittedSignal,
+                      channEventsCut,
+                      cutPassed,
+                      cutNPassed,
+                      overflow,
+                      histCounts,
+                      kTRUE);
+  }
 
-      // Fill histograms for reconstructed variables
-      histsReconstructed["mass_Kch"][KLOE::channName.at(mctruth_tmp)]->Fill(Kchrec[5], weight);
+  // Fill independent histograms for non-primary scenarios.
+  for (const auto &scenario : g_activeScenarios)
+  {
+    if (scenario == fOption)
+      continue;
 
-      histsReconstructed["mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*minv4gam, weight);
+    auto stateIt = g_secondaryScenarioStates.find(scenario);
+    if (stateIt == g_secondaryScenarioStates.end())
+      continue;
 
-      histsReconstructed["mass_pi01"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01[5], weight);
-      histsReconstructed["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi02[5], weight);
+    ScenarioHistogramState &state = stateIt->second;
 
-      histsReconstructed["time_neutral_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(*TrcSum + *T0step1, weight);
+    if ((mctruth_int == 1) && *mcflag == 1)
+      state.deltaTSignalTot->Fill(deltaTMC, weight);
+    if (mctruth_int >= 0)
+      state.channEventsTotal[KLOE::channName.at(mctruth_int)]++;
 
-      histsReconstructed["combined_mass_pi0"][KLOE::channName.at(mctruth_tmp)]->Fill(combinedMassPi0Fit, weight);
+    const Bool_t passScenario = PassScenario(scenario,
+                                             shorterKaonPaths,
+                                             condAnalysisOld,
+                                             simonaChi2Cut,
+                                             badClusSimona,
+                                             simonaKinCuts,
+                                             simonaCuts,
+                                             omegaMassT0Cut,
+                                             blobCut,
+                                             noBlobCut);
 
-      // Fitted signal variables
-      histsFittedSignal["mass_Kch"][KLOE::channName.at(mctruth_tmp)]->Fill(Kchrec[5], weight);
+    if (!passScenario || !mcflagCondition)
+      continue;
 
-      histsFittedSignal["mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*minv4gam, weight);
-
-      histsFittedSignal["bestError"][KLOE::channName.at(mctruth_tmp)]->Fill(*bestError, weight);
-
-      histsFittedSignal["mass_pi01"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[5], weight);
-      histsFittedSignal["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi02Fit[5], weight);
-
-      histsFittedSignal["chi2_signalKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., weight);
-      histCounts->Fill(*Chi2SignalKinFit / 10.);
-
-      histsFittedSignal["chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2OmegaKinFit / 8., weight);
-      histsFittedSignal["prob_signal"][KLOE::channName.at(mctruth_tmp)]->Fill(TMath::Prob(*Chi2SignalKinFit, 10), weight);
-
-      histsFittedSignal["combined_mass_pi0"][KLOE::channName.at(mctruth_tmp)]->Fill(combinedMassPi0Fit, weight);
-
-      for (Int_t i = 0; i < 39; i++)
-      {
-        histsFittedSignal["pull" + std::to_string(i + 1)][KLOE::channName.at(mctruth_tmp)]->Fill(pullsSignalFit[i], weight);
-      }
-
-      histsFittedSignal["time_neutral_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(*TrcSum, weight);
-
-      histsFittedSignal["openingAngleCharged"][KLOE::channName.at(mctruth_tmp)]->Fill(openingAngleCharged, weight);
-      histsFittedSignal["openingAngleNeutral"][KLOE::channName.at(mctruth_tmp)]->Fill(openingAngleNeutral, weight);
-
-      histsFittedSignal["Qmiss"][KLOE::channName.at(mctruth_tmp)]->Fill(*Qmiss, weight);
-
-      histsReconstructed["delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaT, weight);
-      histsFittedSignal["delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTfit, weight);
-
-      histsFittedSignal["delta_t_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTMC, weight);
-
-      histsFittedSignal["deltaPhiv"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaPhi, weight);
-      histsFittedSignal["deltaPhivFit"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaPhiFit, weight);
-
-      histsFittedSignal["deltaTheta"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTheta, weight);
-
-      histsFittedSignal["TransvRadius"][KLOE::channName.at(mctruth_tmp)]->Fill(path00MCCenter, weight);
-
-      histsFittedSignal["T0Omega"][KLOE::channName.at(mctruth_tmp)]->Fill(T0Omega, weight);
-
-      histsFittedSignal["mass_omega"][KLOE::channName.at(mctruth_tmp)]->Fill(omegaFit[5], weight);
-
-      histsFittedSignal["dist_z_Neu"][KLOE::channName.at(mctruth_tmp)]->Fill(KnerecFit[8] - ipFit[2], weight);
-      histsFittedSignal["dist_z_Ch"][KLOE::channName.at(mctruth_tmp)]->Fill(KchrecFit[8] - ipFit[2], weight);
-
-      if (*muonAlertPlus > 0 || *muonAlertMinus > 0)
-        histsFittedSignal["muon_alert"][KLOE::channName.at(mctruth_tmp)]->Fill(1., weight);
-      else
-        histsFittedSignal["muon_alert"][KLOE::channName.at(mctruth_tmp)]->Fill(0., weight);
-
-      hists2DFittedSignal["T0_omega_vs_mass_omega"][KLOE::channName.at(mctruth_tmp)]->Fill(T0Omega, omegaFit[5], weight);
-
-      hists2DFittedSignal["delta_t_mc_vs_delta_t_res"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTMC, deltaTfit - deltaTMC, weight);
-      hists2DFittedSignal["delta_t_vs_delta_t_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTMC, deltaT - deltaTMC, weight);
-
-      hists2DFittedSignal["delta_t_fit_vs_delta_t_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(deltaTMC, deltaTfit, weight);
-
-      hists2DFittedSignal["t_ch_fit_vs_t_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, *KaonChTimeCMSignalFit - *KaonChTimeCMMC, weight);
-      hists2DFittedSignal["t_neu_fit_vs_t_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMSignalFit - *KaonNeTimeCMMC, weight);
-
-      hists2DFittedSignal["t_ch_rec_vs_t_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, propTimes.kaon1TimeCM - *KaonChTimeCMMC, weight);
-      hists2DFittedSignal["t_neu_rec_vs_t_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, propTimes.kaon2TimeCM - *KaonNeTimeCMMC, weight);
-
-      hists2DFittedSignal["t_ch_fit_MC_vs_t_neu_fit_MC"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMSignalFit - *KaonChTimeCMMC, *KaonNeTimeCMSignalFit - *KaonNeTimeCMMC, weight);
-
-      if (*KaonNeTimeCMSignalFit <= *KaonNeTimeCMMC - (KLOE::T0 / 2.))
-        hists2DFittedSignal["t_ch_fit_vs_t_neu_fit"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMSignalFit, *KaonNeTimeCMSignalFit, weight);
-
-      hists2DFittedSignal["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., *Chi2OmegaKinFit / 8., weight);
-
-      hists2DFittedSignal["t00_tri_vs_t00_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostTriFit, weight);
-
-      hists2DFittedSignal["t00_triangle_vs_t00_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostLor, weight);
-
-      hists2DFittedSignal["t00_triangle_vs_t00_tri"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMBoostLor, *KaonNeTimeCMBoostTriFit, weight);
-
-      hists2DFittedSignal["Rkne_vs_Rkch"][KLOE::channName.at(mctruth_tmp)]->Fill(RKne, RKch, weight);
-
-      hists2DFittedSignal["chi2_signalKinFit_vs_mass_Kch"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, Kchrec[5] - PhysicsConstants::mK0, weight);
-
-      hists2DFittedSignal["chi2_signalKinFit_vs_mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit, Knerec[5] - PhysicsConstants::mK0, weight);
-
-      hists2DFittedSignal["chi2_signalKinFit_vs_delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., deltaTfit, weight);
-
-      hists2DFittedSignal["TransvRadius_vs_delta_t"][KLOE::channName.at(mctruth_tmp)]->Fill(pathpm, deltaTfit, weight);
-
-      hists2DFittedSignal["Qmiss_vs_deltaPhi"][KLOE::channName.at(mctruth_tmp)]->Fill(*Qmiss, deltaPhi, weight);
-
-      hists2DFittedSignal["mass_pi01_vs_mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[5], pi02Fit[5], weight);
-
-      hists2DFittedSignal["mass_Kch_vs_mass_Kne"][KLOE::channName.at(mctruth_tmp)]->Fill(Kchrec[5], *minv4gam, weight);
-
-      Double_t ppmMC = sqrt(pow(Kchmc[0], 2) + pow(Kchmc[1], 2) + pow(Kchmc[2], 2)),
-               p00MC = sqrt(pow(Knemc[0], 2) + pow(Knemc[1], 2) + pow(Knemc[2], 2)),
-               ppm = sqrt(pow(KchrecFit[0], 2) + pow(KchrecFit[1], 2) + pow(KchrecFit[2], 2)),
-               p00 = sqrt(pow(KnerecFit[0], 2) + pow(KnerecFit[1], 2) + pow(KnerecFit[2], 2)),
-               pTphi = sqrt(pow(ParamSignalFit[33], 2) + pow(ParamSignalFit[34], 2));
-
-      // std::cout << pTphi << std::endl;
-
-      hists2DFittedSignal["pt_ch_fit_vs_pt_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, ppm - ppmMC, weight);
-      hists2DFittedSignal["pt_neu_fit_vs_pt_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, p00 - p00MC, weight);
-
-      hists2DFittedSignal["rt_ch_fit_vs_rt_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, radiuspm - radiuspmMC, weight);
-      hists2DFittedSignal["rt_neu_fit_vs_rt_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, radius00 - radius00MC, weight);
-
-      hists2DFittedSignal["z_ch_fit_vs_z_ch_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMMC, zdistpm - zdistpmMC, weight);
-      hists2DFittedSignal["z_neu_fit_vs_z_neu_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, zdist00 - zdist00MC, weight);
-
-      hists2DFittedSignal["Phi_trk1_angle_vs_Phi_trk2_angle"][KLOE::channName.at(mctruth_tmp)]->Fill(cos(phiTrk1Angle * TMath::Pi() / 180.0), cos(phiTrk2Angle * TMath::Pi() / 180.0), weight);
-      hists2DFittedSignal["Phi_pi01_angle_vs_Phi_pi02_angle"][KLOE::channName.at(mctruth_tmp)]->Fill(cos(phipi01Angle * TMath::Pi() / 180.0), cos(phipi02Angle * TMath::Pi() / 180.0), weight);
-
-      hists2DFittedSignal["Energy_trk1_vs_Energy_trk2"][KLOE::channName.at(mctruth_tmp)]->Fill(trk1Fit[3], trk2Fit[3], weight);
-      hists2DFittedSignal["Energy_pi01_vs_Energy_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[3], pi02Fit[3], weight);
-
-      dataPCA[0] = T0Omega;
-      dataPCA[1] = omegaFit[5];
-
-      AddDataToPCA(dataPCA);
-    }
+    fillAcceptedEvent(state.histsReconstructed,
+                      state.histsFittedSignal,
+                      state.hists2DFittedSignal,
+                      state.channEventsCut,
+                      state.cutPassed,
+                      state.cutNPassed,
+                      state.overflow,
+                      state.histCounts,
+                      kFALSE);
   }
 
   return kTRUE;
@@ -1027,6 +1307,7 @@ void signal_vs_bcg_v2::Terminate()
 
     // DODAJ WŁASNĄ LEGENDĘ W LEWYM GÓRNYM ROGU:
     TLegend *legend = new TLegend(0.6, 0.65, 0.9, 0.9, "", "NDC");
+    TLegend *deltaTCompLegend = nullptr;
 
     legend->SetBorderSize(1);
     legend->SetFillColor(kWhite);
@@ -1165,12 +1446,24 @@ void signal_vs_bcg_v2::Terminate()
 
         if (config.first == "delta_t" && channelType.second == "Signal")
         {
-          histsFittedSignal["delta_t"][channelType.second]->SetLineColor(kBlue);
+          histsFittedSignal["delta_t"][channelType.second]->SetLineColor(kBlue + 1);
+          histsFittedSignal["delta_t"][channelType.second]->SetLineWidth(3);
           histsFittedSignal["delta_t"][channelType.second]->Draw("HIST SAME");
-          histsReconstructed["delta_t"][channelType.second]->SetLineColor(kRed);
+          histsReconstructed["delta_t"][channelType.second]->SetLineColor(kRed + 1);
+          histsReconstructed["delta_t"][channelType.second]->SetLineWidth(3);
           histsReconstructed["delta_t"][channelType.second]->Draw("HIST SAME");
-          histsFittedSignal["delta_t_MC"][channelType.second]->SetLineColor(kBlack);
+          histsFittedSignal["delta_t_MC"][channelType.second]->SetLineColor(kGreen + 2);
+          histsFittedSignal["delta_t_MC"][channelType.second]->SetLineStyle(2);
+          histsFittedSignal["delta_t_MC"][channelType.second]->SetLineWidth(3);
           histsFittedSignal["delta_t_MC"][channelType.second]->Draw("HIST SAME");
+
+          deltaTCompLegend = new TLegend(0.18, 0.72, 0.52, 0.9, "", "NDC");
+          deltaTCompLegend->SetBorderSize(1);
+          deltaTCompLegend->SetFillColor(kWhite);
+          deltaTCompLegend->SetTextSize(0.03);
+          deltaTCompLegend->AddEntry(histsFittedSignal["delta_t"][channelType.second], "Fitted #Delta t", "l");
+          deltaTCompLegend->AddEntry(histsReconstructed["delta_t"][channelType.second], "Reconstructed #Delta t", "l");
+          deltaTCompLegend->AddEntry(histsFittedSignal["delta_t_MC"][channelType.second], "MC generated #Delta t", "l");
         }
         else
         {
@@ -1211,6 +1504,9 @@ void signal_vs_bcg_v2::Terminate()
 
     if (!fitOmegaGaus && !fitSignalBadClus && !(config.first == "TransvRadius") && channEventsTotal["Omega"] > 0)
       legend->Draw();
+
+    if (deltaTCompLegend)
+      deltaTCompLegend->Draw();
 
     // Sprawdź czy JAKIKOLWIEK histogram ma wpisy
     Bool_t hasEntries = kFALSE;
@@ -1478,6 +1774,243 @@ void signal_vs_bcg_v2::Terminate()
   std::cout << "Background events: " << bkg_tot << std::endl;
 
   std::cout << "Purity: " << 100 * purity << " % (" << channEventsCutCorr["Signal"] << "/" << tot_events << ")" << std::endl;
+
+  std::cout << "\n=== Single-pass multi-scenario summary ===" << std::endl;
+  for (const auto &entry : g_scenarioCounters)
+  {
+    const TString &scenario = entry.first;
+    const ScenarioCounters &cnt = entry.second;
+
+    const Double_t effScenario = (cnt.signal_tot > 0)
+                                   ? static_cast<Double_t>(cnt.signal_num) / cnt.signal_tot
+                                   : 0.0;
+    const Int_t totalScenario = cnt.signal_num + cnt.bkg_tot;
+    const Double_t purityScenario = (totalScenario > 0)
+                                      ? static_cast<Double_t>(cnt.signal_num) / totalScenario
+                                      : 0.0;
+
+    const Int_t denomPreselection = cnt.sel_mctruth_m1 + cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
+    const Int_t numerPreselection = cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
+    const Double_t effPreselection = ComputeSafeRatio(numerPreselection, denomPreselection);
+    const Double_t effSelection = ComputeSafeRatio(cnt.sel_mctruth_1, cnt.sel_mctruth_0 + cnt.sel_mctruth_1);
+    const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1, denomPreselection);
+
+    std::cout << "Scenario: " << scenario
+              << ", Efficiency: " << 100.0 * effScenario << " % (" << cnt.signal_num << "/" << cnt.signal_tot << ")"
+              << ", Purity: " << 100.0 * purityScenario << " % (" << cnt.signal_num << "/" << totalScenario << ")"
+          << ", Preselection eff: " << 100.0 * effPreselection << " % ((mctruth 0+1)/(mctruth -1+0+1) = " << numerPreselection << "/" << denomPreselection << ")"
+              << ", Selection eff: " << 100.0 * effSelection << " % ((mctruth 1)/(mctruth 0+1) = " << cnt.sel_mctruth_1 << "/" << (cnt.sel_mctruth_0 + cnt.sel_mctruth_1) << ")"
+          << ", Total eff: " << 100.0 * effTotalTruth << " % ((mctruth 1)/(mctruth -1+0+1) = " << cnt.sel_mctruth_1 << "/" << denomPreselection << ")"
+              << ", Passed events: " << cnt.passed_events
+              << std::endl;
+  }
+
+  // Save scenario summary reports to log/YYYY-MM-DD with timestamp.
+  {
+    std::time_t now = std::time(nullptr);
+    std::tm *lt = std::localtime(&now);
+    char dateBuf[11];      // YYYY-MM-DD
+    char stampBuf[20];     // YYYY-MM-DD_HH-MM-SS
+    std::strftime(dateBuf, sizeof(dateBuf), "%Y-%m-%d", lt);
+    std::strftime(stampBuf, sizeof(stampBuf), "%Y-%m-%d_%H-%M-%S", lt);
+
+    TString logDir = Form("log/%s", dateBuf);
+    system(Form("mkdir -p %s", logDir.Data()));
+
+    TString csvPath = Form("%s/scenario_report_%s.csv", logDir.Data(), stampBuf);
+    TString txtPath = Form("%s/scenario_report_%s.txt", logDir.Data(), stampBuf);
+
+    std::ofstream csv(csvPath.Data());
+    std::ofstream txt(txtPath.Data());
+
+    if (csv.is_open())
+    {
+      csv << "scenario,signal_num,signal_tot,bkg_tot,total_selected,efficiency,purity,passed_events,mctruth_m1_selected,mctruth_0_selected,mctruth_1_selected,preselection_eff,selection_eff,total_eff\n";
+      for (const auto &entry : g_scenarioCounters)
+      {
+        const TString &scenario = entry.first;
+        const ScenarioCounters &cnt = entry.second;
+        const Double_t effScenario = (cnt.signal_tot > 0) ? static_cast<Double_t>(cnt.signal_num) / cnt.signal_tot : 0.0;
+        const Int_t totalScenario = cnt.signal_num + cnt.bkg_tot;
+        const Double_t purityScenario = (totalScenario > 0) ? static_cast<Double_t>(cnt.signal_num) / totalScenario : 0.0;
+        const Int_t denomPreselection = cnt.sel_mctruth_m1 + cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
+        const Int_t numerPreselection = cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
+        const Double_t effPreselection = ComputeSafeRatio(numerPreselection, denomPreselection);
+        const Double_t effSelection = ComputeSafeRatio(cnt.sel_mctruth_1, cnt.sel_mctruth_0 + cnt.sel_mctruth_1);
+        const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1, denomPreselection);
+
+        csv << scenario.Data() << ","
+            << cnt.signal_num << ","
+            << cnt.signal_tot << ","
+            << cnt.bkg_tot << ","
+            << totalScenario << ","
+            << effScenario << ","
+            << purityScenario << ","
+            << cnt.passed_events << ","
+            << cnt.sel_mctruth_m1 << ","
+            << cnt.sel_mctruth_0 << ","
+            << cnt.sel_mctruth_1 << ","
+            << effPreselection << ","
+            << effSelection << ","
+            << effTotalTruth << "\n";
+      }
+    }
+
+    if (txt.is_open())
+    {
+      txt << "Scenario report generated at: " << stampBuf << "\n\n";
+      for (const auto &entry : g_scenarioCounters)
+      {
+        const TString &scenario = entry.first;
+        const ScenarioCounters &cnt = entry.second;
+        const Double_t effScenario = (cnt.signal_tot > 0) ? static_cast<Double_t>(cnt.signal_num) / cnt.signal_tot : 0.0;
+        const Int_t totalScenario = cnt.signal_num + cnt.bkg_tot;
+        const Double_t purityScenario = (totalScenario > 0) ? static_cast<Double_t>(cnt.signal_num) / totalScenario : 0.0;
+        const Int_t denomPreselection = cnt.sel_mctruth_m1 + cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
+        const Int_t numerPreselection = cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
+        const Double_t effPreselection = ComputeSafeRatio(numerPreselection, denomPreselection);
+        const Double_t effSelection = ComputeSafeRatio(cnt.sel_mctruth_1, cnt.sel_mctruth_0 + cnt.sel_mctruth_1);
+        const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1, denomPreselection);
+
+        txt << "Scenario: " << scenario << "\n"
+            << "  signal_num: " << cnt.signal_num << "\n"
+            << "  signal_tot: " << cnt.signal_tot << "\n"
+            << "  bkg_tot: " << cnt.bkg_tot << "\n"
+            << "  total_selected: " << totalScenario << "\n"
+            << "  efficiency: " << effScenario << "\n"
+            << "  purity: " << purityScenario << "\n"
+            << "  mctruth_-1_selected: " << cnt.sel_mctruth_m1 << "\n"
+            << "  mctruth_0_selected: " << cnt.sel_mctruth_0 << "\n"
+            << "  mctruth_1_selected: " << cnt.sel_mctruth_1 << "\n"
+            << "  preselection_eff ((mctruth 0+1)/(mctruth -1+0+1)): " << effPreselection << "\n"
+            << "  selection_eff ((mctruth 1)/(mctruth 0+1)): " << effSelection << "\n"
+            << "  total_eff ((mctruth 1)/(mctruth -1+0+1)): " << effTotalTruth << "\n"
+            << "  passed_events: " << cnt.passed_events << "\n\n";
+      }
+    }
+
+    std::cout << "Saved scenario reports: " << csvPath << " and " << txtPath << std::endl;
+  }
+
+  // Render separate output plots for all non-primary scenarios.
+  for (auto &entry : g_secondaryScenarioStates)
+  {
+    const TString &scenario = entry.first;
+    ScenarioHistogramState &state = entry.second;
+
+    std::cout << "Rendering plots for scenario: " << scenario << std::endl;
+
+    for (const auto &config : histogramConfigs1D)
+    {
+      TCanvas *c = new TCanvas(Form("c_%s_%s", config.first.Data(), scenario.Data()),
+                               Form("Canvas for %s (%s)", config.first.Data(), scenario.Data()),
+                               750, 750);
+
+      Double_t maxVal = 0.0;
+      for (const auto &channelType : KLOE::channName)
+      {
+        TH1 *h = state.histsFittedSignal[config.first][channelType.second];
+        if (h && h->GetMaximum() > maxVal)
+          maxVal = h->GetMaximum();
+      }
+
+      Bool_t drawn = kFALSE;
+      TLegend *legend = new TLegend(0.6, 0.65, 0.9, 0.9, "", "NDC");
+      legend->SetBorderSize(1);
+      legend->SetFillColor(kWhite);
+      legend->SetTextSize(0.03);
+
+      for (const auto &channelType : KLOE::channName)
+      {
+        if (channelType.second == "MC sum")
+          continue;
+
+        TH1 *h = state.histsFittedSignal[config.first][channelType.second];
+        if (!h || h->GetEntries() <= 0)
+          continue;
+
+        h->SetLineColor(KLOE::channColor.at(channelType.second));
+        h->SetTitle("");
+        h->GetYaxis()->SetRangeUser(0, maxVal > 0.0 ? maxVal * 1.2 : 1.0);
+
+        if (!drawn)
+        {
+          if (channelType.second == "Data")
+            h->Draw("PE");
+          else
+            h->Draw("HIST");
+          drawn = kTRUE;
+        }
+        else
+        {
+          if (channelType.second == "Data")
+            h->Draw("PE SAME");
+          else
+            h->Draw("HIST SAME");
+        }
+
+        legend->AddEntry(h, channelType.second, channelType.second == "Data" ? "pe" : "l");
+      }
+
+      if (drawn)
+      {
+        legend->Draw();
+        c->SaveAs(Form("%s/%s_comparison%s", state.folderPath.Data(), config.first.Data(), Paths::ext_img.Data()));
+      }
+
+      delete c;
+    }
+
+    for (const auto &config : histogramConfigs2D)
+    {
+      for (const auto &channelType : KLOE::channName)
+      {
+        TH2 *h2 = state.hists2DFittedSignal[config.first][channelType.second];
+        if (!h2 || h2->GetEntries() <= 0)
+          continue;
+
+        TCanvas *c2 = new TCanvas(Form("c2_%s_%s_%s", config.first.Data(), channelType.second.Data(), scenario.Data()),
+                                  Form("Canvas2D for %s %s (%s)", config.first.Data(), channelType.second.Data(), scenario.Data()),
+                                  750, 750);
+        c2->SetLogz(1);
+        h2->Draw("COLZ");
+        c2->SaveAs(Form("%s/%s_%s_2D%s", state.folderPath.Data(), config.first.Data(), channelType.second.Data(), Paths::ext_img.Data()));
+        delete c2;
+      }
+    }
+
+    if (state.deltaTSignalTot && state.deltaTSignalTot->Integral(0, state.deltaTSignalTot->GetNbinsX() + 1) > 0.0)
+    {
+      TH1 *numEff = state.histsFittedSignal["delta_t_MC"]["Signal"];
+      if (numEff && numEff->Integral(0, numEff->GetNbinsX() + 1) > 0.0)
+      {
+        TCanvas *cEff = new TCanvas(Form("Efficiency_%s", scenario.Data()), "Efficiency", 800, 800);
+        TEfficiency *effSc = new TEfficiency(*numEff, *state.deltaTSignalTot);
+        effSc->SetUseWeightedEvents(kTRUE);
+        effSc->SetStatisticOption(TEfficiency::kBUniform);
+        effSc->Draw();
+        cEff->SaveAs(state.folderPath + "/efficiency_delta_t" + Paths::ext_img.Data());
+        delete cEff;
+      }
+    }
+
+    TH1 *numPurity = state.histsFittedSignal["delta_t"]["Signal"];
+    TH1 *denPurity = state.histsFittedSignal["delta_t"]["MC sum"];
+    if (numPurity && denPurity && denPurity->Integral(0, denPurity->GetNbinsX() + 1) > 0.0)
+    {
+      TCanvas *cPurity = new TCanvas(Form("Purity_%s", scenario.Data()), "Purity", 800, 800);
+      TEfficiency *purSc = new TEfficiency(*numPurity, *denPurity);
+      purSc->SetUseWeightedEvents(kTRUE);
+      purSc->SetStatisticOption(TEfficiency::kBUniform);
+      purSc->Draw();
+      cPurity->SaveAs(state.folderPath + "/purity_delta_t" + Paths::ext_img.Data());
+      delete cPurity;
+    }
+
+    SaveDeltaTComparisonPlot(state.folderPath, scenario, state.histsFittedSignal, state.histsReconstructed);
+  }
+
+  SaveDeltaTComparisonPlot(folderPath, fOption, histsFittedSignal, histsReconstructed);
 }
 
 Double_t signal_vs_bcg_v2::CalculatePurity(Int_t signal, Int_t total) const
