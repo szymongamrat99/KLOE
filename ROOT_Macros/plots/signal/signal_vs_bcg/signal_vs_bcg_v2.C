@@ -266,15 +266,15 @@ std::vector<TString> ParseScenarioList(const TString &option)
 }
 
 Bool_t PassScenario(const TString &scenario,
-                   Bool_t shorterKaonPaths,
-                   Bool_t condAnalysisOld,
-                   Bool_t simonaChi2Cut,
-                   Bool_t badClusSimona,
-                   Bool_t simonaKinCuts,
-                   Bool_t simonaCuts,
-                   Bool_t omegaMassT0Cut,
-                   Bool_t blobCut,
-                   Bool_t noBlobCut)
+                    Bool_t shorterKaonPaths,
+                    Bool_t condAnalysisOld,
+                    Bool_t simonaChi2Cut,
+                    Bool_t badClusSimona,
+                    Bool_t simonaKinCuts,
+                    Bool_t simonaDeltaPhiCut,
+                    Bool_t omegaMassT0Cut,
+                    Bool_t blobCut,
+                    Bool_t noBlobCut)
 {
   if (scenario == "NO_CUTS")
     return kTRUE;
@@ -289,7 +289,7 @@ Bool_t PassScenario(const TString &scenario,
   if (scenario == "SIMONA_KIN_CUTS")
     return simonaKinCuts;
   if (scenario == "SIMONA_ALL_CUTS")
-    return simonaCuts;
+    return simonaDeltaPhiCut;
   if (scenario == "OMEGA_MASS_T0_CUT")
     return omegaMassT0Cut;
   if (scenario == "BLOB")
@@ -778,7 +778,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   pi02Vec.Boost(boostNeutralKaon);
 
   Float_t openingAngleCharged = pi1.Angle(pi2.Vect()) * 180.0 / TMath::Pi(),
-      openingAngleNeutral = pi01Vec.Angle(pi02Vec.Vect()) * 180.0 / TMath::Pi();
+          openingAngleNeutral = pi01Vec.Angle(pi02Vec.Vect()) * 180.0 / TMath::Pi();
 
   Float_t QmissFit = sqrt(pow(KchboostFit[0] - KchrecFit[0], 2) +
                           pow(KchboostFit[1] - KchrecFit[1], 2) +
@@ -843,9 +843,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   deltaPhiFit = abs(Phi2Fit - Phi1Fit);
 
   // Analiza Simony ciecie na phi bad
-    Bool_t condGeneral = (deltaTfit - deltaTMC) < CutDefs::simonaBadClusDeltaTResMax,
-      condLowerLimit = (deltaTfit - deltaTMC) > CutDefs::simonaBadClusSlope * deltaTMC,
-      condUpperLimit = (deltaTfit - deltaTMC) < (CutDefs::simonaBadClusSlope * (deltaTMC - CutDefs::simonaBadClusDeltaTShift)),
+  Bool_t condGeneral = (deltaTfit - deltaTMC)<CutDefs::simonaBadClusDeltaTResMax,
+                                              condLowerLimit = (deltaTfit - deltaTMC)>
+                           CutDefs::simonaBadClusSlope * deltaTMC,
+         condUpperLimit = (deltaTfit - deltaTMC) < (CutDefs::simonaBadClusSlope * (deltaTMC - CutDefs::simonaBadClusDeltaTShift)),
          badClusSimona = condGeneral && condLowerLimit && condUpperLimit;
   ///////////////////////////////////////////////////////////////////////////////
   // Analiza Simony cięcie na 3 sigma mas
@@ -894,29 +895,36 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   Float_t T0Omega = pi0OmegaFit1[3] - pi0OmegaFit1[5];
 
-  Bool_t mcflagCondition = (*mcflag == 1 && mctruth_int >= 0) || *mcflag == 0,
-     condAnalysisOld = *Chi2SignalKinFit < CutDefs::oldCutsChi2Max &&
-           combinedMassPi0Fit < CutDefs::oldCutsCombinedMassPi0Max &&
-           abs(Kchrec[5] - PhysicsConstants::mK0) < CutDefs::oldCutsMassKchWindow &&
-           abs(*minv4gam - PhysicsConstants::mK0) < CutDefs::oldCutsMassKneWindow &&
-           *Qmiss < CutDefs::oldCutsQmissMax &&
-           *TrcSum > CutDefs::oldCutsTrcSumMin &&
-           openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin),
-     simonaCuts = abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma &&
-            *Chi2SignalKinFit < CutDefs::simonaChi2Max,
-         simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts,
-     shorterKaonPaths = pathKch < CutDefs::kaonPathLimitCharged && pathKne < CutDefs::kaonPathLimitNeutral,
-     blobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor > CutDefs::blobDeltaTMin,
-     noBlobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor <= CutDefs::blobDeltaTMin,
-     simonaChi2Cut = *Chi2SignalKinFit <= CutDefs::simonaChi2Max,
+  // mcflagCondition
+  Bool_t mcflagCondition = (*mcflag == 1 && mctruth_int >= 0) || *mcflag == 0;
+
+  // Simona Cuts
+  Bool_t simonaChi2Cut = *Chi2SignalKinFit <= CutDefs::simonaChi2Max,
+         simonaDeltaPhiCut = abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma && simonaChi2Cut,
+         simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaDeltaPhiCut,
          simonaPositionLimits = radius00 < CutDefs::omegaRadiusLimit && radiuspm < CutDefs::omegaRadiusLimit &&
                                 zdist00 < CutDefs::omegaZdistLimit && zdistpm < CutDefs::omegaZdistLimit,
-     omegaMassT0Cut = ((simonaPositionLimits &&
-            !(abs(T0Omega - CutDefs::omegaT0Center) < CutDefs::omegaNSigma * CutDefs::omegaT0Sigma &&
-              abs(omegaFit[5] - CutDefs::omegaMassCenter) < CutDefs::omegaNSigma * CutDefs::omegaMassSigma &&
-              omegaFit[5] < CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB + CutDefs::omegaLineBreal &&
-              omegaFit[5] > CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB - CutDefs::omegaLineBreal)) ||
-           !simonaPositionLimits); // && simonaKinCuts;
+         omegaMassT0Cut = ((simonaPositionLimits &&
+                            !(abs(T0Omega - CutDefs::omegaT0Center) < CutDefs::omegaNSigma * CutDefs::omegaT0Sigma &&
+                              abs(omegaFit[5] - CutDefs::omegaMassCenter) < CutDefs::omegaNSigma * CutDefs::omegaMassSigma &&
+                              omegaFit[5] < CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB + CutDefs::omegaLineBreal &&
+                              omegaFit[5] > CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB - CutDefs::omegaLineBreal)) ||
+                           !simonaPositionLimits) && simonaKinCuts;
+
+  // Old cuts
+  Bool_t condAnalysisOld = *Chi2SignalKinFit < CutDefs::oldCutsChi2Max &&
+                           combinedMassPi0Fit < CutDefs::oldCutsCombinedMassPi0Max &&
+                           abs(Kchrec[5] - PhysicsConstants::mK0) < CutDefs::oldCutsMassKchWindow &&
+                           abs(*minv4gam - PhysicsConstants::mK0) < CutDefs::oldCutsMassKneWindow &&
+                           *Qmiss < CutDefs::oldCutsQmissMax &&
+                           *TrcSum > CutDefs::oldCutsTrcSumMin &&
+                           openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin);
+
+
+  // Additional cuts
+  Bool_t shorterKaonPaths = pathKch < CutDefs::kaonPathLimitCharged && pathKne<CutDefs::kaonPathLimitNeutral,
+         blobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor > CutDefs::blobDeltaTMin,
+         noBlobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor <= CutDefs::blobDeltaTMin;
 
   TVector3 phiMeson = {ParamSignalFit[32], ParamSignalFit[33], ParamSignalFit[34]};
   TVector3 KchrecVec = {KchrecFit[0], KchrecFit[1], KchrecFit[2]};
@@ -934,18 +942,18 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
            phiTrk1AngleMC = trk1VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi(),
            phiTrk2AngleMC = trk2VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi();
 
-  if ((mctruth_int == 1 || mctruth_int == -1 || mctruth_int == 0) && *mcflag == 1) // && shorterKaonPaths)
+  if ((mctruth_int == 1 || mctruth_int == -1 || mctruth_int == 0) && *mcflag == 1)
     signal_tot++;
 
-  if ((mctruth_int == 1 || mctruth_int == 0) && *mcflag == 1) // && shorterKaonPaths)
+  if ((mctruth_int == 1 || mctruth_int == 0) && *mcflag == 1)
     signal_wo_err++;
 
-  if ((mctruth_int == 1) && *mcflag == 1) // && shorterKaonPaths)
+  if ((mctruth_int == 1) && *mcflag == 1)
   {
     deltaTSignalTot->Fill(deltaTMC, weight);
   }
 
-  if (mctruth_int >= 0) // && shorterKaonPaths)
+  if (mctruth_int >= 0)
     channEventsTotal[KLOE::channName.at(mctruth_int)]++;
 
   // Evaluate all configured scenarios in a single event loop.
@@ -966,13 +974,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                              simonaChi2Cut,
                                              badClusSimona,
                                              simonaKinCuts,
-                                             simonaCuts,
+                                             simonaDeltaPhiCut,
                                              omegaMassT0Cut,
                                              blobCut,
                                              noBlobCut);
-
-    if (!passScenario)
-      continue;
 
     // For the requested preselection/selection/total efficiencies,
     // count MC truth classes after scenario cut and before mcflagCondition filtering.
@@ -991,7 +996,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
     cnt.passed_events++;
 
-    if ((mctruth_tmp == 1) && *mcflag == 1)
+    if (!passScenario)
+      continue;
+
+    if ((mctruth_tmp == 1 || mctruth_tmp == 0) && *mcflag == 1)
       cnt.signal_num++;
 
     if (mctruth_int > 1 && *mcflag == 1)
@@ -1004,7 +1012,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                           simonaChi2Cut,
                                           badClusSimona,
                                           simonaKinCuts,
-                                          simonaCuts,
+                                          simonaDeltaPhiCut,
                                           omegaMassT0Cut,
                                           blobCut,
                                           noBlobCut);
@@ -1171,7 +1179,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                              simonaChi2Cut,
                                              badClusSimona,
                                              simonaKinCuts,
-                                             simonaCuts,
+                                             simonaDeltaPhiCut,
                                              omegaMassT0Cut,
                                              blobCut,
                                              noBlobCut);
@@ -1782,12 +1790,12 @@ void signal_vs_bcg_v2::Terminate()
     const ScenarioCounters &cnt = entry.second;
 
     const Double_t effScenario = (cnt.signal_tot > 0)
-                                   ? static_cast<Double_t>(cnt.signal_num) / cnt.signal_tot
-                                   : 0.0;
+                                     ? static_cast<Double_t>(cnt.signal_num) / cnt.signal_tot
+                                     : 0.0;
     const Int_t totalScenario = cnt.signal_num + cnt.bkg_tot;
     const Double_t purityScenario = (totalScenario > 0)
-                                      ? static_cast<Double_t>(cnt.signal_num) / totalScenario
-                                      : 0.0;
+                                        ? static_cast<Double_t>(cnt.signal_num) / totalScenario
+                                        : 0.0;
 
     const Int_t denomPreselection = cnt.sel_mctruth_m1 + cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
     const Int_t numerPreselection = cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
@@ -1798,9 +1806,9 @@ void signal_vs_bcg_v2::Terminate()
     std::cout << "Scenario: " << scenario
               << ", Efficiency: " << 100.0 * effScenario << " % (" << cnt.signal_num << "/" << cnt.signal_tot << ")"
               << ", Purity: " << 100.0 * purityScenario << " % (" << cnt.signal_num << "/" << totalScenario << ")"
-          << ", Preselection eff: " << 100.0 * effPreselection << " % ((mctruth 0+1)/(mctruth -1+0+1) = " << numerPreselection << "/" << denomPreselection << ")"
+              << ", Preselection eff: " << 100.0 * effPreselection << " % ((mctruth 0+1)/(mctruth -1+0+1) = " << numerPreselection << "/" << denomPreselection << ")"
               << ", Selection eff: " << 100.0 * effSelection << " % ((mctruth 1)/(mctruth 0+1) = " << cnt.sel_mctruth_1 << "/" << (cnt.sel_mctruth_0 + cnt.sel_mctruth_1) << ")"
-          << ", Total eff: " << 100.0 * effTotalTruth << " % ((mctruth 1)/(mctruth -1+0+1) = " << cnt.sel_mctruth_1 << "/" << denomPreselection << ")"
+              << ", Total eff: " << 100.0 * effTotalTruth << " % ((mctruth 1)/(mctruth -1+0+1) = " << cnt.sel_mctruth_1 << "/" << denomPreselection << ")"
               << ", Passed events: " << cnt.passed_events
               << std::endl;
   }
@@ -1809,8 +1817,8 @@ void signal_vs_bcg_v2::Terminate()
   {
     std::time_t now = std::time(nullptr);
     std::tm *lt = std::localtime(&now);
-    char dateBuf[11];      // YYYY-MM-DD
-    char stampBuf[20];     // YYYY-MM-DD_HH-MM-SS
+    char dateBuf[11];  // YYYY-MM-DD
+    char stampBuf[20]; // YYYY-MM-DD_HH-MM-SS
     std::strftime(dateBuf, sizeof(dateBuf), "%Y-%m-%d", lt);
     std::strftime(stampBuf, sizeof(stampBuf), "%Y-%m-%d_%H-%M-%S", lt);
 

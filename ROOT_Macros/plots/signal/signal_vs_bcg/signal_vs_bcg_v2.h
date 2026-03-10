@@ -154,7 +154,7 @@ public:
   TTreeReaderValue<Float_t> bestError = {fReader, "bestErrorSixGamma"};
 
   TTreeReaderArray<int> Asscl = {fReader, "Asscl"};
-  // TTreeReaderArray<int> cutsApplied = {fReader, "cutsApplied"};
+  // TTreeReaderArray<int> cutApplied = {fReader, "cutApplied"};
   TTreeReaderArray<int> eclstream = {fReader, "eclstream"};
   TTreeReaderArray<int> g4takenTriKinFit = {fReader, "g4takenTriKinFit"};
   TTreeReaderArray<int> goodClustersTriKinFit = {fReader, "goodClustersTriKinFit"};
