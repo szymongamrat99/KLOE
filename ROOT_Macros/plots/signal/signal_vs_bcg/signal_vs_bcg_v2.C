@@ -114,6 +114,15 @@ TF1 *chi2DistFunc;
 
 struct ScenarioCounters
 {
+  ScenarioCounters() : signal_num(0), signal_tot(0), bkg_tot(0), passed_events(0), sel_mctruth_m1(0), sel_mctruth_0(0), sel_mctruth_1(0), sel_mctruth_0_before_cut(0), sel_mctruth_1_before_cut(0) 
+  {
+    for (const auto &chann : KLOE::channName)
+    {
+      sel_mctruth_by_channel[(std::string)chann.second] = 0;
+      sel_mctruth_by_channel_before_cut[(std::string)chann.second] = 0;
+    }
+  }
+
   Int_t signal_num = 0;
   Int_t signal_tot = 0;
   Int_t bkg_tot = 0;
@@ -121,6 +130,11 @@ struct ScenarioCounters
   Int_t sel_mctruth_m1 = 0;
   Int_t sel_mctruth_0 = 0;
   Int_t sel_mctruth_1 = 0;
+  Int_t sel_mctruth_0_before_cut = 0;
+  Int_t sel_mctruth_1_before_cut = 0;
+
+  std::unordered_map<std::string, Int_t> sel_mctruth_by_channel;
+  std::unordered_map<std::string, Int_t> sel_mctruth_by_channel_before_cut;
 };
 
 struct ScenarioHistogramState
@@ -909,7 +923,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                               abs(omegaFit[5] - CutDefs::omegaMassCenter) < CutDefs::omegaNSigma * CutDefs::omegaMassSigma &&
                               omegaFit[5] < CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB + CutDefs::omegaLineBreal &&
                               omegaFit[5] > CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB - CutDefs::omegaLineBreal)) ||
-                           !simonaPositionLimits) && simonaKinCuts;
+                           !simonaPositionLimits) &&
+                          simonaKinCuts;
 
   // Old cuts
   Bool_t condAnalysisOld = *Chi2SignalKinFit < CutDefs::oldCutsChi2Max &&
@@ -920,10 +935,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                            *TrcSum > CutDefs::oldCutsTrcSumMin &&
                            openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin);
 
-
   // Additional cuts
   Bool_t shorterKaonPaths = pathKch < CutDefs::kaonPathLimitCharged && pathKne<CutDefs::kaonPathLimitNeutral,
-         blobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor > CutDefs::blobDeltaTMin,
+                                                                               blobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor>
+                                                                           CutDefs::blobDeltaTMin,
          noBlobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor <= CutDefs::blobDeltaTMin;
 
   TVector3 phiMeson = {ParamSignalFit[32], ParamSignalFit[33], ParamSignalFit[34]};
@@ -985,10 +1000,6 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     {
       if (*mctruth == -1)
         cnt.sel_mctruth_m1++;
-      else if (*mctruth == 0)
-        cnt.sel_mctruth_0++;
-      else if (*mctruth == 1)
-        cnt.sel_mctruth_1++;
     }
 
     if (!mcflagCondition)
@@ -996,14 +1007,22 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
     cnt.passed_events++;
 
+    if (*mctruth == 0)
+        cnt.sel_mctruth_0_before_cut++;
+    else if (*mctruth == 1)
+        cnt.sel_mctruth_1_before_cut++;
+
+    if (mctruth_int > 0 && *mcflag == 1)
+      cnt.sel_mctruth_by_channel_before_cut[(std::string)KLOE::channName.at(mctruth_int)]++;
+
     if (!passScenario)
       continue;
 
-    if ((mctruth_tmp == 1 || mctruth_tmp == 0) && *mcflag == 1)
-      cnt.signal_num++;
+    if (*mctruth == 0)
+      cnt.sel_mctruth_0++;
 
-    if (mctruth_int > 1 && *mcflag == 1)
-      cnt.bkg_tot++;
+    if (mctruth_int > 0 && *mcflag == 1)
+      cnt.sel_mctruth_by_channel[(std::string)KLOE::channName.at(mctruth_int)]++;
   }
 
   const Bool_t primaryPass = PassScenario(fOption,
@@ -1137,7 +1156,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     }
   };
 
-  if (primaryPass && mcflagCondition) // && trk2Fit[3] < -trk1Fit[3] + 505) // && abs(deltaTfit) <= 20 && shorterKaonPaths)
+  if (primaryPass && mcflagCondition)
   {
     if ((mctruth_tmp == 1) && *mcflag == 1)
       signal_num++;
@@ -1206,12 +1225,6 @@ void signal_vs_bcg_v2::SlaveTerminate()
   // The SlaveTerminate() function is called after all entries or objects
   // have been processed. When running with PROOF SlaveTerminate() is called
   // on each slave server.
-
-  std::cout << "Overflow entries in chi2_signalKinFit: " << overflow << std::endl;
-
-  std::cout << "Number of events passing cut: " << cutPassed << std::endl;
-  std::cout << "Number of events NOT passing cut: " << cutNPassed << std::endl;
-  std::cout << "Overflows NOT passing cut: " << overflow << std::endl;
 }
 
 void signal_vs_bcg_v2::Terminate()
@@ -1789,25 +1802,35 @@ void signal_vs_bcg_v2::Terminate()
     const TString &scenario = entry.first;
     const ScenarioCounters &cnt = entry.second;
 
+    Int_t bkg_tot = 0;
+
+    for (const auto &chann : KLOE::channName)
+    {
+      if (chann.second != "Signal" && chann.second != "Data" && chann.second != "MC sum")
+      {
+        bkg_tot += cnt.sel_mctruth_by_channel.at((std::string)chann.second);
+      }
+    }
+
     const Double_t effScenario = (cnt.signal_tot > 0)
                                      ? static_cast<Double_t>(cnt.signal_num) / cnt.signal_tot
                                      : 0.0;
-    const Int_t totalScenario = cnt.signal_num + cnt.bkg_tot;
+    const Int_t totalScenario = cnt.signal_num + bkg_tot;
     const Double_t purityScenario = (totalScenario > 0)
                                         ? static_cast<Double_t>(cnt.signal_num) / totalScenario
                                         : 0.0;
 
-    const Int_t denomPreselection = cnt.sel_mctruth_m1 + cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
-    const Int_t numerPreselection = cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
+    const Int_t denomPreselection = cnt.sel_mctruth_m1 + cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut;
+    const Int_t numerPreselection = cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut;
     const Double_t effPreselection = ComputeSafeRatio(numerPreselection, denomPreselection);
-    const Double_t effSelection = ComputeSafeRatio(cnt.sel_mctruth_1, cnt.sel_mctruth_0 + cnt.sel_mctruth_1);
+    const Double_t effSelection = ComputeSafeRatio(cnt.sel_mctruth_1, cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut);
     const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1, denomPreselection);
 
     std::cout << "Scenario: " << scenario
               << ", Efficiency: " << 100.0 * effScenario << " % (" << cnt.signal_num << "/" << cnt.signal_tot << ")"
               << ", Purity: " << 100.0 * purityScenario << " % (" << cnt.signal_num << "/" << totalScenario << ")"
               << ", Preselection eff: " << 100.0 * effPreselection << " % ((mctruth 0+1)/(mctruth -1+0+1) = " << numerPreselection << "/" << denomPreselection << ")"
-              << ", Selection eff: " << 100.0 * effSelection << " % ((mctruth 1)/(mctruth 0+1) = " << cnt.sel_mctruth_1 << "/" << (cnt.sel_mctruth_0 + cnt.sel_mctruth_1) << ")"
+              << ", Selection eff: " << 100.0 * effSelection << " % ((mctruth 1)/(mctruth 0+1) = " << cnt.sel_mctruth_1 << "/" << (cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut) << ")"
               << ", Total eff: " << 100.0 * effTotalTruth << " % ((mctruth 1)/(mctruth -1+0+1) = " << cnt.sel_mctruth_1 << "/" << denomPreselection << ")"
               << ", Passed events: " << cnt.passed_events
               << std::endl;
@@ -1838,14 +1861,14 @@ void signal_vs_bcg_v2::Terminate()
       {
         const TString &scenario = entry.first;
         const ScenarioCounters &cnt = entry.second;
-        const Double_t effScenario = (cnt.signal_tot > 0) ? static_cast<Double_t>(cnt.signal_num) / cnt.signal_tot : 0.0;
-        const Int_t totalScenario = cnt.signal_num + cnt.bkg_tot;
-        const Double_t purityScenario = (totalScenario > 0) ? static_cast<Double_t>(cnt.signal_num) / totalScenario : 0.0;
-        const Int_t denomPreselection = cnt.sel_mctruth_m1 + cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
-        const Int_t numerPreselection = cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
+        const Double_t effScenario = (cnt.sel_mctruth_by_channel_before_cut.at("Signal") > 0) ? static_cast<Double_t>(cnt.sel_mctruth_by_channel.at("Signal")) / cnt.sel_mctruth_by_channel_before_cut.at("Signal") : 0.0;
+        const Int_t totalScenario = cnt.sel_mctruth_by_channel.at("Signal") + bkg_tot;
+        const Double_t purityScenario = (totalScenario > 0) ? static_cast<Double_t>(cnt.sel_mctruth_by_channel.at("Signal")) / totalScenario : 0.0;
+        const Int_t denomPreselection = cnt.sel_mctruth_m1 + cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut;
+        const Int_t numerPreselection = cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut;
         const Double_t effPreselection = ComputeSafeRatio(numerPreselection, denomPreselection);
-        const Double_t effSelection = ComputeSafeRatio(cnt.sel_mctruth_1, cnt.sel_mctruth_0 + cnt.sel_mctruth_1);
-        const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1, denomPreselection);
+        const Double_t effSelection = ComputeSafeRatio(cnt.sel_mctruth_1 + cnt.sel_mctruth_0, cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut);
+        const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1 + cnt.sel_mctruth_0, denomPreselection);
 
         csv << scenario.Data() << ","
             << cnt.signal_num << ","
@@ -1871,14 +1894,14 @@ void signal_vs_bcg_v2::Terminate()
       {
         const TString &scenario = entry.first;
         const ScenarioCounters &cnt = entry.second;
-        const Double_t effScenario = (cnt.signal_tot > 0) ? static_cast<Double_t>(cnt.signal_num) / cnt.signal_tot : 0.0;
-        const Int_t totalScenario = cnt.signal_num + cnt.bkg_tot;
-        const Double_t purityScenario = (totalScenario > 0) ? static_cast<Double_t>(cnt.signal_num) / totalScenario : 0.0;
-        const Int_t denomPreselection = cnt.sel_mctruth_m1 + cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
-        const Int_t numerPreselection = cnt.sel_mctruth_0 + cnt.sel_mctruth_1;
+        const Double_t effScenario = (cnt.sel_mctruth_by_channel_before_cut.at("Signal") > 0) ? static_cast<Double_t>(cnt.sel_mctruth_by_channel.at("Signal")) / cnt.sel_mctruth_by_channel_before_cut.at("Signal") : 0.0;
+        const Int_t totalScenario = cnt.sel_mctruth_by_channel.at("Signal") + bkg_tot;
+        const Double_t purityScenario = (totalScenario > 0) ? static_cast<Double_t>(cnt.sel_mctruth_by_channel.at("Signal")) / totalScenario : 0.0;
+        const Int_t denomPreselection = cnt.sel_mctruth_m1 + cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut;
+        const Int_t numerPreselection = cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut;
         const Double_t effPreselection = ComputeSafeRatio(numerPreselection, denomPreselection);
-        const Double_t effSelection = ComputeSafeRatio(cnt.sel_mctruth_1, cnt.sel_mctruth_0 + cnt.sel_mctruth_1);
-        const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1, denomPreselection);
+        const Double_t effSelection = ComputeSafeRatio(cnt.sel_mctruth_1 + cnt.sel_mctruth_0, cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut);
+        const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1 + cnt.sel_mctruth_0, denomPreselection);
 
         txt << "Scenario: " << scenario << "\n"
             << "  signal_num: " << cnt.signal_num << "\n"

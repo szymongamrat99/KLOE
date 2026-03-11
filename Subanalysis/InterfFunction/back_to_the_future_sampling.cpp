@@ -303,6 +303,10 @@ int main(int argc, char *argv[])
   {
     boost::progress_display progress00pm(nSamplesTarget / evTick);
 
+    Double_t weightSamples = (PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pippim) / (PhysicsConstants::br_ks_pi0pi0 * PhysicsConstants::br_ks_pippim);
+
+    std::cout << "Weight for samples: " << weightSamples << std::endl;
+
     Long64_t nSamples = 0;
     while (nSamples < nSamplesTarget)
     {
@@ -323,10 +327,10 @@ int main(int argc, char *argv[])
     }
 
 
-    boost::progress_display progresspmpm(nSamplesTarget / evTick);
+    boost::progress_display progresspmpm(weightSamples * nSamplesTarget / evTick);
     nSamples = 0;
 
-    while (nSamples < nSamplesTarget)
+    while (nSamples < weightSamples * nSamplesTarget)
     {
       generate_t1_t2(t1, t2, true);
 
