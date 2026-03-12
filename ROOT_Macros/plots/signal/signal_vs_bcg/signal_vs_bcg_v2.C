@@ -114,7 +114,7 @@ TF1 *chi2DistFunc;
 
 struct ScenarioCounters
 {
-  ScenarioCounters() : signal_num(0), signal_tot(0), bkg_tot(0), passed_events(0), sel_mctruth_m1(0), sel_mctruth_0(0), sel_mctruth_1(0), sel_mctruth_0_before_cut(0), sel_mctruth_1_before_cut(0) 
+  ScenarioCounters() : signal_num(0), signal_tot(0), bkg_tot(0), passed_events(0), sel_mctruth_m1(0), sel_mctruth_0(0), sel_mctruth_1(0), sel_mctruth_0_before_cut(0), sel_mctruth_1_before_cut(0)
   {
     for (const auto &chann : KLOE::channName)
     {
@@ -564,72 +564,6 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     }
   }
 
-  // std::vector<Int_t> asscl(&Asscl[0], &Asscl[0] + *ntcl);
-  // std::vector<int> neuclulist;
-
-  // if (mctruth_int == 1 || mctruth_int == 0)
-  // {
-  //   genVarClassifier.FindNeutralCluster(*nclu,
-  //                                       *ntcl,
-  //                                       asscl.data(),
-  //                                       4,
-  //                                       logger,
-  //                                       neuclulist);
-
-  //   std::vector<Float_t> cluster[5],
-  //       bhabha_mom = {*Bpx, *Bpy, *Bpz, *Broots},
-  //       Knetriangle(9),
-  //       gammatriangle[4],
-  //       trcfinal(4),
-  //       Kchboostnew(&Kchboost[0], &Kchboost[0] + 10),
-  //       ipnew(&ip[0], &ip[0] + 3);
-
-  //   std::vector<Int_t> g4takenTrila(&g4takenTriKinFit[0], &g4takenTriKinFit[0] + 4);
-
-  //   gammatriangle[0].resize(8);
-  //   gammatriangle[1].resize(8);
-  //   gammatriangle[2].resize(8);
-  //   gammatriangle[3].resize(8);
-
-  //   Float_t minvgam;
-
-  //   cluster[0].assign(&Xcl[0], &Xcl[0] + *nclu);
-  //   cluster[1].assign(&Ycl[0], &Ycl[0] + *nclu);
-  //   cluster[2].assign(&Zcl[0], &Zcl[0] + *nclu);
-  //   cluster[3].assign(&Tcl[0], &Tcl[0] + *nclu);
-  //   cluster[4].assign(&Enecl[0], &Enecl[0] + *nclu);
-
-  //   std::vector<KLOE::neutralParticle> photon(4);
-  //   KLOE::phiMeson phi;
-
-  //   phi.fourMom[0] = *Bpx;
-  //   phi.fourMom[1] = *Bpy;
-  //   phi.fourMom[2] = *Bpz;
-  //   phi.fourMom[3] = *Broots;
-
-  //   KLOE::kaonNeutral Kchboostprop, Knetriangledupa;
-
-  //   Kchboostprop.fourMom[0] = Kchboostnew[0];
-  //   Kchboostprop.fourMom[1] = Kchboostnew[1];
-  //   Kchboostprop.fourMom[2] = Kchboostnew[2];
-  //   Kchboostprop.fourMom[3] = Kchboostnew[3];
-
-  //   Kchboostprop.fourPos[0] = Kchboostnew[6];
-  //   Kchboostprop.fourPos[1] = Kchboostnew[7];
-  //   Kchboostprop.fourPos[2] = Kchboostnew[8];
-
-  //   for (Int_t i = 0; i < 4; i++)
-  //   {
-  //     photon[i].clusterParams[0] = cluster[0][neuclulist[g4takenTrila[i]] - 1];
-  //     photon[i].clusterParams[1] = cluster[1][neuclulist[g4takenTrila[i]] - 1];
-  //     photon[i].clusterParams[2] = cluster[2][neuclulist[g4takenTrila[i]] - 1];
-  //     photon[i].clusterParams[3] = cluster[3][neuclulist[g4takenTrila[i]] - 1];
-  //     photon[i].clusterParams[4] = cluster[4][neuclulist[g4takenTrila[i]] - 1];
-  //   }
-
-  //   Obj.triangleReconstruction(photon, phi, Kchboostprop, ipnew.data(), Knetriangledupa);
-  // }
-
   Float_t phiv1PhiCM, phivPlusPhiCM, phiv2PhiCM, phivMinusPhiCM, deltaPhiPhiCM;
 
   TVector3 boostPhi(-*Bpx / *Broots, -*Bpy / *Broots, -*Bpz / *Broots);
@@ -1008,9 +942,9 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     cnt.passed_events++;
 
     if (*mctruth == 0)
-        cnt.sel_mctruth_0_before_cut++;
+      cnt.sel_mctruth_0_before_cut++;
     else if (*mctruth == 1)
-        cnt.sel_mctruth_1_before_cut++;
+      cnt.sel_mctruth_1_before_cut++;
 
     if (mctruth_int > 0 && *mcflag == 1)
       cnt.sel_mctruth_by_channel_before_cut[(std::string)KLOE::channName.at(mctruth_int)]++;
@@ -1020,6 +954,9 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
     if (*mctruth == 0)
       cnt.sel_mctruth_0++;
+
+    if (*mctruth == 1)
+      cnt.sel_mctruth_1++;
 
     if (mctruth_int > 0 && *mcflag == 1)
       cnt.sel_mctruth_by_channel[(std::string)KLOE::channName.at(mctruth_int)]++;
@@ -1832,7 +1769,7 @@ void signal_vs_bcg_v2::Terminate()
               << ", Preselection eff: " << 100.0 * effPreselection << " % ((mctruth 0+1)/(mctruth -1+0+1) = " << numerPreselection << "/" << denomPreselection << ")"
               << ", Selection eff: " << 100.0 * effSelection << " % ((mctruth 1)/(mctruth 0+1) = " << cnt.sel_mctruth_1 << "/" << (cnt.sel_mctruth_0_before_cut + cnt.sel_mctruth_1_before_cut) << ")"
               << ", Total eff: " << 100.0 * effTotalTruth << " % ((mctruth 1)/(mctruth -1+0+1) = " << cnt.sel_mctruth_1 << "/" << denomPreselection << ")"
-              << ", Passed events: " << cnt.passed_events
+              << ", Passed events (bkg + signal): " << cnt.passed_events
               << std::endl;
   }
 
@@ -1856,7 +1793,7 @@ void signal_vs_bcg_v2::Terminate()
 
     if (csv.is_open())
     {
-      csv << "scenario,signal_num,signal_tot,bkg_tot,total_selected,efficiency,purity,passed_events,mctruth_m1_selected,mctruth_0_selected,mctruth_1_selected,preselection_eff,selection_eff,total_eff\n";
+      csv << "scenario,signal_num_before_cuts,signal_m1_0_1,bkg_tot,total_selected,purity,passed_events,mctruth_m1_total,mctruth_0_total,mctruth_1_total,mctruth_0_selected,mctruth_1_selected,preselection_eff,selection_eff,efficiency,total_eff\n";
       for (const auto &entry : g_scenarioCounters)
       {
         const TString &scenario = entry.first;
@@ -1871,18 +1808,20 @@ void signal_vs_bcg_v2::Terminate()
         const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1 + cnt.sel_mctruth_0, denomPreselection);
 
         csv << scenario.Data() << ","
-            << cnt.signal_num << ","
+            << cnt.sel_mctruth_1_before_cut + cnt.sel_mctruth_0_before_cut << ","
             << cnt.signal_tot << ","
             << cnt.bkg_tot << ","
             << totalScenario << ","
-            << effScenario << ","
             << purityScenario << ","
             << cnt.passed_events << ","
             << cnt.sel_mctruth_m1 << ","
+            << cnt.sel_mctruth_0_before_cut << ","
+            << cnt.sel_mctruth_1_before_cut << ","
             << cnt.sel_mctruth_0 << ","
             << cnt.sel_mctruth_1 << ","
             << effPreselection << ","
             << effSelection << ","
+            << effScenario << ","
             << effTotalTruth << "\n";
       }
     }
@@ -1904,17 +1843,17 @@ void signal_vs_bcg_v2::Terminate()
         const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1 + cnt.sel_mctruth_0, denomPreselection);
 
         txt << "Scenario: " << scenario << "\n"
-            << "  signal_num: " << cnt.signal_num << "\n"
+            << "  signal_num_before_cuts: " << cnt.sel_mctruth_1_before_cut + cnt.sel_mctruth_0_before_cut<< "\n"
             << "  signal_tot: " << cnt.signal_tot << "\n"
             << "  bkg_tot: " << cnt.bkg_tot << "\n"
             << "  total_selected: " << totalScenario << "\n"
-            << "  efficiency: " << effScenario << "\n"
             << "  purity: " << purityScenario << "\n"
             << "  mctruth_-1_selected: " << cnt.sel_mctruth_m1 << "\n"
             << "  mctruth_0_selected: " << cnt.sel_mctruth_0 << "\n"
             << "  mctruth_1_selected: " << cnt.sel_mctruth_1 << "\n"
             << "  preselection_eff ((mctruth 0+1)/(mctruth -1+0+1)): " << effPreselection << "\n"
             << "  selection_eff ((mctruth 1)/(mctruth 0+1)): " << effSelection << "\n"
+            << "  efficiency: " << effScenario << "\n"
             << "  total_eff ((mctruth 1)/(mctruth -1+0+1)): " << effTotalTruth << "\n"
             << "  passed_events: " << cnt.passed_events << "\n\n";
       }
