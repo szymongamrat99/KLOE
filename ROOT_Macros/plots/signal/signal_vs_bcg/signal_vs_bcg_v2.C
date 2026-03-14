@@ -530,8 +530,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   // The return value is currently not used.
 
   GeneratedVariables genVarClassifier;
-  ErrorHandling::ErrorLogs logger("dupa.txt");
-
+  
   Double_t dataPCA[2];
 
   TString fileNameTmp;
