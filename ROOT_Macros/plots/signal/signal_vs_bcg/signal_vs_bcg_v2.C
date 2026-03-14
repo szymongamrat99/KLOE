@@ -281,7 +281,13 @@ std::vector<TString> ParseScenarioList(const TString &option)
 
 Bool_t PassScenario(const TString &scenario,
                     Bool_t shorterKaonPaths,
-                    Bool_t condAnalysisOld,
+                    Bool_t oldChi2Cut,
+                    Bool_t oldTrcSumCut,
+                    Bool_t oldCombinedMassPi0Cut,
+                    Bool_t oldMassKchCut,
+                    Bool_t oldMassKneCut,
+                    Bool_t oldQmissCut,
+                    Bool_t oldOpeningAngleCut,
                     Bool_t simonaChi2Cut,
                     Bool_t badClusSimona,
                     Bool_t simonaKinCuts,
@@ -294,8 +300,20 @@ Bool_t PassScenario(const TString &scenario,
     return kTRUE;
   if (scenario == "SHORTER_KAON_PATHS")
     return shorterKaonPaths;
-  if (scenario == "OLD_CUTS")
-    return condAnalysisOld;
+  if (scenario == "OLD_CHI2_CUT")
+    return oldChi2Cut;
+  if (scenario == "OLD_TRCSUM_CUT")
+    return oldTrcSumCut;
+  if (scenario == "OLD_COMBINED_MASS_PI0_CUT")
+    return oldCombinedMassPi0Cut;
+  if (scenario == "OLD_MASS_KCH_CUT")
+    return oldMassKchCut;
+  if (scenario == "OLD_MASS_KNE_CUT")
+    return oldMassKneCut;
+  if (scenario == "OLD_QMISS_CUT")
+    return oldQmissCut;
+  if (scenario == "OLD_OPENING_ANGLE_CUT")
+    return oldOpeningAngleCut;
   if (scenario == "SIMONA_CHI2_CUT")
     return simonaChi2Cut;
   if (scenario == "BAD_CLUS_SIMONA")
@@ -860,13 +878,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                           simonaKinCuts;
 
   // Old cuts
-  Bool_t condAnalysisOld = *Chi2SignalKinFit < CutDefs::oldCutsChi2Max &&
-                           combinedMassPi0Fit < CutDefs::oldCutsCombinedMassPi0Max &&
-                           abs(Kchrec[5] - PhysicsConstants::mK0) < CutDefs::oldCutsMassKchWindow &&
-                           abs(*minv4gam - PhysicsConstants::mK0) < CutDefs::oldCutsMassKneWindow &&
-                           *Qmiss < CutDefs::oldCutsQmissMax &&
-                           *TrcSum > CutDefs::oldCutsTrcSumMin &&
-                           openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin);
+  Bool_t oldChi2Cut = *Chi2SignalKinFit < CutDefs::oldCutsChi2Max, 
+         oldTrcSumCut = oldChi2Cut && *TrcSum > CutDefs::oldCutsTrcSumMin,
+         oldCombinedMassPi0Cut = oldTrcSumCut && combinedMassPi0Fit < CutDefs::oldCutsCombinedMassPi0Max,
+         oldMassKchCut = oldCombinedMassPi0Cut && abs(Kchrec[5] - PhysicsConstants::mK0) < CutDefs::oldCutsMassKchWindow,
+         oldMassKneCut = oldMassKchCut && abs(*minv4gam - PhysicsConstants::mK0) < CutDefs::oldCutsMassKneWindow,
+         oldQmissCut = oldMassKneCut && *Qmiss < CutDefs::oldCutsQmissMax,
+         oldOpeningAngleCut = oldQmissCut && openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin);
 
   // Additional cuts
   Bool_t shorterKaonPaths = pathKch < CutDefs::kaonPathLimitCharged && pathKne<CutDefs::kaonPathLimitNeutral,
@@ -918,7 +936,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
     const Bool_t passScenario = PassScenario(scenario,
                                              shorterKaonPaths,
-                                             condAnalysisOld,
+                                             oldChi2Cut,
+                                             oldTrcSumCut,
+                                             oldCombinedMassPi0Cut,
+                                             oldMassKchCut,
+                                             oldMassKneCut,
+                                             oldQmissCut,
+                                             oldOpeningAngleCut,
                                              simonaChi2Cut,
                                              badClusSimona,
                                              simonaKinCuts,
@@ -963,7 +987,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   const Bool_t primaryPass = PassScenario(fOption,
                                           shorterKaonPaths,
-                                          condAnalysisOld,
+                                          oldChi2Cut,
+                                          oldTrcSumCut,
+                                          oldCombinedMassPi0Cut,
+                                          oldMassKchCut,
+                                          oldMassKneCut,
+                                          oldQmissCut,
+                                          oldOpeningAngleCut,
                                           simonaChi2Cut,
                                           badClusSimona,
                                           simonaKinCuts,
@@ -1011,7 +1041,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       targetHistsFitted["mass_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi02Fit[5], weight);
       targetHistsFitted["chi2_signalKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., weight);
       targetHistCounts->Fill(*Chi2SignalKinFit / 10.);
-      targetHistsFitted["chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2OmegaKinFit / 8., weight);
+      targetHistsFitted["chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2TriKinFit / 5., weight);
+      targetHistsFitted["chi2_omegaKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2OmegaKinFit / 8., weight);
       targetHistsFitted["prob_signal"][KLOE::channName.at(mctruth_tmp)]->Fill(TMath::Prob(*Chi2SignalKinFit, 10), weight);
       targetHistsFitted["combined_mass_pi0"][KLOE::channName.at(mctruth_tmp)]->Fill(combinedMassPi0Fit, weight);
 
@@ -1054,7 +1085,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       if (*KaonNeTimeCMSignalFit <= *KaonNeTimeCMMC - (KLOE::T0 / 2.))
         targetHists2DFitted["t_ch_fit_vs_t_neu_fit"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonChTimeCMSignalFit, *KaonNeTimeCMSignalFit, weight);
 
-      targetHists2DFitted["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., *Chi2OmegaKinFit / 8., weight);
+      targetHists2DFitted["chi2_signalKinFit_vs_chi2_trilaterationKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., *Chi2TriKinFit / 5., weight);
+      targetHists2DFitted["chi2_signalKinFit_vs_chi2_omegaKinFit"][KLOE::channName.at(mctruth_tmp)]->Fill(*Chi2SignalKinFit / 10., *Chi2OmegaKinFit / 8., weight);
       targetHists2DFitted["t00_tri_vs_t00_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostTriFit, weight);
       targetHists2DFitted["t00_triangle_vs_t00_mc"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMMC, *KaonNeTimeCMBoostLor, weight);
       targetHists2DFitted["t00_triangle_vs_t00_tri"][KLOE::channName.at(mctruth_tmp)]->Fill(*KaonNeTimeCMBoostLor, *KaonNeTimeCMBoostTriFit, weight);
@@ -1130,7 +1162,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
     const Bool_t passScenario = PassScenario(scenario,
                                              shorterKaonPaths,
-                                             condAnalysisOld,
+                                             oldChi2Cut,
+                                             oldTrcSumCut,
+                                             oldCombinedMassPi0Cut,
+                                             oldMassKchCut,
+                                             oldMassKneCut,
+                                             oldQmissCut,
+                                             oldOpeningAngleCut,
                                              simonaChi2Cut,
                                              badClusSimona,
                                              simonaKinCuts,
