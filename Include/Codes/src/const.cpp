@@ -660,27 +660,27 @@ namespace KLOE
     gStyle->SetHistLineWidth(3);
     gStyle->SetLineWidth(2);
     gStyle->SetFrameLineWidth(2);
-    gStyle->SetTitleFont(62, "XYZ");
+    gStyle->SetTitleFont(63, "XYZ");
 
-    gStyle->SetLabelSize(0.04, "X");
-    gStyle->SetLabelSize(0.04, "Y");
-    gStyle->SetLabelSize(0.04, "Z");
+    gStyle->SetLabelSize(30, "X");
+    gStyle->SetLabelSize(30, "Y");
+    gStyle->SetLabelSize(30, "Z");
     gStyle->SetLabelOffset(0.02, "X");
     gStyle->SetLabelOffset(0.02, "Y");
     gStyle->SetLabelOffset(0.02, "Z");
-    gStyle->SetLabelFont(62, "X");
-    gStyle->SetLabelFont(62, "Y");
-    gStyle->SetLabelFont(62, "Z");
+    gStyle->SetLabelFont(63, "X");
+    gStyle->SetLabelFont(63, "Y");
+    gStyle->SetLabelFont(63, "Z");
 
-    gStyle->SetTitleSize(0.05, "X");
-    gStyle->SetTitleSize(0.05, "Y");
-    gStyle->SetTitleSize(0.05, "Z");
+    gStyle->SetTitleSize(37.5, "X");
+    gStyle->SetTitleSize(37.5, "Y");
+    gStyle->SetTitleSize(37.5, "Z");
     gStyle->SetTitleOffset(1.2, "X");
     gStyle->SetTitleOffset(1.5, "Y");
     gStyle->SetTitleOffset(1.2, "Z");
-    gStyle->SetTitleFont(62, "X");
-    gStyle->SetTitleFont(62, "Y");
-    gStyle->SetTitleFont(62, "Z");
+    gStyle->SetTitleFont(63, "X");
+    gStyle->SetTitleFont(63, "Y");
+    gStyle->SetTitleFont(63, "Z");
 
     gStyle->SetTitle("");
 

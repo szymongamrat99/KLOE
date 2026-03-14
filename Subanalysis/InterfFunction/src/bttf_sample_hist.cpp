@@ -214,6 +214,8 @@ int main()
   const Long64_t evTick = 1000000;
   Long64_t currentEvent = 0;
 
+  Double_t inverseWeight = PhysicsConstants::br_ks_pi0pi0 * PhysicsConstants::br_ks_pippim / (PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pippim);
+
   Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
   Double_t gammaL = PhysicsConstants::tau_S_nonCPT / PhysicsConstants::tau_L;
 
@@ -281,18 +283,18 @@ int main()
 
     if (methodChoice == 0)
     {
-      weight = func_pmpm->Eval(t1Value, t2Value);
+      weight = inverseWeight * func_pmpm->Eval(t1Value, t2Value);
     }
     else if (methodChoice == 1)
     {
-      weight = func_pmpm->Eval(t1Value, t2Value) / (double_exp(t1Value, t2Value));
+      weight = inverseWeight * func_pmpm->Eval(t1Value, t2Value) / (double_exp(t1Value, t2Value));
     }
     else // methodChoice == 2
     {
       t1Value = randGen.Uniform(0.0, 300.0); // Generowanie losowej wartości czasu t1
       t2Value = randGen.Uniform(0.0, 300.0); // Generowanie losowej wartości czasu t2
 
-      weight = func_pmpm->Eval(t1Value, t2Value);
+      weight = inverseWeight * func_pmpm->Eval(t1Value, t2Value);
     }
 
     h_pmpm->Fill(t1Value, t2Value, weight);
