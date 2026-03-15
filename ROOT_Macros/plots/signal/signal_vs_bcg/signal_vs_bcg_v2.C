@@ -548,7 +548,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   // The return value is currently not used.
 
   GeneratedVariables genVarClassifier;
-  
+
   Double_t dataPCA[2];
 
   TString fileNameTmp;
@@ -858,6 +858,23 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           zdist00MC = abs(Knemc[8] - ipmc[2]),
           zdistpmMC = abs(Kchmc[8] - ipmc[2]);
 
+  // Calculating everything for the omega-pi0 rejection method - geometrically
+  std::array<Float_t, 3> distNeutralCharged = {KchrecClosest[6] - Knerec[6],
+                                               KchrecClosest[7] - Knerec[7],
+                                               KchrecClosest[8] - Knerec[8]},
+      distNeutralIP = {Knerec[6] - *Bx,
+                       Knerec[7] - *By,
+                       Knerec[8] - KchrecClosest[8]},
+      distChargedIP = {KchrecClosest[6] - *Bx,
+                       KchrecClosest[7] - *By,
+                       KchrecClosest[8] - *Bz};
+
+  Float_t
+        rho_pm = sqrt(distChargedIP[0] * distChargedIP[0] + distChargedIP[1] * distChargedIP[1]),
+        rho_00 = sqrt(distNeutralIP[0] * distNeutralIP[0] + distNeutralIP[1] * distNeutralIP[1]),
+        rho = sqrt(pow(rho_pm, 2) + pow(rho_00, 2));
+  //
+
   Float_t T0Omega = pi0OmegaFit1[3] - pi0OmegaFit1[5];
 
   // mcflagCondition
@@ -878,13 +895,18 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                           simonaKinCuts;
 
   // Old cuts
-  Bool_t oldChi2Cut = *Chi2SignalKinFit < CutDefs::oldCutsChi2Max, 
+  Bool_t oldChi2Cut = *Chi2SignalKinFit < CutDefs::oldCutsChi2Max,
          oldTrcSumCut = oldChi2Cut && *TrcSum > CutDefs::oldCutsTrcSumMin,
          oldCombinedMassPi0Cut = oldTrcSumCut && combinedMassPi0Fit < CutDefs::oldCutsCombinedMassPi0Max,
          oldMassKchCut = oldCombinedMassPi0Cut && abs(Kchrec[5] - PhysicsConstants::mK0) < CutDefs::oldCutsMassKchWindow,
          oldMassKneCut = oldMassKchCut && abs(*minv4gam - PhysicsConstants::mK0) < CutDefs::oldCutsMassKneWindow,
          oldQmissCut = oldMassKneCut && *Qmiss < CutDefs::oldCutsQmissMax,
          oldOpeningAngleCut = oldQmissCut && openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin);
+
+  // Geometrical omega-pi0 rejection cuts
+  Bool_t
+      fiducialVolume = abs(distNeutralCharged[0]) < 1.45 && abs(distNeutralCharged[1]) < 1.45 && abs(distNeutralCharged[2]) < 2.45,
+      omegaPi0RejectionCut = ((rho > 5 && fiducialVolume) || !fiducialVolume) && oldOpeningAngleCut;
 
   // Additional cuts
   Bool_t shorterKaonPaths = pathKch < CutDefs::kaonPathLimitCharged && pathKne<CutDefs::kaonPathLimitNeutral,
@@ -1067,6 +1089,12 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       targetHistsFitted["dist_z_Neu"][KLOE::channName.at(mctruth_tmp)]->Fill(KnerecFit[8] - ipFit[2], weight);
       targetHistsFitted["dist_z_Ch"][KLOE::channName.at(mctruth_tmp)]->Fill(KchrecFit[8] - ipFit[2], weight);
 
+      targetHistsFitted["dist_ch_neu_closest_x"][KLOE::channName.at(mctruth_tmp)]->Fill(distNeutralCharged[0], weight);
+      targetHistsFitted["dist_ch_neu_closest_y"][KLOE::channName.at(mctruth_tmp)]->Fill(distNeutralCharged[1], weight);
+      targetHistsFitted["dist_ch_neu_closest_z"][KLOE::channName.at(mctruth_tmp)]->Fill(distNeutralCharged[2], weight);
+
+      targetHistsFitted["rho_omega"][KLOE::channName.at(mctruth_tmp)]->Fill(rho, weight);
+
       if (*muonAlertPlus > 0 || *muonAlertMinus > 0)
         targetHistsFitted["muon_alert"][KLOE::channName.at(mctruth_tmp)]->Fill(1., weight);
       else
@@ -1114,6 +1142,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
       targetHists2DFitted["Phi_pi01_angle_vs_Phi_pi02_angle"][KLOE::channName.at(mctruth_tmp)]->Fill(cos(phipi01Angle * TMath::Pi() / 180.0), cos(phipi02Angle * TMath::Pi() / 180.0), weight);
       targetHists2DFitted["Energy_trk1_vs_Energy_trk2"][KLOE::channName.at(mctruth_tmp)]->Fill(trk1Fit[3], trk2Fit[3], weight);
       targetHists2DFitted["Energy_pi01_vs_Energy_pi02"][KLOE::channName.at(mctruth_tmp)]->Fill(pi01Fit[3], pi02Fit[3], weight);
+
+      targetHists2DFitted["dist_ch_neu_closest_x_vs_dist_ch_neu_closest_y"][KLOE::channName.at(mctruth_tmp)]->Fill(distNeutralCharged[0], distNeutralCharged[1], weight);
+
+      targetHists2DFitted["rho_pm_vs_rho_00"][KLOE::channName.at(mctruth_tmp)]->Fill(rho_pm, rho_00, weight);
 
       if (addToPCA)
       {
@@ -1880,7 +1912,7 @@ void signal_vs_bcg_v2::Terminate()
         const Double_t effTotalTruth = ComputeSafeRatio(cnt.sel_mctruth_1 + cnt.sel_mctruth_0, denomPreselection);
 
         txt << "Scenario: " << scenario << "\n"
-            << "  signal_num_before_cuts: " << cnt.sel_mctruth_1_before_cut + cnt.sel_mctruth_0_before_cut<< "\n"
+            << "  signal_num_before_cuts: " << cnt.sel_mctruth_1_before_cut + cnt.sel_mctruth_0_before_cut << "\n"
             << "  signal_tot: " << cnt.signal_tot << "\n"
             << "  bkg_tot: " << cnt.bkg_tot << "\n"
             << "  total_selected: " << totalScenario << "\n"

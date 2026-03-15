@@ -102,18 +102,18 @@ for (Int_t i = 1; i <= 29; i++)\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Signal_%d.root",i));\
 }
 
-# for (Int_t i = 1; i <= 56; i++)\
-# {\
-#     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Omega_%d.root",i));\
-# }
-# for (Int_t i = 1; i <= 56; i++)\
-# {\
-#     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys2_SIGNAL_MIXED_Omega_%d.root",i));\
-# }
-# for (Int_t i = 1; i <= 12; i++)\
-# {\
-#     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Omega_%d.root",i));\
-# }
+for (Int_t i = 1; i <= 56; i++)\
+{\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Omega_%d.root",i));\
+}
+for (Int_t i = 1; i <= 56; i++)\
+{\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys2_SIGNAL_MIXED_Omega_%d.root",i));\
+}
+for (Int_t i = 1; i <= 12; i++)\
+{\
+    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Omega_%d.root",i));\
+}
 
 chain->Process("signal_vs_bcg_v2.C", "$opt");
 .q
