@@ -31,6 +31,8 @@ struct Cuts
   const TString oldMassKneCut = "OLD_MASS_KNE_CUT";
   const TString oldQmissCut = "OLD_QMISS_CUT";
   const TString oldOpeningAngleCut = "OLD_OPENING_ANGLE_CUT";
+  const TString oldOmegaGeometricalCut = "OLD_OMEGA_GEOMETRICAL_CUT";
+  const TString oldOmegaFiducialVolume = "OLD_OMEGA_FIDUCIAL_VOLUME";
   const TString simonaChi2Cuts = "SIMONA_CHI2_CUT";
   const TString badClusSimona = "BAD_CLUS_SIMONA";
   const TString simonaAllCuts = "SIMONA_ALL_CUTS";
@@ -43,7 +45,7 @@ struct Cuts
   // Zbiór wszystkich cięć
   std::set<TString> GetAllCutsSet() const
   {
-    return {oldChi2Cut, oldTrcSumCut, oldCombinedMassPi0Cut, oldMassKchCut, oldMassKneCut, oldQmissCut, oldOpeningAngleCut, simonaChi2Cuts, badClusSimona, simonaAllCuts,
+    return {oldChi2Cut, oldTrcSumCut, oldCombinedMassPi0Cut, oldMassKchCut, oldMassKneCut, oldQmissCut, oldOpeningAngleCut, oldOmegaGeometricalCut, oldOmegaFiducialVolume, simonaChi2Cuts, badClusSimona, simonaAllCuts,
             shorterKaonPaths, blobCut, noBlobCut, simonaKinCuts, omegaMassT0Cut};
   }
 
