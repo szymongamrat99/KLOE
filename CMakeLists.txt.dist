@@ -47,6 +47,7 @@ add_subdirectory(Include/MainMenuHandler)
 # add_subdirectory(Subanalysis/Plots)
 # add_subdirectory(Subanalysis/RegenerationAnalysis)
 # add_subdirectory(Subanalysis/Semileptonic)
+add_subdirectory(tests)
 
 
 # What should be the result of compilation

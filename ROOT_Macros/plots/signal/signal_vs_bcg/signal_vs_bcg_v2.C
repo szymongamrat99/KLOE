@@ -54,6 +54,7 @@
 
 #include <interf_function.h>
 #include <TEfficiency.h>
+#include <const.h>
 
 namespace KH = KLOE::Histograms;
 
@@ -118,6 +119,9 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
   // When running with PROOF Begin() is only called on the client.
   // The tree argument is deprecated (on PROOF 0 is passed).
 
+  // Logger setup
+  ErrorHandling::ErrorLogs logger("log/");
+
   // Creation of output folder with cut names
   /////////////////////////////////////////
   Cuts cuts;
@@ -133,6 +137,7 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
   chi2DistFunc = new TF1("chi2DistFunc", chi2dist, 0, 1E5, 2); // 2 parameters
 
   KLOE::setGlobalStyle();
+  Utils::InitializeVariables(logger);
 
   fitter = new KLOE::TripleGaussFitter();
   doubleFitter = new KLOE::DoublGaussFitter();
@@ -535,11 +540,34 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   Float_t weight = 1.0;
 
+  Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
+  Double_t gammaL = PhysicsConstants::tau_S_nonCPT / PhysicsConstants::tau_L;
+
+  auto double_exponential = [gammaS, gammaL](Double_t dt)
+  {
+    Double_t value = 0.;
+
+    if (dt >= 0)
+    {
+      value = (1. + 2. * PhysicsConstants::Re) * exp(-gammaL * dt) +
+            (1. - 4. * PhysicsConstants::Re) * exp(-gammaS * dt);
+    }
+    else
+    {
+      value = (1. + 2. * PhysicsConstants::Re) * exp(-gammaS * abs(dt)) +
+            (1. - 4. * PhysicsConstants::Re) * exp(-gammaL * abs(dt));
+    }
+
+    return value;
+  };
+
   Double_t *x = new Double_t(*KaonChTimeCMMC - *KaonNeTimeCMMC),
            *par = nullptr;
 
   if ((mctruth_int == 1 || mctruth_int == 0) && *mcflag == 1)
-    weight = interf_function(x, par);
+  {
+    weight = interf_function(x, par) / double_exponential(*x);
+  }
 
   TVector3 z_axis(0., 0., 1.),
       gamma1(gammaMomTriangle1[0], gammaMomTriangle1[1], gammaMomTriangle1[2]),
@@ -661,7 +689,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
          simonaChi2Cut = *Chi2SignalKinFit <= 30,
          simonaPositionLimits = radius00 < radiusLimit && radiuspm < radiusLimit &&
                                 zdist00 < zdistLimit && zdistpm < zdistLimit,
-         omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 155.658) < numSigmaSimona * 5.691 && abs(omegaFit[5] - 782.994) < numSigmaSimona * 5.620 && omegaFit[5] < a * T0Omega + b + Breal && omegaFit[5] > a * T0Omega + b - Breal)) || !simonaPositionLimits);// && simonaKinCuts;
+         omegaMassT0Cut = ((simonaPositionLimits && !(abs(T0Omega - 155.658) < numSigmaSimona * 5.691 && abs(omegaFit[5] - 782.994) < numSigmaSimona * 5.620 && omegaFit[5] < a * T0Omega + b + Breal && omegaFit[5] > a * T0Omega + b - Breal)) || !simonaPositionLimits); // && simonaKinCuts;
 
   TVector3 phiMeson = {ParamSignalFit[32], ParamSignalFit[33], ParamSignalFit[34]};
   TVector3 KchrecVec = {KchrecFit[0], KchrecFit[1], KchrecFit[2]};
@@ -672,15 +700,12 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   TVector3 pi02VecMom = {pi02Fit[0], pi02Fit[1], pi02Fit[2]};
   TVector3 KnerecVec = {KnerecFit[0], KnerecFit[1], KnerecFit[2]};
 
-
   Double_t phiTrk1Angle = trk1Vec.Angle(KchrecVec) * 180.0 / TMath::Pi(),
            phiTrk2Angle = trk2Vec.Angle(KchrecVec) * 180.0 / TMath::Pi(),
            phipi01Angle = pi01VecMom.Angle(KnerecVec) * 180.0 / TMath::Pi(),
            phipi02Angle = pi02VecMom.Angle(KnerecVec) * 180.0 / TMath::Pi(),
            phiTrk1AngleMC = trk1VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi(),
            phiTrk2AngleMC = trk2VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi();
-
-
 
   if ((mctruth_int == 1 || mctruth_int == -1 || mctruth_int == 0) && *mcflag == 1) // && shorterKaonPaths)
     signal_tot++;

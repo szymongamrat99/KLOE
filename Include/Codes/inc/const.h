@@ -671,4 +671,5 @@ namespace Utils
 
   void JsonFieldLookupString(nlohmann::json &jsonObj, const std::string fieldPath, std::string &value, ErrorHandling::ErrorLogs &logger);
   void JsonFieldLookupBool(nlohmann::json &jsonObj, const std::string fieldPath, bool &value, ErrorHandling::ErrorLogs &logger);
+  void JsonFieldLookupDouble(nlohmann::json &jsonObj, const std::string fieldPath, double &value, ErrorHandling::ErrorLogs &logger);
 }
