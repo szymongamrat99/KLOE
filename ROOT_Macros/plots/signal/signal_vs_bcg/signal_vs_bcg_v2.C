@@ -349,7 +349,7 @@ Int_t InferChannelFromFileName(const TString &fileName)
     return 2;
   if (lowerFileName.Contains("_Omega_"))
     return 3;
-  if (lowerFileName.Contains("_3Pi0_"))
+  if (lowerFileName.Contains("_3pi0_"))
     return 4;
   if (lowerFileName.Contains("_Semileptonic_"))
     return 5;
