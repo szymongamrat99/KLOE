@@ -209,6 +209,9 @@ void generate_t1_t2(double &t1, double &t2, bool equalProb)
 int main(int argc, char *argv[])
 {
   KLOE::setGlobalStyle();
+  ErrorHandling::ErrorLogs logger("log/");
+
+  Utils::InitializeVariables(logger);
 
   std::cout << "Do You want to set custom parameters? (1 - yes, 0 - no): ";
   int customParams = 0;
@@ -301,17 +304,79 @@ int main(int argc, char *argv[])
   }
   case 3:
   {
+
+    Double_t inverseWeight = PhysicsConstants::br_ks_pi0pi0 * PhysicsConstants::br_ks_pippim / (PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pippim);
+
+    Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
+    Double_t gammaL = PhysicsConstants::tau_S_nonCPT / PhysicsConstants::tau_L;
+
+    Double_t weightA = PhysicsConstants::br_ks_pi0pi0 * PhysicsConstants::br_kl_pippim,
+             weightB = PhysicsConstants::br_ks_pippim * PhysicsConstants::br_kl_pi0pi0,
+             weightC = PhysicsConstants::br_ks_pippim * PhysicsConstants::br_kl_pippim,
+             totalWeight = weightA + weightB,
+             probA = weightA / totalWeight,
+             normFactS = (1 - exp(-gammaS * maxIntegral)),
+             normFactL = (1 - exp(-gammaL * maxIntegral));
+
+    auto double_exp = [&](Double_t t1, Double_t t2)
+    {
+      return (0.5 / (normFactS * normFactL)) * (gammaS * gammaL * exp(-gammaS * t1 - gammaL * t2) + gammaS * gammaL * exp(-gammaL * t1 - gammaS * t2));
+    };
+
+    auto double_exp_mixed_corr_00pm = [&](Double_t t1, Double_t t2)
+    {
+      // Każdy człon musi być podzielony przez swoją całkę w zakresie [0, Tmax]
+      Double_t term1 = (gammaS * exp(-gammaS * t1) / normFactS) * (gammaL * exp(-gammaL * t2) / normFactL);
+      Double_t term2 = (gammaL * exp(-gammaL * t1) / normFactL) * (gammaS * exp(-gammaS * t2) / normFactS);
+
+      return probA * term1 + (1 - probA) * term2;
+    };
+
+    auto double_exp_mixed_corr_pm00 = [&](Double_t t1, Double_t t2)
+    {
+      // Każdy człon musi być podzielony przez swoją całkę w zakresie [0, Tmax]
+      Double_t term1 = (gammaS * exp(-gammaS * t2) / normFactS) * (gammaL * exp(-gammaL * t1) / normFactL);
+      Double_t term2 = (gammaL * exp(-gammaL * t2) / normFactL) * (gammaS * exp(-gammaS * t1) / normFactS);
+
+      return probA * term1 + (1 - probA) * term2;
+    };
+
+    auto double_exp_mixed_00pm = [&](Double_t t1, Double_t t2)
+    {
+      // Każdy człon musi być podzielony przez swoją całkę w zakresie [0, Tmax]
+      Double_t term1 = (gammaS * exp(-gammaS * t1)) * (gammaL * exp(-gammaL * t2));
+      Double_t term2 = (gammaL * exp(-gammaL * t1)) * (gammaS * exp(-gammaS * t2));
+
+      return probA * term1 + (1 - probA) * term2;
+    };
+
+    auto double_exp_mixed_pm00 = [&](Double_t t1, Double_t t2)
+    {
+      // Każdy człon musi być podzielony przez swoją całkę w zakresie [0, Tmax]
+      Double_t term1 = (gammaS * exp(-gammaS * t2)) * (gammaL * exp(-gammaL * t1));
+      Double_t term2 = (gammaL * exp(-gammaL * t2)) * (gammaS * exp(-gammaS * t1));
+
+      return probA * term1 + (1 - probA) * term2;
+    };
+
     boost::progress_display progress00pm(nSamplesTarget / evTick);
+
+    Double_t weightSamples = (PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pippim) / (PhysicsConstants::br_ks_pi0pi0 * PhysicsConstants::br_ks_pippim);
+
+    std::cout << "Weight for samples: " << weightSamples << std::endl;
 
     Long64_t nSamples = 0;
     while (nSamples < nSamplesTarget)
     {
-      generate_t1_t2(tne, tch, true);
+      generate_t1_t2(tne, tch, false);
 
       if (tne <= maxIntegral && tch <= maxIntegral)
       {
-        hist_00pm->Fill(tne, tch, func_00pm->Eval(tne, tch));
-        hist_pm00->Fill(tch, tne, func_pm00->Eval(tch, tne));
+        Double_t weight00pm = func_00pm->Eval(tne, tch) / (double_exp_mixed_corr_00pm(tne, tch));
+        Double_t weightpm00 = func_pm00->Eval(tch, tne) / (double_exp_mixed_corr_pm00(tch, tne));
+
+        hist_00pm->Fill(tne, tch, weight00pm);
+        hist_pm00->Fill(tch, tne, weightpm00);
 
         tree_00pm->Fill();
 
@@ -322,17 +387,18 @@ int main(int argc, char *argv[])
       }
     }
 
-
-    boost::progress_display progresspmpm(nSamplesTarget / evTick);
+    boost::progress_display progresspmpm(weightSamples * nSamplesTarget / evTick);
     nSamples = 0;
 
-    while (nSamples < nSamplesTarget)
+    while (nSamples < weightSamples * nSamplesTarget)
     {
       generate_t1_t2(t1, t2, true);
 
       if (t1 <= maxIntegral && t2 <= maxIntegral)
       {
-        hist_pmpm->Fill(t1, t2, func_pmpm->Eval(t1, t2));
+        Double_t weight = func_pmpm->Eval(t1, t2) / (double_exp(t1, t2) * weightSamples); // Dodatkowy weightSamples, aby uwzględnić fakt, że generujemy więcej próbek
+
+        hist_pmpm->Fill(t1, t2, weight);
 
         tree_pmpm->Fill();
 
@@ -345,6 +411,10 @@ int main(int argc, char *argv[])
     break;
   }
   }
+
+  // hist_00pm->Scale(1.0 / hist_00pm->GetEntries());
+  // hist_pm00->Scale(1.0 / hist_pm00->GetEntries());
+  // hist_pmpm->Scale(1.0 / hist_pmpm->GetEntries());
 
   TCanvas *c_func_00pm = new TCanvas("c_func_00pm", "Interference function 00pm", 800, 600);
   c_func_00pm->SetLogz(1);

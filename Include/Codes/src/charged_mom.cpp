@@ -92,7 +92,7 @@ namespace KLOE
     if (_nv == 0 || _ntv == 0)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      LOG_EVENT(_logger, err, logMessages[1], ErrorHandling::LogFiles::LogType::ERROR);
+      // LOG_EVENT(_logger, err, logMessages[1], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
 
@@ -172,7 +172,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      LOG_EVENT(_logger, err, logMessages[1], ErrorHandling::LogFiles::LogType::ERROR);
+      // LOG_EVENT(_logger, err, logMessages[1], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -303,7 +303,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      LOG_EVENT(_logger, err, logMessages[1], ErrorHandling::LogFiles::LogType::ERROR);
+      // LOG_EVENT(_logger, err, logMessages[1], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -383,7 +383,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
+      // LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -485,7 +485,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
+      // LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -549,7 +549,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
+      // LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;
@@ -637,7 +637,7 @@ namespace KLOE
     if (!found)
     {
       ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NO_VTX_WITH_OPPOSITE_TRACKS;
-      LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
+      // LOG_EVENT(_logger, err, logMessages[2], ErrorHandling::LogFiles::LogType::ERROR);
       return err;
     }
     return ErrorHandling::ErrorCodes::NO_ERROR;

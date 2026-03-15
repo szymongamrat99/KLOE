@@ -23,5 +23,6 @@ int OmegaRec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOp
 int Neutrec_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
 int CovMatrix_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
 // int Plots_main(TChain &chain);
+// int TheoreticalSimulation_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt);
 
 #endif //! KLSPM00_H

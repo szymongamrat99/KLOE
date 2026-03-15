@@ -1,7 +1,7 @@
 {
   "integralRange": {
     "fixRe": false,
-    "fixIm": true,
+    "fixIm": false,
     "fixRange": true,
     "isReLimited": false,
     "isImLimited": false,

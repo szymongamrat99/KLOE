@@ -112,7 +112,7 @@ std::map<Long64_t, TString> parseHistogramFiles(const std::string &folderPath)
                             &params.nEvents, &params.reParam, &params.imParam);
 
         Double_t reParamTemplate = 0.00166;
-        Double_t imParamTemplate = -0.00192;
+        Double_t imParamTemplate = -0.00198;
         Double_t tolerance = 1e-5;
 
         if (parsed == 3)
@@ -299,6 +299,11 @@ int main()
     return 1;
   }
 
+  std::cout << hist_00pm2D_base->GetEntries() << " " << hist_00pm2D_base->Integral() << std::endl;
+  std::cout << hist_pm002D_base->GetEntries() << " " << hist_pm002D_base->Integral() << std::endl;
+  std::cout << hist_pmpm2D_base->GetEntries() << " " << hist_pmpm2D_base->Integral() << std::endl << std::endl;
+
+
   hist_00pm2D_base->Sumw2();
   hist_pm002D_base->Sumw2();
   hist_pmpm2D_base->Sumw2();
@@ -482,13 +487,13 @@ int main()
   };
 
   TF2 *func_00pm_norm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_00pm_normalized, 0.0, 300, 0.0, 300, 3);
-  func_00pm_norm->SetParameters(reParam, imParam, 2.5E7);
+  func_00pm_norm->SetParameters(reParam, imParam, 1.0);
 
   TF2 *func_pm00_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pm00_normalized, 0.0, 300, 0.0, 300, 3);
-  func_pm00_norm->SetParameters(reParam, imParam, 2.5E7);
+  func_pm00_norm->SetParameters(reParam, imParam, 1.0);
 
   TF2 *func_pmpm_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pmpm_normalized, 0.0, 300, 0.0, 300, 2);
-  func_pmpm_norm->SetParameters(reParam, 2.143E7);
+  func_pmpm_norm->SetParameters(reParam, 0.44);
 
   auto setErrInf = [](TH2 *hist2D, TH2 *hist2DAux)
   {

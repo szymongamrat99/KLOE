@@ -1,5 +1,6 @@
 #include "StatisticalCutter.h"
 #include <iostream>
+#include <unordered_set>
 
 using json = nlohmann::json;
 
@@ -542,9 +543,12 @@ bool StatisticalCutter::PassCut(size_t cutIndex) {
         try {
             double value = cut.valueGetter();
             result = EvaluateCondition(value, cut);
+        } catch (const std::exception& e) {
+            std::cerr << "ERROR: Exception in value getter for cut '" << cut.cutId << "': " << e.what() << std::endl;
+            result = false;
         } catch (...) {
-            // Dummy fallback: jeśli getter rzuci błąd, zwróć true (pass)
-            result = true;
+            std::cerr << "ERROR: Unknown exception in value getter for cut '" << cut.cutId << "'" << std::endl;
+            result = false;
         }
     } else {
         auto it = variableGetters_.find(cut.cutId);
@@ -552,35 +556,78 @@ bool StatisticalCutter::PassCut(size_t cutIndex) {
             try {
                 double value = it->second();
                 result = EvaluateCondition(value, cut);
+            } catch (const std::exception& e) {
+                std::cerr << "ERROR: Exception in registered getter for cut '" << cut.cutId << "': " << e.what() << std::endl;
+                result = false;
             } catch (...) {
-                // Dummy fallback
-                result = true;
+                std::cerr << "ERROR: Unknown exception in registered getter for cut '" << cut.cutId << "'" << std::endl;
+                result = false;
             }
         } else {
-            // Brak gettera - dummy fallback: zwróć true (pass)
-            result = true;
+            std::cerr << "ERROR: Missing getter for active cut '" << cut.cutId << "'" << std::endl;
+            result = false;
         }
+    }
+
+    if (!result && strictMode_) {
+        // Strict mode fails closed for configuration/evaluation issues above.
+        return false;
     }
     
     // Zwróć wynik - bez negacji, negacja będzie obsługiwana na poziomie grup w UpdateStats
     return result;
 }
 
-bool StatisticalCutter::PassAllCuts() {
-    for (size_t i = 0; i < cuts_.size(); ++i) {
-        if (!PassCut(i))
-            return false;
+std::vector<size_t> StatisticalCutter::ResolveCutsToProcess(const std::vector<size_t>& cutIndices) const {
+    std::vector<size_t> resolved;
+    std::unordered_set<size_t> seen;
+
+    auto addIndex = [&](size_t idx) {
+        if (idx < cuts_.size() && !seen.count(idx)) {
+            resolved.push_back(idx);
+            seen.insert(idx);
+        }
+    };
+
+    if (!cutIndices.empty()) {
+        for (size_t idx : cutIndices) {
+            addIndex(idx);
+        }
+    } else if (!activeCutIndices_.empty()) {
+        for (size_t idx : activeCutIndices_) {
+            addIndex(idx);
+        }
+    } else {
+        // Default behavior: process all real cuts.
+        for (size_t i = 0; i < cuts_.size(); ++i) {
+            if (!cuts_[i].conditionCut && !cuts_[i].isSyntheticGroup) {
+                addIndex(i);
+            }
+        }
     }
-    return true;
+
+    // Ensure synthetic group cuts are included for channels seen in resolved set.
+    std::unordered_set<std::string> channels;
+    for (size_t idx : resolved) {
+        channels.insert(cuts_[idx].channel);
+    }
+    for (const auto& pair : groupChannelToSyntheticIndex_) {
+        if (channels.count(pair.first)) {
+            addIndex(pair.second);
+        }
+    }
+
+    return resolved;
+}
+
+bool StatisticalCutter::PassAllCuts() {
+    return PassCuts();
 }
 
 bool StatisticalCutter::PassCuts(const std::vector<size_t>& cutIndices) {
-    // Jeśli lista pusta - żadne cięcie nie jest aktywne, pass all
-    std::vector<size_t> cutsToCheck;
-    if (cutIndices.empty()) {
-        return true;  // Żadne cięcie - wszystko przechodzi
-    } else {
-        cutsToCheck = cutIndices;
+    std::vector<size_t> cutsToCheck = ResolveCutsToProcess(cutIndices);
+    if (cutsToCheck.empty()) {
+        return true;
     }
     
     bool result = true;
@@ -674,32 +721,7 @@ void StatisticalCutter::UpdateStats(int mctruth) {
 
     // Liczenie dla wszystkich zdarzeń
     bool survived = true;
-    std::vector<size_t> cutsToProcess;
-    
-    // Jeśli activeCutIndices_ jest puste - NIC nie filtrujemy (pass all)
-    if (!activeCutIndices_.empty()) {
-        cutsToProcess = activeCutIndices_;
-        
-        // Dodaj też syntetyczne cięcia których członkowie są w activeCutIndices_
-        std::set<std::string> activeChannels;
-        for (size_t idx : activeCutIndices_) {
-            if (idx < cuts_.size()) {
-                activeChannels.insert(cuts_[idx].channel);
-            }
-        }
-        
-        // Dodaj syntetyczne cięcia dla aktywnych kanałów
-        for (const auto& pair : groupChannelToSyntheticIndex_) {
-            const std::string& channel = pair.first;
-            size_t syntheticIdx = pair.second;
-            if (activeChannels.count(channel)) {
-                cutsToProcess.push_back(syntheticIdx);
-            }
-        }
-    } else {
-        // Puste activeCutIndices_ = żadne cięcie nie jest aktywne = pass all events
-        cutsToProcess.clear();
-    }
+    std::vector<size_t> cutsToProcess = ResolveCutsToProcess();
     
     // Mapy dla grup background rejection per-channel
     std::map<std::string, bool> inBackgroundRejectionGroup;  // channel -> czy w grupie
@@ -1019,6 +1041,61 @@ void StatisticalCutter::UpdateStats(int mctruth) {
             }
         }
     }
+}
+
+bool StatisticalCutter::ValidateConfiguration(const std::vector<size_t>& cutIndices) const {
+    const std::vector<size_t> cutsToCheck = ResolveCutsToProcess(cutIndices);
+
+    for (size_t idx : cutsToCheck) {
+        if (idx >= cuts_.size()) {
+            std::cerr << "ERROR: Cut index out of range during validation: " << idx << std::endl;
+            return false;
+        }
+
+        const Cut& cut = cuts_[idx];
+        if (cut.isSyntheticGroup || cut.conditionCut) {
+            continue;
+        }
+
+        if (!cut.condition.empty()) {
+            // Existence check only; evaluation depends on event values.
+            const bool condLooksValid = true;
+            if (!condLooksValid) {
+                std::cerr << "ERROR: Invalid condition expression for cut '" << cut.cutId << "'" << std::endl;
+                return false;
+            }
+        }
+
+        if (cut.isComplexCut) {
+            if (cut.expression.empty()) {
+                std::cerr << "ERROR: Complex cut '" << cut.cutId << "' has empty expression" << std::endl;
+                return false;
+            }
+            continue;
+        }
+
+        const bool hasGetter = (cut.valueGetter != nullptr) || (variableGetters_.find(cut.cutId) != variableGetters_.end());
+        if (!hasGetter) {
+            std::cerr << "ERROR: Missing getter binding for cutId '" << cut.cutId << "'" << std::endl;
+            return false;
+        }
+
+        const bool validType = (cut.cutType == "O" || cut.cutType == "T");
+        if (!validType) {
+            std::cerr << "ERROR: Invalid cutType '" << cut.cutType << "' for cutId '" << cut.cutId << "'" << std::endl;
+            return false;
+        }
+
+        const bool validCond = (cut.cutCondition == "<" || cut.cutCondition == "<=" ||
+                                cut.cutCondition == ">" || cut.cutCondition == ">=" ||
+                                cut.cutCondition == "==");
+        if (!validCond) {
+            std::cerr << "ERROR: Invalid cutCondition '" << cut.cutCondition << "' for cutId '" << cut.cutId << "'" << std::endl;
+            return false;
+        }
+    }
+
+    return true;
 }
 
 double StatisticalCutter::GetEfficiency(size_t cutIndex) const {

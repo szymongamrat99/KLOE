@@ -336,6 +336,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                       { return PhysicsConstants::mK0; });
   }
 
+  if (!cutter.ValidateConfiguration())
+  {
+    std::cerr << "ERROR: StatisticalCutter configuration validation failed. Aborting analysis." << std::endl;
+    return 1;
+  }
+
   // Initialization of momentum smearing
   // -------------------------------------------------------------
   KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj(logger);

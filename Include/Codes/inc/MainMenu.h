@@ -70,9 +70,10 @@ namespace Controls
     CPV_NORM = 12,
     PLOTS = 13,
     COVMATRIX = 14,
-    EXIT = 15,
+    THEORETICAL_SIMULATION = 15,
+    EXIT = 16,
 
-    OPT_TOT = 16
+    OPT_TOT = 17
   };
 
   enum class MainMenuControlSample
@@ -216,6 +217,18 @@ namespace Controls
     EXIT = 2,
 
     OPT_TOT = 3
+  };
+
+  enum class TheoreticalSimulationMenu
+  {
+    INTERFERENCE_FUNCTION_DRAWING = 1,
+    BTTF_FUNCTION_DRAWING = 2,
+    BTTF_SAMPLE_GENERATION = 3,
+    BTTF_HIST_FILLING = 4,
+    BTTF_INTEGRAL_RANGE_SCAN = 5,
+    EXIT = 6,
+
+    OPT_TOT = 7
   };
 
   enum class DataType
@@ -386,6 +399,17 @@ namespace Controls
 
         break;
       }
+      case 15:
+      {
+        MenuOpt[int(TheoreticalSimulationMenu::INTERFERENCE_FUNCTION_DRAWING)] = Form("%d. Interference function drawing.", int(TheoreticalSimulationMenu::INTERFERENCE_FUNCTION_DRAWING));
+        MenuOpt[int(TheoreticalSimulationMenu::BTTF_FUNCTION_DRAWING)] = Form("%d. Back To The Future function drawing.", int(TheoreticalSimulationMenu::BTTF_FUNCTION_DRAWING));
+        MenuOpt[int(TheoreticalSimulationMenu::BTTF_SAMPLE_GENERATION)] = Form("%d. Back To The Future sample generation.", int(TheoreticalSimulationMenu::BTTF_SAMPLE_GENERATION));
+        MenuOpt[int(TheoreticalSimulationMenu::BTTF_HIST_FILLING)] = Form("%d. Back To The Future histogram filling.", int(TheoreticalSimulationMenu::BTTF_HIST_FILLING));
+        MenuOpt[int(TheoreticalSimulationMenu::BTTF_INTEGRAL_RANGE_SCAN)] = Form("%d. Back To The Future integral range scan.", int(TheoreticalSimulationMenu::BTTF_INTEGRAL_RANGE_SCAN));
+        MenuOpt[int(TheoreticalSimulationMenu::EXIT)] = Form("%d. Exit.", int(TheoreticalSimulationMenu::EXIT));
+
+        break;
+      }
       }
     };
 
@@ -509,6 +533,17 @@ namespace Controls
         MenuOpt[int(FileType::ALL_PHYS)] = Form("%d. MC all_phys.", int(FileType::ALL_PHYS));
         MenuOpt[int(FileType::ALL_PHYS2)] = Form("%d. MC all_phys2.", int(FileType::ALL_PHYS2));
         MenuOpt[int(FileType::ALL_PHYS3)] = Form("%d. MC all_phys3.", int(FileType::ALL_PHYS3));
+
+        break;
+      }
+      case 15:
+      {
+        MenuOpt[int(TheoreticalSimulationMenu::INTERFERENCE_FUNCTION_DRAWING)] = Form("%d. Interference function drawing.", int(TheoreticalSimulationMenu::INTERFERENCE_FUNCTION_DRAWING));
+        MenuOpt[int(TheoreticalSimulationMenu::BTTF_FUNCTION_DRAWING)] = Form("%d. Back To The Future function drawing.", int(TheoreticalSimulationMenu::BTTF_FUNCTION_DRAWING));
+        MenuOpt[int(TheoreticalSimulationMenu::BTTF_SAMPLE_GENERATION)] = Form("%d. Back To The Future sample generation.", int(TheoreticalSimulationMenu::BTTF_SAMPLE_GENERATION));
+        MenuOpt[int(TheoreticalSimulationMenu::BTTF_HIST_FILLING)] = Form("%d. Back To The Future histogram filling.", int(TheoreticalSimulationMenu::BTTF_HIST_FILLING));
+        MenuOpt[int(TheoreticalSimulationMenu::BTTF_INTEGRAL_RANGE_SCAN)] = Form("%d. Back To The Future integral range scan.", int(TheoreticalSimulationMenu::BTTF_INTEGRAL_RANGE_SCAN));
+        MenuOpt[int(TheoreticalSimulationMenu::EXIT)] = Form("%d. Exit.", int(TheoreticalSimulationMenu::EXIT));
 
         break;
       }
@@ -637,6 +672,15 @@ namespace Controls
       case 14:
       {
         for (int i = 1; i < int(FileType::OPT_TOT); i++)
+        {
+          std::cout << MenuOpt[i] << std::endl;
+        }
+
+        break;
+      }
+      case 15:
+      {
+        for (int i = 1; i < int(TheoreticalSimulationMenu::OPT_TOT); i++)
         {
           std::cout << MenuOpt[i] << std::endl;
         }

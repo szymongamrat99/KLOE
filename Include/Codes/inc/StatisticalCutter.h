@@ -5,7 +5,7 @@
 #include <set>
 #include <functional>
 #include <stdexcept>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <fstream>
 #include <algorithm>
 #include <memory>
@@ -72,6 +72,13 @@ public:
     
     // Rejestracja limitu cięcia (dynamiczna wartość cutValue) - sprawdza czy nie syntetyczne
     void RegisterCutValueGetter(const std::string& cutId, std::function<double()> getter);
+
+    // Strict mode: configuration/evaluation problems fail closed instead of passing events.
+    void SetStrictMode(bool enabled) { strictMode_ = enabled; }
+    bool IsStrictMode() const { return strictMode_; }
+
+    // Validate active (or default) cuts before entering the event loop.
+    bool ValidateConfiguration(const std::vector<size_t>& cutIndices = std::vector<size_t>()) const;
 
     // Nowe metody dla kombinacji cięć
     bool PassCutsAnd(const std::vector<size_t>& cutIndices);
@@ -163,6 +170,9 @@ private:
     // Sprawdzenie warunku grupy (groupCondition)
     bool CheckGroupCondition(const Cut& groupCut) const;
 
+    // Resolve which cuts should be processed consistently across Pass/Stats code paths.
+    std::vector<size_t> ResolveCutsToProcess(const std::vector<size_t>& cutIndices = std::vector<size_t>()) const;
+
     struct CutStats {
         size_t survivedSignal = 0;
         size_t survivedBackground = 0;
@@ -214,6 +224,8 @@ private:
     
     // Indeksy aktywnych cięć (jeśli puste - żadne cięcie nie jest aktywne)
     std::vector<size_t> activeCutIndices_;
+
+    bool strictMode_ = true;
     
     // Mapowanie channel na indeks syntetycznego cięcia grupy
     std::map<std::string, size_t> groupChannelToSyntheticIndex_;

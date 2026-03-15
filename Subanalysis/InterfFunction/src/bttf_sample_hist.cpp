@@ -99,6 +99,8 @@ int main()
 {
   ROOT::EnableImplicitMT(8);
 
+  ErrorHandling::ErrorLogs logger("log/");
+
   // Ścieżka do folderu głównego
   std::string basePath = "/data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots";
 
@@ -127,6 +129,7 @@ int main()
   chain_pmpm->Add(rootFilePath);
 
   KLOE::setGlobalStyle();
+  Utils::InitializeVariables(logger);
 
   std::cout << "Do You want to set custom parameters? (1 - yes, 0 - no): ";
   int customParams = 0;
@@ -214,20 +217,66 @@ int main()
   const Long64_t evTick = 1000000;
   Long64_t currentEvent = 0;
 
+  Double_t inverseWeight = PhysicsConstants::br_ks_pi0pi0 * PhysicsConstants::br_ks_pippim / (PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pippim);
+
   Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
   Double_t gammaL = PhysicsConstants::tau_S_nonCPT / PhysicsConstants::tau_L;
 
-  auto double_exp = [gammaS, gammaL](Double_t t1, Double_t t2)
+  Double_t weightA = PhysicsConstants::br_ks_pi0pi0 * PhysicsConstants::br_kl_pippim,
+           weightB = PhysicsConstants::br_ks_pippim * PhysicsConstants::br_kl_pi0pi0,
+           weightC = PhysicsConstants::br_ks_pippim * PhysicsConstants::br_kl_pippim,
+           totalWeight = weightA + weightB,
+           probA = weightA / totalWeight,
+           normFactS = (1 - exp(-gammaS * 300.0)),
+           normFactL = (1 - exp(-gammaL * 300.0));
+
+  auto double_exp = [&](Double_t t1, Double_t t2)
   {
-    return exp(-gammaS * t1 - gammaL * t2) + exp(-gammaL * t1 - gammaS * t2);
+    return (0.5 / (normFactS * normFactL)) * (gammaS * gammaL * exp(-gammaS * t1 - gammaL * t2) + gammaS * gammaL * exp(-gammaL * t1 - gammaS * t2));
+  };
+
+  auto double_exp_mixed_corr_00pm = [&](Double_t t1, Double_t t2)
+  {
+    // Każdy człon musi być podzielony przez swoją całkę w zakresie [0, Tmax]
+    Double_t term1 = (gammaS * exp(-gammaS * t1) / normFactS) * (gammaL * exp(-gammaL * t2) / normFactL);
+    Double_t term2 = (gammaL * exp(-gammaL * t1) / normFactL) * (gammaS * exp(-gammaS * t2) / normFactS);
+
+    return probA * term1 + (1 - probA) * term2;
+  };
+
+  auto double_exp_mixed_corr_pm00 = [&](Double_t t1, Double_t t2)
+  {
+    // Każdy człon musi być podzielony przez swoją całkę w zakresie [0, Tmax]
+    Double_t term1 = (gammaS * exp(-gammaS * t2) / normFactS) * (gammaL * exp(-gammaL * t1) / normFactL);
+    Double_t term2 = (gammaL * exp(-gammaL * t2) / normFactL) * (gammaS * exp(-gammaS * t1) / normFactS);
+
+    return probA * term1 + (1 - probA) * term2;
+  };
+
+  auto double_exp_mixed_00pm = [&](Double_t t1, Double_t t2)
+  {
+    // Każdy człon musi być podzielony przez swoją całkę w zakresie [0, Tmax]
+    Double_t term1 = (gammaS * exp(-gammaS * t1)) * (gammaL * exp(-gammaL * t2));
+    Double_t term2 = (gammaL * exp(-gammaL * t1)) * (gammaS * exp(-gammaS * t2));
+
+    return probA * term1 + (1 - probA) * term2;
+  };
+
+  auto double_exp_mixed_pm00 = [&](Double_t t1, Double_t t2)
+  {
+    // Każdy człon musi być podzielony przez swoją całkę w zakresie [0, Tmax]
+    Double_t term1 = (gammaS * exp(-gammaS * t2)) * (gammaL * exp(-gammaL * t1));
+    Double_t term2 = (gammaL * exp(-gammaL * t2)) * (gammaS * exp(-gammaS * t1));
+
+    return probA * term1 + (1 - probA) * term2;
   };
 
   TRandom3 randGen(0); // Inicjalizacja generatora losowego z losowym seedem
 
   while (reader_00pm.Next())
   {
-    if (currentEvent >= nEvents)
-      break;
+    // if (currentEvent >= nEvents)
+    //   break;
 
     Double_t weight00pm;
     Double_t weightpm00;
@@ -241,8 +290,8 @@ int main()
     }
     else if (methodChoice == 1)
     {
-      weight00pm = func_00pm->Eval(tneValue, tchValue) / (double_exp(tneValue, tchValue));
-      weightpm00 = func_pm00->Eval(tchValue, tneValue) / (double_exp(tchValue, tneValue));
+      weight00pm = func_00pm->Eval(tneValue, tchValue) / (double_exp_mixed_corr_00pm(tneValue, tchValue));
+      weightpm00 = func_pm00->Eval(tchValue, tneValue) / (double_exp_mixed_corr_pm00(tchValue, tneValue));
     }
     else // methodChoice == 2
     {
@@ -272,8 +321,8 @@ int main()
 
   while (reader_pmpm.Next())
   {
-    if (currentEvent >= nEvents)
-      break;
+    // if (currentEvent >= nEvents)
+    //   break;
 
     Double_t weight = 1.0;
 
@@ -285,7 +334,7 @@ int main()
     }
     else if (methodChoice == 1)
     {
-      weight = func_pmpm->Eval(t1Value, t2Value) / (double_exp(t1Value, t2Value));
+      weight = inverseWeight * func_pmpm->Eval(t1Value, t2Value) / (double_exp(t1Value, t2Value));
     }
     else // methodChoice == 2
     {
@@ -306,6 +355,10 @@ int main()
 
     currentEvent++;
   }
+
+  // h_00pm->Scale(1.0 / h_00pm->GetEntries());
+  // h_pm00->Scale(1.0 / h_pm00->GetEntries());
+  // h_pmpm->Scale(1.0 / h_pmpm->GetEntries());
 
   TString rootFolderPath = "root_files/" + fileMethodAddition[methodChoice];
 
