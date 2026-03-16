@@ -157,6 +157,30 @@ std::vector<TString> g_activeScenarios;
 std::map<TString, ScenarioCounters> g_scenarioCounters;
 std::map<TString, ScenarioHistogramState> g_secondaryScenarioStates;
 
+namespace
+{
+  void ForceEfficiencyYAxisRange(TEfficiency *eff, Double_t yMin, Double_t yMax)
+  {
+    if (!eff)
+      return;
+
+    // TEfficiency creates the painted graph lazily after Draw + Update.
+    if (auto *graph = eff->GetPaintedGraph())
+    {
+      graph->SetMinimum(yMin);
+      graph->SetMaximum(yMax);
+      if (graph->GetYaxis())
+        graph->GetYaxis()->SetRangeUser(yMin, yMax);
+    }
+
+    if (gPad)
+    {
+      gPad->Modified();
+      gPad->Update();
+    }
+  }
+}
+
 // Central place for tuning analysis cuts.
 namespace CutDefs
 {
@@ -369,6 +393,8 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
   // The Begin() function is called at the start of the query.
   // When running with PROOF Begin() is only called on the client.
   // The tree argument is deprecated (on PROOF 0 is passed).
+
+  ROOT::EnableImplicitMT();
 
   // Logger setup
   ErrorHandling::ErrorLogs logger("log/");
@@ -919,7 +945,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   // Simona Cuts
   Bool_t simonaChi2Cut = *Chi2SignalKinFit <= CutDefs::simonaChi2Max,
-         simonaDeltaPhiCut = (fiducialVolume && (abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && cos(phiTrk1Angle * TMath::Pi() / 180.0) < 0.8)) || !fiducialVolume, // abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma && simonaChi2Cut,
+         simonaDeltaPhiCut = ((fiducialVolume && (abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && cos(phiTrk1Angle * TMath::Pi() / 180.0) < 0.8)) || !fiducialVolume) && simonaChi2Cut, // abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma && simonaChi2Cut,
       simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaDeltaPhiCut,
          simonaPositionLimits = radius00 < CutDefs::omegaRadiusLimit && radiuspm < CutDefs::omegaRadiusLimit &&
                                 zdist00 < CutDefs::omegaZdistLimit && zdistpm < CutDefs::omegaZdistLimit,
@@ -1740,8 +1766,7 @@ void signal_vs_bcg_v2::Terminate()
 
   efficiency->Draw();
   gPad->Update();
-
-  efficiency->GetPaintedGraph()->GetYaxis()->SetRangeUser(0, 1.0);
+  ForceEfficiencyYAxisRange(efficiency, 0.0, 1.0);
 
   // Dodaj box z metrykami
   // TPaveText *metricsBox = new TPaveText(0.15, 0.15, 0.45, 0.35, "NDC");
@@ -1763,6 +1788,8 @@ void signal_vs_bcg_v2::Terminate()
 
   deltaTTot->Scale(scale);
 
+  
+
   efficiency = new TEfficiency(*histsFittedSignal["delta_t"]["Signal"], *histsFittedSignal["delta_t"]["MC sum"]);
   efficiency->SetUseWeightedEvents(kTRUE);
 
@@ -1772,8 +1799,7 @@ void signal_vs_bcg_v2::Terminate()
 
   efficiency->Draw();
   gPad->Update();
-
-  efficiency->GetPaintedGraph()->GetYaxis()->SetRangeUser(0, 1.0);
+  ForceEfficiencyYAxisRange(efficiency, 0.0, 1.0);
 
   // Dodaj box z metrykami
   // TPaveText *metricsBox = new TPaveText(0.15, 0.15, 0.45, 0.35, "NDC");
@@ -1800,7 +1826,8 @@ void signal_vs_bcg_v2::Terminate()
   );
 
   TCanvas *canvas_purity_subsets = DrawPuritySubsets(purity_subsets, "delta_t");
-  canvas_purity_subsets->SaveAs(folderPath + "/purity_subsets_delta_t" + Paths::ext_img.Data());
+  if (canvas_purity_subsets)
+    canvas_purity_subsets->SaveAs(folderPath + "/purity_subsets_delta_t" + Paths::ext_img.Data());
 
   // -- REPORT OF THE CUT STATISTICS IN THE ANALYSIS --
 
@@ -1954,6 +1981,32 @@ void signal_vs_bcg_v2::Terminate()
 
     std::cout << "Rendering plots for scenario: " << scenario << std::endl;
 
+    // Build MC sum for secondary scenarios, analogicznie do scenariusza glownego.
+    for (const auto &config : histogramConfigs1D)
+    {
+      TH1 *mcSumRec = state.histsReconstructed[config.first][KLOE::channName.at(8)];
+      TH1 *mcSumFit = state.histsFittedSignal[config.first][KLOE::channName.at(8)];
+
+      if (mcSumRec)
+        mcSumRec->Reset();
+      if (mcSumFit)
+        mcSumFit->Reset();
+
+      for (const auto &channelType : KLOE::channName)
+      {
+        if (channelType.second == "Data" || channelType.second == "MC sum")
+          continue;
+
+        TH1 *hRec = state.histsReconstructed[config.first][channelType.second];
+        TH1 *hFit = state.histsFittedSignal[config.first][channelType.second];
+
+        if (mcSumRec && hRec)
+          mcSumRec->Add(hRec);
+        if (mcSumFit && hFit)
+          mcSumFit->Add(hFit);
+      }
+    }
+
     for (const auto &config : histogramConfigs1D)
     {
       TCanvas *c = new TCanvas(Form("c_%s_%s", config.first.Data(), scenario.Data()),
@@ -2042,7 +2095,9 @@ void signal_vs_bcg_v2::Terminate()
         TEfficiency *effSc = new TEfficiency(*numEff, *state.deltaTSignalTot);
         effSc->SetUseWeightedEvents(kTRUE);
         effSc->SetStatisticOption(TEfficiency::kBUniform);
+        cEff->cd();
         effSc->Draw();
+        ForceEfficiencyYAxisRange(effSc, 0.0, 1.0);
         cEff->SaveAs(state.folderPath + "/efficiency_delta_t" + Paths::ext_img.Data());
         delete cEff;
       }
@@ -2056,9 +2111,25 @@ void signal_vs_bcg_v2::Terminate()
       TEfficiency *purSc = new TEfficiency(*numPurity, *denPurity);
       purSc->SetUseWeightedEvents(kTRUE);
       purSc->SetStatisticOption(TEfficiency::kBUniform);
+      cPurity->cd();
       purSc->Draw();
+      ForceEfficiencyYAxisRange(purSc, 0.0, 1.0);
       cPurity->SaveAs(state.folderPath + "/purity_delta_t" + Paths::ext_img.Data());
       delete cPurity;
+    }
+
+    // Purity in |Delta t| subsets for each active scenario.
+    if (numPurity && denPurity)
+    {
+      std::vector<PuritySubset> puritySubsetsSc = CalculatePurityInSubsets(
+          numPurity,
+          denPurity,
+          20.0,
+          40);
+
+      TCanvas *canvasPuritySubsetsSc = DrawPuritySubsets(puritySubsetsSc, Form("delta_t_%s", scenario.Data()));
+      if (canvasPuritySubsetsSc)
+        canvasPuritySubsetsSc->SaveAs(state.folderPath + "/purity_subsets_delta_t" + Paths::ext_img.Data());
     }
 
     SaveDeltaTComparisonPlot(state.folderPath, scenario, state.histsFittedSignal, state.histsReconstructed);
@@ -2496,9 +2567,18 @@ std::vector<PuritySubset> signal_vs_bcg_v2::CalculatePurityInSubsets(
     Double_t max_limit,
     Int_t n_subsets)
 {
-  if (!hist_signal || !hist_total || hist_signal->GetEntries() == 0)
+  if (!hist_signal || !hist_total)
   {
     std::cerr << "ERROR: Invalid histograms in CalculatePurityInSubsets" << std::endl;
+    return {};
+  }
+
+  const Double_t signalIntegral = hist_signal->Integral(0, hist_signal->GetNbinsX() + 1);
+  const Double_t totalIntegral = hist_total->Integral(0, hist_total->GetNbinsX() + 1);
+  if (signalIntegral <= 0.0 || totalIntegral <= 0.0)
+  {
+    std::cerr << "ERROR: Empty histogram integrals in CalculatePurityInSubsets (signal="
+              << signalIntegral << ", total=" << totalIntegral << ")" << std::endl;
     return {};
   }
 
@@ -2510,47 +2590,41 @@ std::vector<PuritySubset> signal_vs_bcg_v2::CalculatePurityInSubsets(
   for (Int_t i = 1; i <= n_subsets; i++)
   {
     Double_t current_limit = i * limit_step;
-    Double_t previous_limit = (i - 1) * limit_step;
 
-    // Oblicz gęstość obserwowaną w przedziale |ΔT| < limit
+    // Oblicz czystość w symetrycznym, kumulacyjnym przedziale |ΔT| < limit.
     Int_t bin_low = hist_signal->FindBin(-current_limit);
-    Int_t bin_low_right = hist_signal->FindBin(-previous_limit);
-    Int_t bin_high_left = hist_signal->FindBin(previous_limit);
     Int_t bin_high = hist_signal->FindBin(current_limit);
 
-    // Integrate od -limit do +limit
-    Int_t signal_count_low = static_cast<Int_t>(
-        hist_signal->Integral(bin_low, bin_low_right));
-    Int_t signal_count_high = static_cast<Int_t>(
-        hist_signal->Integral(bin_high_left, bin_high));
+    Double_t signal_count_d = hist_signal->Integral(bin_low, bin_high);
+    Double_t total_count_d = hist_total->Integral(bin_low, bin_high);
 
-    Int_t signal_count = signal_count_low + signal_count_high;
-
-    Int_t total_count_low = static_cast<Int_t>(
-        hist_total->Integral(bin_low, bin_low_right));
-    Int_t total_count_high = static_cast<Int_t>(
-        hist_total->Integral(bin_high_left, bin_high));
-
-    Int_t total_count = total_count_low + total_count_high;
+    Int_t signal_count = static_cast<Int_t>(signal_count_d);
+    Int_t total_count = static_cast<Int_t>(total_count_d);
 
     Double_t purity = 0.0;
     Double_t purity_error = 0.0;
 
-    if (total_count > 0)
+    if (total_count_d > 0.0)
     {
-      purity = static_cast<Double_t>(signal_count) / total_count;
+      purity = signal_count_d / total_count_d;
+
+      if (purity > 1.0)
+      {
+        std::cout << "WARNING: purity > 1 for |DeltaT| < " << current_limit
+                  << " (signal=" << signal_count_d << ", total=" << total_count_d << ")" << std::endl;
+      }
 
       // Błąd Bayesowski dla czystości (binomial)
       // σ_purity = sqrt(p*(1-p)/N)
-      if (total_count > 1)
+      if (total_count_d > 1.0)
       {
-        purity_error = TMath::Sqrt(purity * (1.0 - purity) / total_count);
+        purity_error = TMath::Sqrt(TMath::Abs(purity * (1.0 - purity)) / total_count_d);
       }
     }
 
     PuritySubset subset;
-    subset.deltaT_limit = (current_limit + previous_limit) / 2.;
-    subset.deltaT_limit_error = (current_limit - previous_limit) / 2.;
+    subset.deltaT_limit = current_limit;
+    subset.deltaT_limit_error = limit_step / 2.0;
     subset.signal_events = signal_count;
     subset.total_events = total_count;
     subset.purity = purity;
@@ -2623,7 +2697,13 @@ TCanvas *signal_vs_bcg_v2::DrawPuritySubsets(
 
   // Rysuj
   graph_purity->Draw("APL");
-  graph_purity->GetYaxis()->SetRangeUser(0, 1.0);
+  Double_t maxPurity = 0.0;
+  for (const auto &subset : subsets)
+  {
+    if (subset.purity > maxPurity)
+      maxPurity = subset.purity;
+  }
+  graph_purity->GetYaxis()->SetRangeUser(0.0, TMath::Max(1.0, 1.1 * maxPurity));
   gPad->Update();
 
   // Dodaj siatkę
