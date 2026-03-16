@@ -1,5 +1,5 @@
-#define signal_vs_bcg_v2_cxx
-// The class definition in signal_vs_bcg_v2.h has been generated automatically
+#define signal_vs_bcg_v3_cxx
+// The class definition in signal_vs_bcg_v3.h has been generated automatically
 // by the ROOT utility TTree::MakeSelector(). This class is derived
 // from the ROOT class TSelector. For more information on the TSelector
 // framework see $ROOTSYS/README/README.SELECTOR or the ROOT User Manual.
@@ -18,12 +18,12 @@
 //
 // To use this file, try the following session on your Tree T:
 //
-// root> T->Process("signal_vs_bcg_v2.C")
-// root> T->Process("signal_vs_bcg_v2.C","some options")
-// root> T->Process("signal_vs_bcg_v2.C+")
+// root> T->Process("signal_vs_bcg_v3.C")
+// root> T->Process("signal_vs_bcg_v3.C","some options")
+// root> T->Process("signal_vs_bcg_v3.C+")
 //
 
-#include "signal_vs_bcg_v2.h"
+#include "signal_vs_bcg_v3.h"
 #include <kloe_class.h>
 #include <TH1.h>
 #include <TH2.h>
@@ -509,7 +509,7 @@ auto histogramConfigs2D = KLOE::Histograms::LoadHistogramConfigs2D(Paths::histog
 
 TString g_additionalName = "";
 
-void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
+void signal_vs_bcg_v3::Begin(TTree * /*tree*/)
 {
   // The Begin() function is called at the start of the query.
   // When running with PROOF Begin() is only called on the client.
@@ -669,7 +669,7 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
   }
 }
 
-void signal_vs_bcg_v2::SlaveBegin(TTree *tree)
+void signal_vs_bcg_v3::SlaveBegin(TTree *tree)
 {
   // The SlaveBegin() function is called after the Begin() function.
   // When running with PROOF SlaveBegin() is called on each slave server.
@@ -711,7 +711,7 @@ void signal_vs_bcg_v2::SlaveBegin(TTree *tree)
 
 Int_t overflow = 0, cutPassed = 0, cutNPassed = 0;
 
-Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
+Bool_t signal_vs_bcg_v3::Process(Long64_t entry)
 {
   // The Process() function is called for each entry in the tree (or possibly
   // keyed object in the case of PROOF) to be processed. The entry argument
@@ -1394,14 +1394,14 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   return kTRUE;
 }
 
-void signal_vs_bcg_v2::SlaveTerminate()
+void signal_vs_bcg_v3::SlaveTerminate()
 {
   // The SlaveTerminate() function is called after all entries or objects
   // have been processed. When running with PROOF SlaveTerminate() is called
   // on each slave server.
 }
 
-void signal_vs_bcg_v2::Terminate()
+void signal_vs_bcg_v3::Terminate()
 {
   // The Terminate() function is the last function to be called during
   // a query. It always runs on the client, it can be used to present
@@ -2415,14 +2415,14 @@ void signal_vs_bcg_v2::Terminate()
   }
 }
 
-Double_t signal_vs_bcg_v2::CalculatePurity(Int_t signal, Int_t total) const
+Double_t signal_vs_bcg_v3::CalculatePurity(Int_t signal, Int_t total) const
 {
   if (total == 0)
     return 0.0; // Unikaj dzielenia przez zero
   return static_cast<Double_t>(signal) / total;
 }
 
-Double_t signal_vs_bcg_v2::CalculateEfficiency(Int_t signal, Int_t total) const
+Double_t signal_vs_bcg_v3::CalculateEfficiency(Int_t signal, Int_t total) const
 {
   if (total == 0)
     return 0.0; // Unikaj dzielenia przez zero
@@ -2430,7 +2430,7 @@ Double_t signal_vs_bcg_v2::CalculateEfficiency(Int_t signal, Int_t total) const
   return static_cast<Double_t>(signal) / total;
 }
 
-void signal_vs_bcg_v2::FolderManagement(TString folderPath) const
+void signal_vs_bcg_v3::FolderManagement(TString folderPath) const
 {
   // Usuń folder, jeśli istnieje
   system(Form("rm -rf %s", folderPath.Data()));
@@ -2439,7 +2439,7 @@ void signal_vs_bcg_v2::FolderManagement(TString folderPath) const
   system(Form("mkdir -p %s", folderPath.Data()));
 }
 
-CutCount signal_vs_bcg_v2::CountEventsAroundCut(TH1 *hist, Double_t cutValue)
+CutCount signal_vs_bcg_v3::CountEventsAroundCut(TH1 *hist, Double_t cutValue)
 {
   CutCount result;
   result.totalEvents = hist->GetEntries();
@@ -2471,7 +2471,7 @@ CutCount signal_vs_bcg_v2::CountEventsAroundCut(TH1 *hist, Double_t cutValue)
 }
 
 // Przykład użycia:
-void signal_vs_bcg_v2::PrintCutCount(const TString &histName, Double_t cutValue, const CutCount &count)
+void signal_vs_bcg_v3::PrintCutCount(const TString &histName, Double_t cutValue, const CutCount &count)
 {
   std::cout << "Histogram: " << histName << ", Cut at: " << cutValue << std::endl;
   std::cout << "  Events below: " << count.eventsBelow
@@ -2481,7 +2481,7 @@ void signal_vs_bcg_v2::PrintCutCount(const TString &histName, Double_t cutValue,
   std::cout << "  Total: " << count.totalEvents << std::endl;
 }
 
-void signal_vs_bcg_v2::DrawLabelOnHisto(std::vector<TString> labels)
+void signal_vs_bcg_v3::DrawLabelOnHisto(std::vector<TString> labels)
 {
   for (const auto &label : labels)
   {
@@ -2493,12 +2493,12 @@ void signal_vs_bcg_v2::DrawLabelOnHisto(std::vector<TString> labels)
   }
 }
 
-void signal_vs_bcg_v2::AddDataToPCA(Double_t *data)
+void signal_vs_bcg_v3::AddDataToPCA(Double_t *data)
 {
   pca->AddRow(data);
 }
 
-Double_t signal_vs_bcg_v2::GetPCASlope()
+Double_t signal_vs_bcg_v3::GetPCASlope()
 {
   pca->MakePrincipals();
   const TVectorD *principalValues = pca->GetEigenValues();
@@ -2529,7 +2529,7 @@ Double_t signal_vs_bcg_v2::GetPCASlope()
   return slope;
 }
 
-void signal_vs_bcg_v2::WidthOfCorrelatedHist(Double_t *means, Double_t *sigmas, Double_t *vLong, Double_t *vTransv)
+void signal_vs_bcg_v3::WidthOfCorrelatedHist(Double_t *means, Double_t *sigmas, Double_t *vLong, Double_t *vTransv)
 {
   pca->MakePrincipals();
   const TVectorD *principalValues = pca->GetEigenValues();   // Wariancje λ
@@ -2588,7 +2588,7 @@ void signal_vs_bcg_v2::WidthOfCorrelatedHist(Double_t *means, Double_t *sigmas, 
 }
 
 // Funkcja do tworzenia wykresu RMS vs X
-TGraphErrors *signal_vs_bcg_v2::CreateRMSProfile(TH2 *h2D, const char *name, const char *title)
+TGraphErrors *signal_vs_bcg_v3::CreateRMSProfile(TH2 *h2D, const char *name, const char *title)
 {
   Int_t nbinsX = h2D->GetNbinsX();
 
@@ -2672,7 +2672,7 @@ TGraphErrors *signal_vs_bcg_v2::CreateRMSProfile(TH2 *h2D, const char *name, con
   return graph;
 }
 
-TCanvas *signal_vs_bcg_v2::CreateCanvasWithProfiles(TH2 *h2D, const TString &name,
+TCanvas *signal_vs_bcg_v3::CreateCanvasWithProfiles(TH2 *h2D, const TString &name,
                                                     Bool_t drawMeanProfile,
                                                     Bool_t drawSigmaProfile)
 {
@@ -2838,7 +2838,7 @@ TCanvas *signal_vs_bcg_v2::CreateCanvasWithProfiles(TH2 *h2D, const TString &nam
 }
 
 // Funkcja główna - oblicza czystość w podzbiorach |ΔT| < limit
-std::vector<PuritySubset> signal_vs_bcg_v2::CalculatePurityInSubsets(
+std::vector<PuritySubset> signal_vs_bcg_v3::CalculatePurityInSubsets(
     TH1 *hist_signal,
     TH1 *hist_total,
     Double_t max_limit,
@@ -2919,7 +2919,7 @@ std::vector<PuritySubset> signal_vs_bcg_v2::CalculatePurityInSubsets(
 }
 
 // Funkcja do rysowania wykresu czystości vs |ΔT| limit
-TCanvas *signal_vs_bcg_v2::DrawPuritySubsets(
+TCanvas *signal_vs_bcg_v3::DrawPuritySubsets(
     const std::vector<PuritySubset> &subsets,
     const TString &name)
 {
@@ -3022,7 +3022,7 @@ TCanvas *signal_vs_bcg_v2::DrawPuritySubsets(
 }
 
 // Dodatkowo: Funkcja do porównania purity w podzbiorach symetrycznych
-std::map<Double_t, Double_t> signal_vs_bcg_v2::ComparePuritySymmetric(
+std::map<Double_t, Double_t> signal_vs_bcg_v3::ComparePuritySymmetric(
     TH1 *hist_signal,
     TH1 *hist_total,
     const std::vector<Double_t> &limits)
