@@ -17,6 +17,7 @@ namespace Paths
   extern std::string kloedataPath;
   extern std::string kloeMCPath;
   extern std::string workdirPath;
+  extern std::string softdirPath;
   extern std::string chainDataFiles;
   extern std::string chainMCFiles;
   extern std::string pdgConstFilePath;

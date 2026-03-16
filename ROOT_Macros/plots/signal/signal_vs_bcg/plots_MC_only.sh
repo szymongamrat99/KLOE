@@ -124,7 +124,7 @@ for (Int_t i = 1; i <= 12; i++)\
     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Omega_%d.root",i));\
 }
 
-chain->Process("signal_vs_bcg_v2.C", "$opt");
+chain->Process("signal_vs_bcg_v3.C", "$opt");
 .q
 EOF
 
