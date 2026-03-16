@@ -319,7 +319,7 @@ Bool_t PassScenario(const TString &scenario,
   if (scenario == "OLD_OMEGA_GEOMETRICAL_CUT")
     return oldOmegaGeometricalCut;
   if (scenario == "OLD_OMEGA_FIDUCIAL_VOLUME")
-    return oldOmegaFiducialVolume; 
+    return oldOmegaFiducialVolume;
   if (scenario == "SIMONA_CHI2_CUT")
     return simonaChi2Cut;
   if (scenario == "BAD_CLUS_SIMONA")
@@ -897,6 +897,11 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   // mcflagCondition
   Bool_t mcflagCondition = (*mcflag == 1 && mctruth_int >= 0) || *mcflag == 0;
 
+  // Geometrical omega-pi0 rejection cuts
+  Bool_t
+      fiducialVolume = sqrt(pow(distNeutralCharged[0], 2) + pow(distNeutralCharged[1], 2)) < 2.05 && abs(distNeutralCharged[2]) < 2.45,
+      omegaPi0RejectionCut = ((rho > 0.8 && fiducialVolume) || !fiducialVolume) && oldOpeningAngleCut;
+
   // Simona Cuts
   Bool_t simonaChi2Cut = *Chi2SignalKinFit <= CutDefs::simonaChi2Max,
          simonaDeltaPhiCut = abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma && simonaChi2Cut,
@@ -919,11 +924,6 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
          oldMassKneCut = oldMassKchCut && abs(*minv4gam - PhysicsConstants::mK0) < CutDefs::oldCutsMassKneWindow,
          oldQmissCut = oldMassKneCut && *Qmiss < CutDefs::oldCutsQmissMax,
          oldOpeningAngleCut = oldQmissCut && openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin);
-
-  // Geometrical omega-pi0 rejection cuts
-  Bool_t
-      fiducialVolume = abs(distNeutralCharged[0]) < 1.45 && abs(distNeutralCharged[1]) < 1.45 && abs(distNeutralCharged[2]) < 2.45,
-      omegaPi0RejectionCut = ((rho > 0.8 && fiducialVolume) || !fiducialVolume) && oldOpeningAngleCut;
 
   // Additional cuts
   Bool_t shorterKaonPaths = pathKch < CutDefs::kaonPathLimitCharged && pathKne<CutDefs::kaonPathLimitNeutral,
