@@ -894,18 +894,33 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   Float_t T0Omega = pi0OmegaFit1[3] - pi0OmegaFit1[5];
 
+  TVector3 phiMeson = {ParamSignalFit[32], ParamSignalFit[33], ParamSignalFit[34]};
+  TVector3 KchrecVec = {KchrecFit[0], KchrecFit[1], KchrecFit[2]};
+  TVector3 KchrecVecMC = {Kchmc[0], Kchmc[1], Kchmc[2]};
+  TVector3 trk1VecMC = {trk1MC[0], trk1MC[1], trk1MC[2]};
+  TVector3 trk2VecMC = {trk2MC[0], trk2MC[1], trk2MC[2]};
+  TVector3 pi01VecMom = {pi01Fit[0], pi01Fit[1], pi01Fit[2]};
+  TVector3 pi02VecMom = {pi02Fit[0], pi02Fit[1], pi02Fit[2]};
+  TVector3 KnerecVec = {KnerecFit[0], KnerecFit[1], KnerecFit[2]};
+
+  Double_t phiTrk1Angle = trk1Vec.Angle(KchrecVec) * 180.0 / TMath::Pi(),
+           phiTrk2Angle = trk2Vec.Angle(KchrecVec) * 180.0 / TMath::Pi(),
+           phipi01Angle = pi01VecMom.Angle(KnerecVec) * 180.0 / TMath::Pi(),
+           phipi02Angle = pi02VecMom.Angle(KnerecVec) * 180.0 / TMath::Pi(),
+           phiTrk1AngleMC = trk1VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi(),
+           phiTrk2AngleMC = trk2VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi();
+
   // mcflagCondition
   Bool_t mcflagCondition = (*mcflag == 1 && mctruth_int >= 0) || *mcflag == 0;
 
   // Geometrical omega-pi0 rejection cuts
   Bool_t
-      fiducialVolume = sqrt(pow(distNeutralCharged[0], 2) + pow(distNeutralCharged[1], 2)) < 2.05 && abs(distNeutralCharged[2]) < 2.45,
-      omegaPi0RejectionCut = ((rho > 0.8 && fiducialVolume) || !fiducialVolume) && oldOpeningAngleCut;
+      fiducialVolume = sqrt(pow(distNeutralCharged[0], 2) + pow(distNeutralCharged[1], 2)) < 2.05 && abs(distNeutralCharged[2]) < 2.45;
 
   // Simona Cuts
   Bool_t simonaChi2Cut = *Chi2SignalKinFit <= CutDefs::simonaChi2Max,
-         simonaDeltaPhiCut = abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma && simonaChi2Cut,
-         simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaDeltaPhiCut,
+         simonaDeltaPhiCut = (fiducialVolume && (abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && cos(phiTrk1Angle * TMath::Pi() / 180.0) < 0.8)) || !fiducialVolume, // abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma && simonaChi2Cut,
+      simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaDeltaPhiCut,
          simonaPositionLimits = radius00 < CutDefs::omegaRadiusLimit && radiuspm < CutDefs::omegaRadiusLimit &&
                                 zdist00 < CutDefs::omegaZdistLimit && zdistpm < CutDefs::omegaZdistLimit,
          omegaMassT0Cut = ((simonaPositionLimits &&
@@ -923,29 +938,14 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
          oldMassKchCut = oldCombinedMassPi0Cut && abs(Kchrec[5] - PhysicsConstants::mK0) < CutDefs::oldCutsMassKchWindow,
          oldMassKneCut = oldMassKchCut && abs(*minv4gam - PhysicsConstants::mK0) < CutDefs::oldCutsMassKneWindow,
          oldQmissCut = oldMassKneCut && *Qmiss < CutDefs::oldCutsQmissMax,
-         oldOpeningAngleCut = oldQmissCut && openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin);
+         oldOpeningAngleCut = oldQmissCut && openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin),
+         omegaPi0RejectionCut = ((rho > 0.8 && fiducialVolume) || !fiducialVolume) && oldOpeningAngleCut;
 
   // Additional cuts
   Bool_t shorterKaonPaths = pathKch < CutDefs::kaonPathLimitCharged && pathKne<CutDefs::kaonPathLimitNeutral,
                                                                                blobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor>
                                                                            CutDefs::blobDeltaTMin,
          noBlobCut = *KaonNeTimeCMBoostTriFit - *KaonNeTimeCMBoostLor <= CutDefs::blobDeltaTMin;
-
-  TVector3 phiMeson = {ParamSignalFit[32], ParamSignalFit[33], ParamSignalFit[34]};
-  TVector3 KchrecVec = {KchrecFit[0], KchrecFit[1], KchrecFit[2]};
-  TVector3 KchrecVecMC = {Kchmc[0], Kchmc[1], Kchmc[2]};
-  TVector3 trk1VecMC = {trk1MC[0], trk1MC[1], trk1MC[2]};
-  TVector3 trk2VecMC = {trk2MC[0], trk2MC[1], trk2MC[2]};
-  TVector3 pi01VecMom = {pi01Fit[0], pi01Fit[1], pi01Fit[2]};
-  TVector3 pi02VecMom = {pi02Fit[0], pi02Fit[1], pi02Fit[2]};
-  TVector3 KnerecVec = {KnerecFit[0], KnerecFit[1], KnerecFit[2]};
-
-  Double_t phiTrk1Angle = trk1Vec.Angle(KchrecVec) * 180.0 / TMath::Pi(),
-           phiTrk2Angle = trk2Vec.Angle(KchrecVec) * 180.0 / TMath::Pi(),
-           phipi01Angle = pi01VecMom.Angle(KnerecVec) * 180.0 / TMath::Pi(),
-           phipi02Angle = pi02VecMom.Angle(KnerecVec) * 180.0 / TMath::Pi(),
-           phiTrk1AngleMC = trk1VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi(),
-           phiTrk2AngleMC = trk2VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi();
 
   if ((mctruth_int == 1) && *mcflag == 1)
   {
