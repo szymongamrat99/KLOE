@@ -487,13 +487,13 @@ int main()
   };
 
   TF2 *func_00pm_norm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_00pm_normalized, 0.0, 300, 0.0, 300, 3);
-  func_00pm_norm->SetParameters(reParam, imParam, 1.0);
+  func_00pm_norm->SetParameters(reParam, imParam, 1E7);
 
   TF2 *func_pm00_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pm00_normalized, 0.0, 300, 0.0, 300, 3);
-  func_pm00_norm->SetParameters(reParam, imParam, 1.0);
+  func_pm00_norm->SetParameters(reParam, imParam, 1E7);
 
   TF2 *func_pmpm_norm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &func_pmpm_normalized, 0.0, 300, 0.0, 300, 2);
-  func_pmpm_norm->SetParameters(reParam, 0.44);
+  func_pmpm_norm->SetParameters(reParam, 1E7);
 
   auto setErrInf = [](TH2 *hist2D, TH2 *hist2DAux)
   {
@@ -983,7 +983,7 @@ int main()
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
-  TLine *lineZero = new TLine(30, 0, 320., 0);
+  TLine *lineZero = new TLine(0, 0, 320., 0);
   lineZero->SetLineColor(kBlack);
   lineZero->SetLineStyle(2);
 
@@ -993,8 +993,8 @@ int main()
 
   if (isReLimited)
   {
-    linesRe["Min"] = new TLine(30, fitLimits["Re"][0] - reParam, 320., fitLimits["Re"][0] - reParam);
-    linesRe["Max"] = new TLine(30, fitLimits["Re"][1] - reParam, 320., fitLimits["Re"][1] - reParam);
+    linesRe["Min"] = new TLine(0, fitLimits["Re"][0] - reParam, 320., fitLimits["Re"][0] - reParam);
+    linesRe["Max"] = new TLine(0, fitLimits["Re"][1] - reParam, 320., fitLimits["Re"][1] - reParam);
 
     linesRe["Min"]->SetLineColor(kRed);
     linesRe["Min"]->SetLineStyle(3);
@@ -1004,8 +1004,8 @@ int main()
 
   if (isImLimited)
   {
-    linesIm["Min"] = new TLine(30, fitLimits["Im"][0] - imParam, 320., fitLimits["Im"][0] - imParam);
-    linesIm["Max"] = new TLine(30, fitLimits["Im"][1] - imParam, 320., fitLimits["Im"][1] - imParam);
+    linesIm["Min"] = new TLine(0, fitLimits["Im"][0] - imParam, 320., fitLimits["Im"][0] - imParam);
+    linesIm["Max"] = new TLine(0, fitLimits["Im"][1] - imParam, 320., fitLimits["Im"][1] - imParam);
 
     linesIm["Min"]->SetLineColor(kRed);
     linesIm["Min"]->SetLineStyle(3);
@@ -1020,8 +1020,8 @@ int main()
   {
     if (isRangeLimited)
     {
-      linesRange["Min"] = new TLine(30, fitLimits["Range"][0] - t2Max, 320., fitLimits["Range"][0] - t2Max);
-      linesRange["Max"] = new TLine(30, fitLimits["Range"][1] - t2Max, 320., fitLimits["Range"][1] - t2Max);
+      linesRange["Min"] = new TLine(0, fitLimits["Range"][0] - t2Max, 320., fitLimits["Range"][0] - t2Max);
+      linesRange["Max"] = new TLine(0, fitLimits["Range"][1] - t2Max, 320., fitLimits["Range"][1] - t2Max);
 
       linesRange["Min"]->SetLineColor(kRed);
       linesRange["Min"]->SetLineStyle(3);
@@ -1343,7 +1343,7 @@ int main()
   TCanvas *cGraphRe_RA = new TCanvas("cGraphRe_RA", "Fitted Re parameter for R_{A} vs t2Max", 800, 600);
   graphRe_RA->SetMinimum(-1e-4);
   graphRe_RA->SetMaximum(1e-4);
-  graphRe_RA->GetXaxis()->SetLimits(30, 320);
+  graphRe_RA->GetXaxis()->SetLimits(0, 320);
   graphRe_RA->Draw("AP");
   lineZero->Draw("SAME");
 
@@ -1358,7 +1358,7 @@ int main()
   TCanvas *cGraphRe_RB = new TCanvas("cGraphRe_RB", "Fitted Re parameter for R_{B} vs t2Max", 800, 600);
   graphRe_RB->SetMinimum(-1e-4);
   graphRe_RB->SetMaximum(1e-4);
-  graphRe_RB->GetXaxis()->SetLimits(30, 320);
+  graphRe_RB->GetXaxis()->SetLimits(0, 320);
   graphRe_RB->Draw("AP");
   lineZero->Draw("SAME");
   if (isReLimited)
@@ -1371,7 +1371,7 @@ int main()
   TCanvas *cGraphRe_RC = new TCanvas("cGraphRe_RC", "Fitted Re parameter for R_{C} vs t2Max", 800, 600);
   graphRe_RC->SetMinimum(-1e-4);
   graphRe_RC->SetMaximum(1e-4);
-  graphRe_RC->GetXaxis()->SetLimits(30, 320);
+  graphRe_RC->GetXaxis()->SetLimits(0, 320);
   graphRe_RC->Draw("AP");
   lineZero->Draw("SAME");
   if (isReLimited)
@@ -1384,7 +1384,7 @@ int main()
   TCanvas *cGraphIm_RA = new TCanvas("cGraphIm_RA", "Fitted Im parameter for R_{A} vs t2Max", 800, 600);
   graphIm_RA->SetMinimum(-0.005);
   graphIm_RA->SetMaximum(0.005);
-  graphIm_RA->GetXaxis()->SetLimits(30, 320);
+  graphIm_RA->GetXaxis()->SetLimits(0, 320);
   graphIm_RA->Draw("AP");
   lineZero->Draw("SAME");
   if (isImLimited)
@@ -1397,7 +1397,7 @@ int main()
   TCanvas *cGraphIm_RB = new TCanvas("cGraphIm_RB", "Fitted Im parameter for R_{B} vs t2Max", 800, 600);
   graphIm_RB->SetMinimum(-0.005);
   graphIm_RB->SetMaximum(0.005);
-  graphIm_RB->GetXaxis()->SetLimits(30, 320);
+  graphIm_RB->GetXaxis()->SetLimits(0, 320);
   graphIm_RB->Draw("AP");
   lineZero->Draw("SAME");
   if (isImLimited)
@@ -1410,7 +1410,7 @@ int main()
   TCanvas *cGraphIm_RC = new TCanvas("cGraphIm_RC", "Fitted Im parameter for R_{C} vs t2Max", 800, 600);
   graphIm_RC->SetMinimum(-0.005);
   graphIm_RC->SetMaximum(0.005);
-  graphIm_RC->GetXaxis()->SetLimits(30, 320);
+  graphIm_RC->GetXaxis()->SetLimits(0, 320);
   graphIm_RC->Draw("AP");
   lineZero->Draw("SAME");
   if (isImLimited)
@@ -1423,7 +1423,7 @@ int main()
   TCanvas *cGraphRange_RA = new TCanvas("cGraphRange_RA", "Fitted Range parameter for R_{A} vs t2Max", 800, 600);
   graphRange_RA->SetMinimum(-150);
   graphRange_RA->SetMaximum(150);
-  graphRange_RA->GetXaxis()->SetLimits(30, 320);
+  graphRange_RA->GetXaxis()->SetLimits(0, 320);
   graphRange_RA->Draw("AP");
   lineZero->Draw("SAME");
   if (isRangeLimited)
@@ -1436,7 +1436,7 @@ int main()
   TCanvas *cGraphRange_RB = new TCanvas("cGraphRange_RB", "Fitted Range parameter for R_{B} vs t2Max", 800, 600);
   graphRange_RB->SetMinimum(-150);
   graphRange_RB->SetMaximum(150);
-  graphRange_RB->GetXaxis()->SetLimits(30, 320);
+  graphRange_RB->GetXaxis()->SetLimits(0, 320);
   graphRange_RB->Draw("AP");
   lineZero->Draw("SAME");
   if (isRangeLimited)
@@ -1449,7 +1449,7 @@ int main()
   TCanvas *cGraphRange_RC = new TCanvas("cGraphRange_RC", "Fitted Range parameter for R_{C} vs t2Max", 800, 600);
   graphRange_RC->SetMinimum(-150);
   graphRange_RC->SetMaximum(150);
-  graphRange_RC->GetXaxis()->SetLimits(30, 320);
+  graphRange_RC->GetXaxis()->SetLimits(0, 320);
   graphRange_RC->Draw("AP");
   lineZero->Draw("SAME");
   if (isRangeLimited)
@@ -1471,63 +1471,63 @@ int main()
   TCanvas *cGraphReError_RA = new TCanvas("cGraphReError_RA", "Error on Re parameter for R_{A} vs t2Max", 800, 600);
   graphReError_RA->SetMinimum(reErrorMin);
   graphReError_RA->SetMaximum(reErrorMax);
-  graphReError_RA->GetXaxis()->SetLimits(30, 320);
+  graphReError_RA->GetXaxis()->SetLimits(0, 320);
   graphReError_RA->Draw("AP");
   cGraphReError_RA->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RA_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphReError_RB = new TCanvas("cGraphReError_RB", "Error on Re parameter for R_{B} vs t2Max", 800, 600);
   graphReError_RB->SetMinimum(reErrorMin);
   graphReError_RB->SetMaximum(reErrorMax);
-  graphReError_RB->GetXaxis()->SetLimits(30, 320);
+  graphReError_RB->GetXaxis()->SetLimits(0, 320);
   graphReError_RB->Draw("AP");
   cGraphReError_RB->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RB_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphReError_RC = new TCanvas("cGraphReError_RC", "Error on Re parameter for R_{C} vs t2Max", 800, 600);
   graphReError_RC->SetMinimum(reErrorMin);
   graphReError_RC->SetMaximum(reErrorMax);
-  graphReError_RC->GetXaxis()->SetLimits(30, 320);
+  graphReError_RC->GetXaxis()->SetLimits(0, 320);
   graphReError_RC->Draw("AP");
   cGraphReError_RC->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphImError_RA = new TCanvas("cGraphImError_RA", "Error on Im parameter for R_{A} vs t2Max", 800, 600);
   graphImError_RA->SetMinimum(imErrorMin);
   graphImError_RA->SetMaximum(imErrorMax);
-  graphImError_RA->GetXaxis()->SetLimits(30, 320);
+  graphImError_RA->GetXaxis()->SetLimits(0, 320);
   graphImError_RA->Draw("AP");
   cGraphImError_RA->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RA_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphImError_RB = new TCanvas("cGraphImError_RB", "Error on Im parameter for R_{B} vs t2Max", 800, 600);
   graphImError_RB->SetMinimum(imErrorMin);
   graphImError_RB->SetMaximum(imErrorMax);
-  graphImError_RB->GetXaxis()->SetLimits(30, 320);
+  graphImError_RB->GetXaxis()->SetLimits(0, 320);
   graphImError_RB->Draw("AP");
   cGraphImError_RB->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RB_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphImError_RC = new TCanvas("cGraphImError_RC", "Error on Im parameter for R_{C} vs t2Max", 800, 600);
   graphImError_RC->SetMinimum(imErrorMin);
   graphImError_RC->SetMaximum(imErrorMax);
-  graphImError_RC->GetXaxis()->SetLimits(30, 320);
+  graphImError_RC->GetXaxis()->SetLimits(0, 320);
   graphImError_RC->Draw("AP");
   cGraphImError_RC->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphRangeError_RA = new TCanvas("cGraphRangeError_RA", "Error on Range parameter for R_{A} vs t2Max", 800, 600);
   graphRangeError_RA->SetMinimum(rangeErrorMin);
   graphRangeError_RA->SetMaximum(rangeErrorMax);
-  graphRangeError_RA->GetXaxis()->SetLimits(30, 320);
+  graphRangeError_RA->GetXaxis()->SetLimits(0, 320);
   graphRangeError_RA->Draw("AP");
   cGraphRangeError_RA->SaveAs(Form(imgFolderPath + "/Fitted_RangeError_RA_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphRangeError_RB = new TCanvas("cGraphRangeError_RB", "Error on Range parameter for R_{B} vs t2Max", 800, 600);
   graphRangeError_RB->SetMinimum(rangeErrorMin);
   graphRangeError_RB->SetMaximum(rangeErrorMax);
-  graphRangeError_RB->GetXaxis()->SetLimits(30, 320);
+  graphRangeError_RB->GetXaxis()->SetLimits(0, 320);
   graphRangeError_RB->Draw("AP");
   cGraphRangeError_RB->SaveAs(Form(imgFolderPath + "/Fitted_RangeError_RB_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphRangeError_RC = new TCanvas("cGraphRangeError_RC", "Error on Range parameter for R_{C} vs t2Max", 800, 600);
   graphRangeError_RC->SetMinimum(rangeErrorMin);
   graphRangeError_RC->SetMaximum(rangeErrorMax);
-  graphRangeError_RC->GetXaxis()->SetLimits(30, 320);
+  graphRangeError_RC->GetXaxis()->SetLimits(0, 320);
   graphRangeError_RC->Draw("AP");
   cGraphRangeError_RC->SaveAs(Form(imgFolderPath + "/Fitted_RangeError_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
@@ -1539,7 +1539,7 @@ int main()
   graphChi2_RA->SetTitle(chi2TitleRA);
   graphChi2_RA->SetMinimum(0);
   graphChi2_RA->SetMaximum(2); // Ustaw górną granicę na 5, można dostosować w zależności od wyników
-  graphChi2_RA->GetXaxis()->SetLimits(30, 320);
+  graphChi2_RA->GetXaxis()->SetLimits(0, 320);
   graphChi2_RA->Draw("AP");
   cGraphChi2_RA->SaveAs(Form(imgFolderPath + "/Chi2_RA_vs_t2Max.svg", maxEventsFile.Data()));
 
@@ -1547,7 +1547,7 @@ int main()
   graphChi2_RB->SetTitle(chi2TitleRB);
   graphChi2_RB->SetMinimum(0);
   graphChi2_RB->SetMaximum(2); // Ustaw górną granicę na 5, można dostosować w zależności od wyników
-  graphChi2_RB->GetXaxis()->SetLimits(30, 320);
+  graphChi2_RB->GetXaxis()->SetLimits(0, 320);
   graphChi2_RB->Draw("AP");
   cGraphChi2_RB->SaveAs(Form(imgFolderPath + "/Chi2_RB_vs_t2Max.svg", maxEventsFile.Data()));
 
@@ -1555,13 +1555,13 @@ int main()
   graphChi2_RC->SetTitle(chi2TitleRC);
   graphChi2_RC->SetMinimum(0);
   graphChi2_RC->SetMaximum(2); // Ustaw górną granicę na 5, można dostosować w zależności od wyników
-  graphChi2_RC->GetXaxis()->SetLimits(30, 320);
+  graphChi2_RC->GetXaxis()->SetLimits(0, 320);
   graphChi2_RC->Draw("AP");
   cGraphChi2_RC->SaveAs(Form(imgFolderPath + "/Chi2_RC_vs_t2Max.svg", maxEventsFile.Data()));
 
   TCanvas *cGraphCounts = new TCanvas("cGraphCounts", "Entries vs t2Max", 800, 600);
   graphCounts->SetTitle("Entries vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Entries");
-  graphCounts->GetXaxis()->SetLimits(30, 320);
+  graphCounts->GetXaxis()->SetLimits(0, 320);
   graphCounts->Draw("AP");
   cGraphCounts->SaveAs(Form(imgFolderPath + "/Entries_vs_t2Max.svg", maxEventsFile.Data()));
 

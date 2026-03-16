@@ -57,6 +57,8 @@
 #include <const.h>
 #include <TObjArray.h>
 #include <TObjString.h>
+#include <TFile.h>
+#include <TDirectory.h>
 #include <fstream>
 #include <ctime>
 
@@ -156,28 +158,33 @@ struct ScenarioHistogramState
 std::vector<TString> g_activeScenarios;
 std::map<TString, ScenarioCounters> g_scenarioCounters;
 std::map<TString, ScenarioHistogramState> g_secondaryScenarioStates;
+TString g_rootOutputFileName = "signal_vs_bcg_cache.root";
 
 namespace
 {
-  void ForceEfficiencyYAxisRange(TEfficiency *eff, Double_t yMin, Double_t yMax)
+  void DrawEfficiencyWithFixedYAxis(TEfficiency *eff,
+                                    TH1 *xRefHist,
+                                    Double_t yMin,
+                                    Double_t yMax,
+                                    const TString &yTitle)
   {
-    if (!eff)
+    if (!eff || !xRefHist || !gPad)
       return;
 
-    // TEfficiency creates the painted graph lazily after Draw + Update.
-    if (auto *graph = eff->GetPaintedGraph())
+    const Double_t xMin = xRefHist->GetXaxis()->GetXmin();
+    const Double_t xMax = xRefHist->GetXaxis()->GetXmax();
+
+    TH1 *frame = gPad->DrawFrame(xMin, yMin, xMax, yMax);
+    if (frame)
     {
-      graph->SetMinimum(yMin);
-      graph->SetMaximum(yMax);
-      if (graph->GetYaxis())
-        graph->GetYaxis()->SetRangeUser(yMin, yMax);
+      frame->GetXaxis()->SetTitle(xRefHist->GetXaxis()->GetTitle());
+      frame->GetYaxis()->SetTitle(yTitle);
     }
 
-    if (gPad)
-    {
-      gPad->Modified();
-      gPad->Update();
-    }
+    eff->Draw("P SAME");
+
+    gPad->Modified();
+    gPad->Update();
   }
 }
 
@@ -269,6 +276,118 @@ Double_t ComputeSafeRatio(Int_t num, Int_t den)
   if (den <= 0)
     return 0.0;
   return static_cast<Double_t>(num) / static_cast<Double_t>(den);
+}
+
+TString ParseRootOutputFileName(const TString &option)
+{
+  TString outName = "signal_vs_bcg_cache.root";
+
+  TString opt = option;
+  TObjArray *tokens = opt.Tokenize(";");
+  for (Int_t i = 0; i < tokens->GetEntries(); ++i)
+  {
+    TString token = ((TObjString *)tokens->At(i))->String();
+    token = token.Strip(TString::kBoth);
+    if (token.IsNull())
+      continue;
+
+    TString upper = token;
+    upper.ToUpper();
+    if (upper.BeginsWith("ROOTFILE=") || upper.BeginsWith("OUTPUT_ROOT=") || upper.BeginsWith("ROOT_OUT="))
+    {
+      const Ssiz_t eqPos = token.First('=');
+      if (eqPos >= 0)
+      {
+        TString candidate = token(eqPos + 1, token.Length() - eqPos - 1);
+        candidate = candidate.Strip(TString::kBoth);
+        candidate.ReplaceAll("\"", "");
+        if (!candidate.IsNull())
+          outName = candidate;
+      }
+    }
+  }
+  delete tokens;
+
+  if (!outName.EndsWith(".root"))
+    outName += ".root";
+
+  return outName;
+}
+
+TString ParseFolderAdditionalName(const TString &option)
+{
+  TString additionalName = "";
+
+  TString opt = option;
+  TObjArray *tokens = opt.Tokenize(";");
+  for (Int_t i = 0; i < tokens->GetEntries(); ++i)
+  {
+    TString token = ((TObjString *)tokens->At(i))->String();
+    token = token.Strip(TString::kBoth);
+    if (token.IsNull())
+      continue;
+
+    TString upper = token;
+    upper.ToUpper();
+    if (upper.BeginsWith("ADDNAME") || upper.BeginsWith("FOLDER_NAME=") || upper.BeginsWith("DIR_NAME="))
+    {
+      const Ssiz_t eqPos = token.First('=');
+      if (eqPos >= 0)
+      {
+        TString candidate = token(eqPos + 1, token.Length() - eqPos - 1);
+        candidate = candidate.Strip(TString::kBoth);
+        candidate.ReplaceAll("\"", "");
+        if (!candidate.IsNull())
+          additionalName = candidate;
+      }
+    }
+  }
+  delete tokens;
+
+  if (!additionalName.IsNull())
+    additionalName = "_" + additionalName;
+
+  return additionalName;
+}
+
+void SaveHistMap1D(TDirectory *dir, const std::map<TString, std::map<TString, TH1 *>> &hMap)
+{
+  if (!dir)
+    return;
+
+  dir->cd();
+  for (const auto &cfgEntry : hMap)
+  {
+    const TString &cfgName = cfgEntry.first;
+    for (const auto &chEntry : cfgEntry.second)
+    {
+      const TString &chName = chEntry.first;
+      TH1 *h = chEntry.second;
+      if (!h)
+        continue;
+      h->Write(Form("%s__%s", cfgName.Data(), chName.Data()), TObject::kOverwrite);
+    }
+  }
+}
+
+void SaveHistMap2D(TDirectory *dir, const std::map<TString, std::map<TString, TH2 *>> &hMap)
+{
+  if (!dir)
+    return;
+
+  dir->cd();
+  for (const auto &cfgEntry : hMap)
+  {
+    const TString &cfgName = cfgEntry.first;
+    for (const auto &chEntry : cfgEntry.second)
+    {
+      const TString &chName = chEntry.first;
+      TH2 *h = chEntry.second;
+      if (!h)
+        continue;
+      h->Write(Form("%s__%s", cfgName.Data(), chName.Data()), TObject::kOverwrite);
+    }
+  }
 }
 
 std::vector<TString> ParseScenarioList(const TString &option)
@@ -388,6 +507,8 @@ auto histogramConfigs1D = KLOE::Histograms::LoadHistogramConfigs1D(Paths::histog
 auto histogramConfigs2D = KLOE::Histograms::LoadHistogramConfigs2D(Paths::histogramConfig2DPath);
 ///////////////////////////////////////////////////////////////////////////////
 
+TString g_additionalName = "";
+
 void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
 {
   // The Begin() function is called at the start of the query.
@@ -396,6 +517,9 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
 
   ROOT::EnableImplicitMT();
 
+  const char *datestamp = Obj.getCurrentTimestamp().c_str();
+
+
   // Logger setup
   ErrorHandling::ErrorLogs logger("log/");
 
@@ -403,15 +527,19 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
   /////////////////////////////////////////
   TString option = GetOption();
   g_activeScenarios = ParseScenarioList(option);
+  g_rootOutputFileName = ParseRootOutputFileName(option);
   g_scenarioCounters.clear();
   g_secondaryScenarioStates.clear();
   for (const auto &scenario : g_activeScenarios)
     g_scenarioCounters[scenario] = ScenarioCounters{};
 
+  g_additionalName = ParseFolderAdditionalName(option);
+
   // Primary scenario keeps the legacy histogram/canvas workflow.
   fOption = g_activeScenarios.front();
-  folderPath = "img/" + fOption;
+  folderPath = Form("img/%s%s/%s", datestamp, g_additionalName.Data(), fOption.Data());
   FolderManagement(folderPath);
+  std::cout << "ROOT output file: " << g_rootOutputFileName << std::endl;
   /////////////////////////////////////////
 
   chi2DistFunc = new TF1("chi2DistFunc", chi2dist, 0, 1E5, 2); // 2 parameters
@@ -493,7 +621,7 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
       continue;
 
     ScenarioHistogramState state;
-    state.folderPath = "img/" + scenario;
+    state.folderPath = Form("img/%s%s/%s", datestamp, g_additionalName.Data(), scenario.Data());
     FolderManagement(state.folderPath);
 
     for (const auto &config : histogramConfigs1D)
@@ -1286,6 +1414,13 @@ void signal_vs_bcg_v2::Terminate()
   gStyle->SetOptStat(0);
   gStyle->SetOptFit(0);
 
+  TFile *rootOutFile = TFile::Open(g_rootOutputFileName, "RECREATE");
+  if (!rootOutFile || rootOutFile->IsZombie())
+  {
+    std::cerr << "ERROR: Cannot open ROOT output file: " << g_rootOutputFileName << std::endl;
+    rootOutFile = nullptr;
+  }
+
   std::map<TString, std::map<TString, Int_t>> integrals;
   std::map<TString, Int_t> maxNum;
   std::map<TString, TString> maxChannel;
@@ -1763,10 +1898,7 @@ void signal_vs_bcg_v2::Terminate()
   efficiency->SetStatisticOption(TEfficiency::kBUniform);
 
   canvaEff->cd();
-
-  efficiency->Draw();
-  gPad->Update();
-  ForceEfficiencyYAxisRange(efficiency, 0.0, 1.0);
+  DrawEfficiencyWithFixedYAxis(efficiency, deltaTSignalTot, 0.0, 1.0, "Efficiency");
 
   // Dodaj box z metrykami
   // TPaveText *metricsBox = new TPaveText(0.15, 0.15, 0.45, 0.35, "NDC");
@@ -1781,6 +1913,18 @@ void signal_vs_bcg_v2::Terminate()
   metricsBox->Draw();
 
   canvaEff->SaveAs(folderPath + "/efficiency_delta_t" + Paths::ext_img.Data());
+  if (rootOutFile)
+  {
+    TDirectory *primaryDir = rootOutFile->GetDirectory("primary");
+    if (!primaryDir)
+      primaryDir = rootOutFile->mkdir("primary");
+    if (primaryDir)
+    {
+      primaryDir->cd();
+      efficiency->Write("efficiency_delta_t_obj", TObject::kOverwrite);
+      canvaEff->Write("efficiency_delta_t_canvas", TObject::kOverwrite);
+    }
+  }
 
   /////////////////////////////////////////////////////////////////////////////////
 
@@ -1796,10 +1940,7 @@ void signal_vs_bcg_v2::Terminate()
   efficiency->SetStatisticOption(TEfficiency::kBUniform);
 
   canvaPurity->cd();
-
-  efficiency->Draw();
-  gPad->Update();
-  ForceEfficiencyYAxisRange(efficiency, 0.0, 1.0);
+  DrawEfficiencyWithFixedYAxis(efficiency, histsFittedSignal["delta_t"]["MC sum"], 0.0, 1.0, "Purity");
 
   // Dodaj box z metrykami
   // TPaveText *metricsBox = new TPaveText(0.15, 0.15, 0.45, 0.35, "NDC");
@@ -1814,6 +1955,18 @@ void signal_vs_bcg_v2::Terminate()
   metricsBox->Draw();
 
   canvaPurity->SaveAs(folderPath + "/purity_delta_t" + Paths::ext_img.Data());
+  if (rootOutFile)
+  {
+    TDirectory *primaryDir = rootOutFile->GetDirectory("primary");
+    if (!primaryDir)
+      primaryDir = rootOutFile->mkdir("primary");
+    if (primaryDir)
+    {
+      primaryDir->cd();
+      efficiency->Write("purity_delta_t_obj", TObject::kOverwrite);
+      canvaPurity->Write("purity_delta_t_canvas", TObject::kOverwrite);
+    }
+  }
 
   //////////////////////////////////////////////////////////////////////////////////
 
@@ -1821,13 +1974,26 @@ void signal_vs_bcg_v2::Terminate()
   std::vector<PuritySubset> purity_subsets = CalculatePurityInSubsets(
       histsFittedSignal["delta_t"]["Signal"], // Histogram sygnału
       histsFittedSignal["delta_t"]["MC sum"], // Histogram całkowitego
-      20.0,                                   // max limit [ns]
-      40                                      // liczba podzbiorów
+      30.0,                                   // max limit [ns]
+      30                                      // liczba podzbiorów
   );
 
   TCanvas *canvas_purity_subsets = DrawPuritySubsets(purity_subsets, "delta_t");
   if (canvas_purity_subsets)
+  {
     canvas_purity_subsets->SaveAs(folderPath + "/purity_subsets_delta_t" + Paths::ext_img.Data());
+    if (rootOutFile)
+    {
+      TDirectory *primaryDir = rootOutFile->GetDirectory("primary");
+      if (!primaryDir)
+        primaryDir = rootOutFile->mkdir("primary");
+      if (primaryDir)
+      {
+        primaryDir->cd();
+        canvas_purity_subsets->Write("purity_subsets_delta_t_canvas", TObject::kOverwrite);
+      }
+    }
+  }
 
   // -- REPORT OF THE CUT STATISTICS IN THE ANALYSIS --
 
@@ -2096,9 +2262,21 @@ void signal_vs_bcg_v2::Terminate()
         effSc->SetUseWeightedEvents(kTRUE);
         effSc->SetStatisticOption(TEfficiency::kBUniform);
         cEff->cd();
-        effSc->Draw();
-        ForceEfficiencyYAxisRange(effSc, 0.0, 1.0);
+        DrawEfficiencyWithFixedYAxis(effSc, state.deltaTSignalTot, 0.0, 1.0, "Efficiency");
         cEff->SaveAs(state.folderPath + "/efficiency_delta_t" + Paths::ext_img.Data());
+        if (rootOutFile)
+        {
+          TString scenDirName = TString("scenario_") + scenario;
+          TDirectory *scDir = rootOutFile->GetDirectory(scenDirName);
+          if (!scDir)
+            scDir = rootOutFile->mkdir(scenDirName);
+          if (scDir)
+          {
+            scDir->cd();
+            effSc->Write("efficiency_delta_t_obj", TObject::kOverwrite);
+            cEff->Write("efficiency_delta_t_canvas", TObject::kOverwrite);
+          }
+        }
         delete cEff;
       }
     }
@@ -2112,9 +2290,21 @@ void signal_vs_bcg_v2::Terminate()
       purSc->SetUseWeightedEvents(kTRUE);
       purSc->SetStatisticOption(TEfficiency::kBUniform);
       cPurity->cd();
-      purSc->Draw();
-      ForceEfficiencyYAxisRange(purSc, 0.0, 1.0);
+      DrawEfficiencyWithFixedYAxis(purSc, denPurity, 0.0, 1.0, "Purity");
       cPurity->SaveAs(state.folderPath + "/purity_delta_t" + Paths::ext_img.Data());
+      if (rootOutFile)
+      {
+        TString scenDirName = TString("scenario_") + scenario;
+        TDirectory *scDir = rootOutFile->GetDirectory(scenDirName);
+        if (!scDir)
+          scDir = rootOutFile->mkdir(scenDirName);
+        if (scDir)
+        {
+          scDir->cd();
+          purSc->Write("purity_delta_t_obj", TObject::kOverwrite);
+          cPurity->Write("purity_delta_t_canvas", TObject::kOverwrite);
+        }
+      }
       delete cPurity;
     }
 
@@ -2129,13 +2319,100 @@ void signal_vs_bcg_v2::Terminate()
 
       TCanvas *canvasPuritySubsetsSc = DrawPuritySubsets(puritySubsetsSc, Form("delta_t_%s", scenario.Data()));
       if (canvasPuritySubsetsSc)
+      {
         canvasPuritySubsetsSc->SaveAs(state.folderPath + "/purity_subsets_delta_t" + Paths::ext_img.Data());
+        if (rootOutFile)
+        {
+          TString scenDirName = TString("scenario_") + scenario;
+          TDirectory *scDir = rootOutFile->GetDirectory(scenDirName);
+          if (!scDir)
+            scDir = rootOutFile->mkdir(scenDirName);
+          if (scDir)
+          {
+            scDir->cd();
+            canvasPuritySubsetsSc->Write("purity_subsets_delta_t_canvas", TObject::kOverwrite);
+          }
+        }
+      }
     }
 
     SaveDeltaTComparisonPlot(state.folderPath, scenario, state.histsFittedSignal, state.histsReconstructed);
+
+    if (rootOutFile)
+    {
+      TString scenDirName = TString("scenario_") + scenario;
+      TDirectory *scDir = rootOutFile->GetDirectory(scenDirName);
+      if (!scDir)
+        scDir = rootOutFile->mkdir(scenDirName);
+      if (scDir)
+      {
+        TDirectory *hRecDir = scDir->GetDirectory("hists_reconstructed");
+        if (!hRecDir)
+          hRecDir = scDir->mkdir("hists_reconstructed");
+        SaveHistMap1D(hRecDir, state.histsReconstructed);
+
+        TDirectory *hFitDir = scDir->GetDirectory("hists_fitted");
+        if (!hFitDir)
+          hFitDir = scDir->mkdir("hists_fitted");
+        SaveHistMap1D(hFitDir, state.histsFittedSignal);
+
+        TDirectory *h2Dir = scDir->GetDirectory("hists2d_fitted");
+        if (!h2Dir)
+          h2Dir = scDir->mkdir("hists2d_fitted");
+        SaveHistMap2D(h2Dir, state.hists2DFittedSignal);
+
+        scDir->cd();
+        if (state.deltaTSignalTot)
+          state.deltaTSignalTot->Write("deltaTSignalTot", TObject::kOverwrite);
+        if (state.deltaTTot)
+          state.deltaTTot->Write("deltaTTot", TObject::kOverwrite);
+        if (state.histCounts)
+          state.histCounts->Write("histCounts", TObject::kOverwrite);
+      }
+    }
   }
 
   SaveDeltaTComparisonPlot(folderPath, fOption, histsFittedSignal, histsReconstructed);
+
+  if (rootOutFile)
+  {
+    TDirectory *primaryDir = rootOutFile->GetDirectory("primary");
+    if (!primaryDir)
+      primaryDir = rootOutFile->mkdir("primary");
+    if (primaryDir)
+    {
+      TDirectory *hRecDir = primaryDir->GetDirectory("hists_reconstructed");
+      if (!hRecDir)
+        hRecDir = primaryDir->mkdir("hists_reconstructed");
+      SaveHistMap1D(hRecDir, histsReconstructed);
+
+      TDirectory *hFitDir = primaryDir->GetDirectory("hists_fitted");
+      if (!hFitDir)
+        hFitDir = primaryDir->mkdir("hists_fitted");
+      SaveHistMap1D(hFitDir, histsFittedSignal);
+
+      TDirectory *h2Dir = primaryDir->GetDirectory("hists2d_fitted");
+      if (!h2Dir)
+        h2Dir = primaryDir->mkdir("hists2d_fitted");
+      SaveHistMap2D(h2Dir, hists2DFittedSignal);
+
+      primaryDir->cd();
+      if (deltaTSignalTot)
+        deltaTSignalTot->Write("deltaTSignalTot", TObject::kOverwrite);
+      if (deltaTTot)
+        deltaTTot->Write("deltaTTot", TObject::kOverwrite);
+      if (histCounts)
+        histCounts->Write("histCounts", TObject::kOverwrite);
+      if (canvaEff)
+        canvaEff->Write("efficiency_canvas_latest", TObject::kOverwrite);
+      if (canvaPurity)
+        canvaPurity->Write("purity_canvas_latest", TObject::kOverwrite);
+    }
+
+    rootOutFile->Write();
+    rootOutFile->Close();
+    std::cout << "Saved ROOT cache file: " << g_rootOutputFileName << std::endl;
+  }
 }
 
 Double_t signal_vs_bcg_v2::CalculatePurity(Int_t signal, Int_t total) const
