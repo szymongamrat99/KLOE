@@ -6,4 +6,7 @@ cd build
 cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
 # cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j$nproc
+
+../copy_libs.sh
+
 ./bin/KLSPM00 $file_list

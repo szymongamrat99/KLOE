@@ -105,6 +105,7 @@ int main(int argc, char *argv[])
   // Set tree name
   std::string generalTreeName = "";
   Utils::JsonFieldLookupString(Utils::properties, "variables/tree/treename/general", generalTreeName, logger);
+  std::cout << generalTreeName << std::endl;
   // -------------------------------------------------------------------
   // Set Menu instance
   Controls::Menu mainMenu(10); // For analysis options

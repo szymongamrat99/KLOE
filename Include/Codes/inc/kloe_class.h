@@ -641,7 +641,8 @@ namespace KLOE
       static const std::map<std::string, HypothesisCode> enumMap = {
           {"SIGNAL", HypothesisCode::SIGNAL},
           {"OMEGAPI", HypothesisCode::OMEGAPI},
-          {"FOUR_PI", HypothesisCode::FOUR_PI}};
+          {"FOUR_PI", HypothesisCode::FOUR_PI},
+          {"THREE_PI0", HypothesisCode::THREE_PI0}};
 
       auto it = enumMap.find(str);
       if (it != enumMap.end())
@@ -659,7 +660,8 @@ namespace KLOE
       static const std::map<HypothesisCode, std::string> enumMap = {
           {HypothesisCode::SIGNAL, "SIGNAL"},
           {HypothesisCode::OMEGAPI, "OMEGAPI"},
-          {HypothesisCode::FOUR_PI, "FOUR_PI"}};
+          {HypothesisCode::FOUR_PI, "FOUR_PI"},
+          {HypothesisCode::THREE_PI0, "THREE_PI0"}};
 
       auto it = enumMap.find(code);
       if (it != enumMap.end())
