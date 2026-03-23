@@ -41,12 +41,18 @@ struct Cuts
   const TString noBlobCut = "NO_BLOB";
   const TString simonaKinCuts = "SIMONA_KIN_CUTS";
   const TString omegaMassT0Cut = "OMEGA_MASS_T0_CUT";
+  const TString newChi2Cut = "NEW_CHI2_CUT";
+  const TString newTrkAngleCut = "NEW_TRK_ANGLE_CUT";
+  const TString newCombinedMassPi0Cut = "NEW_COMBINED_MASS_PI0_CUT";
+  const TString newOmegaGeometricalCut = "NEW_OMEGA_GEOMETRICAL_CUT";
+  const TString newOmegaMassT0Cut = "NEW_OMEGA_MASS_T0_CUT";
+  const TString newKchCut = "NEW_MASS_KCH_CUT";
 
   // Zbiór wszystkich cięć
   std::set<TString> GetAllCutsSet() const
   {
     return {oldChi2Cut, oldTrcSumCut, oldCombinedMassPi0Cut, oldMassKchCut, oldMassKneCut, oldQmissCut, oldOpeningAngleCut, oldOmegaGeometricalCut, oldOmegaFiducialVolume, simonaChi2Cuts, badClusSimona, simonaAllCuts,
-            shorterKaonPaths, blobCut, noBlobCut, simonaKinCuts, omegaMassT0Cut};
+            shorterKaonPaths, blobCut, noBlobCut, simonaKinCuts, omegaMassT0Cut, newChi2Cut, newTrkAngleCut, newCombinedMassPi0Cut, newOmegaGeometricalCut, newOmegaMassT0Cut, newKchCut};
   }
 
   // Sprawdzanie w zbiorze
@@ -162,7 +168,6 @@ public:
   TTreeReaderValue<Float_t> bestError = {fReader, "bestErrorSixGamma"};
 
   TTreeReaderArray<int> Asscl = {fReader, "Asscl"};
-  // TTreeReaderArray<int> cutApplied = {fReader, "cutApplied"};
   TTreeReaderArray<int> eclstream = {fReader, "eclstream"};
   TTreeReaderArray<int> g4takenTriKinFit = {fReader, "g4takenTriKinFit"};
   TTreeReaderArray<int> goodClustersTriKinFit = {fReader, "goodClustersTriKinFit"};

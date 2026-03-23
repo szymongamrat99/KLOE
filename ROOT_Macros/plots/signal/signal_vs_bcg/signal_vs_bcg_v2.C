@@ -222,6 +222,10 @@ namespace CutDefs
   constexpr Double_t kaonPathLimitNeutral = 50.0;
   constexpr Double_t kaonPathLimitCharged = 50.0;
   constexpr Double_t blobDeltaTMin = 75.0;
+
+  constexpr Double_t zFidVol = 1.5;
+  constexpr Double_t r00FidVol = 1.5;
+  constexpr Double_t rpmFidVol = 2.0;
 }
 
 void SaveDeltaTComparisonPlot(const TString &outDir,
@@ -439,7 +443,13 @@ Bool_t PassScenario(const TString &scenario,
                     Bool_t simonaDeltaPhiCut,
                     Bool_t omegaMassT0Cut,
                     Bool_t blobCut,
-                    Bool_t noBlobCut)
+                    Bool_t noBlobCut,
+                    Bool_t newChi2Cut,
+                    Bool_t newTrkAngleCut,
+                    Bool_t newCombinedMassPi0Cut,
+                    Bool_t newOmegaGeometricalCut,
+                    Bool_t newOmegaMassT0Cut,
+                    Bool_t newMassKchCut)
 {
   if (scenario == "NO_CUTS")
     return kTRUE;
@@ -477,6 +487,18 @@ Bool_t PassScenario(const TString &scenario,
     return blobCut;
   if (scenario == "NO_BLOB")
     return noBlobCut;
+  if (scenario == "NEW_CHI2_CUT")
+    return newChi2Cut;
+  if (scenario == "NEW_TRK_ANGLE_CUT")
+    return newTrkAngleCut;
+  if (scenario == "NEW_COMBINED_MASS_PI0_CUT")
+    return newCombinedMassPi0Cut;
+  if (scenario == "NEW_OMEGA_GEOMETRICAL_CUT")
+    return newOmegaGeometricalCut;
+  if (scenario == "NEW_OMEGA_MASS_T0_CUT")
+    return newOmegaMassT0Cut;
+  if (scenario == "NEW_MASS_KCH_CUT")
+    return newMassKchCut;
   return kFALSE;
 }
 
@@ -518,7 +540,6 @@ void signal_vs_bcg_v2::Begin(TTree * /*tree*/)
   ROOT::EnableImplicitMT();
 
   const char *datestamp = Obj.getCurrentTimestamp().c_str();
-
 
   // Logger setup
   ErrorHandling::ErrorLogs logger("log/");
@@ -883,6 +904,23 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           deltaT = propTimes.kaon1TimeCM - propTimes.kaon2TimeCM,
           deltaTMC = *KaonChTimeCMMC - *KaonNeTimeCMMC;
 
+  Float_t Pi01FitMean = 134.83240924168854, Pi01FitSigma = 3.4027932219804007,
+          Pi02FitMean = 134.87134080668457, Pi02FitSigma = 3.2275879781199186,
+          rhoFit = -0.33996592037919965;
+
+  Float_t deltaPi01Fit = (pi01Fit[5] - Pi01FitMean) / Pi01FitSigma,
+          deltaPi02Fit = (pi02Fit[5] - Pi02FitMean) / Pi02FitSigma,
+          rhoFactor = 1 / (1 - pow(rhoFit, 2)),
+          pi0MassNorm = sqrt(rhoFactor * (pow(deltaPi01Fit, 2) + pow(deltaPi02Fit, 2) - 2 * rhoFit * deltaPi01Fit * deltaPi02Fit));
+
+  // Rectangular cut on combined mass of two pi0 candidates
+  Float_t u = ((pi01Fit[5] - Pi01FitMean) + (pi02Fit[5] - Pi02FitMean)) / sqrt(2),
+          v = ((pi01Fit[5] - Pi01FitMean) - (pi02Fit[5] - Pi02FitMean)) / sqrt(2),
+          varu = 0.5 * (pow(Pi01FitSigma, 2) + pow(Pi02FitSigma, 2) + 2 * rhoFit * Pi01FitSigma * Pi02FitSigma),
+          varv = 0.5 * (pow(Pi01FitSigma, 2) + pow(Pi02FitSigma, 2) - 2 * rhoFit * Pi01FitSigma * Pi02FitSigma),
+          sigmau = sqrt(varu),
+          sigmav = sqrt(varv);
+
   Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
                                     pow(pi02Fit[5] - PhysicsConstants::mPi0, 2)),
           combinedMassPi0 = sqrt(pow(pi01[5] - PhysicsConstants::mPi0, 2) +
@@ -1069,12 +1107,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   // Geometrical omega-pi0 rejection cuts
   Bool_t
-      fiducialVolume = sqrt(pow(distNeutralCharged[0], 2) + pow(distNeutralCharged[1], 2)) < 2.05 && abs(distNeutralCharged[2]) < 2.45;
+      fiducialVolume = sqrt(pow(distNeutralCharged[0], 2) + pow(distNeutralCharged[1], 2)) < 2.05 && abs(distNeutralCharged[2]) < 2.45,
+      fiducialVolumeSimona = radius00 < 1.5 && radiuspm < 2.0 && zdist00 < 1.5 && zdistpm < 1.5;
 
   // Simona Cuts
   Bool_t simonaChi2Cut = *Chi2SignalKinFit <= CutDefs::simonaChi2Max,
-         simonaDeltaPhiCut = ((fiducialVolume && (abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && cos(phiTrk1Angle * TMath::Pi() / 180.0) < 0.8)) || !fiducialVolume) && simonaChi2Cut, // abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma && simonaChi2Cut,
-      simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaDeltaPhiCut,
+         simonaDeltaPhiCut = /*((fiducialVolume && (abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && cos(phiTrk1Angle * TMath::Pi() / 180.0) < 0.8)) || !fiducialVolume) && simonaChi2Cut,*/ abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma && simonaChi2Cut,
+         simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaDeltaPhiCut,
          simonaPositionLimits = radius00 < CutDefs::omegaRadiusLimit && radiuspm < CutDefs::omegaRadiusLimit &&
                                 zdist00 < CutDefs::omegaZdistLimit && zdistpm < CutDefs::omegaZdistLimit,
          omegaMassT0Cut = ((simonaPositionLimits &&
@@ -1094,6 +1133,22 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
          oldQmissCut = oldMassKneCut && *Qmiss < CutDefs::oldCutsQmissMax,
          oldOpeningAngleCut = oldQmissCut && openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin),
          omegaPi0RejectionCut = ((rho > 0.8 && fiducialVolume) || !fiducialVolume) && oldOpeningAngleCut;
+
+  
+
+  // New cuts
+  Bool_t newChi2Cut = *Chi2SignalKinFit < CutDefs::simonaChi2Max,
+         newTrkAngleCut = newChi2Cut && ((fiducialVolumeSimona && (abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && abs(cos(phiTrk1Angle * TMath::Pi() / 180.0)) < 0.8)) || !fiducialVolumeSimona),
+         newKchCut = newTrkAngleCut && condMassKch,
+         newCombinedMassPi0Cut = newKchCut && (abs(u) < 3.0 * sigmau && abs(v) < 3.0 * sigmav),
+         newOmegaGeometricalCut = newCombinedMassPi0Cut && ((rho > 0.8 && fiducialVolume) || !fiducialVolume),
+         newOmegaT0Cut = ((simonaPositionLimits &&
+                           !(abs(T0Omega - CutDefs::omegaT0Center) < CutDefs::omegaNSigma * CutDefs::omegaT0Sigma &&
+                             abs(omegaFit[5] - CutDefs::omegaMassCenter) < CutDefs::omegaNSigma * CutDefs::omegaMassSigma &&
+                             omegaFit[5] < CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB + CutDefs::omegaLineBreal &&
+                             omegaFit[5] > CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB - CutDefs::omegaLineBreal)) ||
+                          !simonaPositionLimits) &&
+                         newCombinedMassPi0Cut;
 
   // Additional cuts
   Bool_t shorterKaonPaths = pathKch < CutDefs::kaonPathLimitCharged && pathKne<CutDefs::kaonPathLimitNeutral,
@@ -1130,7 +1185,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                              simonaDeltaPhiCut,
                                              omegaMassT0Cut,
                                              blobCut,
-                                             noBlobCut);
+                                             noBlobCut,
+                                             newChi2Cut,
+                                             newTrkAngleCut,
+                                             newCombinedMassPi0Cut,
+                                             newOmegaGeometricalCut,
+                                             newOmegaT0Cut,
+                                             newKchCut);
 
     // For the requested preselection/selection/total efficiencies,
     // count MC truth classes after scenario cut and before mcflagCondition filtering.
@@ -1194,7 +1255,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                           simonaDeltaPhiCut,
                                           omegaMassT0Cut,
                                           blobCut,
-                                          noBlobCut);
+                                          noBlobCut,
+                                          newChi2Cut,
+                                          newTrkAngleCut,
+                                          newCombinedMassPi0Cut,
+                                          newOmegaGeometricalCut,
+                                          newOmegaT0Cut,
+                                          newKchCut);
 
   Bool_t corrPosLimit = (radius00 < 1.5 && radiuspm < 1.5 && zdist00 < 1.0 && zdistpm < 1.0);
   Bool_t phivLimit = abs(deltaPhiFit - 3.110) < 2 * 0.135;
@@ -1375,7 +1442,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                              simonaDeltaPhiCut,
                                              omegaMassT0Cut,
                                              blobCut,
-                                             noBlobCut);
+                                             noBlobCut,
+                                             newChi2Cut,
+                                             newTrkAngleCut,
+                                             newCombinedMassPi0Cut,
+                                             newOmegaGeometricalCut,
+                                             newOmegaT0Cut,
+                                             newKchCut);
 
     if (!passScenario || !mcflagCondition)
       continue;
@@ -1931,8 +2004,6 @@ void signal_vs_bcg_v2::Terminate()
   scale = deltaTTot->GetEntries() / deltaTTot->Integral(0, deltaTTot->GetNbinsX() + 1);
 
   deltaTTot->Scale(scale);
-
-  
 
   efficiency = new TEfficiency(*histsFittedSignal["delta_t"]["Signal"], *histsFittedSignal["delta_t"]["MC sum"]);
   efficiency->SetUseWeightedEvents(kTRUE);

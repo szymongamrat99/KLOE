@@ -1,8 +1,15 @@
 #!/bin/bash
 
+rootfilename=$1
+foldername=$2
+
+if [[ -z "$rootfilename" || -z "$foldername" ]]; then
+    echo "Usage: $0 <root_file_name> <folder_name>"
+    exit 1
+fi
 
 # Definiuje opcje menu (bez EXIT jako scenariusza fizycznego)
-options=("NO_CUTS" "SHORTER_KAON_PATHS" "OLD_CHI2_CUT" "OLD_TRCSUM_CUT" "OLD_COMBINED_MASS_PI0_CUT" "OLD_MASS_KCH_CUT" "OLD_MASS_KNE_CUT" "OLD_QMISS_CUT" "OLD_OPENING_ANGLE_CUT" "OLD_OMEGA_GEOMETRICAL_CUT" "OLD_OMEGA_FIDUCIAL_VOLUME" "SIMONA_CHI2_CUT" "BAD_CLUS_SIMONA" "SIMONA_KIN_CUTS" "SIMONA_ALL_CUTS" "OMEGA_MASS_T0_CUT" "BLOB" "NO_BLOB")
+options=("NO_CUTS" "SHORTER_KAON_PATHS" "OLD_CHI2_CUT" "OLD_TRCSUM_CUT" "OLD_COMBINED_MASS_PI0_CUT" "OLD_MASS_KCH_CUT" "OLD_MASS_KNE_CUT" "OLD_QMISS_CUT" "OLD_OPENING_ANGLE_CUT" "OLD_OMEGA_GEOMETRICAL_CUT" "OLD_OMEGA_FIDUCIAL_VOLUME" "SIMONA_CHI2_CUT" "BAD_CLUS_SIMONA" "SIMONA_KIN_CUTS" "SIMONA_ALL_CUTS" "OMEGA_MASS_T0_CUT" "BLOB" "NO_BLOB" "NEW_CHI2_CUT" "NEW_TRK_ANGLE_CUT" "NEW_COMBINED_MASS_PI0_CUT"  "NEW_OMEGA_GEOMETRICAL_CUT" "NEW_OMEGA_MASS_T0_CUT" "NEW_MASS_KCH_CUT")
 
 echo "Dostępne scenariusze:"
 for i in "${!options[@]}"; do
@@ -85,6 +92,8 @@ fi
 
 opt=$(IFS=';'; echo "${selected[*]}")
 echo "Chosen scenarios: $opt"
+
+opt="$opt;ADDNAME=${foldername};ROOTFILE=${rootfilename}"
 
 root -b <<EOF
 TChain *chain = new TChain("h1");
