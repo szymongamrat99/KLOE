@@ -46,12 +46,13 @@ struct Cuts
   const TString newCombinedMassPi0Cut = "NEW_COMBINED_MASS_PI0_CUT";
   const TString newOmegaGeometricalCut = "NEW_OMEGA_GEOMETRICAL_CUT";
   const TString newOmegaMassT0Cut = "NEW_OMEGA_MASS_T0_CUT";
+  const TString newKchCut = "NEW_MASS_KCH_CUT";
 
   // Zbiór wszystkich cięć
   std::set<TString> GetAllCutsSet() const
   {
     return {oldChi2Cut, oldTrcSumCut, oldCombinedMassPi0Cut, oldMassKchCut, oldMassKneCut, oldQmissCut, oldOpeningAngleCut, oldOmegaGeometricalCut, oldOmegaFiducialVolume, simonaChi2Cuts, badClusSimona, simonaAllCuts,
-            shorterKaonPaths, blobCut, noBlobCut, simonaKinCuts, omegaMassT0Cut, newChi2Cut, newTrkAngleCut, newCombinedMassPi0Cut, newOmegaGeometricalCut, newOmegaMassT0Cut};
+            shorterKaonPaths, blobCut, noBlobCut, simonaKinCuts, omegaMassT0Cut, newChi2Cut, newTrkAngleCut, newCombinedMassPi0Cut, newOmegaGeometricalCut, newOmegaMassT0Cut, newKchCut};
   }
 
   // Sprawdzanie w zbiorze

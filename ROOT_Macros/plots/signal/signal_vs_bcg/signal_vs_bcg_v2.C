@@ -448,7 +448,8 @@ Bool_t PassScenario(const TString &scenario,
                     Bool_t newTrkAngleCut,
                     Bool_t newCombinedMassPi0Cut,
                     Bool_t newOmegaGeometricalCut,
-                    Bool_t newOmegaMassT0Cut)
+                    Bool_t newOmegaMassT0Cut,
+                    Bool_t newMassKchCut)
 {
   if (scenario == "NO_CUTS")
     return kTRUE;
@@ -496,6 +497,8 @@ Bool_t PassScenario(const TString &scenario,
     return newOmegaGeometricalCut;
   if (scenario == "NEW_OMEGA_MASS_T0_CUT")
     return newOmegaMassT0Cut;
+  if (scenario == "NEW_MASS_KCH_CUT")
+    return newMassKchCut;
   return kFALSE;
 }
 
@@ -910,6 +913,14 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           rhoFactor = 1 / (1 - pow(rhoFit, 2)),
           pi0MassNorm = sqrt(rhoFactor * (pow(deltaPi01Fit, 2) + pow(deltaPi02Fit, 2) - 2 * rhoFit * deltaPi01Fit * deltaPi02Fit));
 
+  // Rectangular cut on combined mass of two pi0 candidates
+  Float_t u = ((pi01Fit[5] - Pi01FitMean) + (pi02Fit[5] - Pi02FitMean)) / sqrt(2),
+          v = ((pi01Fit[5] - Pi01FitMean) - (pi02Fit[5] - Pi02FitMean)) / sqrt(2),
+          varu = 0.5 * (pow(Pi01FitSigma, 2) + pow(Pi02FitSigma, 2) + 2 * rhoFit * Pi01FitSigma * Pi02FitSigma),
+          varv = 0.5 * (pow(Pi01FitSigma, 2) + pow(Pi02FitSigma, 2) - 2 * rhoFit * Pi01FitSigma * Pi02FitSigma),
+          sigmau = sqrt(varu),
+          sigmav = sqrt(varv);
+
   Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
                                     pow(pi02Fit[5] - PhysicsConstants::mPi0, 2)),
           combinedMassPi0 = sqrt(pow(pi01[5] - PhysicsConstants::mPi0, 2) +
@@ -1123,10 +1134,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
          oldOpeningAngleCut = oldQmissCut && openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin),
          omegaPi0RejectionCut = ((rho > 0.8 && fiducialVolume) || !fiducialVolume) && oldOpeningAngleCut;
 
+  
+
   // New cuts
   Bool_t newChi2Cut = *Chi2SignalKinFit < CutDefs::simonaChi2Max,
          newTrkAngleCut = newChi2Cut && ((fiducialVolumeSimona && (abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && abs(cos(phiTrk1Angle * TMath::Pi() / 180.0)) < 0.8)) || !fiducialVolumeSimona),
-         newCombinedMassPi0Cut = newTrkAngleCut && pi0MassNorm < 3.,
+         newKchCut = newTrkAngleCut && condMassKch,
+         newCombinedMassPi0Cut = newKchCut && (abs(u) < 3.0 * sigmau && abs(v) < 3.0 * sigmav),
          newOmegaGeometricalCut = newCombinedMassPi0Cut && ((rho > 0.8 && fiducialVolume) || !fiducialVolume),
          newOmegaT0Cut = ((simonaPositionLimits &&
                            !(abs(T0Omega - CutDefs::omegaT0Center) < CutDefs::omegaNSigma * CutDefs::omegaT0Sigma &&
@@ -1176,7 +1190,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                              newTrkAngleCut,
                                              newCombinedMassPi0Cut,
                                              newOmegaGeometricalCut,
-                                             newOmegaT0Cut);
+                                             newOmegaT0Cut,
+                                             newKchCut);
 
     // For the requested preselection/selection/total efficiencies,
     // count MC truth classes after scenario cut and before mcflagCondition filtering.
@@ -1245,7 +1260,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                           newTrkAngleCut,
                                           newCombinedMassPi0Cut,
                                           newOmegaGeometricalCut,
-                                          newOmegaT0Cut);
+                                          newOmegaT0Cut,
+                                          newKchCut);
 
   Bool_t corrPosLimit = (radius00 < 1.5 && radiuspm < 1.5 && zdist00 < 1.0 && zdistpm < 1.0);
   Bool_t phivLimit = abs(deltaPhiFit - 3.110) < 2 * 0.135;
@@ -1431,7 +1447,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                              newTrkAngleCut,
                                              newCombinedMassPi0Cut,
                                              newOmegaGeometricalCut,
-                                             newOmegaT0Cut);
+                                             newOmegaT0Cut,
+                                             newKchCut);
 
     if (!passScenario || !mcflagCondition)
       continue;

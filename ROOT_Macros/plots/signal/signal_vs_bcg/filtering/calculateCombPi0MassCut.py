@@ -4,6 +4,7 @@ import os
 import json
 from modules import utilities as utils
 import math
+import numpy as np
 
 # Enable ROOT's implicit multi-threading to speed up the processing of large datasets.
 ROOT.EnableImplicitMT()
@@ -105,7 +106,7 @@ modelComb = ROOT.RDF.TH1DModel(
 
 modelPi0 = ROOT.RDF.TH1DModel(
   "hPi0Mass",
-  "Pi0 mass error; m^{inv}_{2#gamma} - m_{#pi^{0}} [MeV/c^{2}];Counts",
+  "Pi0 mass error; m^{inv,fit}_{2#gamma} [MeV/c^{2}];Counts",
   100,
   80,
   190,
@@ -113,7 +114,7 @@ modelPi0 = ROOT.RDF.TH1DModel(
 
 modelPi02D = ROOT.RDF.TH2DModel(
   "hPi0Mass2D",
-  "Pi0 mass error; m^{inv}_{2#gamma,1} - m_{#pi^{0}} [MeV/c^{2}]; m^{inv}_{2#gamma,2} - m_{#pi^{0}} [MeV/c^{2}]",
+  "Pi0 mass error; m^{inv,fit}_{2#gamma,1} [MeV/c^{2}]; m^{inv,fit}_{2#gamma,2} [MeV/c^{2}]",
   100,
   80,
   190,
@@ -194,6 +195,11 @@ minSigmaErr1 = sigmasErr1[sigmas1.index(minSigma1)]
 minSigma2 = min(sigmas2)
 minSigmaErr2 = sigmasErr2[sigmas2.index(minSigma2)]
 
+tailSigma1 = max(sigmas1)
+tailSigmaErr1 = sigmasErr1[sigmas1.index(tailSigma1)]
+tailSigma2 = max(sigmas2)
+tailSigmaErr2 = sigmasErr2[sigmas2.index(tailSigma2)]
+
 print("Minimum mean for Pi0Mass1: ", f1.GetParameter(1), "+/-", f1.GetParError(1))
 print("Minimum sigma for Pi0Mass1: ", minSigma1, "+/-", minSigmaErr1)
 print("Minimum mean for Pi0Mass2: ", f2.GetParameter(1), "+/-", f2.GetParError(1))
@@ -214,44 +220,123 @@ rho_factor = "1 / (1 - {})".format(rho**2)
 
 rnorm = "sqrt({}*(pow({}, 2) + pow({}, 2) - 2*{}*{}*{}))".format(rho_factor, dx, dy, rho, dx, dy)
 
+## Square cut
+
+u = "((Pi0Mass1 - {}) + (Pi0Mass2 - {})) / sqrt(2)".format(meanPi0Mass1, meanPi0Mass2)
+v = "((Pi0Mass1 - {}) - (Pi0Mass2 - {})) / sqrt(2)".format(meanPi0Mass1, meanPi0Mass2)
+
+varu = "0.5 * ({}^2 + {}^2 + 2*{}*{}*{})".format(minSigma1, minSigma2, rho, minSigma1, minSigma2)
+varv = "0.5 * ({}^2 + {}^2 - 2*{}*{}*{})".format(minSigma1, minSigma2, rho, minSigma1, minSigma2)
+
+sigmau = "sqrt({})".format(varu)
+sigmav = "sqrt({})".format(varv)
+
+squareCut = "abs({}) < 3 * {} && abs({}) < 3 * {}".format(u, sigmau, v, sigmav)
+
+## Display the rectangle
+
+u_max = 3 * math.sqrt(0.5 * (minSigma1**2 + minSigma2**2 + 2 * rho * minSigma1 * minSigma2))
+v_max = 3 * math.sqrt(0.5 * (minSigma1**2 + minSigma2**2 - 2 * rho * minSigma1 * minSigma2))
+
+x_coords = []
+y_coords = []
+
+for u_sign, v_sign in [(1,1), (-1,1), (-1,-1), (1,-1), (1,1)]:
+  u_cut = u_sign * u_max
+  v_cut = v_sign * v_max
+
+  x_coords.append(meanPi0Mass1 + (u_cut + v_cut) / math.sqrt(2))
+  y_coords.append(meanPi0Mass2 + (u_cut - v_cut) / math.sqrt(2))
+
+x_coords = np.array(x_coords)
+y_coords = np.array(y_coords)
+
+cut_rectangle = ROOT.TPolyLine(5, x_coords, y_coords)
+cut_rectangle.SetLineColor(ROOT.kRed)
+cut_rectangle.SetLineWidth(3)
+cut_rectangle.SetLineStyle(2) # Linia przerywana
+
+
+fitParameters1 = ROOT.TPaveText(0.6, 0.65, 1.0, 0.85, "NDC")
+fitParameters1.SetBorderSize(1)
+fitParameters1.SetFillColor(ROOT.kWhite)
+fitParameters1.SetTextSize(0.03)
+fitParameters1.AddText("#mu(m): {:.2f} #pm {:.2f} MeV/c^{{2}}".format(meanPi0Mass1, f1.GetParError(1)))
+fitParameters1.AddText("#sigma(m)_{{core}}: {:.2f} #pm {:.2f} MeV/c^{{2}}".format(minSigma1, minSigmaErr1))
+fitParameters1.AddText("#sigma(m)_{{tail}}: {:.2f} #pm {:.2f} MeV/c^{{2}}".format(tailSigma1, tailSigmaErr1))
+
+fitParameters2 = ROOT.TPaveText(0.6, 0.65, 1.0, 0.85, "NDC")
+fitParameters2.SetBorderSize(1)
+fitParameters2.SetFillColor(ROOT.kWhite)
+fitParameters2.SetTextSize(0.03)
+fitParameters2.AddText("#mu(m): {:.2f} #pm {:.2f} MeV/c^{{2}}".format(meanPi0Mass2, f2.GetParError(1)))
+fitParameters2.AddText("#sigma(m)_{{core}}: {:.2f} #pm {:.2f} MeV/c^{{2}}".format(minSigma2, minSigmaErr2))
+fitParameters2.AddText("#sigma(m)_{{tail}}: {:.2f} #pm {:.2f} MeV/c^{{2}}".format(tailSigma2, tailSigmaErr2))
+
+
+fitParameters = ROOT.TPaveText(0.6, 0.65, 1.0, 0.85, "NDC")
+fitParameters.SetBorderSize(1)
+fitParameters.SetFillColor(ROOT.kWhite)
+fitParameters.SetTextSize(0.03)
+fitParameters.AddText("#mu(m)_{{core,1}}: {:.2f} #pm {:.2f} MeV/c^{{2}}".format(meanPi0Mass1, f1.GetParError(1)))
+fitParameters.AddText("#sigma(m)_{{core,1}}: {:.2f} #pm {:.2f} MeV/c^{{2}}".format(minSigma1, minSigmaErr1))
+fitParameters.AddText("#mu(m)_{{core,2}}: {:.2f} #pm {:.2f} MeV/c^{{2}}".format(meanPi0Mass2, f2.GetParError(1)))
+fitParameters.AddText("#sigma(m)_{{core,2}}: {:.2f} #pm {:.2f} MeV/c^{{2}}".format(minSigma2, minSigmaErr2))
+fitParameters.AddText("Correlation factor: {:.2f}".format(rho))
+
+
 rdf_sig = rdf_sig.Define("CombPi0MassError", rnorm)
 
 histComb = rdf_sig.Histo1D(modelComb, "CombPi0MassError")
 
-c1 = ROOT.TCanvas("c1", "c1", 800, 600)
+TLine = ROOT.TLine(3., 0, 3., histComb.GetMaximum())
+TLine.SetLineColor(ROOT.kRed)
+TLine.SetLineStyle(ROOT.kDashed)
+
+c1 = ROOT.TCanvas("c1", "c1", 800, 800)
+
+histComb.SetStats(0)
 histComb.SetLineColor(ROOT.kBlack)
 histComb.SetTitle("Combined pi0 mass error")
-histComb.GetXaxis().SetTitle("Combined pi0 mass error [MeV/c^2]")
+histComb.GetXaxis().SetTitle("R_{mass}^{#pi^{0}} [MeV/c^{2}]")
 histComb.GetYaxis().SetTitle("Counts")
 histComb.Draw()
+TLine.Draw("same")
+fitParameters.Draw("same")
 c1.SaveAs(rootFileDatedFolder + "/pi0MassCutSignal.svg")
 
-c2 = ROOT.TCanvas("c2", "c2", 800, 600)
+c2 = ROOT.TCanvas("c2", "c2", 800, 800)
+hist1.SetStats(0)
 hist1.SetLineColor(ROOT.kBlack)
 hist1.SetTitle("Pi0 mass error for signal events")
-hist1.GetXaxis().SetTitle("m^{inv}_{2#gamma,1} - m_{#pi^{0}} [MeV/c^2]")
+hist1.GetXaxis().SetTitle("m^{inv,fit}_{2#gamma,1} [MeV/c^{2}]")
 hist1.GetYaxis().SetTitle("Counts")
 hist1.Draw()
 f1.Draw("same")
 f1part1.Draw("same")
 f1part2.Draw("same")
+fitParameters1.Draw("same")
 c2.SaveAs(rootFileDatedFolder + "/pi0Mass1.svg")
 
-c3 = ROOT.TCanvas("c3", "c3", 800, 600)
+c3 = ROOT.TCanvas("c3", "c3", 800, 800)
+hist2.SetStats(0)
 hist2.SetLineColor(ROOT.kBlack)
 hist2.SetTitle("Pi0 mass error for signal events")
-hist2.GetXaxis().SetTitle("m^{inv}_{2#gamma,2} - m_{#pi^{0}} [MeV/c^2]")
+hist2.GetXaxis().SetTitle("m^{inv,fit}_{2#gamma,2} [MeV/c^{2}]")
 hist2.GetYaxis().SetTitle("Counts")
 hist2.Draw()
 f2.Draw("same")
 f2part1.Draw("same")
 f2part2.Draw("same")
+fitParameters2.Draw("same")
 c3.SaveAs(rootFileDatedFolder + "/pi0Mass2.svg")
 
-c4 = ROOT.TCanvas("c4", "c4", 800, 600)
+c4 = ROOT.TCanvas("c4", "c4", 800, 800)
+hist2d.SetStats(0)
 hist2d.SetTitle("Pi0 mass error for signal events")
-hist2d.GetXaxis().SetTitle("m^{inv}_{2#gamma,1} - m_{#pi^{0}} [MeV/c^2]")
-hist2d.GetYaxis().SetTitle("m^{inv}_{2#gamma,2} - m_{#pi^{0}} [MeV/c^2]")
+hist2d.GetXaxis().SetTitle("m^{inv,fit}_{2#gamma,1} [MeV/c^{2}]")
+hist2d.GetYaxis().SetTitle("m^{inv,fit}_{2#gamma,2} [MeV/c^{2}]")
 hist2d.Draw("COLZ")
+cut_rectangle.Draw("same")
 c4.SaveAs(rootFileDatedFolder + "/pi0Mass2D.svg")
 
