@@ -873,7 +873,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
     }
 
-    if (!cutter.PassCut(0))
+    if (0)
     {
       if (mctruth == mctruthSignal)
       {
@@ -1098,7 +1098,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
         errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.Knerec, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
 
-        if (!cutter.PassCut(1))
+        if (0)
         {
           if (mctruth == mctruthSignal)
           {
@@ -1436,22 +1436,17 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                 }
                 case 1:
                 {
-                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_TRCV);
+                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_INV_MASS_KCH);
                   break;
                 }
                 case 2:
                 {
-                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_INV_MASS_KCH);
+                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_COMB_MPI0);
                   break;
                 }
                 case 3:
                 {
-                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_INV_MASS_KNE);
-                  break;
-                }
-                case 4:
-                {
-                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_QMISS);
+                  baseKin.cut = Int_t(ErrorHandling::ErrorCodes::CUT_COMB_MPI0);
                   break;
                 }
                 }
