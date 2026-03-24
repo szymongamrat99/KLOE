@@ -328,9 +328,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     cutter.RegisterVariableGetter("InvMassKch", [&]()
                                   { return baseKin.Kchrecnew[5]; });
     cutter.RegisterCentralValueGetter("InvMassKch", [&]()
-                                      { return PhysicsConstants::mK0; });
+                                      { return 497.605; });
 
-    cutter.RegisterVariableGetter("InvMassKne", [&]()
+    cutter.RegisterVariableGetter("Chi2SignalKinFit", [&]()
                                   { return baseKin.minv4gam; });
     cutter.RegisterCentralValueGetter("InvMassKne", [&]()
                                       { return PhysicsConstants::mK0; });
