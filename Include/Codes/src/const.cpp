@@ -27,8 +27,8 @@ namespace Paths
   std::string kloedataPath = getenv("KLOE_DBV26_DK0");
   std::string kloeMCPath = getenv("KLOE_DBV26_MK0");
   std::string workdirPath = getenv("WORKDIR");
-  std::string softdirPath = getenv("SOFTDIR");
-  std::string propertiesPath = softdirPath + "/KLOE/Subanalysis/Properties";
+  std::string propertiesPath = getenv("KLOE_PROPERTIES_PATH");
+  std::string generalLogsPath = getenv("KLOE_LOGS_PATH");
   std::string pdgConstFilePath = propertiesPath + "/pdg_api/pdg_const.json";
   std::string pdgCachePath = propertiesPath + "/pdg_api/pdg_cache";
 
@@ -44,7 +44,6 @@ namespace Paths
   std::string reportConfigPath = propertiesPath + "/report-config.json";
   std::string pathsExtensionsPath = propertiesPath + "/paths-extensions.json";
 
-  TString base_path = workdirPath + "/KLOE/";
   TString path_tmp = "";
   TString path_cs = "";
   TString prod2root_path_v26 = "/data/k2/DBV-26/DK0";
@@ -52,15 +51,15 @@ namespace Paths
   TString ext_img = ".pdf";
   TString ext_csv = ".csv";
 
-  TString gen_vars_dir = base_path + "Subanalysis/GeneratedVars/";
-  TString neutrec_dir = base_path + "Subanalysis/Neutrec/";
-  TString cpfit_dir = base_path + "Subanalysis/CPFit/";
-  TString covmatrix_dir = base_path + "Subanalysis/CovarianceMatrix/";
-  TString initialanalysis_dir = base_path + "Subanalysis/InitialAnalysis/";
-  TString omegarec_dir = base_path + "Subanalysis/OmegaRec/";
-  TString efficiency_dir = base_path + "Subanalysis/EfficiencyAnalysis/";
-  TString charged_dir = base_path + "Subanalysis/KchRec/";
-  TString plots_dir = base_path + "Subanalysis/Plots/";
+  TString gen_vars_dir = workdirPath + "/Subanalysis/GeneratedVars/";
+  TString neutrec_dir = workdirPath + "/Subanalysis/Neutrec/";
+  TString cpfit_dir = workdirPath + "/Subanalysis/CPFit/";
+  TString covmatrix_dir = workdirPath + "/Subanalysis/CovarianceMatrix/";
+  TString initialanalysis_dir = workdirPath + "/Subanalysis/InitialAnalysis/";
+  TString omegarec_dir = workdirPath + "/Subanalysis/OmegaRec/";
+  TString efficiency_dir = workdirPath + "/Subanalysis/EfficiencyAnalysis/";
+  TString charged_dir = workdirPath + "/Subanalysis/KchRec/";
+  TString plots_dir = workdirPath + "/Subanalysis/Plots/";
   TString root_files_dir = "root_files/";
   TString input_dir = "input/";
   TString logs_dir = "log/";

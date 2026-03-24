@@ -17,9 +17,9 @@ namespace Paths
   extern std::string kloedataPath;
   extern std::string kloeMCPath;
   extern std::string workdirPath;
-  extern std::string softdirPath;
   extern std::string chainDataFiles;
   extern std::string chainMCFiles;
+  extern std::string generalLogsPath;
   extern std::string pdgConstFilePath;
   extern std::string pdgCachePath;
   extern std::string propertiesPath;
@@ -33,7 +33,6 @@ namespace Paths
   extern std::string reportConfigPath;
   extern std::string pathsExtensionsPath;
 
-  extern TString base_path;
   extern TString path_tmp;
   extern TString path_cs;
   extern TString prod2root_path_v26;

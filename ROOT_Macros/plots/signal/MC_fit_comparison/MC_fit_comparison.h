@@ -24,6 +24,65 @@
 // Headers needed by this particular selector
 #include <vector>
 
+struct Cuts
+{
+  const TString oldChi2Cut = "OLD_CHI2_CUT";
+  const TString oldTrcSumCut = "OLD_TRCSUM_CUT";
+  const TString oldCombinedMassPi0Cut = "OLD_COMBINED_MASS_PI0_CUT";
+  const TString oldMassKchCut = "OLD_MASS_KCH_CUT";
+  const TString oldMassKneCut = "OLD_MASS_KNE_CUT";
+  const TString oldQmissCut = "OLD_QMISS_CUT";
+  const TString oldOpeningAngleCut = "OLD_OPENING_ANGLE_CUT";
+  const TString oldOmegaGeometricalCut = "OLD_OMEGA_GEOMETRICAL_CUT";
+  const TString oldOmegaFiducialVolume = "OLD_OMEGA_FIDUCIAL_VOLUME";
+  const TString simonaChi2Cuts = "SIMONA_CHI2_CUT";
+  const TString badClusSimona = "BAD_CLUS_SIMONA";
+  const TString simonaAllCuts = "SIMONA_ALL_CUTS";
+  const TString shorterKaonPaths = "SHORTER_KAON_PATHS";
+  const TString blobCut = "BLOB";
+  const TString noBlobCut = "NO_BLOB";
+  const TString simonaKinCuts = "SIMONA_KIN_CUTS";
+  const TString omegaMassT0Cut = "OMEGA_MASS_T0_CUT";
+  const TString newChi2Cut = "NEW_CHI2_CUT";
+  const TString newTrkAngleCut = "NEW_TRK_ANGLE_CUT";
+  const TString newCombinedMassPi0Cut = "NEW_COMBINED_MASS_PI0_CUT";
+  const TString newOmegaGeometricalCut = "NEW_OMEGA_GEOMETRICAL_CUT";
+  const TString newOmegaMassT0Cut = "NEW_OMEGA_MASS_T0_CUT";
+  const TString newKchCut = "NEW_MASS_KCH_CUT";
+
+  // Zbiór wszystkich cięć
+  std::set<TString> GetAllCutsSet() const
+  {
+    return {oldChi2Cut, oldTrcSumCut, oldCombinedMassPi0Cut, oldMassKchCut, oldMassKneCut, oldQmissCut, oldOpeningAngleCut, oldOmegaGeometricalCut, oldOmegaFiducialVolume, simonaChi2Cuts, badClusSimona, simonaAllCuts,
+            shorterKaonPaths, blobCut, noBlobCut, simonaKinCuts, omegaMassT0Cut, newChi2Cut, newTrkAngleCut, newCombinedMassPi0Cut, newOmegaGeometricalCut, newOmegaMassT0Cut, newKchCut};
+  }
+
+  // Sprawdzanie w zbiorze
+  Bool_t Contains(const TString &cutName) const
+  {
+    static const std::set<TString> allCuts = GetAllCutsSet();
+    return allCuts.find(cutName) != allCuts.end();
+  }
+};
+
+// Struktura przechowująca wyniki czystości dla podzbiorów
+struct PuritySubset
+{
+  Double_t deltaT_limit;
+  Double_t deltaT_limit_error;
+  Int_t signal_events;
+  Int_t total_events;
+  Double_t purity;
+  Double_t purity_error;
+};
+
+struct CutCount
+{
+  Int_t eventsBelow; // Zdarzenia < cutValue
+  Int_t eventsAbove; // Zdarzenia >= cutValue
+  Int_t totalEvents; // Wszystkie zdarzenia
+};
+
 class MC_fit_comparison : public TSelector
 {
 public:

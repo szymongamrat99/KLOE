@@ -13,7 +13,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include "json.hpp"      // Assuming a JSON library is available, e.g., nlohmann/json
+#include "nlohmann/json.hpp"      // Assuming a JSON library is available, e.g., nlohmann/json
 
 // Standard KLOE class - assuming this is part of your project
 #include <kloe_class.h>  

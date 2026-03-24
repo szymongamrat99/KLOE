@@ -87,8 +87,8 @@ int main(int argc, char *argv[])
   // Set KLOE class instance
   KLOE::pm00 eventAnalysis;
   // Set logger for error logging
-  TString logDirectory = Paths::base_path + Paths::logs_dir;
-  ErrorHandling::ErrorLogs logger((std::string)logDirectory, jobNumber, analysisType);
+  std::string logDir = Paths::generalLogsPath + "/";
+  ErrorHandling::ErrorLogs logger(logDir, jobNumber, analysisType);
   ErrorHandling::InfoCodes infoCode;
   // -------------------------------------------------------------------
   // Initialize utility variables
