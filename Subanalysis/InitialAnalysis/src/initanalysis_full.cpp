@@ -281,6 +281,25 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   KLOE::neutralParticle omega, omegaFit, omegaFitSignal;
   std::vector<KLOE::chargedParticle> chargedPions(2);
 
+  // Lambdas for cuts
+  // SIGNAL hypothesis
+  Float_t pi0Mass1_mean = 134.83240924168848,
+            pi0Mass1_sigma = 3.402793221980809,
+            pi0Mass2_mean = 134.87134080668446,
+            pi0Mass2_sigma = 3.22758797811996,
+            rho = -0.3399659203793453;
+
+    auto u = [&]()
+    {
+      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) + (baseKin.pi02Fit[5] - pi0Mass2_mean)) / sqrt(2);
+    };
+
+    auto v = [&]()
+    {
+      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) - (baseKin.pi02Fit[5] - pi0Mass2_mean)) / sqrt(2);
+    };
+    //
+
   // Cuts application
 
   if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
@@ -332,22 +351,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
     cutter.RegisterVariableGetter("Chi2SignalKinFit", [&]()
                                   { return baseKin.Chi2SignalKinFit; });
-
-    Float_t pi0Mass1_mean = 134.83240924168848,
-            pi0Mass1_sigma = 3.402793221980809,
-            pi0Mass2_mean = 134.87134080668446,
-            pi0Mass2_sigma = 3.22758797811996,
-            rho = -0.3399659203793453;
-
-    auto u = [&]()
-    {
-      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) + (baseKin.pi02Fit[5] - pi0Mass2_mean)) / sqrt(2);
-    };
-
-    auto v = [&]()
-    {
-      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) - (baseKin.pi02Fit[5] - pi0Mass2_mean)) / sqrt(2);
-    };
 
     cutter.RegisterVariableGetter("Pi0MassPlane_u", [&]()
                                   { return u(); });
