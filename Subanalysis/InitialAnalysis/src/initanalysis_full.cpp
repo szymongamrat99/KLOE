@@ -339,17 +339,24 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             pi0Mass2_sigma = 3.22758797811996,
             rho = -0.3399659203793453;
 
-    Float_t u = ((baseKin.pi01Fit[5] - pi0Mass1_mean) + (baseKin.pi02Fit[5] - pi0Mass2_mean)) / sqrt(2),
-            v = ((baseKin.pi01Fit[5] - pi0Mass1_mean) - (baseKin.pi02Fit[5] - pi0Mass2_mean)) / sqrt(2);
+    auto u = [&]()
+    {
+      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) + (baseKin.pi02Fit[5] - pi0Mass2_mean)) / sqrt(2);
+    };
+
+    auto v = [&]()
+    {
+      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) - (baseKin.pi02Fit[5] - pi0Mass2_mean)) / sqrt(2);
+    };
 
     cutter.RegisterVariableGetter("Pi0MassPlane_u", [&]()
-                                  { return u; });
+                                  { return u(); });
 
     cutter.RegisterCentralValueGetter("Pi0MassPlane_u", [&]()
                                   { return 0; });
     
     cutter.RegisterVariableGetter("Pi0MassPlane_v", [&]()
-                                  { return v; });
+                                  { return v(); });
 
     cutter.RegisterCentralValueGetter("Pi0MassPlane_v", [&]()
                                   { return 0; });

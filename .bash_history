@@ -19,3 +19,16 @@ git commit -m "Fixed"
 git push
 git pull
 ./execute_analysis.sh 
+cd ROOT_Macros/plots/signal/signal_vs_bcg/filtering/
+python calculateCombPi0MassCut.py 
+cd ../../../../
+cd ../
+git pull
+git add .
+git commit -m "Additional cuts"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Fixed"
+git push
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
