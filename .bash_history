@@ -32,3 +32,12 @@ git add .
 git commit -m "Fixed"
 git push
 ./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+git add .
+git commit -m "Fixed uv"
+git pus
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Fixed"
+git push
+exit

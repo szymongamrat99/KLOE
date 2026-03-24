@@ -1036,6 +1036,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       // 1. Invariant mass of the charged kaon
       // 2. Missing energy Qmiss
 
+      // Preserve original MC truth for statistical cut accounting.
+      // The analysis flow below may re-label mctruth for output bookkeeping.
+      const Int_t mctruthForCutStats = mctruth;
+
       for (Int_t comp = 0; comp < 3; comp++)
       {
         MissMom[comp] = baseKin.Kchboostnew[comp] - baseKin.Kchrecnew[comp];
@@ -1473,7 +1477,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         }
       }
 
-      cutter.UpdateStats(mctruth);
+      cutter.UpdateStats(mctruthForCutStats);
     }
 
   // All mctruth = 1 with errors appear here
