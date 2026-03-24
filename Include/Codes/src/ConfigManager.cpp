@@ -30,10 +30,10 @@ void ConfigManager::loadConfigurations() {
 // Load properties.json file
 void ConfigManager::loadProperties() {
     try {
-        const char* propertiesPath = getenv("PROPERTIESKLOE");
+        const char* propertiesPath = getenv("KLOE_PROPERTIES_PATH");
         if (!propertiesPath) {
             ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
-            errorLogger->getErrLog(errCode, "PROPERTIESKLOE environment variable not set");
+            errorLogger->getErrLog(errCode, "KLOE_PROPERTIES_PATH environment variable not set");
             return;
         }
         
@@ -64,10 +64,10 @@ void ConfigManager::loadProperties() {
 // Load pdg_const.json file
 void ConfigManager::loadConstants() {
     try {
-        const char* pdgApiPath = getenv("PDGAPI");
+        const char* pdgApiPath = getenv("KLOE_PDGAPI_PATH");
         if (!pdgApiPath) {
             ErrorHandling::ErrorCodes errCode = ErrorHandling::ErrorCodes::FILE_NOT_EXIST;
-            errorLogger->getErrLog(errCode, "PDGAPI environment variable not set");
+            errorLogger->getErrLog(errCode, "KLOE_PDGAPI_PATH environment variable not set");
             return;
         }
         
