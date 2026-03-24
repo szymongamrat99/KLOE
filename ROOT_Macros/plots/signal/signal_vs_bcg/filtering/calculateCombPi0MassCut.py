@@ -6,8 +6,24 @@ from modules import utilities as utils
 import math
 import numpy as np
 
+
+def find_repo_root(start_dir):
+  """Walk up the directory tree and find repository root containing Include/Codes/inc."""
+  current = os.path.abspath(start_dir)
+  while True:
+    if os.path.isdir(os.path.join(current, "Include", "Codes", "inc")):
+      return current
+    parent = os.path.dirname(current)
+    if parent == current:
+      raise RuntimeError("Could not locate repository root with Include/Codes/inc")
+    current = parent
+
 # Enable ROOT's implicit multi-threading to speed up the processing of large datasets.
 ROOT.EnableImplicitMT()
+
+# Ensure ROOT's interpreter can resolve project headers included below.
+repo_root = find_repo_root(os.path.dirname(__file__))
+ROOT.gInterpreter.AddIncludePath(os.path.join(repo_root, "Include", "Codes", "inc"))
 
 # Include necessary headers for constants and error logging.
 ROOT.gInterpreter.Declare('#include <const.h>')
@@ -230,6 +246,15 @@ varv = "0.5 * ({}^2 + {}^2 - 2*{}*{}*{})".format(minSigma1, minSigma2, rho, minS
 
 sigmau = "sqrt({})".format(varu)
 sigmav = "sqrt({})".format(varv)
+
+# Numeric values for quick logging (the string expressions above are used in RDF filters).
+sigmau_val = math.sqrt(0.5 * (minSigma1**2 + minSigma2**2 + 2 * rho * minSigma1 * minSigma2))
+sigmav_val = math.sqrt(0.5 * (minSigma1**2 + minSigma2**2 - 2 * rho * minSigma1 * minSigma2))
+
+print("sigmau expression:", sigmau)
+print("sigmav expression:", sigmav)
+print("sigmau value =", sigmau_val)
+print("sigmav value =", sigmav_val)
 
 squareCut = "abs({}) < 3 * {} && abs({}) < 3 * {}".format(u, sigmau, v, sigmav)
 
