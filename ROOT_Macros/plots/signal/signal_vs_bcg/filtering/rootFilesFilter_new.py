@@ -34,8 +34,23 @@ namespace KloePyRoot {
 
 ROOT.KloePyRoot.EnableSelectiveErrorHandler()
 
+def find_repo_root(start_dir):
+  """Walk up the directory tree and find repository root containing Include/Codes/inc."""
+  current = os.path.abspath(start_dir)
+  while True:
+    if os.path.isdir(os.path.join(current, "Include", "Codes", "inc")):
+      return current
+    parent = os.path.dirname(current)
+    if parent == current:
+      raise RuntimeError("Could not locate repository root with Include/Codes/inc")
+    current = parent
+
 # Enable ROOT's implicit multi-threading to speed up the processing of large datasets.
 ROOT.EnableImplicitMT()
+
+# Ensure ROOT's interpreter can resolve project headers included below.
+repo_root = find_repo_root(os.path.dirname(__file__))
+ROOT.gInterpreter.AddIncludePath(os.path.join(repo_root, "Include", "Codes", "inc"))
 
 # Include necessary headers for constants and error logging.
 ROOT.gInterpreter.Declare('#include <const.h>')
@@ -71,7 +86,7 @@ filePaths = config["filePathsMC"]
 filesMC = {}
 for key, chann in channName.items():
   if chann == 'Signal': #chann != 'Data' and chann != 'MC sum' and chann != 'pi+pi-pi+pi-':
-    filesMC[key] = "mk0*" + chann + "*.root"
+    filesMC[key] = "mk0*.root"
 
 filesChain = {}
 for key, file in filesMC.items():
@@ -83,6 +98,7 @@ for key, file in filesMC.items():
 # Initialize RDataFrame
 rdf = {}
 for key, file in filesChain.items():
+  print("Processing files for channel {}: {}".format(channName[key], file))
   rdf[key] = ROOT.RDataFrame("h1", file)
   rdf[key] = rdf[key].Define("mctruth_int", "mctruth == 0 ? " + str(key) + " : mctruth")
 

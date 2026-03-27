@@ -771,6 +771,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
     {
       mctruth_int = channelFromName;
     }
+
+    mctruth_int = 1;
   }
 
   Float_t phiv1PhiCM, phivPlusPhiCM, phiv2PhiCM, phivMinusPhiCM, deltaPhiPhiCM;

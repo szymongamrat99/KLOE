@@ -3,6 +3,9 @@
 rootfilename=$1
 foldername=$2
 
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(cd "${script_dir}/../../../../" && pwd)"
+
 if [[ -z "$rootfilename" || -z "$foldername" ]]; then
     echo "Usage: $0 <root_file_name> <folder_name>"
     exit 1
@@ -96,33 +99,44 @@ echo "Chosen scenarios: $opt"
 opt="$opt;ADDNAME=${foldername};ROOTFILE=${rootfilename}"
 
 root -b <<EOF
+gInterpreter->AddIncludePath("${repo_root}/Include/Codes/inc");
+gInterpreter->AddIncludePath("${repo_root}/Include");
+gSystem->Load("${repo_root}/build/Include/Codes/libLibRec.so");
+
+std::string dir_all_phys2 = "/data/ssd/gamrat/CNAF_Produced_Files/root_files/ALL_PHYS2_SIGNAL_NoSmearing/mk0*.root";
+std::string dir_all_phys = "/data/ssd/gamrat/CNAF_Produced_Files/root_files/ALL_PHYS_SIGNAL_NoSmearing/mk0*.root";
+
 TChain *chain = new TChain("h1");
 
-for (Int_t i = 1; i <= 70; i++)\
-{\
-    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Signal_%d.root",i));\
-}
-for (Int_t i = 1; i <= 24; i++)\
-{\
-    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys2_SIGNAL_MIXED_Signal_%d.root",i));\
-}
-for (Int_t i = 1; i <= 29; i++)\
-{\
-    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Signal_%d.root",i));\
-}
+chain->Add(dir_all_phys.c_str());
+chain->Add(dir_all_phys2.c_str());
 
-for (Int_t i = 1; i <= 56; i++)\
-{\
-    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Omega_%d.root",i));\
-}
-for (Int_t i = 1; i <= 56; i++)\
-{\
-    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys2_SIGNAL_MIXED_Omega_%d.root",i));\
-}
-for (Int_t i = 1; i <= 12; i++)\
-{\
-    chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Omega_%d.root",i));\
-}
+
+# for (Int_t i = 1; i <= 70; i++)\
+# {\
+#     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Signal_%d.root",i));\
+# }
+# for (Int_t i = 1; i <= 24; i++)\
+# {\
+#     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys2_SIGNAL_MIXED_Signal_%d.root",i));\
+# }
+# for (Int_t i = 1; i <= 29; i++)\
+# {\
+#     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Signal_%d.root",i));\
+# }
+
+# for (Int_t i = 1; i <= 56; i++)\
+# {\
+#     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys_SIGNAL_MIXED_Omega_%d.root",i));\
+# }
+# for (Int_t i = 1; i <= 56; i++)\
+# {\
+#     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-24/mk0*all_phys2_SIGNAL_MIXED_Omega_%d.root",i));\
+# }
+# for (Int_t i = 1; i <= 12; i++)\
+# {\
+#     chain->Add(Form("../../../../Subanalysis/InitialAnalysis/root_files/2025-11-26/mk0*all_phys3_SIGNAL_MIXED_Omega_%d.root",i));\
+# }
 
 chain->Process("signal_vs_bcg_v2.C", "$opt");
 .q

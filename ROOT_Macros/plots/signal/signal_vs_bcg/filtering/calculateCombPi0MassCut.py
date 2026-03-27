@@ -6,6 +6,36 @@ from modules import utilities as utils
 import math
 import numpy as np
 
+ROOT.gInterpreter.Declare('''
+#include <TError.h>
+#include <cstring>
+
+namespace KloePyRoot {
+  void SelectiveErrorHandler(int level, Bool_t abort, const char *location, const char *msg)
+  {
+    if (level >= kError && location && msg)
+    {
+      const bool noisyListCleanup =
+          ((std::strstr(location, "TList::Clear") != nullptr) ||
+           (std::strstr(location, "THashList::Delete") != nullptr)) &&
+          (std::strstr(msg, "already deleted") != nullptr);
+
+      if (noisyListCleanup)
+        return;
+    }
+
+    DefaultErrorHandler(level, abort, location, msg);
+  }
+
+  void EnableSelectiveErrorHandler()
+  {
+    SetErrorHandler(SelectiveErrorHandler);
+  }
+}
+''')
+
+ROOT.KloePyRoot.EnableSelectiveErrorHandler()
+
 
 def find_repo_root(start_dir):
   """Walk up the directory tree and find repository root containing Include/Codes/inc."""
@@ -60,7 +90,7 @@ filePaths = config["filePathsMC"]
 filesMC = {}
 for key, chann in channName.items():
   if chann == 'Signal': #chann != 'Data' and chann != 'MC sum' and chann != 'pi+pi-pi+pi-':
-    filesMC[key] = "mk0*" + chann + "*.root"
+    filesMC[key] = "mk0*.root"
 
 filesChain = {}
 for key, file in filesMC.items():

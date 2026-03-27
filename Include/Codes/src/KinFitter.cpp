@@ -171,9 +171,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
           {
             auxVal = constraint[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
 
-            // if (std::isnan(auxVal))
-            //   throw ErrorHandling::ErrorCodes::NAN_VAL;
-
             _D(l, m) = auxVal;
           }
           else
@@ -191,7 +188,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
         if (abs(_det) > 0 && !TMath::IsNaN(_det))
         {
-          _Aux = _Aux.Invert();
+          _Aux = _Aux.Invert(&_det);
         }
       }
       else
@@ -199,7 +196,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
         _det = 0;
       }
 
-      if (_det == 0 || _det == 1)
+      if (_det == 0)
         throw ErrorHandling::ErrorCodes::DET_ZERO;
       else if (TMath::IsNaN(_det))
         throw ErrorHandling::ErrorCodes::NAN_VAL;
@@ -264,7 +261,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
   _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
   _V = _V_final;
 
-  return _CHISQRTMP;
+  return _CHISQR;
 };
 
 Double_t KinFitter::EnergyCalc(Double_t *p, Double_t mass)
