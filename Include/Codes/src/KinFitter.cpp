@@ -138,7 +138,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
   {
     try
     {
-      // Enforce positive energies and times
+      // Enforce positive energies
       if (_X(4) < 0)
         _X(4) = MIN_CLU_ENE;
       if (_X(9) < 0)
@@ -169,7 +169,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
           if (m < _N_free)
           {
-            auxVal = constraint[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m, m)));
+            auxVal = constraint[l]->GradientPar(m, 0);
 
             _D(l, m) = auxVal;
           }
@@ -184,6 +184,12 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       TDecompSVD svd(_Aux);
       Bool_t svdStatus = false;
+      Double_t condition = svd.Condition();
+
+      if (condition > 1e12)
+      {
+        throw ErrorHandling::ErrorCodes::DET_ZERO;
+      }
 
       _Aux = svd.Invert(svdStatus);
 
@@ -193,12 +199,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       _L = (_Aux * _C);
 
       _CORR = _V * _D_T * _L;
-
-      for (Int_t j = 0; j < _CORR.GetNrows(); j++)
-      {
-        if (abs(_CORR(j)) > 1000.0)
-          _CORR(j) = 0.0;
-      }
 
       _X = _X - _CORR;
 

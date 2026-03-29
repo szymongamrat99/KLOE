@@ -194,8 +194,6 @@ int main()
     std::cout << "Created directory: " << imgFolderPath << std::endl;
   }
 
-  ROOT::EnableImplicitMT(8);
-
   auto formatExpTitle = [](Long64_t n) -> TString
   {
     if (n <= 0)
@@ -330,30 +328,17 @@ int main()
   std::vector<Double_t> t1MaxValues;
   Double_t t1MaxMin = 0.0;
   Double_t t1MaxMax = 300.0;
-  Double_t t1MaxChosen = 20.0;
-  Int_t numT1Steps = 10;
-  std::cout << "Fit range min: ";
-  std::cin >> t1MaxMin;
   std::cout << "Fit range max: ";
   std::cin >> t1MaxMax;
-  std::cout << "Fit range chosen for plots: ";
-  std::cin >> t1MaxChosen;
-  std::cout << "Number of fit range steps: ";
-  std::cin >> numT1Steps;
-  Double_t t1Step = (t1MaxMax - t1MaxMin) / (Double_t)numT1Steps;
-  for (Int_t i = 0; i <= numT1Steps; ++i)
-  {
-    t1MaxValues.push_back(t1MaxMin + i * t1Step);
-  }
 
   std::map<Double_t, TH1 *> hist_00pm2D_projX;
   std::map<Double_t, TH1 *> hist_pm002D_projX;
   std::map<Double_t, TH1 *> hist_pmpmRA2D_projX;
   std::map<Double_t, TH1 *> hist_pmpmRB2D_projX;
 
-  std::map<Double_t, std::map<Double_t, TH1 *>> hist_RA;
-  std::map<Double_t, std::map<Double_t, TH1 *>> hist_RB;
-  std::map<Double_t, std::map<Double_t, TH1 *>> hist_RC;
+  std::map<Double_t, TH1 *> hist_RA;
+  std::map<Double_t, TH1 *> hist_RB;
+  std::map<Double_t, TH1 *> hist_RC;
 
   // Lambda for projection
   auto make_proj_x = [](TH2 *hist2D, const TString &name, Double_t t2Min, Double_t t2Max) -> TH1 *
@@ -376,17 +361,14 @@ int main()
     hist_pmpmRA2D_projX[t2Max] = make_proj_x(hist_pmpm2D_base, Form("h_pmpmRA_projX_%.0f", t2Max), 0, t2Max);
     hist_pmpmRB2D_projX[t2Max] = make_proj_x(hist_pmpm2D_base, Form("h_pmpmRB_projX_%.0f", t2Max), 0, t2Max);
 
-    for (Double_t t1Max : t1MaxValues)
-    {
-      hist_RA[t2Max][t1Max] = (TH1 *)hist_pmpmRA2D_projX[t2Max]->Clone(Form("hist_RA_%.0f_%.0f", t2Max, t1Max));
-      hist_RA[t2Max][t1Max]->Divide(hist_00pm2D_projX[t2Max]);
+    hist_RA[t2Max] = (TH1 *)hist_pmpmRA2D_projX[t2Max]->Clone(Form("hist_RA_%.0f_%.0f", t2Max, t1MaxMax));
+    hist_RA[t2Max]->Divide(hist_00pm2D_projX[t2Max]);
 
-      hist_RB[t2Max][t1Max] = (TH1 *)hist_pmpmRB2D_projX[t2Max]->Clone(Form("hist_RB_%.0f_%.0f", t2Max, t1Max));
-      hist_RB[t2Max][t1Max]->Divide(hist_pm002D_projX[t2Max]);
+    hist_RB[t2Max] = (TH1 *)hist_pmpmRB2D_projX[t2Max]->Clone(Form("hist_RB_%.0f_%.0f", t2Max, t1MaxMax));
+    hist_RB[t2Max]->Divide(hist_pm002D_projX[t2Max]);
 
-      hist_RC[t2Max][t1Max] = (TH1 *)hist_RA[t2Max][t1Max]->Clone(Form("hist_RC_%.0f_%.0f", t2Max, t1Max));
-      hist_RC[t2Max][t1Max]->Divide(hist_RB[t2Max][t1Max]);
-    }
+    hist_RC[t2Max] = (TH1 *)hist_RA[t2Max]->Clone(Form("hist_RC_%.0f_%.0f", t2Max, t1MaxMax));
+    hist_RC[t2Max]->Divide(hist_RB[t2Max]);
   }
 
   // Rysuj oryginalne histogramy 2D (tylko raz)
@@ -770,22 +752,22 @@ int main()
 
   TCanvas *cRes2D_00pm = new TCanvas("cRes2D_00pm", "Residuals 2D 00pm", 800, 600);
   cRes2D_00pm->SetLogz(0);
-  hResiduals2D_00pm->GetXaxis()->SetRangeUser(0, 20.0);
-  hResiduals2D_00pm->GetYaxis()->SetRangeUser(0, 20.0);
+  hResiduals2D_00pm->GetXaxis()->SetRangeUser(0, t1MaxMax);
+  hResiduals2D_00pm->GetYaxis()->SetRangeUser(0, t1MaxMax);
   hResiduals2D_00pm->Draw("COLZ");
   cRes2D_00pm->SaveAs(Form(imgFolderPath + "/residuals2D_00pm_%s.svg", maxEventsFile.Data()));
 
   TCanvas *cRes2D_pm00 = new TCanvas("cRes2D_pm00", "Residuals 2D pm00", 800, 600);
   cRes2D_pm00->SetLogz(0);
-  hResiduals2D_pm00->GetXaxis()->SetRangeUser(0, 20.0);
-  hResiduals2D_pm00->GetYaxis()->SetRangeUser(0, 20.0);
+  hResiduals2D_pm00->GetXaxis()->SetRangeUser(0, t1MaxMax);
+  hResiduals2D_pm00->GetYaxis()->SetRangeUser(0, t1MaxMax);
   hResiduals2D_pm00->Draw("COLZ");
   cRes2D_pm00->SaveAs(Form(imgFolderPath + "/residuals2D_pm00_%s.svg", maxEventsFile.Data()));
 
   TCanvas *cRes2D_pmpm = new TCanvas("cRes2D_pmpm", "Residuals 2D pmpm", 800, 600);
   cRes2D_pmpm->SetLogz(0);
-  hResiduals2D_pmpm->GetXaxis()->SetRangeUser(0, 20.0);
-  hResiduals2D_pmpm->GetYaxis()->SetRangeUser(0, 20.0);
+  hResiduals2D_pmpm->GetXaxis()->SetRangeUser(0, t1MaxMax);
+  hResiduals2D_pmpm->GetYaxis()->SetRangeUser(0, t1MaxMax);
   hResiduals2D_pmpm->Draw("COLZ");
   cRes2D_pmpm->SaveAs(Form(imgFolderPath + "/residuals2D_pmpm_%s.svg", maxEventsFile.Data()));
 
@@ -1061,8 +1043,8 @@ int main()
 
     cR->cd(1);
     hist_RA[t2Max]->SetTitle(Form("R_{A} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
-    hist_RA[t2Max]->GetXaxis()->SetRangeUser(0, 20);
-    fitResultRA = hist_RA[t2Max]->Fit(fitFunc_RA, "RSEMI", "", 0.0, fitRange);
+    hist_RA[t2Max]->GetXaxis()->SetRangeUser(0, t1MaxMax);
+    fitResultRA = hist_RA[t2Max]->Fit(fitFunc_RA, "RSEMI", "", 0.0, t1MaxMax);
     hist_RA[t2Max]->SetMarkerStyle(20);
     hist_RA[t2Max]->SetLineWidth(2);
     hist_RA[t2Max]->SetMarkerColor(kBlack);
@@ -1107,8 +1089,8 @@ int main()
 
     cR->cd(2);
     hist_RB[t2Max]->SetTitle(Form("R_{B} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
-    hist_RB[t2Max]->GetXaxis()->SetRangeUser(0, 20);
-    fitResultRB = hist_RB[t2Max]->Fit(fitFunc_RB, "RSEMI", "", 0.0, fitRange);
+    hist_RB[t2Max]->GetXaxis()->SetRangeUser(0, t1MaxMax);
+    fitResultRB = hist_RB[t2Max]->Fit(fitFunc_RB, "RSEMI", "", 0.0, t1MaxMax);
     hist_RB[t2Max]->SetMarkerStyle(20);
     hist_RB[t2Max]->SetLineWidth(2);
     hist_RB[t2Max]->SetMarkerColor(kBlack);
@@ -1153,8 +1135,8 @@ int main()
 
     cR->cd(3);
     hist_RC[t2Max]->SetTitle(Form("R_{C} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
-    hist_RC[t2Max]->GetXaxis()->SetRangeUser(0, 20);
-    fitResultRC = hist_RC[t2Max]->Fit(fitFunc_RC, "RSEMI", "", 0.0, fitRange);
+    hist_RC[t2Max]->GetXaxis()->SetRangeUser(0, t1MaxMax);
+    fitResultRC = hist_RC[t2Max]->Fit(fitFunc_RC, "RSEMI", "", 0.0, t1MaxMax);
     hist_RC[t2Max]->SetMarkerStyle(20);
     hist_RC[t2Max]->SetLineWidth(2);
     hist_RC[t2Max]->SetMarkerColor(kBlack);
