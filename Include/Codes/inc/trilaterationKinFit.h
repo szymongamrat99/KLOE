@@ -57,7 +57,7 @@ namespace KLOE
 		std::vector<Int_t>
 				_ind_gam;
 
-		std::vector<Float_t>
+		std::vector<Double_t>
 				_cluster[5],
 				_bhabha_mom,
 				_bhabha_mom_err,
@@ -85,7 +85,7 @@ namespace KLOE
 		TrilaterationCode
 				_recMode;
 
-		std::unique_ptr<ChargedVtxRec<Float_t, Int_t>> _chargedVtxRec;
+		std::unique_ptr<ChargedVtxRec<Double_t, Int_t>> _chargedVtxRec;
 
 		Reconstructor
 				_R;
@@ -96,7 +96,7 @@ namespace KLOE
 		TrilaterationReconstructionKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, Int_t jmin, Int_t jmax, ErrorHandling::ErrorLogs &logger);
 		~TrilaterationReconstructionKinFit();
 
-		void SetParameters(const std::vector<Float_t> clu[5], const std::vector<Int_t> NeuClusters, const std::vector<Float_t> bhabha_mom, const std::vector<Float_t> bhabha_mom_err, const std::vector<Float_t> bhabha_vtx)
+		void SetParameters(const std::vector<Double_t> clu[5], const std::vector<Int_t> NeuClusters, const std::vector<Double_t> bhabha_mom, const std::vector<Double_t> bhabha_mom_err, const std::vector<Double_t> bhabha_vtx)
 		{
 			for (Int_t i = 0; i < 5; i++)
 				_cluster[i].assign(clu[i].begin(), clu[i].end());
@@ -107,7 +107,7 @@ namespace KLOE
 			_bhabha_vtx = bhabha_vtx;
 		}
 
-		void GetResults(Int_t &bunchnum, std::vector<Float_t> &iptri_kinfit, std::vector<Int_t> &g4takentri_kinfit, std::vector<Float_t> gamma_mom_final[4], std::vector<Float_t> &fourKnetri_kinfit, std::vector<Float_t> &neu_vtx_min, Float_t &Chi2TriKinFit, std::vector<Float_t> &pulls)
+		void GetResults(Int_t &bunchnum, std::vector<Double_t> &iptri_kinfit, std::vector<Int_t> &g4takentri_kinfit, std::vector<Double_t> gamma_mom_final[4], std::vector<Double_t> &fourKnetri_kinfit, std::vector<Double_t> &neu_vtx_min, Double_t &Chi2TriKinFit, std::vector<Double_t> &pulls)
 		{
 			bunchnum = _bunchnum;
 			iptri_kinfit = _iptri_kinfit;

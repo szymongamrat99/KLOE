@@ -46,7 +46,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
     // Branches' addresses
     // Bhabha vars
-    Float_t bhabha_mom[4], bhabha_vtx[3];
+    Double_t bhabha_mom[4], bhabha_vtx[3];
 
     chain.SetBranchAddress("Bpx", &bhabha_mom[0]);
     chain.SetBranchAddress("Bpy", &bhabha_mom[1]);
@@ -60,7 +60,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
     // Cluster vars
     Int_t nclu;
     UChar_t mctruth, mcflag, g4taken[4], ncll[50];
-    Float_t cluster[5][500], Kchboost[9], Knereclor[9], KnemcOld[9], ip[3];
+    Double_t cluster[5][500], Kchboost[9], Knereclor[9], KnemcOld[9], ip[3];
     KLOE::BaseKinematics baseKin;
 
     chain.SetBranchAddress("ncl", &nclu);
@@ -80,7 +80,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
     chain.SetBranchAddress("ncll", ncll);
 
     Int_t done_kinfit = 0, g4taken_kinfit[4] = {0};
-    Float_t chi2min_tri, Knetri_kinfit[10];
+    Double_t chi2min_tri, Knetri_kinfit[10];
 
     tree_trilateration->SetBranchAddress("done4_kinfit", &done_kinfit);
     tree_trilateration->SetBranchAddress("g4takentri_kinfit", g4taken_kinfit);
@@ -108,10 +108,10 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
     Bool_t cond_ene, cond_clus[4];
     Int_t ind_gam[4];
     Double_t solution[4];
-    Float_t neu_vtx[4] = {0.};
+    Double_t neu_vtx[4] = {0.};
 
     Int_t done, fourg4taken[4], chosen;
-    Float_t gammatriangle[4][8], Knetriangle[10], totalerr, ip_triangle[3], chi2min, trcsum, trcfinal[4], minv4gam;
+    Double_t gammatriangle[4][8], Knetriangle[10], totalerr, ip_triangle[3], chi2min, trcsum, trcfinal[4], minv4gam;
 
     TBranch *b_gamma1triangle = tree->Branch("fourgamma1triangle", gammatriangle[0], "fourgamma1triangle[4]/F");
     TBranch *b_gamma2triangle = tree->Branch("fourgamma2triangle", gammatriangle[1], "fourgamma2triangle[4]/F");
@@ -132,12 +132,12 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
     TBranch *b_fourg4taken = tree->Branch("g4taken_triangle", fourg4taken, "g4taken_triangle[4]/I");
 
-    Float_t distance = 0., distance_mc = 0., distance_diff = 0.;
-    Float_t mc_dist[90], sigmas[90], Knerec[9], trc[4] = {0.};
+    Double_t distance = 0., distance_mc = 0., distance_diff = 0.;
+    Double_t mc_dist[90], sigmas[90], Knerec[9], trc[4] = {0.};
 
-    Float_t Clu5Vec[4][5];
+    Double_t Clu5Vec[4][5];
 
-    Float_t eqn_check[4], eqn_check_tmp[2][4], eqn_check_tmp_tot[2], kaon_inv_mass_tmp[2], vtxSigmaMin, TrcSumMin;
+    Double_t eqn_check[4], eqn_check_tmp[2][4], eqn_check_tmp_tot[2], kaon_inv_mass_tmp[2], vtxSigmaMin, TrcSumMin;
 
     Bool_t
         data_flag = false;
@@ -145,7 +145,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
     Int_t
         nbin = 100;
 
-    Float_t
+    Double_t
         x_lim[4][2] = {
             {-50.0, 50.0},
             {-50.0, 50.0},
@@ -222,7 +222,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
             //!
 
-            Float_t TrcSum = 0., vtxSigma = 0.;
+            Double_t TrcSum = 0., vtxSigma = 0.;
 
             neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip, bhabha_mom, Knerec, neu_vtx, trc, logger);
 

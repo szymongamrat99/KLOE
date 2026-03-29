@@ -38,14 +38,14 @@ namespace KLOE
                         mass(0.),
                         totalMomentum(0.) {};
 
-    std::vector<Float_t> fourMom; /*!< 4-momentum of the charged particle */
-    std::vector<Float_t> fourPos; /*!< 4-momentum of the charged particle */
+    std::vector<Double_t> fourMom; /*!< 4-momentum of the charged particle */
+    std::vector<Double_t> fourPos; /*!< 4-momentum of the charged particle */
 
-    std::vector<Float_t> trackParams; /*!< Track parameters of the charged particle */
+    std::vector<Double_t> trackParams; /*!< Track parameters of the charged particle */
 
-    Float_t mass;                 /*!< Mass of the charged particle */
-    Float_t totalMomentum;        /*!< Total momentum of the charged particle */
-    Float_t openingAngle;         /*!< Opening angle between two charged particles */
+    Double_t mass;                 /*!< Mass of the charged particle */
+    Double_t totalMomentum;        /*!< Total momentum of the charged particle */
+    Double_t openingAngle;         /*!< Opening angle between two charged particles */
     Bool_t fourMomFilled = false; /*!< Flag to check if four momentum is filled */
 
     TLorentzVector lorentzFourMom; /*!< 4-momentum of the charged particle */
@@ -57,7 +57,7 @@ namespace KLOE
       lorentzFourPos.SetXYZT(fourPos[0], fourPos[1], fourPos[2], fourPos[3]);
     };
 
-    void FillFourMom(Float_t &px, Float_t &py, Float_t &pz, Float_t &E)
+    void FillFourMom(Double_t &px, Double_t &py, Double_t &pz, Double_t &E)
     {
       fourMom[0] = px;
       fourMom[1] = py;
@@ -89,24 +89,24 @@ namespace KLOE
                         mass(0.),
                         totalMomentum(0.) {};
 
-    std::vector<Float_t> fourMom; /*!< 4-momentum of the neutral particle */
-    std::vector<Float_t> fourPos; /*!< 4-momentum of the neutral particle */
-    std::vector<Float_t> total;   /*!< Total vector of the neutral particle */
+    std::vector<Double_t> fourMom; /*!< 4-momentum of the neutral particle */
+    std::vector<Double_t> fourPos; /*!< 4-momentum of the neutral particle */
+    std::vector<Double_t> total;   /*!< Total vector of the neutral particle */
 
-    std::vector<Float_t> clusterParams; /*!< Track parameters of the neutral particle */
+    std::vector<Double_t> clusterParams; /*!< Track parameters of the neutral particle */
 
-    Float_t path = 0;          /*!< Path of the neutral particle */
-    Float_t timeOfFlight = 0;  /*!< Time of the neutral particle */
-    Float_t mass = 0;          /*!< Mass of the neutral particle */
-    Float_t totalMomentum = 0; /*!< Total momentum of the neutral particle */
-    Float_t openingAngle = 0;  /*!< Opening angle between two neutral particles */
+    Double_t path = 0;          /*!< Path of the neutral particle */
+    Double_t timeOfFlight = 0;  /*!< Time of the neutral particle */
+    Double_t mass = 0;          /*!< Mass of the neutral particle */
+    Double_t totalMomentum = 0; /*!< Total momentum of the neutral particle */
+    Double_t openingAngle = 0;  /*!< Opening angle between two neutral particles */
 
     Bool_t fourMomFilled = false; /*!< Flag to check if four momentum is filled */
 
     TLorentzVector lorentzFourMom; /*!< 4-momentum of the neutral particle */
     TLorentzVector lorentzFourPos; /*!< 4-momentum of the neutral particle */
 
-    void calculatePath(Float_t *neuVtx)
+    void calculatePath(Double_t *neuVtx)
     {
       path = sqrt(pow(fourPos[0] - neuVtx[0], 2) + pow(fourPos[1] - neuVtx[1], 2) + pow(fourPos[2] - neuVtx[2], 2)); // cm
     };
@@ -116,7 +116,7 @@ namespace KLOE
       timeOfFlight = path / PhysicsConstants::cVel;
     }
 
-    void FillFourMom(Float_t &px, Float_t &py, Float_t &pz, Float_t &E)
+    void FillFourMom(Double_t &px, Double_t &py, Double_t &pz, Double_t &E)
     {
       fourMom[0] = px;
       fourMom[1] = py;
@@ -181,23 +181,23 @@ namespace KLOE
                     mass(0.),
                     totalMomentum(0.) {};
 
-    std::vector<Float_t> fourMom; /*!< 4-momentum of the charged particle */
-    std::vector<Float_t> fourPos; /*!< 4-momentum of the charged particle */
-    std::vector<Float_t> vtxPos;  /*!< 4-momentum of the charged particle */
-    std::vector<Float_t> total;   /*!< 9-vector of the charged particle */
+    std::vector<Double_t> fourMom; /*!< 4-momentum of the charged particle */
+    std::vector<Double_t> fourPos; /*!< 4-momentum of the charged particle */
+    std::vector<Double_t> vtxPos;  /*!< 4-momentum of the charged particle */
+    std::vector<Double_t> total;   /*!< 9-vector of the charged particle */
 
-    Float_t totalMomentum = 0; /*!< Total momentum of the kaon */
-    Float_t beta = 0;          /*!< Beta of the kaon */
-    Float_t gamma = 0;         /*!< Gamma of the kaon */
-    Float_t mass = 0;          /*!< Mass of the kaon */
-    Float_t path = 0;          /*!< Path of the kaon */
-    Float_t lifetimeLAB = 0;   /*!< Lifetime of the kaon in LAB*/
-    Float_t lifetimeCM = 0;    /*!< Lifetime of the kaon in CM*/
+    Double_t totalMomentum = 0; /*!< Total momentum of the kaon */
+    Double_t beta = 0;          /*!< Beta of the kaon */
+    Double_t gamma = 0;         /*!< Gamma of the kaon */
+    Double_t mass = 0;          /*!< Mass of the kaon */
+    Double_t path = 0;          /*!< Path of the kaon */
+    Double_t lifetimeLAB = 0;   /*!< Lifetime of the kaon in LAB*/
+    Double_t lifetimeCM = 0;    /*!< Lifetime of the kaon in CM*/
 
     TLorentzVector lorentzFourMom; /*!< 4-momentum of the charged particle */
     TLorentzVector lorentzFourPos; /*!< 4-momentum of the charged particle */
 
-    void calculatePath(Float_t *ip)
+    void calculatePath(Double_t *ip)
     {
       path = sqrt(pow(fourPos[0] - ip[0], 2) + pow(fourPos[1] - ip[1], 2) + pow(fourPos[2] - ip[2], 2)); // cm
     };
@@ -271,9 +271,9 @@ namespace KLOE
                  vtxPos(3, 0.),
                  total(7, 0.) {};
 
-    std::vector<Float_t> fourMom; /*!< 4-momentum of the charged particle */
-    std::vector<Float_t> vtxPos;  /*!< 3-momentum of the charged particle */
-    std::vector<Float_t> total;   /*!< 7-vector of the charged particle */
+    std::vector<Double_t> fourMom; /*!< 4-momentum of the charged particle */
+    std::vector<Double_t> vtxPos;  /*!< 3-momentum of the charged particle */
+    std::vector<Double_t> total;   /*!< 7-vector of the charged particle */
 
     void SetTotalVector()
     {
@@ -362,12 +362,12 @@ namespace KLOE
     phiMeson
         phi; /*!< Phi meson */
 
-    std::vector<Float_t>
+    std::vector<Double_t>
         bhabha_mom,
         trackParameters,
         ip;
 
-    std::vector<std::vector<Float_t>>
+    std::vector<std::vector<Double_t>>
         cluster;
 
     std::vector<TH1 *> frac, frac_data;
@@ -395,8 +395,8 @@ namespace KLOE
 
     void boost_vector(TLorentzVector four_mom);
     void lorentz_transf(TLorentzVector four_mom);
-    void lorentz_transf(Float_t *, Float_t *, Float_t *);
     void lorentz_transf(Double_t *, Double_t *, Double_t *);
+    void lorentz_transf(Float_t *, Float_t *, Float_t *);
 
     void lorentz_transf(TVector3 &, TLorentzVector &, TLorentzVector &) const;
 
@@ -409,7 +409,7 @@ namespace KLOE
      * - +1: number is positive
      * - -1: number is negative
      */
-    Int_t signum(Float_t value);
+    Int_t signum(Double_t value);
 
     /**
      * @brief Difference of Kaons' lifetimes in their CM frames. The function uses both momenta and positions to get them in kaon's CM frames from scratch.
@@ -426,7 +426,7 @@ namespace KLOE
      * @param M length of the array
      * @param array pointer to the table of elements
      */
-    void Clear1DArray(UInt_t M, Float_t *array);
+    void Clear1DArray(UInt_t M, Double_t *array);
     /**
      * @brief Function to clear the 1D static / dynamic arrays.
      * @param M length of the array
@@ -441,7 +441,7 @@ namespace KLOE
      * @param N number of columns
      * @param array pointer to the matrix elements
      */
-    void Clear2DArray(UInt_t M, UInt_t N, Float_t **array);
+    void Clear2DArray(UInt_t M, UInt_t N, Double_t **array);
     /**
      * @brief Function to clear the 2D static / dynamic arrays.
      * @param M number of rows
@@ -523,7 +523,7 @@ namespace KLOE
      * - ErrorHandling::ErrorCodes::DELTA_LT_ZERO
      * - ErrorHandling::ErrorCodes::DENOM_EQ_ZERO
      */
-    Int_t neu_triangle(Float_t *TrcSumFinal, Float_t *vtxSigmaFinal, Float_t Clu5Vec[4][5], Float_t *ip, Float_t *Phi4Mom, Float_t *Kne4Mom, Float_t *Kne4Vec, Float_t *trc) const;
+    Int_t neu_triangle(Double_t *TrcSumFinal, Double_t *vtxSigmaFinal, Double_t Clu5Vec[4][5], Double_t *ip, Double_t *Phi4Mom, Double_t *Kne4Mom, Double_t *Kne4Vec, Double_t *trc) const;
 
     /**
      * @brief Reconstruction of neutral vertex using the triangle method
@@ -545,14 +545,14 @@ namespace KLOE
      * - ErrorHandling::ErrorCodes::DELTA_LT_ZERO
      * - ErrorHandling::ErrorCodes::DENOM_EQ_ZERO
      */
-    Int_t neu_triangle(std::vector<TLorentzVector> *Clu4Mom, std::vector<TLorentzVector> *Clu4Vec, Float_t *ip, TLorentzVector *Phi4Mom, TLorentzVector *Kne4Mom, TLorentzVector *Kne4Vec, Float_t *trc, Float_t *TrcSumFinal, Float_t *vtxSigmaFinal) const;
+    Int_t neu_triangle(std::vector<TLorentzVector> *Clu4Mom, std::vector<TLorentzVector> *Clu4Vec, Double_t *ip, TLorentzVector *Phi4Mom, TLorentzVector *Kne4Mom, TLorentzVector *Kne4Vec, Double_t *trc, Double_t *TrcSumFinal, Double_t *vtxSigmaFinal) const;
     /// @overload
 
-    ErrorHandling::ErrorCodes NeuCluWrongCheck(std::vector<Int_t> neuclulist, phiMeson phi, kaonNeutral Kchboost, std::vector<Float_t> Xcl, std::vector<Float_t> Ycl, std::vector<Float_t> Zcl, std::vector<Float_t> Tcl, std::vector<Float_t> Enecl);
+    ErrorHandling::ErrorCodes NeuCluWrongCheck(std::vector<Int_t> neuclulist, phiMeson phi, kaonNeutral Kchboost, std::vector<Double_t> Xcl, std::vector<Double_t> Ycl, std::vector<Double_t> Zcl, std::vector<Double_t> Tcl, std::vector<Double_t> Enecl);
 
-    static ErrorHandling::ErrorCodes triangleReconstruction(std::vector<Int_t> g4taken_kinfit, std::vector<Float_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Float_t> bhabha_mom, std::vector<Float_t> Kchboost, std::vector<Float_t> ip, std::vector<Float_t> &Knetriangle, std::vector<Float_t> gammatriangle[4], Float_t &minv4gam, std::vector<Float_t> &trcfinal, ErrorHandling::ErrorLogs &logger);
+    static ErrorHandling::ErrorCodes triangleReconstruction(std::vector<Int_t> g4taken_kinfit, std::vector<Double_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Double_t> bhabha_mom, std::vector<Double_t> Kchboost, std::vector<Double_t> ip, std::vector<Double_t> &Knetriangle, std::vector<Double_t> gammatriangle[4], Double_t &minv4gam, std::vector<Double_t> &trcfinal, ErrorHandling::ErrorLogs &logger);
 
-    ErrorHandling::ErrorCodes triangleReconstruction(std::vector<neutralParticle> &photon, phiMeson phi, kaonNeutral Kchboost, Float_t *ip, kaonNeutral &Knetriangle);
+    ErrorHandling::ErrorCodes triangleReconstruction(std::vector<neutralParticle> &photon, phiMeson phi, kaonNeutral Kchboost, Double_t *ip, kaonNeutral &Knetriangle);
 
     /**
      * @brief Method to initialize a TChain with the list of files. Defined per branch, which files (Prod2ntu, Prod2root, Old analysis) are to be taken into account.
@@ -692,9 +692,9 @@ namespace KLOE
       return TrilaterationCode::INVALID_VALUE;
     };
 
-    void CorrectClusterTime(Float_t T0, std::vector<Float_t> &cluTimeCorrected);
+    void CorrectClusterTime(Double_t T0, std::vector<Double_t> &cluTimeCorrected);
 
-    void PhotonPairingToPi0(std::vector<Float_t> *photon, Int_t numOfPhotons, std::vector<Int_t> &bestPairingIndex);
+    void PhotonPairingToPi0(std::vector<Double_t> *photon, Int_t numOfPhotons, std::vector<Int_t> &bestPairingIndex);
 
     /**
      * @brief Oblicza czasy własne kaonów i ich różnice
@@ -706,11 +706,11 @@ namespace KLOE
      * @param ipPos Wektor położenia IP [x, y, z]
      * @return Struktura z czasami własnymi w układzie LAB i CM oraz różnicami
      */
-    KaonProperTimes CalculateKaonProperTimes(const std::vector<Float_t> &kaon1Mom,
-                                             const std::vector<Float_t> &kaon1Pos,
-                                             const std::vector<Float_t> &kaon2Mom,
-                                             const std::vector<Float_t> &kaon2Pos,
-                                             const std::vector<Float_t> &ipPos);
+    KaonProperTimes CalculateKaonProperTimes(const std::vector<Double_t> &kaon1Mom,
+                                             const std::vector<Double_t> &kaon1Pos,
+                                             const std::vector<Double_t> &kaon2Mom,
+                                             const std::vector<Double_t> &kaon2Pos,
+                                             const std::vector<Double_t> &ipPos);
 
     /**
      * @brief Oblicza czas własny pojedynczego kaona
@@ -721,9 +721,9 @@ namespace KLOE
      * @param timeLAB Referencja na czas w układzie LAB (wyjście)
      * @param timeCM Referencja na czas w układzie CM (wyjście)
      */
-    void CalculateSingleKaonTime(const std::vector<Float_t> &kaonMom,
-                                 const std::vector<Float_t> &kaonPos,
-                                 const std::vector<Float_t> &ipPos,
+    void CalculateSingleKaonTime(const std::vector<Double_t> &kaonMom,
+                                 const std::vector<Double_t> &kaonPos,
+                                 const std::vector<Double_t> &ipPos,
                                  Double_t &timeLAB,
                                  Double_t &timeCM);
 
@@ -743,7 +743,7 @@ namespace KLOE
     bool IsValidDateFormat(const std::string &folderName);
 
     // Weighted mean
-    void WeightedMeanVertex(const std::vector<std::array<Float_t, 4>> &values, const std::vector<Float_t> &weights, std::vector<Float_t> &weightedMean)
+    void WeightedMeanVertex(const std::vector<std::array<Double_t, 4>> &values, const std::vector<Double_t> &weights, std::vector<Double_t> &weightedMean)
     {
       if (values.size() != weights.size() || values.empty())
         return;

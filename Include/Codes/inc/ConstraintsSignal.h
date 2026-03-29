@@ -59,7 +59,7 @@ namespace KLOE
    * @class ConstraintsSignal
    * @brief Auxiliary class with the constraints for \omega\pi^{0} fitting
    */
-  class ConstraintsSignal : public ChargedVtxRec<Float_t, Int_t>
+  class ConstraintsSignal : public ChargedVtxRec<Double_t, Int_t>
   {
   private:
     /**
@@ -118,13 +118,13 @@ namespace KLOE
   public:
     /* Specific physical Constraints for Signal-pi0 hypothesis */
 
-    ConstraintsSignal(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger), _logger(logger) {};
+    ConstraintsSignal(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Double_t, Int_t>(logger), _logger(logger) {};
 
     std::array<neutralParticle, 4> fphoton;
     std::array<chargedParticle, 2> fpionCh;
     kaonNeutral fKchrec, fKchboost, fKnerec, fKnereclor;
     phiMeson fphi;
-    std::vector<Float_t> fip;
+    std::vector<Double_t> fip;
 
     void IntermediateReconstruction(Double_t *p);
 

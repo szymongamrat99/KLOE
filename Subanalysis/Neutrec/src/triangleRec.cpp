@@ -7,13 +7,13 @@
 
 #include "../inc/trilateration.hpp"
 
-ErrorHandling::ErrorCodes TriangleRec(std::vector<Int_t> g4taken_kinfit, std::vector<Float_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Float_t> bhabha_mom, std::vector<Float_t> Kchboost, std::vector<Float_t> ip, std::vector<Float_t> &Knetriangle, std::vector<Float_t> gammatriangle[4], Float_t &minv4gam, std::vector<Float_t> &trcfinal, ErrorHandling::ErrorLogs &logger)
+ErrorHandling::ErrorCodes TriangleRec(std::vector<Int_t> g4taken_kinfit, std::vector<Double_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Double_t> bhabha_mom, std::vector<Double_t> Kchboost, std::vector<Double_t> ip, std::vector<Double_t> &Knetriangle, std::vector<Double_t> gammatriangle[4], Double_t &minv4gam, std::vector<Double_t> &trcfinal, ErrorHandling::ErrorLogs &logger)
 {
   Int_t ind_gam[4];
 
   Bool_t cond_ene;
   Bool_t cond_clus[4];
-  Float_t Clu5Vec[4][5];
+  Double_t Clu5Vec[4][5];
 
   ind_gam[0] = g4taken_kinfit[0];
   ind_gam[1] = g4taken_kinfit[1];
@@ -41,7 +41,7 @@ ErrorHandling::ErrorCodes TriangleRec(std::vector<Int_t> g4taken_kinfit, std::ve
 
     //! Using the charged part of the decay
 
-    Float_t Knerec[9] = {};
+    Double_t Knerec[9] = {};
 
     Knerec[0] = bhabha_mom[0] - Kchboost[0];
     Knerec[1] = bhabha_mom[1] - Kchboost[1];
@@ -50,9 +50,9 @@ ErrorHandling::ErrorCodes TriangleRec(std::vector<Int_t> g4taken_kinfit, std::ve
 
     //!
 
-    Float_t TrcSum = 0., vtxSigma = 0., vtxSigmaMin = 1.e6, TrcSumMin = 1.e6, trcsum = 0.;
+    Double_t TrcSum = 0., vtxSigma = 0., vtxSigmaMin = 1.e6, TrcSumMin = 1.e6, trcsum = 0.;
 
-    Float_t neu_vtx[4], trc[4];
+    Double_t neu_vtx[4], trc[4];
 
     Int_t done = 0;
 

@@ -216,29 +216,29 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
     const Int_t *pidmc,
     const Int_t *vtxmc,
     const Int_t *mother,
-    const Float_t *xvmc,
-    const Float_t *yvmc,
-    const Float_t *zvmc,
-    const Float_t *pxmc,
-    const Float_t *pymc,
-    const Float_t *pzmc,
+    const Double_t *xvmc,
+    const Double_t *yvmc,
+    const Double_t *zvmc,
+    const Double_t *pxmc,
+    const Double_t *pymc,
+    const Double_t *pzmc,
     Int_t mcflag,
     Int_t mctruth,
-    std::vector<Float_t> &ipmc,
-    std::vector<Float_t> &Knemc,
-    std::vector<Float_t> &Kchmc,
-    std::vector<std::vector<Float_t>> &trkMC,
+    std::vector<Double_t> &ipmc,
+    std::vector<Double_t> &Knemc,
+    std::vector<Double_t> &Kchmc,
+    std::vector<std::vector<Double_t>> &trkMC,
     const Int_t numberOfClusters,
-    std::vector<std::vector<Float_t>> &pgammaMC,
-    std::vector<Float_t> &CurvMC,
-    std::vector<Float_t> &PhivMC,
-    std::vector<Float_t> &CotvMC,
+    std::vector<std::vector<Double_t>> &pgammaMC,
+    std::vector<Double_t> &CurvMC,
+    std::vector<Double_t> &PhivMC,
+    std::vector<Double_t> &CotvMC,
     std::vector<Int_t> &good_clus_ind,
-    std::vector<std::vector<Float_t>> cluster_rec,
+    std::vector<std::vector<Double_t>> cluster_rec,
     Int_t &muonAlertPlus,
     Int_t &muonAlertMinus)
 {
-  Float_t
+  Double_t
       Ks[9] = {},
       Kl[9] = {},
       neu_vtx[3] = {},
@@ -254,7 +254,7 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
   const Int_t
       max_count = TMath::Factorial(numberOfClusters);
 
-  std::vector<Float_t>
+  std::vector<Double_t>
       clus_diff,
       region,
       cluster;
@@ -302,14 +302,14 @@ ErrorHandling::ErrorCodes GeneratedVariables::genVars(
 
   return ErrorHandling::ErrorCodes::NO_ERROR;
 }
-void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, const Int_t *mother, const Int_t *vtxmc, const Int_t *pidmc, std::vector<std::vector<Float_t>> &pgammaMC, Int_t &count, const Float_t *pxmc, const Float_t *pymc, const Float_t *pzmc, Float_t neu_vtx[3], std::vector<Float_t> &Knemc, std::vector<Float_t> &region, KLOE::CylinderIntersection &CylIndObj, std::vector<Float_t> &cluster, std::vector<Float_t> &ipmc)
+void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, const Int_t *mother, const Int_t *vtxmc, const Int_t *pidmc, std::vector<std::vector<Double_t>> &pgammaMC, Int_t &count, const Double_t *pxmc, const Double_t *pymc, const Double_t *pzmc, Double_t neu_vtx[3], std::vector<Double_t> &Knemc, std::vector<Double_t> &region, KLOE::CylinderIntersection &CylIndObj, std::vector<Double_t> &cluster, std::vector<Double_t> &ipmc)
 {
   for (Int_t j = 0; j < ntmc; j++)
   {
     if ((mother[vtxmc[j] - 1] == 7) && pidmc[j] == 1)
     {
-      Float_t auxEne = sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2) + pow(pzmc[j], 2));
-      std::vector<Float_t> pgammaAux = {pxmc[j], pymc[j], pzmc[j], auxEne};
+      Double_t auxEne = sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2) + pow(pzmc[j], 2));
+      std::vector<Double_t> pgammaAux = {pxmc[j], pymc[j], pzmc[j], auxEne};
 
       neu_vtx[0] = Knemc[6];
       neu_vtx[1] = Knemc[7];
@@ -317,7 +317,7 @@ void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, const Int_t *mother, 
 
       region.push_back(CylIndObj.inter_point(pgammaAux.data(), neu_vtx, cluster.data()));
 
-      Float_t
+      Double_t
           beta_c = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
           length = sqrt(pow(Knemc[6] - ipmc[0], 2) +
                         pow(Knemc[7] - ipmc[1], 2) +
@@ -327,15 +327,15 @@ void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, const Int_t *mother, 
                              pow(cluster[1] - Knemc[7], 2) +
                              pow(cluster[2] - Knemc[8], 2));
 
-      Float_t auxTim = time_K + (length_clus / PhysicsConstants::cVel);
-      std::vector<Float_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, cluster[0], cluster[1], cluster[2], auxTim};
+      Double_t auxTim = time_K + (length_clus / PhysicsConstants::cVel);
+      std::vector<Double_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, cluster[0], cluster[1], cluster[2], auxTim};
 
       pgammaMC.push_back(auxiliaryVec);
     }
   }
 }
 
-void GeneratedVariables::GeneratedClusterFinder(Int_t nclu, Int_t ind_gam[4], const Int_t max_count, std::vector<Float_t> &clus_diff, std::vector<std::vector<Float_t>> &cluster_rec, std::vector<std::vector<Float_t>> &pgammaMC, Int_t mc_ind[4], std::vector<bool> &clus_time, Int_t min_ind[4], Float_t &clus_diff_min, std::vector<Int_t> &good_clus_ind)
+void GeneratedVariables::GeneratedClusterFinder(Int_t nclu, Int_t ind_gam[4], const Int_t max_count, std::vector<Double_t> &clus_diff, std::vector<std::vector<Double_t>> &cluster_rec, std::vector<std::vector<Double_t>> &pgammaMC, Int_t mc_ind[4], std::vector<bool> &clus_time, Int_t min_ind[4], Double_t &clus_diff_min, std::vector<Int_t> &good_clus_ind)
 {
   for (Int_t j1 = 0; j1 < nclu - 3; j1++)
     for (Int_t j2 = j1 + 1; j2 < nclu - 2; j2++)
@@ -411,7 +411,7 @@ void GeneratedVariables::MCvsReconstructedClustersComparator(const std::vector<I
   }
 }
 
-void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const Int_t *vtxmc, const Int_t *pidmc, std::vector<Float_t> &Knemc, Float_t Kl[9], std::vector<Float_t> &Kchmc, Float_t Ks[9], std::vector<std::vector<Float_t>> &trkMC, const Float_t *pxmc, const Float_t *pymc, const Float_t *pzmc, Int_t mctruth, std::vector<Float_t> &CurvMC, std::vector<Float_t> &PhivMC, std::vector<Float_t> &CotvMC, Int_t &muonAlertPlus, Int_t &muonAlertMinus)
+void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const Int_t *vtxmc, const Int_t *pidmc, std::vector<Double_t> &Knemc, Double_t Kl[9], std::vector<Double_t> &Kchmc, Double_t Ks[9], std::vector<std::vector<Double_t>> &trkMC, const Double_t *pxmc, const Double_t *pymc, const Double_t *pzmc, Int_t mctruth, std::vector<Double_t> &CurvMC, std::vector<Double_t> &PhivMC, std::vector<Double_t> &CotvMC, Int_t &muonAlertPlus, Int_t &muonAlertMinus)
 {
   muonAlertPlus = false;
   muonAlertMinus = false;
@@ -442,11 +442,11 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
 
     if ((mother[vtxmc[j] - 1] == 10) && (pidmc[j] == 8 || pidmc[j] == 9))
     {
-      Float_t auxEne = sqrt(pow(pxmc[j], 2) +
+      Double_t auxEne = sqrt(pow(pxmc[j], 2) +
                             pow(pymc[j], 2) +
                             pow(pzmc[j], 2) +
                             pow(PhysicsConstants::mPiCh, 2));
-      std::vector<Float_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 10};
+      std::vector<Double_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 10};
 
       trkMC.push_back(auxiliaryVec);
 
@@ -475,11 +475,11 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
 
     if ((mother[vtxmc[j] - 1] == 16) && (pidmc[j] == 8 || pidmc[j] == 9))
     {
-      Float_t auxEne = sqrt(pow(pxmc[j], 2) +
+      Double_t auxEne = sqrt(pow(pxmc[j], 2) +
                             pow(pymc[j], 2) +
                             pow(pzmc[j], 2) +
                             pow(PhysicsConstants::mPiCh, 2));
-      std::vector<Float_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 16};
+      std::vector<Double_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 16};
 
       trkMC.push_back(auxiliaryVec);
 
@@ -508,7 +508,7 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
   }
 }
 
-void GeneratedVariables::KSLGenerated(Int_t nvtxmc, const Int_t *mother, Float_t Kl[9], const Float_t *xvmc, const Float_t *yvmc, const Float_t *zvmc, Float_t Ks[9], Int_t ntmc, const Int_t *pidmc, const Float_t *pxmc, const Float_t *pymc, const Float_t *pzmc)
+void GeneratedVariables::KSLGenerated(Int_t nvtxmc, const Int_t *mother, Double_t Kl[9], const Double_t *xvmc, const Double_t *yvmc, const Double_t *zvmc, Double_t Ks[9], Int_t ntmc, const Int_t *pidmc, const Double_t *pxmc, const Double_t *pymc, const Double_t *pzmc)
 {
   for (Int_t j = 0; j < nvtxmc; j++)
   {
@@ -558,7 +558,7 @@ void GeneratedVariables::KSLGenerated(Int_t nvtxmc, const Int_t *mother, Float_t
     }
   }
 }
-void GeneratedVariables::IPGenerated(Int_t nvtxmc, const Int_t *mother, std::vector<Float_t> &ipmc, const Float_t *xvmc, const Float_t *yvmc, const Float_t *zvmc)
+void GeneratedVariables::IPGenerated(Int_t nvtxmc, const Int_t *mother, std::vector<Double_t> &ipmc, const Double_t *xvmc, const Double_t *yvmc, const Double_t *zvmc)
 {
   for (Int_t j = 0; j < nvtxmc; j++)
   {

@@ -5,12 +5,12 @@
 
 using namespace std;
 
-int neu_triangle(Float_t *TrcSumFinal, Float_t *vtxSigmaFinal, Float_t Clu5Vec[4][5], Float_t *ip, Float_t *Phi4Mom, Float_t *Kne4Mom, Float_t *Kne4Vec, Float_t *trc, ErrorHandling::ErrorLogs &logger)
+int neu_triangle(Double_t *TrcSumFinal, Double_t *vtxSigmaFinal, Double_t Clu5Vec[4][5], Double_t *ip, Double_t *Phi4Mom, Double_t *Kne4Mom, Double_t *Kne4Vec, Double_t *trc, ErrorHandling::ErrorLogs &logger)
 {
-  Float_t KneTotMom = 0., BetaK, CosPkD[4], DTot[4];
-  Float_t A, B[4], C[4], Delta[4], lK[4][2], lGamma[4][2], lGammaFinal[4], trctmp[4][2], lKtrue[4];
+  Double_t KneTotMom = 0., BetaK, CosPkD[4], DTot[4];
+  Double_t A, B[4], C[4], Delta[4], lK[4][2], lGamma[4][2], lGammaFinal[4], trctmp[4][2], lKtrue[4];
 
-  Float_t NeuVtxTmp[4][2][4], NeuVtxTrueClu[4][4], NeuVtxAvg[4] = {0.}, EneTot = 0., TrcSum = 0., vtxSigma = 0.;
+  Double_t NeuVtxTmp[4][2][4], NeuVtxTrueClu[4][4], NeuVtxAvg[4] = {0.}, EneTot = 0., TrcSum = 0., vtxSigma = 0.;
 
   TVector3 D[4], pK(Kne4Mom[0], Kne4Mom[1], Kne4Mom[2]);
 

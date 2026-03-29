@@ -85,7 +85,7 @@ namespace KLOE
 
     _invMassDiffMin = 1.e6;
 
-    std::vector<Float_t>
+    std::vector<Double_t>
         px(_nPions, 0.),
         py(_nPions, 0.),
         pz(_nPions, 0.),
@@ -94,15 +94,15 @@ namespace KLOE
 
     for (const auto &indices : _combinations)
     {
-      std::array<Float_t, 2> invMass;
-      Float_t chi2_pi0s = 0.0;
+      std::array<Double_t, 2> invMass;
+      Double_t chi2_pi0s = 0.0;
 
       for (Int_t i = 0; i < _nPions; i++)
       {
-        Float_t px = _Photons[indices[i * 2]].fourMom[0] + _Photons[indices[i * 2 + 1]].fourMom[0];
-        Float_t py = _Photons[indices[i * 2]].fourMom[1] + _Photons[indices[i * 2 + 1]].fourMom[1];
-        Float_t pz = _Photons[indices[i * 2]].fourMom[2] + _Photons[indices[i * 2 + 1]].fourMom[2];
-        Float_t E = _Photons[indices[i * 2]].fourMom[3] + _Photons[indices[i * 2 + 1]].fourMom[3];
+        Double_t px = _Photons[indices[i * 2]].fourMom[0] + _Photons[indices[i * 2 + 1]].fourMom[0];
+        Double_t py = _Photons[indices[i * 2]].fourMom[1] + _Photons[indices[i * 2 + 1]].fourMom[1];
+        Double_t pz = _Photons[indices[i * 2]].fourMom[2] + _Photons[indices[i * 2 + 1]].fourMom[2];
+        Double_t E = _Photons[indices[i * 2]].fourMom[3] + _Photons[indices[i * 2 + 1]].fourMom[3];
 
         invMass[i] = sqrt(E * E - px * px - py * py - pz * pz);
 
@@ -127,22 +127,22 @@ namespace KLOE
       return;
     }
 
-    Float_t mPi0Sigma = 8.5, // MeV
+    Double_t mPi0Sigma = 8.5, // MeV
         mOmegaSigma = 30.0;  // MeV
 
     _invMassDiffMin = 1.e6;
 
     for (const auto &indices : _combinations)
     {
-      std::array<Float_t, 2> invMass;
-      Float_t chi2_pi0s = 0.0;
+      std::array<Double_t, 2> invMass;
+      Double_t chi2_pi0s = 0.0;
 
       for (Int_t i = 0; i < _nPions; i++)
       {
-        Float_t px = _Photons[indices[i * 2]].fourMom[0] + _Photons[indices[i * 2 + 1]].fourMom[0];
-        Float_t py = _Photons[indices[i * 2]].fourMom[1] + _Photons[indices[i * 2 + 1]].fourMom[1];
-        Float_t pz = _Photons[indices[i * 2]].fourMom[2] + _Photons[indices[i * 2 + 1]].fourMom[2];
-        Float_t E = _Photons[indices[i * 2]].fourMom[3] + _Photons[indices[i * 2 + 1]].fourMom[3];
+        Double_t px = _Photons[indices[i * 2]].fourMom[0] + _Photons[indices[i * 2 + 1]].fourMom[0];
+        Double_t py = _Photons[indices[i * 2]].fourMom[1] + _Photons[indices[i * 2 + 1]].fourMom[1];
+        Double_t pz = _Photons[indices[i * 2]].fourMom[2] + _Photons[indices[i * 2 + 1]].fourMom[2];
+        Double_t E = _Photons[indices[i * 2]].fourMom[3] + _Photons[indices[i * 2 + 1]].fourMom[3];
 
         invMass[i] = sqrt(E * E - px * px - py * py - pz * pz);
 
@@ -155,8 +155,8 @@ namespace KLOE
       {
         _OmegaReconstructionCore(pionIdx);
 
-        Float_t chi2_omega = pow((_omega.mass - PhysicsConstants::mOmega) / mOmegaSigma, 2);
-        Float_t chi2_total = chi2_pi0s + chi2_omega;
+        Double_t chi2_omega = pow((_omega.mass - PhysicsConstants::mOmega) / mOmegaSigma, 2);
+        Double_t chi2_total = chi2_pi0s + chi2_omega;
 
         if (chi2_total < _invMassDiffMin)
         {
@@ -226,19 +226,19 @@ namespace KLOE
     _omega.SetLorentzVectors();
   }
 
-  ErrorHandling::ErrorCodes NeutralReconstruction::ReconstructSixGammaVertex(const std::vector<Float_t> cluster[5], const std::vector<Int_t> &neu_clu_list, std::vector<Int_t> &bestIndices, Float_t &bestError, kaonNeutral &KnerecSix, std::vector<neutralParticle> &photonSix)
+  ErrorHandling::ErrorCodes NeutralReconstruction::ReconstructSixGammaVertex(const std::vector<Double_t> cluster[5], const std::vector<Int_t> &neu_clu_list, std::vector<Int_t> &bestIndices, Double_t &bestError, kaonNeutral &KnerecSix, std::vector<neutralParticle> &photonSix)
   {
     const Int_t
         photonNum = 6,
         neuCluSize = neu_clu_list.size();
 
-    Float_t bestTotalError = 1e6;
+    Double_t bestTotalError = 1e6;
     Bool_t solutionFound = false;
 
-    std::vector<std::array<Float_t, 4>>
+    std::vector<std::array<Double_t, 4>>
         partialSolutions;
 
-    std::vector<Float_t>
+    std::vector<Double_t>
         partialSolutionEnergy;
 
     // Implementation of the six-gamma vertex reconstruction algorithm
@@ -265,7 +265,7 @@ namespace KLOE
 
     for (auto &combo : combinations)
     {
-      Float_t totalEnergy = cluster[4][combo[0] - 1] + cluster[4][combo[1] - 1] +
+      Double_t totalEnergy = cluster[4][combo[0] - 1] + cluster[4][combo[1] - 1] +
                             cluster[4][combo[2] - 1] + cluster[4][combo[3] - 1] +
                             cluster[4][combo[4] - 1] + cluster[4][combo[5] - 1];
 
@@ -303,11 +303,11 @@ namespace KLOE
             }
       ////////////////////////////////////////////////////////////////////////////
 
-      Float_t totalErrorTmp = 0.;
-      std::vector<std::array<Float_t, 4>>
+      Double_t totalErrorTmp = 0.;
+      std::vector<std::array<Double_t, 4>>
           partialSolutionsTmp;
 
-      std::vector<Float_t>
+      std::vector<Double_t>
           partialSolutionEnergyTmp;
 
       // Calculation of trilateration solutions for every possible combination
@@ -318,7 +318,7 @@ namespace KLOE
         // Check validity of solutions and calculate errors
         Bool_t isValid[2] = {!_S.error[0], !_S.error[1]},
                anyValid = isValid[0] || isValid[1];
-        Float_t errTmp[2] = {999999., 999999.};
+        Double_t errTmp[2] = {999999., 999999.};
 
         // Reject event if no solution is valid
         if (!anyValid)
@@ -336,7 +336,7 @@ namespace KLOE
           // Save a partial solution in the vector
           totalErrorTmp += errTmp[0];
           partialSolutionsTmp.push_back({_S.sol[0][0], _S.sol[0][1], _S.sol[0][2], _S.sol[0][3]});
-          Float_t energy = 0.;
+          Double_t energy = 0.;
 
           for (Int_t j = 0; j < 4; j++)
             energy += cluster[4][combo[ind[j] - 1] - 1];
@@ -348,7 +348,7 @@ namespace KLOE
           // Save a partial solution in the vector
           totalErrorTmp += errTmp[1];
           partialSolutionsTmp.push_back({_S.sol[1][0], _S.sol[1][1], _S.sol[1][2], _S.sol[1][3]});
-          Float_t energy = 0.;
+          Double_t energy = 0.;
 
           for (Int_t j = 0; j < 4; j++)
             energy += cluster[4][combo[ind[j] - 1] - 1];
@@ -410,19 +410,19 @@ namespace KLOE
     return ErrorHandling::ErrorCodes::NO_ERROR;
   }
 
-  ErrorHandling::ErrorCodes NeutralReconstruction::ReconstructSixGammaVertexWithFourTaken(const std::vector<Float_t> cluster[5], const std::vector<Int_t> &neu_clu_list, const std::vector<Int_t> &g4taken, std::vector<Int_t> &bestIndices, Float_t &bestError, kaonNeutral &KnerecSix, std::vector<neutralParticle> &photonSix)
+  ErrorHandling::ErrorCodes NeutralReconstruction::ReconstructSixGammaVertexWithFourTaken(const std::vector<Double_t> cluster[5], const std::vector<Int_t> &neu_clu_list, const std::vector<Int_t> &g4taken, std::vector<Int_t> &bestIndices, Double_t &bestError, kaonNeutral &KnerecSix, std::vector<neutralParticle> &photonSix)
   {
     const Int_t
         photonNum = 6,
         neuCluSize = neu_clu_list.size();
 
-    Float_t bestTotalError = 1e6;
+    Double_t bestTotalError = 1e6;
     Bool_t solutionFound = false;
 
-    std::vector<std::array<Float_t, 4>>
+    std::vector<std::array<Double_t, 4>>
         partialSolutions;
 
-    std::vector<Float_t>
+    std::vector<Double_t>
         partialSolutionEnergy;
 
     // Implementation of the six-gamma vertex reconstruction algorithm
@@ -451,7 +451,7 @@ namespace KLOE
 
     for (auto &combo : combinations)
     {
-      Float_t totalEnergy = cluster[4][combo[0] - 1] + cluster[4][combo[1] - 1] +
+      Double_t totalEnergy = cluster[4][combo[0] - 1] + cluster[4][combo[1] - 1] +
                             cluster[4][combo[2] - 1] + cluster[4][combo[3] - 1] +
                             cluster[4][combo[4] - 1] + cluster[4][combo[5] - 1];
 
@@ -489,11 +489,11 @@ namespace KLOE
             }
       ////////////////////////////////////////////////////////////////////////////
 
-      Float_t totalErrorTmp = 0.;
-      std::vector<std::array<Float_t, 4>>
+      Double_t totalErrorTmp = 0.;
+      std::vector<std::array<Double_t, 4>>
           partialSolutionsTmp;
 
-      std::vector<Float_t>
+      std::vector<Double_t>
           partialSolutionEnergyTmp;
 
       // Calculation of trilateration solutions for every possible combination
@@ -504,7 +504,7 @@ namespace KLOE
         // Check validity of solutions and calculate errors
         Bool_t isValid[2] = {!_S.error[0], !_S.error[1]},
                anyValid = isValid[0] || isValid[1];
-        Float_t errTmp[2] = {999999., 999999.};
+        Double_t errTmp[2] = {999999., 999999.};
 
         // Reject event if no solution is valid
         if (!anyValid)
@@ -522,7 +522,7 @@ namespace KLOE
           // Save a partial solution in the vector
           totalErrorTmp += errTmp[0];
           partialSolutionsTmp.push_back({_S.sol[0][0], _S.sol[0][1], _S.sol[0][2], _S.sol[0][3]});
-          Float_t energy = 0.;
+          Double_t energy = 0.;
 
           for (Int_t j = 0; j < 4; j++)
             energy += cluster[4][combo[ind[j] - 1] - 1];
@@ -534,7 +534,7 @@ namespace KLOE
           // Save a partial solution in the vector
           totalErrorTmp += errTmp[1];
           partialSolutionsTmp.push_back({_S.sol[1][0], _S.sol[1][1], _S.sol[1][2], _S.sol[1][3]});
-          Float_t energy = 0.;
+          Double_t energy = 0.;
 
           for (Int_t j = 0; j < 4; j++)
             energy += cluster[4][combo[ind[j] - 1] - 1];

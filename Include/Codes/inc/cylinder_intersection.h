@@ -12,8 +12,8 @@ namespace KLOE
           _zmax = 165.0,
           _Rmax = 200.0;
 
-      void barrel_inter(Float_t *, Float_t *, Float_t *);
-      void endcap_inter(Float_t *, Float_t *, Float_t *);
+      void barrel_inter(Double_t *, Double_t *, Double_t *);
+      void endcap_inter(Double_t *, Double_t *, Double_t *);
 
     public:
       CylinderIntersection(Double_t zmax = 165.0, Double_t rmax = 200.0);
@@ -21,7 +21,7 @@ namespace KLOE
       Double_t getZmax() { return _zmax; };
       Double_t getRmax() { return _Rmax; };
 
-      Int_t inter_point(Float_t *, Float_t *, Float_t *);
+      Int_t inter_point(Double_t *, Double_t *, Double_t *);
   };
 }
 

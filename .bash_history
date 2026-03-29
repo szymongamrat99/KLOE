@@ -145,3 +145,5 @@ ls
 ll
 ls -hl
 exit
+git checkout -- .
+git add .

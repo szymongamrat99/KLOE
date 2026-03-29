@@ -80,7 +80,7 @@ namespace KLOE
     static kaonNeutral KnerecTmp[2];        // Temporary kaon neutral objects
     static neutralParticle photonTmp[2][4]; // Temporary photon objects
 
-    static Float_t ipTmp[2][3]; // Temporary interaction point
+    static Double_t ipTmp[2][3]; // Temporary interaction point
 
     std::array<Double_t, 2> value = {0., 0.};
 
@@ -143,7 +143,7 @@ namespace KLOE
                                     photonTmp[i][2].fourMom[j] +
                                     photonTmp[i][3].fourMom[j];
 
-        Float_t X_line[3] = {KnerecTmp[i].fourPos[0],
+        Double_t X_line[3] = {KnerecTmp[i].fourPos[0],
                              KnerecTmp[i].fourPos[1],
                              KnerecTmp[i].fourPos[2]},
                 mom[3] = {KnerecTmp[i].fourMom[0],
@@ -212,7 +212,7 @@ namespace KLOE
 
     if (phi.fourMom[3] != 0.)
     {
-      Float_t boostVec[3] = {-phi.fourMom[0] / phi.fourMom[3],
+      Double_t boostVec[3] = {-phi.fourMom[0] / phi.fourMom[3],
                              -phi.fourMom[1] / phi.fourMom[3],
                              -phi.fourMom[2] / phi.fourMom[3]};
 
@@ -258,7 +258,7 @@ namespace KLOE
     std::array<kaonNeutral, 2> KnerecTmp = {};                    // Temporary kaon neutral objects
     std::array<std::array<neutralParticle, 4>, 2> photonTmp = {}; // Temporary photon objects
 
-    std::array<std::array<Float_t, 3>, 2> ipTmp = {}; // Temporary interaction point
+    std::array<std::array<Double_t, 3>, 2> ipTmp = {}; // Temporary interaction point
 
     std::array<Double_t, 2> value = {0., 0.};
 
@@ -318,7 +318,7 @@ namespace KLOE
                                     photonTmp[i][2].fourMom[j] +
                                     photonTmp[i][3].fourMom[j];
 
-        Float_t X_line[3] = {KnerecTmp[i].fourPos[0],
+        Double_t X_line[3] = {KnerecTmp[i].fourPos[0],
                              KnerecTmp[i].fourPos[1],
                              KnerecTmp[i].fourPos[2]},
                 mom[3] = {KnerecTmp[i].fourMom[0],
@@ -388,7 +388,7 @@ namespace KLOE
     if (fphi.fourMom[3] != 0.)
     {
 
-      Float_t boostVec[3] = {-fphi.fourMom[0] / fphi.fourMom[3],
+      Double_t boostVec[3] = {-fphi.fourMom[0] / fphi.fourMom[3],
                              -fphi.fourMom[1] / fphi.fourMom[3],
                              -fphi.fourMom[2] / fphi.fourMom[3]};
 

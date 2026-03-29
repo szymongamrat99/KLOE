@@ -41,11 +41,11 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	else if (data_type == Controls::DataType::DATA_ONLY)
 		chainDoublePiPi->Add(filepathData.c_str());
 
-	Float_t gammaKS, gammaKL;
+	Double_t gammaKS, gammaKL;
 	Char_t vtxTwoTracks;
 	Int_t mcflag_int, mctruth_int;
 
-	std::vector<Float_t>
+	std::vector<Double_t>
 			*trk1KL = &baseKin.trkKL[0],
 			*trk2KL = &baseKin.trkKL[1],
 			*trk1KS = &baseKin.trkKS[0],
@@ -219,7 +219,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	const Int_t nentries = chainDoublePiPi->GetEntries();
 
 	Int_t events[2] = {0, 0};
-	Float_t efficiency[2];
+	Double_t efficiency[2];
 
 	std::string covMatrixType = config.getProperty<std::string>("flags.covMatrixType", "KL");
 
@@ -339,7 +339,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 			piKL[0][i][j]->GetXaxis()->SetTitle(x_names_pi[j]);
 			piKL[0][i][j]->GetYaxis()->SetTitle("Counts");
 
-			Float_t maxY;
+			Double_t maxY;
 
 			if (piKL[0][i][j]->GetMaximum() >= piKL[1][i][j]->GetMaximum())
 				maxY = piKL[0][i][j]->GetMaximum();
@@ -373,7 +373,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 		KaonHistKL[0][i]->GetXaxis()->SetTitle(x_names_kaon[i]);
 		KaonHistKL[0][i]->GetYaxis()->SetTitle("Counts");
 
-		Float_t maxY;
+		Double_t maxY;
 
 		maxY = KaonHistKL[0][i]->GetMaximum();
 
@@ -393,7 +393,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 	histDiffKL->GetXaxis()->SetTitle("Correcting #gamma angle [^{#circ}]");
 	histDiffKL->GetYaxis()->SetTitle("Counts");
 
-	Float_t maxY = histDiffKL->GetMaximum();
+	Double_t maxY = histDiffKL->GetMaximum();
 
 	histDiffKL->GetYaxis()->SetRangeUser(0.0, 1.2 * maxY);
 
@@ -417,7 +417,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 			piKS[0][i][j]->GetXaxis()->SetTitle(x_names_pi[j]);
 			piKS[0][i][j]->GetYaxis()->SetTitle("Counts");
 
-			Float_t maxY;
+			Double_t maxY;
 
 			if (piKS[0][i][j]->GetMaximum() >= piKS[1][i][j]->GetMaximum())
 				maxY = piKS[0][i][j]->GetMaximum();
@@ -449,7 +449,7 @@ int CovarianceMatrixDeterminationControlSample(TChain &chain, Controls::DataType
 		KaonHistKS[0][i]->GetXaxis()->SetTitle(x_names_kaon[i]);
 		KaonHistKS[0][i]->GetYaxis()->SetTitle("Counts");
 
-		Float_t maxY;
+		Double_t maxY;
 
 		maxY = KaonHistKS[0][i]->GetMaximum();
 

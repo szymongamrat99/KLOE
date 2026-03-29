@@ -7,7 +7,7 @@
 
 #include "../inc/trilateration.hpp"
 
-ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Float_t chiSqrStep, Int_t jmin, Int_t jmax, Int_t nclu, std::vector<Float_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Float_t> bhabha_mom, std::vector<Float_t> bhabha_mom_err, std::vector<Float_t> bhabha_vtx, Int_t &bunchnum, std::vector<Float_t> &iptri_kinfit, std::vector<Int_t> &g4takentri_kinfit, std::vector<Float_t> gamma_mom_final[4], std::vector<Float_t> &fourKnetri_kinfit, std::vector<Float_t> &neu_vtx_min, Float_t &Chi2TriKinFit, ErrorHandling::ErrorLogs &logger)
+ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, Int_t jmin, Int_t jmax, Int_t nclu, std::vector<Double_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Double_t> bhabha_mom, std::vector<Double_t> bhabha_mom_err, std::vector<Double_t> bhabha_vtx, Int_t &bunchnum, std::vector<Double_t> &iptri_kinfit, std::vector<Int_t> &g4takentri_kinfit, std::vector<Double_t> gamma_mom_final[4], std::vector<Double_t> &fourKnetri_kinfit, std::vector<Double_t> &neu_vtx_min, Double_t &Chi2TriKinFit, ErrorHandling::ErrorLogs &logger)
 {
   gErrorIgnoreLevel = 6001;
 
@@ -28,7 +28,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
       Errors[N_free + N_const];
 
   Double_t det;
-  Float_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, Tcorr;
+  Double_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, Tcorr;
   Int_t fail;
   Bool_t cond_time_clus[2];
 
@@ -36,8 +36,8 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
   Bool_t clusterEnergy, solError, cond_clus[4];
   Int_t ind_gam[4], sort_ind_gam[2][4], chosen_ind_gam[4], found_best, isConverged, n_bunch;
-  Float_t CHISQRMIN, min_value_def;
-  Float_t gamma_mom_min[4][4], kaon_mom_min[4], kaon_vel[3], kaon_vel_tot, kaon_path_tot, bhabha_vtx_min[3], ip_min[3], time_diff[2][4], time_diff_fin, gamma_path[2][4], neu_vtx[2][4], dist_tmp[2], value[2];
+  Double_t CHISQRMIN, min_value_def;
+  Double_t gamma_mom_min[4][4], kaon_mom_min[4], kaon_vel[3], kaon_vel_tot, kaon_path_tot, bhabha_vtx_min[3], ip_min[3], time_diff[2][4], time_diff_fin, gamma_path[2][4], neu_vtx[2][4], dist_tmp[2], value[2];
 
   TMatrixD
       *V = new TMatrixD(N_free + N_const, N_free + N_const),
@@ -148,7 +148,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
               }
             }
 
-            Float_t
+            Double_t
                 gamma_mom_tmp[4][4],
                 fourKnetri_tmp[2][4],
                 kaon_vel_tmp[2],
@@ -182,7 +182,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
               S = R.MySolve(selected);
 
-              Float_t distance[4] = {0.};
+              Double_t distance[4] = {0.};
 
               for (Int_t k = 0; k < 2; k++)
               {

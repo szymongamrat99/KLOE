@@ -258,7 +258,7 @@ namespace KLOE
                        Kchboostnew(10, 0)
                         {}
 
-    Float_t
+    Double_t
         Kchboost[9] = {0.0},
         KchboostKSOld[9] = {0.0},
         KchboostKLOld[9] = {0.0},
@@ -352,7 +352,7 @@ namespace KLOE
         muonAlertPlus = 0,
         muonAlertMinus = 0;
 
-    std::vector<Float_t>
+    std::vector<Double_t>
         Kchrecnew,
         KchrecKS,
         KchrecKL,

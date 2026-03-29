@@ -56,7 +56,7 @@ namespace KLOE
    * @class ConstraintsOmega
    * @brief Auxiliary class with the constraints for \omega\pi^{0} fitting
    */
-  class ConstraintsOmega : public ChargedVtxRec<Float_t, Int_t>
+  class ConstraintsOmega : public ChargedVtxRec<Double_t, Int_t>
   {
   private:
     /**
@@ -115,9 +115,9 @@ namespace KLOE
     std::array<chargedParticle, 2> fpionCh = {};
     kaonNeutral fKchrec, fKchboost, fKnerec, fKnereclor;
     phiMeson fphi;
-    std::vector<Float_t> fip = {0., 0., 0.}; /*!< Interaction point */
+    std::vector<Double_t> fip = {0., 0., 0.}; /*!< Interaction point */
 
-    ConstraintsOmega(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger), neutRec(logger) {};
+    ConstraintsOmega(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Double_t, Int_t>(logger), neutRec(logger) {};
     
     void IntermediateReconstruction(Double_t *p);
       

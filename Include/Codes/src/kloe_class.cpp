@@ -171,18 +171,18 @@ namespace KLOE
     return frequencyMap;
   }
 
-  Int_t pm00::signum(Float_t value)
+  Int_t pm00::signum(Double_t value)
   {
     return value / abs(value);
   }
 
-  void pm00::Clear1DArray(UInt_t M, Float_t *array)
+  void pm00::Clear1DArray(UInt_t M, Double_t *array)
   {
     for (UInt_t i = 0; i < M; i++)
       array[i] = 999.;
   };
 
-  void pm00::Clear2DArray(UInt_t M, UInt_t N, Float_t **array)
+  void pm00::Clear2DArray(UInt_t M, UInt_t N, Double_t **array)
   {
     for (UInt_t i = 0; i < M; i++)
       for (UInt_t j = 0; j < N; j++)
@@ -293,17 +293,17 @@ namespace KLOE
     return 0;
   };
 
-  Int_t pm00::neu_triangle(Float_t *TrcSumFinal, Float_t *vtxSigmaFinal, Float_t Clu5Vec[4][5], Float_t *ip, Float_t *Phi4Mom, Float_t *Kne4Mom, Float_t *Kne4Vec, Float_t *trc) const
+  Int_t pm00::neu_triangle(Double_t *TrcSumFinal, Double_t *vtxSigmaFinal, Double_t Clu5Vec[4][5], Double_t *ip, Double_t *Phi4Mom, Double_t *Kne4Mom, Double_t *Kne4Vec, Double_t *trc) const
   {
     // Logging of errors
     std::string logFilename = (std::string)Paths::neutrec_dir + (std::string)Paths::logs_dir + "TriangleIter.log";
     ErrorHandling::ErrorLogs logger(logFilename);
     // ----------------------------------------------------------------------------
 
-    Float_t KneTotMom = 0., BetaK, CosPkD[4], DTot[4];
-    Float_t A, B[4], C[4], Delta[4], lK[4][2], lGamma[4][2], lGammaFinal[4], trctmp[4][2], lKtrue[4];
+    Double_t KneTotMom = 0., BetaK, CosPkD[4], DTot[4];
+    Double_t A, B[4], C[4], Delta[4], lK[4][2], lGamma[4][2], lGammaFinal[4], trctmp[4][2], lKtrue[4];
 
-    Float_t NeuVtxTmp[4][2][4], NeuVtxTrueClu[4][4], NeuVtxAvg[4] = {0.}, EneTot = 0., TrcSum = 0., vtxSigma = 0.;
+    Double_t NeuVtxTmp[4][2][4], NeuVtxTrueClu[4][4], NeuVtxAvg[4] = {0.}, EneTot = 0., TrcSum = 0., vtxSigma = 0.;
 
     TVector3 D[4], pK(Kne4Mom[0], Kne4Mom[1], Kne4Mom[2]);
 
@@ -416,7 +416,7 @@ namespace KLOE
     return 0;
   };
 
-  Int_t pm00::neu_triangle(std::vector<TLorentzVector> *Clu4Mom, std::vector<TLorentzVector> *Clu4Vec, Float_t *ip, TLorentzVector *Phi4Mom, TLorentzVector *Kne4Mom, TLorentzVector *Kne4Vec, Float_t *trc, Float_t *TrcSumFinal, Float_t *vtxSigmaFinal) const
+  Int_t pm00::neu_triangle(std::vector<TLorentzVector> *Clu4Mom, std::vector<TLorentzVector> *Clu4Vec, Double_t *ip, TLorentzVector *Phi4Mom, TLorentzVector *Kne4Mom, TLorentzVector *Kne4Vec, Double_t *trc, Double_t *TrcSumFinal, Double_t *vtxSigmaFinal) const
   {
     // Logging of errors
 
@@ -427,10 +427,10 @@ namespace KLOE
     ErrorHandling::ErrorLogs logger(logFilename);
     // ----------------------------------------------------------------------------
 
-    Float_t KneTotMom = 0., BetaK, CosPkD[4], DTot[4];
-    Float_t A, B[4], C[4], Delta[4], lK[4][2], lGamma[4][2], lGammaFinal[4], trctmp[4][2], lKtrue[4];
+    Double_t KneTotMom = 0., BetaK, CosPkD[4], DTot[4];
+    Double_t A, B[4], C[4], Delta[4], lK[4][2], lGamma[4][2], lGammaFinal[4], trctmp[4][2], lKtrue[4];
 
-    Float_t NeuVtxTmp[4][2][4], NeuVtxTrueClu[4][4], NeuVtxAvg[4] = {0.}, EneTot = 0., TrcSum = 0., vtxSigma = 0.;
+    Double_t NeuVtxTmp[4][2][4], NeuVtxTrueClu[4][4], NeuVtxAvg[4] = {0.}, EneTot = 0., TrcSum = 0., vtxSigma = 0.;
 
     TVector3
         D[4],
@@ -808,7 +808,7 @@ namespace KLOE
     return std::set<Int_t>(unique_runs.begin(), unique_runs.end());
   }
 
-  void pm00::CorrectClusterTime(Float_t T0, std::vector<Float_t> &cluTimeCorrected)
+  void pm00::CorrectClusterTime(Double_t T0, std::vector<Double_t> &cluTimeCorrected)
   {
     for (size_t i = 0; i < cluTimeCorrected.size(); ++i)
     {
@@ -816,14 +816,14 @@ namespace KLOE
     }
   }
 
-  ErrorHandling::ErrorCodes pm00::triangleReconstruction(std::vector<Int_t> g4taken_kinfit, std::vector<Float_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Float_t> bhabha_mom, std::vector<Float_t> Kchboost, std::vector<Float_t> ip, std::vector<Float_t> &Knetriangle, std::vector<Float_t> gammatriangle[4], Float_t &minv4gam, std::vector<Float_t> &trcfinal, ErrorHandling::ErrorLogs &logger)
+  ErrorHandling::ErrorCodes pm00::triangleReconstruction(std::vector<Int_t> g4taken_kinfit, std::vector<Double_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Double_t> bhabha_mom, std::vector<Double_t> Kchboost, std::vector<Double_t> ip, std::vector<Double_t> &Knetriangle, std::vector<Double_t> gammatriangle[4], Double_t &minv4gam, std::vector<Double_t> &trcfinal, ErrorHandling::ErrorLogs &logger)
   {
 
     Int_t ind_gam[4];
 
     Bool_t cond_ene;
     Bool_t cond_clus[4];
-    Float_t Clu5Vec[4][5];
+    Double_t Clu5Vec[4][5];
 
     Int_t done = 0;
 
@@ -853,7 +853,7 @@ namespace KLOE
 
       //! Using the charged part of the decay
 
-      Float_t Knerec[9] = {};
+      Double_t Knerec[9] = {};
 
       Knerec[0] = bhabha_mom[0] - Kchboost[0];
       Knerec[1] = bhabha_mom[1] - Kchboost[1];
@@ -862,9 +862,9 @@ namespace KLOE
 
       //!
 
-      Float_t TrcSum = 0., vtxSigma = 0., vtxSigmaMin = 1.e6, TrcSumMin = 1.e6, trcsum = 0.;
+      Double_t TrcSum = 0., vtxSigma = 0., vtxSigmaMin = 1.e6, TrcSumMin = 1.e6, trcsum = 0.;
 
-      Float_t neu_vtx[4], trc[4];
+      Double_t neu_vtx[4], trc[4];
 
       // neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip.data(), bhabha_mom.data(), Knerec, neu_vtx, trc);
 
@@ -912,11 +912,11 @@ namespace KLOE
     return ErrorHandling::ErrorCodes::NO_ERROR;
   }
 
-  ErrorHandling::ErrorCodes pm00::triangleReconstruction(std::vector<neutralParticle> &photon, phiMeson phi, kaonNeutral Kchboost, Float_t *ip, kaonNeutral &Knetriangle)
+  ErrorHandling::ErrorCodes pm00::triangleReconstruction(std::vector<neutralParticle> &photon, phiMeson phi, kaonNeutral Kchboost, Double_t *ip, kaonNeutral &Knetriangle)
   {
     Bool_t cond_ene;
     Bool_t cond_clus[4];
-    Float_t Clu5Vec[4][5];
+    Double_t Clu5Vec[4][5];
 
     Int_t done = 0;
 
@@ -941,7 +941,7 @@ namespace KLOE
 
       //! Using the charged part of the decay
 
-      Float_t Knerec[9] = {};
+      Double_t Knerec[9] = {};
 
       Knerec[0] = phi.fourMom[0] - Kchboost.fourMom[0];
       Knerec[1] = phi.fourMom[1] - Kchboost.fourMom[1];
@@ -950,9 +950,9 @@ namespace KLOE
 
       //!
 
-      Float_t TrcSum = 0., vtxSigma = 0., vtxSigmaMin = 1.e6, TrcSumMin = 1.e6, trcsum = 0.;
+      Double_t TrcSum = 0., vtxSigma = 0., vtxSigmaMin = 1.e6, TrcSumMin = 1.e6, trcsum = 0.;
 
-      Float_t neu_vtx[4], trc[4];
+      Double_t neu_vtx[4], trc[4];
 
       neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip, phi.fourMom.data(), Knerec, neu_vtx, trc);
 
@@ -986,7 +986,7 @@ namespace KLOE
     return ErrorHandling::ErrorCodes::NO_ERROR;
   }
 
-  ErrorHandling::ErrorCodes pm00::NeuCluWrongCheck(std::vector<Int_t> neuclulist, phiMeson phi, kaonNeutral Kchboost, std::vector<Float_t> Xcl, std::vector<Float_t> Ycl, std::vector<Float_t> Zcl, std::vector<Float_t> Tcl, std::vector<Float_t> Enecl)
+  ErrorHandling::ErrorCodes pm00::NeuCluWrongCheck(std::vector<Int_t> neuclulist, phiMeson phi, kaonNeutral Kchboost, std::vector<Double_t> Xcl, std::vector<Double_t> Ycl, std::vector<Double_t> Zcl, std::vector<Double_t> Tcl, std::vector<Double_t> Enecl)
   {
     TLorentzVector Kch4MomLAB, Phi4MomLAB, Kch4MomCM, Kch4MomCMKaon;
     Phi4MomLAB.SetXYZT(phi.fourMom[0], phi.fourMom[1], phi.fourMom[2], phi.fourMom[3]);
@@ -1002,7 +1002,7 @@ namespace KLOE
     return ErrorHandling::ErrorCodes::NO_ERROR;
   }
 
-  void pm00::PhotonPairingToPi0(std::vector<Float_t> *photonMom, Int_t numOfPhotons, std::vector<Int_t> &bestPairingIndex)
+  void pm00::PhotonPairingToPi0(std::vector<Double_t> *photonMom, Int_t numOfPhotons, std::vector<Int_t> &bestPairingIndex)
   {
     Int_t intPi0 = numOfPhotons / 2.;
 
@@ -1010,18 +1010,18 @@ namespace KLOE
 
     std::iota(indices.begin(), indices.end(), 0);
 
-    Float_t invMassDiffMin = 1.e6;
+    Double_t invMassDiffMin = 1.e6;
 
     do
     {
-      std::vector<Float_t>
+      std::vector<Double_t>
           px(intPi0, 0.),
           py(intPi0, 0.),
           pz(intPi0, 0.),
           E(intPi0, 0.),
           invMassDiff(intPi0, 0.);
 
-      Float_t invMassDiffTot = 0.;
+      Double_t invMassDiffTot = 0.;
 
       for (Int_t i = 0; i < intPi0; i++)
       {
@@ -1047,11 +1047,11 @@ namespace KLOE
   }
 
   KLOE::KaonProperTimes KLOE::pm00::CalculateKaonProperTimes(
-      const std::vector<Float_t> &kaon1Mom,
-      const std::vector<Float_t> &kaon1Pos,
-      const std::vector<Float_t> &kaon2Mom,
-      const std::vector<Float_t> &kaon2Pos,
-      const std::vector<Float_t> &ipPos)
+      const std::vector<Double_t> &kaon1Mom,
+      const std::vector<Double_t> &kaon1Pos,
+      const std::vector<Double_t> &kaon2Mom,
+      const std::vector<Double_t> &kaon2Pos,
+      const std::vector<Double_t> &ipPos)
   {
     KaonProperTimes result;
 
@@ -1071,9 +1071,9 @@ namespace KLOE
   }
 
   void KLOE::pm00::CalculateSingleKaonTime(
-      const std::vector<Float_t> &kaonMom,
-      const std::vector<Float_t> &kaonPos,
-      const std::vector<Float_t> &ipPos,
+      const std::vector<Double_t> &kaonMom,
+      const std::vector<Double_t> &kaonPos,
+      const std::vector<Double_t> &ipPos,
       Double_t &timeLAB,
       Double_t &timeCM)
   {

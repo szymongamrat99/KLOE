@@ -5,7 +5,7 @@ namespace KLOE
   // Default constructor
   CylinderIntersection::CylinderIntersection(Double_t zmax, Double_t Rmax) : _zmax(zmax), _Rmax(Rmax) {};
 
-  Int_t CylinderIntersection::inter_point(Float_t *momentum, Float_t *neu_vtx, Float_t *cluster)
+  Int_t CylinderIntersection::inter_point(Double_t *momentum, Double_t *neu_vtx, Double_t *cluster)
   {
     // Step 1 - checking the intersection of momentum line with barrel
 
@@ -24,9 +24,9 @@ namespace KLOE
     return 0;
   };
 
-  void CylinderIntersection::barrel_inter(Float_t *momentum, Float_t *neu_vtx, Float_t *cluster)
+  void CylinderIntersection::barrel_inter(Double_t *momentum, Double_t *neu_vtx, Double_t *cluster)
   {
-    Float_t transv_vector_pr = 0., mom_val2 = 0., delta = 0., b = 0., a = 0., num[2] = {0., 0.}, den = 0., par[2] = {0., 0.}, tmp[3] = {0., 0., 0.}, clus_mom_scalar_pr = 0., gamma_path = 0., cosangle = -999.;
+    Double_t transv_vector_pr = 0., mom_val2 = 0., delta = 0., b = 0., a = 0., num[2] = {0., 0.}, den = 0., par[2] = {0., 0.}, tmp[3] = {0., 0., 0.}, clus_mom_scalar_pr = 0., gamma_path = 0., cosangle = -999.;
 
     transv_vector_pr = momentum[0] * neu_vtx[1] - momentum[1] * neu_vtx[0];
     mom_val2 = pow(momentum[0], 2) + pow(momentum[1], 2);
@@ -94,9 +94,9 @@ namespace KLOE
     }
   };
 
-  void CylinderIntersection::endcap_inter(Float_t *momentum, Float_t *neu_vtx, Float_t *cluster)
+  void CylinderIntersection::endcap_inter(Double_t *momentum, Double_t *neu_vtx, Double_t *cluster)
   {
-    Float_t z_axis[3] = {0., 0., 1.}, r0[3] = {0., 0., 0.}, num = 0., den = 0., par = 0.;
+    Double_t z_axis[3] = {0., 0., 1.}, r0[3] = {0., 0., 0.}, num = 0., den = 0., par = 0.;
 
     if (cluster[2] >= _zmax)
     {

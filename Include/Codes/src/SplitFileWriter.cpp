@@ -102,10 +102,10 @@ void SplitFileWriter::SetBranches()
     _tree->Branch(var.first.c_str(), &(var.second), (var.first + "/I").c_str());
   }
 
-  // Dodanie zmiennych typu Float_t (z konkretnymi nazwami)
+  // Dodanie zmiennych typu Double_t (z konkretnymi nazwami)
   for (auto &var : _floatVars)
   {
-    _tree->Branch(var.first.c_str(), &(var.second), (var.first + "/F").c_str());
+    _tree->Branch(var.first.c_str(), &(var.second), (var.first + "/D").c_str());
   }
 
   // Dodanie tablic (z konkretnymi nazwami)
@@ -430,9 +430,9 @@ Int_t SplitFileWriter::GetMaxFileNumber() const
 }
 
 void SplitFileWriter::Fill(const std::map<std::string, Int_t> &intVars,
-                           const std::map<std::string, Float_t> &floatVars,
+                           const std::map<std::string, Double_t> &floatVars,
                            const std::map<std::string, std::vector<Int_t>> &intArrays,
-                           const std::map<std::string, std::vector<Float_t>> &floatArrays)
+                           const std::map<std::string, std::vector<Double_t>> &floatArrays)
 {
   // For integer variables
   for (const auto &pair : intVars)

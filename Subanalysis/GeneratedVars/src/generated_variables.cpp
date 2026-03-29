@@ -19,7 +19,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 	// Bhabha vars
 	Int_t ntmc, nvtxmc, nclu;
 	UChar_t pidmcOld[200], vtxmcOld[200], motherOld[200], mctruth = 0, mcflag = 0;
-	Float_t pos_mc[3][200], mom_mc[3][200], KnemcOld[9], cluster_rec[3][200], ipmcOld[3];
+	Double_t pos_mc[3][200], mom_mc[3][200], KnemcOld[9], cluster_rec[3][200], ipmcOld[3];
 
 	chain.SetBranchAddress("ntmc", &ntmc);
 	chain.SetBranchAddress("nvtxmc", &nvtxmc);
@@ -49,21 +49,21 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 
 	Int_t nentries = (Int_t)chain.GetEntries();
 
-	Float_t pgammc[4][8], neu_vtx[3], cluster[3],
+	Double_t pgammc[4][8], neu_vtx[3], cluster[3],
 			Knemcnew[9], Kchmcnew[9], ipmcnew[3], Ks[9], Kl[9], trkMC[2][4];
 	Int_t good_clus_ind[4], region[4];
 
-	TBranch *b_pgammc1 = tree->Branch("pgammc1", pgammc[0], "pgammc1[8]/F");
-	TBranch *b_pgammc2 = tree->Branch("pgammc2", pgammc[1], "pgammc2[8]/F");
-	TBranch *b_pgammc3 = tree->Branch("pgammc3", pgammc[2], "pgammc3[8]/F");
-	TBranch *b_pgammc4 = tree->Branch("pgammc4", pgammc[3], "pgammc4[8]/F");
+	TBranch *b_pgammc1 = tree->Branch("pgammc1", pgammc[0], "pgammc1[8]/D");
+	TBranch *b_pgammc2 = tree->Branch("pgammc2", pgammc[1], "pgammc2[8]/D");
+	TBranch *b_pgammc3 = tree->Branch("pgammc3", pgammc[2], "pgammc3[8]/D");
+	TBranch *b_pgammc4 = tree->Branch("pgammc4", pgammc[3], "pgammc4[8]/D");
 
-	TBranch *b_trkMC1 = tree->Branch("trkMC1", trkMC[0], "trkMC1[4]/F");
-	TBranch *b_trkMC2 = tree->Branch("trkMC2", trkMC[1], "trkMC2[4]/F");
+	TBranch *b_trkMC1 = tree->Branch("trkMC1", trkMC[0], "trkMC1[4]/D");
+	TBranch *b_trkMC2 = tree->Branch("trkMC2", trkMC[1], "trkMC2[4]/D");
 
-	TBranch *b_Knemc = tree->Branch("Knemcnew", Knemcnew, "Knemcnew[9]/F");
-	TBranch *b_Kchmc = tree->Branch("Kchmcnew", Kchmcnew, "Kchmcnew[9]/F");
-	TBranch *b_ipmc = tree->Branch("ipmcnew", ipmcnew, "ipmcnew[3]/F");
+	TBranch *b_Knemc = tree->Branch("Knemcnew", Knemcnew, "Knemcnew[9]/D");
+	TBranch *b_Kchmc = tree->Branch("Kchmcnew", Kchmcnew, "Kchmcnew[9]/D");
+	TBranch *b_ipmc = tree->Branch("ipmcnew", ipmcnew, "ipmcnew[3]/D");
 
 	TBranch *b_clusindgood = tree->Branch("clusindgood", good_clus_ind, "clusindgood[4]/I");
 
@@ -71,7 +71,7 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 
 	const Int_t max_count = TMath::Factorial(4);
 	Int_t count = 0, ind_gam[4], mc_ind[4] = {0, 1, 2, 3}, min_ind[max_count];
-	Float_t clus_diff[max_count], clus_diff_min;
+	Double_t clus_diff[max_count], clus_diff_min;
 
 	Bool_t clus_time[max_count];
 
@@ -228,9 +228,9 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 					pgammc[count][5] = cluster[1];
 					pgammc[count][6] = cluster[2];
 
-					Float_t beta_c = PhysicsConstants::cVel * KnemcOld[4] / KnemcOld[3], length = sqrt(pow(KnemcOld[6] - ipmcOld[0], 2) + pow(KnemcOld[7] - ipmcOld[1], 2) + pow(KnemcOld[8] - ipmcOld[2], 2)), time_K = length / beta_c;
+					Double_t beta_c = PhysicsConstants::cVel * KnemcOld[4] / KnemcOld[3], length = sqrt(pow(KnemcOld[6] - ipmcOld[0], 2) + pow(KnemcOld[7] - ipmcOld[1], 2) + pow(KnemcOld[8] - ipmcOld[2], 2)), time_K = length / beta_c;
 
-					Float_t length_clus = sqrt(pow(cluster[0] - KnemcOld[6], 2) + pow(cluster[1] - KnemcOld[7], 2) + pow(cluster[2] - KnemcOld[8], 2));
+					Double_t length_clus = sqrt(pow(cluster[0] - KnemcOld[6], 2) + pow(cluster[1] - KnemcOld[7], 2) + pow(cluster[2] - KnemcOld[8], 2));
 
 					pgammc[count][7] = time_K + (length_clus / PhysicsConstants::cVel);
 

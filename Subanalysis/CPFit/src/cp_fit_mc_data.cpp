@@ -65,7 +65,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
   chain.SetBranchAddress("Qmiss", &baseKin.Qmiss);
   chain.SetBranchAddress("ip", baseKin.ip);
 
-  Float_t
+  Double_t
       PichFourMom[2][4];
 
   chain.SetBranchAddress("trk1", PichFourMom[0]);
@@ -190,7 +190,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
       doneOmega,
       g4takenomega[4];
 
-  Float_t
+  Double_t
       gammaomega[4][8],
       Omegapi0[6],
       Pi0[6],
@@ -260,12 +260,12 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
   KLOE::interference event(mode, check_corr, nbins, x_min, x_max, split);
 
   Double_t velocity_kch, velocity_kne, tch_LAB, tch_CM, tne_LAB, tne_CM, trcv_sum, TRCV[4];
-  Float_t Kch_LAB[4], Kne_LAB[4], Kch_CM[4], Kne_CM[4], Kch_CMCM[4], Kne_CMCM[4], Kne_boost[3], Kch_boost[3], Phi_boost[3], Kchmom_LAB[4], Knemom_LAB[4], Kchmom_CM[4], Knemom_CM[4];
+  Double_t Kch_LAB[4], Kne_LAB[4], Kch_CM[4], Kne_CM[4], Kch_CMCM[4], Kne_CMCM[4], Kne_boost[3], Kch_boost[3], Phi_boost[3], Kchmom_LAB[4], Knemom_LAB[4], Kchmom_CM[4], Knemom_CM[4];
 
   TH1 *sig_total = new TH1D("sig_tot", ";#Delta t;Counts", nbins, x_min, x_max);
   TH1 *sig_pass = new TH1D("sig_pass", ";#Delta t;Counts", nbins, x_min, x_max);
 
-  std::vector<Float_t> no_cuts_sig[2];
+  std::vector<Double_t> no_cuts_sig[2];
 
   // Initialization of cut formulas
   Int_t cuts_number = 6;
@@ -434,7 +434,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
         covMatrix(nRows, nCols, elems.data());
 
     KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
-    KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj(logger);
+    KLOE::ChargedVtxRec<Double_t, UChar_t> BoostMethodObj(logger);
 
     boost::progress_display display(nentries);
 
@@ -442,7 +442,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     {
       chain.GetEntry(i);
 
-      Float_t KchrecSmeared[4], KchboostSmeared[4], energyPion[2];
+      Double_t KchrecSmeared[4], KchboostSmeared[4], energyPion[2];
 
       if (baseKin.doneTriKinFit == 1)// && doneOmega == 1)
       {
@@ -477,7 +477,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
           BoostMethodObj.KaonMomFromBoost(KchrecSmeared, baseKin.phi_mom, KchboostSmeared);
 
-          Float_t X_line[3] = {baseKin.Kchboost[6], baseKin.Kchboost[7], baseKin.Kchboost[8]},
+          Double_t X_line[3] = {baseKin.Kchboost[6], baseKin.Kchboost[7], baseKin.Kchboost[8]},
                   p[3] = {KchboostSmeared[0], KchboostSmeared[1], KchboostSmeared[2]},
                   xB[3] = {baseKin.bhabha_vtx[0], baseKin.bhabha_vtx[1], baseKin.bhabha_vtx[2]},
                   plane_perp[3] = {0., baseKin.phi_mom[1], 0.};

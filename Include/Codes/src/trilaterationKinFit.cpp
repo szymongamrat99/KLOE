@@ -8,7 +8,7 @@
 
 namespace KLOE
 {
-  TrilaterationReconstructionKinFit::TrilaterationReconstructionKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, Int_t jmin, Int_t jmax, ErrorHandling::ErrorLogs &logger) : KinFitter("Trilateration", N_free, N_const, M, 0, loopcount, chiSqrStep, logger), _jmin(jmin), _jmax(jmax), _V(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _V_min(N_free + N_const, N_free + N_const), _Aux(M, M), _V_invert(N_free, N_free), _V_init(N_free + N_const, N_free + N_const), _X(N_free + N_const), _C(M), _X_final(N_free + N_const), _L(M), _CORR(N_free + N_const), _X_init(N_free + N_const), _X_min(N_free + N_const), _C_min(M), _L_min(M), _C_aux(M), _L_aux(M), _X_init_min(N_free + N_const), _X_init_aux(N_free + N_const), _Param(N_free + N_const), _Errors(N_free + N_const), _chargedVtxRec(std::make_unique<ChargedVtxRec<Float_t, Int_t>>(logger)), _recMode(pm00::StringToTrilaterationCode(_config.getProperty<std::string>("flags.trilaterationReconstructionMode")))
+  TrilaterationReconstructionKinFit::TrilaterationReconstructionKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, Int_t jmin, Int_t jmax, ErrorHandling::ErrorLogs &logger) : KinFitter("Trilateration", N_free, N_const, M, 0, loopcount, chiSqrStep, logger), _jmin(jmin), _jmax(jmax), _V(N_free + N_const, N_free + N_const), _D(M, N_free + N_const), _D_T(N_free + N_const, M), _V_final(N_free + N_const, N_free + N_const), _V_aux(N_free + N_const, N_free + N_const), _V_min(N_free + N_const, N_free + N_const), _Aux(M, M), _V_invert(N_free, N_free), _V_init(N_free + N_const, N_free + N_const), _X(N_free + N_const), _C(M), _X_final(N_free + N_const), _L(M), _CORR(N_free + N_const), _X_init(N_free + N_const), _X_min(N_free + N_const), _C_min(M), _L_min(M), _C_aux(M), _L_aux(M), _X_init_min(N_free + N_const), _X_init_aux(N_free + N_const), _Param(N_free + N_const), _Errors(N_free + N_const), _chargedVtxRec(std::make_unique<ChargedVtxRec<Double_t, Int_t>>(logger)), _recMode(pm00::StringToTrilaterationCode(_config.getProperty<std::string>("flags.trilaterationReconstructionMode")))
   {
     if (_recMode == TrilaterationCode::TWO_PI0)
     {
@@ -53,29 +53,29 @@ namespace KLOE
 
   ErrorHandling::ErrorCodes TrilaterationReconstructionKinFit::Reconstruct()
   {
-    Float_t
+    Double_t
         CHISQRTMP = 999.,
         FUNVALTMP = 999999.,
         Tcorr = 0;
 
-    Float_t value_tmp[2] = {999999., 999999.};
+    Double_t value_tmp[2] = {999999., 999999.};
 
     Bool_t
         clusterEnergy = true,
         cond_clus[4] = {false, false, false, false},
         cond_time_clus[2] = {false, false};
 
-    Float_t
+    Double_t
         gamma_mom_tmp[4][8] = {},
         fourKnetri_tmp[2][10] = {},
         kaon_vel_tmp[2] = {},
         y_axis[3] = {},
         ip_tmp[2][3] = {};
 
-    Float_t distance[4] = {0.};
+    Double_t distance[4] = {0.};
 
-    Float_t neu_vtx[2][4] = {};
-    Float_t dist_tmp[2] = {0.};
+    Double_t neu_vtx[2][4] = {};
+    Double_t dist_tmp[2] = {0.};
 
     _CHISQRMIN = TMath::Limits<Double_t>::Max();
     _isConverged = 0;

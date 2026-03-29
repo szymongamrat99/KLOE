@@ -42,9 +42,9 @@ public:
   ~SplitFileWriter();
 
   void Fill(const std::map<std::string, Int_t> &intVars,
-            const std::map<std::string, Float_t> &floatVars,
+            const std::map<std::string, Double_t> &floatVars,
             const std::map<std::string, std::vector<Int_t>> &intArrays,
-            const std::map<std::string, std::vector<Float_t>> &floatArrays);
+            const std::map<std::string, std::vector<Double_t>> &floatArrays);
 
   void Close();
 
@@ -96,9 +96,9 @@ private:
 
   // Zmienne do zapisania
   std::map<std::string, Int_t> _intVars;                    // Zmienne Int_t
-  std::map<std::string, Float_t> _floatVars;                // Zmienne Float_t
+  std::map<std::string, Double_t> _floatVars;                // Zmienne Double_t
   std::map<std::string, std::vector<Int_t>> _intArrays;     // Tablice Int_t
-  std::map<std::string, std::vector<Float_t>> _floatArrays; // Tablice Float_t
+  std::map<std::string, std::vector<Double_t>> _floatArrays; // Tablice Double_t
 };
 
 #endif // !SPLITFILEWRITER_H

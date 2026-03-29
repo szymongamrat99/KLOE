@@ -105,7 +105,7 @@ void ConstraintsSignal::IntermediateReconstruction()
   Kchboost.SetPositionAndMomentumFromTotal();
   Kchboost.SetLorentzVectors();
 
-  Float_t X_line[3] = {Kchboost.fourPos[0],
+  Double_t X_line[3] = {Kchboost.fourPos[0],
                        Kchboost.fourPos[1],
                        Kchboost.fourPos[2]}, // Vertex laying on the line
       mom[3] = {Kchboost.fourMom[0],
@@ -229,7 +229,7 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
   fKchboost.SetPositionAndMomentumFromTotal();
   fKchboost.SetLorentzVectors();
 
-  Float_t X_line[3] = {fKchboost.fourPos[0],
+  Double_t X_line[3] = {fKchboost.fourPos[0],
                        fKchboost.fourPos[1],
                        fKchboost.fourPos[2]}, // Vertex laying on the line
       mom[3] = {fKchboost.fourMom[0],
@@ -325,7 +325,7 @@ Double_t ConstraintsSignal::MinvConsv(Double_t *x, Double_t *p)
   // SetParameters(p);
   IntermediateReconstruction(p);
 
-  std::map<std::string, Float_t> minvModes = {
+  std::map<std::string, Double_t> minvModes = {
       {"neutral", fKnerec.total[5]},
       {"charged", fKchrec.total[5]}};
 

@@ -49,17 +49,17 @@ namespace KLOE
     Bool_t
         _isConverged;
 
-    std::array<std::vector<Float_t>, 2>
+    std::array<std::vector<Double_t>, 2>
         _trkFit,
         _trackParameters,
         _trackParametersErr,
         _Pi0OmegaFit;
 
-    std::array<std::vector<Float_t>, 4>
+    std::array<std::vector<Double_t>, 4>
         _cluster,
         _photonFit;
 
-    std::vector<Float_t>
+    std::vector<Double_t>
         _omegaVtx,
         _omegaVtxErr,
         _bhabha_mom,
@@ -82,7 +82,7 @@ namespace KLOE
     OmegaKinFit(Int_t N_free, Int_t N_const, Int_t M, Int_t loopcount, Double_t chiSqrStep, ErrorHandling::ErrorLogs &logger);
     ~OmegaKinFit();
 
-    void SetParameters(const std::vector<Float_t> trackParameters[2], const std::vector<Float_t> trackParametersErr[2], const std::vector<Float_t> cluster[4], const std::vector<Float_t> bhabha_mom, const std::vector<Float_t> bhabha_mom_err, const std::vector<Float_t> omegaVtx, const std::vector<Float_t> omegaVtxErr, const std::vector<Float_t> bhabha_vtx, const std::vector<Float_t> bhabhaVtxErr)
+    void SetParameters(const std::vector<Double_t> trackParameters[2], const std::vector<Double_t> trackParametersErr[2], const std::vector<Double_t> cluster[4], const std::vector<Double_t> bhabha_mom, const std::vector<Double_t> bhabha_mom_err, const std::vector<Double_t> omegaVtx, const std::vector<Double_t> omegaVtxErr, const std::vector<Double_t> bhabha_vtx, const std::vector<Double_t> bhabhaVtxErr)
     {
       for (Int_t i = 0; i < 2; i++)
       {
@@ -104,7 +104,7 @@ namespace KLOE
       _bhabhaVtxErr = bhabhaVtxErr;
     }
 
-    void GetResults(std::vector<Float_t> &Param, std::vector<Float_t> &Errors, std::vector<Float_t> &ParamFit, std::vector<Float_t> &ErrorsFit, std::vector<Float_t> trkFit[2], std::vector<Float_t> &ipFit, std::vector<Float_t> photonFit[4], std::vector<Float_t> &OmegaFit, std::vector<Float_t> Pi0OmegaFit[2], std::vector<Float_t> &PhiMomFit, Float_t &Chi2OmegaKinFit, std::vector<Float_t> &pulls)
+    void GetResults(std::vector<Double_t> &Param, std::vector<Double_t> &Errors, std::vector<Double_t> &ParamFit, std::vector<Double_t> &ErrorsFit, std::vector<Double_t> trkFit[2], std::vector<Double_t> &ipFit, std::vector<Double_t> photonFit[4], std::vector<Double_t> &OmegaFit, std::vector<Double_t> Pi0OmegaFit[2], std::vector<Double_t> &PhiMomFit, Double_t &Chi2OmegaKinFit, std::vector<Double_t> &pulls)
     {
       Param = _Param;
       Errors = _Errors;

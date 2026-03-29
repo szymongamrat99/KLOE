@@ -52,7 +52,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	// Branches' addresses
 	// Bhabha vars
 	KLOE::BaseKinematics baseKin;
-	Float_t bhabha_mom[4], bhabha_mom_err[4], bhabha_vtx[3];
+	Double_t bhabha_mom[4], bhabha_mom_err[4], bhabha_vtx[3];
 
 	chain.SetBranchAddress("Bpx", &bhabha_mom[0]);
 	chain.SetBranchAddress("Bpy", &bhabha_mom[1]);
@@ -76,7 +76,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 	// Cluster vars
 	Int_t nclu;
 	UChar_t mctruth, mcflag;
-	Float_t cluster[5][500], Kchboost[9], Knerec[9], KnemcOld[9], ipmcOld[3], ip[3], Dtmc, bunch_corr;
+	Double_t cluster[5][500], Kchboost[9], Knerec[9], KnemcOld[9], ipmcOld[3], ip[3], Dtmc, bunch_corr;
 
 	chain.SetBranchAddress("nclu", &nclu);
 	chain.SetBranchAddress("Xcl", cluster[0]);
@@ -99,7 +99,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			doneOmega,
 			g4takenomega[4];
 
-	Float_t
+	Double_t
 			gammaomega[4][8],
 			Omegapi0[6],
 			Pi0[6],
@@ -154,7 +154,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			cond_time_clus[2],
 			data_flag;
 
-	Float_t lengthPhoton[4];
+	Double_t lengthPhoton[4];
 
 	for (Int_t i = 0; i < nentries; i++)
 	{
@@ -167,7 +167,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 		lengthPhotonMin[2] = 1E6;
 		lengthPhotonMin[3] = 1E6;
 
-		Float_t
+		Double_t
 				lengthPhotonMinAvg = 1E6;
 
 		// Clear of the variables
@@ -238,7 +238,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 							total_cond = cond_ene && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3];
 							// -----------------------------------------------------------------------
 							// For Omega - the clusters from vtx closest to IP need to be found
-							Float_t
+							Double_t
 									lengthPhotonAux = 0.,
 									lengthPhotonAvg = 0., // Average Kaon path length
 									totEnergy = 0.;				// Total energy of the clusters (energy of Kaon)
@@ -275,7 +275,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 						}
 
 			// Initialization of the variables
-			Float_t
+			Double_t
 					kaonMom[4] = {0.},
 					IP_vtx[3] = {bhabha_vtx[0],
 											 bhabha_vtx[1],
@@ -306,7 +306,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			kaonMom[2] = bhabha_mom[2] - baseKin.Kchrec[2];
 			kaonMom[3] = bhabha_mom[3] - baseKin.Kchrec[3];
 
-			Float_t
+			Double_t
 					kaonMomTot = sqrt(pow(kaonMom[0], 2) + pow(kaonMom[1], 2) + pow(kaonMom[2], 2)), // total 'Kaon' momentum
 					kaonVelTot = PhysicsConstants::cVel * (kaonMomTot / kaonMom[3]);																	 // total 'Kaon' velocity
 
@@ -318,7 +318,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			Int_t
 					g4takenPi0[2][2];
 
-			Float_t
+			Double_t
 					PhotonMomPi0[2][2][4],
 					Pi0Mom[2][4],
 					OmegaMom[4],
@@ -418,7 +418,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 					Omegarec[6] = Omegarec[5] - ( PichFourMom[0][3] + PichFourMom[1][3] ) - Pi0[5]; // Kinetic energy after the decay
 				}
 
-				Float_t
+				Double_t
 						Kne[4] = {Pi0[0] + Omegapi0[0], // Reconstructed neutral 'Kaon'
 											Pi0[1] + Omegapi0[1],
 											Pi0[2] + Omegapi0[2],
@@ -440,7 +440,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 				anglePichKaonCM = pich1.Angle(pich2) * 180. / M_PI;
 				// -----------------------------------------------------------------------------
 
-				Float_t
+				Double_t
 						boost_vec_Kne[3] = {-(Kne[0]) / (Kne[3]), // Reconstructed neutral 'Kaon' velocity
 																-(Kne[1]) / (Kne[3]),
 																-(Kne[2]) / (Kne[3])},
@@ -458,7 +458,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 				anglePi0KaonCM = pi01.Angle(pi02) * 180. / M_PI;
 				// -----------------------------------------------------------------------------
 
-				Float_t
+				Double_t
 						boost_vec_phi[3] = {-(bhabha_mom[0]) / (bhabha_mom[3]), // Average Phi meson velocity
 																-(bhabha_mom[1]) / (bhabha_mom[3]),
 																-(bhabha_mom[2]) / (bhabha_mom[3])},

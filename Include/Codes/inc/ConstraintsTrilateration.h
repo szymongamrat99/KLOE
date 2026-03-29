@@ -57,7 +57,7 @@ namespace KLOE
    * @class ConstraintsTrilateration
    * @brief Auxiliary class with the constraints for trilateration kinematic fit - do not include charged part of the event
    */
-  class ConstraintsTrilateration : public KinFit, public ChargedVtxRec<Float_t, Int_t>
+  class ConstraintsTrilateration : public KinFit, public ChargedVtxRec<Double_t, Int_t>
   {
   private:
     // Path conservation in LAB
@@ -92,13 +92,13 @@ namespace KLOE
   public:
     /* Specific physical Constraints for trilateration kinematic fit */
 
-    ConstraintsTrilateration(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger) {};
+    ConstraintsTrilateration(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Double_t, Int_t>(logger) {};
 
     std::array<neutralParticle, 4> fphoton;
     std::array<chargedParticle, 2> fpionCh;
     kaonNeutral fKchrec, fKchboost, fKnerec, fKnerecCMPhi, fKnereclor;
     phiMeson fphi;
-    std::vector<Float_t> fip;
+    std::vector<Double_t> fip;
 
     void IntermediateReconstruction(Double_t *p);
 

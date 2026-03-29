@@ -31,7 +31,7 @@ using namespace std;
 Int_t j_ch, k_ch;
 
 Double_t det;
-Float_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, Tcorr;
+Double_t CHISQR, CHISQRTMP, FUNVAL, FUNVALTMP, FUNVALMIN, Tcorr;
 Int_t fail;
 
 Int_t selected[4] = {1, 2, 3, 4};
@@ -64,7 +64,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
 	// Branches' addresses
 	// Bhabha vars
-	Float_t bhabha_mom[4], bhabha_mom_err[4], bhabha_vtx[3];
+	Double_t bhabha_mom[4], bhabha_mom_err[4], bhabha_vtx[3];
 
 	chain.SetBranchAddress("Bpx", &bhabha_mom[0]);
 	chain.SetBranchAddress("Bpy", &bhabha_mom[1]);
@@ -83,7 +83,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 	// Cluster vars
 	Int_t nclu;
 	UChar_t mctruth, mcflag;
-	Float_t cluster[5][500], Kchboost[9], Knerec[9], KnemcOld[9], ipmcOld[3], ip[3], Dtmc, bunch_corr;
+	Double_t cluster[5][500], Kchboost[9], Knerec[9], KnemcOld[9], ipmcOld[3], ip[3], Dtmc, bunch_corr;
 
 	KLOE::BaseKinematics baseKin;
 
@@ -113,24 +113,24 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
 	Bool_t clusterEnergy, solError, cond_clus[4];
 	Int_t ind_gam[4], sort_ind_gam[2][4], chosen_ind_gam[4], found_best, isConverged, n_bunch;
-	Float_t CHISQRMIN, min_value_def;
+	Double_t CHISQRMIN, min_value_def;
 	std::vector<Double_t>
 			reinitialize((N_free + N_const) * (N_free + N_const));
-	Float_t gamma_mom_min[4][4], neu_vtx_min[4], kaon_mom_min[4], kaon_vel[3], kaon_vel_tot, kaon_path_tot, bhabha_vtx_min[3], ip_min[3], time_diff[2][4], time_diff_fin, gamma_path[2][4], neu_vtx[2][4];
+	Double_t gamma_mom_min[4][4], neu_vtx_min[4], kaon_mom_min[4], kaon_vel[3], kaon_vel_tot, kaon_path_tot, bhabha_vtx_min[3], ip_min[3], time_diff[2][4], time_diff_fin, gamma_path[2][4], neu_vtx[2][4];
 
 	TMatrixD V(N_free + N_const, N_free + N_const), D(M, N_free + N_const), D_T(N_free + N_const, M), V_final(N_free + N_const, N_free + N_const), V_aux(N_free + N_const, N_free + N_const), V_min(N_free + N_const, N_free + N_const), Aux(M, M), V_invert(N_free, N_free), V_init(N_free + N_const, N_free + N_const);
 	TVectorD X(N_free + N_const), C(M), X_final(N_free + N_const), L(M), CORR(N_free + N_const), X_init(N_free + N_const), X_min(N_free + N_const), C_min(M), L_min(M), C_aux(M), L_aux(M), X_init_min(N_free + N_const), X_init_aux(N_free + N_const);
 
 	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-	Float_t length_ch, time_ch, velocity_ch, gamma_mom_final[4][8], Omegarec_kinfit[10], Omegapi0_kinfit[10], pi0_kinfit[10], iptri_kinfit[3], y_axis[3], ip_tri[2][3], bhabha_mom_fit[4], gamma_mom_tmp[4][8], Omegarec_tmp[2][10], Omegapi0_tmp[2][10], pi0_tmp[2][10], value[2], kaon_vel_tmp[2], dist_tmp[2], ip_tmp[2][3], gamma_len[4];
+	Double_t length_ch, time_ch, velocity_ch, gamma_mom_final[4][8], Omegarec_kinfit[10], Omegapi0_kinfit[10], pi0_kinfit[10], iptri_kinfit[3], y_axis[3], ip_tri[2][3], bhabha_mom_fit[4], gamma_mom_tmp[4][8], Omegarec_tmp[2][10], Omegapi0_tmp[2][10], pi0_tmp[2][10], value[2], kaon_vel_tmp[2], dist_tmp[2], ip_tmp[2][3], gamma_len[4];
 	Int_t g4takentri_kinfit[4], bunchnum;
 
 	Int_t
 			clusterind[4],
 			clusterindpi0[2][2];
 
-	Float_t
+	Double_t
 			gamma_mom[4][4],
 			gamma_mom_pi0[2][2][4],
 			pi0_mom[2][4],
@@ -140,7 +140,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 			doneOmega,
 			g4takenomega[4];
 
-	Float_t
+	Double_t
 			gammaomega[4][8],
 			Omegapi0[6],
 			Pi0[6],
@@ -214,7 +214,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
 	// Initialization of Charged part of decay reconstruction class
 	// Constructor is below, in the loop
-	boost::optional<KLOE::ChargedVtxRec<Float_t, Int_t>> eventAnalysis;
+	boost::optional<KLOE::ChargedVtxRec<Double_t, Int_t>> eventAnalysis;
 	// -------------------------------------------------------------
 
 	std::vector<std::string> ConstSet = {
@@ -368,7 +368,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									Int_t
 											g4takenPi0[2][2];
 
-									Float_t
+									Double_t
 											PhotonMomPi0[2][2][4],
 											Pi0Mom[2][4],
 											OmegaMom[4],
@@ -388,7 +388,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									PichFourMom[1][2] = baseKin.trk[1][2];
 									PichFourMom[1][3] = baseKin.trk[1][3];
 
-									Float_t
+									Double_t
 											lengthPhoton[4] = {0.},
 											lengthPhotonAvg = 0.,
 											totEnergy = 0.;
@@ -413,7 +413,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									lengthPhotonMin[2] = lengthPhoton[2];
 									lengthPhotonMin[3] = lengthPhoton[3];
 
-									Float_t
+									Double_t
 											photonVel[3] = {0.},
 											kaonMom[3] = {0.},
 											photonLength = 0.,
@@ -424,7 +424,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									kaonMom[2] = bhabha_mom[2] - baseKin.Kchrec[2];
 									kaonMom[3] = bhabha_mom[3] - baseKin.Kchrec[3];
 
-									Float_t
+									Double_t
 											kaonMomTot = sqrt(pow(kaonMom[0], 2) + pow(kaonMom[1], 2) + pow(kaonMom[2], 2)),
 											kaonVelTot = PhysicsConstants::cVel * (kaonMomTot / kaonMom[3]);
 
@@ -495,7 +495,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 											Pi0[5] = sqrt(pow(Pi0[3], 2) - pow(Pi0[4], 2));
 										}
 
-										Float_t
+										Double_t
 												Kne[4] = {Pi0[0] + Omegapi0[0], Pi0[1] + Omegapi0[1], Pi0[2] + Omegapi0[2], Pi0[3] + Omegapi0[3]},
 												boost_vec_Kchboost[3] = {-(bhabha_mom[0] - Kne[0]) / (bhabha_mom[3] - Kne[3]),
 																								 -(bhabha_mom[1] - Kne[1]) / (bhabha_mom[3] - Kne[3]),
@@ -512,7 +512,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 										anglePichKaonCM = pich1.Angle(pich2) * 180. / M_PI;
 
 										// Lorentz transformation of Pi0 to Kaon CM frame
-										Float_t
+										Double_t
 												boost_vec_Kne[3] = {-(Kne[0]) / (Kne[3]),
 																						-(Kne[1]) / (Kne[3]),
 																						-(Kne[2]) / (Kne[3])},
@@ -528,7 +528,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 										anglePi0KaonCM = pi01.Angle(pi02) * 180. / M_PI;
 
 										// Lorentz transformation of Pi0 to Kaon CM frame
-										Float_t
+										Double_t
 												boost_vec_phi[3] = {-(bhabha_mom[0]) / (bhabha_mom[3]),
 																						-(bhabha_mom[1]) / (bhabha_mom[3]),
 																						-(bhabha_mom[2]) / (bhabha_mom[3])},

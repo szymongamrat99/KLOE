@@ -264,7 +264,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   // if (MonteCarloInitAnalysis)
   //   eventProps = new GeneralEventPropertiesMC(reader);
 
-  Float_t
+  Double_t
       KchrecKSMom = 0,
       KchrecKLMom = 0,
       PmissKS = 0,
@@ -274,7 +274,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       pKTwoBody = 0,
       TrcSum = 0;
 
-  Float_t Emiss = 0., Pmiss = 0., MissMom[3] = {};
+  Double_t Emiss = 0., Pmiss = 0., MissMom[3] = {};
 
   std::vector<KLOE::neutralParticle> photons(nPhotons), pions(nPions), pionsOmega(nPions);
   KLOE::kaonNeutral Knerec, Knereclor;
@@ -283,7 +283,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   // Lambdas for cuts
   // SIGNAL hypothesis
-  Float_t pi0Mass1_mean = 134.83240924168848,
+  Double_t pi0Mass1_mean = 134.83240924168848,
             pi0Mass1_sigma = 3.402793221980809,
             pi0Mass2_mean = 134.87134080668446,
             pi0Mass2_sigma = 3.22758797811996,
@@ -374,7 +374,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   // Initialization of momentum smearing
   // -------------------------------------------------------------
-  KLOE::ChargedVtxRec<Float_t, UChar_t> BoostMethodObj(logger);
+  KLOE::ChargedVtxRec<Double_t, UChar_t> BoostMethodObj(logger);
   // -------------------------------------------------------------
 
   Bool_t
@@ -397,7 +397,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     N_free[method] = (Short_t)Utils::properties["variables"]["KinFit"][method]["freeVars"];
     N_const[method] = (Short_t)Utils::properties["variables"]["KinFit"][method]["fixedVars"];
     M[method] = (Short_t)Utils::properties["variables"]["KinFit"][method]["numOfConstraints"];
-    chiSqrStep[method] = (Float_t)Utils::properties["variables"]["KinFit"][method]["chiSqrStep"];
+    chiSqrStep[method] = (Double_t)Utils::properties["variables"]["KinFit"][method]["chiSqrStep"];
   }
 
   const Short_t
@@ -413,14 +413,14 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::vector<Int_t> iv_data;
 
   // Skopiuj dane do lokalnych tablic dla wskaźników
-  std::vector<Float_t> curv_data;
-  std::vector<Float_t> phiv_data;
-  std::vector<Float_t> cotv_data;
-  std::vector<Float_t> xv_data;
-  std::vector<Float_t> yv_data;
-  std::vector<Float_t> zv_data;
+  std::vector<Double_t> curv_data;
+  std::vector<Double_t> phiv_data;
+  std::vector<Double_t> cotv_data;
+  std::vector<Double_t> xv_data;
+  std::vector<Double_t> yv_data;
+  std::vector<Double_t> zv_data;
 
-  std::vector<std::vector<Float_t>>
+  std::vector<std::vector<Double_t>>
       trkMC,
       pgammaMC,
       clusterMC;
@@ -445,7 +445,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   // Auxiliary reconstruction of Kneutral with 6 gammas (for studies)
   KLOE::kaonNeutral KnerecSix;
   std::vector<KLOE::neutralParticle> photonFourMomSix(6);
-  Float_t bestError;
+  Double_t bestError;
   std::vector<Int_t> bestIndicesSix;
 
   while (dataAccess.Next())
@@ -510,7 +510,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     }
 
     // Construction of the charged rec class object
-    Float_t bhabha_vtx[3] = {dataAccess.GetBx(),
+    Double_t bhabha_vtx[3] = {dataAccess.GetBx(),
                              dataAccess.GetBy(),
                              dataAccess.GetBz()};
 
@@ -523,22 +523,22 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     iv_data = dataAccess.GetIv();
 
     // Skopiuj dane do lokalnych tablic dla wskaźników
-    curv_data = dataAccess.GetCurv();
-    phiv_data = dataAccess.GetPhiv();
-    cotv_data = dataAccess.GetCotv();
-    xv_data = dataAccess.GetXv();
-    yv_data = dataAccess.GetYv();
-    zv_data = dataAccess.GetZv();
+    curv_data.assign(dataAccess.GetCurv().begin(), dataAccess.GetCurv().end());
+    phiv_data.assign(dataAccess.GetPhiv().begin(), dataAccess.GetPhiv().end());
+    cotv_data.assign(dataAccess.GetCotv().begin(), dataAccess.GetCotv().end());
+    xv_data.assign(dataAccess.GetXv().begin(), dataAccess.GetXv().end());
+    yv_data.assign(dataAccess.GetYv().begin(), dataAccess.GetYv().end());
+    zv_data.assign(dataAccess.GetZv().begin(), dataAccess.GetZv().end());
 
-    baseKin.pxtv = dataAccess.GetPxtv();
-    baseKin.pytv = dataAccess.GetPytv();
-    baseKin.pztv = dataAccess.GetPztv();
-    baseKin.vtxcov[0] = dataAccess.GetVtxCov1();
-    baseKin.vtxcov[1] = dataAccess.GetVtxCov2();
-    baseKin.vtxcov[2] = dataAccess.GetVtxCov3();
-    baseKin.vtxcov[3] = dataAccess.GetVtxCov4();
-    baseKin.vtxcov[4] = dataAccess.GetVtxCov5();
-    baseKin.vtxcov[5] = dataAccess.GetVtxCov6();
+    baseKin.pxtv.assign(dataAccess.GetPxtv().begin(), dataAccess.GetPxtv().end());
+    baseKin.pytv.assign(dataAccess.GetPytv().begin(), dataAccess.GetPytv().end());
+    baseKin.pztv.assign(dataAccess.GetPztv().begin(), dataAccess.GetPztv().end());
+    baseKin.vtxcov[0].assign(dataAccess.GetVtxCov1().begin(), dataAccess.GetVtxCov1().end());
+    baseKin.vtxcov[1].assign(dataAccess.GetVtxCov2().begin(), dataAccess.GetVtxCov2().end());
+    baseKin.vtxcov[2].assign(dataAccess.GetVtxCov3().begin(), dataAccess.GetVtxCov3().end());
+    baseKin.vtxcov[3].assign(dataAccess.GetVtxCov4().begin(), dataAccess.GetVtxCov4().end());
+    baseKin.vtxcov[4].assign(dataAccess.GetVtxCov5().begin(), dataAccess.GetVtxCov5().end());
+    baseKin.vtxcov[5].assign(dataAccess.GetVtxCov6().begin(), dataAccess.GetVtxCov6().end()) ;
 
     baseKin.bhabha_vtx[0] = dataAccess.GetBx();
     baseKin.bhabha_vtx[1] = dataAccess.GetBy();
@@ -548,6 +548,20 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     baseKin.phi_mom[1] = dataAccess.GetBpy();
     baseKin.phi_mom[2] = dataAccess.GetBpz();
     baseKin.phi_mom[3] = dataAccess.GetBRoots();
+
+    baseKin.ntmc = dataAccess.GetNTMC();
+    baseKin.nvtxmc = dataAccess.GetNVtxMC();
+    baseKin.nclu = dataAccess.GetNClu();
+
+    baseKin.pidmc.assign(dataAccess.GetPidMC().begin(), dataAccess.GetPidMC().end());
+    baseKin.vtxmc.assign(dataAccess.GetVtxMC().begin(), dataAccess.GetVtxMC().end());
+    baseKin.mother.assign(dataAccess.GetMother().begin(), dataAccess.GetMother().end());
+    baseKin.xvmc.assign(dataAccess.GetXvMC().begin(), dataAccess.GetXvMC().end());
+    baseKin.yvmc.assign(dataAccess.GetYvMC().begin(), dataAccess.GetYvMC().end());
+    baseKin.zvmc.assign(dataAccess.GetZvMC().begin(), dataAccess.GetZvMC().end());
+    baseKin.pxmc.assign(dataAccess.GetPxMC().begin(), dataAccess.GetPxMC().end());
+    baseKin.pymc.assign(dataAccess.GetPyMC().begin(), dataAccess.GetPyMC().end());
+    baseKin.pzmc.assign(dataAccess.GetPzMC().begin(), dataAccess.GetPzMC().end());
 
     // Transverse momenta of the two charged pions
     Double_t pT1 = 0, pT2 = 0;
@@ -598,18 +612,18 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       MctruthCounter(mctruth, mctruth_num);
       // -------------------------------------------------------------------
 
-      genVarClassifier.genVars(dataAccess.GetNTMC(),
-                               dataAccess.GetNVtxMC(),
-                               dataAccess.GetNClu(),
-                               dataAccess.GetPidMC().data(),
-                               dataAccess.GetVtxMC().data(),
-                               dataAccess.GetMother().data(),
-                               dataAccess.GetXvMC().data(),
-                               dataAccess.GetYvMC().data(),
-                               dataAccess.GetZvMC().data(),
-                               dataAccess.GetPxMC().data(),
-                               dataAccess.GetPyMC().data(),
-                               dataAccess.GetPzMC().data(),
+      genVarClassifier.genVars(baseKin.ntmc,
+                               baseKin.nvtxmc,
+                               baseKin.nclu,
+                               baseKin.pidmc.data(),
+                               baseKin.vtxmc.data(),
+                               baseKin.mother.data(),
+                               baseKin.xvmc.data(),
+                               baseKin.yvmc.data(),
+                               baseKin.zvmc.data(),
+                               baseKin.pxmc.data(),
+                               baseKin.pymc.data(),
+                               baseKin.pzmc.data(),
                                mcflag,
                                mctruth,
                                baseKin.ipmc,
@@ -626,7 +640,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                baseKin.muonAlertPlus,
                                baseKin.muonAlertMinus);
 
-      std::vector<Float_t> kaonChMom = {baseKin.Kchmc[0], baseKin.Kchmc[1], baseKin.Kchmc[2], baseKin.Kchmc[3]},
+      std::vector<Double_t> kaonChMom = {baseKin.Kchmc[0], baseKin.Kchmc[1], baseKin.Kchmc[2], baseKin.Kchmc[3]},
                            kaonChPos = {baseKin.Kchmc[6], baseKin.Kchmc[7], baseKin.Kchmc[8]},
                            kaonNeMom = {baseKin.Knemc[0], baseKin.Knemc[1], baseKin.Knemc[2], baseKin.Knemc[3]},
                            kaonNePos = {baseKin.Knemc[6], baseKin.Knemc[7], baseKin.Knemc[8]},
@@ -903,7 +917,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     {
       if (cutter.PassCut(0) && cutter.PassCut(1))
       {
-        Float_t
+        Double_t
             boostPhi[3] = {
                 -dataAccess.GetBpx() / dataAccess.GetBRoots(),
                 -dataAccess.GetBpy() / dataAccess.GetBRoots(),
@@ -930,7 +944,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS, baseKin.phi_mom, baseKin.KchboostKS);
         eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL, baseKin.phi_mom, baseKin.KchboostKL);
 
-        Float_t X_lineKS[3] = {baseKin.KchboostKS[6],
+        Double_t X_lineKS[3] = {baseKin.KchboostKS[6],
                                baseKin.KchboostKS[7],
                                baseKin.KchboostKS[8]}, // Vertex laying on the line
             X_lineKL[3] = {baseKin.KchboostKL[6],
@@ -966,7 +980,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         if (abs(baseKin.ipKL[2] - baseKin.bhabha_vtx[2]) > 2.8)
           baseKin.ipKL[2] = baseKin.bhabha_vtx[2];
 
-        Float_t
+        Double_t
             MissMomKS[3] = {},
             MissMomKL[3] = {};
 
@@ -1009,9 +1023,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
       BoostMethodObj.KaonMomFromBoost(baseKin.Kchrecnew, baseKin.phi_mom, baseKin.Kchboostnew);
 
-      Float_t X_line[3] = {baseKin.Kchboostnew[6],
-                           baseKin.Kchboostnew[7],
-                           baseKin.Kchboostnew[8]}, // Vertex laying on the line
+      Double_t X_line[3] = {baseKin.Kchboostnew[6],
+                            baseKin.Kchboostnew[7],
+                            baseKin.Kchboostnew[8]}, // Vertex laying on the line
           p[3] = {baseKin.Kchboostnew[0],
                   baseKin.Kchboostnew[1],
                   baseKin.Kchboostnew[2]}, // Direction of the line
@@ -1050,15 +1064,15 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
       baseKin.Qmiss = sqrt(pow(Emiss, 2) + pow(Pmiss, 2));
 
-      std::vector<Float_t> cluster[5];
+      std::vector<Double_t> cluster[5];
 
-      cluster[0] = dataAccess.GetXCl();
-      cluster[1] = dataAccess.GetYCl();
-      cluster[2] = dataAccess.GetZCl();
-      cluster[3] = dataAccess.GetTCl();
-      cluster[4] = dataAccess.GetEneCl();
+      cluster[0].assign(dataAccess.GetXCl().begin(), dataAccess.GetXCl().end());
+      cluster[1].assign(dataAccess.GetYCl().begin(), dataAccess.GetYCl().end());
+      cluster[2].assign(dataAccess.GetZCl().begin(), dataAccess.GetZCl().end());
+      cluster[3].assign(dataAccess.GetTCl().begin(), dataAccess.GetTCl().end());
+      cluster[4].assign(dataAccess.GetEneCl().begin(), dataAccess.GetEneCl().end());
 
-      std::vector<Float_t>
+      std::vector<Double_t>
           bhabha_mom_err = {dataAccess.GetBpxErr(),
                             dataAccess.GetBpyErr(),
                             dataAccess.GetBpzErr(),
@@ -1108,7 +1122,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
       else
       {
-        genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g4takenTriKinFit, dataAccess.GetPNum1(), dataAccess.GetNTMC(), dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersTriKinFit);
+        genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g4takenTriKinFit, dataAccess.GetPNum1(), baseKin.ntmc, dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersTriKinFit);
 
         errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.Knerec, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
 
@@ -1220,7 +1234,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
           // Signal Global Kinematic Fit
 
-          std::vector<Float_t>
+          std::vector<Double_t>
               trackParameters[2],
               trackParametersErr[2],
               clusterChosen[4],
@@ -1337,7 +1351,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           baseKin.Knereclor[7] = baseKin.Knerec[7];
           baseKin.Knereclor[8] = baseKin.Knerec[8];
 
-          std::vector<Float_t>
+          std::vector<Double_t>
               kaonChMomRec = {baseKin.Kchrecnew[0], baseKin.Kchrecnew[1], baseKin.Kchrecnew[2], baseKin.Kchrecnew[3]},
               kaonChMomBoost = {baseKin.Kchboostnew[0], baseKin.Kchboostnew[1], baseKin.Kchboostnew[2], baseKin.Kchboostnew[3]},
               kaonChMomSignalKinFit = {baseKin.KchboostFit[0], baseKin.KchboostFit[1], baseKin.KchboostFit[2], baseKin.KchboostFit[3]},
@@ -1395,7 +1409,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             trackParametersErr[1].push_back(pow(1.5, 2) / 2.0);
             trackParametersErr[1].push_back(pow(1.8, 2) / 2.0);
 
-            std::vector<Float_t> omegaVtx = {baseKin.KchrecClosest[6],
+            std::vector<Double_t> omegaVtx = {baseKin.KchrecClosest[6],
                                              baseKin.KchrecClosest[7],
                                              baseKin.KchrecClosest[8]},
                                  omegaVtxErr = {sqrt(baseKin.vtxcov[0][baseKin.vtakenClosest[0]]),
@@ -1597,8 +1611,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"muonAlertPlus", baseKin.muonAlertPlus},
           {"muonAlertMinus", baseKin.muonAlertMinus}};
 
-      // Float_t zmienne
-      std::map<std::string, Float_t> floatVars = {
+      // Double_t zmienne
+      std::map<std::string, Double_t> floatVars = {
           {"T0step1", baseKin.T0step1},
           {"Bx", baseKin.Bx},
           {"By", baseKin.By},
@@ -1672,7 +1686,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"g4takenTriKinFit", baseKin.g4takenTriKinFit},
           {"goodClustersTriKinFit", baseKin.goodClustersTriKinFit}};
 
-      std::map<std::string, std::vector<Float_t>> floatArrays = {
+      std::map<std::string, std::vector<Double_t>> floatArrays = {
           {"Xcl", baseKin.Xcl},
           {"Ycl", baseKin.Ycl},
           {"Zcl", baseKin.Zcl},

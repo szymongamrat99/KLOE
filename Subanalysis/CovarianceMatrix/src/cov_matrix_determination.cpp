@@ -28,7 +28,7 @@ int CovarianceMatrixDetermination(TChain &chain, Controls::DataType &data_type, 
 	ConfigManager &config = ConfigManager::getInstance();
 	// =============================================================================
 
-	std::vector<Float_t>
+	std::vector<Double_t>
 			*trk1KL = &baseKin.trkKL[0],
 			*trk2KL = &baseKin.trkKL[1],
 			*trk1KLmc = &baseKin.trkKLmc[0],

@@ -69,7 +69,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   chain.SetBranchAddress("Bpz", &baseKin.phi_mom[2]);
   chain.SetBranchAddress("Broots", &baseKin.phi_mom[3]);
 
-  std::vector<Float_t>
+  std::vector<Double_t>
       *ipKS(&baseKin.ipKS),
       *ipKL(&baseKin.ipKL),
       *ipmc(&baseKin.ipmc),
@@ -142,17 +142,17 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   chain.SetBranchAddress("trk2KLmc", &trkKLmc[1]);
   // -----------------------------------------------------------
 
-  Float_t EmissKS = 0.0;
-  Float_t EmissKL = 0.0;
-  Float_t PmissKS = 0.0;
-  Float_t PmissKL = 0.0;
-  Float_t KchrecKSMom = 0.0;
-  Float_t KchrecKLMom = 0.0;
+  Double_t EmissKS = 0.0;
+  Double_t EmissKL = 0.0;
+  Double_t PmissKS = 0.0;
+  Double_t PmissKL = 0.0;
+  Double_t KchrecKSMom = 0.0;
+  Double_t KchrecKLMom = 0.0;
 
   std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
   StatisticalCutter cutter(cutFileName, 7, KLOE::HypothesisCode::FOUR_PI, logger);
 
-  Float_t pKTwoBody = Obj.TwoBodyDecayMass(PhysicsConstants::mPhi, PhysicsConstants::mK0, PhysicsConstants::mK0);
+  Double_t pKTwoBody = Obj.TwoBodyDecayMass(PhysicsConstants::mPhi, PhysicsConstants::mK0, PhysicsConstants::mK0);
 
   ///////////////////////////////////////////////////////////////////
   cutter.RegisterVariableGetter("InvMassKS", [&]()
@@ -211,7 +211,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 
   SplitFileWriter writer(base_filename, 1.5 * 1024 * 1024 * 1024, false, dated_folder);
 
-  Float_t
+  Double_t
       invMass = 0.;
 
   Int_t nentries = chain.GetEntries();
@@ -278,25 +278,25 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 
   Int_t graph_flag = 0;
 
-  Float_t minDiff = 999999.;
+  Double_t minDiff = 999999.;
 
   // Progress bar
   boost::progress_display show_progress(nentries);
   // --------------------------------------------------------------------
 
-  std::vector<Float_t>
+  std::vector<Double_t>
       trkKLTwoBody1(4),
       trkKLTwoBody2(4),
       trkKSTwoBody1(4),
       trkKSTwoBody2(4);
 
-  Float_t gammaKS = 0.0, gammaKL = 0.0;
+  Double_t gammaKS = 0.0, gammaKL = 0.0;
 
   for (Int_t i = 0; i < nentries; i++)
   {
     chain.GetEntry(i);
 
-    Float_t
+    Double_t
         PhiMom[3] = {baseKin.phi_mom[0], baseKin.phi_mom[1], baseKin.phi_mom[2]},
         MissMomKS[3] = {},
         MissMomKL[3] = {};
@@ -313,7 +313,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
     EmissKS = KchboostKS->at(3) - KchrecKS->at(3);
     EmissKL = KchboostKL->at(3) - KchrecKL->at(3);
 
-    Float_t
+    Double_t
         boostPhi[3] = {
             -baseKin.phi_mom[0] / baseKin.phi_mom[3],
             -baseKin.phi_mom[1] / baseKin.phi_mom[3],
@@ -474,14 +474,14 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
           {"mcflag", mcflag},
           {"mctruth", mctruth}};
 
-      std::map<std::string, Float_t> floatVars = {
+      std::map<std::string, Double_t> floatVars = {
           {"gammaKS", gammaKS},
           {"gammaKL", gammaKL}};
 
       // Tablice
       std::map<std::string, std::vector<Int_t>> intArrays = {};
 
-      std::map<std::string, std::vector<Float_t>> floatArrays = {
+      std::map<std::string, std::vector<Double_t>> floatArrays = {
           {"Kchmc", *Kchmc},
           {"Knemc", *Knemc},
           {"KchrecKS", *KchrecKS},
@@ -951,7 +951,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   return 0;
 }
 
-ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Float_t> *Kchboost, std::vector<Float_t> *ip, std::vector<Float_t> *trk[2], KLOE::pm00 &Obj, std::vector<Float_t> &KchrecTwoBody, Float_t &gamma, TLorentzVector PiKaon4VecLAB[2], TLorentzVector trk4VecLAB[2])
+ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Double_t> *Kchboost, std::vector<Double_t> *ip, std::vector<Double_t> *trk[2], KLOE::pm00 &Obj, std::vector<Double_t> &KchrecTwoBody, Double_t &gamma, TLorentzVector PiKaon4VecLAB[2], TLorentzVector trk4VecLAB[2])
 {
   // 2. Calculation of KL flight direction
   // Double_t KLpath = sqrt(pow(Kchboost->at(6) - ip->at(0), 2) +

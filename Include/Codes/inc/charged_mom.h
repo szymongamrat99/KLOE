@@ -11,7 +11,7 @@
 namespace KLOE
 {
   // Template for function definition
-  template <typename F = Float_t, typename T = Int_t> 
+  template <typename F = Double_t, typename T = Int_t> 
   class ChargedVtxRec : public virtual pm00
   {
   private:
