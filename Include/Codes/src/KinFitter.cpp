@@ -182,24 +182,13 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _Aux = (_D * _V * _D_T);
 
-      if (_Aux.IsValid() && !CheckMatrixNan(_Aux))
-      {
-        _det = _Aux.Determinant();
+      TDecompSVD svd(_Aux);
+      Bool_t svdStatus = false;
 
-        if (abs(_det) > 0 && !TMath::IsNaN(_det))
-        {
-          _Aux = _Aux.Invert(&_det);
-        }
-      }
-      else
-      {
-        _det = 0;
-      }
+      _Aux = svd.Invert(svdStatus);
 
-      if (_det == 0)
+      if (!svdStatus)
         throw ErrorHandling::ErrorCodes::DET_ZERO;
-      else if (TMath::IsNaN(_det))
-        throw ErrorHandling::ErrorCodes::NAN_VAL;
 
       _L = (_Aux * _C);
 
