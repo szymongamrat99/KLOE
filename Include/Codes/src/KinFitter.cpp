@@ -169,7 +169,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
           if (m < _N_free)
           {
-            auxVal = constraint[l]->GradientPar(m, 0);
+            auxVal = DerivativeCalc(l,m);//constraint[l]->GradientPar(m, 0);
 
             _D(l, m) = auxVal;
           }
@@ -183,6 +183,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       _Aux = (_D * _V * _D_T);
 
       TDecompSVD svd(_Aux);
+      svd.SetTol(1e-12); // Ustawienie tolerancji dla wartości singularnych, aby uniknąć problemów z macierzą osobliwą
       Bool_t svdStatus = false;
       Double_t condition = svd.Condition();
 
@@ -204,9 +205,19 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       _V_final = _V - _V * _D_T * _Aux * _D * _V;
 
-      _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
+      TVectorD deltaX = _X - _X_init;
 
-      if (abs(_CHISQR - _CHISQRTMP) < _CHISQRSTEP)
+      _CHISQR = _V_invert.Similarity(deltaX);
+
+      Double_t maxDeltaX = 0;
+      for (int j = 0; j < _CORR.GetNrows(); j++)
+      {
+        double relChange = abs(_CORR(j) / (_X(j) + 1e-9)); // 1e-9 zapobiega /0
+        if (relChange > maxDeltaX)
+          maxDeltaX = relChange;
+      }
+
+      if (abs(_CHISQR - _CHISQRTMP) < _CHISQRSTEP || maxDeltaX < 1e-5)
         break;
 
       _L_aux = _L;
@@ -454,4 +465,3 @@ Bool_t KinFitter::CheckMatrixNan(TMatrixD &matrix)
   }
   return false;
 }
-

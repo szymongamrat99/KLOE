@@ -147,3 +147,101 @@ ls -hl
 exit
 git checkout -- .
 git add .
+./execute_analysis.sh 
+nohup ./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt < parameters.txt > nohup.log &
+git add .
+git commit -m "Changed floats to doubles"
+git push
+./execute_analysis.sh 
+nohup ./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt < parameters.txt > nohup.log &
+git add .
+git commit -m "Added SVD to kin fit"
+git push
+git add .
+git commit -m "New histos"
+git push
+cd Subanalysis/InterfFunction/
+./compile.sh 
+vi ~/.bashrc 
+./compile.sh 
+vi ~/.bashrc 
+source ~/.bashrc 
+./compile.sh 
+./hist_fits_integral_range 
+vi ~/.bashrc 
+source ~/.bashrc 
+./hist_fits_integral_range 
+vi ~/.bashrc 
+source ~/.bashrc 
+./hist_fits_integral_range 
+source ~/.bashrc 
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+git checkout -- .
+./execute_analysis.sh 
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+./execute_analysis.sh 
+cd Subanalysis/InitialAnalysis/root_files/ALL_PHYS3_SIGNAL_NoSmearing/
+ls
+ll
+ls -hl
+root mk0_initial_analysis_all_phys3_SIGNAL_NoSmearing_Signal_1.root
+cd ../../../../
+./execute_analysis.sh 
+git commit -m "Added new things"
+git push
+cd Subanalysis/InterfFunction/
+ls
+./compile.sh 
+./hist_fits_integral_range 
+nohup ./hist_fits_integral_range < parameters.txt > nohup_1.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_2.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_3.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_4.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_5.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_6.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_7.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_8.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_9.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_10.log &
+killall hist_fits_integral_range 
+pgrep hist_fits_integral_range
+nohup ./hist_fits_integral_range < parameters.txt > nohup_1.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_2.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_3.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_4.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_5.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_6.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_7.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_8.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_9.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_10.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_11.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_12.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_13.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_14.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_15.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_16.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_17.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_18.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_19.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_20.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_21.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_22.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_23.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_24.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_25.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_26.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_27.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_28.log &
+nohup ./hist_fits_integral_range < parameters.txt > nohup_29.log &
+lscpu

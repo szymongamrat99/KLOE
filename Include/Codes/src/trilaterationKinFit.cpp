@@ -179,7 +179,10 @@ namespace KLOE
               CHISQRTMP = KinFitter::FitFunction(Tcorr);
 
               if (std::isnan(CHISQRTMP) || std::isinf(CHISQRTMP))
-                continue;
+              {
+                // continue;
+                CHISQRTMP = 999.;
+              }
 
               KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _ipFitTri, _photonFitTri, _KnerecFitTri, _PhiFitTri);
 
@@ -260,6 +263,8 @@ namespace KLOE
       _bunchnum = 999;
 
       _Chi2TriKinFit = 999.;
+
+      std::cout << "Trilateration kinematic fit did not converge." << std::endl;
 
       return ErrorHandling::ErrorCodes::TRILATERATION_KIN_FIT;
     }
