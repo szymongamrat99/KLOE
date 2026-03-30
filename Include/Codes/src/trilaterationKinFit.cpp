@@ -264,8 +264,6 @@ namespace KLOE
 
       _Chi2TriKinFit = 999.;
 
-      std::cout << "Trilateration kinematic fit did not converge." << std::endl;
-
       return ErrorHandling::ErrorCodes::TRILATERATION_KIN_FIT;
     }
   }
