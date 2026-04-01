@@ -885,4 +885,22 @@ namespace Utils
     }
   }
 
+  void JsonFieldLookupInt(nlohmann::json &jsonObj, const std::string fieldPath, int &value, ErrorHandling::ErrorLogs &logger)
+  {
+    std::string pointerString = "/" + fieldPath;
+
+    try
+    {
+      value = jsonObj.at(nlohmann::json::json_pointer(pointerString)).get<int>();
+      ErrorHandling::InfoCodes infoCode = ErrorHandling::InfoCodes::VARIABLES_INITIALIZED;
+      logger.getLog(infoCode, Form("Successfully accessed JSON field: %s. Value: %d", fieldPath.c_str(), value));
+    }
+    catch (const nlohmann::json::out_of_range &e)
+    {
+      ErrorHandling::ErrorCodes errorCode = ErrorHandling::ErrorCodes::INITIALIZATION_FAILED;
+      std::string logMessage = Form("Failed to access JSON field: %s. Error: %s", fieldPath.c_str(), e.what());
+      logger.getErrLog(errorCode, logMessage);
+    }
+  }
+
 }

@@ -12,12 +12,15 @@
 #include <TRandom3.h>
 #include <TBranch.h>
 #include <TTree.h>
+#include <nlohmann/json.hpp>
 
 #include <boost/filesystem.hpp>
 #include <boost/progress.hpp>
 
 #include <interf_function.h>
 #include <const.h>
+
+namespace fs = boost::filesystem;
 
 Double_t evTick = 10000.0;
 
@@ -27,6 +30,51 @@ void createDirIfNotExists(const TString &path)
 
   if (!boost::filesystem::exists(dirPath))
     boost::filesystem::create_directories(dirPath);
+}
+
+void renameFile(std::string directory = "./", Int_t jobNum = 0)
+{
+  std::vector<fs::path> rootFiles;
+  std::string pattern = std::to_string(jobNum) + "_tmp";
+
+  // 1. Zbieramy wskaźniki (ścieżki) do plików spełniających warunek
+  for (const auto &entry : fs::directory_iterator(directory))
+  {
+    std::string filename = entry.path().filename().string();
+
+    // Szukamy plików name_tmp_1.root, name_tmp_2.root itd.
+    if (filename.find(pattern) != std::string::npos && entry.path().extension() == ".root")
+    {
+      rootFiles.push_back(entry.path());
+    }
+  }
+
+  // Opcjonalne sortowanie (żeby pliki szły po kolei _1, _2...)
+  std::sort(rootFiles.begin(), rootFiles.end());
+
+  // 2. Przetwarzamy zebraną listę
+  for (const auto &oldPath : rootFiles)
+  {
+    std::string newName = oldPath.filename().string();
+
+    size_t pos = newName.find("_tmp");
+    if (pos != std::string::npos)
+    {
+      newName.erase(pos, 4); // usuwa "_tmp"
+    }
+
+    fs::path newPath = oldPath.parent_path() / newName;
+
+    try
+    {
+      fs::rename(oldPath, newPath);
+      std::cout << "Zmieniono: " << oldPath.filename() << " -> " << newName << std::endl;
+    }
+    catch (const fs::filesystem_error &e)
+    {
+      std::cerr << "Błąd przy pliku " << oldPath << ": " << e.what() << std::endl;
+    }
+  }
 }
 
 void GenerateHitOrMissSample(TH2D *hist, TF2 *func, Long64_t nSamplesTarget, Double_t &t1Hit, Double_t &t2Hit, TTree *tree)
@@ -181,7 +229,7 @@ void GenerateRandom21D(TH1 *hist, TF2 *func, Long64_t nSamplesTarget)
 
 static TRandom3 gRand(0);
 
-void generate_t1_t2(double &t1, double &t2, bool equalProb)
+void generate_t1_t2(double &t1, double &t2, bool equalProb, double t1Min, double t1Max, double t2Min, double t2Max)
 {
   Double_t weightA = PhysicsConstants::br_ks_pi0pi0 * PhysicsConstants::br_kl_pippim,
            weightB = PhysicsConstants::br_ks_pippim * PhysicsConstants::br_kl_pi0pi0,
@@ -191,16 +239,35 @@ void generate_t1_t2(double &t1, double &t2, bool equalProb)
   if (equalProb)
     probA = 0.5;
 
+  Double_t tauS = 1.0; // Wartość tau_S do ustawienia zakresów
+  Double_t tauL = PhysicsConstants::tau_L / PhysicsConstants::tau_S_nonCPT;
+
+  Double_t u1MinS = 1 - exp(-t1Min / tauS);
+  Double_t u1MaxS = 1 - exp(-t1Max / tauS);
+  Double_t u2MinS = 1 - exp(-t2Min / tauS);
+  Double_t u2MaxS = 1 - exp(-t2Max / tauS);
+
+  Double_t u1MinL = 1 - exp(-t1Min / tauL);
+  Double_t u1MaxL = 1 - exp(-t1Max / tauL);
+  Double_t u2MinL = 1 - exp(-t2Min / tauL);
+  Double_t u2MaxL = 1 - exp(-t2Max / tauL);
+
   Double_t u = gRand.Uniform();
-  Double_t u1 = gRand.Uniform(), u2 = gRand.Uniform();
+  Double_t u1 = 0.0, u2 = 0.0;
 
   if (u < probA)
   {
+    u1 = gRand.Uniform(u1MinS, u1MaxS);
+    u2 = gRand.Uniform(u2MinL, u2MaxL);
+
     t1 = -TMath::Log(1 - u1);
     t2 = -PhysicsConstants::tau_L / PhysicsConstants::tau_S_nonCPT * TMath::Log(1 - u2);
   }
   else
   {
+    u1 = gRand.Uniform(u1MinL, u1MaxL);
+    u2 = gRand.Uniform(u2MinS, u2MaxS);
+
     t1 = -PhysicsConstants::tau_L / PhysicsConstants::tau_S_nonCPT * TMath::Log(1 - u1);
     t2 = -TMath::Log(1 - u2);
   }
@@ -208,31 +275,58 @@ void generate_t1_t2(double &t1, double &t2, bool equalProb)
 
 int main(int argc, char *argv[])
 {
+  Int_t jobNum = 0;
+
+  if (argc > 1 && std::atoi(argv[1]) >= 0)
+    jobNum = std::atoi(argv[1]);
+
   KLOE::setGlobalStyle();
   ErrorHandling::ErrorLogs logger("log/");
-
   Utils::InitializeVariables(logger);
 
-  std::cout << "Do You want to set custom parameters? (1 - yes, 0 - no): ";
-  int customParams = 0;
-  std::cin >> customParams;
-
-  Double_t reParam = PhysicsConstants::Re;
-  Double_t imParam = PhysicsConstants::Im_nonCPT;
-
-  if (customParams)
+  TString configPath = "config/config.json";
+  std::ifstream configFile(configPath);
+  if (!configFile.is_open())
   {
-    std::cout << "Set Re(epsilon'/epsilon) (default " << PhysicsConstants::Re << "): ";
-    std::cin >> reParam;
-
-    std::cout << "Set Im(epsilon'/epsilon) (default " << PhysicsConstants::Im_nonCPT << "): ";
-    std::cin >> imParam;
+    std::cerr << "Error opening config file: " << configPath << std::endl;
+    return 1;
   }
+
+  std::unordered_map<int, TString> methodNames = {
+      {1, "HitOrMiss"},
+      {2, "GetRandom2D"},
+      {3, "DoubleExponential"}};
+
+  // Parameters from config file with default values
+
+  Double_t t1Min = 0.0, t1Max = 300.0, t2Min = 0.0, t2Max = 300.0;
+  Int_t nSamplesTarget = 100000, samplingMethod = 3;
+  Bool_t customParamsFlag = false;
+  Double_t reParam = PhysicsConstants::Re, imParam = PhysicsConstants::Im_nonCPT;
+
+  nlohmann::json config;
+  config = nlohmann::json::parse(configFile);
+
+  Utils::JsonFieldLookupDouble(config, "sampling/t1Min", t1Min, logger);
+  Utils::JsonFieldLookupDouble(config, "sampling/t1Max", t1Max, logger);
+  Utils::JsonFieldLookupDouble(config, "sampling/t2Min", t2Min, logger);
+  Utils::JsonFieldLookupDouble(config, "sampling/t2Max", t2Max, logger);
+
+  Utils::JsonFieldLookupInt(config, "sampling/nSamplesTarget", nSamplesTarget, logger);
+  Utils::JsonFieldLookupInt(config, "sampling/samplingMethod", samplingMethod, logger);
+
+  Utils::JsonFieldLookupBool(config, "sampling/customParameters/flag", customParamsFlag, logger);
+
+  if (customParamsFlag)
+  {
+    Utils::JsonFieldLookupDouble(config, "sampling/customParameters/parameters/ReParam", reParam, logger);
+    Utils::JsonFieldLookupDouble(config, "sampling/customParameters/parameters/ImParam", imParam, logger);
+  }
+
+  // -----------------------------------------------------------------------------------
 
   // Sampling functions to create 2D histograms
   const Float_t sigmaT = 1; // Time resolution in tau_S units
-  const Float_t t1Min = 0.0, t1Max = 300.0;
-  const Float_t t2Min = 0.0, t2Max = 300.0;
   const Int_t nBinst1 = (t1Max - t1Min) / sigmaT, nBinst2 = (t2Max - t2Min) / sigmaT;
 
   TF2 *func_00pm = new TF2("I(#pi^{0}#pi^{0},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_00pm, t1Min, t1Max, t2Min, t2Max, 2);
@@ -244,14 +338,7 @@ int main(int argc, char *argv[])
   TF2 *func_pmpm = new TF2("I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}]; t_{2} [#tau_{S}]", &interf_function_pmpm, t1Min, t1Max, t2Min, t2Max, 2);
   func_pmpm->SetParameters(reParam, imParam);
 
-  Long64_t nSamplesTarget = 100000; // Number of samples for MC sampling
   Double_t maxIntegral = 300.0;
-
-  std::cout << "Input max integral for sampling (default 300.0): ";
-  std::cin >> maxIntegral;
-
-  std::cout << "Set number of samples for MC sampling (default 1e5): ";
-  std::cin >> nSamplesTarget;
 
   Long64_t nSamples = 0;
 
@@ -259,17 +346,23 @@ int main(int argc, char *argv[])
   TH2D *hist_pm00 = new TH2D("hist_pm00", "I(#pi^{+}#pi^{-},t_{1},#pi^{0}#pi^{0},t_{2});t_{1} [#tau_{S}];t_{2} [#tau_{S}]", nBinst1, t1Min, t1Max, nBinst2, t2Min, t2Max);
   TH2D *hist_pmpm = new TH2D("hist_pmpm", "I(#pi^{+}#pi^{-},t_{1},#pi^{+}#pi^{-},t_{2});t_{1} [#tau_{S}];t_{2} [#tau_{S}]", nBinst1, t1Min, t1Max, nBinst2, t2Min, t2Max);
 
-  // Creation of the plot directory if it does not exist
-  // Creation of the plot directory with tmp suffix
-  TString plot_dir = "theoretical_plots/";
-  TString dir_name = "integralLimit_" + TString::Format("%.0f", maxIntegral) + "_samples_" + TString::Format("%lld", nSamplesTarget) + "_Re_" + TString::Format("%.5f", reParam) + "_Im_" + TString::Format("%.5f", imParam);
-  TString dir_tmp_path = Paths::img_dir + plot_dir + dir_name + "_tmp/";
-  TString dir_final_path = Paths::img_dir + plot_dir + dir_name + "/";
-  createDirIfNotExists(dir_tmp_path);
+  // Creation of the output ROOT folder if it does not exist
+  TString
+      timeOrientedDir = "t1Min_" + TString::Format("%.0f", t1Min) + "_t1Max_" + TString::Format("%.0f", t1Max) + "_t2Min_" + TString::Format("%.0f", t2Min) + "_t2Max_" + TString::Format("%.0f", t2Max) + "_nSamples_" + TString::Format("%lld", nSamplesTarget) + "_customParamsFlag_" + (customParamsFlag ? "true" : "false"),
+      root_dir = Paths::workdirPath + "/Subanalysis/InterfFunction/root_files/sampling/" + methodNames[samplingMethod] + "/" + timeOrientedDir + "/";
+
+  createDirIfNotExists(root_dir);
+
+  TString rootFileName = "";
+
+  if (argc > 1 && std::atoi(argv[1]) >= 0)
+    rootFileName = root_dir + "sampling_results_job_" + TString::Format("%d", jobNum) + "_tmp" + "_1.root";
+  else
+    rootFileName = root_dir + "sampling_results_1.root";
 
   Double_t tne, tch, t1, t2;
 
-  TFile *outputFile = new TFile(dir_tmp_path + "sampling_results_" + TString::Format("%.0f", maxIntegral) + ".root", "RECREATE");
+  TFile *outputFile = new TFile(rootFileName, "RECREATE");
   outputFile->cd();
 
   TTree *tree_00pm = new TTree("00pm", "Tree with sampled events");
@@ -280,10 +373,6 @@ int main(int argc, char *argv[])
 
   TBranch *branch_t1_pmpm = tree_pmpm->Branch("t1", &t1, "t1/D");
   TBranch *branch_t2_pmpm = tree_pmpm->Branch("t2", &t2, "t2/D");
-
-  std::cout << "Which method of sampling do You want to use? (1 - Hit or Miss, 2 - GetRandom2, 3 - with weights): ";
-  int samplingMethod = 3;
-  std::cin >> samplingMethod;
 
   switch (samplingMethod)
   {
@@ -368,7 +457,7 @@ int main(int argc, char *argv[])
     Long64_t nSamples = 0;
     while (nSamples < nSamplesTarget)
     {
-      generate_t1_t2(tne, tch, false);
+      generate_t1_t2(tne, tch, false, t1Min, t1Max, t2Min, t2Max);
 
       if (tne <= maxIntegral && tch <= maxIntegral)
       {
@@ -392,7 +481,7 @@ int main(int argc, char *argv[])
 
     while (nSamples < weightSamples * nSamplesTarget)
     {
-      generate_t1_t2(t1, t2, true);
+      generate_t1_t2(t1, t2, true, t1Min, t1Max, t2Min, t2Max);
 
       if (t1 <= maxIntegral && t2 <= maxIntegral)
       {
@@ -412,157 +501,10 @@ int main(int argc, char *argv[])
   }
   }
 
-  // hist_00pm->Scale(1.0 / hist_00pm->GetEntries());
-  // hist_pm00->Scale(1.0 / hist_pm00->GetEntries());
-  // hist_pmpm->Scale(1.0 / hist_pmpm->GetEntries());
-
-  TCanvas *c_func_00pm = new TCanvas("c_func_00pm", "Interference function 00pm", 800, 600);
-  c_func_00pm->SetLogz(1);
-  hist_00pm->Draw("COLZ");
-  c_func_00pm->SaveAs(dir_tmp_path + "interf_func_00pm.pdf");
-
-  TCanvas *c_func_pm00 = new TCanvas("c_func_pm00", "Interference function pm00", 800, 600);
-  c_func_pm00->SetLogz(1);
-  hist_pm00->Draw("COLZ");
-  c_func_pm00->SaveAs(dir_tmp_path + "interf_func_pm00.pdf");
-
-  TCanvas *c_func_pmpm = new TCanvas("c_func_pmpm", "Interference function pmpm", 800, 600);
-  c_func_pmpm->SetLogz(1);
-  hist_pmpm->Draw("COLZ");
-  c_func_pmpm->SaveAs(dir_tmp_path + "interf_func_pmpm.pdf");
-
-  // Create 1D projections from 2D histograms with cuts
-  // For projection we integrate over y-axis up to a certain limit (par[1] or par[0])
-
-  auto create_projection_y_cut = [](TH2D *hist, Double_t t_max) -> TH1D *
-  {
-    TRandom3 randGen(0);
-    TString name = TString::Format("%s_projx_tmax%.0f_%d", hist->GetName(), t_max, randGen.Integer(400));
-    return hist->ProjectionX(name, -1, hist->GetYaxis()->FindBin(t_max) + 1);
-  };
-
-  // Create projections for different T values
-  TH1D *hist_00pm_1D = create_projection_y_cut(hist_00pm, maxIntegral);
-  TH1D *hist_pm00_1D = create_projection_y_cut(hist_pm00, maxIntegral);
-  TH1D *hist_pmpm_1D_for_RA = create_projection_y_cut(hist_pmpm, maxIntegral);
-  TH1D *hist_pmpm_1D_for_RB = create_projection_y_cut(hist_pmpm, maxIntegral);
-
-  hist_00pm_1D->Sumw2();
-  hist_pm00_1D->Sumw2();
-  hist_pmpm_1D_for_RA->Sumw2();
-  hist_pmpm_1D_for_RB->Sumw2();
-
-  hist_00pm_1D->SetTitle("Projection 00pm;t_{1} [#tau_{S}];Events");
-  hist_pm00_1D->SetTitle("Projection pm00;t_{1} [#tau_{S}];Events");
-  hist_pmpm_1D_for_RA->SetTitle("Projection pmpm (R_{A});t_{1} [#tau_{S}];Events");
-  hist_pmpm_1D_for_RB->SetTitle("Projection pmpm (R_{B});t_{1} [#tau_{S}];Events");
-
-  ////////////////////////////////////////////////////////
-
-  // Rysowanie projekcji 1D
-  TCanvas *c_pm00 = new TCanvas("c_pm00", "Projection of pm00", 800, 600);
-  hist_pm00_1D->Draw("PE1");
-  c_pm00->SaveAs(dir_tmp_path + "interf_func_pm001D_draw.pdf");
-
-  ///////////////////////////////////////////////////////////////////
-
-  TCanvas *c_00pm = new TCanvas("c_00pm", "Projection of 00pm", 800, 600);
-  hist_00pm_1D->Draw("PE1");
-  c_00pm->SaveAs(dir_tmp_path + "interf_func_00pm1D_draw.pdf");
-
-  ////////////////////////////////////////////////////////////////////
-
-  TCanvas *c_pmpm = new TCanvas("c_pmpm", "Projection of pmpm", 800, 600);
-  hist_pmpm_1D_for_RA->Draw("PE1");
-  c_pmpm->SaveAs(dir_tmp_path + "interf_func_pmpm1D_draw.pdf");
-
-  ////////////////////////////////////////////////////////////////////
-
-  // Create ratio histograms R_A, R_B, R_C from projections
-  TH1D *hist_RA = (TH1D *)hist_pmpm_1D_for_RA->Clone("hist_RA");
-  hist_RA->SetTitle("R_{A}(t_{1});t_{1} [#tau_{S}];R_{A}(t_{1}) [-]");
-  hist_RA->Divide(hist_00pm_1D);
-
-  TH1D *hist_RB = (TH1D *)hist_pmpm_1D_for_RB->Clone("hist_RB");
-  hist_RB->SetTitle("R_{B}(t_{1});t_{1} [#tau_{S}];R_{B}(t_{1}) [-]");
-  hist_RB->Divide(hist_pm00_1D);
-
-  TH1D *hist_RC = (TH1D *)hist_RA->Clone("hist_RC");
-  hist_RC->SetTitle("R_{C}(t_{1});t_{1} [#tau_{S}];R_{C}(t_{1}) [-]");
-  hist_RC->Divide(hist_RB);
-
-  TF1 *const_line = new TF1("const_line", "1 + 6 * [0]", 0, 20);
-  const_line->SetParameter(0, PhysicsConstants::Re);
-  const_line->SetLineColor(kBlack);
-  const_line->SetLineStyle(2);
-  const_line->SetLineWidth(2);
-
-  // Rysowanie R_A
-  TCanvas *c = new TCanvas("c", "R_A from histogram ratio", 800, 600);
-  hist_RA->GetXaxis()->SetRangeUser(0, 20);
-  hist_RA->Draw("PE1");
-  const_line->Draw("SAME");
-  c->SaveAs(dir_tmp_path + "interf_func_RA_draw.pdf");
-
-  // Rysowanie R_B
-  TCanvas *cg = new TCanvas("cg", "R_B from histogram ratio", 800, 600);
-  hist_RB->GetXaxis()->SetRangeUser(0, 20);
-  hist_RB->Draw("PE1");
-  const_line->Draw("SAME");
-  cg->SaveAs(dir_tmp_path + "interf_func_RB_draw.pdf");
-
-  // Rysowanie R_C
-  TCanvas *c1 = new TCanvas("c1", "R_C from histogram ratio", 800, 600);
-  hist_RC->GetXaxis()->SetRangeUser(0, 20);
-  hist_RC->Draw("PE1");
-
-  TF1 *const_line2 = new TF1("const_line2", "1 + 6 * [0]", 0, 20);
-  const_line2->SetParameter(0, PhysicsConstants::Re);
-  const_line2->SetLineColor(kBlack);
-  const_line2->SetLineStyle(2);
-  const_line2->SetLineWidth(2);
-
-  TF1 *const_line3 = new TF1("const_line3", "1 - 6 * [0]", 0, 20);
-  const_line3->SetParameter(0, PhysicsConstants::Re);
-  const_line3->SetLineColor(kBlack);
-  const_line3->SetLineStyle(2);
-  const_line3->SetLineWidth(2);
-
-  const_line2->Draw("SAME");
-  const_line3->Draw("SAME");
-
-  c1->SaveAs(dir_tmp_path + "interf_func_RC_double_draw.pdf");
-
-  hist_00pm->Write();
-  hist_pm00->Write();
-  hist_pmpm->Write();
-
-  hist_00pm_1D->Write();
-  hist_pm00_1D->Write();
-  hist_pmpm_1D_for_RA->Write();
-  hist_pmpm_1D_for_RB->Write();
-
-  hist_RA->Write();
-  hist_RB->Write();
-  hist_RC->Write();
-
   tree_00pm->Write();
   tree_pmpm->Write();
 
   outputFile->Close();
 
-  // Rename temporary directory to final name
-  boost::filesystem::path tmp_path(dir_tmp_path.Data());
-  boost::filesystem::path final_path(dir_final_path.Data());
-
-  // Remove final directory if it exists
-  if (boost::filesystem::exists(final_path))
-  {
-    boost::filesystem::remove_all(final_path);
-  }
-
-  // Rename tmp to final
-  boost::filesystem::rename(tmp_path, final_path);
-
-  std::cout << "Results saved to: " << dir_final_path << std::endl;
+  renameFile(root_dir.Data(), jobNum);
 }

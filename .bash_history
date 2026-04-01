@@ -245,3 +245,343 @@ nohup ./hist_fits_integral_range < parameters.txt > nohup_27.log &
 nohup ./hist_fits_integral_range < parameters.txt > nohup_28.log &
 nohup ./hist_fits_integral_range < parameters.txt > nohup_29.log &
 lscpu
+./execute_analysis.sh 
+git add .
+git commit -m "Simplified derivative"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Simplified derivative"
+git push
+cd Subanalysis/InterfFunction/
+./compile.sh 
+cd img/integral_range/
+rm -fr *
+cd ../../
+ls
+chmod +x run_fit_int_range.sh 
+./run_fit_int_range.sh 
+./run_fit_int_range.sh 10
+echo 1 | ./run_fit_int_range.sh 10
+nohup echo 1 | ./run_fit_int_range.sh 10 > nohup_1.log &
+killall hist_fits_integral_range 
+nohup echo 1 | ./run_fit_int_range.sh 10 > nohup_1.log 2>&1 &
+nohup echo 1 | ./run_fit_int_range.sh 20 > nohup_1.log 2>&1 &
+nohup echo 1 | ./run_fit_int_range.sh 40 > nohup_1.log 2>&1 &
+nohup echo 1 | ./run_fit_int_range.sh 60 > nohup_1.log 2>&1 &
+nohup echo 1 | ./run_fit_int_range.sh 80 > nohup_1.log 2>&1 &
+nohup echo 1 | ./run_fit_int_range.sh 100 > nohup_1.log 2>&1 &
+nohup echo 1 | ./run_fit_int_range.sh 150 > nohup_1.log 2>&1 &
+nohup echo 1 | ./run_fit_int_range.sh 200 > nohup_1.log 2>&1 &
+nohup echo 1 | ./run_fit_int_range.sh 250 > nohup_1.log 2>&1 &
+nohup echo 1 | ./run_fit_int_range.sh 300 > nohup_1.log 2>&1 &
+nohup echo 2 | ./run_fit_int_range.sh 300 > nohup_1.log 2>&1 &
+nohup echo 2 | ./run_fit_int_range.sh 250 > nohup_1.log 2>&1 &
+nohup echo 2 | ./run_fit_int_range.sh 200 > nohup_1.log 2>&1 &
+nohup echo 2 | ./run_fit_int_range.sh 150 > nohup_1.log 2>&1 &
+nohup echo 2 | ./run_fit_int_range.sh 100 > nohup_1.log 2>&1 &
+nohup echo 2 | ./run_fit_int_range.sh 80 > nohup_1.log 2>&1 &
+nohup echo 2 | ./run_fit_int_range.sh 60 > nohup_1.log 2>&1 &
+nohup echo 2 | ./run_fit_int_range.sh 40 > nohup_1.log 2>&1 &
+nohup echo 2 | ./run_fit_int_range.sh 20 > nohup_1.log 2>&1 &
+nohup echo 2 | ./run_fit_int_range.sh 10 > nohup_1.log 2>&1 &
+killall hist_fits_integral_range 
+./compile.sh 
+vi run_fit_int_range.sh 
+./run_fit_int_range.sh 
+exit
+cd Subanalysis/InterfFunction
+ls
+cd img/theoretical_plots/
+ls
+cd ..
+cd root_files/
+ls
+cd exp_corrected/
+ll
+ls -hl
+cd ..
+ls
+cd ..
+ls
+cd img/
+ls -hl
+cd theoretical_plots/
+ls -hl
+quota
+ls
+cd 
+rm -fr .cern-root/
+cd $WORKDIR
+ls
+cd ..
+exit
+ls
+cd ..
+mkdir .cern-root
+cd .cern-root/
+mkdir root_src root_install root_build
+git clone --branch latest-stable --depth=1 https://github.com/root-project/root.git root_src
+ls
+cd root_build/
+cmake -DCMAKE_INSTALL_PREFIX=../root_install -Dbuiltin_nlohmannjson=ON -Dbuiltin_veccore=ON -Ddev=ON -Dfortran=ON -Dsoversion=ON -Dxrootd=OFF -Dasan=ON -Droottest=ON -Dtesting=ON -Dfail-on-missing=ON -Dclingtest=ON  ../root_src
+apt list -a libxxhash-dev
+cmake --version
+cd ../.cern-root/
+ls
+cd root_build/
+cmake -DCMAKE_INSTALL_PREFIX=../root_install -Dbuiltin_nlohmannjson=ON -Dbuiltin_veccore=ON -Ddev=ON -Dfortran=ON -Dsoversion=ON -Dxrootd=OFF -Dasan=ON -Droottest=ON -Dtesting=ON -Dfail-on-missing=ON -Dclingtest=ON  ../root_src
+cd ../root_src/
+cat README
+ls
+cat requirements.txt 
+ls
+cd README/
+ls
+cat INSTALL 
+cd ../../
+cd root_build/
+cmake -DCMAKE_INSTALL_PREFIX=../root_install -Dbuiltin_nlohmannjson=ON -Dbuiltin_veccore=ON -Ddev=ON -Dfortran=ON -Dsoversion=ON -Dxrootd=OFF -Dasan=ON -Droottest=ON -Dtesting=ON -Dfail-on-missing=ON -Dclingtest=ON  ../root_src
+cd ../root_src/
+ls
+vi CMakeLists.txt 
+llq
+cd 
+ls
+cd
+cd /data/ssd/gamrat
+ls
+cd Node1/
+ls
+cd ..
+ls -a
+cd .cern-root/
+ls
+cd root_build/
+ls
+cd ..
+cd root_install/
+ls
+cd ..
+exit
+root snap
+root
+vi ~/.bashrc
+exit
+./execute_analysis.sh 
+root
+cd build
+cmake -DCMAKE_PREFIX_PATH=/snap/root/current/usr/local ..
+make
+cd ..
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+vi ~/.bashrc 
+./execute_analysis.sh 
+./execute_analysis.sh 
+vi ~/.bashrc
+echo $CMAKE_PREFIX_PATH 
+vi ~/.bashrc
+echo $CMAKE_PREFIX_PATH 
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+cmake --version
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+vi ~/.bashrc 
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+vi ~/.bashrc 
+source ~/.bashrc
+./execute_analysis.sh 
+cd /usr/
+ls
+cd lib
+ls
+cd ..
+ls
+cd include/
+ls
+cd boost/
+ls
+cd ..
+ls
+cd ..
+ls
+cd lib64
+ls
+cd ..
+cd lib32
+ls
+cd ..
+cd lib
+cd ..
+ls
+cd local/
+ls
+cd lib/
+ls
+cd ..
+cd include/
+ls
+cd ..
+cd src/
+ls
+cd ..
+cd bin/
+ls
+cd ../../
+cd bin/
+ls
+ls boost
+cd ..
+ls
+find --name boost
+find -name boost
+cd include/boost/
+ls
+find -name BoostConfig
+find -name BoostConfig.cmake
+find -name FindBoost.cmake
+cd 
+cd /data/ssd/gamrat/KLOE/
+./execute_analysis.sh 
+source ~/.bashrc
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+cd build/
+make VERBOSE=1
+vi ~/.bashrc 
+root
+cd /snap/root-framework/current/lib
+ls
+cd ../
+cd lib64
+ls
+cd ../../
+ls
+cd current
+ls
+cd include/
+ls
+cd ../lib
+ls
+cd python3.12/
+ls
+cd site-packages/
+ls
+cd ../../../
+cd ..
+ls
+cd current
+cd ..
+cd 954/
+ls
+cd lib
+ls
+cd ..
+cd share/
+ls
+cd ..
+cd usr/
+ls
+cd include/
+ls
+cd ../
+cd lib
+ls
+cd x86_64-linux-gnu/
+ls
+cd ..
+ls
+cd ..
+ls
+cd include/
+ls
+cd ..
+ls
+cd ../
+ls
+cd ../current
+ls
+cd usr/
+ls
+cd local/
+ls
+cd i
+cd include/
+ls
+cd ../
+cd include/
+ls
+vi ~/.bashrc
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+g++ --version
+vi ~/.bashrc 
+source ~/.bashrc
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ../
+./execute_analysis.sh 
+ls /usr/include/boost/version.hpp
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+root
+vi ~/.bashrc 
+source ~/.bashrc 
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+cd build/
+make -DCMAKE_PREFIX_PATH=/usr
+make -DCMAKE_PREFIX_PATH=/usr .
+make -DCMAKE_PREFIX_PATH=/usr .ls
+ls
+cd ..
+ls
+vi ~/.bashrc 
+./execute_analysis.sh 
+cd build/
+rm -fr *
+./execute_analysis.sh 
+cd ..
+./execute_analysis.sh 
+cmake --version
+cd build/bin/
+cd ..
+rm -fr *
+cd ..
+./execute_analysis.sh 
+cd Subanalysis/InterfFunction/
+./compile.sh 
+./bttf_sample 
+ulimit -n
+./execute_analysis.sh 

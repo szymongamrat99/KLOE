@@ -1,7 +1,7 @@
 {
   "integralRange": {
     "fixRe": false,
-    "fixIm": false,
+    "fixIm": true,
     "fixRange": true,
     "isReLimited": false,
     "isImLimited": false,
@@ -12,5 +12,20 @@
       "Im": 1.0,
       "Range": 1.0
     }
+  },
+  "sampling": {
+    "nSamplesTarget": 1000000,
+    "customParameters": {
+      "flag": false,
+      "parameters": {
+        "ReParam": 0.0,
+        "ImParam": 0.0
+      }
+    },
+    "samplingMethod": 3,
+    "t1Min": 0.0,
+    "t1Max": 20.0,
+    "t2Min": 0.0,
+    "t2Max": 20.0
   }
 }
