@@ -205,6 +205,10 @@ namespace KLOE
 
               if ((hasBetterChi2 && condTime) || (hasBetterChi2 && _isConverged == 0))
               {
+                
+                _X_init.Print();
+                _X_min.Print();
+
                 _isConverged = 1;
                 _FUNVALMIN = FUNVALTMP;
                 _CHISQRMIN = CHISQRTMP;
