@@ -170,7 +170,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
           else
             _D(l, m) = 0;
 
-          std::cout << _D(l, m) << " ";
+          std::cout << "D(" << l << "," << m << ")= " << _D(l, m) << std::endl;
         }
       }
 
