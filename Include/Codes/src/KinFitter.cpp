@@ -185,7 +185,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       _Aux = (_D * _V * _D_T);
 
       TDecompSVD svd(_Aux);
-      svd.SetTol(1e-12); // Ustawienie tolerancji dla wartości singularnych, aby uniknąć problemów z macierzą osobliwą
+      svd.SetTol(1e-17); // Ustawienie tolerancji dla wartości singularnych, aby uniknąć problemów z macierzą osobliwą
       Bool_t svdStatus = false;
       Double_t condition = svd.Condition();
 
