@@ -743,3 +743,17 @@ cd root_files/sampling/DoubleExponential/t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamp
 ls -hl
 cd Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
 ls -hl
+./execute_analysis.sh 
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+ls /data/ssd/gamrat/PROD2ROOT/MC/MK0/all_phys3/prod2root_mk0_all_phys3_30342_v2.root
+ls /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys3/prod2root_mk0_all_phys3_30342_v2.root
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+git add .
+git commit -m "Done"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Done"
+git push
+cd Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ls -hl

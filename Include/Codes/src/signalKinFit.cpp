@@ -144,6 +144,11 @@ namespace KLOE
 
       std::cout << "Chi2 min: " << _CHISQRMIN << std::endl;
 
+      _X_min.Print();
+      _X_init_min.Print();
+      _V_min.Print();
+      _V_init.Print();
+
 			_isConverged = 1;
 		}
 		else
