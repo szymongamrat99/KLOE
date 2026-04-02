@@ -450,6 +450,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   while (dataAccess.Next())
   {
+    if (dataAccess.GetNEv() != 25426)
+      continue;
+
     // Here you would process each entry in the tree.
     // For example, you can read values from the tree and perform calculations.
     // This is a placeholder for your actual analysis logic.
