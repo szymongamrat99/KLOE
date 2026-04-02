@@ -300,7 +300,8 @@ int main(int argc, char *argv[])
   // Parameters from config file with default values
 
   Double_t t1Min = 0.0, t1Max = 300.0, t2Min = 0.0, t2Max = 300.0;
-  Int_t nSamplesTarget = 100000, samplingMethod = 3;
+  Int_t samplingMethod = 3;
+  Long_t nSamplesTarget = 100000;
   Bool_t customParamsFlag = false;
   Double_t reParam = PhysicsConstants::Re, imParam = PhysicsConstants::Im_nonCPT;
 
@@ -312,7 +313,7 @@ int main(int argc, char *argv[])
   Utils::JsonFieldLookupDouble(config, "sampling/t2Min", t2Min, logger);
   Utils::JsonFieldLookupDouble(config, "sampling/t2Max", t2Max, logger);
 
-  Utils::JsonFieldLookupInt(config, "sampling/nSamplesTarget", nSamplesTarget, logger);
+  Utils::JsonFieldLookupLong(config, "sampling/nSamplesTarget", nSamplesTarget, logger);
   Utils::JsonFieldLookupInt(config, "sampling/samplingMethod", samplingMethod, logger);
 
   Utils::JsonFieldLookupBool(config, "sampling/customParameters/flag", customParamsFlag, logger);
@@ -348,8 +349,8 @@ int main(int argc, char *argv[])
 
   // Creation of the output ROOT folder if it does not exist
   TString
-      timeOrientedDir = "t1Min_" + TString::Format("%.0f", t1Min) + "_t1Max_" + TString::Format("%.0f", t1Max) + "_t2Min_" + TString::Format("%.0f", t2Min) + "_t2Max_" + TString::Format("%.0f", t2Max) + "_nSamples_" + TString::Format("%lld", nSamplesTarget) + "_customParamsFlag_" + (customParamsFlag ? "true" : "false"),
-      root_dir = Paths::workdirPath + "/Subanalysis/InterfFunction/root_files/sampling/" + methodNames[samplingMethod] + "/" + timeOrientedDir + "/";
+      timeOrientedDir = "t1Min_" + TString::Format("%.0f", t1Min) + "_t1Max_" + TString::Format("%.0f", t1Max) + "_t2Min_" + TString::Format("%.0f", t2Min) + "_t2Max_" + TString::Format("%.0f", t2Max) + "_nSamples_" + TString::Format("%ld", nSamplesTarget) + "_customParamsFlag_" + (customParamsFlag ? "true" : "false") + "_ReParam_" + TString::Format("%.5f", reParam) + "_ImParam_" + TString::Format("%.5f", imParam),
+      root_dir = "root_files/sampling/" + methodNames[samplingMethod] + "/" + timeOrientedDir + "/";
 
   createDirIfNotExists(root_dir);
 

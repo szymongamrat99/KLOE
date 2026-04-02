@@ -11,7 +11,7 @@
  *          - For Enecl > 0. returns the calculated uncertainty
  *          - For Enecl <= 0 returns -999
  */
-Double_t clu_ene_error(Float_t Enecl)
+Double_t clu_ene_error(Double_t Enecl)
 {
     Double_t sigma_E = 0.;
 
@@ -32,7 +32,7 @@ Double_t clu_ene_error(Float_t Enecl)
  *          - For Enecl > 0. returns the calculated uncertainty
  *          - For Enecl <= 0 returns -999
  */
-Double_t clu_time_error(Float_t Enecl)
+Double_t clu_time_error(Double_t Enecl)
 {
     Double_t sigma_time = 0.;
 
@@ -46,7 +46,7 @@ Double_t clu_time_error(Float_t Enecl)
         return -999;
 }
 
-Double_t clu_x_error(Float_t x_coor, Float_t y_coor, Float_t z_coor, Float_t Enecl)
+Double_t clu_x_error(Double_t x_coor, Double_t y_coor, Double_t z_coor, Double_t Enecl)
 {
     Double_t sigma_x = 0.;
 
@@ -61,7 +61,7 @@ Double_t clu_x_error(Float_t x_coor, Float_t y_coor, Float_t z_coor, Float_t Ene
         return -999;
 }
 
-Double_t clu_y_error(Float_t x_coor, Float_t y_coor, Float_t z_coor, Float_t Enecl)
+Double_t clu_y_error(Double_t x_coor, Double_t y_coor, Double_t z_coor, Double_t Enecl)
 {
     Double_t sigma_y = 0.;
 
@@ -78,7 +78,7 @@ Double_t clu_y_error(Float_t x_coor, Float_t y_coor, Float_t z_coor, Float_t Ene
         return -999;
 }
 
-Double_t clu_z_error(Float_t x_coor, Float_t y_coor, Float_t z_coor, Float_t Enecl)
+Double_t clu_z_error(Double_t x_coor, Double_t y_coor, Double_t z_coor, Double_t Enecl)
 {
     Double_t sigma_z = 0.;
 

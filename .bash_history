@@ -585,3 +585,161 @@ cd Subanalysis/InterfFunction/
 ./bttf_sample 
 ulimit -n
 ./execute_analysis.sh 
+cd Subanalysis/InterfFunction/
+ls
+rm nohup_*
+ls
+rm log_*
+ls
+./compile.sh 
+./bttf_sample 
+./bttf_sample 1
+./bttf_sample 10
+./compile.sh 
+./bttf_sample 10
+./bttf_sample 1
+./compile.sh 
+./bttf_sample 10
+./compile.sh 
+./bttf_sample 10
+./compile.sh 
+./bttf_sample 11
+./bttf_sample 12
+./compile.sh 
+./bttf_sample 12
+./bttf_sample 13
+./compile.sh 
+./bttf_sample 13
+./bttf_sample
+./compile.sh 
+./bttf_sample
+./bttf_sample 13
+./compile.sh 
+./bttf_sample 13
+./bttf_sample 10
+./compile.sh 
+./bttf_sample 10
+./compile.sh 
+./bttf_sample 10
+./compile.sh 
+./bttf_sample 10
+./bttf_sample 11
+./bttf_sample 12
+git add .
+git commit -m "Fixed Interf for jobs"
+git push
+cd Subanalysis/InterfFunction/root_files/sampling/DoubleExponential
+ls
+rm -fr *
+ls
+cd t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamples_1000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ls
+q
+/q
+exit
+llq
+ll
+g++ version
+g++ --version
+c++ --version
+ls 
+cd Subanalysis/InterfFunction/
+ls
+parallel -j 5 ./bttf_sample {#} ::: {1..5}
+cd root_files/sampling/DoubleExponential/t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamples_1000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ls
+root
+root sampling_results_job_1_1.root 
+rm -fr *
+ls
+cd ../../../../
+cd img/theoretical_plots/integralLimit_300_samples_10000000000_Re_0.00166_Im_-0.00198_tmp/
+ls
+ls -hl
+
+cd ../../
+cd ../
+nohup parallel --results -j 5 ./bttf_sample {#} ::: {1..6} > parallel_output.log 2>&1 & 
+ls
+cd -j/
+cd -j
+rm -j
+rm -fr "-j"
+rm -fr ./-j
+ls
+nohup parallel --results log_parallel -j 5 ./bttf_sample {#} ::: {1..6} > parallel_output.log 2>&1 & 
+ls
+cd log_parallel/
+ls
+cd 1
+cd ../
+ls
+cd ..
+nohup parallel -j 5 ./bttf_sample {#} ::: {1..6} > parallel_output.log 2>&1 & 
+ls
+cat parallel_output.log 
+nohup parallel -j 6 ./bttf_sample {#} ::: {1..6} > parallel_output.log 2>&1 & 
+cat parallel_output.log 
+ps -e | grep bttf
+cat parallel_output.log 
+killall bttf_sample
+nohup parallel -j 6 ./bttf_sample {#} ::: {1..6} > parallel_output.log 2>&1 & 
+cd root_files/sampling/DoubleExponential/t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ls -hl
+tmux
+ls -hl
+top
+htop
+ls -hl
+tmux ls
+ls -hl
+top
+ls -hl
+cd ..
+ls
+cd ..
+ls
+cd ..
+ls
+rm nohup*
+ls
+rm -r log_parallel/
+ls
+cat parallel_output.log 
+cd 
+cd /data/ssd/gamrat/PROD2ROOT/
+ls
+cd MC
+ls
+cd MK0/
+ls
+cd all_phys
+ls
+sha256sum *.root
+sha256sum *.root > checksums.root
+ls
+vi checksums.root 
+scp checksums.root tier1-cnaf:~/.
+ssh tier1-cnaf 
+ls
+rm checksums.root 
+cd /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys
+scp tier1-cnaf:/home/g/gamrat/sum.txt .
+sha256sum -c sum.txt 
+ls
+ssh tier1-cnaf 
+./execute_analysis.sh 
+cd Subanalysis/InterfFunction/
+./compile.sh 
+ls
+./hist_fits_integral_range
+./compile.sh
+./hist_fits_integral_range
+./compile.sh
+./hist_fits_integral_range
+cd Subanalysis/InterfFunction/
+./compile.sh 
+cd root_files/sampling/DoubleExponential/t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ls -hl
+cd Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ls -hl

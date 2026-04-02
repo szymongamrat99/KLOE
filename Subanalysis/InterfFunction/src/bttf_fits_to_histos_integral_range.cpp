@@ -328,6 +328,8 @@ int main()
   std::vector<Double_t> t1MaxValues;
   Double_t t1MaxMin = 0.0;
   Double_t t1MaxMax = 300.0;
+  std::cout << "Fit range min: ";
+  std::cin >> t1MaxMin;
   std::cout << "Fit range max: ";
   std::cin >> t1MaxMax;
 
@@ -1043,8 +1045,8 @@ int main()
 
     cR->cd(1);
     hist_RA[t2Max]->SetTitle(Form("R_{A} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
-    fitResultRA = hist_RA[t2Max]->Fit(fitFunc_RA, "RSEMI", "", 0.0, t1MaxMax);
-    hist_RA[t2Max]->GetXaxis()->SetRangeUser(0, 20.0);
+    fitResultRA = hist_RA[t2Max]->Fit(fitFunc_RA, "RSEMI", "", t1MaxMin, t1MaxMax);
+    hist_RA[t2Max]->GetXaxis()->SetRangeUser(0, t1MaxMax);
     hist_RA[t2Max]->SetMarkerStyle(20);
     hist_RA[t2Max]->SetLineWidth(2);
     hist_RA[t2Max]->SetMarkerColor(kBlack);
@@ -1089,13 +1091,18 @@ int main()
 
     cR->cd(2);
     hist_RB[t2Max]->SetTitle(Form("R_{B} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
-    fitResultRB = hist_RB[t2Max]->Fit(fitFunc_RB, "RSEMI", "", 0.0, t1MaxMax);
-    hist_RB[t2Max]->GetXaxis()->SetRangeUser(0, 20.0);
+    if(t1MaxMin < 1.0)
+      fitResultRB = hist_RB[t2Max]->Fit(fitFunc_RB, "RSEMI", "", t1MaxMin, t1MaxMax);
+    hist_RB[t2Max]->GetXaxis()->SetRangeUser(0, t1MaxMax);
     hist_RB[t2Max]->SetMarkerStyle(20);
     hist_RB[t2Max]->SetLineWidth(2);
     hist_RB[t2Max]->SetMarkerColor(kBlack);
     hist_RB[t2Max]->SetLineColor(kBlack);
     hist_RB[t2Max]->Draw();
+
+    if (t1MaxMin >= 1.0)
+      std::cout << "Skipping fit for R_{B} (t2Max=" << t2Max << ") due to t1MaxMin >= 1.0." << std::endl;
+      goto skipFitRB;
 
     if (fitResultRB->IsValid())
     {
@@ -1133,10 +1140,12 @@ int main()
       std::cout << "Fit for R_{B} (t2Max=" << t2Max << ") was not valid." << std::endl;
     }
 
+    skipFitRB:
+
     cR->cd(3);
     hist_RC[t2Max]->SetTitle(Form("R_{C} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
-    fitResultRC = hist_RC[t2Max]->Fit(fitFunc_RC, "RSEMI", "", 0.0, t1MaxMax);
-    hist_RC[t2Max]->GetXaxis()->SetRangeUser(0, 20.0);
+    fitResultRC = hist_RC[t2Max]->Fit(fitFunc_RC, "RSEMI", "", t1MaxMin, t1MaxMax);
+    hist_RC[t2Max]->GetXaxis()->SetRangeUser(0, t1MaxMax);
     hist_RC[t2Max]->SetMarkerStyle(20);
     hist_RC[t2Max]->SetLineWidth(2);
     hist_RC[t2Max]->SetMarkerColor(kBlack);
