@@ -120,6 +120,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
   _CHISQRTMP = 999999.;
   _Aux.Zero();
 
+  Int_t iter = 0;
+
   // Correction of cluster time - [ns]
   if (bunchCorr != 0 && _mode == "Trilateration")
   {
@@ -136,6 +138,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   for (Int_t i = 0; i < _loopcount; i++)
   {
+    iter = i;
+
     try
     {
       // Enforce positive energies
@@ -258,8 +262,11 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
     _baseObj->IntermediateReconstruction();
   }
 
-  _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
-  _V = _V_final;
+  if (iter != 0)
+  {
+    _CHISQR = Dot((_X - _X_init), _V_invert * (_X - _X_init));
+    _V = _V_final;
+  }
 
   return _CHISQR;
 };
