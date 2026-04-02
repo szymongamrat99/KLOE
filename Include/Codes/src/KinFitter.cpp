@@ -150,28 +150,17 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       if (_X(19) < 0)
         _X(19) = MIN_CLU_ENE;
 
-      std::vector<Double_t> tempParams(_X.GetNoElements());
-      std::copy(_X.GetMatrixArray(), _X.GetMatrixArray() + _X.GetNoElements(), tempParams.begin());
-
-      std::vector<std::unique_ptr<TF1>> constraint;
-
-      for (const auto &func_ptr : _constraints)
-      {
-        // Tworzymy NOWY, PRYWATNY obiekt TF1 dla tego wątku
-        constraint.push_back(std::make_unique<TF1>(*func_ptr));
-      }
-
       for (Int_t l = 0; l < _M; l++)
       {
-        constraint[l]->SetParameters(tempParams.data());
-        _C(l) = constraint[l]->EvalPar(0, tempParams.data());
+        _constraints[l]->SetParameters(_X.GetMatrixArray());
+        _C(l) = _constraints[l]->EvalPar(0, _X.GetMatrixArray());
         for (Int_t m = 0; m < _N_free + _N_const; m++)
         {
           Double_t auxVal = 0.;
 
           if (m < _N_free)
           {
-            auxVal = constraint[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m,m)));
+            auxVal = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V_init(m,m)));
 
             _D(l, m) = auxVal;
           }
