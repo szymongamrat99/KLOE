@@ -178,7 +178,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       Bool_t svdStatus = false;
       Double_t condition = svd.Condition();
 
-      if (condition > 1e12)
+      if (condition > 1e17)
       {
         throw ErrorHandling::ErrorCodes::DET_ZERO;
       }
