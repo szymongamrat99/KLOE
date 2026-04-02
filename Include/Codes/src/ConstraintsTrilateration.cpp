@@ -152,7 +152,7 @@ namespace KLOE
                 xB[3] = {phi.vtxPos[0],
                          phi.vtxPos[1],
                          phi.vtxPos[2]},
-                plane_perp[3] = {0.,
+                plane_perp[3] = {phi.fourMom[0],
                                  phi.fourMom[1],
                                  0.};
 
@@ -327,7 +327,7 @@ namespace KLOE
                 xB[3] = {fphi.vtxPos[0],
                          fphi.vtxPos[1],
                          fphi.vtxPos[2]},
-                plane_perp[3] = {0.,
+                plane_perp[3] = {fphi.fourMom[0],
                                  fphi.fourMom[1],
                                  0.};
 
