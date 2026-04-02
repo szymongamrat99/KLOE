@@ -1,12 +1,14 @@
 #ifndef RECONSTRUCTOR_H
 #define RECONSTRUCTOR_H
 
+#include <TMath.h>
+
 struct Solution{
   /*
     1,2
     x,y,z,t
   */
-  float sol[2][4];
+  Double_t sol[2][4];
   // indicates error computing solution
   bool error[2];
 };
@@ -14,26 +16,26 @@ struct Solution{
 class Reconstructor{
   
  public:
-  void SetClu(int i, float x, float y, float z, float t, float E);
-  Solution MySolve(int * selected);
-  Solution KleusbergSolve(int * selected);
-  Solution LeastSquaresSolve(float * x0);
-  Solution MinuitSolve(float *x0);
+  void SetClu(Int_t i, Double_t x, Double_t y, Double_t z, Double_t t, Double_t E);
+  Solution MySolve(Int_t * selected);
+  Solution KleusbergSolve(Int_t * selected);
+  Solution LeastSquaresSolve(Double_t * x0);
+  Solution MinuitSolve(Double_t *x0);
   
-  float ResidualErr(int i, float const * x);
-  float ResidualErrTot(float const * x);
-  float CombEnergy(int * selected);
-  float TotalEnergy()const;
-  float GetInvMasses(float * sol, int * comb, float * Minvgg)const;
-  float GetInvMassDiscrepancy(float * sol, int * comb)const;
-  void GetKmomentum(const float * sol, float * p)const;
+  Double_t ResidualErr(Int_t i, Double_t const * x);
+  Double_t ResidualErrTot(Double_t const * x);
+  Double_t CombEnergy(Int_t * selected);
+  Double_t TotalEnergy()const;
+  Double_t GetInvMasses(Double_t * sol, Int_t * comb, Double_t * Minvgg)const;
+  Double_t GetInvMassDiscrepancy(Double_t * sol, Int_t * comb)const;
+  void GetKmomentum(const Double_t * sol, Double_t * p)const;
   
  private:
   /*
     x,y,z,t
    */
-  float _clu[6][4];
-  float _ene[6];
+  Double_t _clu[6][4];
+  Double_t _ene[6];
 };
 
 #endif

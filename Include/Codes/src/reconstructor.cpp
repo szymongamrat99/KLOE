@@ -3,9 +3,9 @@
 #include <cmath>
 #include <iostream>
 
-const float c = PhysicsConstants::cVel;
+const Double_t c = PhysicsConstants::cVel;
 
-void Reconstructor::SetClu(int i, float x, float y, float z, float t, float E)
+void Reconstructor::SetClu(Int_t i, Double_t x, Double_t y, Double_t z, Double_t t, Double_t E)
 {
   _clu[i][0] = x;
   _clu[i][1] = y;
@@ -17,15 +17,15 @@ void Reconstructor::SetClu(int i, float x, float y, float z, float t, float E)
 /*
   wartosci w selected liczone od 1
 */
-Solution Reconstructor::MySolve(int *selected)
+Solution Reconstructor::MySolve(Int_t *selected)
 {
 
-  float t[4];
-  float x[4];
-  float y[4];
-  float z[4];
+  Double_t t[4];
+  Double_t x[4];
+  Double_t y[4];
+  Double_t z[4];
 
-  for (int i = 0; i < 4; i++)
+  for (Int_t i = 0; i < 4; i++)
   {
     x[i] = _clu[selected[i] - 1][0];
     y[i] = _clu[selected[i] - 1][1];
@@ -34,16 +34,16 @@ Solution Reconstructor::MySolve(int *selected)
   }
 
   // tablice robocze
-  float T[4];
-  float B[4];
-  float C[4];
-  float D[4];
-  float X[4];
-  float Y[4];
-  float Z[4];
+  Double_t T[4];
+  Double_t B[4];
+  Double_t C[4];
+  Double_t D[4];
+  Double_t X[4];
+  Double_t Y[4];
+  Double_t Z[4];
 
   // form linear system
-  for (int k = 1; k < 4; k++)
+  for (Int_t k = 1; k < 4; k++)
   {
     T[k] = 2. * c * c * (t[k] - t[0]);
     X[k] = 2. * (x[0] - x[k]);
@@ -54,7 +54,7 @@ Solution Reconstructor::MySolve(int *selected)
   }
 
   // solution of linear system
-  float denom = -1. * X[3] * Y[2] * Z[1] + X[2] * Y[3] * Z[1] + X[3] * Y[1] * Z[2] - X[1] * Y[3] * Z[2] - X[2] * Y[1] * Z[3] + X[1] * Y[2] * Z[3];
+  Double_t denom = -1. * X[3] * Y[2] * Z[1] + X[2] * Y[3] * Z[1] + X[3] * Y[1] * Z[2] - X[1] * Y[3] * Z[2] - X[2] * Y[1] * Z[3] + X[1] * Y[2] * Z[3];
 
   // poszukwanie zrodla NaN
   // assert( denom != 0 );
@@ -76,19 +76,19 @@ Solution Reconstructor::MySolve(int *selected)
 
   denom = 2. * (c * c - D[1] * D[1] - D[2] * D[2] - D[3] * D[3]);
 
-  float p = 2. * (C[1] * D[1] + C[2] * D[2] + C[3] * D[3] + c * c * t[0] - D[1] * x[0] - D[2] * y[0] - D[3] * z[0]);
-  float q = -C[1] * C[1] - C[2] * C[2] - C[3] * C[3] + c * c * t[0] * t[0] + 2. * C[1] * x[0] - x[0] * x[0] + 2. * C[2] * y[0] - y[0] * y[0] + 2. * C[3] * z[0] - z[0] * z[0];
+  Double_t p = 2. * (C[1] * D[1] + C[2] * D[2] + C[3] * D[3] + c * c * t[0] - D[1] * x[0] - D[2] * y[0] - D[3] * z[0]);
+  Double_t q = -C[1] * C[1] - C[2] * C[2] - C[3] * C[3] + c * c * t[0] * t[0] + 2. * C[1] * x[0] - x[0] * x[0] + 2. * C[2] * y[0] - y[0] * y[0] + 2. * C[3] * z[0] - z[0] * z[0];
 
-  // float delta;
+  // Double_t delta;
   // delta = p*p - 2.*denom*q;
 
   S.sol[0][3] = (p - sqrt(p * p - 2. * denom * q)) / denom;
   S.sol[1][3] = (p + sqrt(p * p - 2. * denom * q)) / denom;
 
-  for (int i = 0; i < 2; i++)
+  for (Int_t i = 0; i < 2; i++)
   {
     S.error[i] = false;
-    for (int j = 0; j < 3; j++)
+    for (Int_t j = 0; j < 3; j++)
     {
       S.sol[i][j] = C[j + 1] + D[j + 1] * S.sol[i][3];
       if (std::isnan(S.sol[i][j]) ||
@@ -103,7 +103,7 @@ Solution Reconstructor::MySolve(int *selected)
 }
 
 /**************************** Kleusberg *****************************/
-Solution Reconstructor::KleusbergSolve(int *selected)
+Solution Reconstructor::KleusbergSolve(Int_t *selected)
 {
   Solution S;
   return S;
@@ -112,7 +112,7 @@ Solution Reconstructor::KleusbergSolve(int *selected)
 /*
   x0 - initial guess (x,y,z,t)
  */
-Solution Reconstructor::LeastSquaresSolve(float *x0)
+Solution Reconstructor::LeastSquaresSolve(Double_t *x0)
 {
 
   Solution S;
@@ -122,19 +122,19 @@ Solution Reconstructor::LeastSquaresSolve(float *x0)
 /************************ Solve with Minui5Bt *************************/
 Reconstructor *r;
 
-float rsq(const float *x)
+Double_t rsq(const Double_t *x)
 {
 
-  float sum = 0;
+  Double_t sum = 0;
 
-  for (int i = 0; i < 6; i++)
+  for (Int_t i = 0; i < 6; i++)
   {
     sum += pow(r->ResidualErr(i, x), 2.);
   }
   return sum;
 }
 
-Solution Reconstructor::MinuitSolve(float *x0)
+Solution Reconstructor::MinuitSolve(Double_t *x0)
 {
 
   Solution S;
@@ -143,9 +143,9 @@ Solution Reconstructor::MinuitSolve(float *x0)
 
 /******************** Residual Error computation ********************/
 // i - counts from 0
-float Reconstructor::ResidualErr(int i, const float *x)
+Double_t Reconstructor::ResidualErr(Int_t i, const Double_t *x)
 {
-  float err = 0;
+  Double_t err = 0;
   err = sqrt(pow(_clu[i][0] - x[0], 2.) +
              pow(_clu[i][1] - x[1], 2.) +
              pow(_clu[i][2] - x[2], 2.)) -
@@ -154,10 +154,10 @@ float Reconstructor::ResidualErr(int i, const float *x)
   return fabs(err);
 }
 
-float Reconstructor::ResidualErrTot(const float *x)
+Double_t Reconstructor::ResidualErrTot(const Double_t *x)
 {
-  float R = 0;
-  for (int i = 0; i < 6; i++)
+  Double_t R = 0;
+  for (Int_t i = 0; i < 6; i++)
   {
     R += ResidualErr(i, x);
   }
@@ -165,11 +165,11 @@ float Reconstructor::ResidualErrTot(const float *x)
 }
 
 /************** Total energy of 4-cluster combination ***************/
-float Reconstructor::CombEnergy(int *selected)
+Double_t Reconstructor::CombEnergy(Int_t *selected)
 {
 
-  float E = 0;
-  for (int i = 0; i < 4; i++)
+  Double_t E = 0;
+  for (Int_t i = 0; i < 4; i++)
   {
     E += _ene[selected[i] - 1];
   }
@@ -177,11 +177,11 @@ float Reconstructor::CombEnergy(int *selected)
 }
 
 /****************** Total energy of all 6 clusters ******************/
-float Reconstructor::TotalEnergy() const
+Double_t Reconstructor::TotalEnergy() const
 {
 
-  float E = 0;
-  for (int i = 0; i < 6; i++)
+  Double_t E = 0;
+  for (Int_t i = 0; i < 6; i++)
   {
     E += _ene[i];
   }
@@ -190,33 +190,33 @@ float Reconstructor::TotalEnergy() const
 
 /****************** Invariant masses of three gg pairs **************/
 /*
-  Fills Minvgg (float[3]) with gg invariant masses
+  Fills Minvgg (Double_t[3]) with gg invariant masses
   Returns pi0pi0pi0 (or 6gamma) invariant mass
  */
-float Reconstructor::GetInvMasses(float *sol, int *comb,
-                                  float *Minvgg) const
+Double_t Reconstructor::GetInvMasses(Double_t *sol, Int_t *comb,
+                                  Double_t *Minvgg) const
 {
 
   // calculate momenta of gammas
-  float p[6][3];
-  float tot;
-  for (int i = 0; i < 6; i++)
+  Double_t p[6][3];
+  Double_t tot;
+  for (Int_t i = 0; i < 6; i++)
   { // over gammas
     tot = 0;
-    for (int j = 0; j < 3; j++)
+    for (Int_t j = 0; j < 3; j++)
     { // over coordinates
       p[i][j] = _clu[i][j] - sol[j];
       tot += pow(p[i][j], 2.);
     }
     tot = sqrt(tot);
-    for (int j = 0; j < 3; j++)
+    for (Int_t j = 0; j < 3; j++)
     { // over coordinates
       p[i][j] = p[i][j] * _ene[i] / tot;
     }
   }
 
   // calculate gg invariant masses
-  for (int i = 0; i < 3; i++)
+  for (Int_t i = 0; i < 3; i++)
   {
     Minvgg[i] = sqrt(pow(_ene[comb[2 * i] - 1] + _ene[comb[2 * i + 1] - 1], 2.) -
                      pow(p[comb[2 * i] - 1][0] + p[comb[2 * i + 1] - 1][0], 2.) -
@@ -225,7 +225,7 @@ float Reconstructor::GetInvMasses(float *sol, int *comb,
   }
 
   // calculate 6g invariant mass
-  float M6g = sqrt(pow(_ene[0] + _ene[1] + _ene[2] + _ene[3] + _ene[4] + _ene[5], 2.) -
+  Double_t M6g = sqrt(pow(_ene[0] + _ene[1] + _ene[2] + _ene[3] + _ene[4] + _ene[5], 2.) -
                    pow(p[0][0] + p[1][0] + p[2][0] + p[3][0] + p[4][0] + p[5][0], 2.) -
                    pow(p[0][1] + p[1][1] + p[2][1] + p[3][1] + p[4][1] + p[5][1], 2.) -
                    pow(p[0][2] + p[1][2] + p[2][2] + p[3][2] + p[4][2] + p[5][2], 2.));
@@ -234,22 +234,22 @@ float Reconstructor::GetInvMasses(float *sol, int *comb,
 }
 
 /****************** Difference between Mpi and mgg x 3 **************/
-float Reconstructor::GetInvMassDiscrepancy(float *sol, int *comb) const
+Double_t Reconstructor::GetInvMassDiscrepancy(Double_t *sol, Int_t *comb) const
 {
 
-  const float mPi0 = PhysicsConstants::mPi0; // Mev/c2
-  float *mgg = new float[3];
+  const Double_t mPi0 = PhysicsConstants::mPi0; // Mev/c2
+  Double_t *mgg = new Double_t[3];
   GetInvMasses(sol, comb, mgg);
 
   // calculate sigmas of energy
-  float dE[6];
-  for (int i = 0; i < 6; i++)
+  Double_t dE[6];
+  for (Int_t i = 0; i < 6; i++)
   {
     dE[i] = 0.057 * _ene[i] / sqrt(_ene[i] / 1000.);
   }
   // calculate sigmas of invariant masses
-  float dM[3];
-  for (int i = 0; i < 3; i++)
+  Double_t dM[3];
+  for (Int_t i = 0; i < 3; i++)
   {
     dM[i] = 0.5 * sqrt((_ene[comb[2 * i + 1] - 1] / _ene[comb[2 * i] - 1]) *
                            pow(dE[2 * i], 2.) +
@@ -258,8 +258,8 @@ float Reconstructor::GetInvMassDiscrepancy(float *sol, int *comb) const
   }
 
   // finally calculate discrepancy
-  float d = 0;
-  for (int i = 0; i < 3; i++)
+  Double_t d = 0;
+  for (Int_t i = 0; i < 3; i++)
   {
     d += abs(mgg[i] - PhysicsConstants::mPi0) / dM[i];
     //    d += abs( mgg[i] - PhysicsConstants::mPi0 ) * pow( _ene[comb[2*i+1]-1] + _ene[comb[2*i]-1], -2. );
@@ -276,24 +276,24 @@ float Reconstructor::GetInvMassDiscrepancy(float *sol, int *comb) const
   p[4] - total K momentum
   uses solution sol for vertex
  */
-void Reconstructor::GetKmomentum(const float *sol, float *p) const
+void Reconstructor::GetKmomentum(const Double_t *sol, Double_t *p) const
 {
 
-  const float mK0 = PhysicsConstants::mK0; // Mev/c2
+  const Double_t mK0 = PhysicsConstants::mK0; // Mev/c2
 
   // calculate momenta of gammas
-  float pgam[6][3];
-  float tot;
-  for (int i = 0; i < 6; i++)
+  Double_t pgam[6][3];
+  Double_t tot;
+  for (Int_t i = 0; i < 6; i++)
   { // over gammas
     tot = 0;
-    for (int j = 0; j < 3; j++)
+    for (Int_t j = 0; j < 3; j++)
     { // over coordinates
       pgam[i][j] = _clu[i][j] - sol[j];
       tot += pow(pgam[i][j], 2.);
     }
     tot = sqrt(tot);
-    for (int j = 0; j < 3; j++)
+    for (Int_t j = 0; j < 3; j++)
     { // over coordinates
       pgam[i][j] = pgam[i][j] * _ene[i] / tot;
     }
@@ -301,10 +301,10 @@ void Reconstructor::GetKmomentum(const float *sol, float *p) const
 
   // total momentum of kaon
   p[4] = 0;
-  for (int j = 0; j < 3; j++)
+  for (Int_t j = 0; j < 3; j++)
   {
     p[j] = 0;
-    for (int i = 0; i < 6; i++)
+    for (Int_t i = 0; i < 6; i++)
     {
       p[j] += pgam[i][j];
     }
