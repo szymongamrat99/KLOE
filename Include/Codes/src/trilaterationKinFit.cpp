@@ -107,6 +107,9 @@ namespace KLOE
             _ind_gam[2] = j3;
             _ind_gam[3] = j4;
 
+            if (!(_ind_gam[0] == 2 && _ind_gam[1] == 3 && _ind_gam[2] == 4 && _ind_gam[3] == 5))
+              continue;
+
             Bool_t hasBadCluster = false;
             for (const auto &idx : neucluwrongInd)
             {
@@ -178,15 +181,6 @@ namespace KLOE
 
               CHISQRTMP = KinFitter::FitFunction(Tcorr);
 
-              if (_ind_gam[0] == 2 && _ind_gam[1] == 3 && _ind_gam[2] == 4 && _ind_gam[3] == 5)
-              {
-                std::cout << "Chi2 for 2345: " << CHISQRTMP << std::endl;
-              }
-
-              if (_ind_gam[0] == 1 && _ind_gam[1] == 2 && _ind_gam[2] == 3 && _ind_gam[3] == 4)
-              {
-                std::cout << "Chi2 for 1234: " << CHISQRTMP << std::endl;
-              }
 
               if (std::isnan(CHISQRTMP) || std::isinf(CHISQRTMP))
               {

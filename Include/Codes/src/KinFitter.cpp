@@ -138,6 +138,9 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   for (Int_t i = 0; i < _loopcount; i++)
   {
+    if (i != 0)
+      continue;
+
     try
     {
       // Enforce positive energies
