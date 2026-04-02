@@ -163,8 +163,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
           if (m < _N_free)
           {
-            _constraints[l]->SetParError(m, sqrt(_V_init(m, m)));
-            auxVal = _constraints[l]->GradientPar(m, 0);
+            auxVal = _constraints[l]->GradientPar(m, 0, 0.1);
 
             _D(l, m) = auxVal;
           }
