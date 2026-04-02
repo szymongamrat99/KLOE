@@ -181,6 +181,7 @@ namespace KLOE
 
               CHISQRTMP = KinFitter::FitFunction(Tcorr);
 
+              std::cout << "Chi2: " << CHISQRTMP << " for Tcorr: " << Tcorr << " ns" << std::endl;
 
               if (std::isnan(CHISQRTMP) || std::isinf(CHISQRTMP))
               {
