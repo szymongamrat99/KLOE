@@ -757,3 +757,8 @@ git commit -m "Done"
 git push
 cd Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
 ls -hl
+du -h
+df -h
+pgrep bttf
+ps -e
+exit

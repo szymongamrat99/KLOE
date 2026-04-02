@@ -1292,6 +1292,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
           if (signalKinFit)
           {
+            std::cout << dataAccess.GetNEv() << " " << dataAccess.GetNRun() << std::endl;
+
             signalKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, neuVtx, neuVtxErr, bhabha_vtx, bhabhaVtxErr);
             errorCode = signalKinFitObj.Reconstruct();
             signalKinFitObj.GetResults(baseKin.ParamSignal,
