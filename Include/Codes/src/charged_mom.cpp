@@ -110,7 +110,7 @@ namespace KLOE
                 ChargedVtxRec::charged_mom(j1, mom_vec1Tmp, _logger);
                 ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
 
-                Float_t KchrecSmeared[9], KchboostSmeared[9], energyPion[2];
+                Double_t KchrecSmeared[9], KchboostSmeared[9], energyPion[2];
 
                 if (0)
                 {
@@ -237,7 +237,7 @@ namespace KLOE
                   return err;
                 }
 
-                Float_t KchrecSmeared[9], KchboostSmeared[9], energyPion[2];
+                Double_t KchrecSmeared[9], KchboostSmeared[9], energyPion[2];
 
                 if (mcflag == 1 && smearingFlag == 1)
                 {
@@ -888,8 +888,6 @@ namespace KLOE
   }
 
   // Explicit definition of template class
-  template class ChargedVtxRec<Float_t, Int_t>;
   template class ChargedVtxRec<Double_t, Int_t>;
-  template class ChargedVtxRec<Float_t, UChar_t>;
   template class ChargedVtxRec<Double_t, UChar_t>;
 }

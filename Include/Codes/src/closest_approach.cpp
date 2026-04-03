@@ -2,11 +2,11 @@
 #include <TMath.h>
 #include <const.h>
 
-void closest_approach(Float_t point1[3], Float_t vector1[3], 
-                      Float_t point2[3], Float_t vector2[3],
-                      Float_t ip_closest[3])
+void closest_approach(Double_t point1[3], Double_t vector1[3], 
+                      Double_t point2[3], Double_t vector2[3],
+                      Double_t ip_closest[3])
 {
-    Float_t n[3], n_len_2, vector1xn[3], vector2xn[3], 
+    Double_t n[3], n_len_2, vector1xn[3], vector2xn[3], 
             numerator1, numerator2, t1, t2;
 
     n[0] = vector1[1]*vector2[2] - vector1[2]*vector2[1];

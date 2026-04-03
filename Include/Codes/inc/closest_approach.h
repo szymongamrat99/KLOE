@@ -3,8 +3,8 @@
 
 #include "TMath.h"
 
-void closest_approach(Float_t *, Float_t *,
-                 Float_t *, Float_t *,
-                 Float_t *);
+void closest_approach(Double_t *, Double_t *,
+                 Double_t *, Double_t *,
+                 Double_t *);
 
 #endif

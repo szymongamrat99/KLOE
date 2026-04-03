@@ -229,7 +229,7 @@ Double_t ConstraintsOmega::MinvConsv(Double_t *x, Double_t *p)
 {
   IntermediateReconstruction(p);
 
-  std::map<std::string, Float_t> minvModes = {
+  std::map<std::string, Double_t> minvModes = {
       {"omega", fomega.mass}};
 
   return minvModes[_minvMode] - PhysicsConstants::mOmega; // MeV/c^2

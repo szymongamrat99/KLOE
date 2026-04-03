@@ -59,7 +59,7 @@ namespace KLOE
    * @class ConstraintsTest
    * @brief Auxiliary class with the constraints for \omega\pi^{0} fitting
    */
-  class ConstraintsTest : public KinFit, public ChargedVtxRec<Float_t, Int_t>
+  class ConstraintsTest : public KinFit, public ChargedVtxRec<Double_t, Int_t>
   {
   private:
     /**
@@ -116,7 +116,7 @@ namespace KLOE
   public:
     /* Specific physical Constraints for Test-pi0 hypothesis */
 
-    ConstraintsTest(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Float_t, Int_t>(logger) {};
+    ConstraintsTest(ErrorHandling::ErrorLogs &logger) : ChargedVtxRec<Double_t, Int_t>(logger) {};
 
     /**
      * @brief A method used to pair the photons in an event. Needed to get omega and neutral pions' parameters.
