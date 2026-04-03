@@ -138,9 +138,6 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   for (Int_t i = 0; i < _loopcount; i++)
   {
-    if (i != 0)
-      continue;
-
     try
     {
       // Enforce positive energies
@@ -163,7 +160,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
           if (m < _N_free)
           {
-            auxVal = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V(m, m)));
+            auxVal = DerivativeCalc(l, m);//_constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V(m, m)));
 
             _D(l, m) = auxVal;
           }
