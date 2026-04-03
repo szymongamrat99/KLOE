@@ -348,6 +348,10 @@ namespace KLOE
 
         value[i] = sqrt(pow(KnerecTmp[i].total[5] - PhysicsConstants::mK0, 2) +
                         pow(KnerecTmp[i].fourPos[3] - KnerecTmp[i].lifetimeLAB, 2));
+
+        std::cout << "Solution " << i << ": Mass difference: " << KnerecTmp[i].total[5] - PhysicsConstants::mK0
+                  << ", Lifetime difference: " << KnerecTmp[i].fourPos[3] - KnerecTmp[i].lifetimeLAB
+                  << ", Combined value: " << value[i] << std::endl;
       }
       else
       {
@@ -403,12 +407,7 @@ namespace KLOE
     }
 
     std::cout << "Knerec: " << fKnerec.fourPos[0] << ", " << fKnerec.fourPos[1] << ", " << fKnerec.fourPos[2] << ", " << fKnerec.fourPos[3] << std::endl;
-    std::cout << "IP: " << fip[0] << ", " << fip[1] << ", " << fip[2] << std::endl;
     std::cout << "Knerec momentum: " << fKnerec.fourMom[0] << ", " << fKnerec.fourMom[1] << ", " << fKnerec.fourMom[2] << ", " << fKnerec.fourMom[3] << std::endl;
-    std::cout << "Phi momentum: " << fphi.fourMom[0] << ", " << fphi.fourMom[1] << ", " << fphi.fourMom[2] << ", " << fphi.fourMom[3] << std::endl;
-    std::cout << "Phi vertex: " << fphi.vtxPos[0] << ", " << fphi.vtxPos[1] << ", " << fphi.vtxPos[2] << std::endl;
-    std::cout << "Photon 1 momentum: " << fphoton[0].fourMom[0] << ", " << fphoton[0].fourMom[1] << ", " << fphoton[0].fourMom[2] << ", " << fphoton[0].fourMom[3] << std::endl;
-    std::cout << "Photon 1 position: " << fphoton[0].fourPos[0] << ", " << fphoton[0].fourPos[1] << ", " << fphoton[0].fourPos[2] << ", " << fphoton[0].fourPos[3] << std::endl;
   }
 
   Double_t ConstraintsTrilateration::EnergyConsvCM(Double_t *x, Double_t *p)
