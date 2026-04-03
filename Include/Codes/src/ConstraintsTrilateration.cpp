@@ -426,6 +426,7 @@ namespace KLOE
              kneVelComp = abs(fKnerec.fourMom[_chosenComponent] / fKnerec.fourMom[3] * PhysicsConstants::cVel);
 
              std::cout << "Path component: " << pathComp << ", Velocity component: " << kneVelComp << std::endl;
+             std::cout << "Knerec: " << fKnerec.fourPos[_chosenComponent] << ", IP: " << fip[_chosenComponent] << ", Knerec momentum: " << fKnerec.fourMom[_chosenComponent] << ", Knerec energy: " << fKnerec.fourMom[3] << std::endl;
 
     return fKnerec.fourPos[3] - (pathComp / kneVelComp);
   }
