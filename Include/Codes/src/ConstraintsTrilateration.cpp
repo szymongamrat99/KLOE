@@ -401,6 +401,14 @@ namespace KLOE
       for (Int_t j = 0; j < 4; j++)
         fKnerecCMPhi.fourMom[j] = 999.;
     }
+
+    std::cout << "Knerec: " << fKnerec.fourPos[0] << ", " << fKnerec.fourPos[1] << ", " << fKnerec.fourPos[2] << ", " << fKnerec.fourPos[3] << std::endl;
+    std::cout << "IP: " << fip[0] << ", " << fip[1] << ", " << fip[2] << std::endl;
+    std::cout << "Knerec momentum: " << fKnerec.fourMom[0] << ", " << fKnerec.fourMom[1] << ", " << fKnerec.fourMom[2] << ", " << fKnerec.fourMom[3] << std::endl;
+    std::cout << "Phi momentum: " << fphi.fourMom[0] << ", " << fphi.fourMom[1] << ", " << fphi.fourMom[2] << ", " << fphi.fourMom[3] << std::endl;
+    std::cout << "Phi vertex: " << fphi.vtxPos[0] << ", " << fphi.vtxPos[1] << ", " << fphi.vtxPos[2] << std::endl;
+    std::cout << "Photon 1 momentum: " << fphoton[0].fourMom[0] << ", " << fphoton[0].fourMom[1] << ", " << fphoton[0].fourMom[2] << ", " << fphoton[0].fourMom[3] << std::endl;
+    std::cout << "Photon 1 position: " << fphoton[0].fourPos[0] << ", " << fphoton[0].fourPos[1] << ", " << fphoton[0].fourPos[2] << ", " << fphoton[0].fourPos[3] << std::endl;
   }
 
   Double_t ConstraintsTrilateration::EnergyConsvCM(Double_t *x, Double_t *p)
@@ -421,9 +429,9 @@ namespace KLOE
   {
     IntermediateReconstruction(p);
 
-    Double_t pathComp = abs(fKnerec.fourPos[_chosenComponent] -
+    Double_t pathComp = (Double_t)abs(fKnerec.fourPos[_chosenComponent] -
                             fip[_chosenComponent]),
-             kneVelComp = abs(fKnerec.fourMom[_chosenComponent] / fKnerec.fourMom[3] * PhysicsConstants::cVel);
+             kneVelComp = (Double_t)abs(fKnerec.fourMom[_chosenComponent] / fKnerec.fourMom[3] * PhysicsConstants::cVel);
 
              std::cout << "Path component: " << pathComp << ", Velocity component: " << kneVelComp << std::endl;
              std::cout << "Knerec: " << fKnerec.fourPos[_chosenComponent] << ", IP: " << fip[_chosenComponent] << ", Knerec momentum: " << fKnerec.fourMom[_chosenComponent] << ", Knerec energy: " << fKnerec.fourMom[3] << std::endl;
