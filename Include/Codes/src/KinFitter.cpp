@@ -160,7 +160,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
           if (m < _N_free)
           {
-            auxVal = DerivativeCalc(l, m);//_constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V(m, m)));
+            auxVal = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V(m, m)));
 
             _D(l, m) = auxVal;
           }
