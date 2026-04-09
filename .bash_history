@@ -762,3 +762,108 @@ df -h
 pgrep bttf
 ps -e
 exit
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+git add .
+git commit -m "Debug"
+git push
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+git add .
+git commit -m "Debug"
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+git add .
+git commit -m "Debug"
+git add .
+git commit -m "Debug"
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Debug"
+git push
+git add .
+git commit -m "Debug"
+git push
+git add .
+git commit -m "Debug"
+git push
+git add .
+git commit -m "Debug"
+git push
+./execute_analysis.sh 
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+./execute_analysis.sh 
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+./execute_analysis.sh 
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt
+ls
+exit
+cd Subanalysis/InterfFunction/
+./compile.sh 
+./hist_sample_draw 
+nohup ./hist_sample_draw < params.txt > nohup.log &
+cd Subanalysis/InterfFunction/
+ls

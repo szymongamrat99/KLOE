@@ -3,6 +3,7 @@
     "fixRe": false,
     "fixIm": true,
     "fixRange": true,
+    "fixOffset": true,
     "isReLimited": false,
     "isImLimited": false,
     "isRangeLimited": false,

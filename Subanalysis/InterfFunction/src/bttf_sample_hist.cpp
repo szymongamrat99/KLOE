@@ -101,32 +101,36 @@ int main()
 
   ErrorHandling::ErrorLogs logger("log/");
 
-  // Ścieżka do folderu głównego
-  std::string basePath = "/data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots";
+  // // Ścieżka do folderu głównego
+  // std::string basePath = "/data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots";
 
-  // Pobierz listę folderów
-  std::vector<std::string> directories = GetDirectories(basePath);
+  // // Pobierz listę folderów
+  // std::vector<std::string> directories = GetDirectories(basePath);
 
-  // Pozwól użytkownikowi wybrać
-  int selectedIndex = SelectDirectory(directories);
+  // // Pozwól użytkownikowi wybrać
+  // int selectedIndex = SelectDirectory(directories);
 
-  if (selectedIndex == -1)
-  {
-    return 1;
-  }
+  // if (selectedIndex == -1)
+  // {
+  //   return 1;
+  // }
 
-  // Zbuduj pełną ścieżkę do wybranego folderu
-  std::string selectedPath = (fs::path(basePath) / directories[selectedIndex]).string();
-  std::cout << "\nWybrany folder: " << selectedPath << std::endl;
+  // // Zbuduj pełną ścieżkę do wybranego folderu
+  // std::string selectedPath = (fs::path(basePath) / directories[selectedIndex]).string();
+  // std::cout << "\nWybrany folder: " << selectedPath << std::endl;
 
   // Teraz możesz użyć selectedPath do otwarcia pliku ROOT
-  TString rootFilePath = selectedPath + "/*.root";
+  TString rootFilePathMain = "/data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots/integralLimit_300_samples_10000000000_Re_0.00166_Im_-0.00198_tmp/*.root",
+          rootFilePathAux = "/data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/*.root";
 
   TChain *chain_00pm = new TChain("00pm");
   TChain *chain_pmpm = new TChain("pmpm");
 
-  chain_00pm->Add(rootFilePath);
-  chain_pmpm->Add(rootFilePath);
+  chain_00pm->Add(rootFilePathMain);
+  chain_pmpm->Add(rootFilePathMain);
+
+  chain_00pm->Add(rootFilePathAux);
+  chain_pmpm->Add(rootFilePathAux);
 
   KLOE::setGlobalStyle();
   Utils::InitializeVariables(logger);

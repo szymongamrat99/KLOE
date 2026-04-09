@@ -148,7 +148,7 @@ int main()
     return 1;
   }
 
-  Bool_t fixRe = false, fixIm = false, fixRange = false, isReLimited = false, isImLimited = false, isRangeLimited = false;
+  Bool_t fixRe = false, fixIm = false, fixRange = false, fixOffset = false, isReLimited = false, isImLimited = false, isRangeLimited = false;
   Double_t reLimitPercentage = 1.0, imLimitPercentage = 1.0, rangeLimitPercentage = 1.0;
 
   json config;
@@ -158,6 +158,7 @@ int main()
   Utils::JsonFieldLookupBool(config, "integralRange/fixRe", fixRe, logger);
   Utils::JsonFieldLookupBool(config, "integralRange/fixIm", fixIm, logger);
   Utils::JsonFieldLookupBool(config, "integralRange/fixRange", fixRange, logger);
+  Utils::JsonFieldLookupBool(config, "integralRange/fixOffset", fixOffset, logger);
   Utils::JsonFieldLookupBool(config, "integralRange/isReLimited", isReLimited, logger);
   Utils::JsonFieldLookupBool(config, "integralRange/isImLimited", isImLimited, logger);
   Utils::JsonFieldLookupBool(config, "integralRange/isRangeLimited", isRangeLimited, logger);
@@ -837,17 +838,17 @@ int main()
 
   auto func_pmpm_00pm_1D = [&](Double_t *x, Double_t *par)
   {
-    return func_pmpm_1D(x, par) / func_00pm_1D(x, par);
+    return par[3] + func_pmpm_1D(x, par) / func_00pm_1D(x, par);
   };
 
   auto func_pmpm_pm00_1D = [&](Double_t *x, Double_t *par)
   {
-    return func_pmpm_1D(x, par) / func_pm00_1D(x, par);
+    return par[3] + func_pmpm_1D(x, par) / func_pm00_1D(x, par);
   };
 
   auto func_RA_RB_1D = [&](Double_t *x, Double_t *par)
   {
-    return func_pmpm_00pm_1D(x, par) / func_pmpm_pm00_1D(x, par);
+    return par[3] + func_pmpm_00pm_1D(x, par) / func_pmpm_pm00_1D(x, par);
   };
 
   std::map<std::string, Double_t *> fitLimits;
@@ -867,17 +868,17 @@ int main()
   std::vector<CorrelationPoint> corrPointsRB;
   std::vector<CorrelationPoint> corrPointsRC;
 
-  TF1 *fitFunc_RA = new TF1("fitFunc_RA", func_pmpm_00pm_1D, 0.0, 300.0, 3);
-  fitFunc_RA->SetParameters(reParam, imParam, 300.0);
-  fitFunc_RA->SetParNames("Re", "Im", "Range");
+  TF1 *fitFunc_RA = new TF1("fitFunc_RA", func_pmpm_00pm_1D, 0.0, 300.0, 4);
+  fitFunc_RA->SetParameters(reParam, imParam, 300.0, 0.0);
+  fitFunc_RA->SetParNames("Re", "Im", "Range", "Offset");
 
-  TF1 *fitFunc_RB = new TF1("fitFunc_RB", func_pmpm_pm00_1D, 0.0, 300.0, 3);
-  fitFunc_RB->SetParameters(reParam, imParam, 300.0);
-  fitFunc_RB->SetParNames("Re", "Im", "Range");
+  TF1 *fitFunc_RB = new TF1("fitFunc_RB", func_pmpm_pm00_1D, 0.0, 300.0, 4);
+  fitFunc_RB->SetParameters(reParam, imParam, 300.0, 0.0);
+  fitFunc_RB->SetParNames("Re", "Im", "Range", "Offset");
 
-  TF1 *fitFunc_RC = new TF1("fitFunc_RC", func_RA_RB_1D, 0.0, 300.0, 3);
-  fitFunc_RC->SetParameters(reParam, imParam, 300.0);
-  fitFunc_RC->SetParNames("Re", "Im", "Range");
+  TF1 *fitFunc_RC = new TF1("fitFunc_RC", func_RA_RB_1D, 0.0, 300.0, 4);
+  fitFunc_RC->SetParameters(reParam, imParam, 300.0, 0.0);
+  fitFunc_RC->SetParNames("Re", "Im", "Range", "Offset");
 
   if (fixRe)
   {
@@ -898,6 +899,13 @@ int main()
     fitFunc_RA->FixParameter(2, 300.0);
     fitFunc_RB->FixParameter(2, 300.0);
     fitFunc_RC->FixParameter(2, 300.0);
+  }
+
+  if (fixOffset)
+  {
+    fitFunc_RA->FixParameter(3, 0.0);
+    fitFunc_RB->FixParameter(3, 0.0);
+    fitFunc_RC->FixParameter(3, 0.0);
   }
 
   if (isReLimited)
@@ -1102,7 +1110,6 @@ int main()
 
     if (t1MaxMin >= 1.0)
       std::cout << "Skipping fit for R_{B} (t2Max=" << t2Max << ") due to t1MaxMin >= 1.0." << std::endl;
-      goto skipFitRB;
 
     if (fitResultRB->IsValid())
     {
@@ -1139,8 +1146,6 @@ int main()
     {
       std::cout << "Fit for R_{B} (t2Max=" << t2Max << ") was not valid." << std::endl;
     }
-
-    skipFitRB:
 
     cR->cd(3);
     hist_RC[t2Max]->SetTitle(Form("R_{C} - t_{2}^{max}=%.0f #tau_{S}", t2Max));
