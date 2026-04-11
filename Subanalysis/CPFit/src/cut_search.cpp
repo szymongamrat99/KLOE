@@ -275,7 +275,7 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 		cutLimits[1] = (Double_t)Utils::properties["variables"]["CPFit"]["cuts"]["cutScanMode"]["cutLimits"][1];
 	}
 
-	cutStep = abs(cutLimits[1] - cutLimits[0]) / (Double_t)numberOfPoints;
+	cutStep = std::abs(cutLimits[1] - cutLimits[0]) / (Double_t)numberOfPoints;
 
 	// Vectors needed for the initialization of graphs
 	TString graphMode = "FitResultErr";
@@ -430,9 +430,9 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 				myEvent.rho00 = rho_00_IP - meanRho00IP < stdDevRho00IP;
 				myEvent.rhopm = rho_pm_IP - meanRhopmIP < stdDevRhopmIP;
 				myEvent.z00 =
-						abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < stdDevOmegaVtx[2];
+						std::abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < stdDevOmegaVtx[2];
 				myEvent.zpm =
-						abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < stdDevOmegaVtx[5];
+						std::abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < stdDevOmegaVtx[5];
 				myEvent.totalOmegaFidVol =
 						myEvent.rho00 &&
 						myEvent.rhopm &&
@@ -459,9 +459,9 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 				myEvent.rho00 = rho_00_IP - meanRho00IP < stdDevRho00IP;
 				myEvent.rhopm = rho_pm_IP - meanRhopmIP < stdDevRhopmIP;
 				myEvent.z00 =
-						abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < stdDevOmegaVtx[2];
+						std::abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < stdDevOmegaVtx[2];
 				myEvent.zpm =
-						abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < stdDevOmegaVtx[5];
+						std::abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < stdDevOmegaVtx[5];
 				myEvent.totalOmegaFidVol =
 						myEvent.rho00 &&
 						myEvent.rhopm &&
@@ -530,8 +530,8 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 			{
 				if (ev.totalOmegaFidVol)
 				{
-					cut_MinvOmega = abs(ev.MinvOmega - meanInvMass) < k * stdInvMass;
-					cut_KinEnePi0 = abs(ev.KinEnePi0 - meanKinEne) < k * stdKinEne;
+					cut_MinvOmega = std::abs(ev.MinvOmega - meanInvMass) < k * stdInvMass;
+					cut_KinEnePi0 = std::abs(ev.KinEnePi0 - meanKinEne) < k * stdKinEne;
 
 					Double_t normFactor = k * lineWidth / sqrt(a * a + 1); // Norm of normal vector
 					cut_line_up = (a * ev.KinEnePi0 + b + (1 - pow(a, 2)) * normFactor) > ev.MinvOmega;
@@ -545,8 +545,8 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 					cut_line_up = 0;
 				}
 
-				cut_regen_neg = abs(ev.beamPipeCutNeg - TrHigher[0]) < sigma * TrHigher[1];
-				cut_regen_pos = abs(ev.beamPipeCutPos - ChHigher[0]) < sigma * ChHigher[1];
+				cut_regen_neg = std::abs(ev.beamPipeCutNeg - TrHigher[0]) < sigma * TrHigher[1];
+				cut_regen_pos = std::abs(ev.beamPipeCutPos - ChHigher[0]) < sigma * ChHigher[1];
 
 				cut_total = !(cut_regen_neg || cut_regen_pos) && !(cut_MinvOmega && cut_KinEnePi0 && cut_line_up && cut_line_down);
 
@@ -620,8 +620,8 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 			{
 				if (ev.totalOmegaFidVol)
 				{
-					cut_MinvOmega = abs(ev.MinvOmega - meanInvMass) < cutLimitCombined[i][0] * stdInvMass;
-					cut_KinEnePi0 = abs(ev.KinEnePi0 - meanKinEne) < cutLimitCombined[i][1] * stdKinEne;
+					cut_MinvOmega = std::abs(ev.MinvOmega - meanInvMass) < cutLimitCombined[i][0] * stdInvMass;
+					cut_KinEnePi0 = std::abs(ev.KinEnePi0 - meanKinEne) < cutLimitCombined[i][1] * stdKinEne;
 
 					Double_t normFactor = cutLimitCombined[i][2] * lineWidth / sqrt(a * a + 1); // Norm of normal vector
 					cut_line_up = (a * ev.KinEnePi0 + b + (1 - pow(a, 2)) * normFactor) > ev.MinvOmega;
@@ -635,8 +635,8 @@ int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType 
 					cut_line_up = 0;
 				}
 
-				cut_regen_neg = abs(ev.beamPipeCutNeg - TrHigher[0]) < sigma * TrHigher[1];
-				cut_regen_pos = abs(ev.beamPipeCutPos - ChHigher[0]) < sigma * ChHigher[1];
+				cut_regen_neg = std::abs(ev.beamPipeCutNeg - TrHigher[0]) < sigma * TrHigher[1];
+				cut_regen_pos = std::abs(ev.beamPipeCutPos - ChHigher[0]) < sigma * ChHigher[1];
 
 				cut_total = !(cut_regen_neg && cut_regen_pos) && !(cut_MinvOmega && cut_KinEnePi0 && cut_line_up && cut_line_down);
 

@@ -203,12 +203,12 @@ int plots(Int_t firstFile, Int_t lastFile)
 
       interfcommon_.DtBoostRec = auxilliary.DeltaT(momKch, posKch, momKne, posKne);
 
-      cuts[0] = abs(radius[0] - meanRadiusPureTriangleHigher) > errorRadiusPureTriangleHigher * sigma;      // && radius[1] > 8;
-      cuts[1] = abs(radius[1] - meanRadiusPureTriangleLower) > errorRadiusPureTriangleLower * sigma;     // && radius[1] <= 8;
-      cuts[2] = abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma; // && radius_ch[1] > 8;
-      cuts[3] = abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
-      cuts[4] = abs(radius_tri[0] - meanRadiusTriangleHigher) > errorRadiusTriangleHigher * sigma; // && radius_tri[1] > 8;
-      cuts[5] = abs(radius_tri[1] - meanRadiusTriangleLower) > errorRadiusTriangleLower * sigma;         // && radius_tri[1] <= 8;
+      cuts[0] = std::abs(radius[0] - meanRadiusPureTriangleHigher) > errorRadiusPureTriangleHigher * sigma;      // && radius[1] > 8;
+      cuts[1] = std::abs(radius[1] - meanRadiusPureTriangleLower) > errorRadiusPureTriangleLower * sigma;     // && radius[1] <= 8;
+      cuts[2] = std::abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma; // && radius_ch[1] > 8;
+      cuts[3] = std::abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
+      cuts[4] = std::abs(radius_tri[0] - meanRadiusTriangleHigher) > errorRadiusTriangleHigher * sigma; // && radius_tri[1] > 8;
+      cuts[5] = std::abs(radius_tri[1] - meanRadiusTriangleLower) > errorRadiusTriangleLower * sigma;         // && radius_tri[1] <= 8;
 
       deltaT[0]->Fill(interfcommon_.DtBoostRec);
       if (cuts[0])

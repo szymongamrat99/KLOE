@@ -60,11 +60,11 @@ Double_t funkcja(Float_t dt)
     }
     else
     {
-        Value = (1. + 2. * RePart) * exp(-GammaKs * abs(dt)) +
-                (1. - 4. * RePart) * exp(-GammaKl * abs(dt)) -
-                2. * exp(-Gamma / 2. * abs(dt)) *
-                    ((1. - RePart) * cos(DMass * abs(dt)) -
-                     3. * ImPart * sin(DMass * abs(dt)));
+        Value = (1. + 2. * RePart) * exp(-GammaKs * std::abs(dt)) +
+                (1. - 4. * RePart) * exp(-GammaKl * std::abs(dt)) -
+                2. * exp(-Gamma / 2. * std::abs(dt)) *
+                    ((1. - RePart) * cos(DMass * std::abs(dt)) -
+                     3. * ImPart * sin(DMass * std::abs(dt)));
     }
 
     return (Epsilon * Epsilon) / (2. * Gamma) * Value * 100000;
@@ -112,11 +112,11 @@ Double_t fitf(const Float_t x, const Double_t *par)
     }
     else
     {
-        Value = (1. + 2. * RePart) * exp(-GammaKs * abs(dt)) +
-                (1. - 4. * RePart) * exp(-GammaKl * abs(dt)) -
-                2. * exp(-Gamma / 2. * abs(dt)) *
-                    ((1. - RePart) * cos(DMass * abs(dt)) -
-                     3. * ImPart * sin(DMass * abs(dt)));
+        Value = (1. + 2. * RePart) * exp(-GammaKs * std::abs(dt)) +
+                (1. - 4. * RePart) * exp(-GammaKl * std::abs(dt)) -
+                2. * exp(-Gamma / 2. * std::abs(dt)) *
+                    ((1. - RePart) * cos(DMass * std::abs(dt)) -
+                     3. * ImPart * sin(DMass * std::abs(dt)));
     }
 
     return ((((Epsilon * Epsilon) / (2. * Gamma)) * Value * 100000));
@@ -699,8 +699,8 @@ Int_t recon_mc_fit_eff(Int_t minpoints = 1, Int_t maxpoints = 1, TString name = 
         Double_t step[12] = {1.0E-2, 1.0E-2, 0.1, 0.0, 0.0, 0.1, 0.0, 0.0, 0.1, 0.1, 0.0, 0.0};
 
         Double_t variable[12] = {1.66E-3, -1.98E-3, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-        minimum->SetLimitedVariable(2 * howmuch + 2 * binn + howmuchregen + howmuchomega + howmuchthree + howmuchsemi + howmuchelsee + 7, "PhysicsConstants::Re", variable[0], step[0], variable[0] - 5. * abs(variable[0]), variable[0] + 5. * abs(variable[0]));
-        minimum->SetLimitedVariable(2 * howmuch + 2 * binn + howmuchregen + howmuchomega + howmuchthree + howmuchsemi + howmuchelsee + 8, "Im", variable[1], step[1], variable[1] - 5. * abs(variable[1]), variable[1] + 5. * abs(variable[1]));
+        minimum->SetLimitedVariable(2 * howmuch + 2 * binn + howmuchregen + howmuchomega + howmuchthree + howmuchsemi + howmuchelsee + 7, "PhysicsConstants::Re", variable[0], step[0], variable[0] - 5. * std::abs(variable[0]), variable[0] + 5. * std::abs(variable[0]));
+        minimum->SetLimitedVariable(2 * howmuch + 2 * binn + howmuchregen + howmuchomega + howmuchthree + howmuchsemi + howmuchelsee + 8, "Im", variable[1], step[1], variable[1] - 5. * std::abs(variable[1]), variable[1] + 5. * std::abs(variable[1]));
         minimum->SetLimitedVariable(2 * howmuch + 2 * binn + howmuchregen + howmuchomega + howmuchthree + howmuchsemi + howmuchelsee + 9, "A", variable[2], step[2], 0.8, 1.2);
 
         minimum->SetLimitedVariable(2 * howmuch + 2 * binn + howmuchregen + howmuchomega + howmuchthree + howmuchsemi + howmuchelsee + 10, "N_regen", variable[3], step[3], 0.8, 1.2);

@@ -65,7 +65,7 @@ Double_t ene_consv(Double_t *x, Double_t *p)
     }
   }
 
-  if (abs(value[0]) < abs(value[1]))
+  if (std::abs(value[0]) < std::abs(value[1]))
     value_min = value[0];
   else
     value_min = value[1];
@@ -129,7 +129,7 @@ Double_t minv_consv(Double_t *x, Double_t *p)
     }
   }
 
-  if (abs(value[0]) < abs(value[1]))
+  if (std::abs(value[0]) < std::abs(value[1]))
     value_min = value[0];
   else
     value_min = value[1];
@@ -188,7 +188,7 @@ Double_t x_consv(Double_t *x, Double_t *p)
 
       ip[0] = p[24];
       ip[1] = p[25];
-      if (abs(p[26] - ip[2]) > 2)
+      if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
       dist[0] = neu_vtx[0] - ip[0];
@@ -210,7 +210,7 @@ Double_t x_consv(Double_t *x, Double_t *p)
     }
   }
 
-  if (abs(value[0]) < abs(value[1]))
+  if (std::abs(value[0]) < std::abs(value[1]))
     value_min = value[0];
   else
     value_min = value[1];
@@ -269,7 +269,7 @@ Double_t y_consv(Double_t *x, Double_t *p)
 
       ip[0] = p[24];
       ip[1] = p[25];
-      if (abs(p[26] - ip[2]) > 2)
+      if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
       dist[0] = neu_vtx[0] - ip[0];
@@ -288,7 +288,7 @@ Double_t y_consv(Double_t *x, Double_t *p)
     }
   }
 
-  if (abs(value[0]) < abs(value[1]))
+  if (std::abs(value[0]) < std::abs(value[1]))
     value_min = value[0];
   else
     value_min = value[1];
@@ -347,7 +347,7 @@ Double_t z_consv(Double_t *x, Double_t *p)
 
       ip[0] = p[24];
       ip[1] = p[25];
-      if (abs(p[26] - ip[2]) > 2)
+      if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
       dist[0] = neu_vtx[0] - ip[0];
@@ -366,7 +366,7 @@ Double_t z_consv(Double_t *x, Double_t *p)
     }
   }
 
-  if (abs(value[0]) < abs(value[1]))
+  if (std::abs(value[0]) < std::abs(value[1]))
     value_min = value[0];
   else
     value_min = value[1];
@@ -425,7 +425,7 @@ Double_t gamma1_consv(Double_t *x, Double_t *p)
 
       ip[0] = p[24];
       ip[1] = p[25];
-      if (abs(p[26] - ip[2]) > 2)
+      if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
       Float_t gamma_path = sqrt(pow(p[0] - neu_vtx[0], 2) + pow(p[1] - neu_vtx[1], 2) + pow(p[2] - neu_vtx[2], 2));
@@ -438,7 +438,7 @@ Double_t gamma1_consv(Double_t *x, Double_t *p)
     }
   }
 
-  if (abs(value[0]) < abs(value[1]))
+  if (std::abs(value[0]) < std::abs(value[1]))
     value_min = value[0];
   else
     value_min = value[1];
@@ -497,7 +497,7 @@ Double_t gamma2_consv(Double_t *x, Double_t *p)
 
       ip[0] = p[24];
       ip[1] = p[25];
-      if (abs(p[26] - ip[2]) > 2)
+      if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
       Float_t gamma_path = sqrt(pow(p[5] - neu_vtx[0], 2) + pow(p[6] - neu_vtx[1], 2) + pow(p[7] - neu_vtx[2], 2));
@@ -510,7 +510,7 @@ Double_t gamma2_consv(Double_t *x, Double_t *p)
     }
   }
 
-  if (abs(value[0]) < abs(value[1]))
+  if (std::abs(value[0]) < std::abs(value[1]))
     value_min = value[0];
   else
     value_min = value[1];
@@ -569,7 +569,7 @@ Double_t gamma3_consv(Double_t *x, Double_t *p)
 
       ip[0] = p[24];
       ip[1] = p[25];
-      if (abs(p[26] - ip[2]) > 2)
+      if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
       Float_t gamma_path = sqrt(pow(p[10] - neu_vtx[0], 2) + pow(p[11] - neu_vtx[1], 2) + pow(p[12] - neu_vtx[2], 2));
@@ -582,7 +582,7 @@ Double_t gamma3_consv(Double_t *x, Double_t *p)
     }
   }
 
-  if (abs(value[0]) < abs(value[1]))
+  if (std::abs(value[0]) < std::abs(value[1]))
     value_min = value[0];
   else
     value_min = value[1];
@@ -641,7 +641,7 @@ Double_t gamma4_consv(Double_t *x, Double_t *p)
 
       ip[0] = p[24];
       ip[1] = p[25];
-      if (abs(p[26] - ip[2]) > 2)
+      if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
       Float_t gamma_path = sqrt(pow(p[15] - neu_vtx[0], 2) + pow(p[16] - neu_vtx[1], 2) + pow(p[17] - neu_vtx[2], 2));
@@ -654,7 +654,7 @@ Double_t gamma4_consv(Double_t *x, Double_t *p)
     }
   }
 
-  if (abs(value[0]) < abs(value[1]))
+  if (std::abs(value[0]) < std::abs(value[1]))
     value_min = value[0];
   else
     value_min = value[1];

@@ -75,7 +75,7 @@ void cp_fit(Bool_t check = false, TString mode = "")
     {
         chain->GetEntry(i);
 
-        if(done4 == 1)// && Chi2 < 40 && abs(fourKnetri[5] - PhysicsConstants::mK0) < 76 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75)
+        if(done4 == 1)// && Chi2 < 40 && std::abs(fourKnetri[5] - PhysicsConstants::mK0) < 76 && std::abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75)
         {
             velocity_kch = PhysicsConstants::cVel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
 

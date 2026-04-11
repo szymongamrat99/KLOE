@@ -225,7 +225,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
                 ip_tmp[k][0] = bhabha_vtx[0];
                 ip_tmp[k][1] = bhabha_vtx[1];
-                if (abs(ip_tmp[k][2] - bhabha_vtx[2]) > 2)
+                if (std::abs(ip_tmp[k][2] - bhabha_vtx[2]) > 2)
                   ip_tmp[k][2] = bhabha_vtx[2];
 
                 dist_tmp[k] = sqrt(pow(neu_vtx[k][0] - ip_tmp[k][0], 2) +
@@ -248,7 +248,7 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
                                   S.sol[1][3] < (*X)(13) &&
                                   S.sol[1][3] < (*X)(18);
 
-              if (abs(CHISQRTMP) < abs(CHISQRMIN))
+              if (std::abs(CHISQRTMP) < std::abs(CHISQRMIN))
               {
                 if (cond_time_clus[0] && value[0] < value[1])
                 {

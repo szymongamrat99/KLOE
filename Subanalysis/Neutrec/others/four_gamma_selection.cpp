@@ -168,20 +168,20 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                 }
 
                                 cond_sol[0][0] = (S.sol[0][3] >= 0) && (S.sol[0][3] < 60);
-                                cond_sol[0][1] = (sqrt(pow(S.sol[0][0],2) + pow(S.sol[0][1],2)) < 200) && (abs(S.sol[0][2]) < 169);
+                                cond_sol[0][1] = (sqrt(pow(S.sol[0][0],2) + pow(S.sol[0][1],2)) < 200) && (std::abs(S.sol[0][2]) < 169);
                                 path_diff[0] = kaon_vel[0]*S.sol[0][3] - kaon_len[0];
 
                                 cond_sol[1][0] = (S.sol[1][3] >= 0) && (S.sol[1][3] < 60);
-                                cond_sol[1][1] = (sqrt(pow(S.sol[1][0],2) + pow(S.sol[1][1],2)) < 200) && (abs(S.sol[1][2]) < 169);
+                                cond_sol[1][1] = (sqrt(pow(S.sol[1][0],2) + pow(S.sol[1][1],2)) < 200) && (std::abs(S.sol[1][2]) < 169);
                                 path_diff[1] = kaon_vel[1]*S.sol[1][3] - kaon_len[1];
 
-                                onesol = (abs(S.sol[0][3] - S.sol[1][3]) < 1);
+                                onesol = (std::abs(S.sol[0][3] - S.sol[1][3]) < 1);
 
                                 //We have to choose solutions
 
                                 if(onesol == 1 && cond_sol[0][0] == 1 && cond_sol[0][1] == 1
                                                && cond_sol[1][0] == 1 && cond_sol[1][1] == 1 && 
-                                               abs(path_diff[0]) < 10. && abs(path_diff[1]) < 10.)
+                                               std::abs(path_diff[0]) < 10. && std::abs(path_diff[1]) < 10.)
                                 {
                                     solution[0] = (S.sol[0][0] + S.sol[1][0])/2.;
                                     solution[1] = (S.sol[0][1] + S.sol[1][1])/2.;
@@ -192,7 +192,7 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                     error = 0;
                                 }
                                 else if(onesol != 1 && (cond_sol[0][0] == 1 && cond_sol[0][1] == 1) &&
-                                         abs(path_diff[0]) < 10. && abs(path_diff[1]) > 10.)
+                                         std::abs(path_diff[0]) < 10. && std::abs(path_diff[1]) > 10.)
                                 {
                                     solution[0] = S.sol[0][0];
                                     solution[1] = S.sol[0][1];
@@ -203,7 +203,7 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                     error = 0;
                                 }
                                 else if(onesol != 1 && (cond_sol[1][0] == 1 && cond_sol[1][1] == 1) &&
-                                        abs(path_diff[1]) < 10. && abs(path_diff[0]) > 10.)
+                                        std::abs(path_diff[1]) < 10. && std::abs(path_diff[0]) > 10.)
                                 {
                                     solution[0] = S.sol[1][0];
                                     solution[1] = S.sol[1][1];
@@ -252,7 +252,7 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                         Knetri_tmp[8] = solution[2];
                                         Knetri_tmp[9] = solution[3];
 
-                                        total_err = abs(Knetri_tmp[5] - PhysicsConstants::mK0);
+                                        total_err = std::abs(Knetri_tmp[5] - PhysicsConstants::mK0);
 
                                 }
                                 else

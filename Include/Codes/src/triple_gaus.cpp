@@ -94,7 +94,7 @@ Double_t comb_mean_err(const Double_t *p, const Double_t *err)
     rel_err_mean[i] = mean_err[i] / mean[i];
     rel_err_sigma[i] = sigma_err[i] / sigma[i];
 
-    tot_rel_err = abs(rel_err_sigma[i]);
+    tot_rel_err = std::abs(rel_err_sigma[i]);
 
     // if (tot_rel_err > 0.9 || rel_err_N[i] > 0.9)
     //   N[i] = 0.;

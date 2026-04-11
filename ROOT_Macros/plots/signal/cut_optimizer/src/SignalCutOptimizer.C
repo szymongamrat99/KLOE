@@ -125,10 +125,10 @@ Bool_t SignalCutOptimizer::Process(Long64_t entry)
 
   fCutsOneSided["Chi2SignalKinFit"](fParamP);
 
-  if (abs(Kchrec[5] - PhysicsConstants::mK0) > 3)
+  if (std::abs(Kchrec[5] - PhysicsConstants::mK0) > 3)
     return kFALSE;
 
-  if (abs(*minv4gam - PhysicsConstants::mK0) > 50)
+  if (std::abs(*minv4gam - PhysicsConstants::mK0) > 50)
     return kFALSE;
 
   if (combinedMassPi0Err > 15)

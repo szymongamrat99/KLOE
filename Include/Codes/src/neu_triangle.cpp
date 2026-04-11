@@ -67,7 +67,7 @@ int neu_triangle(Double_t *TrcSumFinal, Double_t *vtxSigmaFinal, Double_t Clu5Ve
           trctmp[i][j] = Clu5Vec[i][3] - NeuVtxTmp[i][j][3] - (lGamma[i][j] / PhysicsConstants::cVel);
         }
 
-        if (abs(trctmp[i][0]) < abs(trctmp[i][1]))
+        if (std::abs(trctmp[i][0]) < std::abs(trctmp[i][1]))
         {
           for (Int_t j = 0; j < 4; j++)
             NeuVtxTrueClu[i][j] = NeuVtxTmp[i][0][j];

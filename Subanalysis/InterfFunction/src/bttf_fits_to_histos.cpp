@@ -110,8 +110,8 @@ std::map<Long64_t, TString> parseHistogramFiles(const std::string &folderPath)
 
         if (parsed == 3)
         {
-          if (abs(params.reParam - reParamTemplate) < tolerance &&
-              abs(params.imParam - imParamTemplate) < tolerance)
+          if (std::abs(params.reParam - reParamTemplate) < tolerance &&
+              std::abs(params.imParam - imParamTemplate) < tolerance)
           {
             fileParams[params.nEvents] = filename;
             std::cout << "Found: " << filename

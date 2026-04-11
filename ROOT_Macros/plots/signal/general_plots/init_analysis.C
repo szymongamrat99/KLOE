@@ -547,37 +547,37 @@ Bool_t init_analysis::Process(Long64_t entry)
             histMgr->Fill1D("zchMC", *mctruth, KchboostFit[8] - Kchmc[8], weight);
 
             Float_t
-                testcharged00 = sqrt(pow(abs(*CurvSmeared1) - abs(CurvMC[0]), 2) + pow(abs(*PhivSmeared1) - abs(PhivMC[0]), 2) + pow(abs(*CotvSmeared1) - abs(CotvMC[0]), 2)),
-                testcharged11 = sqrt(pow(abs(*CurvSmeared2) - abs(CurvMC[0]), 2) + pow(abs(*PhivSmeared2) - abs(PhivMC[0]), 2) + pow(abs(*CotvSmeared2) - abs(CotvMC[0]), 2));
+                testcharged00 = sqrt(pow(std::abs(*CurvSmeared1) - std::abs(CurvMC[0]), 2) + pow(std::abs(*PhivSmeared1) - std::abs(PhivMC[0]), 2) + pow(std::abs(*CotvSmeared1) - std::abs(CotvMC[0]), 2)),
+                testcharged11 = sqrt(pow(std::abs(*CurvSmeared2) - std::abs(CurvMC[0]), 2) + pow(std::abs(*PhivSmeared2) - std::abs(PhivMC[0]), 2) + pow(std::abs(*CotvSmeared2) - std::abs(CotvMC[0]), 2));
 
             // Float_t
-            //     testchargednotsmeared00 = sqrt(pow(abs(Curv[vtaken[1] - 1]) - abs(CurvMC[0]), 2) + pow(abs(Phiv[vtaken[1] - 1]) - abs(PhivMC[0]), 2) + pow(abs(Cotv[vtaken[1] - 1]) - abs(CotvMC[0]), 2)),
-            //     testchargednotsmeared11 = sqrt(pow(abs(Curv[vtaken[2] - 1]) - abs(CurvMC[0]), 2) + pow(abs(Phiv[vtaken[2] - 1]) - abs(PhivMC[0]), 2) + pow(abs(Cotv[vtaken[2] - 1]) - abs(CotvMC[0]), 2));
+            //     testchargednotsmeared00 = sqrt(pow(std::abs(Curv[vtaken[1] - 1]) - std::abs(CurvMC[0]), 2) + pow(std::abs(Phiv[vtaken[1] - 1]) - std::abs(PhivMC[0]), 2) + pow(std::abs(Cotv[vtaken[1] - 1]) - std::abs(CotvMC[0]), 2)),
+            //     testchargednotsmeared11 = sqrt(pow(std::abs(Curv[vtaken[2] - 1]) - std::abs(CurvMC[0]), 2) + pow(std::abs(Phiv[vtaken[2] - 1]) - std::abs(PhivMC[0]), 2) + pow(std::abs(Cotv[vtaken[2] - 1]) - std::abs(CotvMC[0]), 2));
 
             if (testcharged00 < testcharged11)
             {
-               histMgr->Fill1D("curvMC", *mctruth, abs(*CurvSmeared1) - abs(CurvMC[0]), weight);
-               histMgr->Fill1D("phivMC", *mctruth, abs(*PhivSmeared1) - abs(PhivMC[0]), weight);
-               histMgr->Fill1D("cotvMC", *mctruth, abs(*CotvSmeared1) - abs(CotvMC[0]), weight);
+               histMgr->Fill1D("curvMC", *mctruth, std::abs(*CurvSmeared1) - std::abs(CurvMC[0]), weight);
+               histMgr->Fill1D("phivMC", *mctruth, std::abs(*PhivSmeared1) - std::abs(PhivMC[0]), weight);
+               histMgr->Fill1D("cotvMC", *mctruth, std::abs(*CotvSmeared1) - std::abs(CotvMC[0]), weight);
             }
             else
             {
-               histMgr->Fill1D("curvMC", *mctruth, abs(*CurvSmeared1) - abs(CurvMC[1]), weight);
-               histMgr->Fill1D("phivMC", *mctruth, abs(*PhivSmeared1) - abs(PhivMC[1]), weight);
-               histMgr->Fill1D("cotvMC", *mctruth, abs(*CotvSmeared1) - abs(CotvMC[1]), weight);
+               histMgr->Fill1D("curvMC", *mctruth, std::abs(*CurvSmeared1) - std::abs(CurvMC[1]), weight);
+               histMgr->Fill1D("phivMC", *mctruth, std::abs(*PhivSmeared1) - std::abs(PhivMC[1]), weight);
+               histMgr->Fill1D("cotvMC", *mctruth, std::abs(*CotvSmeared1) - std::abs(CotvMC[1]), weight);
             }
 
             // if (testchargednotsmeared00 < testchargednotsmeared11)
             // {
-            //    histMgr->Fill1D("curvNotSmearedMC", *mctruth, abs(Curv[vtaken[1] - 1]) - abs(CurvMC[0]), weight);
-            //    histMgr->Fill1D("phivNotSmearedMC", *mctruth, abs(Phiv[vtaken[1] - 1]) - abs(PhivMC[0]), weight);
-            //    histMgr->Fill1D("cotvNotSmearedMC", *mctruth, abs(Cotv[vtaken[1] - 1]) - abs(CotvMC[0]), weight);
+            //    histMgr->Fill1D("curvNotSmearedMC", *mctruth, std::abs(Curv[vtaken[1] - 1]) - std::abs(CurvMC[0]), weight);
+            //    histMgr->Fill1D("phivNotSmearedMC", *mctruth, std::abs(Phiv[vtaken[1] - 1]) - std::abs(PhivMC[0]), weight);
+            //    histMgr->Fill1D("cotvNotSmearedMC", *mctruth, std::abs(Cotv[vtaken[1] - 1]) - std::abs(CotvMC[0]), weight);
             // }
             // else
             // {
-            //    histMgr->Fill1D("curvNotSmearedMC", *mctruth, abs(Curv[vtaken[1] - 1]) - abs(CurvMC[1]), weight);
-            //    histMgr->Fill1D("phivNotSmearedMC", *mctruth, abs(Phiv[vtaken[1] - 1]) - abs(PhivMC[1]), weight);
-            //    histMgr->Fill1D("cotvNotSmearedMC", *mctruth, abs(Cotv[vtaken[1] - 1]) - abs(CotvMC[1]), weight);
+            //    histMgr->Fill1D("curvNotSmearedMC", *mctruth, std::abs(Curv[vtaken[1] - 1]) - std::abs(CurvMC[1]), weight);
+            //    histMgr->Fill1D("phivNotSmearedMC", *mctruth, std::abs(Phiv[vtaken[1] - 1]) - std::abs(PhivMC[1]), weight);
+            //    histMgr->Fill1D("cotvNotSmearedMC", *mctruth, std::abs(Cotv[vtaken[1] - 1]) - std::abs(CotvMC[1]), weight);
             // }
          }
 

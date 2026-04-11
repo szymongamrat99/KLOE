@@ -206,7 +206,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 												kaon_mom[l1][3] += gamma_mom[l1][l2][3];
 											}
 
-											kaon_inv_mass_tmp[l1] = abs(sqrt(pow(kaon_mom[l1][3],2) - pow(kaon_mom[l1][0],2) - pow(kaon_mom[l1][1],2) - pow(kaon_mom[l1][2],2)) - PhysicsConstants::mK0);
+											kaon_inv_mass_tmp[l1] = std::abs(sqrt(pow(kaon_mom[l1][3],2) - pow(kaon_mom[l1][0],2) - pow(kaon_mom[l1][1],2) - pow(kaon_mom[l1][2],2)) - PhysicsConstants::mK0);
 
 											y_axis[0] = 0.;
 											y_axis[1] = bhabha_mom[1];
@@ -214,7 +214,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 											plane_intersection(bhabha_vtx, y_axis, S.sol[l1], kaon_mom[l1], ip_tri); //! Plane rec
 
-											if (abs(ip_tri[2] - bhabha_vtx[2]) > 2)
+											if (std::abs(ip_tri[2] - bhabha_vtx[2]) > 2)
 												ip_tri[2] = bhabha_vtx[2];
 
 											ip_tri[0] = bhabha_vtx[0];
@@ -225,12 +225,12 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 										}
 
 										cond_sol[0][0] = (S.sol[0][3] < cluster[3][ind_gam[0]]) && (S.sol[0][3] < cluster[3][ind_gam[1]]) && (S.sol[0][3] < cluster[3][ind_gam[2]]) && (S.sol[0][3] < cluster[3][ind_gam[3]]);
-										cond_sol[0][1] = (sqrt(pow(S.sol[0][0], 2) + pow(S.sol[0][1], 2)) < 200) && (abs(S.sol[0][2]) < 165);
+										cond_sol[0][1] = (sqrt(pow(S.sol[0][0], 2) + pow(S.sol[0][1], 2)) < 200) && (std::abs(S.sol[0][2]) < 165);
 										path_diff[0] = kaon_vel[0] * S.sol[0][3] - kaon_len[0];
 
 
 										cond_sol[1][0] = (S.sol[1][3] < cluster[3][ind_gam[0]]) && (S.sol[1][3] < cluster[3][ind_gam[1]]) && (S.sol[1][3] < cluster[3][ind_gam[2]]) && (S.sol[1][3] < cluster[3][ind_gam[3]]);
-										cond_sol[1][1] = (sqrt(pow(S.sol[1][0], 2) + pow(S.sol[1][1], 2)) < 200) && (abs(S.sol[1][2]) < 165);
+										cond_sol[1][1] = (sqrt(pow(S.sol[1][0], 2) + pow(S.sol[1][1], 2)) < 200) && (std::abs(S.sol[1][2]) < 165);
 										path_diff[1] = kaon_vel[1] * S.sol[1][3] - kaon_len[1];
 
 										sol1[0] = S.sol[0][0];
@@ -249,26 +249,26 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 										// We have to choose solutions
 
 										if ((cond_sol[1][0] == true && cond_sol[1][1] == true) &&
-															abs(path_diff[1]) + kaon_inv_mass_tmp[1] < abs(path_diff[0]) + kaon_inv_mass_tmp[0])
+															std::abs(path_diff[1]) + kaon_inv_mass_tmp[1] < std::abs(path_diff[0]) + kaon_inv_mass_tmp[0])
 										{
 											solution[0] = S.sol[1][0];
 											solution[1] = S.sol[1][1];
 											solution[2] = S.sol[1][2];
 											solution[3] = S.sol[1][3];
 
-											total_err = abs(path_diff[1]);
+											total_err = std::abs(path_diff[1]);
 
 											chosen = 2;
 											error = 0;
 										}
-										else if ((cond_sol[0][0] == true && cond_sol[0][1] == true) && abs(path_diff[0]) + kaon_inv_mass_tmp[0] < abs(path_diff[1]) + kaon_inv_mass_tmp[1])
+										else if ((cond_sol[0][0] == true && cond_sol[0][1] == true) && std::abs(path_diff[0]) + kaon_inv_mass_tmp[0] < std::abs(path_diff[1]) + kaon_inv_mass_tmp[1])
 										{
 											solution[0] = S.sol[0][0];
 											solution[1] = S.sol[0][1];
 											solution[2] = S.sol[0][2];
 											solution[3] = S.sol[0][3];
 
-											total_err = abs(path_diff[0]);
+											total_err = std::abs(path_diff[0]);
 
 											chosen = 1;
 											error = 0;
@@ -305,7 +305,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 												Knetri_tmp[2] += gammatri_tmp[l][2];
 												Knetri_tmp[3] += gammatri_tmp[l][3];
 
-												eqn_check[l] = abs(PhysicsConstants::cVel * (cluster[3][ind_gam[l]] - solution[3]) - gamma_len_tmp[l]);
+												eqn_check[l] = std::abs(PhysicsConstants::cVel * (cluster[3][ind_gam[l]] - solution[3]) - gamma_len_tmp[l]);
 											}
 
 											Knetri_tmp[4] = sqrt(pow(Knetri_tmp[0], 2) + pow(Knetri_tmp[1], 2) + pow(Knetri_tmp[2], 2));
@@ -315,7 +315,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 											Knetri_tmp[8] = solution[2];
 											Knetri_tmp[9] = solution[3];
 
-											total_err += abs(Knetri_tmp[5] - PhysicsConstants::mK0);
+											total_err += std::abs(Knetri_tmp[5] - PhysicsConstants::mK0);
 										}
 										else
 										{
@@ -373,7 +373,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 										plane_intersection(bhabha_vtx, y_axis, neu_vtx, Knetri, ip_tri); //! Plane rec
 
-										if (abs(ip_tri[2] - bhabha_vtx[2]) > 2)
+										if (std::abs(ip_tri[2] - bhabha_vtx[2]) > 2)
 											ip_tri[2] = bhabha_vtx[2];
 
 										ip_tri[0] = bhabha_vtx[0];
@@ -464,7 +464,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 							plane_intersection(bhabha_vtx, y_axis, S.sol[l1], kaon_mom[l1], ip_tri); //! Plane rec
 
-							if (abs(ip_tri[2] - bhabha_vtx[2]) > 2)
+							if (std::abs(ip_tri[2] - bhabha_vtx[2]) > 2)
 								ip_tri[2] = bhabha_vtx[2];
 
 							ip_tri[0] = bhabha_vtx[0];
@@ -476,7 +476,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 						cond_sol[0][0] = (S.sol[0][3] < cluster[3][ind_gam[0]]) && (S.sol[0][3] < cluster[3][ind_gam[1]]) && (S.sol[0][3] < cluster[3][ind_gam[2]]) && (S.sol[0][3] < cluster[3][ind_gam[3]]);
 
-						cond_sol[0][1] = (sqrt(pow(S.sol[0][0] - bhabha_vtx[0], 2) + pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
+						cond_sol[0][1] = (sqrt(pow(S.sol[0][0] - bhabha_vtx[0], 2) + pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
 						path_diff[0] = kaon_vel[0] * S.sol[0][3] - kaon_len[0];
 						eqn_check_tmp[0][0] = PhysicsConstants::cVel * (cluster[3][ind_gam[0]] - S.sol[0][3]) - gamma_len[0][0];
 						eqn_check_tmp[0][1] = PhysicsConstants::cVel * (cluster[3][ind_gam[1]] - S.sol[0][3]) - gamma_len[0][1];
@@ -489,7 +489,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 																				pow(eqn_check_tmp[0][3], 2));
 
 						cond_sol[1][0] = (S.sol[1][3] < cluster[3][ind_gam[0]]) && (S.sol[1][3] < cluster[3][ind_gam[1]]) && (S.sol[1][3] < cluster[3][ind_gam[2]]) && (S.sol[1][3] < cluster[3][ind_gam[3]]);
-						cond_sol[1][1] = (sqrt(pow(S.sol[1][0] - bhabha_vtx[0], 2) + pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
+						cond_sol[1][1] = (sqrt(pow(S.sol[1][0] - bhabha_vtx[0], 2) + pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
 						path_diff[1] = kaon_vel[1] * S.sol[1][3] - kaon_len[1];
 						eqn_check_tmp[1][0] = PhysicsConstants::cVel * (cluster[3][ind_gam[0]] - S.sol[1][3]) - gamma_len[1][0];
 						eqn_check_tmp[1][1] = PhysicsConstants::cVel * (cluster[3][ind_gam[1]] - S.sol[1][3]) - gamma_len[1][1];
@@ -524,27 +524,27 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 						// We have to choose solutions
 
 						if ((cond_sol[1][0] == true && cond_sol[1][1] == true) &&
-										 abs(path_diff[1]) < abs(path_diff[0]))
+										 std::abs(path_diff[1]) < std::abs(path_diff[0]))
 						{
 							solution[0] = S.sol[1][0];
 							solution[1] = S.sol[1][1];
 							solution[2] = S.sol[1][2];
 							solution[3] = S.sol[1][3];
 
-							total_err = abs(path_diff[1]);
+							total_err = std::abs(path_diff[1]);
 
 							chosen = 2;
 							error = 0;
 						}
 						else if ((cond_sol[0][0] == true && cond_sol[0][1] == true) &&
-										 abs(path_diff[0]) < abs(path_diff[1]))
+										 std::abs(path_diff[0]) < std::abs(path_diff[1]))
 						{
 							solution[0] = S.sol[0][0];
 							solution[1] = S.sol[0][1];
 							solution[2] = S.sol[0][2];
 							solution[3] = S.sol[0][3];
 
-							total_err = abs(path_diff[0]);
+							total_err = std::abs(path_diff[0]);
 
 							chosen = 1;
 							error = 0;
@@ -591,7 +591,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 							Knetri_tmp[8] = solution[2];
 							Knetri_tmp[9] = solution[3];
 
-							total_err += abs(Knetri_tmp[5] - PhysicsConstants::mK0);
+							total_err += std::abs(Knetri_tmp[5] - PhysicsConstants::mK0);
 															// + pow(eqn_check[0], 2) +
 															//   pow(eqn_check[1], 2) +
 															//   pow(eqn_check[2], 2) +
@@ -653,7 +653,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 						plane_intersection(bhabha_vtx, y_axis, neu_vtx, Knetri, ip_tri); //! Plane rec
 
-						if (abs(ip_tri[2] - bhabha_vtx[2]) > 2)
+						if (std::abs(ip_tri[2] - bhabha_vtx[2]) > 2)
 							ip_tri[2] = bhabha_vtx[2];
 
 						ip_tri[0] = bhabha_vtx[0];
@@ -738,7 +738,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 							plane_intersection(bhabha_vtx, y_axis, S.sol[l1], kaon_mom[l1], ip_tri); //! Plane rec
 
-							if (abs(ip_tri[2] - bhabha_vtx[2]) > 2)
+							if (std::abs(ip_tri[2] - bhabha_vtx[2]) > 2)
 								ip_tri[2] = bhabha_vtx[2];
 
 							ip_tri[0] = bhabha_vtx[0];
@@ -752,7 +752,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 						cond_sol[0][0] = 1;//(S.sol[0][3] < pgammc[0][7]) && (S.sol[0][3] < pgammc[1][7]) && (S.sol[0][3] < pgammc[2][7]) && (S.sol[0][3] < pgammc[3][7]);
 
-						cond_sol[0][1] = (sqrt(pow(S.sol[0][0] - bhabha_vtx[0], 2) + pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
+						cond_sol[0][1] = (sqrt(pow(S.sol[0][0] - bhabha_vtx[0], 2) + pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
 						path_diff[0] = kaon_vel[0] * S.sol[0][3] - kaon_len[0];
 						eqn_check_tmp[0][0] = PhysicsConstants::cVel * (pgammc[0][7] - S.sol[0][3]) - gamma_len[0][0];
 						eqn_check_tmp[0][1] = PhysicsConstants::cVel * (pgammc[1][7] - S.sol[0][3]) - gamma_len[0][1];
@@ -765,7 +765,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 																				pow(eqn_check_tmp[0][3], 2));
 
 						cond_sol[1][0] = 1;//(S.sol[1][3] < pgammc[0][7]) && (S.sol[1][3] < pgammc[1][7]) && (S.sol[1][3] < pgammc[2][7]) && (S.sol[1][3] < pgammc[3][7]);
-						cond_sol[1][1] = (sqrt(pow(S.sol[1][0] - bhabha_vtx[0], 2) + pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
+						cond_sol[1][1] = (sqrt(pow(S.sol[1][0] - bhabha_vtx[0], 2) + pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
 						path_diff[1] = kaon_vel[1] * S.sol[1][3] - kaon_len[1];
 						eqn_check_tmp[1][0] = PhysicsConstants::cVel * (pgammc[0][7] - S.sol[1][3]) - gamma_len[1][0];
 						eqn_check_tmp[1][1] = PhysicsConstants::cVel * (pgammc[1][7] - S.sol[1][3]) - gamma_len[1][1];
@@ -800,27 +800,27 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 						// We have to choose solutions
 
 						if ((cond_sol[1][0] == true && cond_sol[1][1] == true) &&
-										 abs(path_diff[1]) < abs(path_diff[0]))
+										 std::abs(path_diff[1]) < std::abs(path_diff[0]))
 						{
 							solution[0] = S.sol[1][0];
 							solution[1] = S.sol[1][1];
 							solution[2] = S.sol[1][2];
 							solution[3] = S.sol[1][3];
 
-							total_err = abs(path_diff[1]);
+							total_err = std::abs(path_diff[1]);
 
 							chosen = 2;
 							error = 0;
 						}
 						else if ((cond_sol[0][0] == true && cond_sol[0][1] == true) &&
-										 abs(path_diff[0]) < abs(path_diff[1]))
+										 std::abs(path_diff[0]) < std::abs(path_diff[1]))
 						{
 							solution[0] = S.sol[0][0];
 							solution[1] = S.sol[0][1];
 							solution[2] = S.sol[0][2];
 							solution[3] = S.sol[0][3];
 
-							total_err = abs(path_diff[0]);
+							total_err = std::abs(path_diff[0]);
 
 							chosen = 1;
 							error = 0;
@@ -867,7 +867,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 							Knetri_tmp[8] = solution[2];
 							Knetri_tmp[9] = solution[3];
 
-							total_err += abs(Knetri_tmp[5] - PhysicsConstants::mK0);
+							total_err += std::abs(Knetri_tmp[5] - PhysicsConstants::mK0);
 															// + pow(eqn_check[0], 2) +
 															//   pow(eqn_check[1], 2) +
 															//   pow(eqn_check[2], 2) +
@@ -929,7 +929,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 						plane_intersection(bhabha_vtx, y_axis, neu_vtx, Knetri, ip_tri); //! Plane rec
 
-						if (abs(ip_tri[2] - bhabha_vtx[2]) > 2)
+						if (std::abs(ip_tri[2] - bhabha_vtx[2]) > 2)
 							ip_tri[2] = bhabha_vtx[2];
 
 						ip_tri[0] = bhabha_vtx[0];

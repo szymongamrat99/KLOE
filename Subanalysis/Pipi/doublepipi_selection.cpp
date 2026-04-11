@@ -102,7 +102,7 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
             for(Int_t j = 0; j < nv; j++)
             {
                 radius = sqrt(pow(charged_vtx[0][j] - bhabha_vtx[0],2) + pow(charged_vtx[1][j] - bhabha_vtx[1],2));
-                height = abs(charged_vtx[2][j] - bhabha_vtx[2]);
+                height = std::abs(charged_vtx[2][j] - bhabha_vtx[2]);
 
                 if( qualv[j] == 1 && vtx[j] == 2 && radius < 10 && height < 20 )
                 {
@@ -110,13 +110,13 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                     for(Int_t k1 = 0; k1 < ntv - 1; k1++)
                     {
                         
-                        sign[0] = charged_vars[0][k1]/abs(charged_vars[0][k1]);
+                        sign[0] = charged_vars[0][k1]/std::abs(charged_vars[0][k1]);
                         if(ivOld[k1]-1 == j) 
                             charged_mom(charged_vars[0][k1], charged_vars[1][k1], charged_vars[2][k1], mom_vec[0], 1);
 
                         for(Int_t k2 = k1 + 1; k2 < ntv; k2++)
                         {
-                            sign[1] = charged_vars[0][k2]/abs(charged_vars[0][k2]);
+                            sign[1] = charged_vars[0][k2]/std::abs(charged_vars[0][k2]);
                             if(ivOld[k2]-1 == j && sign[0] != sign[1])
                             { 
                                 charged_mom(charged_vars[0][k2], charged_vars[1][k2], charged_vars[2][k2], mom_vec[1], 1);
@@ -124,7 +124,7 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                                 pow(mom_vec[0][0] + mom_vec[1][0],2) - 
                                                 pow(mom_vec[0][1] + mom_vec[1][1],2) -
                                                 pow(mom_vec[0][2] + mom_vec[1][2],2) );
-                                inv_mass_diff = abs(inv_mass - PhysicsConstants::mK0);
+                                inv_mass_diff = std::abs(inv_mass - PhysicsConstants::mK0);
                             }
                             else
                             {
@@ -179,13 +179,13 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                     for(Int_t k1 = 0; k1 < ntv - 1; k1++)
                     {
                         
-                        sign[0] = charged_vars[0][k1]/abs(charged_vars[0][k1]);
+                        sign[0] = charged_vars[0][k1]/std::abs(charged_vars[0][k1]);
                         if(ivOld[k1]-1 == j) 
                             charged_mom(charged_vars[0][k1], charged_vars[1][k1], charged_vars[2][k1], mom_vec[0], 1);
 
                         for(Int_t k2 = k1 + 1; k2 < ntv; k2++)
                         {
-                            sign[1] = charged_vars[0][k2]/abs(charged_vars[0][k2]);
+                            sign[1] = charged_vars[0][k2]/std::abs(charged_vars[0][k2]);
                             if(ivOld[k2]-1 == j && sign[0] != sign[1])
                             { 
                                 charged_mom(charged_vars[0][k2], charged_vars[1][k2], charged_vars[2][k2], mom_vec[1], 1);
@@ -193,7 +193,7 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                                 pow(mom_vec[0][0] + mom_vec[1][0],2) - 
                                                 pow(mom_vec[0][1] + mom_vec[1][1],2) -
                                                 pow(mom_vec[0][2] + mom_vec[1][2],2) );
-                                inv_mass_diff = abs(inv_mass - PhysicsConstants::mK0);
+                                inv_mass_diff = std::abs(inv_mass - PhysicsConstants::mK0);
                             }
                             else
                             {

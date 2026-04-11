@@ -114,7 +114,7 @@ Bool_t trilateration::Process(Long64_t entry)
 
    distance_mc = sqrt(pow(Knemc_three[6] - *Bx, 2) + pow(Knemc_three[7] - *By, 2) + pow(Knemc_three[8] - *Bz, 2));
 
-   if(*done4 == 1 && abs(*Qmiss_inv - 104.6) < 15 && abs(*anglepipi_CM_kch - 145) < 25 )
+   if(*done4 == 1 && std::abs(*Qmiss_inv - 104.6) < 15 && std::abs(*anglepipi_CM_kch - 145) < 25 )
    {
       distance_rec2 = sqrt(pow(fourKnetri[6] - *Bx, 2) + pow(fourKnetri[7] - *By, 2) + pow(fourKnetri[8] - *Bz, 2));
 

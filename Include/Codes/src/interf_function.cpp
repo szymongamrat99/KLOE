@@ -40,11 +40,11 @@ Double_t interf_function(const Double_t *x, const Double_t *par)
   }
   else
   {
-    Value = (1. + 2. * RePart) * exp(-GammaKs * abs(dt)) +
-            (1. - 4. * RePart) * exp(-GammaKl * abs(dt)) -
-            2. * exp(-0.5 * Gamma * abs(dt)) *
-                ((1. - RePart) * cos(DMass * abs(dt)) -
-                 3. * ImPart * sin(DMass * abs(dt)));
+    Value = (1. + 2. * RePart) * exp(-GammaKs * std::abs(dt)) +
+            (1. - 4. * RePart) * exp(-GammaKl * std::abs(dt)) -
+            2. * exp(-0.5 * Gamma * std::abs(dt)) *
+                ((1. - RePart) * cos(DMass * std::abs(dt)) -
+                 3. * ImPart * sin(DMass * std::abs(dt)));
   }
 
   return (pow(Epsilon, 2) / (2. * Gamma)) * Value * 1000000;
@@ -171,8 +171,8 @@ Double_t double_exponential(const Double_t *x, const Double_t *par)
   }
   else
   {
-    value = (1. + 2. * PhysicsConstants::Re) * exp(-gammaS * abs(dt)) +
-            (1. - 4. * PhysicsConstants::Re) * exp(-gammaL * abs(dt));
+    value = (1. + 2. * PhysicsConstants::Re) * exp(-gammaS * std::abs(dt)) +
+            (1. - 4. * PhysicsConstants::Re) * exp(-gammaL * std::abs(dt));
   }
 
   return value;

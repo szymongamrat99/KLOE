@@ -93,14 +93,14 @@ int cp_fit_func(KLOE::interference &event, std::vector<std::vector<Double_t>> &r
 
 	minimum->Minimize();
 
-	relativeErr[0].push_back(abs(minimum->Errors()[0] / minimum->X()[0]));
-	relativeErr[1].push_back(abs(minimum->Errors()[1] / minimum->X()[1]));
+	relativeErr[0].push_back(std::abs(minimum->Errors()[0] / minimum->X()[0]));
+	relativeErr[1].push_back(std::abs(minimum->Errors()[1] / minimum->X()[1]));
 
-	real[0].push_back(abs(minimum->X()[0]));
-	real[1].push_back(abs(minimum->Errors()[0]));
+	real[0].push_back(std::abs(minimum->X()[0]));
+	real[1].push_back(std::abs(minimum->Errors()[0]));
 
-	imaginary[0].push_back(abs(minimum->X()[1]));
-	imaginary[1].push_back(abs(minimum->Errors()[1]));
+	imaginary[0].push_back(std::abs(minimum->X()[1]));
+	imaginary[1].push_back(std::abs(minimum->Errors()[1]));
 
 	return 0;
 }

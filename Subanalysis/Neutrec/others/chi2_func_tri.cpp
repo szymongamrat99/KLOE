@@ -125,7 +125,7 @@ Double_t trilateration_chi_square(const Double_t *x)
     ip_rec[i][0] = bhabha_vtx[0];
     ip_rec[i][1] = bhabha_vtx[1];
 
-		if (abs(ip_rec[i][2] - bhabha_vtx[2]) > 2)
+		if (std::abs(ip_rec[i][2] - bhabha_vtx[2]) > 2)
 		{
 			ip_rec[i][2] = bhabha_vtx[2];
 		}

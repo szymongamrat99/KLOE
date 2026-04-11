@@ -318,15 +318,15 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                                pow(trk1[0] + trk2[0] + pi0Omega2[0], 2) -
                                pow(trk1[1] + trk2[1] + pi0Omega2[1], 2) -
                                pow(trk1[2] + trk2[2] + pi0Omega2[2], 2)),
-          Omega1ErrTmp = abs(Omega1MassTmp - PhysicsConstants::mOmega),
-          Omega2ErrTmp = abs(Omega2MassTmp - PhysicsConstants::mOmega);
+          Omega1ErrTmp = std::abs(Omega1MassTmp - PhysicsConstants::mOmega),
+          Omega2ErrTmp = std::abs(Omega2MassTmp - PhysicsConstants::mOmega);
 
   Float_t radius00 = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
                           pow(KnerecFit[7] - ipFit[1], 2)),
           radiuspm = sqrt(pow(KchrecFit[6] - ipFit[0], 2) +
                           pow(KchrecFit[7] - ipFit[1], 2)),
-          zdist00 = abs(KnerecFit[8] - ipFit[2]),
-          zdistpm = abs(KchrecFit[8] - ipFit[2]),
+          zdist00 = std::abs(KnerecFit[8] - ipFit[2]),
+          zdistpm = std::abs(KchrecFit[8] - ipFit[2]),
           path00 = sqrt(pow(Knerec[6] - *Bx, 2) +
                         pow(Knerec[7] - *By, 2) +
                         pow(Knerec[8] - *Bz, 2)),
@@ -393,15 +393,15 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
           Phi1Rec = trk1VecRec.Phi(),
           Phi2Rec = trk2VecRec.Phi();
 
-  deltaPhi = abs(Phi2Rec - Phi1Rec);
-  deltaTheta = abs(Theta2Fit - Theta1Fit);
-  deltaPhiFit = abs(Phi2Fit - Phi1Fit);
+  deltaPhi = std::abs(Phi2Rec - Phi1Rec);
+  deltaTheta = std::abs(Theta2Fit - Theta1Fit);
+  deltaPhiFit = std::abs(Phi2Fit - Phi1Fit);
 
   // Analiza Simony cięcie na 3 sigma mas
-  Bool_t condMassKch = abs(Kchrec[5] - 497.605) < 3 * 0.879,
-         condMassKne = abs(*minv4gam - 488.411) < 3 * 41.293,
-         condMassPi01 = abs(pi01Fit[5] - 134.840) < 3 * 3.479,
-         condMassPi02 = abs(pi02Fit[5] - 134.867) < 3 * 3.331;
+  Bool_t condMassKch = std::abs(Kchrec[5] - 497.605) < 3 * 0.879,
+         condMassKne = std::abs(*minv4gam - 488.411) < 3 * 41.293,
+         condMassPi01 = std::abs(pi01Fit[5] - 134.840) < 3 * 3.479,
+         condMassPi02 = std::abs(pi02Fit[5] - 134.867) < 3 * 3.331;
   ///////////////////////////////////////////////////////////////////////////////
 
   Float_t kaonChPath = sqrt(pow(Kchrec[6] - ip[0], 2) +
@@ -433,9 +433,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
           openingAngleNeutral = pi01Vec.Angle(pi02Vec.Vect()) * 180.0 / TMath::Pi(),
           acosCutAngle = acos(-0.8) * 180.0 / TMath::Pi();
 
-  Bool_t simonaCuts = abs(deltaPhiFit - 3.110) > 2 * 0.135 && *Chi2SignalKinFit < 30.,
+  Bool_t simonaCuts = std::abs(deltaPhiFit - 3.110) > 2 * 0.135 && *Chi2SignalKinFit < 30.,
          simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaCuts,
-         condAnalysisOld = *Chi2SignalKinFit < 40. && combinedMassPi0Fit < 35. && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && abs(*minv4gam - PhysicsConstants::mK0) < 76. && *Qmiss < 3.75 && *TrcSum > -1. && openingAngleCharged > acosCutAngle;
+         condAnalysisOld = *Chi2SignalKinFit < 40. && combinedMassPi0Fit < 35. && std::abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && std::abs(*minv4gam - PhysicsConstants::mK0) < 76. && *Qmiss < 3.75 && *TrcSum > -1. && openingAngleCharged > acosCutAngle;
 
   if (mctruth_int == 0 || mctruth_int == -1 || mctruth_int == 1)
     signal_tot_err++;
@@ -456,8 +456,8 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   RtNeuRec = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
                   pow(KnerecFit[7] - ipFit[1], 2));
 
-  ZChRec = abs(KchrecFit[8] - ipFit[2]);
-  ZNeuRec = abs(KnerecFit[8] - ipFit[2]);
+  ZChRec = std::abs(KchrecFit[8] - ipFit[2]);
+  ZNeuRec = std::abs(KnerecFit[8] - ipFit[2]);
 
   Bool_t lastSimonaCut = (isInsideFiducialVolume && !(cutter->PassCut(12) && cutter->PassCut(13) && cutter->PassCut(14) && cutter->PassCut(15))) || (!isInsideFiducialVolume);
 
@@ -482,7 +482,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
            phiTrk2AngleMC = trk2VecMC.Angle(KchrecVecMC) * 180.0 / TMath::Pi();
 
   Bool_t corrPosLimit = (radius00 < 1.5 && radiuspm < 1.5 && zdist00 < 1.0 && zdistpm < 1.0);
-  Bool_t phivLimit = abs(deltaPhiFit - 3.110) < 2 * 0.135;
+  Bool_t phivLimit = std::abs(deltaPhiFit - 3.110) < 2 * 0.135;
   Bool_t condResCorr = (phivLimit && !(cos(phiTrk1Angle * TMath::Pi() / 180.0) > 0.9 || cos(phiTrk2Angle * TMath::Pi() / 180.0) > 0.9)) || !phivLimit;
 
   if (mctruth_int == 1 && condMassKch && condMassKne && combinedMassPi0Fit < 15 && *Chi2SignalKinFit / 10. < 3 && condResCorr) // && pathKchFit <= limitRadiusChMC && pathKneFit <= limitRadiusNeMC)
@@ -523,12 +523,12 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsReconstructed["pz_Phi"]->Fill(*Bpz - Kchmc[2] - Knemc[2], weight);
     histsReconstructed["Energy_Phi"]->Fill(*Broots - Kchmc[3] - Knemc[3], weight);
 
-    if (abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
+    if (std::abs(Omega1ErrTmp) > std::abs(Omega2ErrTmp))
       histsReconstructed["mass_omega"]->Fill(Omega2MassTmp, weight);
     else
       histsReconstructed["mass_omega"]->Fill(Omega1MassTmp, weight);
 
-    if (abs(Omega1ErrTmp) > abs(Omega2ErrTmp))
+    if (std::abs(Omega1ErrTmp) > std::abs(Omega2ErrTmp))
       histsReconstructed["mass_omega_rec"]->Fill(Omega2MassTmp, weight);
     else
       histsReconstructed["mass_omega_rec"]->Fill(Omega1MassTmp, weight);
@@ -565,44 +565,44 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     Double_t errorPart10, errorPart20, errorPart11, errorPart21, error1021, error1120;
 
-    errorPart10 = pow(abs(*CurvSmeared1) - abs(CurvMC[0]), 2) +
-                  pow(abs(*PhivSmeared1) - abs(PhivMC[0]), 2) +
-                  pow(abs(*CotvSmeared1) - abs(CotvMC[0]), 2);
+    errorPart10 = pow(std::abs(*CurvSmeared1) - std::abs(CurvMC[0]), 2) +
+                  pow(std::abs(*PhivSmeared1) - std::abs(PhivMC[0]), 2) +
+                  pow(std::abs(*CotvSmeared1) - std::abs(CotvMC[0]), 2);
 
-    errorPart20 = pow(abs(*CurvSmeared2) - abs(CurvMC[0]), 2) +
-                  pow(abs(*PhivSmeared2) - abs(PhivMC[0]), 2) +
-                  pow(abs(*CotvSmeared2) - abs(CotvMC[0]), 2);
+    errorPart20 = pow(std::abs(*CurvSmeared2) - std::abs(CurvMC[0]), 2) +
+                  pow(std::abs(*PhivSmeared2) - std::abs(PhivMC[0]), 2) +
+                  pow(std::abs(*CotvSmeared2) - std::abs(CotvMC[0]), 2);
 
-    errorPart11 = pow(abs(*CurvSmeared1) - abs(CurvMC[1]), 2) +
-                  pow(abs(*PhivSmeared1) - abs(PhivMC[1]), 2) +
-                  pow(abs(*CotvSmeared1) - abs(CotvMC[1]), 2);
+    errorPart11 = pow(std::abs(*CurvSmeared1) - std::abs(CurvMC[1]), 2) +
+                  pow(std::abs(*PhivSmeared1) - std::abs(PhivMC[1]), 2) +
+                  pow(std::abs(*CotvSmeared1) - std::abs(CotvMC[1]), 2);
 
-    errorPart21 = pow(abs(*CurvSmeared2) - abs(CurvMC[1]), 2) +
-                  pow(abs(*PhivSmeared2) - abs(PhivMC[1]), 2) +
-                  pow(abs(*CotvSmeared2) - abs(CotvMC[1]), 2);
+    errorPart21 = pow(std::abs(*CurvSmeared2) - std::abs(CurvMC[1]), 2) +
+                  pow(std::abs(*PhivSmeared2) - std::abs(PhivMC[1]), 2) +
+                  pow(std::abs(*CotvSmeared2) - std::abs(CotvMC[1]), 2);
 
     error1021 = sqrt(errorPart10 + errorPart21);
     error1120 = sqrt(errorPart11 + errorPart20);
 
     if (error1021 < error1120)
     {
-      histsReconstructed["curv1"]->Fill(abs(*CurvSmeared1) - abs(CurvMC[0]), weight);
-      histsReconstructed["phiv1"]->Fill(abs(*PhivSmeared1) - abs(PhivMC[0]), weight);
-      histsReconstructed["cotv1"]->Fill(abs(*CotvSmeared1) - abs(CotvMC[0]), weight);
+      histsReconstructed["curv1"]->Fill(std::abs(*CurvSmeared1) - std::abs(CurvMC[0]), weight);
+      histsReconstructed["phiv1"]->Fill(std::abs(*PhivSmeared1) - std::abs(PhivMC[0]), weight);
+      histsReconstructed["cotv1"]->Fill(std::abs(*CotvSmeared1) - std::abs(CotvMC[0]), weight);
 
-      histsReconstructed["curv2"]->Fill(abs(*CurvSmeared2) - abs(CurvMC[1]), weight);
-      histsReconstructed["phiv2"]->Fill(abs(*PhivSmeared2) - abs(PhivMC[1]), weight);
-      histsReconstructed["cotv2"]->Fill(abs(*CotvSmeared2) - abs(CotvMC[1]), weight);
+      histsReconstructed["curv2"]->Fill(std::abs(*CurvSmeared2) - std::abs(CurvMC[1]), weight);
+      histsReconstructed["phiv2"]->Fill(std::abs(*PhivSmeared2) - std::abs(PhivMC[1]), weight);
+      histsReconstructed["cotv2"]->Fill(std::abs(*CotvSmeared2) - std::abs(CotvMC[1]), weight);
     }
     else
     {
-      histsReconstructed["curv1"]->Fill(abs(*CurvSmeared1) - abs(CurvMC[1]), weight);
-      histsReconstructed["phiv1"]->Fill(abs(*PhivSmeared1) - abs(PhivMC[1]), weight);
-      histsReconstructed["cotv1"]->Fill(abs(*CotvSmeared1) - abs(CotvMC[1]), weight);
+      histsReconstructed["curv1"]->Fill(std::abs(*CurvSmeared1) - std::abs(CurvMC[1]), weight);
+      histsReconstructed["phiv1"]->Fill(std::abs(*PhivSmeared1) - std::abs(PhivMC[1]), weight);
+      histsReconstructed["cotv1"]->Fill(std::abs(*CotvSmeared1) - std::abs(CotvMC[1]), weight);
 
-      histsReconstructed["curv2"]->Fill(abs(*CurvSmeared2) - abs(CurvMC[0]), weight);
-      histsReconstructed["phiv2"]->Fill(abs(*PhivSmeared2) - abs(PhivMC[0]), weight);
-      histsReconstructed["cotv2"]->Fill(abs(*CotvSmeared2) - abs(CotvMC[0]), weight);
+      histsReconstructed["curv2"]->Fill(std::abs(*CurvSmeared2) - std::abs(CurvMC[0]), weight);
+      histsReconstructed["phiv2"]->Fill(std::abs(*PhivSmeared2) - std::abs(PhivMC[0]), weight);
+      histsReconstructed["cotv2"]->Fill(std::abs(*CotvSmeared2) - std::abs(CotvMC[0]), weight);
     }
 
     errorPart10 = pow(trk1[0] - trk1MC[0], 2) +

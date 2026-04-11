@@ -117,8 +117,8 @@ std::map<Long64_t, TString> parseHistogramFiles(const std::string &folderPath)
 
         if (parsed == 3)
         {
-          if (abs(params.reParam - reParamTemplate) < tolerance &&
-              abs(params.imParam - imParamTemplate) < tolerance)
+          if (std::abs(params.reParam - reParamTemplate) < tolerance &&
+              std::abs(params.imParam - imParamTemplate) < tolerance)
           {
             fileParams[params.nEvents] = filename;
             std::cout << "Found: " << filename
@@ -1034,8 +1034,8 @@ int main()
 
   if (isReLimited)
   {
-    fitLimits["Re"][0] = reParam - reLimitPercentage * abs(reParam);
-    fitLimits["Re"][1] = reParam + reLimitPercentage * abs(reParam);
+    fitLimits["Re"][0] = reParam - reLimitPercentage * std::abs(reParam);
+    fitLimits["Re"][1] = reParam + reLimitPercentage * std::abs(reParam);
 
     fitFunc_RA->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
     fitFunc_RB->SetParLimits(0, fitLimits["Re"][0], fitLimits["Re"][1]);
@@ -1044,8 +1044,8 @@ int main()
 
   if (isImLimited)
   {
-    fitLimits["Im"][0] = imParam - imLimitPercentage * abs(imParam);
-    fitLimits["Im"][1] = imParam + imLimitPercentage * abs(imParam);
+    fitLimits["Im"][0] = imParam - imLimitPercentage * std::abs(imParam);
+    fitLimits["Im"][1] = imParam + imLimitPercentage * std::abs(imParam);
 
     fitFunc_RA->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
     fitFunc_RB->SetParLimits(1, fitLimits["Im"][0], fitLimits["Im"][1]);
@@ -1349,7 +1349,7 @@ int main()
 
       extreme = *std::max_element(values, values + 3);
 
-      return extreme + 0.15 * abs(extreme); // Dodaj 15% marginesu powyżej maksimum
+      return extreme + 0.15 * std::abs(extreme); // Dodaj 15% marginesu powyżej maksimum
     }
     else
     {
@@ -1367,7 +1367,7 @@ int main()
 
       extreme = *std::min_element(values, values + 3);
 
-      return extreme - 0.15 * abs(extreme); // Dodaj 15% marginesu poniżej minimum
+      return extreme - 0.15 * std::abs(extreme); // Dodaj 15% marginesu poniżej minimum
     }
   };
 

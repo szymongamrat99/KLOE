@@ -345,7 +345,7 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 											ip_tri[k][0] = bhabha_vtx[0];
 											ip_tri[k][1] = bhabha_vtx[1];
 
-											if (abs(ip_tri[k][2] - bhabha_vtx[2]) > 2)
+											if (std::abs(ip_tri[k][2] - bhabha_vtx[2]) > 2)
 												ip_tri[k][2] = bhabha_vtx[2];
 
 											length_kaon[k] = sqrt(pow(neu_vtx_min[k][0] - ip_tri[k][0], 2) + pow(neu_vtx_min[k][1] - ip_tri[k][1], 2) + pow(neu_vtx_min[k][2] - ip_tri[k][2], 2));
@@ -353,7 +353,7 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 											diff_kaon[k] = v_kaon[k] * neu_vtx_min[k][3] - length_kaon[k];
 										}
 
-										if (abs(diff_kaon[0]) < abs(diff_kaon[1]))
+										if (std::abs(diff_kaon[0]) < std::abs(diff_kaon[1]))
 										{
 											gamma_mom_final[0][0] = gamma_mom[0][0][0];
 											gamma_mom_final[0][1] = gamma_mom[0][0][1];
@@ -418,10 +418,10 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 											iptri_kinfit[0] = bhabha_vtx[0];
 											iptri_kinfit[1] = bhabha_vtx[1];
 
-											if (abs(iptri_kinfit[2] - bhabha_vtx[2]) > 2)
+											if (std::abs(iptri_kinfit[2] - bhabha_vtx[2]) > 2)
 												iptri_kinfit[2] = bhabha_vtx[2];
 										}
-										else if (abs(diff_kaon[0]) > abs(diff_kaon[1]))
+										else if (std::abs(diff_kaon[0]) > std::abs(diff_kaon[1]))
 										{
 											gamma_mom_final[0][0] = gamma_mom[1][0][0];
 											gamma_mom_final[0][1] = gamma_mom[1][0][1];
@@ -484,7 +484,7 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 											iptri_kinfit[0] = bhabha_vtx[0];
 											iptri_kinfit[1] = bhabha_vtx[1];
 
-											if (abs(iptri_kinfit[2] - bhabha_vtx[2]) > 2)
+											if (std::abs(iptri_kinfit[2] - bhabha_vtx[2]) > 2)
 												iptri_kinfit[2] = bhabha_vtx[2];
 										}
 									}

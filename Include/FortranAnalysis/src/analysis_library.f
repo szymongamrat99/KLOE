@@ -1412,7 +1412,7 @@ C out: g4vtxerr
               DO j = 1,3
                  neuvtxx(i,j) = ip(j) + kpath_tmp*beta_k(j)/beta_k_mod
               ENDDO
-              IF( abs(trc(i)).gt.abs(tcl(ncll(i))-sqrt(
+              IF( std::abs(trc(i)).gt.std::abs(tcl(ncll(i))-sqrt(
      &                 (xcl(ncll(i))-neuvtxx(i,1))**2 +
      &                 (ycl(ncll(i))-neuvtxx(i,2))**2 +
      &                 (zcl(ncll(i))-neuvtxx(i,3))**2  )/Cvel -
@@ -1614,7 +1614,7 @@ C Clust-NeuVtx dist.
      &             (ycl(ncll(g4ind(i)))-vcoor(2))**2 +
      &             (zcl(ncll(g4ind(i)))-vcoor(3))**2 )/Cvel
                  chigam_tmp(5) = chigam_tmp(5) +
-     &           enecl(ncll(g4ind(i)))*abs(trcvtmp(g4ind(i)))
+     &           enecl(ncll(g4ind(i)))*std::abs(trcvtmp(g4ind(i)))
                  chigam_tmp(6) = chigam_tmp(6) + sqrt(
      &             (vcoor(1)-neuvtxx(g4ind(i),1))**2 +
      &             (vcoor(2)-neuvtxx(g4ind(i),2))**2 +
@@ -1915,7 +1915,7 @@ C      ENDIF
          CALL statisticss(4)
          RETURN
        ENDIF
-C       IF( abs(Interf%kchrec(6)-Mko).gt.1.2 ) THEN
+C       IF( std::abs(Interf%kchrec(6)-Mko).gt.1.2 ) THEN
 C         CALL statisticss(5)
 C         RETURN
 C       ENDIF

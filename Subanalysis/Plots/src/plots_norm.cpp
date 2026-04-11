@@ -143,7 +143,7 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 
 	for (Int_t i = 0; i < alias.size(); i++)
 	{
-		bin_width[alias[i]] = abs(range_max[alias[i]] - range_min[alias[i]]) / bin_num[alias[i]];
+		bin_width[alias[i]] = std::abs(range_max[alias[i]] - range_min[alias[i]]) / bin_num[alias[i]];
 		yTitle[alias[i]] = (std::string)Form("Counts/%.2f", bin_width[alias[i]]);
 
 		model[alias[i]] = {alias[i].c_str(), "", bin_num[alias[i]], range_min[alias[i]], range_max[alias[i]]};

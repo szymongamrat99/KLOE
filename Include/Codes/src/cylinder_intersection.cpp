@@ -11,7 +11,7 @@ namespace KLOE
 
     barrel_inter(momentum, neu_vtx, cluster);
 
-    if (abs(cluster[2]) < _zmax)
+    if (std::abs(cluster[2]) < _zmax)
     {
       return 1;
     }

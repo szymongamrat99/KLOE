@@ -169,13 +169,13 @@ Bool_t histos1::Process(Long64_t entry)
 
    DeltaT = tpm - t00;
 
-   cuts_semi[0] = abs(*Qmiss_inv - 115.31) < 13;
-   cuts_semi[1] = abs(*anglepipi_CM_kch - 141) < 30;
+   cuts_semi[0] = std::abs(*Qmiss_inv - 115.31) < 13;
+   cuts_semi[1] = std::abs(*anglepipi_CM_kch - 141) < 30;
 
-   cuts_signal_neutral_cs[0] = 1;//(abs(fourKnetri[5] - PhysicsConstants::mK0) < 76);
+   cuts_signal_neutral_cs[0] = 1;//(std::abs(fourKnetri[5] - PhysicsConstants::mK0) < 76);
    cuts_signal_neutral_cs[1] = 1;//(trcv_sum > -5);
 
-   cuts_signal_charged_cs[0] = 1;//(abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2);
+   cuts_signal_charged_cs[0] = 1;//(std::abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2);
    cuts_signal_charged_cs[1] = 1;//(*Qmiss_inv < 3.75);
    cuts_signal_charged_cs[2] = 1;//= (cos(M_PI**anglepipi_CM_kch/180.) < -0.8);
 
@@ -217,7 +217,7 @@ Bool_t histos1::Process(Long64_t entry)
 		hist_signal_nocuts->Fill(*Dtrec);
    }
 
-   if(abs(*minv4gam - PhysicsConstants::mK0) < 150 && trcv_sum_signal > -1 && abs(Kchrec[5] - PhysicsConstants::mK0) < 2 && *Qmiss_inv < 3.75 && cos(M_PI**anglepipi_CM_kch/180.) < -0.8)
+   if(std::abs(*minv4gam - PhysicsConstants::mK0) < 150 && trcv_sum_signal > -1 && std::abs(Kchrec[5] - PhysicsConstants::mK0) < 2 && *Qmiss_inv < 3.75 && cos(M_PI**anglepipi_CM_kch/180.) < -0.8)
    {
    	if(*mctruth == 1)
 	   {
@@ -452,7 +452,7 @@ Bool_t histos1::Process(Long64_t entry)
    }
 
    //Pipi selection
-   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 /*&& *done4 == 1*/)
+   if(donepipi[0] == 1 && donepipi[1] == 1 && std::abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 /*&& *done4 == 1*/)
    {
       hist_pipi_nocuts->Fill(DeltaT, br_ks_pippim + br_kl_pippim);
 

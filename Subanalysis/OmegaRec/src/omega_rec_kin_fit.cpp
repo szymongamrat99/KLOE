@@ -337,7 +337,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
 								CHISQRTMP = kinematicFitObj.FitFunction();
 
-								if (abs(CHISQRTMP) < abs(CHISQRMIN))
+								if (std::abs(CHISQRTMP) < std::abs(CHISQRMIN))
 								{
 									isConverged = 1;
 									FUNVALMIN = FUNVALTMP;
@@ -448,7 +448,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									else
 									{
 										doneOmega = 1;
-										if (abs(M_omega_diff[0]) < abs(M_omega_diff[1]))
+										if (std::abs(M_omega_diff[0]) < std::abs(M_omega_diff[1]))
 										{
 											Omegarec[0] = PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[0][0];
 											Omegarec[1] = PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[0][1];

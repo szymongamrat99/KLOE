@@ -286,7 +286,7 @@ print("sigmav expression:", sigmav)
 print("sigmau value =", sigmau_val)
 print("sigmav value =", sigmav_val)
 
-squareCut = "abs({}) < 3 * {} && abs({}) < 3 * {}".format(u, sigmau, v, sigmav)
+squareCut = "std::abs({}) < 3 * {} && std::abs({}) < 3 * {}".format(u, sigmau, v, sigmav)
 
 ## Display the rectangle
 

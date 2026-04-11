@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(curv_zero_guard)
 
 BOOST_AUTO_TEST_CASE(negative_curvature_uses_abs)
 {
-  // Ujemna krzywizna → abs(curv) powinien dać te same wielkości pędów
+  // Ujemna krzywizna → std::abs(curv) powinien dać te same wielkości pędów
   auto &logger = testLogger();
   double momPos[4] = {}, momNeg[4] = {};
   KLOE::ChargedVtxRec<double, int>::charged_mom(3.0, 0.7, 0.5, momPos, 1, logger);

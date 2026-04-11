@@ -412,18 +412,18 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
    if(*mctruth == 1)
 	{
       trcv_sum_signal = trcv[g4taken[0]-1] + trcv[g4taken[1]-1] + trcv[g4taken[2]-1] + trcv[g4taken[3]-1];
-      pEff_signal->FillWeighted(trcv_sum_signal > -1 && abs(*minv4gam - PhysicsConstants::mK0) < 76 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, event.interf_function(DeltaT_mc,1,0), DeltaT_signal);
-      pEff_signal_tri->FillWeighted(trcv_sum > -1 && abs(fourKnetri[5] - PhysicsConstants::mK0) < 76 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, event.interf_function(DeltaT_mc,1,0), DeltaT_signal);
+      pEff_signal->FillWeighted(trcv_sum_signal > -1 && std::abs(*minv4gam - PhysicsConstants::mK0) < 76 && std::abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, event.interf_function(DeltaT_mc,1,0), DeltaT_signal);
+      pEff_signal_tri->FillWeighted(trcv_sum > -1 && std::abs(fourKnetri[5] - PhysicsConstants::mK0) < 76 && std::abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && *Qmiss_inv < 3.75 && cos(M_PI*(*anglepipi_CM_kch/180.)) < -0.8, event.interf_function(DeltaT_mc,1,0), DeltaT_signal);
 
    }
 
-   cuts_semi[0] = abs(*Qmiss_inv - 71.13) < 25;
-   cuts_semi[1] = abs(*anglepipi_CM_kch - 145.8) < 10;
+   cuts_semi[0] = std::abs(*Qmiss_inv - 71.13) < 25;
+   cuts_semi[1] = std::abs(*anglepipi_CM_kch - 145.8) < 10;
 
-   cuts_signal_neutral_cs[0] = (abs(fourKnetri[5] - PhysicsConstants::mK0) < 76);
+   cuts_signal_neutral_cs[0] = (std::abs(fourKnetri[5] - PhysicsConstants::mK0) < 76);
    cuts_signal_neutral_cs[1] = (trcv_sum > -1.0);
 
-   cuts_signal_charged_cs[0] = (abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2);
+   cuts_signal_charged_cs[0] = (std::abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2);
    cuts_signal_charged_cs[1] = (*Qmiss_inv < 3.75);
    cuts_signal_charged_cs[2] = (cos(M_PI*(*anglepipi_CM_kch)/180.) < -0.8);
 
@@ -433,14 +433,14 @@ Double_t tot_br_pipi = ((br_kl_pippim)/(br_kl_pippim + br_ks_pippim))*br_ks_pipp
 
    if(tot_cuts_semi && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_semimc->FillWeighted(tot_cuts_neutral, tot_br_semi, DeltaT_control);
    if(*done == 1 && *mcflag == 1 && *mctruth != 0 && *done4 == 1) pEff_threemc->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
-   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 1 && *mctruth != 0) pEff_pipimc->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
+   if(donepipi[0] == 1 && donepipi[1] == 1 && std::abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 1 && *mctruth != 0) pEff_pipimc->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
 
    if(tot_cuts_semi && *mcflag == 0 && *done4 == 1) pEff_semi->FillWeighted(tot_cuts_neutral, tot_br_semi, DeltaT_control);
    if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
-   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 0) pEff_pipi->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
+   if(donepipi[0] == 1 && donepipi[1] == 1 && std::abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 0) pEff_pipi->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
 
    if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three_length->FillWeighted(tot_cuts_charged, br_ks_pippim, sqrt(pow(Kchrec[6] - *Bx,2) + pow(Kchrec[7] - *By,2) + pow(Kchrec[8] - *Bz,2)));
-   if(donepipi[0] == 1 && donepipi[1] == 1 && abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 0) pEff_pipi_length->FillWeighted(tot_cuts_charged, tot_br_pipi, sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)));
+   if(donepipi[0] == 1 && donepipi[1] == 1 && std::abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 0) pEff_pipi_length->FillWeighted(tot_cuts_charged, tot_br_pipi, sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)));
 
    return kTRUE;
 }

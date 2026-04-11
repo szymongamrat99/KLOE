@@ -985,7 +985,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           thetaGamma3 = gamma3.Angle(z_axis) * 180.0 / TMath::Pi(),
           thetaGamma4 = gamma4.Angle(z_axis) * 180.0 / TMath::Pi();
 
-  Bool_t passSemi = abs(*Qmiss - 40.73) < 15 && openingAngleNeutral > 160. && openingAngleCharged > 160.;
+  Bool_t passSemi = std::abs(*Qmiss - 40.73) < 15 && openingAngleNeutral > 160. && openingAngleCharged > 160.;
 
   Double_t angleLower = 0., angleUpper = 180.;
 
@@ -1013,10 +1013,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           Phi1Rec = trk1VecRec.Phi(),
           Phi2Rec = trk2VecRec.Phi();
 
-  deltaPhiPhiCM = abs(phiv2PhiCM - phiv1PhiCM);
-  deltaPhi = abs(Phi2Rec - Phi1Rec);
-  deltaTheta = abs(Theta2Fit - Theta1Fit);
-  deltaPhiFit = abs(Phi2Fit - Phi1Fit);
+  deltaPhiPhiCM = std::abs(phiv2PhiCM - phiv1PhiCM);
+  deltaPhi = std::abs(Phi2Rec - Phi1Rec);
+  deltaTheta = std::abs(Theta2Fit - Theta1Fit);
+  deltaPhiFit = std::abs(Phi2Fit - Phi1Fit);
 
   // Analiza Simony ciecie na phi bad
   Bool_t condGeneral = (deltaTfit - deltaTMC)<CutDefs::simonaBadClusDeltaTResMax,
@@ -1026,10 +1026,10 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
          badClusSimona = condGeneral && condLowerLimit && condUpperLimit;
   ///////////////////////////////////////////////////////////////////////////////
   // Analiza Simony cięcie na 3 sigma mas
-  Bool_t condMassKch = abs(Kchrec[5] - 497.605) < 3 * 0.879,
-         condMassKne = abs(*minv4gam - 488.411) < 3 * 41.293,
-         condMassPi01 = abs(pi01Fit[5] - 134.840) < 3 * 3.479,
-         condMassPi02 = abs(pi02Fit[5] - 134.867) < 3 * 3.331;
+  Bool_t condMassKch = std::abs(Kchrec[5] - 497.605) < 3 * 0.879,
+         condMassKne = std::abs(*minv4gam - 488.411) < 3 * 41.293,
+         condMassPi01 = std::abs(pi01Fit[5] - 134.840) < 3 * 3.479,
+         condMassPi02 = std::abs(pi02Fit[5] - 134.867) < 3 * 3.331;
 
   ///////////////////////////////////////////////////////////////////////////////
 
@@ -1041,18 +1041,18 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                 pow(KnerecFit[7], 2)),
           radiuspmCenter = sqrt(pow(KchrecFit[6], 2) +
                                 pow(KchrecFit[7], 2)),
-          zdist00 = abs(KnerecFit[8] - ipFit[2]),
-          zdistpm = abs(KchrecFit[8] - ipFit[2]),
+          zdist00 = std::abs(KnerecFit[8] - ipFit[2]),
+          zdistpm = std::abs(KchrecFit[8] - ipFit[2]),
           path00 = sqrt(pow(radius00, 2) + pow(zdist00, 2)),
           pathpm = sqrt(pow(radiuspm, 2) + pow(zdistpm, 2)),
           path00MC = sqrt(pow(sqrt(pow(Knemc[6] - ipmc[0], 2) +
                                    pow(Knemc[7] - ipmc[1], 2)),
                               2) +
-                          pow(abs(Knemc[8] - ipmc[2]), 2)),
+                          pow(std::abs(Knemc[8] - ipmc[2]), 2)),
           pathpmMC = sqrt(pow(sqrt(pow(Kchmc[6] - ipmc[0], 2) +
                                    pow(Kchmc[7] - ipmc[1], 2)),
                               2) +
-                          pow(abs(Kchmc[8] - ipmc[2]), 2)),
+                          pow(std::abs(Kchmc[8] - ipmc[2]), 2)),
           radius00MC = sqrt(pow(Knemc[6], 2) +
                             pow(Knemc[7], 2)),
           radiuspmMC = sqrt(pow(Kchmc[6], 2) +
@@ -1060,14 +1060,14 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
           path00MCCenter = sqrt(pow(sqrt(pow(Knemc[6], 2) +
                                          pow(Knemc[7], 2)),
                                     2) +
-                                pow(abs(Knemc[8]), 2)),
+                                pow(std::abs(Knemc[8]), 2)),
           pathpmMCCenter = sqrt(pow(sqrt(pow(Kchmc[6], 2) +
                                          pow(Kchmc[7], 2)),
                                     2) +
-                                pow(abs(Kchmc[8]), 2)),
+                                pow(std::abs(Kchmc[8]), 2)),
 
-          zdist00MC = abs(Knemc[8] - ipmc[2]),
-          zdistpmMC = abs(Kchmc[8] - ipmc[2]);
+          zdist00MC = std::abs(Knemc[8] - ipmc[2]),
+          zdistpmMC = std::abs(Kchmc[8] - ipmc[2]);
 
   // Calculating everything for the omega-pi0 rejection method - geometrically
   std::array<Float_t, 3> distNeutralCharged = {KchrecClosest[6] - Knerec[6],
@@ -1109,18 +1109,18 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   // Geometrical omega-pi0 rejection cuts
   Bool_t
-      fiducialVolume = sqrt(pow(distNeutralCharged[0], 2) + pow(distNeutralCharged[1], 2)) < 2.05 && abs(distNeutralCharged[2]) < 2.45,
+      fiducialVolume = sqrt(pow(distNeutralCharged[0], 2) + pow(distNeutralCharged[1], 2)) < 2.05 && std::abs(distNeutralCharged[2]) < 2.45,
       fiducialVolumeSimona = radius00 < 1.5 && radiuspm < 2.0 && zdist00 < 1.5 && zdistpm < 1.5;
 
   // Simona Cuts
   Bool_t simonaChi2Cut = *Chi2SignalKinFit <= CutDefs::simonaChi2Max,
-         simonaDeltaPhiCut = /*((fiducialVolume && (abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && cos(phiTrk1Angle * TMath::Pi() / 180.0) < 0.8)) || !fiducialVolume) && simonaChi2Cut,*/ abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma && simonaChi2Cut,
+         simonaDeltaPhiCut = /*((fiducialVolume && (std::abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && cos(phiTrk1Angle * TMath::Pi() / 180.0) < 0.8)) || !fiducialVolume) && simonaChi2Cut,*/ std::abs(deltaPhiFit - CutDefs::simonaDeltaPhiCenter) > CutDefs::simonaDeltaPhiNSigma * CutDefs::simonaDeltaPhiSigma && simonaChi2Cut,
          simonaKinCuts = condMassKch && condMassKne && condMassPi01 && condMassPi02 && simonaDeltaPhiCut,
          simonaPositionLimits = radius00 < CutDefs::omegaRadiusLimit && radiuspm < CutDefs::omegaRadiusLimit &&
                                 zdist00 < CutDefs::omegaZdistLimit && zdistpm < CutDefs::omegaZdistLimit,
          omegaMassT0Cut = ((simonaPositionLimits &&
-                            !(abs(T0Omega - CutDefs::omegaT0Center) < CutDefs::omegaNSigma * CutDefs::omegaT0Sigma &&
-                              abs(omegaFit[5] - CutDefs::omegaMassCenter) < CutDefs::omegaNSigma * CutDefs::omegaMassSigma &&
+                            !(std::abs(T0Omega - CutDefs::omegaT0Center) < CutDefs::omegaNSigma * CutDefs::omegaT0Sigma &&
+                              std::abs(omegaFit[5] - CutDefs::omegaMassCenter) < CutDefs::omegaNSigma * CutDefs::omegaMassSigma &&
                               omegaFit[5] < CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB + CutDefs::omegaLineBreal &&
                               omegaFit[5] > CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB - CutDefs::omegaLineBreal)) ||
                            !simonaPositionLimits) &&
@@ -1130,8 +1130,8 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
   Bool_t oldChi2Cut = *Chi2SignalKinFit < CutDefs::oldCutsChi2Max,
          oldTrcSumCut = oldChi2Cut && *TrcSum > CutDefs::oldCutsTrcSumMin,
          oldCombinedMassPi0Cut = oldTrcSumCut && combinedMassPi0Fit < CutDefs::oldCutsCombinedMassPi0Max,
-         oldMassKchCut = oldCombinedMassPi0Cut && abs(Kchrec[5] - PhysicsConstants::mK0) < CutDefs::oldCutsMassKchWindow,
-         oldMassKneCut = oldMassKchCut && abs(*minv4gam - PhysicsConstants::mK0) < CutDefs::oldCutsMassKneWindow,
+         oldMassKchCut = oldCombinedMassPi0Cut && std::abs(Kchrec[5] - PhysicsConstants::mK0) < CutDefs::oldCutsMassKchWindow,
+         oldMassKneCut = oldMassKchCut && std::abs(*minv4gam - PhysicsConstants::mK0) < CutDefs::oldCutsMassKneWindow,
          oldQmissCut = oldMassKneCut && *Qmiss < CutDefs::oldCutsQmissMax,
          oldOpeningAngleCut = oldQmissCut && openingAngleCharged > acos(CutDefs::oldCutsOpeningCosMin),
          omegaPi0RejectionCut = ((rho > 0.8 && fiducialVolume) || !fiducialVolume) && oldOpeningAngleCut;
@@ -1140,13 +1140,13 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
 
   // New cuts
   Bool_t newChi2Cut = *Chi2SignalKinFit < CutDefs::simonaChi2Max,
-         newTrkAngleCut = newChi2Cut && ((fiducialVolumeSimona && (abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && abs(cos(phiTrk1Angle * TMath::Pi() / 180.0)) < 0.8)) || !fiducialVolumeSimona),
+         newTrkAngleCut = newChi2Cut && ((fiducialVolumeSimona && (std::abs(cos(phiTrk2Angle * TMath::Pi() / 180.0)) < 0.8 && std::abs(cos(phiTrk1Angle * TMath::Pi() / 180.0)) < 0.8)) || !fiducialVolumeSimona),
          newKchCut = newTrkAngleCut && condMassKch,
-         newCombinedMassPi0Cut = newKchCut && (abs(u) < 3.0 * sigmau && abs(v) < 3.0 * sigmav),
+         newCombinedMassPi0Cut = newKchCut && (std::abs(u) < 3.0 * sigmau && std::abs(v) < 3.0 * sigmav),
          newOmegaGeometricalCut = newCombinedMassPi0Cut && ((rho > 0.8 && fiducialVolume) || !fiducialVolume),
          newOmegaT0Cut = ((simonaPositionLimits &&
-                           !(abs(T0Omega - CutDefs::omegaT0Center) < CutDefs::omegaNSigma * CutDefs::omegaT0Sigma &&
-                             abs(omegaFit[5] - CutDefs::omegaMassCenter) < CutDefs::omegaNSigma * CutDefs::omegaMassSigma &&
+                           !(std::abs(T0Omega - CutDefs::omegaT0Center) < CutDefs::omegaNSigma * CutDefs::omegaT0Sigma &&
+                             std::abs(omegaFit[5] - CutDefs::omegaMassCenter) < CutDefs::omegaNSigma * CutDefs::omegaMassSigma &&
                              omegaFit[5] < CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB + CutDefs::omegaLineBreal &&
                              omegaFit[5] > CutDefs::omegaLineA * T0Omega + CutDefs::omegaLineB - CutDefs::omegaLineBreal)) ||
                           !simonaPositionLimits) &&
@@ -1266,7 +1266,7 @@ Bool_t signal_vs_bcg_v2::Process(Long64_t entry)
                                           newKchCut);
 
   Bool_t corrPosLimit = (radius00 < 1.5 && radiuspm < 1.5 && zdist00 < 1.0 && zdistpm < 1.0);
-  Bool_t phivLimit = abs(deltaPhiFit - 3.110) < 2 * 0.135;
+  Bool_t phivLimit = std::abs(deltaPhiFit - 3.110) < 2 * 0.135;
   Bool_t condResCorr = (corrPosLimit && !(cos(phiTrk1Angle * TMath::Pi() / 180.0) > 0.9 || cos(phiTrk2Angle * TMath::Pi() / 180.0) > 0.9)) || !corrPosLimit;
 
   auto fillAcceptedEvent = [&](std::map<TString, std::map<TString, TH1 *>> &targetHistsReconstructed,

@@ -302,7 +302,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     cutLimits[1] = 0.0;
   }
 
-  cutStep = abs(cutLimits[1] - cutLimits[0]) / (Double_t)numberOfPoints;
+  cutStep = std::abs(cutLimits[1] - cutLimits[0]) / (Double_t)numberOfPoints;
 
   // Vectors needed for the initialization of graphs
   TString graphMode = "FitResultErr";
@@ -486,7 +486,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
           baseKin.ip[0] = baseKin.bhabha_vtx[0];
           baseKin.ip[1] = baseKin.bhabha_vtx[1];
-          if (abs(baseKin.ip[2] - baseKin.bhabha_vtx[2]) > 2.0)
+          if (std::abs(baseKin.ip[2] - baseKin.bhabha_vtx[2]) > 2.0)
             baseKin.ip[2] = baseKin.bhabha_vtx[2];
         }
         else
@@ -605,8 +605,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
         cond[0] = rho_00_IP - meanRho00IP < stdDevRho00IP;
         cond[1] = rho_pm_IP - meanRhopmIP < stdDevRhopmIP;
-        cond[2] = abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < stdDevOmegaVtx[2];
-        cond[3] = abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < stdDevOmegaVtx[5];
+        cond[2] = std::abs(neu_vtx_avg[2] - baseKin.Kchboost[8]) < stdDevOmegaVtx[2];
+        cond[3] = std::abs(baseKin.Kchboost[8] - baseKin.bhabha_vtx[2]) < stdDevOmegaVtx[5];
 
         cond_tot = cond[0] && cond[1] && cond[2] && cond[3];
         // ----------------------------------------------------------------------------------------------------------------
@@ -629,10 +629,10 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
           x_vector[5] = 0.0;
         }
 
-        // cuts[0] = abs(radius[0] - meanRadiusTriangleHigher) > errorRadiusTriangleHigher * sigma; // && radius[1] > 8;
-        // cuts[1] = 1;																																						 // abs(radius[1] - meanRadiusTriangleLower) > errorRadiusTriangleLower * sigma;     // && radius[1] <= 8;
-        // cuts[2] = abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma;					 // && radius_ch[1] > 8;
-        // cuts[3] = 1;																																						 // abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
+        // cuts[0] = std::abs(radius[0] - meanRadiusTriangleHigher) > errorRadiusTriangleHigher * sigma; // && radius[1] > 8;
+        // cuts[1] = 1;																																						 // std::abs(radius[1] - meanRadiusTriangleLower) > errorRadiusTriangleLower * sigma;     // && radius[1] <= 8;
+        // cuts[2] = std::abs(radius_ch[0] - meanRadiusChHigher) > errorRadiusChHigher * sigma;					 // && radius_ch[1] > 8;
+        // cuts[3] = 1;																																						 // std::abs(radius_ch[1] - meanRadiusChLower) > errorRadiusChLower * sigma;  // && radius_ch[1] <= 8;
 
         cuts[0] = Obj.GetSingleConditionValue(formula_vector[0], x_vector[0]);
         cuts[2] = Obj.GetSingleConditionValue(formula_vector[2], x_vector[2]);
@@ -765,14 +765,14 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
     if (scanFlag)
     {
-      errValue[0].push_back(abs(minimum->Errors()[0] / minimum->X()[0]));
-      errValue[1].push_back(abs(minimum->Errors()[1] / minimum->X()[1]));
+      errValue[0].push_back(std::abs(minimum->Errors()[0] / minimum->X()[0]));
+      errValue[1].push_back(std::abs(minimum->Errors()[1] / minimum->X()[1]));
 
-      realValue[0].push_back(abs(minimum->X()[0]));
-      realValue[1].push_back(abs(minimum->Errors()[0]));
+      realValue[0].push_back(std::abs(minimum->X()[0]));
+      realValue[1].push_back(std::abs(minimum->Errors()[0]));
 
-      imaginaryValue[0].push_back(abs(minimum->X()[1]));
-      imaginaryValue[1].push_back(abs(minimum->Errors()[1]));
+      imaginaryValue[0].push_back(std::abs(minimum->X()[1]));
+      imaginaryValue[1].push_back(std::abs(minimum->Errors()[1]));
 
       event.time_diff["Signal"].clear();
       event.time_diff["Regeneration"].clear();

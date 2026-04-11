@@ -182,7 +182,7 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
     {
       // Neutral vtx triangle method
 
-      if (abs(interfcommon_.KneRecLor[8]) > methodB_bound)
+      if (std::abs(interfcommon_.KneRecLor[8]) > methodB_bound)
       {
         h_radius[0][0]->Fill(radius[0]);
         h_radius[0][1]->Fill(radius[1]);
@@ -206,7 +206,7 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
 
       // Charged vtx
 
-      if (abs(interfcommon_.KchBoost[8]) > methodB_bound)
+      if (std::abs(interfcommon_.KchBoost[8]) > methodB_bound)
       {
         h_radius_ch[0][0]->Fill(radius_ch[0]);
         h_radius_ch[0][1]->Fill(radius_ch[1]);
@@ -232,7 +232,7 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
 
       if (interfcommon_.done4 == 1)
       {
-        if (abs(interfcommon_.KneRecTriangle[8]) > methodB_bound)
+        if (std::abs(interfcommon_.KneRecTriangle[8]) > methodB_bound)
         {
           h_radius_tri[0][0]->Fill(radius_tri[0]);
           h_radius_tri[0][1]->Fill(radius_tri[1]);

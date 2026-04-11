@@ -462,8 +462,8 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 
 		cond[0] = rho_pm_IP < 0.5 * sigmas_ip;
 		cond[1] = rho_00_IP < 0.6 * sigmas_ip;
-		cond[2] = abs(Kchrec[8] - ip_avg[2]) < sigmas_ip * 1.06;
-		cond[3] = abs(neu_vtx_avg[2] - Kchrec[8]) < sigmas_ip * 0.39;
+		cond[2] = std::abs(Kchrec[8] - ip_avg[2]) < sigmas_ip * 1.06;
+		cond[3] = std::abs(neu_vtx_avg[2] - Kchrec[8]) < sigmas_ip * 0.39;
 
 		cond_tot = 1; // cond[0] && cond[1] && cond[2] && cond[3];
 
@@ -491,7 +491,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 				hist2d[0]->Fill(Omegapi0[3] - Omegapi0[5], Omegarec[5]);
 
 				hist2d_00IP_pmIP[0][0]->Fill(rho_pm_IP, rho_00_IP, event.interf_function(baseKin.Dtmc, 0, par));
-				hist2d_00IP_pmIP[1][0]->Fill(abs(Kchrec[8] - ip_avg[8]), abs(neu_vtx_avg[2] - ip_avg[8]), event.interf_function(baseKin.Dtmc, 0, par));
+				hist2d_00IP_pmIP[1][0]->Fill(std::abs(Kchrec[8] - ip_avg[8]), std::abs(neu_vtx_avg[2] - ip_avg[8]), event.interf_function(baseKin.Dtmc, 0, par));
 			}
 			if (baseKin.mctruth_int == 3)
 			{

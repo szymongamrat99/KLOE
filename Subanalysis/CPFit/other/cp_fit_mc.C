@@ -65,7 +65,7 @@ void cp_fit(Bool_t check = false, TString mode = "")
         chain->GetEntry(i);
         tree->GetEntry(i);
 
-        if(Chi2 < 40 && abs(minv4gam - PhysicsConstants::mK0) < 76 && abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75)
+        if(Chi2 < 40 && std::abs(minv4gam - PhysicsConstants::mK0) < 76 && std::abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75)
         {
             if(mcflag == 1)
             {

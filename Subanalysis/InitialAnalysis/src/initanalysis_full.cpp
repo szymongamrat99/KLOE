@@ -974,13 +974,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         baseKin.ipKS[0] = baseKin.bhabha_vtx[0];
         baseKin.ipKS[1] = baseKin.bhabha_vtx[1];
         // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
-        if (abs(baseKin.ipKS[2] - baseKin.bhabha_vtx[2]) > 2.8)
+        if (std::abs(baseKin.ipKS[2] - baseKin.bhabha_vtx[2]) > 2.8)
           baseKin.ipKS[2] = baseKin.bhabha_vtx[2];
 
         baseKin.ipKL[0] = baseKin.bhabha_vtx[0];
         baseKin.ipKL[1] = baseKin.bhabha_vtx[1];
         // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
-        if (abs(baseKin.ipKL[2] - baseKin.bhabha_vtx[2]) > 2.8)
+        if (std::abs(baseKin.ipKL[2] - baseKin.bhabha_vtx[2]) > 2.8)
           baseKin.ipKL[2] = baseKin.bhabha_vtx[2];
 
         Double_t
@@ -1044,7 +1044,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       baseKin.ipnew[0] = baseKin.bhabha_vtx[0];
       baseKin.ipnew[1] = baseKin.bhabha_vtx[1];
       // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
-      if (abs(baseKin.ipnew[2] - baseKin.bhabha_vtx[2]) > 2.8)
+      if (std::abs(baseKin.ipnew[2] - baseKin.bhabha_vtx[2]) > 2.8)
         baseKin.ipnew[2] = baseKin.bhabha_vtx[2];
 
       // ----------------------------------------------------------------------

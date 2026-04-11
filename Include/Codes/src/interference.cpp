@@ -57,11 +57,11 @@ namespace KLOE
     }
     else
     {
-      Value = (1. + 2. * RePart) * exp(-GammaKs * abs(dt)) +
-              (1. - 4. * RePart) * exp(-GammaKl * abs(dt)) -
-              2. * exp(-0.5 * Gamma * abs(dt)) *
-                  ((1. - RePart) * cos(DMass * abs(dt)) -
-                   3. * ImPart * sin(DMass * abs(dt)));
+      Value = (1. + 2. * RePart) * exp(-GammaKs * std::abs(dt)) +
+              (1. - 4. * RePart) * exp(-GammaKl * std::abs(dt)) -
+              2. * exp(-0.5 * Gamma * std::abs(dt)) *
+                  ((1. - RePart) * cos(DMass * std::abs(dt)) -
+                   3. * ImPart * sin(DMass * std::abs(dt)));
     }
 
     return (pow(Epsilon, 2) / (2. * Gamma)) * Value * 100000;

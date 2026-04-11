@@ -173,7 +173,7 @@ namespace KLOE
 
   Int_t pm00::signum(Double_t value)
   {
-    return value / abs(value);
+    return value / std::abs(value);
   }
 
   void pm00::Clear1DArray(UInt_t M, Double_t *array)
@@ -360,7 +360,7 @@ namespace KLOE
             trctmp[i][j] = Clu5Vec[i][3] - NeuVtxTmp[i][j][3] - (lGamma[i][j] / PhysicsConstants::cVel);
           }
 
-          if (abs(trctmp[i][0]) < abs(trctmp[i][1]))
+          if (std::abs(trctmp[i][0]) < std::abs(trctmp[i][1]))
           {
             for (Int_t j = 0; j < 4; j++)
               NeuVtxTrueClu[i][j] = NeuVtxTmp[i][0][j];
@@ -489,7 +489,7 @@ namespace KLOE
             trctmp[i][j] = (*Clu4Vec)[i][3] - NeuVtxTmp[i][j][3] - (lGamma[i][j] / PhysicsConstants::cVel);
           }
 
-          if (abs(trctmp[i][0]) < abs(trctmp[i][1]))
+          if (std::abs(trctmp[i][0]) < std::abs(trctmp[i][1]))
           {
             for (Int_t j = 0; j < 4; j++)
               NeuVtxTrueClu[i][j] = NeuVtxTmp[i][0][j];
@@ -626,7 +626,7 @@ namespace KLOE
   void pm00::ConditionInitializer(std::vector<TFormula> &formula_vector, std::vector<TString> &formula_names) const
   {
     for (Int_t i = 0; i < formula_names.size(); i++)
-      formula_vector[i] = TFormula(formula_names[i], "abs(x - [0]) > [1]");
+      formula_vector[i] = TFormula(formula_names[i], "std::abs(x - [0]) > [1]");
   }
 
   void pm00::SetSingleConditionParameters(TFormula &formula, Double_t *mean_sigma) const

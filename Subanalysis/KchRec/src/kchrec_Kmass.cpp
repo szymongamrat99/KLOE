@@ -1064,7 +1064,7 @@ ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Double_t> *Kchboost,
            theta1 = trkMomVecKaonCM[0].Theta(),
            theta2 = trkMomVecKaonCM[1].Theta();
 
-  gamma = (M_PI_2 - 0.5 * abs(angle1) - 0.5 * abs(angle2));
+  gamma = (M_PI_2 - 0.5 * std::abs(angle1) - 0.5 * std::abs(angle2));
 
   if (angle1 < 0.0)
     PiMomKaonCM[0].SetXYZ(PiMomMagKaonCM1 * sin(theta1) * cos(angle1 - gamma),

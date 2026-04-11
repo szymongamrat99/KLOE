@@ -258,7 +258,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 
 							lengthPhotonAvg = sqrt(lengthPhotonAvg) / totEnergy; // weighted average of paths over cluster energies
 
-							if (abs(lengthPhotonAvg) < abs(lengthPhotonMinAvg) && total_cond)
+							if (std::abs(lengthPhotonAvg) < std::abs(lengthPhotonMinAvg) && total_cond)
 							{
 								lengthPhotonMinAvg = lengthPhotonAvg; // if the condition was passed, the last average becomes new min length
 
@@ -360,7 +360,7 @@ int omegarec(TChain &chain, Controls::DataType &data_type, ErrorHandling::ErrorL
 			else
 			{
 				doneOmega = 1; // flag to show, that the reconstruction was done well
-				if (abs(M_omega_diff[0]) < abs(M_omega_diff[1]))
+				if (std::abs(M_omega_diff[0]) < std::abs(M_omega_diff[1]))
 				{
 					// Reconstructed Omega meson
 					Omegarec[0] = PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[0][0];

@@ -21,9 +21,9 @@ namespace KLOE
       return;
     }
 
-    mom_vec[0] = cos(PhivOld) * 1000. / abs(CurvOld);
-    mom_vec[1] = sin(PhivOld) * 1000. / abs(CurvOld);
-    mom_vec[2] = CotvOld * 1000. / abs(CurvOld);
+    mom_vec[0] = cos(PhivOld) * 1000. / std::abs(CurvOld);
+    mom_vec[1] = sin(PhivOld) * 1000. / std::abs(CurvOld);
+    mom_vec[2] = CotvOld * 1000. / std::abs(CurvOld);
 
     if (mode == 1)
       mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mPiCh, 2));
@@ -43,9 +43,9 @@ namespace KLOE
       return;
     }
 
-    mom_vec[0] = cos(_PhiV[i]) * 1000. / abs(_CurV[i]);
-    mom_vec[1] = sin(_PhiV[i]) * 1000. / abs(_CurV[i]);
-    mom_vec[2] = _CotV[i] * 1000. / abs(_CurV[i]);
+    mom_vec[0] = cos(_PhiV[i]) * 1000. / std::abs(_CurV[i]);
+    mom_vec[1] = sin(_PhiV[i]) * 1000. / std::abs(_CurV[i]);
+    mom_vec[2] = _CotV[i] * 1000. / std::abs(_CurV[i]);
 
     if (_mode == 1)
       mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mPiCh, 2));
@@ -147,7 +147,7 @@ namespace KLOE
                 KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
                 KchTmp[4] = sqrt(KchTmp[4]);
 
-                if (vtaken[0] <= -1 || abs(KchTmp[5] - PhysicsConstants::mK0) < abs(KchRec[5] - PhysicsConstants::mK0))
+                if (vtaken[0] <= -1 || std::abs(KchTmp[5] - PhysicsConstants::mK0) < std::abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
                   vtaken[1] = j1;
@@ -273,7 +273,7 @@ namespace KLOE
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
                 KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
                 KchTmp[4] = sqrt(KchTmp[4]);
-                if (vtaken[0] <= -1 || abs(KchTmp[5] - PhysicsConstants::mK0) < abs(KchRec[5] - PhysicsConstants::mK0))
+                if (vtaken[0] <= -1 || std::abs(KchTmp[5] - PhysicsConstants::mK0) < std::abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
                   vtaken[1] = j1;
@@ -326,7 +326,7 @@ namespace KLOE
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2));
-      cyl_vol[1] = abs(_zv[i] - _IP[2]);
+      cyl_vol[1] = std::abs(_zv[i] - _IP[2]);
       if (kaonFlag == 16)
       {
         distFlag = (cyl_vol[0] < 10. && cyl_vol[1] < 20.);
@@ -357,7 +357,7 @@ namespace KLOE
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
                 KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
                 KchTmp[4] = sqrt(KchTmp[4]);
-                if (vtaken[0] <= -1 || abs(KchTmp[5] - PhysicsConstants::mK0) < abs(KchRec[5] - PhysicsConstants::mK0))
+                if (vtaken[0] <= -1 || std::abs(KchTmp[5] - PhysicsConstants::mK0) < std::abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
                   vtaken[1] = j1;
@@ -407,7 +407,7 @@ namespace KLOE
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2));
-      cyl_vol[1] = abs(_zv[i] - _IP[2]);
+      cyl_vol[1] = std::abs(_zv[i] - _IP[2]);
       if (kaonFlag == 16)
       {
         distFlag = (cyl_vol[0] < 10. && cyl_vol[1] < 20.);
@@ -460,7 +460,7 @@ namespace KLOE
                 KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
                 KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
                 KchTmp[4] = sqrt(KchTmp[4]);
-                if (vtaken[0] <= -1 || abs(KchTmp[5] - PhysicsConstants::mK0) < abs(KchRec[5] - PhysicsConstants::mK0))
+                if (vtaken[0] <= -1 || std::abs(KchTmp[5] - PhysicsConstants::mK0) < std::abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
                   vtaken[1] = j1;
@@ -506,7 +506,7 @@ namespace KLOE
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2) + pow(_zv[i] - _IP[2], 2));
-      cyl_vol[1] = abs(_zv[i] - _IP[2]);
+      cyl_vol[1] = std::abs(_zv[i] - _IP[2]);
       if (mapTmp[_iv[i]] == 2)
       {
         for (Int_t j1 = 0; j1 < _ntv - 1; j1++)
@@ -572,7 +572,7 @@ namespace KLOE
     for (Int_t i = 0; i < _nv; i++)
     {
       cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2) + pow(_zv[i] - _IP[2], 2));
-      cyl_vol[1] = abs(_zv[i] - _IP[2]);
+      cyl_vol[1] = std::abs(_zv[i] - _IP[2]);
       if (mapTmp[_iv[i]] == 2)
       {
         for (Int_t j1 = 0; j1 < _ntv - 1; j1++)

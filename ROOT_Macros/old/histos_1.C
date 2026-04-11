@@ -108,7 +108,7 @@ Bool_t histos_1::Process(Long64_t entry)
    if(*mctruth_pipi == 1) entries[5]++;
    if(*mctruth == 7) entries[6]++;
 
-   if(1)//abs(*Qmiss_inv - 104.6) < 15 && abs(*anglepipi_CM_kch - 145) < 25 && *done4 == 1 && abs(Kchrec1[5] - PhysicsConstants::mK0) < 76)
+   if(1)//std::abs(*Qmiss_inv - 104.6) < 15 && std::abs(*anglepipi_CM_kch - 145) < 25 && *done4 == 1 && std::abs(Kchrec1[5] - PhysicsConstants::mK0) < 76)
    {
    	   if(*mctruth == 1)
 	   {

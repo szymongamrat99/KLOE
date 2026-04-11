@@ -173,17 +173,17 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
                                                             kaon_len[l1] = sqrt(pow(S.sol[l1][0] - bhabha_vtx[0],2) + pow(S.sol[l1][1] - bhabha_vtx[1],2) + pow(S.sol[l1][2] - bhabha_vtx[2],2));
 
                                                             cond_sol[l1][0] = (S.sol[l1][3] >= 0) && (S.sol[l1][3] < 60);
-                                                            cond_sol[l1][1] = (sqrt(pow(S.sol[l1][0],2) + pow(S.sol[l1][1],2)) < 200) && (abs(S.sol[l1][2]) < 169);
+                                                            cond_sol[l1][1] = (sqrt(pow(S.sol[l1][0],2) + pow(S.sol[l1][1],2)) < 200) && (std::abs(S.sol[l1][2]) < 169);
                                                             path_diff[l1] = kaon_vel[l1]*S.sol[l1][3] - kaon_len[l1];
                                                         }
 
-                                                        onesol = (abs(S.sol[0][3] - S.sol[1][3]) < 1);
+                                                        onesol = (std::abs(S.sol[0][3] - S.sol[1][3]) < 1);
 
                                                         //We have to choose solutions
 
                                                         if(onesol == 1 && cond_sol[0][0] == 1 && cond_sol[0][1] == 1
                                                                        && cond_sol[1][0] == 1 && cond_sol[1][1] == 1 &&
-                                                                       abs(path_diff[0]) < 0.1 && abs(path_diff[1]) < 0.1)
+                                                                       std::abs(path_diff[0]) < 0.1 && std::abs(path_diff[1]) < 0.1)
                                                         {
                                                             solution[index][0] = (S.sol[0][0] + S.sol[1][0])/2.;
                                                             solution[index][1] = (S.sol[0][1] + S.sol[1][1])/2.;
@@ -197,7 +197,7 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
                                                             error = 0;
                                                         }
                                                         else if((cond_sol[0][0] == 1 && cond_sol[0][1] == 1) &&
-                                                             abs(path_diff[0]) < 0.1 && abs(path_diff[1]) > 0.1)
+                                                             std::abs(path_diff[0]) < 0.1 && std::abs(path_diff[1]) > 0.1)
                                                         {
                                                             solution[index][0] = S.sol[0][0];
                                                             solution[index][1] = S.sol[0][1];
@@ -211,7 +211,7 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
                                                             error = 0;
                                                         }
                                                         else if((cond_sol[1][0] == 1 && cond_sol[1][1] == 1) &&
-                                                            abs(path_diff[1]) < 0.1 && abs(path_diff[0]) > 0.1)
+                                                            std::abs(path_diff[1]) < 0.1 && std::abs(path_diff[0]) > 0.1)
                                                         {
                                                             solution[index][0] = S.sol[1][0];
                                                             solution[index][1] = S.sol[1][1];

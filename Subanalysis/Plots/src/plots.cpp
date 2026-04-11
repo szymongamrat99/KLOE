@@ -323,12 +323,12 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 			resComb[k] = resCh[k] + resNeu[k];
 		}
 
-		cond[0] = abs(Kchrec[6] - neu_vtx_avg[0]) < sigmas_neu * resComb[0];
-		cond[1] = abs(Kchrec[7] - neu_vtx_avg[1]) < sigmas_neu * resComb[1];
-		cond[2] = abs(Kchrec[8] - neu_vtx_avg[2]) < sigmas_neu * resComb[2];
-		cond[3] = abs(Kchrec[6] - ip_avg[0]) < sigmas_ip * 2.63;
-		cond[4] = abs(Kchrec[7] - ip_avg[1]) < sigmas_ip * 2.03;
-		cond[5] = abs(Kchrec[8] - ip_avg[2]) < sigmas_ip * 3.39;
+		cond[0] = std::abs(Kchrec[6] - neu_vtx_avg[0]) < sigmas_neu * resComb[0];
+		cond[1] = std::abs(Kchrec[7] - neu_vtx_avg[1]) < sigmas_neu * resComb[1];
+		cond[2] = std::abs(Kchrec[8] - neu_vtx_avg[2]) < sigmas_neu * resComb[2];
+		cond[3] = std::abs(Kchrec[6] - ip_avg[0]) < sigmas_ip * 2.63;
+		cond[4] = std::abs(Kchrec[7] - ip_avg[1]) < sigmas_ip * 2.03;
+		cond[5] = std::abs(Kchrec[8] - ip_avg[2]) < sigmas_ip * 3.39;
 
 		cond_tot = cond[0] && cond[1] && cond[2];
 
@@ -357,7 +357,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 				hist2d[0]->Fill(chi2min, rho);
 
 				hist2d_00IP_pmIP[0][0]->Fill(rho_pm_IP, rho_00_IP, event.interf_function(baseKin.Dtmc, 0, par));
-				hist2d_00IP_pmIP[1][0]->Fill(abs(Kchrec[8] - ip_avg[8]), abs(neu_vtx_avg[2] - ip_avg[8]), event.interf_function(baseKin.Dtmc, 0, par));
+				hist2d_00IP_pmIP[1][0]->Fill(std::abs(Kchrec[8] - ip_avg[8]), std::abs(neu_vtx_avg[2] - ip_avg[8]), event.interf_function(baseKin.Dtmc, 0, par));
 			}
 			if (baseKin.mctruth_int == 3)
 			{

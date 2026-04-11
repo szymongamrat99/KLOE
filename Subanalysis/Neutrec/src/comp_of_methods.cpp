@@ -679,9 +679,9 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       for (Int_t j = 0; j < 2; j++)
       {
         if (j == 0)
-          cut = chi2min < 10000000000.; // && abs(Knetri_kinfit[9] - t_neumc) < 2.375/2.;
+          cut = chi2min < 10000000000.; // && std::abs(Knetri_kinfit[9] - t_neumc) < 2.375/2.;
         else
-          cut = chi2min < 40.0; // && abs(Knetri_kinfit[9] - t_neumc) < 2.375/2.;
+          cut = chi2min < 40.0; // && std::abs(Knetri_kinfit[9] - t_neumc) < 2.375/2.;
 
         if (cut && (errId > 3 || errId == 0) && done_kinfit == 1)
         {
@@ -773,7 +773,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
             bad_clus = isEqual;
 
-            bunch_0 = abs(Knetri_kinfit[9] - t_neumc) < 2.715 / 2.;
+            bunch_0 = std::abs(Knetri_kinfit[9] - t_neumc) < 2.715 / 2.;
             bunch_plus1 = Knetri_kinfit[9] - t_neumc < 3. * 2.715 / 2. && Knetri_kinfit[9] - t_neumc > 2.715 / 2.;
             bunch_minus1 = Knetri_kinfit[9] - t_neumc < -2.715 / 2. && Knetri_kinfit[9] - t_neumc > -3. * 2.715 / 2.;
             blob = Knetri_kinfit[9] - t_neumc > 3. * 2.715 / 2. && Knetri_kinfit[9] - t_neumc < 200.;

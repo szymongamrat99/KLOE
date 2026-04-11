@@ -132,7 +132,7 @@ void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
 
             trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
-            passed_cond = (minv4gam - PhysicsConstants::mK0) < 76 && abs(Kchboost[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75;
+            passed_cond = (minv4gam - PhysicsConstants::mK0) < 76 && std::abs(Kchboost[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75;
             efficiency->Fill(passed_cond, Dtboostlor);
 
             trcv_hist->Fill(trcv_sum);

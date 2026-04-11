@@ -176,9 +176,9 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 		resCombString[k] = Form("%f",resComb[k]);
 	}
 
-	condition[0] = "abs(Kchrec[6] - " + omegarec_tree + ".NeuVtxAvg[0]) < " + resCombString[0];
-	condition[1] = "abs(Kchrec[7] - " + omegarec_tree + ".NeuVtxAvg[1]) < " + resCombString[1];
-	condition[2] = "abs(Kchrec[8] - " + omegarec_tree + ".NeuVtxAvg[2]) < " + resCombString[2];
+	condition[0] = "std::abs(Kchrec[6] - " + omegarec_tree + ".NeuVtxAvg[0]) < " + resCombString[0];
+	condition[1] = "std::abs(Kchrec[7] - " + omegarec_tree + ".NeuVtxAvg[1]) < " + resCombString[1];
+	condition[2] = "std::abs(Kchrec[8] - " + omegarec_tree + ".NeuVtxAvg[2]) < " + resCombString[2];
 
 	// Total num of events
 	for (Int_t i = 0; i < KLOE::channNum; i++)
@@ -196,7 +196,7 @@ int efficiencyScan(UInt_t first_file, UInt_t last_file)
 				x_val[i][k].push_back(min_lim[k] + j * step[k]);
 
 				if (absVal[k])
-					cutStr = "abs(" + varName[k] + " - " + benchmark[k] + ")" + sign[k];
+					cutStr = "std::abs(" + varName[k] + " - " + benchmark[k] + ")" + sign[k];
 				else
 					cutStr = "(" + varName[k] + " - " + benchmark[k] + ")" + sign[k];
 
