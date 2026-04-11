@@ -77,10 +77,10 @@ namespace KLOE
 
   void ConstraintsTrilateration::IntermediateReconstruction()
   {
-    static kaonNeutral KnerecTmp[2];        // Temporary kaon neutral objects
-    static neutralParticle photonTmp[2][4]; // Temporary photon objects
+    kaonNeutral KnerecTmp[2];        // Temporary kaon neutral objects
+    neutralParticle photonTmp[2][4]; // Temporary photon objects
 
-    static Double_t ipTmp[2][3]; // Temporary interaction point
+    Double_t ipTmp[2][3]; // Temporary interaction point
 
     std::array<Double_t, 2> value = {0., 0.};
 

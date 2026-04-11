@@ -7,6 +7,7 @@
 #include <TDecompSVD.h>
 
 #include <chrono>
+#include <limits>
 
 using namespace KLOE;
 
@@ -160,7 +161,22 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
           if (m < _N_free)
           {
-            auxVal = _constraints[l]->GradientPar(m, 0, 0.01 * sqrt(_V(m, m)));
+            // Explicit central-difference numerical gradient
+            // (bypasses TF1::GradientPar / Clad for ROOT 6.36+ compatibility)
+            Double_t eps_step = 0.01 * sqrt(_V(m, m));
+            if (eps_step < 1e-12) eps_step = 1e-6;
+
+            Double_t parOrig = _constraints[l]->GetParameter(m);
+
+            _constraints[l]->SetParameter(m, parOrig + eps_step);
+            Double_t fPlus = _constraints[l]->EvalPar(0, _constraints[l]->GetParameters());
+
+            _constraints[l]->SetParameter(m, parOrig - eps_step);
+            Double_t fMinus = _constraints[l]->EvalPar(0, _constraints[l]->GetParameters());
+
+            _constraints[l]->SetParameter(m, parOrig); // restore original
+
+            auxVal = (fPlus - fMinus) / (2.0 * eps_step);
 
             _D(l, m) = auxVal;
           }
@@ -174,7 +190,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       _Aux = (_D * _V * _D_T);
 
       TDecompSVD svd(_Aux);
-      svd.SetTol(1e-17); // Ustawienie tolerancji dla wartości singularnych, aby uniknąć problemów z macierzą osobliwą
+      svd.SetTol(std::numeric_limits<Double_t>::epsilon()); // Machine epsilon (~2.22e-16) for ROOT 6.36+ compatibility
       Bool_t svdStatus = false;
       Double_t condition = svd.Condition();
 
