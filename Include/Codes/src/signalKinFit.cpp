@@ -142,8 +142,6 @@ namespace KLOE
 
 			KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit.data(), _KchrecFit, _KchboostFit, _ipFit, _photonFit.data(), _KnerecFit, _KnereclorFit);
 
-      std::cout << "Chi2 min: " << _CHISQRMIN << std::endl << std::endl;
-
 			_isConverged = 1;
 		}
 		else

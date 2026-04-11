@@ -349,9 +349,6 @@ namespace KLOE
         value[i] = sqrt(pow(KnerecTmp[i].total[5] - PhysicsConstants::mK0, 2) +
                         pow(KnerecTmp[i].fourPos[3] - KnerecTmp[i].lifetimeLAB, 2));
 
-        std::cout << "Solution " << i << ": Mass difference: " << KnerecTmp[i].total[5] - PhysicsConstants::mK0
-                  << ", Lifetime difference: " << KnerecTmp[i].fourPos[3] - KnerecTmp[i].lifetimeLAB
-                  << ", Combined value: " << value[i] << std::endl;
       }
       else
       {
@@ -405,9 +402,6 @@ namespace KLOE
       for (Int_t j = 0; j < 4; j++)
         fKnerecCMPhi.fourMom[j] = 999.;
     }
-
-    std::cout << "Knerec: " << fKnerec.fourPos[0] << ", " << fKnerec.fourPos[1] << ", " << fKnerec.fourPos[2] << ", " << fKnerec.fourPos[3] << std::endl;
-    std::cout << "Knerec momentum: " << fKnerec.fourMom[0] << ", " << fKnerec.fourMom[1] << ", " << fKnerec.fourMom[2] << ", " << fKnerec.fourMom[3] << std::endl;
   }
 
   Double_t ConstraintsTrilateration::EnergyConsvCM(Double_t *x, Double_t *p)
@@ -431,9 +425,6 @@ namespace KLOE
     Double_t pathComp = std::abs(fKnerec.fourPos[_chosenComponent] -
                             fip[_chosenComponent]),
              kneVelComp = std::abs(fKnerec.fourMom[_chosenComponent] / fKnerec.fourMom[3] * PhysicsConstants::cVel);
-
-             std::cout << "Path component: " << pathComp << ", Velocity component: " << kneVelComp << std::endl;
-             std::cout << "Knerec: " << fKnerec.fourPos[_chosenComponent] << ", IP: " << fip[_chosenComponent] << ", Knerec momentum: " << fKnerec.fourMom[_chosenComponent] << ", Knerec energy: " << fKnerec.fourMom[3] << std::endl;
 
     return fKnerec.fourPos[3] - (pathComp / kneVelComp);
   }
