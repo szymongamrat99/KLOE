@@ -139,6 +139,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
   for (Int_t i = 0; i < _loopcount; i++)
   {
+    std::cout << "Iteration: " << i + 1 << std::endl;
+
     try
     {
       // Enforce positive energies
