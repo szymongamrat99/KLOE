@@ -148,9 +148,9 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                 {
                                     for(Int_t l2 = 0; l2 < 4; l2++)
                                     {
-                                        gamma_len[l1][l2] = sqrt(pow(cluster[0][ind_gam[l2]] - S.sol[l1][0],2) +
-                                                                 pow(cluster[1][ind_gam[l2]] - S.sol[l1][1],2) +
-                                                                 pow(cluster[2][ind_gam[l2]] - S.sol[l1][2],2) );
+                                        gamma_len[l1][l2] = std::sqrt(std::pow(cluster[0][ind_gam[l2]] - S.sol[l1][0],2) +
+                                                                 std::pow(cluster[1][ind_gam[l2]] - S.sol[l1][1],2) +
+                                                                 std::pow(cluster[2][ind_gam[l2]] - S.sol[l1][2],2) );
 
                                         gamma_mom[l1][l2][0] = cluster[4][ind_gam[l2]]*(cluster[0][ind_gam[l2]] - S.sol[l1][0])/gamma_len[l1][l2];
                                         gamma_mom[l1][l2][1] = cluster[4][ind_gam[l2]]*(cluster[1][ind_gam[l2]] - S.sol[l1][1])/gamma_len[l1][l2];
@@ -163,16 +163,16 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                         kaon_mom[l1][3] += gamma_mom[l1][l2][3];
                                     }
                                                             
-                                    kaon_vel[l1] = PhysicsConstants::cVel*sqrt(pow(kaon_mom[l1][0],2) + pow(kaon_mom[l1][1],2) + pow(kaon_mom[l1][2],2))/(kaon_mom[l1][3]); 
-                                    kaon_len[l1] = sqrt(pow(S.sol[l1][0] - bhabha_vtx[0],2) + pow(S.sol[l1][1] - bhabha_vtx[1],2) + pow(S.sol[l1][2] - bhabha_vtx[2],2));
+                                    kaon_vel[l1] = PhysicsConstants::cVel*std::sqrt(std::pow(kaon_mom[l1][0],2) + std::pow(kaon_mom[l1][1],2) + std::pow(kaon_mom[l1][2],2))/(kaon_mom[l1][3]); 
+                                    kaon_len[l1] = std::sqrt(std::pow(S.sol[l1][0] - bhabha_vtx[0],2) + std::pow(S.sol[l1][1] - bhabha_vtx[1],2) + std::pow(S.sol[l1][2] - bhabha_vtx[2],2));
                                 }
 
                                 cond_sol[0][0] = (S.sol[0][3] >= 0) && (S.sol[0][3] < 60);
-                                cond_sol[0][1] = (sqrt(pow(S.sol[0][0],2) + pow(S.sol[0][1],2)) < 200) && (std::abs(S.sol[0][2]) < 169);
+                                cond_sol[0][1] = (std::sqrt(std::pow(S.sol[0][0],2) + std::pow(S.sol[0][1],2)) < 200) && (std::abs(S.sol[0][2]) < 169);
                                 path_diff[0] = kaon_vel[0]*S.sol[0][3] - kaon_len[0];
 
                                 cond_sol[1][0] = (S.sol[1][3] >= 0) && (S.sol[1][3] < 60);
-                                cond_sol[1][1] = (sqrt(pow(S.sol[1][0],2) + pow(S.sol[1][1],2)) < 200) && (std::abs(S.sol[1][2]) < 169);
+                                cond_sol[1][1] = (std::sqrt(std::pow(S.sol[1][0],2) + std::pow(S.sol[1][1],2)) < 200) && (std::abs(S.sol[1][2]) < 169);
                                 path_diff[1] = kaon_vel[1]*S.sol[1][3] - kaon_len[1];
 
                                 onesol = (std::abs(S.sol[0][3] - S.sol[1][3]) < 1);
@@ -226,9 +226,9 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
 
                                     for(Int_t l = 0; l < 4; l++)
                                     {
-                                        gamma_len_tmp[l] = sqrt(pow(cluster[0][ind_gam[l]] - solution[0],2) +
-                                                                pow(cluster[1][ind_gam[l]] - solution[1],2) +
-                                                                pow(cluster[2][ind_gam[l]] - solution[2],2) );
+                                        gamma_len_tmp[l] = std::sqrt(std::pow(cluster[0][ind_gam[l]] - solution[0],2) +
+                                                                std::pow(cluster[1][ind_gam[l]] - solution[1],2) +
+                                                                std::pow(cluster[2][ind_gam[l]] - solution[2],2) );
 
                                         gammatri_tmp[l][0] = cluster[4][ind_gam[l]]*(cluster[0][ind_gam[l]] - solution[0])/gamma_len_tmp[l];
                                         gammatri_tmp[l][1] = cluster[4][ind_gam[l]]*(cluster[1][ind_gam[l]] - solution[1])/gamma_len_tmp[l];
@@ -245,8 +245,8 @@ void four_gamma_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                         Knetri_tmp[3] += gammatri_tmp[l][3];
                                     }
 
-                                        Knetri_tmp[4] = sqrt(pow(Knetri_tmp[0],2) + pow(Knetri_tmp[1],2) + pow(Knetri_tmp[2],2));
-                                        Knetri_tmp[5] = sqrt(pow(Knetri_tmp[3],2) - pow(Knetri_tmp[0],2) - pow(Knetri_tmp[1],2) - pow(Knetri_tmp[2],2));
+                                        Knetri_tmp[4] = std::sqrt(std::pow(Knetri_tmp[0],2) + std::pow(Knetri_tmp[1],2) + std::pow(Knetri_tmp[2],2));
+                                        Knetri_tmp[5] = std::sqrt(std::pow(Knetri_tmp[3],2) - std::pow(Knetri_tmp[0],2) - std::pow(Knetri_tmp[1],2) - std::pow(Knetri_tmp[2],2));
                                         Knetri_tmp[6] = solution[0];
                                         Knetri_tmp[7] = solution[1];
                                         Knetri_tmp[8] = solution[2];

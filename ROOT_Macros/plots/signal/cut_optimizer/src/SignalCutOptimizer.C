@@ -120,8 +120,8 @@ Bool_t SignalCutOptimizer::Process(Long64_t entry)
   if (fmctruth != -1)
   {
 
-  Double_t combinedMassPi0Err = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) + 
-                                     pow(pi02Fit[5] - PhysicsConstants::mPi0, 2) );
+  Double_t combinedMassPi0Err = std::sqrt(std::pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) + 
+                                     std::pow(pi02Fit[5] - PhysicsConstants::mPi0, 2) );
 
   fCutsOneSided["Chi2SignalKinFit"](fParamP);
 

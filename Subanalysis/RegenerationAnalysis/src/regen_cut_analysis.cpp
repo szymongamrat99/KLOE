@@ -154,27 +154,27 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
     for (Int_t i = 0; i < 3; i++)
     {
       // Spherical
-      radius[0] += pow(interfcommon_.KneRecLor[6 + i] - interfcommon_.ip[i], 2);
-      radius_ch[0] += pow(interfcommon_.KchBoost[6 + i] - interfcommon_.ip[i], 2);
-      radius_tri[0] += pow(interfcommon_.KneRecTriangle[6 + i] - interfcommon_.ip[i], 2);
+      radius[0] += std::pow(interfcommon_.KneRecLor[6 + i] - interfcommon_.ip[i], 2);
+      radius_ch[0] += std::pow(interfcommon_.KchBoost[6 + i] - interfcommon_.ip[i], 2);
+      radius_tri[0] += std::pow(interfcommon_.KneRecTriangle[6 + i] - interfcommon_.ip[i], 2);
 
       if (i < 2)
       {
         // Cylindrical
-        radius[1] += pow(interfcommon_.KneRecLor[6 + i] - interfcommon_.ip[i], 2);
-        radius_ch[1] += pow(interfcommon_.KchBoost[6 + i] - interfcommon_.ip[i], 2);
-        radius_tri[1] += pow(interfcommon_.KneRecTriangle[6 + i] - interfcommon_.ip[i], 2);
+        radius[1] += std::pow(interfcommon_.KneRecLor[6 + i] - interfcommon_.ip[i], 2);
+        radius_ch[1] += std::pow(interfcommon_.KchBoost[6 + i] - interfcommon_.ip[i], 2);
+        radius_tri[1] += std::pow(interfcommon_.KneRecTriangle[6 + i] - interfcommon_.ip[i], 2);
       }
     }
 
-    radius[0] = sqrt(radius[0]);
-    radius[1] = sqrt(radius[1]);
+    radius[0] = std::sqrt(radius[0]);
+    radius[1] = std::sqrt(radius[1]);
 
-    radius_ch[0] = sqrt(radius_ch[0]);
-    radius_ch[1] = sqrt(radius_ch[1]);
+    radius_ch[0] = std::sqrt(radius_ch[0]);
+    radius_ch[1] = std::sqrt(radius_ch[1]);
 
-    radius_tri[0] = sqrt(radius_tri[0]);
-    radius_tri[1] = sqrt(radius_tri[1]);
+    radius_tri[0] = std::sqrt(radius_tri[0]);
+    radius_tri[1] = std::sqrt(radius_tri[1]);
     
     count_tot++;
 
@@ -606,8 +606,8 @@ int regenrejec(Int_t firstFile, Int_t lastFile)
   // std::cout << "Comparison of regen branching ratio for negative: " << count_neg_reg / (Float_t)(count_pos_reg + count_neg_reg) << std::endl;
 
   // std::cout << "Count sig total branching ratio: " << count_sig / (Float_t)(count_tot) << std::endl;
-  // std::cout << "Count sig negative branching ratio: " << count_sig_neg / (Float_t)(count_tot) << " pm " << sqrt(pow(sqrt(count_sig_neg) / (Float_t)(count_tot), 2) + pow(sqrt(count_tot) * count_sig_neg / pow((Float_t)(count_tot), 2), 2)) << std::endl;
-  // std::cout << "Count sig positive branching ratio: " << count_sig_pos / (Float_t)(count_tot) << " pm " << sqrt(pow(sqrt(count_sig_pos) / (Float_t)(count_tot), 2) + pow(sqrt(count_tot) * count_sig_pos / pow((Float_t)(count_tot), 2), 2)) << std::endl;
+  // std::cout << "Count sig negative branching ratio: " << count_sig_neg / (Float_t)(count_tot) << " pm " << std::sqrt(std::pow(std::sqrt(count_sig_neg) / (Float_t)(count_tot), 2) + std::pow(std::sqrt(count_tot) * count_sig_neg / std::pow((Float_t)(count_tot), 2), 2)) << std::endl;
+  // std::cout << "Count sig positive branching ratio: " << count_sig_pos / (Float_t)(count_tot) << " pm " << std::sqrt(std::pow(std::sqrt(count_sig_pos) / (Float_t)(count_tot), 2) + std::pow(std::sqrt(count_tot) * count_sig_pos / std::pow((Float_t)(count_tot), 2), 2)) << std::endl;
 
   return 0;
 }

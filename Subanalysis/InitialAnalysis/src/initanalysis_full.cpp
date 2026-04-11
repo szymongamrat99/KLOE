@@ -291,12 +291,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
     auto u = [&]()
     {
-      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) + (baseKin.pi02Fit[5] - pi0Mass2_mean)) / sqrt(2);
+      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) + (baseKin.pi02Fit[5] - pi0Mass2_mean)) / std::sqrt(2);
     };
 
     auto v = [&]()
     {
-      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) - (baseKin.pi02Fit[5] - pi0Mass2_mean)) / sqrt(2);
+      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) - (baseKin.pi02Fit[5] - pi0Mass2_mean)) / std::sqrt(2);
     };
     //
 
@@ -326,20 +326,20 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                       { return pKTwoBody; });
     ///////////////////////////////////////////////////////////////////
     cutter.RegisterVariableGetter("MissTotKS", [&]()
-                                  { return sqrt(pow(PmissKS, 2) + pow(EmissKS, 2)); });
+                                  { return std::sqrt(std::pow(PmissKS, 2) + std::pow(EmissKS, 2)); });
     ///////////////////////////////////////////////////////////////////
     cutter.RegisterVariableGetter("MissHigherKS", [&]()
-                                  { return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+                                  { return (std::pow(EmissKS, 2) - std::pow(PmissKS, 2)); });
     cutter.RegisterVariableGetter("MissLowerKS", [&]()
-                                  { return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+                                  { return (std::pow(EmissKS, 2) - std::pow(PmissKS, 2)); });
     ///////////////////////////////////////////////////////////////////
     cutter.RegisterVariableGetter("MissTotKL", [&]()
-                                  { return sqrt(pow(PmissKL, 2) + pow(EmissKL, 2)); });
+                                  { return std::sqrt(std::pow(PmissKL, 2) + std::pow(EmissKL, 2)); });
     ///////////////////////////////////////////////////////////////////
     cutter.RegisterVariableGetter("MissHigherKL", [&]()
-                                  { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+                                  { return (std::pow(EmissKL, 2) - std::pow(PmissKL, 2)); });
     cutter.RegisterVariableGetter("MissLowerKL", [&]()
-                                  { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+                                  { return (std::pow(EmissKL, 2) - std::pow(PmissKL, 2)); });
   }
   else if (hypoCode == KLOE::HypothesisCode::SIGNAL)
   {
@@ -793,8 +793,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 0, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
     }
 
-    pT1 = sqrt(pow(baseKin.trknew[0][0], 2) + pow(baseKin.trknew[0][1], 2)),
-    pT2 = sqrt(pow(baseKin.trknew[1][0], 2) + pow(baseKin.trknew[1][1], 2));
+    pT1 = std::sqrt(std::pow(baseKin.trknew[0][0], 2) + std::pow(baseKin.trknew[0][1], 2)),
+    pT2 = std::sqrt(std::pow(baseKin.trknew[1][0], 2) + std::pow(baseKin.trknew[1][1], 2));
 
     baseKin.CurvSmeared1 = 1000. / pT1;
     baseKin.PhivSmeared1 = atan2(baseKin.trknew[0][1], baseKin.trknew[0][0]);
@@ -938,8 +938,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             KchrecKL_PhiCM[comp] += trkKL_PhiCM[part][comp];
           }
 
-        KchrecKSMom = sqrt(pow(KchrecKS_PhiCM[0], 2) + pow(KchrecKS_PhiCM[1], 2) + pow(KchrecKS_PhiCM[2], 2));
-        KchrecKLMom = sqrt(pow(KchrecKL_PhiCM[0], 2) + pow(KchrecKL_PhiCM[1], 2) + pow(KchrecKL_PhiCM[2], 2));
+        KchrecKSMom = std::sqrt(std::pow(KchrecKS_PhiCM[0], 2) + std::pow(KchrecKS_PhiCM[1], 2) + std::pow(KchrecKS_PhiCM[2], 2));
+        KchrecKLMom = std::sqrt(std::pow(KchrecKL_PhiCM[0], 2) + std::pow(KchrecKL_PhiCM[1], 2) + std::pow(KchrecKL_PhiCM[2], 2));
 
         eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS, baseKin.phi_mom, baseKin.KchboostKS);
         eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL, baseKin.phi_mom, baseKin.KchboostKL);
@@ -990,8 +990,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           MissMomKL[comp] = baseKin.phi_mom[comp] - baseKin.KchboostKL[comp] - baseKin.KchrecKS[comp];
         }
 
-        PmissKS = sqrt(pow(MissMomKS[0], 2) + pow(MissMomKS[1], 2) + pow(MissMomKS[2], 2));
-        PmissKL = sqrt(pow(MissMomKL[0], 2) + pow(MissMomKL[1], 2) + pow(MissMomKL[2], 2));
+        PmissKS = std::sqrt(std::pow(MissMomKS[0], 2) + std::pow(MissMomKS[1], 2) + std::pow(MissMomKS[2], 2));
+        PmissKL = std::sqrt(std::pow(MissMomKL[0], 2) + std::pow(MissMomKL[1], 2) + std::pow(MissMomKL[2], 2));
 
         EmissKS = baseKin.KchboostKS[3] - baseKin.KchrecKS[3];
         EmissKL = baseKin.KchboostKL[3] - baseKin.KchrecKL[3];
@@ -1059,10 +1059,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         MissMom[comp] = baseKin.Kchboostnew[comp] - baseKin.Kchrecnew[comp];
       }
 
-      Pmiss = sqrt(pow(MissMom[0], 2) + pow(MissMom[1], 2) + pow(MissMom[2], 2));
+      Pmiss = std::sqrt(std::pow(MissMom[0], 2) + std::pow(MissMom[1], 2) + std::pow(MissMom[2], 2));
       Emiss = baseKin.Kchboostnew[3] - baseKin.Kchrecnew[3];
 
-      baseKin.Qmiss = sqrt(pow(Emiss, 2) + pow(Pmiss, 2));
+      baseKin.Qmiss = std::sqrt(std::pow(Emiss, 2) + std::pow(Pmiss, 2));
 
       std::vector<Double_t> cluster[5];
 
@@ -1251,12 +1251,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           trackParameters[1].push_back(baseKin.trknew[1][1]);
           trackParameters[1].push_back(baseKin.trknew[1][2]);
 
-          trackParametersErr[0].push_back(pow(1.5, 2) / 2.0);
-          trackParametersErr[0].push_back(pow(1.5, 2) / 2.0);
-          trackParametersErr[0].push_back(pow(1.8, 2) / 2.0);
-          trackParametersErr[1].push_back(pow(1.5, 2) / 2.0);
-          trackParametersErr[1].push_back(pow(1.5, 2) / 2.0);
-          trackParametersErr[1].push_back(pow(1.8, 2) / 2.0);
+          trackParametersErr[0].push_back(std::pow(1.5, 2) / 2.0);
+          trackParametersErr[0].push_back(std::pow(1.5, 2) / 2.0);
+          trackParametersErr[0].push_back(std::pow(1.8, 2) / 2.0);
+          trackParametersErr[1].push_back(std::pow(1.5, 2) / 2.0);
+          trackParametersErr[1].push_back(std::pow(1.5, 2) / 2.0);
+          trackParametersErr[1].push_back(std::pow(1.8, 2) / 2.0);
 
           for (Int_t k = 0; k < 4; k++)
           {
@@ -1272,9 +1272,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             chargedVtx.push_back(baseKin.Kchboostnew[k]);
           }
 
-          chargedVtxErr.push_back(sqrt(baseKin.vtxcov[0][baseKin.vtaken[0]]));
-          chargedVtxErr.push_back(sqrt(baseKin.vtxcov[3][baseKin.vtaken[0]]));
-          chargedVtxErr.push_back(sqrt(baseKin.vtxcov[5][baseKin.vtaken[0]]));
+          chargedVtxErr.push_back(std::sqrt(baseKin.vtxcov[0][baseKin.vtaken[0]]));
+          chargedVtxErr.push_back(std::sqrt(baseKin.vtxcov[3][baseKin.vtaken[0]]));
+          chargedVtxErr.push_back(std::sqrt(baseKin.vtxcov[5][baseKin.vtaken[0]]));
 
           for (Int_t k = 6; k < 9; k++)
           {
@@ -1286,9 +1286,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           neuVtxErr.push_back(1.334);
 
           // bhabha_vtx errors from the data access
-          bhabhaVtxErr.push_back(sqrt(pow(dataAccess.GetBxErr(), 2) + pow(dataAccess.GetBlumx(), 2)));
+          bhabhaVtxErr.push_back(std::sqrt(std::pow(dataAccess.GetBxErr(), 2) + std::pow(dataAccess.GetBlumx(), 2)));
           bhabhaVtxErr.push_back(dataAccess.GetByErr());
-          bhabhaVtxErr.push_back(sqrt(pow(dataAccess.GetBzErr(), 2) + pow(dataAccess.GetBlumz(), 2)));
+          bhabhaVtxErr.push_back(std::sqrt(std::pow(dataAccess.GetBzErr(), 2) + std::pow(dataAccess.GetBlumz(), 2)));
 
           if (signalKinFit)
           {
@@ -1345,7 +1345,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           baseKin.Knereclor[1] = bhabha_mom[1] - baseKin.Kchboostnew[1];
           baseKin.Knereclor[2] = bhabha_mom[2] - baseKin.Kchboostnew[2];
           baseKin.Knereclor[3] = bhabha_mom[3] - baseKin.Kchboostnew[3];
-          baseKin.Knereclor[4] = sqrt(pow(baseKin.Knereclor[0], 2) + pow(baseKin.Knereclor[1], 2) + pow(baseKin.Knereclor[2], 2));
+          baseKin.Knereclor[4] = std::sqrt(std::pow(baseKin.Knereclor[0], 2) + std::pow(baseKin.Knereclor[1], 2) + std::pow(baseKin.Knereclor[2], 2));
           baseKin.Knereclor[5] = PhysicsConstants::mK0;
           baseKin.Knereclor[6] = baseKin.Knerec[6];
           baseKin.Knereclor[7] = baseKin.Knerec[7];
@@ -1402,19 +1402,19 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             trackParameters[1].push_back(baseKin.trkClosest[1][1]);
             trackParameters[1].push_back(baseKin.trkClosest[1][2]);
 
-            trackParametersErr[0].push_back(pow(1.5, 2) / 2.0);
-            trackParametersErr[0].push_back(pow(1.5, 2) / 2.0);
-            trackParametersErr[0].push_back(pow(1.8, 2) / 2.0);
-            trackParametersErr[1].push_back(pow(1.5, 2) / 2.0);
-            trackParametersErr[1].push_back(pow(1.5, 2) / 2.0);
-            trackParametersErr[1].push_back(pow(1.8, 2) / 2.0);
+            trackParametersErr[0].push_back(std::pow(1.5, 2) / 2.0);
+            trackParametersErr[0].push_back(std::pow(1.5, 2) / 2.0);
+            trackParametersErr[0].push_back(std::pow(1.8, 2) / 2.0);
+            trackParametersErr[1].push_back(std::pow(1.5, 2) / 2.0);
+            trackParametersErr[1].push_back(std::pow(1.5, 2) / 2.0);
+            trackParametersErr[1].push_back(std::pow(1.8, 2) / 2.0);
 
             std::vector<Double_t> omegaVtx = {baseKin.KchrecClosest[6],
                                              baseKin.KchrecClosest[7],
                                              baseKin.KchrecClosest[8]},
-                                 omegaVtxErr = {sqrt(baseKin.vtxcov[0][baseKin.vtakenClosest[0]]),
-                                                sqrt(baseKin.vtxcov[3][baseKin.vtakenClosest[0]]),
-                                                sqrt(baseKin.vtxcov[5][baseKin.vtakenClosest[0]])};
+                                 omegaVtxErr = {std::sqrt(baseKin.vtxcov[0][baseKin.vtakenClosest[0]]),
+                                                std::sqrt(baseKin.vtxcov[3][baseKin.vtakenClosest[0]]),
+                                                std::sqrt(baseKin.vtxcov[5][baseKin.vtakenClosest[0]])};
 
             omegaKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, bhabha_mom, bhabha_mom_err, chargedVtx, chargedVtxErr, omegaVtx, omegaVtxErr);
             errorCode = omegaKinFitObj.Reconstruct();

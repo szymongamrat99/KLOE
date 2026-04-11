@@ -223,11 +223,11 @@ void reconstruct3pi0_(int * ncl,
 	spreadSol[i][j] = 0.;
 	for(int ic = 0; ic < 15; ic++){
 	  if( zeroSolution[ic].error[i] == false){
-	    spreadSol[i][j] += Cene[ic]*pow( meanSol[i][j]-zeroSolution[ic].sol[i][j] , 2.);
+	    spreadSol[i][j] += Cene[ic]*std::pow( meanSol[i][j]-zeroSolution[ic].sol[i][j] , 2.);
 	  }
 	}
 	spreadSol[i][j] /= Etemp[i];
-	spreadSol[i][j] = sqrt( spreadSol[i][j] );
+	spreadSol[i][j] = std::sqrt( spreadSol[i][j] );
       }
     }
 
@@ -280,7 +280,7 @@ void reconstruct3pi0_(int * ncl,
     // 6th criterion - reasonability of mean solution
     if( meanSol[0][3] < -10 || meanSol[0][3] > 60.){
       //      continue;
-    }else if( pow(meanSol[0][0],2.)+pow(meanSol[0][1],2.) > 190.*190. || fabs( meanSol[0][2] )>170. ){
+    }else if( std::pow(meanSol[0][0],2.)+std::pow(meanSol[0][1],2.) > 190.*190. || fabs( meanSol[0][2] )>170. ){
       //      continue;
     }
     
@@ -344,22 +344,22 @@ void reconstruct3pi0_(int * ncl,
 
 /** my power function ***/
 /*
-double pow(double x, int n){
-  double pow = 1;
+double std::pow(double x, int n){
+  double std::pow = 1;
   for(int i=0;i<n;i++){
-    pow *= x;
+    std::pow *= x;
   }
-  return pow;
+  return std::pow;
 }
 */
 
 /******************* distance between two points ********************/
 double Dist(double * a, double * b){
   double d = 0;
-  d += pow( a[0]-b[0] ,2.);
-  d += pow( a[1]-b[1] ,2.);
-  d += pow( a[2]-b[2] ,2.);
-  d = sqrt( d );
+  d += std::pow( a[0]-b[0] ,2.);
+  d += std::pow( a[1]-b[1] ,2.);
+  d += std::pow( a[2]-b[2] ,2.);
+  d = std::sqrt( d );
 
   return d;
 }

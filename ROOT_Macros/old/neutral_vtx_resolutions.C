@@ -121,9 +121,9 @@ Bool_t neutral_vtx_resolutions::Process(Long64_t entry)
 
    if (*mctruth == 1)
    {
-      length_mc = sqrt(pow(KnemcOld[6] - ipmcOld[0], 2) + pow(KnemcOld[7] - ipmcOld[1], 2) + pow(KnemcOld[8] - ipmcOld[2], 2));
+      length_mc = std::sqrt(std::pow(KnemcOld[6] - ipmcOld[0], 2) + std::pow(KnemcOld[7] - ipmcOld[1], 2) + std::pow(KnemcOld[8] - ipmcOld[2], 2));
 
-      length_std = sqrt(pow(Knerec[6] - *Bx, 2) + pow(Knerec[7] - *By, 2) + pow(Knerec[8] - *Bz, 2));
+      length_std = std::sqrt(std::pow(Knerec[6] - *Bx, 2) + std::pow(Knerec[7] - *By, 2) + std::pow(Knerec[8] - *Bz, 2));
 
       sigmas_std[0]->Fill(KnemcOld[6], Knerec[6] - KnemcOld[6]);
       sigmas_std[1]->Fill(KnemcOld[7], Knerec[7] - KnemcOld[7]);
@@ -150,7 +150,7 @@ void neutral_vtx_resolutions::Terminate()
    TFitResultPtr r;
    Float_t parameter[3];
 
-   TF1 *func = new TF1("f1", "[0]*exp(-0.5*pow((x-[1])/[2],2))", -200, 200);
+   TF1 *func = new TF1("f1", "[0]*exp(-0.5*std::pow((x-[1])/[2],2))", -200, 200);
    func->SetParNames("Constant", "Mean", "Sigma");
 
    Color_t res_color[4] = {kRed, kBlue, kGreen, kBlack};

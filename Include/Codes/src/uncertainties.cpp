@@ -17,7 +17,7 @@ Double_t clu_ene_error(Double_t Enecl)
 
     // Error in MeV
 
-    sigma_E = Enecl * 0.057 / sqrt(0.001 * Enecl);
+    sigma_E = Enecl * 0.057 / std::sqrt(0.001 * Enecl);
 
     if (Enecl > 0.)
         return sigma_E;
@@ -38,7 +38,7 @@ Double_t clu_time_error(Double_t Enecl)
 
     // Error in ns
 
-    sigma_time = sqrt(pow(0.054 / sqrt(0.001 * Enecl), 2) + pow(0.05, 2));
+    sigma_time = std::sqrt(std::pow(0.054 / std::sqrt(0.001 * Enecl), 2) + std::pow(0.05, 2));
 
     if (Enecl > 0.)
         return sigma_time;
@@ -50,7 +50,7 @@ Double_t clu_x_error(Double_t x_coor, Double_t y_coor, Double_t z_coor, Double_t
 {
     Double_t sigma_x = 0.;
 
-    if (sqrt(pow(x_coor, 2) + pow(y_coor, 2)) > 200.)
+    if (std::sqrt(std::pow(x_coor, 2) + std::pow(y_coor, 2)) > 200.)
         sigma_x = sigma_coor;
     else
         sigma_x = sigma_coor;
@@ -67,10 +67,10 @@ Double_t clu_y_error(Double_t x_coor, Double_t y_coor, Double_t z_coor, Double_t
 
     // Error in ns
 
-    if (sqrt(pow(x_coor, 2) + pow(y_coor, 2)) > 200.)
+    if (std::sqrt(std::pow(x_coor, 2) + std::pow(y_coor, 2)) > 200.)
         sigma_y = sigma_coor;
     else
-        sigma_y = sigma_coor / sqrt(0.001 * Enecl);
+        sigma_y = sigma_coor / std::sqrt(0.001 * Enecl);
 
     if (Enecl > 0.)
         return sigma_y;
@@ -84,8 +84,8 @@ Double_t clu_z_error(Double_t x_coor, Double_t y_coor, Double_t z_coor, Double_t
 
     // Error in ns
 
-    if (sqrt(pow(x_coor, 2) + pow(y_coor, 2)) > 200.)
-        sigma_z = sigma_coor / sqrt(0.001 * Enecl);
+    if (std::sqrt(std::pow(x_coor, 2) + std::pow(y_coor, 2)) > 200.)
+        sigma_z = sigma_coor / std::sqrt(0.001 * Enecl);
     else
         sigma_z = sigma_coor;
 

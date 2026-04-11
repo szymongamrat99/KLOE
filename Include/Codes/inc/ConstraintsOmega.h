@@ -8,7 +8,7 @@
 /*
   For 4 gamma decay, without charged decay:
   4 x 5 (Xcl, Ycl, Zcl, TclOld, EneCl)
-  1 x 4 (Px_Phi, Py_Phi, Pz_Phi, sqrt(S))
+  1 x 4 (Px_Phi, Py_Phi, Pz_Phi, std::sqrt(S))
 
   IP determined during fit (using direction of Kne momentum from clusters)
   Neutral kaon 4-vec determined during fit
@@ -18,7 +18,7 @@
   For 4 gamma decay, with charged decay:
   2 x 3 (CurvOld, PhivOld, CotvOld)
   4 x 5 (Xcl, Ycl, Zcl, TclOld, EneCl)
-  1 x 4 (Px_Phi, Py_Phi, Pz_Phi, sqrt(S))
+  1 x 4 (Px_Phi, Py_Phi, Pz_Phi, std::sqrt(S))
 
   IP determined during fit (using direction of Kch momentum)
   Charged kaon 4-mom determined during fit (using the boost method as well)
@@ -29,7 +29,7 @@
 
   For 6 gamma decay, without charged decay:
   6 x 5 (Xcl, Ycl, Zcl, TclOld, EneCl)
-  1 x 4 (Px_Phi, Py_Phi, Pz_Phi, sqrt(S))
+  1 x 4 (Px_Phi, Py_Phi, Pz_Phi, std::sqrt(S))
 
   IP determined during fit (using direction of Kne momentum from clusters)
   Neutral kaon 4-vec determined during fit
@@ -39,7 +39,7 @@
   For 6 gamma decay, with charged decay:
   2 x 3 (CurvOld, PhivOld, CotvOld)
   6 x 5 (Xcl, Ycl, Zcl, TclOld, EneCl)
-  1 x 4 (Px_Phi, Py_Phi, Pz_Phi, sqrt(S))
+  1 x 4 (Px_Phi, Py_Phi, Pz_Phi, std::sqrt(S))
 
   IP determined during fit (using direction of Kch momentum)
   Charged kaon 4-mom determined during fit (using the boost method as well)

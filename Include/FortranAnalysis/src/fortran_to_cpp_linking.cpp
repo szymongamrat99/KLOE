@@ -83,17 +83,17 @@ int main()
 
     Float_t dist[4];
 
-    dist[0] = sqrt(pow(interfcommon_.KchRec[6] - interfcommon_.Bx,2) + 
-                   pow(interfcommon_.KchRec[7] - interfcommon_.By,2));
+    dist[0] = std::sqrt(std::pow(interfcommon_.KchRec[6] - interfcommon_.Bx,2) + 
+                   std::pow(interfcommon_.KchRec[7] - interfcommon_.By,2));
 
-    dist[1] = sqrt(pow(interfcommon_.KchRecKS[6] - interfcommon_.Bx,2) + 
-                   pow(interfcommon_.KchRecKS[7] - interfcommon_.By,2));
+    dist[1] = std::sqrt(std::pow(interfcommon_.KchRecKS[6] - interfcommon_.Bx,2) + 
+                   std::pow(interfcommon_.KchRecKS[7] - interfcommon_.By,2));
     
-    dist[2] = sqrt(pow(interfcommon_.KchRecKL[6] - interfcommon_.Bx,2) + 
-                   pow(interfcommon_.KchRecKL[7] - interfcommon_.By,2));
+    dist[2] = std::sqrt(std::pow(interfcommon_.KchRecKL[6] - interfcommon_.Bx,2) + 
+                   std::pow(interfcommon_.KchRecKL[7] - interfcommon_.By,2));
 
-    dist[3] = sqrt(pow(interfcommon_.KchRecClose[6] - interfcommon_.Bx,2) + 
-                   pow(interfcommon_.KchRecClose[7] - interfcommon_.By,2));
+    dist[3] = std::sqrt(std::pow(interfcommon_.KchRecClose[6] - interfcommon_.Bx,2) + 
+                   std::pow(interfcommon_.KchRecClose[7] - interfcommon_.By,2));
 
     massKaon[0]->Fill(dist[0]);
     massKaon[1]->Fill(dist[1]);

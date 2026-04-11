@@ -95,20 +95,20 @@ void four_pi::Begin(TTree * /*tree*/)
                                       { return pKTwoBody; });
    ///////////////////////////////////////////////////////////////////
    cutter->RegisterVariableGetter("MissTotKS", [&]()
-                                  { return sqrt(pow(PmissKS, 2) + pow(EmissKS, 2)); });
+                                  { return std::sqrt(std::pow(PmissKS, 2) + std::pow(EmissKS, 2)); });
    ///////////////////////////////////////////////////////////////////
    cutter->RegisterVariableGetter("MissHigherKS", [&]()
-                                  { return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+                                  { return (std::pow(EmissKS, 2) - std::pow(PmissKS, 2)); });
    cutter->RegisterVariableGetter("MissLowerKS", [&]()
-                                  { return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+                                  { return (std::pow(EmissKS, 2) - std::pow(PmissKS, 2)); });
    ///////////////////////////////////////////////////////////////////
    cutter->RegisterVariableGetter("MissTotKL", [&]()
-                                  { return sqrt(pow(PmissKL, 2) + pow(EmissKL, 2)); });
+                                  { return std::sqrt(std::pow(PmissKL, 2) + std::pow(EmissKL, 2)); });
    ///////////////////////////////////////////////////////////////////
    cutter->RegisterVariableGetter("MissHigherKL", [&]()
-                                  { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+                                  { return (std::pow(EmissKL, 2) - std::pow(PmissKL, 2)); });
    cutter->RegisterVariableGetter("MissLowerKL", [&]()
-                                  { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+                                  { return (std::pow(EmissKL, 2) - std::pow(PmissKL, 2)); });
 
    invMassKSConfig.name = "invMassKS";
    invMassKSConfig.xtitle = "m^{inv}_{K#rightarrow#pi^{+}#pi^{-}} [MeV/c^{2}]";
@@ -244,8 +244,8 @@ Bool_t four_pi::Process(Long64_t entry)
       MissMomKL[comp] = PhiMom[comp] - KchboostKL[comp] - KchrecKS[comp];
    }
 
-   PmissKS = sqrt(pow(MissMomKS[0], 2) + pow(MissMomKS[1], 2) + pow(MissMomKS[2], 2));
-   PmissKL = sqrt(pow(MissMomKL[0], 2) + pow(MissMomKL[1], 2) + pow(MissMomKL[2], 2));
+   PmissKS = std::sqrt(std::pow(MissMomKS[0], 2) + std::pow(MissMomKS[1], 2) + std::pow(MissMomKS[2], 2));
+   PmissKL = std::sqrt(std::pow(MissMomKL[0], 2) + std::pow(MissMomKL[1], 2) + std::pow(MissMomKL[2], 2));
 
    EmissKS = KchboostKS[3] - KchrecKS[3];
    EmissKL = KchboostKL[3] - KchrecKL[3];
@@ -269,8 +269,8 @@ Bool_t four_pi::Process(Long64_t entry)
          KchrecKL_PhiCM[comp] += trkKL_PhiCM[part][comp];
       }
 
-   KchrecKSMom = sqrt(pow(KchrecKS_PhiCM[0], 2) + pow(KchrecKS_PhiCM[1], 2) + pow(KchrecKS_PhiCM[2], 2));
-   KchrecKLMom = sqrt(pow(KchrecKL_PhiCM[0], 2) + pow(KchrecKL_PhiCM[1], 2) + pow(KchrecKL_PhiCM[2], 2));
+   KchrecKSMom = std::sqrt(std::pow(KchrecKS_PhiCM[0], 2) + std::pow(KchrecKS_PhiCM[1], 2) + std::pow(KchrecKS_PhiCM[2], 2));
+   KchrecKLMom = std::sqrt(std::pow(KchrecKL_PhiCM[0], 2) + std::pow(KchrecKL_PhiCM[1], 2) + std::pow(KchrecKL_PhiCM[2], 2));
 
    Float_t weight = 1.0;
 
@@ -284,10 +284,10 @@ Bool_t four_pi::Process(Long64_t entry)
          histMgr->Fill1D("twoBodyMomKS", *mctruth, KchrecKSMom, weight);
          histMgr->Fill1D("twoBodyMomKL", *mctruth, KchrecKLMom, weight);
 
-         histMgr->Fill1D("missTotKS", *mctruth, sqrt(pow(EmissKS, 2) + pow(PmissKS, 2)), weight);
-         histMgr->Fill1D("missTotKL", *mctruth, sqrt(pow(EmissKL, 2) + pow(PmissKL, 2)), weight);
-         histMgr->Fill1D("missSqKS", *mctruth, pow(EmissKS, 2) - pow(PmissKS, 2), weight);
-         histMgr->Fill1D("missSqKL", *mctruth, pow(EmissKL, 2) - pow(PmissKL, 2), weight);
+         histMgr->Fill1D("missTotKS", *mctruth, std::sqrt(std::pow(EmissKS, 2) + std::pow(PmissKS, 2)), weight);
+         histMgr->Fill1D("missTotKL", *mctruth, std::sqrt(std::pow(EmissKL, 2) + std::pow(PmissKL, 2)), weight);
+         histMgr->Fill1D("missSqKS", *mctruth, std::pow(EmissKS, 2) - std::pow(PmissKS, 2), weight);
+         histMgr->Fill1D("missSqKL", *mctruth, std::pow(EmissKL, 2) - std::pow(PmissKL, 2), weight);
       }
 
       if (*mcflag == 0)
@@ -297,10 +297,10 @@ Bool_t four_pi::Process(Long64_t entry)
          histMgr->FillData1D("twoBodyMomKS", KchrecKSMom, weight);
          histMgr->FillData1D("twoBodyMomKL", KchrecKLMom, weight);
 
-         histMgr->FillData1D("missTotKS", sqrt(pow(EmissKS, 2) + pow(PmissKS, 2)), weight);
-         histMgr->FillData1D("missTotKL", sqrt(pow(EmissKL, 2) + pow(PmissKL, 2)), weight);
-         histMgr->FillData1D("missSqKS", pow(EmissKS, 2) - pow(PmissKS, 2), weight);
-         histMgr->FillData1D("missSqKL", pow(EmissKL, 2) - pow(PmissKL, 2), weight);
+         histMgr->FillData1D("missTotKS", std::sqrt(std::pow(EmissKS, 2) + std::pow(PmissKS, 2)), weight);
+         histMgr->FillData1D("missTotKL", std::sqrt(std::pow(EmissKL, 2) + std::pow(PmissKL, 2)), weight);
+         histMgr->FillData1D("missSqKS", std::pow(EmissKS, 2) - std::pow(PmissKS, 2), weight);
+         histMgr->FillData1D("missSqKL", std::pow(EmissKL, 2) - std::pow(PmissKL, 2), weight);
       }
    }
 

@@ -93,19 +93,19 @@ int CovarianceMatrixDetermination(TChain &chain, Controls::DataType &data_type, 
 		{
 			if (covMatrixType == "KL" || covMatrixType == "MIXED")
 			{
-				checkMCKL[0] = sqrt(pow(trk1KLmc->at(0) - trk1KL->at(0), 2) +
-														pow(trk1KLmc->at(1) - trk1KL->at(1), 2) +
-														pow(trk1KLmc->at(2) - trk1KL->at(2), 2) +
-														pow(trk2KLmc->at(0) - trk2KL->at(0), 2) +
-														pow(trk2KLmc->at(1) - trk2KL->at(1), 2) +
-														pow(trk2KLmc->at(2) - trk2KL->at(2), 2));
+				checkMCKL[0] = std::sqrt(std::pow(trk1KLmc->at(0) - trk1KL->at(0), 2) +
+														std::pow(trk1KLmc->at(1) - trk1KL->at(1), 2) +
+														std::pow(trk1KLmc->at(2) - trk1KL->at(2), 2) +
+														std::pow(trk2KLmc->at(0) - trk2KL->at(0), 2) +
+														std::pow(trk2KLmc->at(1) - trk2KL->at(1), 2) +
+														std::pow(trk2KLmc->at(2) - trk2KL->at(2), 2));
 
-				checkMCKL[1] = sqrt(pow(trk1KLmc->at(0) - trk2KL->at(0), 2) +
-														pow(trk1KLmc->at(1) - trk2KL->at(1), 2) +
-														pow(trk1KLmc->at(2) - trk2KL->at(2), 2) +
-														pow(trk2KLmc->at(0) - trk1KL->at(0), 2) +
-														pow(trk2KLmc->at(1) - trk1KL->at(1), 2) +
-														pow(trk2KLmc->at(2) - trk1KL->at(2), 2));
+				checkMCKL[1] = std::sqrt(std::pow(trk1KLmc->at(0) - trk2KL->at(0), 2) +
+														std::pow(trk1KLmc->at(1) - trk2KL->at(1), 2) +
+														std::pow(trk1KLmc->at(2) - trk2KL->at(2), 2) +
+														std::pow(trk2KLmc->at(0) - trk1KL->at(0), 2) +
+														std::pow(trk2KLmc->at(1) - trk1KL->at(1), 2) +
+														std::pow(trk2KLmc->at(2) - trk1KL->at(2), 2));
 
 				for (Int_t j = 0; j < 3; j++)
 				{
@@ -132,19 +132,19 @@ int CovarianceMatrixDetermination(TChain &chain, Controls::DataType &data_type, 
 
 			if (covMatrixType == "KS" || covMatrixType == "MIXED")
 			{
-				checkMCKS[0] = sqrt(pow(trk1KSmc->at(0) - trk1KS->at(0), 2) +
-														pow(trk1KSmc->at(1) - trk1KS->at(1), 2) +
-														pow(trk1KSmc->at(2) - trk1KS->at(2), 2) +
-														pow(trk2KSmc->at(0) - trk2KS->at(0), 2) +
-														pow(trk2KSmc->at(1) - trk2KS->at(1), 2) +
-														pow(trk2KSmc->at(2) - trk2KS->at(2), 2));
+				checkMCKS[0] = std::sqrt(std::pow(trk1KSmc->at(0) - trk1KS->at(0), 2) +
+														std::pow(trk1KSmc->at(1) - trk1KS->at(1), 2) +
+														std::pow(trk1KSmc->at(2) - trk1KS->at(2), 2) +
+														std::pow(trk2KSmc->at(0) - trk2KS->at(0), 2) +
+														std::pow(trk2KSmc->at(1) - trk2KS->at(1), 2) +
+														std::pow(trk2KSmc->at(2) - trk2KS->at(2), 2));
 
-				checkMCKS[1] = sqrt(pow(trk1KSmc->at(0) - trk2KS->at(0), 2) +
-														pow(trk1KSmc->at(1) - trk2KS->at(1), 2) +
-														pow(trk1KSmc->at(2) - trk2KS->at(2), 2) +
-														pow(trk2KSmc->at(0) - trk1KS->at(0), 2) +
-														pow(trk2KSmc->at(1) - trk1KS->at(1), 2) +
-														pow(trk2KSmc->at(2) - trk1KS->at(2), 2));
+				checkMCKS[1] = std::sqrt(std::pow(trk1KSmc->at(0) - trk2KS->at(0), 2) +
+														std::pow(trk1KSmc->at(1) - trk2KS->at(1), 2) +
+														std::pow(trk1KSmc->at(2) - trk2KS->at(2), 2) +
+														std::pow(trk2KSmc->at(0) - trk1KS->at(0), 2) +
+														std::pow(trk2KSmc->at(1) - trk1KS->at(1), 2) +
+														std::pow(trk2KSmc->at(2) - trk1KS->at(2), 2));
 
 				for (Int_t j = 0; j < 3; j++)
 				{

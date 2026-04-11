@@ -29,11 +29,11 @@ namespace KLOE
     Double_t transv_vector_pr = 0., mom_val2 = 0., delta = 0., b = 0., a = 0., num[2] = {0., 0.}, den = 0., par[2] = {0., 0.}, tmp[3] = {0., 0., 0.}, clus_mom_scalar_pr = 0., gamma_path = 0., cosangle = -999.;
 
     transv_vector_pr = momentum[0] * neu_vtx[1] - momentum[1] * neu_vtx[0];
-    mom_val2 = pow(momentum[0], 2) + pow(momentum[1], 2);
+    mom_val2 = std::pow(momentum[0], 2) + std::pow(momentum[1], 2);
 
     b = momentum[0] * neu_vtx[0] + momentum[1] * neu_vtx[1];
 
-    delta = mom_val2 * pow(_Rmax, 2) - pow(transv_vector_pr, 2);
+    delta = mom_val2 * std::pow(_Rmax, 2) - std::pow(transv_vector_pr, 2);
 
     if (delta < 0)
     {
@@ -43,7 +43,7 @@ namespace KLOE
     }
     else
     {
-      delta = sqrt(delta);
+      delta = std::sqrt(delta);
 
       den = mom_val2;
 
@@ -63,8 +63,8 @@ namespace KLOE
 
         // Calculation of temporary clusters and cross check with momentum direction
 
-        mom_val2 += pow(momentum[2], 2);
-        mom_val2 = sqrt(mom_val2);
+        mom_val2 += std::pow(momentum[2], 2);
+        mom_val2 = std::sqrt(mom_val2);
 
         for (Int_t i = 0; i < 2; i++)
         {
@@ -76,10 +76,10 @@ namespace KLOE
             tmp[j] = neu_vtx[j] + par[i] * momentum[j];
 
             clus_mom_scalar_pr += (tmp[j] - neu_vtx[j]) * momentum[j];
-            gamma_path += pow(tmp[j] - neu_vtx[j], 2);
+            gamma_path += std::pow(tmp[j] - neu_vtx[j], 2);
           }
 
-          gamma_path = sqrt(gamma_path);
+          gamma_path = std::sqrt(gamma_path);
           cosangle = clus_mom_scalar_pr / (gamma_path * mom_val2);
 
           if (cosangle > 0.99)

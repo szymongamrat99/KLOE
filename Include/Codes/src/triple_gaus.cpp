@@ -9,8 +9,8 @@ Double_t triple_gaus(Double_t *x, Double_t *p)
 
   for (Int_t i = 0; i < 3; i++)
   {
-    norm[i] = p[i * 3] / (p[2 + i * 3] * sqrt(2 * M_PI));
-    gaus[i] = norm[i] * exp(-pow((x[0] - p[1 + i * 3]) / p[2 + i * 3], 2) / 2.);
+    norm[i] = p[i * 3] / (p[2 + i * 3] * std::sqrt(2 * M_PI));
+    gaus[i] = norm[i] * exp(-std::pow((x[0] - p[1 + i * 3]) / p[2 + i * 3], 2) / 2.);
 
     value += gaus[i];
   }
@@ -22,8 +22,8 @@ Double_t single_gaus(Double_t *x, Double_t *p)
 {
   Double_t norm, gaus;
 
-  norm = p[0] / (p[2] * sqrt(2 * M_PI));
-  gaus = norm * exp(-pow((x[0] - p[1]) / p[2], 2) / 2.);
+  norm = p[0] / (p[2] * std::sqrt(2 * M_PI));
+  gaus = norm * exp(-std::pow((x[0] - p[1]) / p[2], 2) / 2.);
 
   return gaus;
 }
@@ -115,14 +115,14 @@ Double_t comb_mean_err(const Double_t *p, const Double_t *err)
   {
     // Składowa od błędu mean_i
     Double_t d_dmean = N[i] / NTot;
-    err_squared += pow(d_dmean * mean_err[i], 2);
+    err_squared += std::pow(d_dmean * mean_err[i], 2);
 
     // Składowa od błędu N_i
     Double_t d_dN = (mean[i] - mean_comb) / NTot;
-    err_squared += pow(d_dN * N_err[i], 2);
+    err_squared += std::pow(d_dN * N_err[i], 2);
   }
 
-  return sqrt(err_squared);
+  return std::sqrt(err_squared);
 }
 
 Double_t comb_std_dev(const Double_t *p, const Double_t *err)
@@ -156,7 +156,7 @@ Double_t comb_std_dev(const Double_t *p, const Double_t *err)
     sigma[i] = p[2 + i * 3];
 
     // ✅ POPRAWKA: weighted variance, nie (N*sigma)^2!
-    // Stara formuła: pow(N[i] * sigma[i], 2) dawała zawyżone wartości
+    // Stara formuła: std::pow(N[i] * sigma[i], 2) dawała zawyżone wartości
     nominator1 += weight[i] * sigma[i] * sigma[i];
     nominator2 += weight[i] * mean[i] * mean[i];
     nominator3 += weight[i] * mean[i];
@@ -164,7 +164,7 @@ Double_t comb_std_dev(const Double_t *p, const Double_t *err)
 
   nominator = nominator1 + nominator2 - nominator3 * nominator3;
 
-  return sqrt(nominator);
+  return std::sqrt(nominator);
 }
 
 Double_t comb_std_dev_err(const Double_t *p, const Double_t *err)
@@ -220,8 +220,8 @@ Double_t comb_std_dev_err(const Double_t *p, const Double_t *err)
 
   nominator = nominator1 + nominator2 - nominator3 * nominator3;
 
-  // Weighted RMS: sigma_comb = sqrt(sum(N_i * sigma_i^2) / N_total)
-  std_dev = sqrt(nominator);
+  // Weighted RMS: sigma_comb = std::sqrt(sum(N_i * sigma_i^2) / N_total)
+  std_dev = std::sqrt(nominator);
 
   // Propagacja błędu przez pochodne cząstkowe:
   // d(sigma_comb)/d(sigma_i) = (N_i * sigma_i) / (N_tot * sigma_comb)
@@ -232,19 +232,19 @@ Double_t comb_std_dev_err(const Double_t *p, const Double_t *err)
   {
     // Składowa od błędu sigma_i
     Double_t d_dsigma = (2 * N[i] * sigma[i]) / (NTot);
-    err_squared += pow(d_dsigma * sigma_err[i], 2);
+    err_squared += std::pow(d_dsigma * sigma_err[i], 2);
 
     // Składowa od błędu mean_i
     Double_t d_dmean = (2 * N[i] / NTot ) * ( mean[i] - nominator3 );
-    err_squared += pow(d_dmean * mean_err[i], 2);
+    err_squared += std::pow(d_dmean * mean_err[i], 2);
 
     // Składowa od błędu N_i
-    Double_t d_dN = pow(sigma[i], 2) + pow(mean[i], 2) - nominator1 - nominator2 - 2 * mean[i] * nominator3 + 2 * nominator3 * nominator3;
+    Double_t d_dN = std::pow(sigma[i], 2) + std::pow(mean[i], 2) - nominator1 - nominator2 - 2 * mean[i] * nominator3 + 2 * nominator3 * nominator3;
 
     d_dN /= (NTot);
 
-    err_squared += pow(d_dN * N_err[i], 2);
+    err_squared += std::pow(d_dN * N_err[i], 2);
   }
 
-  return sqrt(err_squared);
+  return std::sqrt(err_squared);
 }

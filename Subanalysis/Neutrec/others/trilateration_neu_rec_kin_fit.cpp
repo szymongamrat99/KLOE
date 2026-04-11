@@ -208,14 +208,14 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 
 										DP[k * 5] = 1.2;																						  // cm
 
-										if(sqrt(pow(P[k * 5],2) + pow(P[k * 5 + 1],2)) > 200)
+										if(std::sqrt(std::pow(P[k * 5],2) + std::pow(P[k * 5 + 1],2)) > 200)
 										{
 											DP[k * 5 + 1] = 1.2;																				// cm
-											DP[k * 5 + 2] = 1.2 / sqrt(cluster[4][ind_gam[k]] / 1000.); // cm
+											DP[k * 5 + 2] = 1.2 / std::sqrt(cluster[4][ind_gam[k]] / 1000.); // cm
 										}
 										else
 										{
-											DP[k * 5 + 1] = 1.2 / sqrt(cluster[4][ind_gam[k]] / 1000.);	// cm
+											DP[k * 5 + 1] = 1.2 / std::sqrt(cluster[4][ind_gam[k]] / 1000.);	// cm
 											DP[k * 5 + 2] = 1.2; // cm
 										}
 
@@ -269,7 +269,7 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 										for (Int_t m = 0; m < N; m++)
 										{
 											P1[m] = minimum->X()[m];
-											CHISQR += pow((P1[m] - P[m]) / DP[m], 2);
+											CHISQR += std::pow((P1[m] - P[m]) / DP[m], 2);
 											for (Int_t n = 0; n < N; n++)
 												chi2_corr->SetBinContent(m + 1, n + 1, minimum->Correlation(m, n));
 										}
@@ -333,7 +333,7 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 											mom_kaon[k][2] = gamma_mom[k][0][2] + gamma_mom[k][1][2] + gamma_mom[k][2][2] + gamma_mom[k][3][2];
 											mom_kaon[k][3] = gamma_mom[k][0][3] + gamma_mom[k][1][3] + gamma_mom[k][2][3] + gamma_mom[k][3][3];
 
-											v_kaon[k] = PhysicsConstants::cVel * sqrt(pow(mom_kaon[k][0], 2) + pow(mom_kaon[k][1], 2) + pow(mom_kaon[k][2], 2)) / mom_kaon[k][3];
+											v_kaon[k] = PhysicsConstants::cVel * std::sqrt(std::pow(mom_kaon[k][0], 2) + std::pow(mom_kaon[k][1], 2) + std::pow(mom_kaon[k][2], 2)) / mom_kaon[k][3];
 
 											bhabha_mom_fit[0] = P1[20];
 											bhabha_mom_fit[1] = P1[21];
@@ -348,7 +348,7 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 											if (std::abs(ip_tri[k][2] - bhabha_vtx[2]) > 2)
 												ip_tri[k][2] = bhabha_vtx[2];
 
-											length_kaon[k] = sqrt(pow(neu_vtx_min[k][0] - ip_tri[k][0], 2) + pow(neu_vtx_min[k][1] - ip_tri[k][1], 2) + pow(neu_vtx_min[k][2] - ip_tri[k][2], 2));
+											length_kaon[k] = std::sqrt(std::pow(neu_vtx_min[k][0] - ip_tri[k][0], 2) + std::pow(neu_vtx_min[k][1] - ip_tri[k][1], 2) + std::pow(neu_vtx_min[k][2] - ip_tri[k][2], 2));
 
 											diff_kaon[k] = v_kaon[k] * neu_vtx_min[k][3] - length_kaon[k];
 										}
@@ -399,10 +399,10 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 																						 gamma_mom_final[2][2] + gamma_mom_final[3][2];
 											fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] +
 																						 gamma_mom_final[2][3] + gamma_mom_final[3][3];
-											fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) +
-																									pow(fourKnetri_kinfit[1], 2) +
-																									pow(fourKnetri_kinfit[2], 2));
-											fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
+											fourKnetri_kinfit[4] = std::sqrt(std::pow(fourKnetri_kinfit[0], 2) +
+																									std::pow(fourKnetri_kinfit[1], 2) +
+																									std::pow(fourKnetri_kinfit[2], 2));
+											fourKnetri_kinfit[5] = std::sqrt(std::pow(fourKnetri_kinfit[3], 2) - std::pow(fourKnetri_kinfit[4], 2));
 											fourKnetri_kinfit[6] = neu_vtx_min[0][0];
 											fourKnetri_kinfit[7] = neu_vtx_min[0][1];
 											fourKnetri_kinfit[8] = neu_vtx_min[0][2];
@@ -467,8 +467,8 @@ void tri_neurec_kinfit(int first_file, int last_file) //	arguments are: 1. Numbe
 																						 gamma_mom_final[2][2] + gamma_mom_final[3][2];
 											fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] +
 																						 gamma_mom_final[2][3] + gamma_mom_final[3][3];
-											fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[2], 2));
-											fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
+											fourKnetri_kinfit[4] = std::sqrt(std::pow(fourKnetri_kinfit[2], 2));
+											fourKnetri_kinfit[5] = std::sqrt(std::pow(fourKnetri_kinfit[3], 2) - std::pow(fourKnetri_kinfit[4], 2));
 											fourKnetri_kinfit[6] = neu_vtx_min[1][0];
 											fourKnetri_kinfit[7] = neu_vtx_min[1][1];
 											fourKnetri_kinfit[8] = neu_vtx_min[1][2];

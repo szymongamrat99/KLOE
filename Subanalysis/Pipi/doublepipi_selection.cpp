@@ -101,7 +101,7 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
         {
             for(Int_t j = 0; j < nv; j++)
             {
-                radius = sqrt(pow(charged_vtx[0][j] - bhabha_vtx[0],2) + pow(charged_vtx[1][j] - bhabha_vtx[1],2));
+                radius = std::sqrt(std::pow(charged_vtx[0][j] - bhabha_vtx[0],2) + std::pow(charged_vtx[1][j] - bhabha_vtx[1],2));
                 height = std::abs(charged_vtx[2][j] - bhabha_vtx[2]);
 
                 if( qualv[j] == 1 && vtx[j] == 2 && radius < 10 && height < 20 )
@@ -120,10 +120,10 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                             if(ivOld[k2]-1 == j && sign[0] != sign[1])
                             { 
                                 charged_mom(charged_vars[0][k2], charged_vars[1][k2], charged_vars[2][k2], mom_vec[1], 1);
-                                inv_mass = sqrt(pow(mom_vec[0][3] + mom_vec[1][3],2) - 
-                                                pow(mom_vec[0][0] + mom_vec[1][0],2) - 
-                                                pow(mom_vec[0][1] + mom_vec[1][1],2) -
-                                                pow(mom_vec[0][2] + mom_vec[1][2],2) );
+                                inv_mass = std::sqrt(std::pow(mom_vec[0][3] + mom_vec[1][3],2) - 
+                                                std::pow(mom_vec[0][0] + mom_vec[1][0],2) - 
+                                                std::pow(mom_vec[0][1] + mom_vec[1][1],2) -
+                                                std::pow(mom_vec[0][2] + mom_vec[1][2],2) );
                                 inv_mass_diff = std::abs(inv_mass - PhysicsConstants::mK0);
                             }
                             else
@@ -155,11 +155,11 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                 Kchrec1[1] = trkpi11[1] + trkpi12[1];
                                 Kchrec1[2] = trkpi11[2] + trkpi12[2];
                                 Kchrec1[3] = trkpi11[3] + trkpi12[3];
-                                Kchrec1[4] = sqrt(pow(trkpi11[0] + trkpi12[0],2) + 
-                                                pow(trkpi11[1] + trkpi12[1],2) +
-                                                pow(trkpi11[2] + trkpi12[2],2) );
-                                Kchrec1[5] = sqrt(pow(Kchrec1[3] ,2) -
-                                                pow(Kchrec1[4], 2) );
+                                Kchrec1[4] = std::sqrt(std::pow(trkpi11[0] + trkpi12[0],2) + 
+                                                std::pow(trkpi11[1] + trkpi12[1],2) +
+                                                std::pow(trkpi11[2] + trkpi12[2],2) );
+                                Kchrec1[5] = std::sqrt(std::pow(Kchrec1[3] ,2) -
+                                                std::pow(Kchrec1[4], 2) );
                                 Kchrec1[6] = charged_vtx[0][vtakenpi1[0]];
                                 Kchrec1[7] = charged_vtx[1][vtakenpi1[0]];
                                 Kchrec1[8] = charged_vtx[2][vtakenpi1[0]];
@@ -189,10 +189,10 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                             if(ivOld[k2]-1 == j && sign[0] != sign[1])
                             { 
                                 charged_mom(charged_vars[0][k2], charged_vars[1][k2], charged_vars[2][k2], mom_vec[1], 1);
-                                inv_mass = sqrt(pow(mom_vec[0][3] + mom_vec[1][3],2) - 
-                                                pow(mom_vec[0][0] + mom_vec[1][0],2) - 
-                                                pow(mom_vec[0][1] + mom_vec[1][1],2) -
-                                                pow(mom_vec[0][2] + mom_vec[1][2],2) );
+                                inv_mass = std::sqrt(std::pow(mom_vec[0][3] + mom_vec[1][3],2) - 
+                                                std::pow(mom_vec[0][0] + mom_vec[1][0],2) - 
+                                                std::pow(mom_vec[0][1] + mom_vec[1][1],2) -
+                                                std::pow(mom_vec[0][2] + mom_vec[1][2],2) );
                                 inv_mass_diff = std::abs(inv_mass - PhysicsConstants::mK0);
                             }
                             else
@@ -224,11 +224,11 @@ void doublepipi_selection(UInt_t filenumber = 1, TString directory = "230531_dat
                                 Kchrec2[1] = trkpi21[1] + trkpi22[1];
                                 Kchrec2[2] = trkpi21[2] + trkpi22[2];
                                 Kchrec2[3] = trkpi21[3] + trkpi22[3];
-                                Kchrec2[4] = sqrt(pow(trkpi21[0] + trkpi22[0],2) + 
-                                                pow(trkpi21[1] + trkpi22[1],2) +
-                                                pow(trkpi21[2] + trkpi22[2],2) );
-                                Kchrec2[5] = sqrt(pow(Kchrec2[3] ,2) -
-                                                pow(Kchrec2[4], 2) );
+                                Kchrec2[4] = std::sqrt(std::pow(trkpi21[0] + trkpi22[0],2) + 
+                                                std::pow(trkpi21[1] + trkpi22[1],2) +
+                                                std::pow(trkpi21[2] + trkpi22[2],2) );
+                                Kchrec2[5] = std::sqrt(std::pow(Kchrec2[3] ,2) -
+                                                std::pow(Kchrec2[4], 2) );
                                 Kchrec2[6] = charged_vtx[0][vtakenpi2[0]];
                                 Kchrec2[7] = charged_vtx[1][vtakenpi2[0]];
                                 Kchrec2[8] = charged_vtx[2][vtakenpi2[0]];

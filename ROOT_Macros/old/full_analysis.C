@@ -234,12 +234,12 @@ Bool_t full_analysis::Process(Long64_t entry)
    momPhi(2) = *Bpz;
    momPhi(3) = *Broots;
 
-   phi_vel = PhysicsConstants::cVel*(sqrt(pow(momPhi(0),2) + pow(momPhi(1),2) + pow(momPhi(2),2))/momPhi(3));
+   phi_vel = PhysicsConstants::cVel*(std::sqrt(std::pow(momPhi(0),2) + std::pow(momPhi(1),2) + std::pow(momPhi(2),2))/momPhi(3));
 
    pos_phi(0) = 0.;
    pos_phi(1) = 0.;
    pos_phi(2) = 0.;
-   pos_phi(3) = PhysicsConstants::cVel*(sqrt(pow(pos_phi(0),2) + pow(pos_phi(1),2) + pow(pos_phi(2),2))/phi_vel);
+   pos_phi(3) = PhysicsConstants::cVel*(std::sqrt(std::pow(pos_phi(0),2) + std::pow(pos_phi(1),2) + std::pow(pos_phi(2),2))/phi_vel);
 
    //Momentum and position of charged kaon MC
    mom_kch_mc(0) = KchmcOld[0];
@@ -247,12 +247,12 @@ Bool_t full_analysis::Process(Long64_t entry)
    mom_kch_mc(2) = KchmcOld[2];
    mom_kch_mc(3) = KchmcOld[3];
 
-   kaon_pm_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kch_mc(0),2) + pow(mom_kch_mc(1),2) + pow(mom_kch_mc(2),2))/mom_kch_mc(3));
+   kaon_pm_vel = PhysicsConstants::cVel*(std::sqrt(std::pow(mom_kch_mc(0),2) + std::pow(mom_kch_mc(1),2) + std::pow(mom_kch_mc(2),2))/mom_kch_mc(3));
 
    pos_kch_mc(0) = KchmcOld[6] - ipmcOld[0];
    pos_kch_mc(1) = KchmcOld[7] - ipmcOld[1];
    pos_kch_mc(2) = KchmcOld[8] - ipmcOld[2];
-   pos_kch_mc(3) = PhysicsConstants::cVel*(sqrt(pow(pos_kch_mc(0),2) + pow(pos_kch_mc(1),2) + pow(pos_kch_mc(2),2))/kaon_pm_vel);
+   pos_kch_mc(3) = PhysicsConstants::cVel*(std::sqrt(std::pow(pos_kch_mc(0),2) + std::pow(pos_kch_mc(1),2) + std::pow(pos_kch_mc(2),2))/kaon_pm_vel);
 
    //Momentum and position of neutral kaon MC
    mom_kne_mc(0) = KnemcOld[0];
@@ -260,12 +260,12 @@ Bool_t full_analysis::Process(Long64_t entry)
    mom_kne_mc(2) = KnemcOld[2];
    mom_kne_mc(3) = KnemcOld[3];
 
-   kaon_pm_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kne_mc(0),2) + pow(mom_kne_mc(1),2) + pow(mom_kne_mc(2),2))/mom_kne_mc(3));
+   kaon_pm_vel = PhysicsConstants::cVel*(std::sqrt(std::pow(mom_kne_mc(0),2) + std::pow(mom_kne_mc(1),2) + std::pow(mom_kne_mc(2),2))/mom_kne_mc(3));
 
    pos_kne_mc(0) = KnemcOld[6] - ipmcOld[0];
    pos_kne_mc(1) = KnemcOld[7] - ipmcOld[1];
    pos_kne_mc(2) = KnemcOld[8] - ipmcOld[2];
-   pos_kne_mc(3) = PhysicsConstants::cVel*(sqrt(pow(pos_kne_mc(0),2) + pow(pos_kne_mc(1),2) + pow(pos_kne_mc(2),2))/kaon_pm_vel);
+   pos_kne_mc(3) = PhysicsConstants::cVel*(std::sqrt(std::pow(pos_kne_mc(0),2) + std::pow(pos_kne_mc(1),2) + std::pow(pos_kne_mc(2),2))/kaon_pm_vel);
 
    //Momentum and position of charged kaon
    mom_kaon_pm(0) = Kchboost[0];
@@ -273,20 +273,20 @@ Bool_t full_analysis::Process(Long64_t entry)
    mom_kaon_pm(2) = Kchboost[2];
    mom_kaon_pm(3) = Kchboost[3];
 
-   kaon_pm_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3));
+   kaon_pm_vel = PhysicsConstants::cVel*(std::sqrt(std::pow(mom_kaon_pm(0),2) + std::pow(mom_kaon_pm(1),2) + std::pow(mom_kaon_pm(2),2))/mom_kaon_pm(3));
 
    pos_kaon_pm(0) = Kchboost[6] - *Bx;
    pos_kaon_pm(1) = Kchboost[7] - *By;
    pos_kaon_pm(2) = Kchboost[8] - *Bz;
-   pos_kaon_pm(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2))/kaon_pm_vel);
+   pos_kaon_pm(3) = PhysicsConstants::cVel*(pos_phi(3) + std::sqrt(std::pow(pos_kaon_pm(0),2) + std::pow(pos_kaon_pm(1),2) + std::pow(pos_kaon_pm(2),2))/kaon_pm_vel);
 
    //Momentum and position of charged kaon
-   mom_kaon_pm_alt(0) = sqrt(pow(mom_kaon_pm(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_pm(0) - pos_phi(0))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
-   mom_kaon_pm_alt(1) = sqrt(pow(mom_kaon_pm(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_pm(1) - pos_phi(1))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
-   mom_kaon_pm_alt(2) = sqrt(pow(mom_kaon_pm(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_pm(2) - pos_phi(2))/sqrt(pow(pos_kaon_pm(0) - pos_phi(0),2) + pow(pos_kaon_pm(1) - pos_phi(1),2) + pow(pos_kaon_pm(2) - pos_phi(2),2));
+   mom_kaon_pm_alt(0) = std::sqrt(std::pow(mom_kaon_pm(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_pm(0) - pos_phi(0))/std::sqrt(std::pow(pos_kaon_pm(0) - pos_phi(0),2) + std::pow(pos_kaon_pm(1) - pos_phi(1),2) + std::pow(pos_kaon_pm(2) - pos_phi(2),2));
+   mom_kaon_pm_alt(1) = std::sqrt(std::pow(mom_kaon_pm(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_pm(1) - pos_phi(1))/std::sqrt(std::pow(pos_kaon_pm(0) - pos_phi(0),2) + std::pow(pos_kaon_pm(1) - pos_phi(1),2) + std::pow(pos_kaon_pm(2) - pos_phi(2),2));
+   mom_kaon_pm_alt(2) = std::sqrt(std::pow(mom_kaon_pm(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_pm(2) - pos_phi(2))/std::sqrt(std::pow(pos_kaon_pm(0) - pos_phi(0),2) + std::pow(pos_kaon_pm(1) - pos_phi(1),2) + std::pow(pos_kaon_pm(2) - pos_phi(2),2));
    mom_kaon_pm_alt(3) = mom_kaon_pm(3);
 
-   if(sqrt(pow(Kchrec1[6] - *Bx,2) + pow(Kchrec1[7] - *By,2) + pow(Kchrec1[8] - *Bz,2)) < sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)))
+   if(std::sqrt(std::pow(Kchrec1[6] - *Bx,2) + std::pow(Kchrec1[7] - *By,2) + std::pow(Kchrec1[8] - *Bz,2)) < std::sqrt(std::pow(Kchrec2[6] - *Bx,2) + std::pow(Kchrec2[7] - *By,2) + std::pow(Kchrec2[8] - *Bz,2)))
    {
       //Momentum and position of charged kaon_s
       mom_kaon_s(0) = Kchrec1[0];
@@ -294,17 +294,17 @@ Bool_t full_analysis::Process(Long64_t entry)
       mom_kaon_s(2) = Kchrec1[2];
       mom_kaon_s(3) = Kchrec1[3];
 
-      kaon_s_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_s(0),2) + pow(mom_kaon_s(1),2) + pow(mom_kaon_s(2),2))/mom_kaon_s(3));
+      kaon_s_vel = PhysicsConstants::cVel*(std::sqrt(std::pow(mom_kaon_s(0),2) + std::pow(mom_kaon_s(1),2) + std::pow(mom_kaon_s(2),2))/mom_kaon_s(3));
 
       pos_kaon_s(0) = Kchrec1[6] - *Bx;
       pos_kaon_s(1) = Kchrec1[7] - *By;
       pos_kaon_s(2) = Kchrec1[8] - *Bz;
-      pos_kaon_s(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_s(0),2) + pow(pos_kaon_s(1),2) + pow(pos_kaon_s(2),2))/kaon_s_vel);
+      pos_kaon_s(3) = PhysicsConstants::cVel*(pos_phi(3) + std::sqrt(std::pow(pos_kaon_s(0),2) + std::pow(pos_kaon_s(1),2) + std::pow(pos_kaon_s(2),2))/kaon_s_vel);
 
       //Momentum and position of charged kaon_s alternative
-      mom_kaon_s_alt(0) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(0) - pos_phi(0))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));
-      mom_kaon_s_alt(1) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(1) - pos_phi(1))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
-      mom_kaon_s_alt(2) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(2) - pos_phi(2))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(0) = std::sqrt(std::pow(mom_kaon_s(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_s(0) - pos_phi(0))/std::sqrt(std::pow(pos_kaon_s(0) - pos_phi(0),2) + std::pow(pos_kaon_s(1) - pos_phi(1),2) + std::pow(pos_kaon_s(2) - pos_phi(2),2));
+      mom_kaon_s_alt(1) = std::sqrt(std::pow(mom_kaon_s(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_s(1) - pos_phi(1))/std::sqrt(std::pow(pos_kaon_s(0) - pos_phi(0),2) + std::pow(pos_kaon_s(1) - pos_phi(1),2) + std::pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(2) = std::sqrt(std::pow(mom_kaon_s(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_s(2) - pos_phi(2))/std::sqrt(std::pow(pos_kaon_s(0) - pos_phi(0),2) + std::pow(pos_kaon_s(1) - pos_phi(1),2) + std::pow(pos_kaon_s(2) - pos_phi(2),2));;
       mom_kaon_s_alt(3) = mom_kaon_s(3);
 
       //Momentum and position of charged kaon_l
@@ -313,17 +313,17 @@ Bool_t full_analysis::Process(Long64_t entry)
       mom_kaon_l(2) = Kchrec2[2];
       mom_kaon_l(3) = Kchrec2[3];
 
-      kaon_l_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_l(0),2) + pow(mom_kaon_l(1),2) + pow(mom_kaon_l(2),2))/mom_kaon_l(3));
+      kaon_l_vel = PhysicsConstants::cVel*(std::sqrt(std::pow(mom_kaon_l(0),2) + std::pow(mom_kaon_l(1),2) + std::pow(mom_kaon_l(2),2))/mom_kaon_l(3));
 
       pos_kaon_l(0) = Kchrec2[6] - *Bx;
       pos_kaon_l(1) = Kchrec2[7] - *By;
       pos_kaon_l(2) = Kchrec2[8] - *Bz;
-      pos_kaon_l(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_l(0),2) + pow(pos_kaon_l(1),2) + pow(pos_kaon_l(2),2))/kaon_l_vel);
+      pos_kaon_l(3) = PhysicsConstants::cVel*(pos_phi(3) + std::sqrt(std::pow(pos_kaon_l(0),2) + std::pow(pos_kaon_l(1),2) + std::pow(pos_kaon_l(2),2))/kaon_l_vel);
 
       //Momentum and position of charged kaon_l alternative
-      mom_kaon_l_alt(0) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(0) - pos_phi(0))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));
-      mom_kaon_l_alt(1) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(1) - pos_phi(1))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
-      mom_kaon_l_alt(2) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(2) - pos_phi(2))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(0) = std::sqrt(std::pow(mom_kaon_l(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_l(0) - pos_phi(0))/std::sqrt(std::pow(pos_kaon_l(0) - pos_phi(0),2) + std::pow(pos_kaon_l(1) - pos_phi(1),2) + std::pow(pos_kaon_l(2) - pos_phi(2),2));
+      mom_kaon_l_alt(1) = std::sqrt(std::pow(mom_kaon_l(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_l(1) - pos_phi(1))/std::sqrt(std::pow(pos_kaon_l(0) - pos_phi(0),2) + std::pow(pos_kaon_l(1) - pos_phi(1),2) + std::pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(2) = std::sqrt(std::pow(mom_kaon_l(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_l(2) - pos_phi(2))/std::sqrt(std::pow(pos_kaon_l(0) - pos_phi(0),2) + std::pow(pos_kaon_l(1) - pos_phi(1),2) + std::pow(pos_kaon_l(2) - pos_phi(2),2));;
       mom_kaon_l_alt(3) = mom_kaon_l(3);
    }
    else
@@ -334,17 +334,17 @@ Bool_t full_analysis::Process(Long64_t entry)
       mom_kaon_s(2) = Kchrec2[2];
       mom_kaon_s(3) = Kchrec2[3];
 
-      kaon_s_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_s(0),2) + pow(mom_kaon_s(1),2) + pow(mom_kaon_s(2),2))/mom_kaon_s(3));
+      kaon_s_vel = PhysicsConstants::cVel*(std::sqrt(std::pow(mom_kaon_s(0),2) + std::pow(mom_kaon_s(1),2) + std::pow(mom_kaon_s(2),2))/mom_kaon_s(3));
 
       pos_kaon_s(0) = Kchrec2[6] - *Bx;
       pos_kaon_s(1) = Kchrec2[7] - *By;
       pos_kaon_s(2) = Kchrec2[8] - *Bz;
-      pos_kaon_s(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_s(0),2) + pow(pos_kaon_s(1),2) + pow(pos_kaon_s(2),2))/kaon_s_vel);
+      pos_kaon_s(3) = PhysicsConstants::cVel*(pos_phi(3) + std::sqrt(std::pow(pos_kaon_s(0),2) + std::pow(pos_kaon_s(1),2) + std::pow(pos_kaon_s(2),2))/kaon_s_vel);
 
       //Momentum and position of charged kaon_s alternative
-      mom_kaon_s_alt(0) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(0) - pos_phi(0))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));
-      mom_kaon_s_alt(1) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(1) - pos_phi(1))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
-      mom_kaon_s_alt(2) = sqrt(pow(mom_kaon_s(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_s(2) - pos_phi(2))/sqrt(pow(pos_kaon_s(0) - pos_phi(0),2) + pow(pos_kaon_s(1) - pos_phi(1),2) + pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(0) = std::sqrt(std::pow(mom_kaon_s(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_s(0) - pos_phi(0))/std::sqrt(std::pow(pos_kaon_s(0) - pos_phi(0),2) + std::pow(pos_kaon_s(1) - pos_phi(1),2) + std::pow(pos_kaon_s(2) - pos_phi(2),2));
+      mom_kaon_s_alt(1) = std::sqrt(std::pow(mom_kaon_s(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_s(1) - pos_phi(1))/std::sqrt(std::pow(pos_kaon_s(0) - pos_phi(0),2) + std::pow(pos_kaon_s(1) - pos_phi(1),2) + std::pow(pos_kaon_s(2) - pos_phi(2),2));;
+      mom_kaon_s_alt(2) = std::sqrt(std::pow(mom_kaon_s(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_s(2) - pos_phi(2))/std::sqrt(std::pow(pos_kaon_s(0) - pos_phi(0),2) + std::pow(pos_kaon_s(1) - pos_phi(1),2) + std::pow(pos_kaon_s(2) - pos_phi(2),2));;
       mom_kaon_s_alt(3) = mom_kaon_s(3);
 
       //Momentum and position of charged kaon_l
@@ -353,17 +353,17 @@ Bool_t full_analysis::Process(Long64_t entry)
       mom_kaon_l(2) = Kchrec1[2];
       mom_kaon_l(3) = Kchrec1[3];
 
-      kaon_l_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_l(0),2) + pow(mom_kaon_l(1),2) + pow(mom_kaon_l(2),2))/mom_kaon_l(3));
+      kaon_l_vel = PhysicsConstants::cVel*(std::sqrt(std::pow(mom_kaon_l(0),2) + std::pow(mom_kaon_l(1),2) + std::pow(mom_kaon_l(2),2))/mom_kaon_l(3));
 
       pos_kaon_l(0) = Kchrec1[6] - *Bx;
       pos_kaon_l(1) = Kchrec1[7] - *By;
       pos_kaon_l(2) = Kchrec1[8] - *Bz;
-      pos_kaon_l(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_l(0),2) + pow(pos_kaon_l(1),2) + pow(pos_kaon_l(2),2))/kaon_l_vel);
+      pos_kaon_l(3) = PhysicsConstants::cVel*(pos_phi(3) + std::sqrt(std::pow(pos_kaon_l(0),2) + std::pow(pos_kaon_l(1),2) + std::pow(pos_kaon_l(2),2))/kaon_l_vel);
 
       //Momentum and position of charged kaon_l alternative
-      mom_kaon_l_alt(0) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(0) - pos_phi(0))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));
-      mom_kaon_l_alt(1) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(1) - pos_phi(1))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
-      mom_kaon_l_alt(2) = sqrt(pow(mom_kaon_l(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_l(2) - pos_phi(2))/sqrt(pow(pos_kaon_l(0) - pos_phi(0),2) + pow(pos_kaon_l(1) - pos_phi(1),2) + pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(0) = std::sqrt(std::pow(mom_kaon_l(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_l(0) - pos_phi(0))/std::sqrt(std::pow(pos_kaon_l(0) - pos_phi(0),2) + std::pow(pos_kaon_l(1) - pos_phi(1),2) + std::pow(pos_kaon_l(2) - pos_phi(2),2));
+      mom_kaon_l_alt(1) = std::sqrt(std::pow(mom_kaon_l(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_l(1) - pos_phi(1))/std::sqrt(std::pow(pos_kaon_l(0) - pos_phi(0),2) + std::pow(pos_kaon_l(1) - pos_phi(1),2) + std::pow(pos_kaon_l(2) - pos_phi(2),2));;
+      mom_kaon_l_alt(2) = std::sqrt(std::pow(mom_kaon_l(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_l(2) - pos_phi(2))/std::sqrt(std::pow(pos_kaon_l(0) - pos_phi(0),2) + std::pow(pos_kaon_l(1) - pos_phi(1),2) + std::pow(pos_kaon_l(2) - pos_phi(2),2));;
       mom_kaon_l_alt(3) = mom_kaon_l(3);
    }
 
@@ -373,17 +373,17 @@ Bool_t full_analysis::Process(Long64_t entry)
    mom_kaon_00_std(2) = Knereclor[2];
    mom_kaon_00_std(3) = Knereclor[3];
 
-   kaon_00_std_vel = PhysicsConstants::cVel*(sqrt(pow(mom_kaon_00_std(0),2) + pow(mom_kaon_00_std(1),2) + pow(mom_kaon_00_std(2),2))/mom_kaon_00_std(3));
+   kaon_00_std_vel = PhysicsConstants::cVel*(std::sqrt(std::pow(mom_kaon_00_std(0),2) + std::pow(mom_kaon_00_std(1),2) + std::pow(mom_kaon_00_std(2),2))/mom_kaon_00_std(3));
 
    pos_kaon_00_std(0) = Knereclor[6] - *Bx;
    pos_kaon_00_std(1) = Knereclor[7] - *By;
    pos_kaon_00_std(2) = Knereclor[8] - *Bz;
-   pos_kaon_00_std(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_00_std(0),2) + pow(pos_kaon_00_std(1),2) + pow(pos_kaon_00_std(2),2))/kaon_00_std_vel);
+   pos_kaon_00_std(3) = PhysicsConstants::cVel*(pos_phi(3) + std::sqrt(std::pow(pos_kaon_00_std(0),2) + std::pow(pos_kaon_00_std(1),2) + std::pow(pos_kaon_00_std(2),2))/kaon_00_std_vel);
 
    //Momentum and position of neutral standard kaon
-   mom_kaon_00_std_alt(0) = sqrt(pow(mom_kaon_00_std(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_std(0) - pos_phi(0))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));
-   mom_kaon_00_std_alt(1) = sqrt(pow(mom_kaon_00_std(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_std(1) - pos_phi(1))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));;
-   mom_kaon_00_std_alt(2) = sqrt(pow(mom_kaon_00_std(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_std(2) - pos_phi(2))/sqrt(pow(pos_kaon_00_std(0) - pos_phi(0),2) + pow(pos_kaon_00_std(1) - pos_phi(1),2) + pow(pos_kaon_00_std(2) - pos_phi(2),2));;
+   mom_kaon_00_std_alt(0) = std::sqrt(std::pow(mom_kaon_00_std(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_00_std(0) - pos_phi(0))/std::sqrt(std::pow(pos_kaon_00_std(0) - pos_phi(0),2) + std::pow(pos_kaon_00_std(1) - pos_phi(1),2) + std::pow(pos_kaon_00_std(2) - pos_phi(2),2));
+   mom_kaon_00_std_alt(1) = std::sqrt(std::pow(mom_kaon_00_std(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_00_std(1) - pos_phi(1))/std::sqrt(std::pow(pos_kaon_00_std(0) - pos_phi(0),2) + std::pow(pos_kaon_00_std(1) - pos_phi(1),2) + std::pow(pos_kaon_00_std(2) - pos_phi(2),2));;
+   mom_kaon_00_std_alt(2) = std::sqrt(std::pow(mom_kaon_00_std(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_00_std(2) - pos_phi(2))/std::sqrt(std::pow(pos_kaon_00_std(0) - pos_phi(0),2) + std::pow(pos_kaon_00_std(1) - pos_phi(1),2) + std::pow(pos_kaon_00_std(2) - pos_phi(2),2));;
    mom_kaon_00_std_alt(3) = mom_kaon_00_std(3);
 
    //Momentum and position of neutral trilateration kaon
@@ -397,20 +397,20 @@ Bool_t full_analysis::Process(Long64_t entry)
    pos_kaon_00_tri(0) = fourKnetri[6] - *Bx;
    pos_kaon_00_tri(1) = fourKnetri[7] - *By;
    pos_kaon_00_tri(2) = fourKnetri[8] - *Bz;
-   pos_kaon_00_tri(3) = PhysicsConstants::cVel*(pos_phi(3) + sqrt(pow(pos_kaon_00_tri(0),2) + pow(pos_kaon_00_tri(1),2) + pow(pos_kaon_00_tri(2),2))/kaon_00_tri_vel);
+   pos_kaon_00_tri(3) = PhysicsConstants::cVel*(pos_phi(3) + std::sqrt(std::pow(pos_kaon_00_tri(0),2) + std::pow(pos_kaon_00_tri(1),2) + std::pow(pos_kaon_00_tri(2),2))/kaon_00_tri_vel);
 
    //Momentum and position of neutral standard kaon
-   mom_kaon_00_tri_alt(0) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_tri(0) - pos_phi(0))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));
-   mom_kaon_00_tri_alt(1) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_tri(1) - pos_phi(1))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
-   mom_kaon_00_tri_alt(2) = sqrt(pow(mom_kaon_00_tri(3),2) - pow(PhysicsConstants::mK0,2))*(pos_kaon_00_tri(2) - pos_phi(2))/sqrt(pow(pos_kaon_00_tri(0) - pos_phi(0),2) + pow(pos_kaon_00_tri(1) - pos_phi(1),2) + pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
+   mom_kaon_00_tri_alt(0) = std::sqrt(std::pow(mom_kaon_00_tri(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_00_tri(0) - pos_phi(0))/std::sqrt(std::pow(pos_kaon_00_tri(0) - pos_phi(0),2) + std::pow(pos_kaon_00_tri(1) - pos_phi(1),2) + std::pow(pos_kaon_00_tri(2) - pos_phi(2),2));
+   mom_kaon_00_tri_alt(1) = std::sqrt(std::pow(mom_kaon_00_tri(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_00_tri(1) - pos_phi(1))/std::sqrt(std::pow(pos_kaon_00_tri(0) - pos_phi(0),2) + std::pow(pos_kaon_00_tri(1) - pos_phi(1),2) + std::pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
+   mom_kaon_00_tri_alt(2) = std::sqrt(std::pow(mom_kaon_00_tri(3),2) - std::pow(PhysicsConstants::mK0,2))*(pos_kaon_00_tri(2) - pos_phi(2))/std::sqrt(std::pow(pos_kaon_00_tri(0) - pos_phi(0),2) + std::pow(pos_kaon_00_tri(1) - pos_phi(1),2) + std::pow(pos_kaon_00_tri(2) - pos_phi(2),2));;
    mom_kaon_00_tri_alt(3) = mom_kaon_00_tri(3);
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    // Lorentz transformation to CM of Phi
 
-   k_pathpm = sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2));
-   k_betapm = sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3);
-   k_path00_tri = sqrt(pow(pos_kaon_00_tri(0),2) + pow(pos_kaon_00_tri(1),2) + pow(pos_kaon_00_tri(2),2));
-   k_beta00_tri = sqrt(pow(mom_kaon_00_tri(0),2) + pow(mom_kaon_00_tri(1),2) + pow(mom_kaon_00_tri(2),2))/mom_kaon_00_tri(3);
+   k_pathpm = std::sqrt(std::pow(pos_kaon_pm(0),2) + std::pow(pos_kaon_pm(1),2) + std::pow(pos_kaon_pm(2),2));
+   k_betapm = std::sqrt(std::pow(mom_kaon_pm(0),2) + std::pow(mom_kaon_pm(1),2) + std::pow(mom_kaon_pm(2),2))/mom_kaon_pm(3);
+   k_path00_tri = std::sqrt(std::pow(pos_kaon_00_tri(0),2) + std::pow(pos_kaon_00_tri(1),2) + std::pow(pos_kaon_00_tri(2),2));
+   k_beta00_tri = std::sqrt(std::pow(mom_kaon_00_tri(0),2) + std::pow(mom_kaon_00_tri(1),2) + std::pow(mom_kaon_00_tri(2),2))/mom_kaon_00_tri(3);
 
    phi_boost = momPhi.BoostVector();
 
@@ -435,8 +435,8 @@ Bool_t full_analysis::Process(Long64_t entry)
 
    momPhi.Boost(-phi_boost);
 
-   k_pathpm = sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2));
-   k_betapm = sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3);
+   k_pathpm = std::sqrt(std::pow(pos_kaon_pm(0),2) + std::pow(pos_kaon_pm(1),2) + std::pow(pos_kaon_pm(2),2));
+   k_betapm = std::sqrt(std::pow(mom_kaon_pm(0),2) + std::pow(mom_kaon_pm(1),2) + std::pow(mom_kaon_pm(2),2))/mom_kaon_pm(3);
 
    phi_boost = momPhi_mc.BoostVector();
    mom_kne_mc.Boost(-phi_boost);
@@ -468,10 +468,10 @@ Bool_t full_analysis::Process(Long64_t entry)
    pos_kch_mc.Boost(-kaon_pm_boost);
    pos_kne_mc.Boost(-kaon_00_std_boost);
 
-   //k_pathpm = sqrt(pow(pos_kaon_pm(0),2) + pow(pos_kaon_pm(1),2) + pow(pos_kaon_pm(2),2));
-   //k_betapm = sqrt(pow(mom_kaon_pm(0),2) + pow(mom_kaon_pm(1),2) + pow(mom_kaon_pm(2),2))/mom_kaon_pm(3);
-   //k_path00_tri = sqrt(pow(pos_kaon_00_std(0),2) + pow(pos_kaon_00_std(1),2) + pow(pos_kaon_00_std(2),2));
-   //k_beta00_tri = sqrt(pow(mom_kaon_00_std(0),2) + pow(mom_kaon_00_std(1),2) + pow(mom_kaon_00_std(2),2))/mom_kaon_00_std(3);
+   //k_pathpm = std::sqrt(std::pow(pos_kaon_pm(0),2) + std::pow(pos_kaon_pm(1),2) + std::pow(pos_kaon_pm(2),2));
+   //k_betapm = std::sqrt(std::pow(mom_kaon_pm(0),2) + std::pow(mom_kaon_pm(1),2) + std::pow(mom_kaon_pm(2),2))/mom_kaon_pm(3);
+   //k_path00_tri = std::sqrt(std::pow(pos_kaon_00_std(0),2) + std::pow(pos_kaon_00_std(1),2) + std::pow(pos_kaon_00_std(2),2));
+   //k_beta00_tri = std::sqrt(std::pow(mom_kaon_00_std(0),2) + std::pow(mom_kaon_00_std(1),2) + std::pow(mom_kaon_00_std(2),2))/mom_kaon_00_std(3);
 
    
 
@@ -492,7 +492,7 @@ Bool_t full_analysis::Process(Long64_t entry)
 
    ///////////////////////////////////////////////////////////////////////////////////////////////
 
-   //for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/PhysicsConstants::cVel) - (k_path00/(k_beta00*PhysicsConstants::cVel));
+   //for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (std::sqrt(std::pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + std::pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + std::pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/PhysicsConstants::cVel) - (k_path00/(k_beta00*PhysicsConstants::cVel));
 
    //trcv_sum = TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3];
 
@@ -501,7 +501,7 @@ Bool_t full_analysis::Process(Long64_t entry)
    //Signal truth check
    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-   for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/PhysicsConstants::cVel) - (k_path00_tri/(k_beta00_tri*PhysicsConstants::cVel));
+   for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (std::sqrt(std::pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + std::pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + std::pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/PhysicsConstants::cVel) - (k_path00_tri/(k_beta00_tri*PhysicsConstants::cVel));
    trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 
    if(*mctruth == 1)
@@ -864,8 +864,8 @@ Bool_t full_analysis::Process(Long64_t entry)
    if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three->FillWeighted(tot_cuts_charged, br_ks_pippim, DeltaT_control);
    if(donepipi[0] == 1 && donepipi[1] == 1 && std::abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 0) pEff_pipi->FillWeighted(tot_cuts_charged, tot_br_pipi, DeltaT_pipi);
 
-   if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three_length->FillWeighted(tot_cuts_charged, br_ks_pippim, sqrt(pow(Kchrec[6] - *Bx,2) + pow(Kchrec[7] - *By,2) + pow(Kchrec[8] - *Bz,2)));
-   if(donepipi[0] == 1 && donepipi[1] == 1 && std::abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 0) pEff_pipi_length->FillWeighted(tot_cuts_charged, tot_br_pipi, sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)));
+   if(*done == 1 && *mcflag == 0 && *done4 == 1) pEff_three_length->FillWeighted(tot_cuts_charged, br_ks_pippim, std::sqrt(std::pow(Kchrec[6] - *Bx,2) + std::pow(Kchrec[7] - *By,2) + std::pow(Kchrec[8] - *Bz,2)));
+   if(donepipi[0] == 1 && donepipi[1] == 1 && std::abs(Kchrec1[5] - PhysicsConstants::mK0) < 2 && *mcflag == 0) pEff_pipi_length->FillWeighted(tot_cuts_charged, tot_br_pipi, std::sqrt(std::pow(Kchrec2[6] - *Bx,2) + std::pow(Kchrec2[7] - *By,2) + std::pow(Kchrec2[8] - *Bz,2)));
 
    return kTRUE;
 }
@@ -1474,15 +1474,15 @@ void full_analysis::Terminate()
       deltat[i] = -100. + i*200/201;
       div[i] = total->GetEfficiency(i)/total_mc->GetEfficiency(i);
       err[0][i] = 0;
-      err[1][i] = sqrt(pow(total->GetEfficiencyErrorUp(i)/total_mc->GetEfficiency(i),2) + pow(total_mc->GetEfficiencyErrorUp(i)*total->GetEfficiency(i)/pow(total_mc->GetEfficiency(i),2),2));
+      err[1][i] = std::sqrt(std::pow(total->GetEfficiencyErrorUp(i)/total_mc->GetEfficiency(i),2) + std::pow(total_mc->GetEfficiencyErrorUp(i)*total->GetEfficiency(i)/std::pow(total_mc->GetEfficiency(i),2),2));
 
-      denom += 1/pow((Float_t)err[1][i],2);
-      nomin += div[i]/pow((Float_t)err[1][i],2);
+      denom += 1/std::pow((Float_t)err[1][i],2);
+      nomin += div[i]/std::pow((Float_t)err[1][i],2);
 
    }
 
    average = nomin/denom;
-   average_err = sqrt(1/denom);
+   average_err = std::sqrt(1/denom);
 
    TLatex text_average;
    text_average.SetTextSize(0.035);

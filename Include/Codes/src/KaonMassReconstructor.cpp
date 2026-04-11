@@ -16,9 +16,9 @@ KaonReconstructionResult KaonMassReconstructor::reconstructKaonMass(
     result.track2TwoBody.resize(4);
 
     // 1. Calculate kaon flight direction and momentum
-    Double_t KLpath = sqrt(pow(kaonBoost[6] - interactionPoint[0], 2) +
-                          pow(kaonBoost[7] - interactionPoint[1], 2) +
-                          pow(kaonBoost[8] - interactionPoint[2], 2));
+    Double_t KLpath = std::sqrt(std::pow(kaonBoost[6] - interactionPoint[0], 2) +
+                          std::pow(kaonBoost[7] - interactionPoint[1], 2) +
+                          std::pow(kaonBoost[8] - interactionPoint[2], 2));
     
     TVector3 flightDirection(
         (kaonBoost[6] - interactionPoint[0]) / KLpath,
@@ -26,9 +26,9 @@ KaonReconstructionResult KaonMassReconstructor::reconstructKaonMass(
         (kaonBoost[8] - interactionPoint[2]) / KLpath
     );
 
-    Double_t momMag = sqrt(pow(kaonBoost[0], 2) +
-                          pow(kaonBoost[1], 2) +
-                          pow(kaonBoost[2], 2));
+    Double_t momMag = std::sqrt(std::pow(kaonBoost[0], 2) +
+                          std::pow(kaonBoost[1], 2) +
+                          std::pow(kaonBoost[2], 2));
 
     // Fill KaonTwoBody vector
     for(Int_t j = 0; j < 3; j++) {
@@ -36,7 +36,7 @@ KaonReconstructionResult KaonMassReconstructor::reconstructKaonMass(
     }
     result.KaonTwoBody[3] = kaonBoost[3];  // Energy
     result.KaonTwoBody[4] = momMag;        // Momentum magnitude
-    result.KaonTwoBody[5] = sqrt(pow(kaonBoost[3], 2) - pow(momMag, 2));  // Mass
+    result.KaonTwoBody[5] = std::sqrt(std::pow(kaonBoost[3], 2) - std::pow(momMag, 2));  // Mass
     // Copy vertex position
     result.KaonTwoBody[6] = kaonBoost[6];
     result.KaonTwoBody[7] = kaonBoost[7];
@@ -76,7 +76,7 @@ KaonReconstructionResult KaonMassReconstructor::reconstructKaonMass(
     std::vector<TLorentzVector> pionsLAB(2);
     for(int i = 0; i < 2; i++) {
         TLorentzVector pionCM;
-        Double_t E = sqrt(pionsCM[i].Mag2() + pow(PhysicsConstants::mPiCh, 2));
+        Double_t E = std::sqrt(pionsCM[i].Mag2() + std::pow(PhysicsConstants::mPiCh, 2));
         pionCM.SetPxPyPzE(pionsCM[i].X(), pionsCM[i].Y(), pionsCM[i].Z(), E);
         
         TLorentzVector pionLAB;
@@ -89,7 +89,7 @@ KaonReconstructionResult KaonMassReconstructor::reconstructKaonMass(
         result.track1TwoBody[i] = pionMomLAB.X();
         result.track1TwoBody[i+1] = pionMomLAB.Y();
         result.track1TwoBody[i+2] = pionMomLAB.Z();
-        result.track1TwoBody[3] = sqrt(pionMomLAB.Mag2() + pow(PhysicsConstants::mPiCh, 2));
+        result.track1TwoBody[3] = std::sqrt(pionMomLAB.Mag2() + std::pow(PhysicsConstants::mPiCh, 2));
     }
 
     return result;

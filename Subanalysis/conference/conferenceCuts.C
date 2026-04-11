@@ -199,7 +199,7 @@ Bool_t conferenceCuts::Process(Long64_t entry)
 
 	fReader.SetLocalEntry(entry);
 
-	CombinedPi0Masses = sqrt(pow(pi0fit[0] - PhysicsConstants::mPi0, 2) + pow(pi0fit[1] - PhysicsConstants::mPi0, 2));
+	CombinedPi0Masses = std::sqrt(std::pow(pi0fit[0] - PhysicsConstants::mPi0, 2) + std::pow(pi0fit[1] - PhysicsConstants::mPi0, 2));
 
 	trcvsum = trcv[g4taken[0]] + trcv[g4taken[1]] + trcv[g4taken[2]] + trcv[g4taken[3]];
 

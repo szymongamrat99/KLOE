@@ -69,12 +69,12 @@ namespace KLOE
 
     void CalculateMassFromFourMom()
     {
-      mass = sqrt(pow(fourMom[3], 2) - (pow(fourMom[0], 2) + pow(fourMom[1], 2) + pow(fourMom[2], 2)));
+      mass = std::sqrt(std::pow(fourMom[3], 2) - (std::pow(fourMom[0], 2) + std::pow(fourMom[1], 2) + std::pow(fourMom[2], 2)));
     };
 
     void CalculateTotalMomentumFromFourMom()
     {
-      totalMomentum = sqrt(pow(fourMom[0], 2) + pow(fourMom[1], 2) + pow(fourMom[2], 2));
+      totalMomentum = std::sqrt(std::pow(fourMom[0], 2) + std::pow(fourMom[1], 2) + std::pow(fourMom[2], 2));
     };
   };
 
@@ -108,7 +108,7 @@ namespace KLOE
 
     void calculatePath(Double_t *neuVtx)
     {
-      path = sqrt(pow(fourPos[0] - neuVtx[0], 2) + pow(fourPos[1] - neuVtx[1], 2) + pow(fourPos[2] - neuVtx[2], 2)); // cm
+      path = std::sqrt(std::pow(fourPos[0] - neuVtx[0], 2) + std::pow(fourPos[1] - neuVtx[1], 2) + std::pow(fourPos[2] - neuVtx[2], 2)); // cm
     };
 
     void calculateTimeOfFlightPhoton()
@@ -146,8 +146,8 @@ namespace KLOE
       total[1] = fourMom[1];
       total[2] = fourMom[2];
       total[3] = fourMom[3];
-      total[4] = sqrt(pow(fourMom[0], 2) + pow(fourMom[1], 2) + pow(fourMom[2], 2));
-      total[5] = sqrt(pow(fourMom[3], 2) - pow(total[4], 2));
+      total[4] = std::sqrt(std::pow(fourMom[0], 2) + std::pow(fourMom[1], 2) + std::pow(fourMom[2], 2));
+      total[5] = std::sqrt(std::pow(fourMom[3], 2) - std::pow(total[4], 2));
       total[6] = fourPos[0];
       total[7] = fourPos[1];
       total[8] = fourPos[2];
@@ -161,12 +161,12 @@ namespace KLOE
 
     void CalculateMassFromFourMom()
     {
-      mass = sqrt(pow(fourMom[3], 2) - (pow(fourMom[0], 2) + pow(fourMom[1], 2) + pow(fourMom[2], 2)));
+      mass = std::sqrt(std::pow(fourMom[3], 2) - (std::pow(fourMom[0], 2) + std::pow(fourMom[1], 2) + std::pow(fourMom[2], 2)));
     };
 
     void CalculateTotalMomentumFromFourMom()
     {
-      totalMomentum = sqrt(pow(fourMom[0], 2) + pow(fourMom[1], 2) + pow(fourMom[2], 2));
+      totalMomentum = std::sqrt(std::pow(fourMom[0], 2) + std::pow(fourMom[1], 2) + std::pow(fourMom[2], 2));
     };
   };
 
@@ -199,7 +199,7 @@ namespace KLOE
 
     void calculatePath(Double_t *ip)
     {
-      path = sqrt(pow(fourPos[0] - ip[0], 2) + pow(fourPos[1] - ip[1], 2) + pow(fourPos[2] - ip[2], 2)); // cm
+      path = std::sqrt(std::pow(fourPos[0] - ip[0], 2) + std::pow(fourPos[1] - ip[1], 2) + std::pow(fourPos[2] - ip[2], 2)); // cm
     };
 
     void calculateBeta()
@@ -211,7 +211,7 @@ namespace KLOE
 
     void calculateTotalMomentum()
     {
-      totalMomentum = sqrt(pow(fourMom[0], 2) + pow(fourMom[1], 2) + pow(fourMom[2], 2));
+      totalMomentum = std::sqrt(std::pow(fourMom[0], 2) + std::pow(fourMom[1], 2) + std::pow(fourMom[2], 2));
     }
 
     void calculateLifetimeLAB()
@@ -227,8 +227,8 @@ namespace KLOE
       total[1] = fourMom[1];
       total[2] = fourMom[2];
       total[3] = fourMom[3];
-      total[4] = sqrt(pow(fourMom[0], 2) + pow(fourMom[1], 2) + pow(fourMom[2], 2));
-      total[5] = sqrt(pow(fourMom[3], 2) - pow(total[4], 2));
+      total[4] = std::sqrt(std::pow(fourMom[0], 2) + std::pow(fourMom[1], 2) + std::pow(fourMom[2], 2));
+      total[5] = std::sqrt(std::pow(fourMom[3], 2) - std::pow(total[4], 2));
       total[6] = fourPos[0];
       total[7] = fourPos[1];
       total[8] = fourPos[2];
@@ -260,7 +260,7 @@ namespace KLOE
     {
       totalMomentum = lorentzFourMom.P();
       beta = totalMomentum / lorentzFourMom.E();
-      gamma = 1. / sqrt(1. - beta * beta);
+      gamma = 1. / std::sqrt(1. - beta * beta);
       mass = lorentzFourMom.M();
     };
   };
@@ -507,14 +507,14 @@ namespace KLOE
     /**
      * @brief Reconstruction of neutral vertex using the triangle method
      * @param TrcSumFinal pointer to variable to get the TrcSum after the method application $$\sum^{4}_{i=1} (T_{cl,i} - \frac{d_{\gamma,i}}{c} - \frac{d_{K}}{c\beta_{K}})$$
-     * @param vtxSigmaFinal pointer variable to get the average error of the neutral vertex reconstruction (over clusters' energies) $$\frac{\sum^{4}_{i=1}E_{cl,i}\times\sqrt{(X_{neu,i} - X_{neu,avg})^2 + (Y_{neu,i} - Y_{neu,avg})^2 + (Z_{neu,i} - Z_{neu,avg})^2}}{\sum^{4}_{i=1}E_{cl,i}}$$
+     * @param vtxSigmaFinal pointer variable to get the average error of the neutral vertex reconstruction (over clusters' energies) $$\frac{\sum^{4}_{i=1}E_{cl,i}\times\std::sqrt{(X_{neu,i} - X_{neu,avg})^2 + (Y_{neu,i} - Y_{neu,avg})^2 + (Z_{neu,i} - Z_{neu,avg})^2}}{\sum^{4}_{i=1}E_{cl,i}}$$
      * @param Clu5Vec matrix of clusters' variables:
      * - first index: choice of cluster
      * - second index:
      *  + 0-3: ($X_{cl} [cm], Y_{cl} [cm], Z_{cl} [cm], T_{cl} [ns]$)
      *  + 4: $E_{cl} [MeV]$
      * @param ip pointer to the array of interaction point's spatial coordinates: ($X_{IP}, Y_{IP}, Z_{IP}$)
-     * @param Phi4Mom pointer to the array of $\phi$ meson's 4-momentum: ($p_{x}, p_{y}, p_{z}, \sqrt{s}$)
+     * @param Phi4Mom pointer to the array of $\phi$ meson's 4-momentum: ($p_{x}, p_{y}, p_{z}, \std::sqrt{s}$)
      * @param Kne4Mom pointer to the array of kaon's 4-momentum: ($p_{x}, p_{y}, p_{z}, E_{K}$)
      * @param Kne4Vec pointer to the array of kaon's 4-position: ($x_{neu,avg}, y_{neu,avg}, z_{neu,avg}, t_{K}$)
      * @param trc pointer to the array of $$(T_{cl,i} - \frac{d_{\gamma,i}}{c} - \frac{d_{K}}{c\beta_{K}})$$ for each cluster
@@ -528,7 +528,7 @@ namespace KLOE
     /**
      * @brief Reconstruction of neutral vertex using the triangle method
      * @param TrcSumFinal pointer to variable to get the TrcSum after the method application $$\sum^{4}_{i=1} (T_{cl,i} - \frac{d_{\gamma,i}}{c} - \frac{d_{K}}{c\beta_{K}})$$
-     * @param vtxSigmaFinal pointer variable to get the average error of the neutral vertex reconstruction (over clusters' energies) $$\frac{\sum^{4}_{i=1}E_{cl,i}\times\sqrt{(X_{neu,i} - X_{neu,avg})^2 + (Y_{neu,i} - Y_{neu,avg})^2 + (Z_{neu,i} - Z_{neu,avg})^2}}{\sum^{4}_{i=1}E_{cl,i}}$$
+     * @param vtxSigmaFinal pointer variable to get the average error of the neutral vertex reconstruction (over clusters' energies) $$\frac{\sum^{4}_{i=1}E_{cl,i}\times\std::sqrt{(X_{neu,i} - X_{neu,avg})^2 + (Y_{neu,i} - Y_{neu,avg})^2 + (Z_{neu,i} - Z_{neu,avg})^2}}{\sum^{4}_{i=1}E_{cl,i}}$$
      * @param Clu4Mom std::vector of TLorentzVector objects for 4-momentum:
      * - first index: choice of cluster
      * - vectors' content: ($p_{x,cl} [MeV/c], p_{y,cl} [MeV/c], p_{z,cl} [Mev/c], E_{cl} [MeV]$)
@@ -536,7 +536,7 @@ namespace KLOE
      * - first index: choice of cluster
      * - vectors' content: ($X_{cl} [cm], Y_{cl} [cm], Z_{cl} [cm], T_{cl} [ns]$)
      * @param ip pointer to the array of interaction point's spatial coordinates: ($X_{IP}, Y_{IP}, Z_{IP}$)
-     * @param Phi4Mom pointer to the array of $\phi$ meson's 4-momentum: ($p_{x}, p_{y}, p_{z}, \sqrt{s}$)
+     * @param Phi4Mom pointer to the array of $\phi$ meson's 4-momentum: ($p_{x}, p_{y}, p_{z}, \std::sqrt{s}$)
      * @param Kne4Mom pointer to the array of kaon's 4-momentum: ($p_{x}, p_{y}, p_{z}, E_{K}$)
      * @param Kne4Vec pointer to the array of kaon's 4-position: ($x_{neu,avg}, y_{neu,avg}, z_{neu,avg}, t_{K}$)
      * @param trc pointer to the array of $$(T_{cl,i} - \frac{d_{\gamma,i}}{c} - \frac{d_{K}}{c\beta_{K}})$$ for each cluster
@@ -605,9 +605,9 @@ namespace KLOE
           denominator = 0,
           value = 0;
 
-      numerator = sqrt(pow(p[0] - p[4] * cos(p[5]), 2) + pow(p[1] - p[4] * sin(p[5]), 2)) +
-                  sqrt(pow(p[2] - p[4] * cos(M_PI + p[5]), 2) + pow(p[3] - p[4] * sin(M_PI + p[5]), 2));
-      denominator = sqrt(pow(p[0], 2) + pow(p[1], 2)) + sqrt(pow(p[2], 2) + pow(p[3], 2));
+      numerator = std::sqrt(std::pow(p[0] - p[4] * cos(p[5]), 2) + std::pow(p[1] - p[4] * sin(p[5]), 2)) +
+                  std::sqrt(std::pow(p[2] - p[4] * cos(M_PI + p[5]), 2) + std::pow(p[3] - p[4] * sin(M_PI + p[5]), 2));
+      denominator = std::sqrt(std::pow(p[0], 2) + std::pow(p[1], 2)) + std::sqrt(std::pow(p[2], 2) + std::pow(p[3], 2));
 
       if (denominator != 0 && !TMath::IsNaN(denominator) && !TMath::IsNaN(numerator))
         value = numerator / denominator;

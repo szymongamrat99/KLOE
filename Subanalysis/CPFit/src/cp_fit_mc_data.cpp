@@ -470,8 +470,8 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
           KchrecSmeared[1] = momVecSmeared[1] + momVecSmeared[4];
           KchrecSmeared[2] = momVecSmeared[2] + momVecSmeared[5];
 
-          energyPion[0] = sqrt(pow(momVecSmeared[0], 2) + pow(momVecSmeared[1], 2) + pow(momVecSmeared[2], 2) + pow(PhysicsConstants::mPiCh, 2));
-          energyPion[1] = sqrt(pow(momVecSmeared[3], 2) + pow(momVecSmeared[4], 2) + pow(momVecSmeared[5], 2) + pow(PhysicsConstants::mPiCh, 2));
+          energyPion[0] = std::sqrt(std::pow(momVecSmeared[0], 2) + std::pow(momVecSmeared[1], 2) + std::pow(momVecSmeared[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
+          energyPion[1] = std::sqrt(std::pow(momVecSmeared[3], 2) + std::pow(momVecSmeared[4], 2) + std::pow(momVecSmeared[5], 2) + std::pow(PhysicsConstants::mPiCh, 2));
 
           KchrecSmeared[3] = energyPion[0] + energyPion[1];
 
@@ -497,12 +497,12 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
           KchboostSmeared[3] = baseKin.Kchboost[3];
         }
 
-        velocity_kch = PhysicsConstants::cVel * sqrt(pow(KchboostSmeared[0], 2) + pow(KchboostSmeared[1], 2) + pow(KchboostSmeared[2], 2)) / KchboostSmeared[3];
+        velocity_kch = PhysicsConstants::cVel * std::sqrt(std::pow(KchboostSmeared[0], 2) + std::pow(KchboostSmeared[1], 2) + std::pow(KchboostSmeared[2], 2)) / KchboostSmeared[3];
 
-        velocity_kne = PhysicsConstants::cVel * sqrt(pow(baseKin.Knerec.data()[0], 2) + pow(baseKin.Knerec.data()[1], 2) + pow(baseKin.Knerec.data()[2], 2)) / baseKin.Knerec.data()[3];
+        velocity_kne = PhysicsConstants::cVel * std::sqrt(std::pow(baseKin.Knerec.data()[0], 2) + std::pow(baseKin.Knerec.data()[1], 2) + std::pow(baseKin.Knerec.data()[2], 2)) / baseKin.Knerec.data()[3];
 
-        tch_LAB = sqrt(pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + pow(baseKin.Kchboost[8] - baseKin.ip[2], 2)) / velocity_kch;
-        tne_LAB = sqrt(pow(baseKin.Knerec.data()[6] - baseKin.ip[0], 2) + pow(baseKin.Knerec.data()[7] - baseKin.ip[1], 2) + pow(baseKin.Knerec.data()[8] - baseKin.ip[2], 2)) / velocity_kne;
+        tch_LAB = std::sqrt(std::pow(baseKin.Kchboost[6] - baseKin.ip[0], 2) + std::pow(baseKin.Kchboost[7] - baseKin.ip[1], 2) + std::pow(baseKin.Kchboost[8] - baseKin.ip[2], 2)) / velocity_kch;
+        tne_LAB = std::sqrt(std::pow(baseKin.Knerec.data()[6] - baseKin.ip[0], 2) + std::pow(baseKin.Knerec.data()[7] - baseKin.ip[1], 2) + std::pow(baseKin.Knerec.data()[8] - baseKin.ip[2], 2)) / velocity_kne;
 
         Kch_LAB[0] = baseKin.Kchboost[6] - baseKin.ip[0];
         Kch_LAB[1] = baseKin.Kchboost[7] - baseKin.ip[1];
@@ -548,7 +548,7 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
         for (Int_t i = 0; i < 4; i++)
         {
-          TRCV[i] = baseKin.cluster[3][baseKin.g4takenTriKinFit.data()[i]] - (sqrt(pow(baseKin.cluster[0][baseKin.g4takenTriKinFit.data()[i]] - baseKin.Knerec.data()[6], 2) + pow(baseKin.cluster[1][baseKin.g4takenTriKinFit.data()[i]] - baseKin.Knerec.data()[7], 2) + pow(baseKin.cluster[2][baseKin.g4takenTriKinFit.data()[i]] - baseKin.Knerec.data()[8], 2)) / PhysicsConstants::cVel) - tne_LAB;
+          TRCV[i] = baseKin.cluster[3][baseKin.g4takenTriKinFit.data()[i]] - (std::sqrt(std::pow(baseKin.cluster[0][baseKin.g4takenTriKinFit.data()[i]] - baseKin.Knerec.data()[6], 2) + std::pow(baseKin.cluster[1][baseKin.g4takenTriKinFit.data()[i]] - baseKin.Knerec.data()[7], 2) + std::pow(baseKin.cluster[2][baseKin.g4takenTriKinFit.data()[i]] - baseKin.Knerec.data()[8], 2)) / PhysicsConstants::cVel) - tne_LAB;
         }
 
         trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
@@ -560,27 +560,27 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
 
         Bool_t cuts[4] = {false, false, false, false};
 
-        Double_t normFactor = sigmas * lineWidth / sqrt(a * a + 1); // Norm of normal vector
-        cut_line_up = (a * Omegarec[6] + b + (1 - pow(a, 2)) * normFactor) > Omegarec[5];
-        cut_line_down = (a * Omegarec[6] + b - (1 - pow(a, 2)) * normFactor) < Omegarec[5];
+        Double_t normFactor = sigmas * lineWidth / std::sqrt(a * a + 1); // Norm of normal vector
+        cut_line_up = (a * Omegarec[6] + b + (1 - std::pow(a, 2)) * normFactor) > Omegarec[5];
+        cut_line_down = (a * Omegarec[6] + b - (1 - std::pow(a, 2)) * normFactor) < Omegarec[5];
 
         for (Int_t i = 0; i < 3; i++)
         {
-          radius[0] += pow(baseKin.Knerec.data()[6 + i] - baseKin.ip[i], 2);
-          radius_ch[0] += pow(baseKin.Kchboost[6 + i] - baseKin.ip[i], 2);
+          radius[0] += std::pow(baseKin.Knerec.data()[6 + i] - baseKin.ip[i], 2);
+          radius_ch[0] += std::pow(baseKin.Kchboost[6 + i] - baseKin.ip[i], 2);
 
           if (i < 2)
           {
-            radius[1] += pow(baseKin.Knerec.data()[6 + i] - baseKin.ip[i], 2);
-            radius_ch[1] += pow(baseKin.Kchboost[6 + i] - baseKin.ip[i], 2);
+            radius[1] += std::pow(baseKin.Knerec.data()[6 + i] - baseKin.ip[i], 2);
+            radius_ch[1] += std::pow(baseKin.Kchboost[6 + i] - baseKin.ip[i], 2);
           }
         }
 
-        radius[0] = sqrt(radius[0]);
-        radius[1] = sqrt(radius[1]);
+        radius[0] = std::sqrt(radius[0]);
+        radius[1] = std::sqrt(radius[1]);
 
-        radius_ch[0] = sqrt(radius_ch[0]);
-        radius_ch[1] = sqrt(radius_ch[1]);
+        radius_ch[0] = std::sqrt(radius_ch[0]);
+        radius_ch[1] = std::sqrt(radius_ch[1]);
 
         Bool_t
             cond[4],
@@ -598,10 +598,10 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
           }
 
         Double_t
-            stdDevRho00IP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[0] + stdDevOmegaVtx[1]) / 2.,
-            stdDevRhopmIP = sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[3] + stdDevOmegaVtx[4]) / 2.,
-            meanRho00IP = sqrt(M_PI / 2.) * (stdDevOmegaVtx[0] + stdDevOmegaVtx[1]) / 2.,
-            meanRhopmIP = sqrt(M_PI / 2.) * (stdDevOmegaVtx[3] + stdDevOmegaVtx[4]) / 2.;
+            stdDevRho00IP = std::sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[0] + stdDevOmegaVtx[1]) / 2.,
+            stdDevRhopmIP = std::sqrt((4 - M_PI) / 2) * (stdDevOmegaVtx[3] + stdDevOmegaVtx[4]) / 2.,
+            meanRho00IP = std::sqrt(M_PI / 2.) * (stdDevOmegaVtx[0] + stdDevOmegaVtx[1]) / 2.,
+            meanRhopmIP = std::sqrt(M_PI / 2.) * (stdDevOmegaVtx[3] + stdDevOmegaVtx[4]) / 2.;
 
         cond[0] = rho_00_IP - meanRho00IP < stdDevRho00IP;
         cond[1] = rho_pm_IP - meanRhopmIP < stdDevRhopmIP;

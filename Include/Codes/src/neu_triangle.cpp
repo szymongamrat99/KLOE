@@ -20,7 +20,7 @@ int neu_triangle(Double_t *TrcSumFinal, Double_t *vtxSigmaFinal, Double_t Clu5Ve
   KneTotMom = pK.Mag();
   BetaK = KneTotMom / Kne4Mom[3];
 
-  A = (1 - pow(BetaK, 2)) / pow(BetaK, 2);
+  A = (1 - std::pow(BetaK, 2)) / std::pow(BetaK, 2);
 
   for (Int_t i = 0; i < 4; i++)
   {
@@ -34,9 +34,9 @@ int neu_triangle(Double_t *TrcSumFinal, Double_t *vtxSigmaFinal, Double_t Clu5Ve
     CosPkD[i] = (D[i].Dot(pK)) / (DTot[i] * KneTotMom);
 
     B[i] = 2 * (DTot[i] * CosPkD[i] - (PhysicsConstants::cVel * Clu5Vec[i][3] / BetaK));
-    C[i] = pow(PhysicsConstants::cVel * Clu5Vec[i][3], 2) - pow(DTot[i], 2);
+    C[i] = std::pow(PhysicsConstants::cVel * Clu5Vec[i][3], 2) - std::pow(DTot[i], 2);
 
-    Delta[i] = pow(B[i], 2) - 4 * A * C[i];
+    Delta[i] = std::pow(B[i], 2) - 4 * A * C[i];
 
     try
     {
@@ -50,8 +50,8 @@ int neu_triangle(Double_t *TrcSumFinal, Double_t *vtxSigmaFinal, Double_t Clu5Ve
       }
       else
       {
-        lK[i][0] = (-B[i] - sqrt(Delta[i])) / (2. * A);
-        lK[i][1] = (-B[i] + sqrt(Delta[i])) / (2. * A);
+        lK[i][0] = (-B[i] - std::sqrt(Delta[i])) / (2. * A);
+        lK[i][1] = (-B[i] + std::sqrt(Delta[i])) / (2. * A);
 
         for (Int_t j = 0; j < 2; j++)
         {
@@ -60,9 +60,9 @@ int neu_triangle(Double_t *TrcSumFinal, Double_t *vtxSigmaFinal, Double_t Clu5Ve
 
           NeuVtxTmp[i][j][3] = (lK[i][j] / (PhysicsConstants::cVel * BetaK));
 
-          lGamma[i][j] = sqrt(pow(Clu5Vec[i][0] - NeuVtxTmp[i][j][0], 2) +
-                              pow(Clu5Vec[i][1] - NeuVtxTmp[i][j][1], 2) +
-                              pow(Clu5Vec[i][2] - NeuVtxTmp[i][j][2], 2));
+          lGamma[i][j] = std::sqrt(std::pow(Clu5Vec[i][0] - NeuVtxTmp[i][j][0], 2) +
+                              std::pow(Clu5Vec[i][1] - NeuVtxTmp[i][j][1], 2) +
+                              std::pow(Clu5Vec[i][2] - NeuVtxTmp[i][j][2], 2));
 
           trctmp[i][j] = Clu5Vec[i][3] - NeuVtxTmp[i][j][3] - (lGamma[i][j] / PhysicsConstants::cVel);
         }
@@ -94,19 +94,19 @@ int neu_triangle(Double_t *TrcSumFinal, Double_t *vtxSigmaFinal, Double_t Clu5Ve
   for (Int_t j = 0; j < 3; j++)
     NeuVtxAvg[j] = NeuVtxAvg[j] / EneTot;
 
-  NeuVtxAvg[3] = sqrt(pow(NeuVtxAvg[0] - ip[0], 2) +
-                      pow(NeuVtxAvg[1] - ip[1], 2) +
-                      pow(NeuVtxAvg[2] - ip[2], 2)) /
+  NeuVtxAvg[3] = std::sqrt(std::pow(NeuVtxAvg[0] - ip[0], 2) +
+                      std::pow(NeuVtxAvg[1] - ip[1], 2) +
+                      std::pow(NeuVtxAvg[2] - ip[2], 2)) /
                  (BetaK * PhysicsConstants::cVel);
 
   for (Int_t i = 0; i < 4; i++)
   {
-    lGammaFinal[i] = sqrt(pow(Clu5Vec[i][0] - NeuVtxAvg[0], 2) +
-                          pow(Clu5Vec[i][1] - NeuVtxAvg[1], 2) +
-                          pow(Clu5Vec[i][2] - NeuVtxAvg[2], 2));
+    lGammaFinal[i] = std::sqrt(std::pow(Clu5Vec[i][0] - NeuVtxAvg[0], 2) +
+                          std::pow(Clu5Vec[i][1] - NeuVtxAvg[1], 2) +
+                          std::pow(Clu5Vec[i][2] - NeuVtxAvg[2], 2));
     trc[i] = Clu5Vec[i][3] - NeuVtxAvg[3] - (lGammaFinal[i] / PhysicsConstants::cVel);
 
-    vtxSigma += Clu5Vec[i][4] * sqrt(pow(NeuVtxTrueClu[i][0] - NeuVtxAvg[0], 2) + pow(NeuVtxTrueClu[i][1] - NeuVtxAvg[1], 2) + pow(NeuVtxTrueClu[i][2] - NeuVtxAvg[2], 2)) / EneTot;
+    vtxSigma += Clu5Vec[i][4] * std::sqrt(std::pow(NeuVtxTrueClu[i][0] - NeuVtxAvg[0], 2) + std::pow(NeuVtxTrueClu[i][1] - NeuVtxAvg[1], 2) + std::pow(NeuVtxTrueClu[i][2] - NeuVtxAvg[2], 2)) / EneTot;
   }
 
   Kne4Vec[0] = NeuVtxAvg[0];

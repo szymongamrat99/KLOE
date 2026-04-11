@@ -320,8 +320,8 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
                     fourKnetri_tmp[k][2] = gamma_mom_tmp[0][2] + gamma_mom_tmp[1][2] + gamma_mom_tmp[2][2] + gamma_mom_tmp[3][2];
                     fourKnetri_tmp[k][3] = gamma_mom_tmp[0][3] + gamma_mom_tmp[1][3] + gamma_mom_tmp[2][3] + gamma_mom_tmp[3][3];
 
-                    fourKnetri_tmp[k][4] = sqrt(pow(fourKnetri_tmp[k][0], 2) + pow(fourKnetri_tmp[k][1], 2) + pow(fourKnetri_tmp[k][2], 2));
-                    fourKnetri_tmp[k][5] = sqrt(pow(fourKnetri_tmp[k][3], 2) - pow(fourKnetri_tmp[k][4], 2));
+                    fourKnetri_tmp[k][4] = std::sqrt(std::pow(fourKnetri_tmp[k][0], 2) + std::pow(fourKnetri_tmp[k][1], 2) + std::pow(fourKnetri_tmp[k][2], 2));
+                    fourKnetri_tmp[k][5] = std::sqrt(std::pow(fourKnetri_tmp[k][3], 2) - std::pow(fourKnetri_tmp[k][4], 2));
 
                     kaon_vel_tmp[k] = PhysicsConstants::cVel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
 
@@ -336,11 +336,11 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
                     if (std::abs(ip_tmp[k][2] - bhabha_vtx[2]) > 2)
                       ip_tmp[k][2] = bhabha_vtx[2];
 
-                    dist_tmp[k] = sqrt(pow(neu_vtx[k][0] - ip_tmp[k][0], 2) +
-                                       pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
-                                       pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
+                    dist_tmp[k] = std::sqrt(std::pow(neu_vtx[k][0] - ip_tmp[k][0], 2) +
+                                       std::pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
+                                       std::pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
 
-                    value[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - PhysicsConstants::mK0, 2));
+                    value[k] = std::sqrt(std::pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + std::pow(fourKnetri_tmp[k][5] - PhysicsConstants::mK0, 2));
 
                     if (TMath::IsNaN(value[k]))
                       value[k] = 999999.;
@@ -382,9 +382,9 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 
                       for (Int_t l = 0; l < 4; l++)
                       {
-                        distance[l] = sqrt(pow(X[l * 5] - neu_vtx[0][0], 2) +
-                                           pow(X[l * 5 + 1] - neu_vtx[0][1], 2) +
-                                           pow(X[l * 5 + 2] - neu_vtx[0][2], 2));
+                        distance[l] = std::sqrt(std::pow(X[l * 5] - neu_vtx[0][0], 2) +
+                                           std::pow(X[l * 5 + 1] - neu_vtx[0][1], 2) +
+                                           std::pow(X[l * 5 + 2] - neu_vtx[0][2], 2));
 
                         gamma_mom_final[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[0][0]) / distance[l]);
                         gamma_mom_final[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[0][1]) / distance[l]);
@@ -400,8 +400,8 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
                       fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
                       fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
                       fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
-                      fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
-                      fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
+                      fourKnetri_kinfit[4] = std::sqrt(std::pow(fourKnetri_kinfit[0], 2) + std::pow(fourKnetri_kinfit[1], 2) + std::pow(fourKnetri_kinfit[2], 2));
+                      fourKnetri_kinfit[5] = std::sqrt(std::pow(fourKnetri_kinfit[3], 2) - std::pow(fourKnetri_kinfit[4], 2));
                       fourKnetri_kinfit[6] = neu_vtx_min[0];
                       fourKnetri_kinfit[7] = neu_vtx_min[1];
                       fourKnetri_kinfit[8] = neu_vtx_min[2];
@@ -436,9 +436,9 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
 
                       for (Int_t l = 0; l < 4; l++)
                       {
-                        distance[l] = sqrt(pow(X[l * 5] - neu_vtx[1][0], 2) +
-                                           pow(X[l * 5 + 1] - neu_vtx[1][1], 2) +
-                                           pow(X[l * 5 + 2] - neu_vtx[1][2], 2));
+                        distance[l] = std::sqrt(std::pow(X[l * 5] - neu_vtx[1][0], 2) +
+                                           std::pow(X[l * 5 + 1] - neu_vtx[1][1], 2) +
+                                           std::pow(X[l * 5 + 2] - neu_vtx[1][2], 2));
 
                         gamma_mom_final[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[1][0]) / distance[l]);
                         gamma_mom_final[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[1][1]) / distance[l]);
@@ -454,8 +454,8 @@ Int_t TrilaterationNeurecKinfit(TChain &chain, Controls::DataType &dataType, Err
                       fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
                       fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
                       fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
-                      fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
-                      fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
+                      fourKnetri_kinfit[4] = std::sqrt(std::pow(fourKnetri_kinfit[0], 2) + std::pow(fourKnetri_kinfit[1], 2) + std::pow(fourKnetri_kinfit[2], 2));
+                      fourKnetri_kinfit[5] = std::sqrt(std::pow(fourKnetri_kinfit[3], 2) - std::pow(fourKnetri_kinfit[4], 2));
                       fourKnetri_kinfit[6] = neu_vtx_min[0];
                       fourKnetri_kinfit[7] = neu_vtx_min[1];
                       fourKnetri_kinfit[8] = neu_vtx_min[2];

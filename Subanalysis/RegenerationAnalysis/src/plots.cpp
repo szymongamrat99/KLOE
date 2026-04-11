@@ -159,27 +159,27 @@ int plots(Int_t firstFile, Int_t lastFile)
     for (Int_t i = 0; i < 3; i++)
     {
       // Spherical
-      radius[0] += pow(interfcommon_.KneRecLor[6 + i] - interfcommon_.ip[i], 2);
-      radius_ch[0] += pow(interfcommon_.KchBoost[6 + i] - interfcommon_.ip[i], 2);
-      radius_tri[0] += pow(interfcommon_.KneRecTriangle[6 + i] - interfcommon_.ip[i], 2);
+      radius[0] += std::pow(interfcommon_.KneRecLor[6 + i] - interfcommon_.ip[i], 2);
+      radius_ch[0] += std::pow(interfcommon_.KchBoost[6 + i] - interfcommon_.ip[i], 2);
+      radius_tri[0] += std::pow(interfcommon_.KneRecTriangle[6 + i] - interfcommon_.ip[i], 2);
 
       if (i < 2)
       {
         // Cylindrical
-        radius[1] += pow(interfcommon_.KneRecLor[6 + i] - interfcommon_.ip[i], 2);
-        radius_ch[1] += pow(interfcommon_.KchBoost[6 + i] - interfcommon_.ip[i], 2);
-        radius_tri[1] += pow(interfcommon_.KneRecTriangle[6 + i] - interfcommon_.ip[i], 2);
+        radius[1] += std::pow(interfcommon_.KneRecLor[6 + i] - interfcommon_.ip[i], 2);
+        radius_ch[1] += std::pow(interfcommon_.KchBoost[6 + i] - interfcommon_.ip[i], 2);
+        radius_tri[1] += std::pow(interfcommon_.KneRecTriangle[6 + i] - interfcommon_.ip[i], 2);
       }
     }
 
-    radius[0] = sqrt(radius[0]);
-    radius[1] = sqrt(radius[1]);
+    radius[0] = std::sqrt(radius[0]);
+    radius[1] = std::sqrt(radius[1]);
 
-    radius_ch[0] = sqrt(radius_ch[0]);
-    radius_ch[1] = sqrt(radius_ch[1]);
+    radius_ch[0] = std::sqrt(radius_ch[0]);
+    radius_ch[1] = std::sqrt(radius_ch[1]);
 
-    radius_tri[0] = sqrt(radius_tri[0]);
-    radius_tri[1] = sqrt(radius_tri[1]);
+    radius_tri[0] = std::sqrt(radius_tri[0]);
+    radius_tri[1] = std::sqrt(radius_tri[1]);
 
     count_tot++;
 

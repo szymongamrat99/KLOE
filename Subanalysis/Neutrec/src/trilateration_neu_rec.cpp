@@ -191,9 +191,9 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 										{
 											for (Int_t l2 = 0; l2 < 4; l2++)
 											{
-												gamma_len[l1][l2] = sqrt(pow(cluster[0][ind_gam[l2]] - S.sol[l1][0], 2) +
-																								 pow(cluster[1][ind_gam[l2]] - S.sol[l1][1], 2) +
-																								 pow(cluster[2][ind_gam[l2]] - S.sol[l1][2], 2));
+												gamma_len[l1][l2] = std::sqrt(std::pow(cluster[0][ind_gam[l2]] - S.sol[l1][0], 2) +
+																								 std::pow(cluster[1][ind_gam[l2]] - S.sol[l1][1], 2) +
+																								 std::pow(cluster[2][ind_gam[l2]] - S.sol[l1][2], 2));
 
 												gamma_mom[l1][l2][0] = cluster[4][ind_gam[l2]] * (cluster[0][ind_gam[l2]] - S.sol[l1][0]) / gamma_len[l1][l2];
 												gamma_mom[l1][l2][1] = cluster[4][ind_gam[l2]] * (cluster[1][ind_gam[l2]] - S.sol[l1][1]) / gamma_len[l1][l2];
@@ -206,7 +206,7 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 												kaon_mom[l1][3] += gamma_mom[l1][l2][3];
 											}
 
-											kaon_inv_mass_tmp[l1] = std::abs(sqrt(pow(kaon_mom[l1][3],2) - pow(kaon_mom[l1][0],2) - pow(kaon_mom[l1][1],2) - pow(kaon_mom[l1][2],2)) - PhysicsConstants::mK0);
+											kaon_inv_mass_tmp[l1] = std::abs(std::sqrt(std::pow(kaon_mom[l1][3],2) - std::pow(kaon_mom[l1][0],2) - std::pow(kaon_mom[l1][1],2) - std::pow(kaon_mom[l1][2],2)) - PhysicsConstants::mK0);
 
 											y_axis[0] = 0.;
 											y_axis[1] = bhabha_mom[1];
@@ -220,17 +220,17 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 											ip_tri[0] = bhabha_vtx[0];
 											ip_tri[1] = bhabha_vtx[1];
 
-											kaon_vel[l1] = PhysicsConstants::cVel * sqrt(pow(kaon_mom[l1][0], 2) + pow(kaon_mom[l1][1], 2) + pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
-											kaon_len[l1] = sqrt(pow(S.sol[l1][0] - ip_tri[0], 2) + pow(S.sol[l1][1] - ip_tri[1], 2) + pow(S.sol[l1][2] - ip_tri[2], 2));
+											kaon_vel[l1] = PhysicsConstants::cVel * std::sqrt(std::pow(kaon_mom[l1][0], 2) + std::pow(kaon_mom[l1][1], 2) + std::pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
+											kaon_len[l1] = std::sqrt(std::pow(S.sol[l1][0] - ip_tri[0], 2) + std::pow(S.sol[l1][1] - ip_tri[1], 2) + std::pow(S.sol[l1][2] - ip_tri[2], 2));
 										}
 
 										cond_sol[0][0] = (S.sol[0][3] < cluster[3][ind_gam[0]]) && (S.sol[0][3] < cluster[3][ind_gam[1]]) && (S.sol[0][3] < cluster[3][ind_gam[2]]) && (S.sol[0][3] < cluster[3][ind_gam[3]]);
-										cond_sol[0][1] = (sqrt(pow(S.sol[0][0], 2) + pow(S.sol[0][1], 2)) < 200) && (std::abs(S.sol[0][2]) < 165);
+										cond_sol[0][1] = (std::sqrt(std::pow(S.sol[0][0], 2) + std::pow(S.sol[0][1], 2)) < 200) && (std::abs(S.sol[0][2]) < 165);
 										path_diff[0] = kaon_vel[0] * S.sol[0][3] - kaon_len[0];
 
 
 										cond_sol[1][0] = (S.sol[1][3] < cluster[3][ind_gam[0]]) && (S.sol[1][3] < cluster[3][ind_gam[1]]) && (S.sol[1][3] < cluster[3][ind_gam[2]]) && (S.sol[1][3] < cluster[3][ind_gam[3]]);
-										cond_sol[1][1] = (sqrt(pow(S.sol[1][0], 2) + pow(S.sol[1][1], 2)) < 200) && (std::abs(S.sol[1][2]) < 165);
+										cond_sol[1][1] = (std::sqrt(std::pow(S.sol[1][0], 2) + std::pow(S.sol[1][1], 2)) < 200) && (std::abs(S.sol[1][2]) < 165);
 										path_diff[1] = kaon_vel[1] * S.sol[1][3] - kaon_len[1];
 
 										sol1[0] = S.sol[0][0];
@@ -287,9 +287,9 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 											for (Int_t l = 0; l < 4; l++)
 											{
-												gamma_len_tmp[l] = sqrt(pow(cluster[0][ind_gam[l]] - solution[0], 2) +
-																								pow(cluster[1][ind_gam[l]] - solution[1], 2) +
-																								pow(cluster[2][ind_gam[l]] - solution[2], 2));
+												gamma_len_tmp[l] = std::sqrt(std::pow(cluster[0][ind_gam[l]] - solution[0], 2) +
+																								std::pow(cluster[1][ind_gam[l]] - solution[1], 2) +
+																								std::pow(cluster[2][ind_gam[l]] - solution[2], 2));
 
 												gammatri_tmp[l][0] = cluster[4][ind_gam[l]] * (cluster[0][ind_gam[l]] - solution[0]) / gamma_len_tmp[l];
 												gammatri_tmp[l][1] = cluster[4][ind_gam[l]] * (cluster[1][ind_gam[l]] - solution[1]) / gamma_len_tmp[l];
@@ -308,8 +308,8 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 												eqn_check[l] = std::abs(PhysicsConstants::cVel * (cluster[3][ind_gam[l]] - solution[3]) - gamma_len_tmp[l]);
 											}
 
-											Knetri_tmp[4] = sqrt(pow(Knetri_tmp[0], 2) + pow(Knetri_tmp[1], 2) + pow(Knetri_tmp[2], 2));
-											Knetri_tmp[5] = sqrt(pow(Knetri_tmp[3], 2) - pow(Knetri_tmp[0], 2) - pow(Knetri_tmp[1], 2) - pow(Knetri_tmp[2], 2));
+											Knetri_tmp[4] = std::sqrt(std::pow(Knetri_tmp[0], 2) + std::pow(Knetri_tmp[1], 2) + std::pow(Knetri_tmp[2], 2));
+											Knetri_tmp[5] = std::sqrt(std::pow(Knetri_tmp[3], 2) - std::pow(Knetri_tmp[0], 2) - std::pow(Knetri_tmp[1], 2) - std::pow(Knetri_tmp[2], 2));
 											Knetri_tmp[6] = solution[0];
 											Knetri_tmp[7] = solution[1];
 											Knetri_tmp[8] = solution[2];
@@ -443,9 +443,9 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 						{
 							for (Int_t l2 = 0; l2 < 4; l2++)
 							{
-								gamma_len[l1][l2] = sqrt(pow(cluster[0][ind_gam[l2]] - S.sol[l1][0], 2) +
-																				 pow(cluster[1][ind_gam[l2]] - S.sol[l1][1], 2) +
-																				 pow(cluster[2][ind_gam[l2]] - S.sol[l1][2], 2));
+								gamma_len[l1][l2] = std::sqrt(std::pow(cluster[0][ind_gam[l2]] - S.sol[l1][0], 2) +
+																				 std::pow(cluster[1][ind_gam[l2]] - S.sol[l1][1], 2) +
+																				 std::pow(cluster[2][ind_gam[l2]] - S.sol[l1][2], 2));
 
 								gamma_mom[l1][l2][0] = cluster[4][ind_gam[l2]] * (cluster[0][ind_gam[l2]] - S.sol[l1][0]) / gamma_len[l1][l2];
 								gamma_mom[l1][l2][1] = cluster[4][ind_gam[l2]] * (cluster[1][ind_gam[l2]] - S.sol[l1][1]) / gamma_len[l1][l2];
@@ -470,36 +470,36 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 							ip_tri[0] = bhabha_vtx[0];
 							ip_tri[1] = bhabha_vtx[1];
 
-							kaon_vel[l1] = PhysicsConstants::cVel * sqrt(pow(kaon_mom[l1][0], 2) + pow(kaon_mom[l1][1], 2) + pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
-							kaon_len[l1] = sqrt(pow(S.sol[l1][0] - ip_tri[0], 2) + pow(S.sol[l1][1] - ip_tri[1], 2) + pow(S.sol[l1][2] - ip_tri[2], 2));
+							kaon_vel[l1] = PhysicsConstants::cVel * std::sqrt(std::pow(kaon_mom[l1][0], 2) + std::pow(kaon_mom[l1][1], 2) + std::pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
+							kaon_len[l1] = std::sqrt(std::pow(S.sol[l1][0] - ip_tri[0], 2) + std::pow(S.sol[l1][1] - ip_tri[1], 2) + std::pow(S.sol[l1][2] - ip_tri[2], 2));
 						}
 
 						cond_sol[0][0] = (S.sol[0][3] < cluster[3][ind_gam[0]]) && (S.sol[0][3] < cluster[3][ind_gam[1]]) && (S.sol[0][3] < cluster[3][ind_gam[2]]) && (S.sol[0][3] < cluster[3][ind_gam[3]]);
 
-						cond_sol[0][1] = (sqrt(pow(S.sol[0][0] - bhabha_vtx[0], 2) + pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
+						cond_sol[0][1] = (std::sqrt(std::pow(S.sol[0][0] - bhabha_vtx[0], 2) + std::pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
 						path_diff[0] = kaon_vel[0] * S.sol[0][3] - kaon_len[0];
 						eqn_check_tmp[0][0] = PhysicsConstants::cVel * (cluster[3][ind_gam[0]] - S.sol[0][3]) - gamma_len[0][0];
 						eqn_check_tmp[0][1] = PhysicsConstants::cVel * (cluster[3][ind_gam[1]] - S.sol[0][3]) - gamma_len[0][1];
 						eqn_check_tmp[0][2] = PhysicsConstants::cVel * (cluster[3][ind_gam[2]] - S.sol[0][3]) - gamma_len[0][2];
 						eqn_check_tmp[0][3] = PhysicsConstants::cVel * (cluster[3][ind_gam[3]] - S.sol[0][3]) - gamma_len[0][3];
 
-						eqn_check_tmp_tot[0] = sqrt(pow(eqn_check_tmp[0][0], 2) +
-																				pow(eqn_check_tmp[0][1], 2) +
-																				pow(eqn_check_tmp[0][2], 2) +
-																				pow(eqn_check_tmp[0][3], 2));
+						eqn_check_tmp_tot[0] = std::sqrt(std::pow(eqn_check_tmp[0][0], 2) +
+																				std::pow(eqn_check_tmp[0][1], 2) +
+																				std::pow(eqn_check_tmp[0][2], 2) +
+																				std::pow(eqn_check_tmp[0][3], 2));
 
 						cond_sol[1][0] = (S.sol[1][3] < cluster[3][ind_gam[0]]) && (S.sol[1][3] < cluster[3][ind_gam[1]]) && (S.sol[1][3] < cluster[3][ind_gam[2]]) && (S.sol[1][3] < cluster[3][ind_gam[3]]);
-						cond_sol[1][1] = (sqrt(pow(S.sol[1][0] - bhabha_vtx[0], 2) + pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
+						cond_sol[1][1] = (std::sqrt(std::pow(S.sol[1][0] - bhabha_vtx[0], 2) + std::pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
 						path_diff[1] = kaon_vel[1] * S.sol[1][3] - kaon_len[1];
 						eqn_check_tmp[1][0] = PhysicsConstants::cVel * (cluster[3][ind_gam[0]] - S.sol[1][3]) - gamma_len[1][0];
 						eqn_check_tmp[1][1] = PhysicsConstants::cVel * (cluster[3][ind_gam[1]] - S.sol[1][3]) - gamma_len[1][1];
 						eqn_check_tmp[1][2] = PhysicsConstants::cVel * (cluster[3][ind_gam[2]] - S.sol[1][3]) - gamma_len[1][2];
 						eqn_check_tmp[1][3] = PhysicsConstants::cVel * (cluster[3][ind_gam[3]] - S.sol[1][3]) - gamma_len[1][3];
 
-						eqn_check_tmp_tot[1] = sqrt(pow(eqn_check_tmp[1][0], 2) +
-																				pow(eqn_check_tmp[1][1], 2) +
-																				pow(eqn_check_tmp[1][2], 2) +
-																				pow(eqn_check_tmp[1][3], 2));
+						eqn_check_tmp_tot[1] = std::sqrt(std::pow(eqn_check_tmp[1][0], 2) +
+																				std::pow(eqn_check_tmp[1][1], 2) +
+																				std::pow(eqn_check_tmp[1][2], 2) +
+																				std::pow(eqn_check_tmp[1][3], 2));
 
 						sol1[0] = S.sol[0][0];
 						sol1[1] = S.sol[0][1];
@@ -563,9 +563,9 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 							for (Int_t l = 0; l < 4; l++)
 							{
-								gamma_len_tmp[l] = sqrt(pow(cluster[0][ind_gam[l]] - solution[0], 2) +
-																				pow(cluster[1][ind_gam[l]] - solution[1], 2) +
-																				pow(cluster[2][ind_gam[l]] - solution[2], 2));
+								gamma_len_tmp[l] = std::sqrt(std::pow(cluster[0][ind_gam[l]] - solution[0], 2) +
+																				std::pow(cluster[1][ind_gam[l]] - solution[1], 2) +
+																				std::pow(cluster[2][ind_gam[l]] - solution[2], 2));
 
 								gammatri_tmp[l][0] = cluster[4][ind_gam[l]] * (cluster[0][ind_gam[l]] - solution[0]) / gamma_len_tmp[l];
 								gammatri_tmp[l][1] = cluster[4][ind_gam[l]] * (cluster[1][ind_gam[l]] - solution[1]) / gamma_len_tmp[l];
@@ -584,18 +584,18 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 								eqn_check[l] = PhysicsConstants::cVel * (cluster[3][ind_gam[l]] - solution[3]) - gamma_len_tmp[l];
 							}
 
-							Knetri_tmp[4] = sqrt(pow(Knetri_tmp[0], 2) + pow(Knetri_tmp[1], 2) + pow(Knetri_tmp[2], 2));
-							Knetri_tmp[5] = sqrt(pow(Knetri_tmp[3], 2) - pow(Knetri_tmp[0], 2) - pow(Knetri_tmp[1], 2) - pow(Knetri_tmp[2], 2));
+							Knetri_tmp[4] = std::sqrt(std::pow(Knetri_tmp[0], 2) + std::pow(Knetri_tmp[1], 2) + std::pow(Knetri_tmp[2], 2));
+							Knetri_tmp[5] = std::sqrt(std::pow(Knetri_tmp[3], 2) - std::pow(Knetri_tmp[0], 2) - std::pow(Knetri_tmp[1], 2) - std::pow(Knetri_tmp[2], 2));
 							Knetri_tmp[6] = solution[0];
 							Knetri_tmp[7] = solution[1];
 							Knetri_tmp[8] = solution[2];
 							Knetri_tmp[9] = solution[3];
 
 							total_err += std::abs(Knetri_tmp[5] - PhysicsConstants::mK0);
-															// + pow(eqn_check[0], 2) +
-															//   pow(eqn_check[1], 2) +
-															//   pow(eqn_check[2], 2) +
-															//   pow(eqn_check[3], 2));
+															// + std::pow(eqn_check[0], 2) +
+															//   std::pow(eqn_check[1], 2) +
+															//   std::pow(eqn_check[2], 2) +
+															//   std::pow(eqn_check[3], 2));
 						}
 						else
 						{
@@ -717,9 +717,9 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 						{
 							for (Int_t l2 = 0; l2 < 4; l2++)
 							{
-								gamma_len[l1][l2] = sqrt(pow(pgammc[l2][4] - S.sol[l1][0], 2) +
-																				 pow(pgammc[l2][5] - S.sol[l1][1], 2) +
-																				 pow(pgammc[l2][6] - S.sol[l1][2], 2));
+								gamma_len[l1][l2] = std::sqrt(std::pow(pgammc[l2][4] - S.sol[l1][0], 2) +
+																				 std::pow(pgammc[l2][5] - S.sol[l1][1], 2) +
+																				 std::pow(pgammc[l2][6] - S.sol[l1][2], 2));
 
 								gamma_mom[l1][l2][0] = pgammc[l2][3] * (pgammc[l2][4] - S.sol[l1][0]) / gamma_len[l1][l2];
 								gamma_mom[l1][l2][1] = pgammc[l2][3] * (pgammc[l2][5] - S.sol[l1][1]) / gamma_len[l1][l2];
@@ -744,38 +744,38 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 							ip_tri[0] = bhabha_vtx[0];
 							ip_tri[1] = bhabha_vtx[1];
 
-							kaon_vel[l1] = PhysicsConstants::cVel * sqrt(pow(kaon_mom[l1][0], 2) + pow(kaon_mom[l1][1], 2) + pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
-							kaon_len[l1] = sqrt(pow(S.sol[l1][0] - ip_tri[0], 2) + pow(S.sol[l1][1] - ip_tri[1], 2) + pow(S.sol[l1][2] - ip_tri[2], 2));
+							kaon_vel[l1] = PhysicsConstants::cVel * std::sqrt(std::pow(kaon_mom[l1][0], 2) + std::pow(kaon_mom[l1][1], 2) + std::pow(kaon_mom[l1][2], 2)) / (kaon_mom[l1][3]);
+							kaon_len[l1] = std::sqrt(std::pow(S.sol[l1][0] - ip_tri[0], 2) + std::pow(S.sol[l1][1] - ip_tri[1], 2) + std::pow(S.sol[l1][2] - ip_tri[2], 2));
 						}
 
 						std::cout << pgammc[0][7] << " " << pgammc[1][7] << " " << pgammc[2][7] << " " << pgammc[3][7] << std::endl; 
 
 						cond_sol[0][0] = 1;//(S.sol[0][3] < pgammc[0][7]) && (S.sol[0][3] < pgammc[1][7]) && (S.sol[0][3] < pgammc[2][7]) && (S.sol[0][3] < pgammc[3][7]);
 
-						cond_sol[0][1] = (sqrt(pow(S.sol[0][0] - bhabha_vtx[0], 2) + pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
+						cond_sol[0][1] = (std::sqrt(std::pow(S.sol[0][0] - bhabha_vtx[0], 2) + std::pow(S.sol[0][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[0][2] - bhabha_vtx[2]) < 165);
 						path_diff[0] = kaon_vel[0] * S.sol[0][3] - kaon_len[0];
 						eqn_check_tmp[0][0] = PhysicsConstants::cVel * (pgammc[0][7] - S.sol[0][3]) - gamma_len[0][0];
 						eqn_check_tmp[0][1] = PhysicsConstants::cVel * (pgammc[1][7] - S.sol[0][3]) - gamma_len[0][1];
 						eqn_check_tmp[0][2] = PhysicsConstants::cVel * (pgammc[2][7] - S.sol[0][3]) - gamma_len[0][2];
 						eqn_check_tmp[0][3] = PhysicsConstants::cVel * (pgammc[3][7] - S.sol[0][3]) - gamma_len[0][3];
 
-						eqn_check_tmp_tot[0] = sqrt(pow(eqn_check_tmp[0][0], 2) +
-																				pow(eqn_check_tmp[0][1], 2) +
-																				pow(eqn_check_tmp[0][2], 2) +
-																				pow(eqn_check_tmp[0][3], 2));
+						eqn_check_tmp_tot[0] = std::sqrt(std::pow(eqn_check_tmp[0][0], 2) +
+																				std::pow(eqn_check_tmp[0][1], 2) +
+																				std::pow(eqn_check_tmp[0][2], 2) +
+																				std::pow(eqn_check_tmp[0][3], 2));
 
 						cond_sol[1][0] = 1;//(S.sol[1][3] < pgammc[0][7]) && (S.sol[1][3] < pgammc[1][7]) && (S.sol[1][3] < pgammc[2][7]) && (S.sol[1][3] < pgammc[3][7]);
-						cond_sol[1][1] = (sqrt(pow(S.sol[1][0] - bhabha_vtx[0], 2) + pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
+						cond_sol[1][1] = (std::sqrt(std::pow(S.sol[1][0] - bhabha_vtx[0], 2) + std::pow(S.sol[1][1] - bhabha_vtx[1], 2)) < 200) && (std::abs(S.sol[1][2] - bhabha_vtx[2]) < 165);
 						path_diff[1] = kaon_vel[1] * S.sol[1][3] - kaon_len[1];
 						eqn_check_tmp[1][0] = PhysicsConstants::cVel * (pgammc[0][7] - S.sol[1][3]) - gamma_len[1][0];
 						eqn_check_tmp[1][1] = PhysicsConstants::cVel * (pgammc[1][7] - S.sol[1][3]) - gamma_len[1][1];
 						eqn_check_tmp[1][2] = PhysicsConstants::cVel * (pgammc[2][7] - S.sol[1][3]) - gamma_len[1][2];
 						eqn_check_tmp[1][3] = PhysicsConstants::cVel * (pgammc[3][7] - S.sol[1][3]) - gamma_len[1][3];
 
-						eqn_check_tmp_tot[1] = sqrt(pow(eqn_check_tmp[1][0], 2) +
-																				pow(eqn_check_tmp[1][1], 2) +
-																				pow(eqn_check_tmp[1][2], 2) +
-																				pow(eqn_check_tmp[1][3], 2));
+						eqn_check_tmp_tot[1] = std::sqrt(std::pow(eqn_check_tmp[1][0], 2) +
+																				std::pow(eqn_check_tmp[1][1], 2) +
+																				std::pow(eqn_check_tmp[1][2], 2) +
+																				std::pow(eqn_check_tmp[1][3], 2));
 
 						sol1[0] = S.sol[0][0];
 						sol1[1] = S.sol[0][1];
@@ -839,9 +839,9 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 
 							for (Int_t l = 0; l < 4; l++)
 							{
-								gamma_len_tmp[l] = sqrt(pow(pgammc[l][4] - solution[0], 2) +
-																				pow(pgammc[l][5] - solution[1], 2) +
-																				pow(pgammc[l][6] - solution[2], 2));
+								gamma_len_tmp[l] = std::sqrt(std::pow(pgammc[l][4] - solution[0], 2) +
+																				std::pow(pgammc[l][5] - solution[1], 2) +
+																				std::pow(pgammc[l][6] - solution[2], 2));
 
 								gammatri_tmp[l][0] = pgammc[l][3] * (pgammc[l][4] - solution[0]) / gamma_len_tmp[l];
 								gammatri_tmp[l][1] = pgammc[l][3] * (pgammc[l][5] - solution[1]) / gamma_len_tmp[l];
@@ -860,18 +860,18 @@ void tri_neurec(int data_type, int first_file, int last_file, int good_clus) //	
 								eqn_check[l] = PhysicsConstants::cVel * (pgammc[l][7] - solution[3]) - gamma_len_tmp[l];
 							}
 
-							Knetri_tmp[4] = sqrt(pow(Knetri_tmp[0], 2) + pow(Knetri_tmp[1], 2) + pow(Knetri_tmp[2], 2));
-							Knetri_tmp[5] = sqrt(pow(Knetri_tmp[3], 2) - pow(Knetri_tmp[0], 2) - pow(Knetri_tmp[1], 2) - pow(Knetri_tmp[2], 2));
+							Knetri_tmp[4] = std::sqrt(std::pow(Knetri_tmp[0], 2) + std::pow(Knetri_tmp[1], 2) + std::pow(Knetri_tmp[2], 2));
+							Knetri_tmp[5] = std::sqrt(std::pow(Knetri_tmp[3], 2) - std::pow(Knetri_tmp[0], 2) - std::pow(Knetri_tmp[1], 2) - std::pow(Knetri_tmp[2], 2));
 							Knetri_tmp[6] = solution[0];
 							Knetri_tmp[7] = solution[1];
 							Knetri_tmp[8] = solution[2];
 							Knetri_tmp[9] = solution[3];
 
 							total_err += std::abs(Knetri_tmp[5] - PhysicsConstants::mK0);
-															// + pow(eqn_check[0], 2) +
-															//   pow(eqn_check[1], 2) +
-															//   pow(eqn_check[2], 2) +
-															//   pow(eqn_check[3], 2));
+															// + std::pow(eqn_check[0], 2) +
+															//   std::pow(eqn_check[1], 2) +
+															//   std::pow(eqn_check[2], 2) +
+															//   std::pow(eqn_check[3], 2));
 						}
 						else
 						{

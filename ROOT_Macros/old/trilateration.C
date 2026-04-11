@@ -112,11 +112,11 @@ Bool_t trilateration::Process(Long64_t entry)
    if(*mctruth_pipi == 1) entries[5]++;
    if(*mctruth == 7) entries[6]++;
 
-   distance_mc = sqrt(pow(Knemc_three[6] - *Bx, 2) + pow(Knemc_three[7] - *By, 2) + pow(Knemc_three[8] - *Bz, 2));
+   distance_mc = std::sqrt(std::pow(Knemc_three[6] - *Bx, 2) + std::pow(Knemc_three[7] - *By, 2) + std::pow(Knemc_three[8] - *Bz, 2));
 
    if(*done4 == 1 && std::abs(*Qmiss_inv - 104.6) < 15 && std::abs(*anglepipi_CM_kch - 145) < 25 )
    {
-      distance_rec2 = sqrt(pow(fourKnetri[6] - *Bx, 2) + pow(fourKnetri[7] - *By, 2) + pow(fourKnetri[8] - *Bz, 2));
+      distance_rec2 = std::sqrt(std::pow(fourKnetri[6] - *Bx, 2) + std::pow(fourKnetri[7] - *By, 2) + std::pow(fourKnetri[8] - *Bz, 2));
 
       if(*mctruth == 1)
       {
@@ -164,7 +164,7 @@ Bool_t trilateration::Process(Long64_t entry)
 
    if(*done == 1)
    {
-      distance_rec3 = sqrt(pow(Knetri[6] - *Bx, 2) + pow(Knetri[7] - *By, 2) + pow(Knetri[8] - *Bz, 2));
+      distance_rec3 = std::sqrt(std::pow(Knetri[6] - *Bx, 2) + std::pow(Knetri[7] - *By, 2) + std::pow(Knetri[8] - *Bz, 2));
 
       if(*mctruth == 1)
       {
@@ -320,7 +320,7 @@ void trilateration::Terminate()
 
    Float_t parameter[3];
 
-   TF1* func = new TF1("f1","[0]*exp(-0.5*pow((x-[1])/[2],2))",-30,200);
+   TF1* func = new TF1("f1","[0]*exp(-0.5*std::pow((x-[1])/[2],2))",-30,200);
    func->SetParNames("Constant", "Mean", "Sigma");
 
    for(Int_t i = 1; i <= 13; i++)

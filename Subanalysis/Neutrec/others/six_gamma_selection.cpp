@@ -154,9 +154,9 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
                                                         for(Int_t l1 = 0; l1 < 2; l1++){
                                                             for(Int_t l2 = 0; l2 < 6; l2++)
                                                             {
-                                                                gamma_len[l1][l2] = sqrt(pow(cluster[0][indgam[l2]] - S.sol[l1][0],2) +
-                                                                                         pow(cluster[1][indgam[l2]] - S.sol[l1][1],2) +
-                                                                                         pow(cluster[2][indgam[l2]] - S.sol[l1][2],2) );
+                                                                gamma_len[l1][l2] = std::sqrt(std::pow(cluster[0][indgam[l2]] - S.sol[l1][0],2) +
+                                                                                         std::pow(cluster[1][indgam[l2]] - S.sol[l1][1],2) +
+                                                                                         std::pow(cluster[2][indgam[l2]] - S.sol[l1][2],2) );
 
                                                                 gamma_mom[l1][l2][0] = cluster[4][indgam[l2]]*(cluster[0][indgam[l2]] - S.sol[l1][0])/gamma_len[l1][l2];
                                                                 gamma_mom[l1][l2][1] = cluster[4][indgam[l2]]*(cluster[1][indgam[l2]] - S.sol[l1][1])/gamma_len[l1][l2];
@@ -169,11 +169,11 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
                                                                 kaon_mom[l1][3] += gamma_mom[l1][l2][3];
                                                             }
                                                             
-                                                            kaon_vel[l1] = PhysicsConstants::cVel*sqrt(pow(kaon_mom[l1][0],2) + pow(kaon_mom[l1][1],2) + pow(kaon_mom[l1][2],2))/(kaon_mom[l1][3]); 
-                                                            kaon_len[l1] = sqrt(pow(S.sol[l1][0] - bhabha_vtx[0],2) + pow(S.sol[l1][1] - bhabha_vtx[1],2) + pow(S.sol[l1][2] - bhabha_vtx[2],2));
+                                                            kaon_vel[l1] = PhysicsConstants::cVel*std::sqrt(std::pow(kaon_mom[l1][0],2) + std::pow(kaon_mom[l1][1],2) + std::pow(kaon_mom[l1][2],2))/(kaon_mom[l1][3]); 
+                                                            kaon_len[l1] = std::sqrt(std::pow(S.sol[l1][0] - bhabha_vtx[0],2) + std::pow(S.sol[l1][1] - bhabha_vtx[1],2) + std::pow(S.sol[l1][2] - bhabha_vtx[2],2));
 
                                                             cond_sol[l1][0] = (S.sol[l1][3] >= 0) && (S.sol[l1][3] < 60);
-                                                            cond_sol[l1][1] = (sqrt(pow(S.sol[l1][0],2) + pow(S.sol[l1][1],2)) < 200) && (std::abs(S.sol[l1][2]) < 169);
+                                                            cond_sol[l1][1] = (std::sqrt(std::pow(S.sol[l1][0],2) + std::pow(S.sol[l1][1],2)) < 200) && (std::abs(S.sol[l1][2]) < 169);
                                                             path_diff[l1] = kaon_vel[l1]*S.sol[l1][3] - kaon_len[l1];
                                                         }
 
@@ -273,9 +273,9 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
 
                                                             for(Int_t l = 0; l < 6; l++)
                                                             {
-                                                                gamma_len_tmp[l] = sqrt(pow(cluster[0][indgam[l]] - sol_tmp[0],2) +
-                                                                                            pow(cluster[1][indgam[l]] - sol_tmp[1],2) +
-                                                                                            pow(cluster[2][indgam[l]] - sol_tmp[2],2) );
+                                                                gamma_len_tmp[l] = std::sqrt(std::pow(cluster[0][indgam[l]] - sol_tmp[0],2) +
+                                                                                            std::pow(cluster[1][indgam[l]] - sol_tmp[1],2) +
+                                                                                            std::pow(cluster[2][indgam[l]] - sol_tmp[2],2) );
 
                                                                 gammatri[l][0] = cluster[4][indgam[l]]*(cluster[0][indgam[l]] - sol_tmp[0])/gamma_len_tmp[l];
                                                                 gammatri[l][1] = cluster[4][indgam[l]]*(cluster[1][indgam[l]] - sol_tmp[1])/gamma_len_tmp[l];
@@ -292,8 +292,8 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
                                                                 Knetri[3] += gammatri[l][3];
                                                             }
 
-                                                                Knetri[4] = sqrt(pow(Knetri[0],2) + pow(Knetri[1],2) + pow(Knetri[2],2));
-                                                                Knetri[5] = sqrt(pow(Knetri[3],2) - pow(Knetri[0],2) - pow(Knetri[1],2) - pow(Knetri[2],2));
+                                                                Knetri[4] = std::sqrt(std::pow(Knetri[0],2) + std::pow(Knetri[1],2) + std::pow(Knetri[2],2));
+                                                                Knetri[5] = std::sqrt(std::pow(Knetri[3],2) - std::pow(Knetri[0],2) - std::pow(Knetri[1],2) - std::pow(Knetri[2],2));
                                                                 Knetri[6] = sol_tmp[0];
                                                                 Knetri[7] = sol_tmp[1];
                                                                 Knetri[8] = sol_tmp[2];
@@ -314,9 +314,9 @@ void six_gamma_selection(UInt_t filenumber = 1, TString directory = "230623_mc",
 
         /*if(total_err_def < 999999.)
         {   
-            distance = sqrt(pow(Knetri[6] - bhabha_vtx[0],2) + pow(Knetri[7] - bhabha_vtx[1],2));
-            distance_mc = sqrt(pow(KnemcOld[6] - bhabha_vtx[0],2) + pow(KnemcOld[7] - bhabha_vtx[1],2));
-            distance_diff = sqrt(pow(Knetri[6] - KnemcOld[6],2) + pow(Knetri[7] - KnemcOld[7],2));
+            distance = std::sqrt(std::pow(Knetri[6] - bhabha_vtx[0],2) + std::pow(Knetri[7] - bhabha_vtx[1],2));
+            distance_mc = std::sqrt(std::pow(KnemcOld[6] - bhabha_vtx[0],2) + std::pow(KnemcOld[7] - bhabha_vtx[1],2));
+            distance_diff = std::sqrt(std::pow(Knetri[6] - KnemcOld[6],2) + std::pow(Knetri[7] - KnemcOld[7],2));
 
             hist->Fill(Knetri[5]);
             hist2d->Fill(distance_mc, distance_diff);    

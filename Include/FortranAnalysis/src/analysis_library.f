@@ -773,7 +773,7 @@ C
                         KchTmp(5) = KchTmp(1)**2 + KchTmp(2)**2 +
      &                              KchTmp(3)**2
                         KchTmp(6) = SQRT( KchTmp(4)**2 - KchTmp(5) )
-                        KchTmp(5) = sqrt( KchTmp(5) )
+                        KchTmp(5) = std::sqrt( KchTmp(5) )
 
                         IF( findClose .EQ. 0) THEN
                            IF( (vtaken(1).eq.0).or.
@@ -919,7 +919,7 @@ C     dist      distance of closest approach
       Pmiss = ( KchBoost(1)-trk1(1)-trk2(1) )**2 +
      &        ( KchBoost(2)-trk1(2)-trk2(2) )**2 +
      &        ( KchBoost(3)-trk1(3)-trk2(3) )**2
-      Qmiss = sqrt( Emiss**2 + Pmiss )
+      Qmiss = std::sqrt( Emiss**2 + Pmiss )
       END
 C=======================================================================
 C=======================================================================
@@ -951,8 +951,8 @@ C     Executable statements
         dot = dot + pb(i)*pK(i)
       end do
       cosb_sq = dot**2/(pb_mod*pK_mod)
-      pb_mod = sqrt(pb_mod)
-      pK_mod = sqrt(pK_mod)
+      pb_mod = std::sqrt(pb_mod)
+      pK_mod = std::sqrt(pK_mod)
       b_sq = (pb_mod/pb(4))**2
       bg_sq = pb_mod**2/(pb(4)**2 - pb_mod**2)
       g_sq = 1. + bg_sq
@@ -970,26 +970,26 @@ C     Executable statements
         end if
         disc = 0.
       end if
-      disc = sqrt(disc)
+      disc = std::sqrt(disc)
       P1 = (-B + disc)/A
       P2 = (-B - disc)/A
       if (P1.gt.0.and.P2.lt.0) then
-        pk_from_boost = sqrt(P1)
+        pk_from_boost = std::sqrt(P1)
       else if (P2.gt.0.and.P1.lt.0) then
-        pk_from_boost = sqrt(P2)
+        pk_from_boost = std::sqrt(P2)
       else if (P1.gt.0.and.P2.gt.0) then
 C       For boost directed along the NEGATIVE x axis
         if (dot.lt.0) then
-          pk_from_boost = sqrt(min(P1, P2))
+          pk_from_boost = std::sqrt(min(P1, P2))
         else
-          pk_from_boost = sqrt(max(P1, P2))
+          pk_from_boost = std::sqrt(max(P1, P2))
         end if
       end if
 C     Fix-up the KS momentum on output
       do i = 1, 3
         pK(i) = pK(i)*pk_from_boost/pK_mod
       end do
-      pK(4) = sqrt(pk_from_boost**2 + k0mass**2)
+      pK(4) = std::sqrt(pk_from_boost**2 + k0mass**2)
       return
       end
 C=======================================================================
@@ -1010,9 +1010,9 @@ C     Local specifications
       real D(3), u(3), D1(3), D2(3), umod, D1u, D2u
 C     Executable statements
       dist_lines = 0
-      p1mod = sqrt(p1(1)**2 + p1(2)**2 + p1(3)**2)
+      p1mod = std::sqrt(p1(1)**2 + p1(2)**2 + p1(3)**2)
       if (p1mod.eq.0.) goto 13
-      p2mod = sqrt(p2(1)**2 + p2(2)**2 + p2(3)**2)
+      p2mod = std::sqrt(p2(1)**2 + p2(2)**2 + p2(3)**2)
       if (p2mod.eq.0.) goto 13
       do k = 1, 3
         dp1(k) = p1(k)/p1mod
@@ -1020,7 +1020,7 @@ C     Executable statements
         D(k) = x2(k) - x1(k)
       end do
       call crossProd (dp1, dp2, u)
-      umod = sqrt(u(1)**2 + u(2)**2 + u(3)**2)
+      umod = std::sqrt(u(1)**2 + u(2)**2 + u(3)**2)
       if (umod.eq.0.) goto 13
       call crossProd (D, dp1, D1)
       D1u = D1(1)*u(1) + D1(2)*u(2) + D1(3)*u(3)
@@ -1032,7 +1032,7 @@ C     Executable statements
         x2PCA(k) = x2(k) + (D1u/umod)*dp2(k)
         dist = dist + (x2PCA(k) - x1PCA(k))**2
       end do
-      dist = sqrt(dist)
+      dist = std::sqrt(dist)
       dist_lines = 1
  13   return
       end
@@ -1357,7 +1357,7 @@ C out: g4vtxerr
          KneRecLor(i+6) = 0.
       ENDDO
       beta_k_mod = beta_k(1)**2+beta_k(2)**2+beta_k(3)**2
-      beta_k_mod = sqrt(beta_k_mod)
+      beta_k_mod = std::sqrt(beta_k_mod)
       IF ( ( beta_k_mod.eq.0. ).or.
      &     ((beta_k_mod*Cvel).eq.0).or.((beta_k_mod**2).eq.0) ) THEN
          ErrFlag = .TRUE.
@@ -1373,7 +1373,7 @@ C out: g4vtxerr
            ia(1) = xcl(ncll(i))-ip(1)
            ia(2) = ycl(ncll(i))-ip(2)
            ia(3) = zcl(ncll(i))-ip(3)
-           ia_mod = sqrt(ia(1)**2+ia(2)**2+ia(3)**2)
+           ia_mod = std::sqrt(ia(1)**2+ia(2)**2+ia(3)**2)
            costhe = 0.
            DO j = 1,3
               costhe = costhe + ia(j)*beta_k(j)
@@ -1394,8 +1394,8 @@ C out: g4vtxerr
               kpath = b/(-2.*a)
               kpath_tmp = kpath
            ELSE
-              kpath     = (b-sqrt(delta))/(-2.*a)
-              kpath_tmp = (b+sqrt(delta))/(-2.*a)
+              kpath     = (b-std::sqrt(delta))/(-2.*a)
+              kpath_tmp = (b+std::sqrt(delta))/(-2.*a)
            ENDIF
            IF( warning ) THEN
               nclwrong = nclwrong + 1
@@ -1404,7 +1404,7 @@ C out: g4vtxerr
               DO j = 1,3
                  neuvtxx(i,j) = ip(j) + kpath*beta_k(j)/beta_k_mod
               ENDDO
-              trc(i) =  tcl(ncll(i))-sqrt(
+              trc(i) =  tcl(ncll(i))-std::sqrt(
      &                 (xcl(ncll(i))-neuvtxx(i,1))**2 +
      &                 (ycl(ncll(i))-neuvtxx(i,2))**2 +
      &                 (zcl(ncll(i))-neuvtxx(i,3))**2  )/Cvel -
@@ -1412,13 +1412,13 @@ C out: g4vtxerr
               DO j = 1,3
                  neuvtxx(i,j) = ip(j) + kpath_tmp*beta_k(j)/beta_k_mod
               ENDDO
-              IF( std::abs(trc(i)).gt.std::abs(tcl(ncll(i))-sqrt(
+              IF( std::abs(trc(i)).gt.std::abs(tcl(ncll(i))-std::sqrt(
      &                 (xcl(ncll(i))-neuvtxx(i,1))**2 +
      &                 (ycl(ncll(i))-neuvtxx(i,2))**2 +
      &                 (zcl(ncll(i))-neuvtxx(i,3))**2  )/Cvel -
      &                 kpath_tmp/(beta_k_mod*Cvel)) ) THEN
                  kpath = kpath_tmp
-                 trc(i) = tcl(ncll(i))-sqrt(
+                 trc(i) = tcl(ncll(i))-std::sqrt(
      &                    (xcl(ncll(i))-neuvtxx(i,1))**2 +
      &                    (ycl(ncll(i))-neuvtxx(i,2))**2 +
      &                    (zcl(ncll(i))-neuvtxx(i,3))**2  )/Cvel -
@@ -1470,7 +1470,7 @@ C out: g4vtxerr
                 vcoorsigm(i) = 0.
               ENDDO
               DO i = 1,3
-C                vcoorsigm(i) = sqrt(
+C                vcoorsigm(i) = std::sqrt(
 C     &           ((enecl(ncll(g4ind(1))))*
 C     &              (neuvtxx(g4ind(1),i)-vcoor(i)))**2 +
 C     &           ((enecl(ncll(g4ind(2))))*
@@ -1479,12 +1479,12 @@ C     &           ((enecl(ncll(g4ind(3))))*
 C     &              (neuvtxx(g4ind(3),i)-vcoor(i)))**2 +
 C     &           ((enecl(ncll(g4ind(4))))*
 C     &              (neuvtxx(g4ind(4),i)-vcoor(i)))**2 ) /
-C     &           ( vene * 4. * sqrt( 4.-1. ) )
+C     &           ( vene * 4. * std::sqrt( 4.-1. ) )
                 DO j = 1,4
                    vcoorsigm(i) = vcoorsigm(i) + enecl(ncll(g4ind(j))) *
      &                ( neuvtxx(g4ind(j),i)-vcoor(i) )**2
                 ENDDO
-                vcoorsigm(i) = sqrt( vcoorsigm(i)/vene )
+                vcoorsigm(i) = std::sqrt( vcoorsigm(i)/vene )
                 IF( vcoorsigm(i).eq.0. ) THEN
                       goto 16
                 ENDIF
@@ -1585,7 +1585,7 @@ C Clust-NeuVtx dist.
               ELSE
                 goto 16
               ENDIF
-              minv4gam_tmp = sqrt(
+              minv4gam_tmp = std::sqrt(
      &              ( PgamRec(1,4) + PgamRec(2,4) +
      &                PgamRec(3,4) + PgamRec(4,4) )**2 -
      &              ( PgamRec(1,1) + PgamRec(2,1) +
@@ -1605,17 +1605,17 @@ C Clust-NeuVtx dist.
                 chigam_tmp(3) = chigam_tmp(3) +
      &           ( ( (pi0tmp(i)-Mpio) / (19.348) )**2 )/2.
               ENDDO
-              chigam_tmp(4) = sqrt( vcoorsigm(1)**2 +
+              chigam_tmp(4) = std::sqrt( vcoorsigm(1)**2 +
      &                              vcoorsigm(2)**2 +
      &                              vcoorsigm(3)**2 )
               DO i = 1,4
-                 trcvtmp(g4ind(i)) = trcvtmp(g4ind(i)) - sqrt(
+                 trcvtmp(g4ind(i)) = trcvtmp(g4ind(i)) - std::sqrt(
      &             (xcl(ncll(g4ind(i)))-vcoor(1))**2 +
      &             (ycl(ncll(g4ind(i)))-vcoor(2))**2 +
      &             (zcl(ncll(g4ind(i)))-vcoor(3))**2 )/Cvel
                  chigam_tmp(5) = chigam_tmp(5) +
      &           enecl(ncll(g4ind(i)))*std::abs(trcvtmp(g4ind(i)))
-                 chigam_tmp(6) = chigam_tmp(6) + sqrt(
+                 chigam_tmp(6) = chigam_tmp(6) + std::sqrt(
      &             (vcoor(1)-neuvtxx(g4ind(i),1))**2 +
      &             (vcoor(2)-neuvtxx(g4ind(i),2))**2 +
      &             (vcoor(3)-neuvtxx(g4ind(i),3))**2 ) *
@@ -1662,7 +1662,7 @@ C test
                         RETURN
                  ENDIF
                  KneRec(6) = SQRT( KneRec(4)**2 - KneRec(5) )
-                 KneRec(5) = sqrt( KneRec(5) )
+                 KneRec(5) = std::sqrt( KneRec(5) )
                  DO i = 1,3
                    KneRecLor(i+6) = vcoor(i)
                    KneRec(i+6)    = vcoor(i)
@@ -1872,8 +1872,8 @@ C-----------------------------------------------------------------------
 C in: p1(9),p2(9)
 C out: cosin
 C-----------------------------------------------------------------------
-      pmod =  sqrt( p1(1)**2 + p1(2)**2 + p1(3)**2 )
-      ddmod = sqrt( p2(1)**2 + p2(2)**2 + p2(3)**2 )
+      pmod =  std::sqrt( p1(1)**2 + p1(2)**2 + p1(3)**2 )
+      ddmod = std::sqrt( p2(1)**2 + p2(2)**2 + p2(3)**2 )
       if ((pmod*ddmod).ne.0.) then
          cosin = ( p1(1)*p2(1) + p1(2)*p2(2) + p1(3)*p2(3)) / (pmod*ddmo
      &d)
@@ -1897,7 +1897,7 @@ C
          CALL statisticss(1)
          RETURN
          ENDIF
-         IF( sqrt((Interf%pi0Fit(1)-Mpio)**2+
+         IF( std::sqrt((Interf%pi0Fit(1)-Mpio)**2+
      &         (Interf%pi0Fit(2)-Mpio)**2).gt.35 ) THEN
          CALL statisticss(2)
          RETURN
@@ -2619,8 +2619,8 @@ C-----------------------------------------------------------------------
       d(1) = p(7) - ix
       d(2) = p(8) - iy
       d(3) = p(9) - iz
-      pmod =  sqrt( p(1)**2 + p(2)**2 + p(3)**2 )
-      ddmod = sqrt( d(1)**2 + d(2)**2 + d(3)**2 )
+      pmod =  std::sqrt( p(1)**2 + p(2)**2 + p(3)**2 )
+      ddmod = std::sqrt( d(1)**2 + d(2)**2 + d(3)**2 )
       if ((pmod*ddmod).ne.0.) then
          cosinus = ( p(1)*d(1) + p(2)*d(2) + p(3)*d(3)) / (pmod*ddmod)
       else
@@ -2658,9 +2658,9 @@ C-----------------------------------------------------------------------
       VxP1=v2*p(3)-v3*p(2)
       VxP2=v3*p(1)-v1*p(3)
       VxP3=v1*p(2)+v2*p(1)
-      modvxp=sqrt(VxP1**2+VxP2**2+VxP3**2)
-      IF( sqrt(p(1)**2+p(2)**2+p(3)**2).ne.0 ) THEN
-        distance = modvxp/sqrt(p(1)**2+p(2)**2+p(3)**2)
+      modvxp=std::sqrt(VxP1**2+VxP2**2+VxP3**2)
+      IF( std::sqrt(p(1)**2+p(2)**2+p(3)**2).ne.0 ) THEN
+        distance = modvxp/std::sqrt(p(1)**2+p(2)**2+p(3)**2)
       ELSE
         distance = -2.
       ENDIF

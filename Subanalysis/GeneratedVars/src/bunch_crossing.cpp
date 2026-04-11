@@ -66,17 +66,17 @@ int bunch_crossing()
 
       lorentz_transf(phi_vel,Knemc_init,Knemc_lor);
 
-      kaon_mom = sqrt(pow(Knemc_init[0],2) + pow(Knemc_init[1],2) + pow(Knemc_init[2],2));
+      kaon_mom = std::sqrt(std::pow(Knemc_init[0],2) + std::pow(Knemc_init[1],2) + std::pow(Knemc_init[2],2));
       kaon_vel = PhysicsConstants::cVel*kaon_mom/Knemc_init[3];
-      kaon_path = sqrt(pow(Knereclor[6] - ip[0],2) + pow(Knereclor[7] - ip[1],2) + pow(Knereclor[8] - ip[2],2));
+      kaon_path = std::sqrt(std::pow(Knereclor[6] - ip[0],2) + std::pow(Knereclor[7] - ip[1],2) + std::pow(Knereclor[8] - ip[2],2));
 
       kaon_time = 0;
 
       for(Int_t j = 0; j < 4; j++)
       {
-        gamma_path[j] = sqrt(pow(Xcl[ncll[g4taken[j] - 1] - 1] - KnemcOld[6],2) + 
-                            pow(Ycl[ncll[g4taken[j] - 1] - 1] - KnemcOld[7],2) +
-                            pow(Zcl[ncll[g4taken[j] - 1] - 1] - KnemcOld[8],2));
+        gamma_path[j] = std::sqrt(std::pow(Xcl[ncll[g4taken[j] - 1] - 1] - KnemcOld[6],2) + 
+                            std::pow(Ycl[ncll[g4taken[j] - 1] - 1] - KnemcOld[7],2) +
+                            std::pow(Zcl[ncll[g4taken[j] - 1] - 1] - KnemcOld[8],2));
 
         // t0 = -1.*t_bunch;
         kaon_time += (TclOld[ncll[g4taken[j] - 1] - 1] - (gamma_path[j]/PhysicsConstants::cVel));
@@ -101,7 +101,7 @@ int bunch_crossing()
   TFitResultPtr r;
   Float_t parameter[9];
 
-  TF1 *func = new TF1("f1", "[0]*exp(-0.5*pow((x-[1])/[2],2)) + [3]*exp(-0.5*pow((x-[4])/[5],2)) + [6]*exp(-0.5*pow((x-[7])/[8],2))", -20.0, 20.0);
+  TF1 *func = new TF1("f1", "[0]*exp(-0.5*std::pow((x-[1])/[2],2)) + [3]*exp(-0.5*std::pow((x-[4])/[5],2)) + [6]*exp(-0.5*std::pow((x-[7])/[8],2))", -20.0, 20.0);
   func->SetParNames("Constant_l", "Mean_l", "Sigma_l", "Constant_r", "Mean_r", "Sigma_r");
 
   parameter[0] = 8E4;

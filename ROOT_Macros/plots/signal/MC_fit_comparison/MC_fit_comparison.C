@@ -231,43 +231,43 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     weight = interf_function(*KaonChTimeCMMC - *KaonNeTimeCMMC);
 
   Float_t vKchFit = PhysicsConstants::cVel * KchboostFit[4] / KchboostFit[3],
-          pathKchFit = sqrt(pow(KchboostFit[6] - ipFit[0], 2) +
-                            pow(KchboostFit[7] - ipFit[1], 2) +
-                            pow(KchboostFit[8] - ipFit[2], 2)),
+          pathKchFit = std::sqrt(std::pow(KchboostFit[6] - ipFit[0], 2) +
+                            std::pow(KchboostFit[7] - ipFit[1], 2) +
+                            std::pow(KchboostFit[8] - ipFit[2], 2)),
           tKchFit = KchboostFit[9] / (0.0895),
           vKneFit = PhysicsConstants::cVel * KnereclorFit[4] / KnereclorFit[3],
-          pathKneFit = sqrt(pow(KnereclorFit[6] - ipFit[0], 2) +
-                            pow(KnereclorFit[7] - ipFit[1], 2) +
-                            pow(KnereclorFit[8] - ipFit[2], 2)),
+          pathKneFit = std::sqrt(std::pow(KnereclorFit[6] - ipFit[0], 2) +
+                            std::pow(KnereclorFit[7] - ipFit[1], 2) +
+                            std::pow(KnereclorFit[8] - ipFit[2], 2)),
           tKneFit = KnerecFit[9] / (0.0895),
           vKneMC = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
           vKchMC = PhysicsConstants::cVel * Kchmc[4] / Kchmc[3],
           vKne = PhysicsConstants::cVel * Knerec[4] / Knerec[3],
-          pathKne = sqrt(pow(Knerec[6], 2) +
-                         pow(Knerec[7], 2) +
-                         pow(Knerec[8], 2)),
-          pathKch = sqrt(pow(Kchrec[6], 2) +
-                         pow(Kchrec[7], 2) +
-                         pow(Kchrec[8], 2)),
+          pathKne = std::sqrt(std::pow(Knerec[6], 2) +
+                         std::pow(Knerec[7], 2) +
+                         std::pow(Knerec[8], 2)),
+          pathKch = std::sqrt(std::pow(Kchrec[6], 2) +
+                         std::pow(Kchrec[7], 2) +
+                         std::pow(Kchrec[8], 2)),
           tKne = pathKne / (vKne * 0.0895);
 
-  Float_t combinedMassPi0Fit = sqrt(pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
-                                    pow(pi02Fit[5] - PhysicsConstants::mPi0, 2)),
-          combinedMassPi0 = sqrt(pow(pi01[5] - PhysicsConstants::mPi0, 2) +
-                                 pow(pi02[5] - PhysicsConstants::mPi0, 2));
+  Float_t combinedMassPi0Fit = std::sqrt(std::pow(pi01Fit[5] - PhysicsConstants::mPi0, 2) +
+                                    std::pow(pi02Fit[5] - PhysicsConstants::mPi0, 2)),
+          combinedMassPi0 = std::sqrt(std::pow(pi01[5] - PhysicsConstants::mPi0, 2) +
+                                 std::pow(pi02[5] - PhysicsConstants::mPi0, 2));
 
-  Float_t photon1path = sqrt(pow(photonFit1[4] - KnerecFit[6], 2) +
-                             pow(photonFit1[5] - KnerecFit[7], 2) +
-                             pow(photonFit1[6] - KnerecFit[8], 2)),
-          photon2path = sqrt(pow(photonFit2[4] - KnerecFit[6], 2) +
-                             pow(photonFit2[5] - KnerecFit[7], 2) +
-                             pow(photonFit2[6] - KnerecFit[8], 2)),
-          photon3path = sqrt(pow(photonFit3[4] - KnerecFit[6], 2) +
-                             pow(photonFit3[5] - KnerecFit[7], 2) +
-                             pow(photonFit3[6] - KnerecFit[8], 2)),
-          photon4path = sqrt(pow(photonFit4[4] - KnerecFit[6], 2) +
-                             pow(photonFit4[5] - KnerecFit[7], 2) +
-                             pow(photonFit4[6] - KnerecFit[8], 2));
+  Float_t photon1path = std::sqrt(std::pow(photonFit1[4] - KnerecFit[6], 2) +
+                             std::pow(photonFit1[5] - KnerecFit[7], 2) +
+                             std::pow(photonFit1[6] - KnerecFit[8], 2)),
+          photon2path = std::sqrt(std::pow(photonFit2[4] - KnerecFit[6], 2) +
+                             std::pow(photonFit2[5] - KnerecFit[7], 2) +
+                             std::pow(photonFit2[6] - KnerecFit[8], 2)),
+          photon3path = std::sqrt(std::pow(photonFit3[4] - KnerecFit[6], 2) +
+                             std::pow(photonFit3[5] - KnerecFit[7], 2) +
+                             std::pow(photonFit3[6] - KnerecFit[8], 2)),
+          photon4path = std::sqrt(std::pow(photonFit4[4] - KnerecFit[6], 2) +
+                             std::pow(photonFit4[5] - KnerecFit[7], 2) +
+                             std::pow(photonFit4[6] - KnerecFit[8], 2));
 
   Float_t trc1Fit = photonFit1[7] - photon1path / PhysicsConstants::cVel - tKneFit * 0.0895,
           trc2Fit = photonFit2[7] - photon2path / PhysicsConstants::cVel - tKneFit * 0.0895,
@@ -310,61 +310,61 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
                                                                       KnePosFit,
                                                                       ipPosFit);
 
-  Float_t Omega1MassTmp = sqrt(pow(trk1[3] + trk2[3] + pi0Omega1[3], 2) -
-                               pow(trk1[0] + trk2[0] + pi0Omega1[0], 2) -
-                               pow(trk1[1] + trk2[1] + pi0Omega1[1], 2) -
-                               pow(trk1[2] + trk2[2] + pi0Omega1[2], 2)),
-          Omega2MassTmp = sqrt(pow(trk1[3] + trk2[3] + pi0Omega2[3], 2) -
-                               pow(trk1[0] + trk2[0] + pi0Omega2[0], 2) -
-                               pow(trk1[1] + trk2[1] + pi0Omega2[1], 2) -
-                               pow(trk1[2] + trk2[2] + pi0Omega2[2], 2)),
+  Float_t Omega1MassTmp = std::sqrt(std::pow(trk1[3] + trk2[3] + pi0Omega1[3], 2) -
+                               std::pow(trk1[0] + trk2[0] + pi0Omega1[0], 2) -
+                               std::pow(trk1[1] + trk2[1] + pi0Omega1[1], 2) -
+                               std::pow(trk1[2] + trk2[2] + pi0Omega1[2], 2)),
+          Omega2MassTmp = std::sqrt(std::pow(trk1[3] + trk2[3] + pi0Omega2[3], 2) -
+                               std::pow(trk1[0] + trk2[0] + pi0Omega2[0], 2) -
+                               std::pow(trk1[1] + trk2[1] + pi0Omega2[1], 2) -
+                               std::pow(trk1[2] + trk2[2] + pi0Omega2[2], 2)),
           Omega1ErrTmp = std::abs(Omega1MassTmp - PhysicsConstants::mOmega),
           Omega2ErrTmp = std::abs(Omega2MassTmp - PhysicsConstants::mOmega);
 
-  Float_t radius00 = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
-                          pow(KnerecFit[7] - ipFit[1], 2)),
-          radiuspm = sqrt(pow(KchrecFit[6] - ipFit[0], 2) +
-                          pow(KchrecFit[7] - ipFit[1], 2)),
+  Float_t radius00 = std::sqrt(std::pow(KnerecFit[6] - ipFit[0], 2) +
+                          std::pow(KnerecFit[7] - ipFit[1], 2)),
+          radiuspm = std::sqrt(std::pow(KchrecFit[6] - ipFit[0], 2) +
+                          std::pow(KchrecFit[7] - ipFit[1], 2)),
           zdist00 = std::abs(KnerecFit[8] - ipFit[2]),
           zdistpm = std::abs(KchrecFit[8] - ipFit[2]),
-          path00 = sqrt(pow(Knerec[6] - *Bx, 2) +
-                        pow(Knerec[7] - *By, 2) +
-                        pow(Knerec[8] - *Bz, 2)),
-          pathpm = sqrt(pow(Kchrec[6] - *Bx, 2) +
-                        pow(Kchrec[7] - *By, 2) +
-                        pow(Kchrec[8] - *Bz, 2)),
-          path00Center = sqrt(pow(Knerec[6], 2) +
-                              pow(Knerec[7], 2) +
-                              pow(Knerec[8], 2)),
-          pathpmCenter = sqrt(pow(Kchrec[6], 2) +
-                              pow(Kchrec[7], 2) +
-                              pow(Kchrec[8], 2)),
-          path00FitCenter = sqrt(pow(KnerecFit[6], 2) +
-                                 pow(KnerecFit[7], 2) +
-                                 pow(KnerecFit[8], 2)),
-          pathpmFitCenter = sqrt(pow(KchrecFit[6], 2) +
-                                 pow(KchrecFit[7], 2) +
-                                 pow(KchrecFit[8], 2)),
-          path00MC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
-                          pow(Knemc[7] - ipmc[1], 2) +
-                          pow(Knemc[8] - ipmc[2], 2)),
-          pathpmMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
-                          pow(Kchmc[7] - ipmc[1], 2) +
-                          pow(Kchmc[8] - ipmc[2], 2)),
-          radius00MC = sqrt(pow(Knemc[6] - ipmc[0], 2) +
-                            pow(Knemc[7] - ipmc[1], 2)),
-          radiuspmMC = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
-                            pow(Kchmc[7] - ipmc[1], 2)),
-          path00MCCenter = sqrt(pow(Knemc[6], 2) +
-                                pow(Knemc[7], 2) +
-                                pow(Knemc[8], 2)),
-          pathpmMCCenter = sqrt(pow(Kchmc[6], 2) +
-                                pow(Kchmc[7], 2) +
-                                pow(Kchmc[8], 2)),
-          radius00MCCenter = sqrt(pow(Knemc[6], 2) +
-                                  pow(Knemc[7], 2)),
-          radiuspmMCCenter = sqrt(pow(Kchmc[6], 2) +
-                                  pow(Kchmc[7], 2)),
+          path00 = std::sqrt(std::pow(Knerec[6] - *Bx, 2) +
+                        std::pow(Knerec[7] - *By, 2) +
+                        std::pow(Knerec[8] - *Bz, 2)),
+          pathpm = std::sqrt(std::pow(Kchrec[6] - *Bx, 2) +
+                        std::pow(Kchrec[7] - *By, 2) +
+                        std::pow(Kchrec[8] - *Bz, 2)),
+          path00Center = std::sqrt(std::pow(Knerec[6], 2) +
+                              std::pow(Knerec[7], 2) +
+                              std::pow(Knerec[8], 2)),
+          pathpmCenter = std::sqrt(std::pow(Kchrec[6], 2) +
+                              std::pow(Kchrec[7], 2) +
+                              std::pow(Kchrec[8], 2)),
+          path00FitCenter = std::sqrt(std::pow(KnerecFit[6], 2) +
+                                 std::pow(KnerecFit[7], 2) +
+                                 std::pow(KnerecFit[8], 2)),
+          pathpmFitCenter = std::sqrt(std::pow(KchrecFit[6], 2) +
+                                 std::pow(KchrecFit[7], 2) +
+                                 std::pow(KchrecFit[8], 2)),
+          path00MC = std::sqrt(std::pow(Knemc[6] - ipmc[0], 2) +
+                          std::pow(Knemc[7] - ipmc[1], 2) +
+                          std::pow(Knemc[8] - ipmc[2], 2)),
+          pathpmMC = std::sqrt(std::pow(Kchmc[6] - ipmc[0], 2) +
+                          std::pow(Kchmc[7] - ipmc[1], 2) +
+                          std::pow(Kchmc[8] - ipmc[2], 2)),
+          radius00MC = std::sqrt(std::pow(Knemc[6] - ipmc[0], 2) +
+                            std::pow(Knemc[7] - ipmc[1], 2)),
+          radiuspmMC = std::sqrt(std::pow(Kchmc[6] - ipmc[0], 2) +
+                            std::pow(Kchmc[7] - ipmc[1], 2)),
+          path00MCCenter = std::sqrt(std::pow(Knemc[6], 2) +
+                                std::pow(Knemc[7], 2) +
+                                std::pow(Knemc[8], 2)),
+          pathpmMCCenter = std::sqrt(std::pow(Kchmc[6], 2) +
+                                std::pow(Kchmc[7], 2) +
+                                std::pow(Kchmc[8], 2)),
+          radius00MCCenter = std::sqrt(std::pow(Knemc[6], 2) +
+                                  std::pow(Knemc[7], 2)),
+          radiuspmMCCenter = std::sqrt(std::pow(Kchmc[6], 2) +
+                                  std::pow(Kchmc[7], 2)),
           radiusLimit = 1,
           zdistLimit = 0.6;
 
@@ -404,9 +404,9 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
          condMassPi02 = std::abs(pi02Fit[5] - 134.867) < 3 * 3.331;
   ///////////////////////////////////////////////////////////////////////////////
 
-  Float_t kaonChPath = sqrt(pow(Kchrec[6] - ip[0], 2) +
-                            pow(Kchrec[7] - ip[1], 2) +
-                            pow(Kchrec[8] - ip[2], 2)),
+  Float_t kaonChPath = std::sqrt(std::pow(Kchrec[6] - ip[0], 2) +
+                            std::pow(Kchrec[7] - ip[1], 2) +
+                            std::pow(Kchrec[8] - ip[2], 2)),
           kaonChMom[3] = {(Kchrec[6] - ip[0]) / kaonChPath * Kchboost[4],
                           (Kchrec[7] - ip[1]) / kaonChPath * Kchboost[4],
                           (Kchrec[8] - ip[2]) / kaonChPath * Kchboost[4]};
@@ -446,15 +446,15 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
   Double_t limitRadiusChMC = 50.,
            limitRadiusNeMC = 50.;
 
-  RtNeu = sqrt(pow(Knemc[6] - ipmc[0], 2) +
-               pow(Knemc[7] - ipmc[1], 2));
-  RtCh = sqrt(pow(Kchmc[6] - ipmc[0], 2) +
-              pow(Kchmc[7] - ipmc[1], 2));
+  RtNeu = std::sqrt(std::pow(Knemc[6] - ipmc[0], 2) +
+               std::pow(Knemc[7] - ipmc[1], 2));
+  RtCh = std::sqrt(std::pow(Kchmc[6] - ipmc[0], 2) +
+              std::pow(Kchmc[7] - ipmc[1], 2));
 
-  RtChRec = sqrt(pow(KchrecFit[6] - ipFit[0], 2) +
-                 pow(KchrecFit[7] - ipFit[1], 2));
-  RtNeuRec = sqrt(pow(KnerecFit[6] - ipFit[0], 2) +
-                  pow(KnerecFit[7] - ipFit[1], 2));
+  RtChRec = std::sqrt(std::pow(KchrecFit[6] - ipFit[0], 2) +
+                 std::pow(KchrecFit[7] - ipFit[1], 2));
+  RtNeuRec = std::sqrt(std::pow(KnerecFit[6] - ipFit[0], 2) +
+                  std::pow(KnerecFit[7] - ipFit[1], 2));
 
   ZChRec = std::abs(KchrecFit[8] - ipFit[2]);
   ZNeuRec = std::abs(KnerecFit[8] - ipFit[2]);
@@ -565,24 +565,24 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     Double_t errorPart10, errorPart20, errorPart11, errorPart21, error1021, error1120;
 
-    errorPart10 = pow(std::abs(*CurvSmeared1) - std::abs(CurvMC[0]), 2) +
-                  pow(std::abs(*PhivSmeared1) - std::abs(PhivMC[0]), 2) +
-                  pow(std::abs(*CotvSmeared1) - std::abs(CotvMC[0]), 2);
+    errorPart10 = std::pow(std::abs(*CurvSmeared1) - std::abs(CurvMC[0]), 2) +
+                  std::pow(std::abs(*PhivSmeared1) - std::abs(PhivMC[0]), 2) +
+                  std::pow(std::abs(*CotvSmeared1) - std::abs(CotvMC[0]), 2);
 
-    errorPart20 = pow(std::abs(*CurvSmeared2) - std::abs(CurvMC[0]), 2) +
-                  pow(std::abs(*PhivSmeared2) - std::abs(PhivMC[0]), 2) +
-                  pow(std::abs(*CotvSmeared2) - std::abs(CotvMC[0]), 2);
+    errorPart20 = std::pow(std::abs(*CurvSmeared2) - std::abs(CurvMC[0]), 2) +
+                  std::pow(std::abs(*PhivSmeared2) - std::abs(PhivMC[0]), 2) +
+                  std::pow(std::abs(*CotvSmeared2) - std::abs(CotvMC[0]), 2);
 
-    errorPart11 = pow(std::abs(*CurvSmeared1) - std::abs(CurvMC[1]), 2) +
-                  pow(std::abs(*PhivSmeared1) - std::abs(PhivMC[1]), 2) +
-                  pow(std::abs(*CotvSmeared1) - std::abs(CotvMC[1]), 2);
+    errorPart11 = std::pow(std::abs(*CurvSmeared1) - std::abs(CurvMC[1]), 2) +
+                  std::pow(std::abs(*PhivSmeared1) - std::abs(PhivMC[1]), 2) +
+                  std::pow(std::abs(*CotvSmeared1) - std::abs(CotvMC[1]), 2);
 
-    errorPart21 = pow(std::abs(*CurvSmeared2) - std::abs(CurvMC[1]), 2) +
-                  pow(std::abs(*PhivSmeared2) - std::abs(PhivMC[1]), 2) +
-                  pow(std::abs(*CotvSmeared2) - std::abs(CotvMC[1]), 2);
+    errorPart21 = std::pow(std::abs(*CurvSmeared2) - std::abs(CurvMC[1]), 2) +
+                  std::pow(std::abs(*PhivSmeared2) - std::abs(PhivMC[1]), 2) +
+                  std::pow(std::abs(*CotvSmeared2) - std::abs(CotvMC[1]), 2);
 
-    error1021 = sqrt(errorPart10 + errorPart21);
-    error1120 = sqrt(errorPart11 + errorPart20);
+    error1021 = std::sqrt(errorPart10 + errorPart21);
+    error1120 = std::sqrt(errorPart11 + errorPart20);
 
     if (error1021 < error1120)
     {
@@ -605,24 +605,24 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
       histsReconstructed["cotv2"]->Fill(std::abs(*CotvSmeared2) - std::abs(CotvMC[0]), weight);
     }
 
-    errorPart10 = pow(trk1[0] - trk1MC[0], 2) +
-                  pow(trk1[1] - trk1MC[1], 2) +
-                  pow(trk1[2] - trk1MC[2], 2);
+    errorPart10 = std::pow(trk1[0] - trk1MC[0], 2) +
+                  std::pow(trk1[1] - trk1MC[1], 2) +
+                  std::pow(trk1[2] - trk1MC[2], 2);
 
-    errorPart20 = pow(trk2[0] - trk1MC[0], 2) +
-                  pow(trk2[1] - trk1MC[1], 2) +
-                  pow(trk2[2] - trk1MC[2], 2);
+    errorPart20 = std::pow(trk2[0] - trk1MC[0], 2) +
+                  std::pow(trk2[1] - trk1MC[1], 2) +
+                  std::pow(trk2[2] - trk1MC[2], 2);
 
-    errorPart11 = pow(trk1[0] - trk2MC[0], 2) +
-                  pow(trk1[1] - trk2MC[1], 2) +
-                  pow(trk1[2] - trk2MC[2], 2);
+    errorPart11 = std::pow(trk1[0] - trk2MC[0], 2) +
+                  std::pow(trk1[1] - trk2MC[1], 2) +
+                  std::pow(trk1[2] - trk2MC[2], 2);
 
-    errorPart21 = pow(trk2[0] - trk2MC[0], 2) +
-                  pow(trk2[1] - trk2MC[1], 2) +
-                  pow(trk2[2] - trk2MC[2], 2);
+    errorPart21 = std::pow(trk2[0] - trk2MC[0], 2) +
+                  std::pow(trk2[1] - trk2MC[1], 2) +
+                  std::pow(trk2[2] - trk2MC[2], 2);
 
-    error1021 = sqrt(errorPart10 + errorPart21);
-    error1120 = sqrt(errorPart11 + errorPart20);
+    error1021 = std::sqrt(errorPart10 + errorPart21);
+    error1120 = std::sqrt(errorPart11 + errorPart20);
 
     if (error1021 < error1120)
     {
@@ -674,10 +674,10 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
     histsFittedSignal["px_Phi"]->Fill(ParamSignalFit[32] - Kchmc[0] - Knemc[0], weight);
     histsFittedSignal["py_Phi"]->Fill(ParamSignalFit[33] - Kchmc[1] - Knemc[1], weight);
     histsFittedSignal["pz_Phi"]->Fill(ParamSignalFit[34] - Kchmc[2] - Knemc[2], weight);
-    Double_t energyPhiFit = sqrt(pow(ParamSignalFit[32], 2) +
-                                 pow(ParamSignalFit[33], 2) +
-                                 pow(ParamSignalFit[34], 2) +
-                                 pow(PhysicsConstants::mPhi, 2));
+    Double_t energyPhiFit = std::sqrt(std::pow(ParamSignalFit[32], 2) +
+                                 std::pow(ParamSignalFit[33], 2) +
+                                 std::pow(ParamSignalFit[34], 2) +
+                                 std::pow(PhysicsConstants::mPhi, 2));
     histsFittedSignal["Energy_Phi"]->Fill(energyPhiFit - Kchmc[3] - Knemc[3], weight);
 
     histsFittedSignal["phi_vtx_x"]->Fill(ipFit[0] - ipmc[0], weight);
@@ -701,7 +701,7 @@ Bool_t MC_fit_comparison::Process(Long64_t entry)
 
     for (Int_t i = 0; i < 38; i++)
     {
-      Double_t chi2inp = pow(ParamSignalFit[i] - ParamSignal[i], 2) / pow(ErrorsSignal[i], 2);
+      Double_t chi2inp = std::pow(ParamSignalFit[i] - ParamSignal[i], 2) / std::pow(ErrorsSignal[i], 2);
       histsReconstructed["Chi2Comp" + std::to_string(i + 1)]->Fill(chi2inp, weight);
     }
 

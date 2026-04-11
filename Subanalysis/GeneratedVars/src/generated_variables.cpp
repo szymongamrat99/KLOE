@@ -140,9 +140,9 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 					Kl[1] = mom_mc[1][j];
 					Kl[2] = mom_mc[2][j];
 					Kl[5] = PhysicsConstants::mK0;
-					Kl[4] = pow(Kl[0], 2) + pow(Kl[1], 2) + pow(Kl[2], 2);
-					Kl[3] = sqrt(Kl[4] + pow(Kl[5], 2));
-					Kl[4] = sqrt(Kl[4]);
+					Kl[4] = std::pow(Kl[0], 2) + std::pow(Kl[1], 2) + std::pow(Kl[2], 2);
+					Kl[3] = std::sqrt(Kl[4] + std::pow(Kl[5], 2));
+					Kl[4] = std::sqrt(Kl[4]);
 				}
 			}
 
@@ -154,9 +154,9 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 					Ks[1] = mom_mc[1][j];
 					Ks[2] = mom_mc[2][j];
 					Ks[5] = PhysicsConstants::mK0;
-					Ks[4] = pow(Ks[0], 2) + pow(Ks[1], 2) + pow(Ks[2], 2);
-					Ks[3] = sqrt(Ks[4] + pow(Ks[5], 2));
-					Ks[4] = sqrt(Ks[4]);
+					Ks[4] = std::pow(Ks[0], 2) + std::pow(Ks[1], 2) + std::pow(Ks[2], 2);
+					Ks[3] = std::sqrt(Ks[4] + std::pow(Ks[5], 2));
+					Ks[4] = std::sqrt(Ks[4]);
 				}
 			}
 
@@ -189,20 +189,20 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 						trkMC[0][0] = mom_mc[0][j];
 						trkMC[0][1] = mom_mc[1][j];
 						trkMC[0][2] = mom_mc[2][j];
-						trkMC[0][3] = sqrt(pow(trkMC[0][0], 2) +
-															 pow(trkMC[0][1], 2) +
-															 pow(trkMC[0][2], 2) +
-															 pow(PhysicsConstants::mPiCh, 2));
+						trkMC[0][3] = std::sqrt(std::pow(trkMC[0][0], 2) +
+															 std::pow(trkMC[0][1], 2) +
+															 std::pow(trkMC[0][2], 2) +
+															 std::pow(PhysicsConstants::mPiCh, 2));
 					}
 					else
 					{
 						trkMC[1][0] = mom_mc[0][j];
 						trkMC[1][1] = mom_mc[1][j];
 						trkMC[1][2] = mom_mc[2][j];
-						trkMC[1][3] = sqrt(pow(trkMC[1][0], 2) +
-															 pow(trkMC[1][1], 2) +
-															 pow(trkMC[1][2], 2) +
-															 pow(PhysicsConstants::mPiCh, 2));
+						trkMC[1][3] = std::sqrt(std::pow(trkMC[1][0], 2) +
+															 std::pow(trkMC[1][1], 2) +
+															 std::pow(trkMC[1][2], 2) +
+															 std::pow(PhysicsConstants::mPiCh, 2));
 					}
 				}
 			}
@@ -214,9 +214,9 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 					pgammc[count][0] = mom_mc[0][j];
 					pgammc[count][1] = mom_mc[1][j];
 					pgammc[count][2] = mom_mc[2][j];
-					pgammc[count][3] = sqrt(pow(pgammc[count][0], 2) +
-																	pow(pgammc[count][1], 2) +
-																	pow(pgammc[count][2], 2));
+					pgammc[count][3] = std::sqrt(std::pow(pgammc[count][0], 2) +
+																	std::pow(pgammc[count][1], 2) +
+																	std::pow(pgammc[count][2], 2));
 
 					neu_vtx[0] = KnemcOld[6];
 					neu_vtx[1] = KnemcOld[7];
@@ -228,9 +228,9 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 					pgammc[count][5] = cluster[1];
 					pgammc[count][6] = cluster[2];
 
-					Double_t beta_c = PhysicsConstants::cVel * KnemcOld[4] / KnemcOld[3], length = sqrt(pow(KnemcOld[6] - ipmcOld[0], 2) + pow(KnemcOld[7] - ipmcOld[1], 2) + pow(KnemcOld[8] - ipmcOld[2], 2)), time_K = length / beta_c;
+					Double_t beta_c = PhysicsConstants::cVel * KnemcOld[4] / KnemcOld[3], length = std::sqrt(std::pow(KnemcOld[6] - ipmcOld[0], 2) + std::pow(KnemcOld[7] - ipmcOld[1], 2) + std::pow(KnemcOld[8] - ipmcOld[2], 2)), time_K = length / beta_c;
 
-					Double_t length_clus = sqrt(pow(cluster[0] - KnemcOld[6], 2) + pow(cluster[1] - KnemcOld[7], 2) + pow(cluster[2] - KnemcOld[8], 2));
+					Double_t length_clus = std::sqrt(std::pow(cluster[0] - KnemcOld[6], 2) + std::pow(cluster[1] - KnemcOld[7], 2) + std::pow(cluster[2] - KnemcOld[8], 2));
 
 					pgammc[count][7] = time_K + (length_clus / PhysicsConstants::cVel);
 
@@ -251,18 +251,18 @@ Int_t GenVars(TChain &chain, Controls::DataType &data_type, ErrorHandling::Error
 							for (Int_t k = 0; k < max_count; k++)
 							{
 
-								clus_diff[k] = sqrt(pow(cluster_rec[0][ind_gam[0]] - pgammc[mc_ind[0]][4], 2) +
-																		pow(cluster_rec[1][ind_gam[0]] - pgammc[mc_ind[0]][5], 2) +
-																		pow(cluster_rec[2][ind_gam[0]] - pgammc[mc_ind[0]][6], 2)) +
-															 sqrt(pow(cluster_rec[0][ind_gam[1]] - pgammc[mc_ind[1]][4], 2) +
-																		pow(cluster_rec[1][ind_gam[1]] - pgammc[mc_ind[1]][5], 2) +
-																		pow(cluster_rec[2][ind_gam[1]] - pgammc[mc_ind[1]][6], 2)) +
-															 sqrt(pow(cluster_rec[0][ind_gam[2]] - pgammc[mc_ind[2]][4], 2) +
-																		pow(cluster_rec[1][ind_gam[2]] - pgammc[mc_ind[2]][5], 2) +
-																		pow(cluster_rec[2][ind_gam[2]] - pgammc[mc_ind[2]][6], 2)) +
-															 sqrt(pow(cluster_rec[0][ind_gam[3]] - pgammc[mc_ind[3]][4], 2) +
-																		pow(cluster_rec[1][ind_gam[3]] - pgammc[mc_ind[3]][5], 2) +
-																		pow(cluster_rec[2][ind_gam[3]] - pgammc[mc_ind[3]][6], 2));
+								clus_diff[k] = std::sqrt(std::pow(cluster_rec[0][ind_gam[0]] - pgammc[mc_ind[0]][4], 2) +
+																		std::pow(cluster_rec[1][ind_gam[0]] - pgammc[mc_ind[0]][5], 2) +
+																		std::pow(cluster_rec[2][ind_gam[0]] - pgammc[mc_ind[0]][6], 2)) +
+															 std::sqrt(std::pow(cluster_rec[0][ind_gam[1]] - pgammc[mc_ind[1]][4], 2) +
+																		std::pow(cluster_rec[1][ind_gam[1]] - pgammc[mc_ind[1]][5], 2) +
+																		std::pow(cluster_rec[2][ind_gam[1]] - pgammc[mc_ind[1]][6], 2)) +
+															 std::sqrt(std::pow(cluster_rec[0][ind_gam[2]] - pgammc[mc_ind[2]][4], 2) +
+																		std::pow(cluster_rec[1][ind_gam[2]] - pgammc[mc_ind[2]][5], 2) +
+																		std::pow(cluster_rec[2][ind_gam[2]] - pgammc[mc_ind[2]][6], 2)) +
+															 std::sqrt(std::pow(cluster_rec[0][ind_gam[3]] - pgammc[mc_ind[3]][4], 2) +
+																		std::pow(cluster_rec[1][ind_gam[3]] - pgammc[mc_ind[3]][5], 2) +
+																		std::pow(cluster_rec[2][ind_gam[3]] - pgammc[mc_ind[3]][6], 2));
 
 								clus_time[k] = pgammc[mc_ind[0]][7] > 0. && pgammc[mc_ind[1]][7] > 0. && pgammc[mc_ind[2]][7] > 0. && pgammc[mc_ind[3]][7] > 0.;
 

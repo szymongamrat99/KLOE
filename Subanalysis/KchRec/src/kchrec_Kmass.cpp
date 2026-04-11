@@ -176,20 +176,20 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
                                     { return pKTwoBody; });
   ///////////////////////////////////////////////////////////////////
   cutter.RegisterVariableGetter("MissTotKS", [&]()
-                                { return sqrt(pow(PmissKS, 2) + pow(EmissKS, 2)); });
+                                { return std::sqrt(std::pow(PmissKS, 2) + std::pow(EmissKS, 2)); });
   ///////////////////////////////////////////////////////////////////
   cutter.RegisterVariableGetter("MissHigherKS", [&]()
-                                { return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+                                { return (std::pow(EmissKS, 2) - std::pow(PmissKS, 2)); });
   cutter.RegisterVariableGetter("MissLowerKS", [&]()
-                                { return (pow(EmissKS, 2) - pow(PmissKS, 2)); });
+                                { return (std::pow(EmissKS, 2) - std::pow(PmissKS, 2)); });
   ///////////////////////////////////////////////////////////////////
   cutter.RegisterVariableGetter("MissTotKL", [&]()
-                                { return sqrt(pow(PmissKL, 2) + pow(EmissKL, 2)); });
+                                { return std::sqrt(std::pow(PmissKL, 2) + std::pow(EmissKL, 2)); });
   ///////////////////////////////////////////////////////////////////
   cutter.RegisterVariableGetter("MissHigherKL", [&]()
-                                { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+                                { return (std::pow(EmissKL, 2) - std::pow(PmissKL, 2)); });
   cutter.RegisterVariableGetter("MissLowerKL", [&]()
-                                { return (pow(EmissKL, 2) - pow(PmissKL, 2)); });
+                                { return (std::pow(EmissKL, 2) - std::pow(PmissKL, 2)); });
 
   std::string
       dirname = (std::string)Paths::charged_dir + (std::string)Paths::root_files_dir,
@@ -307,8 +307,8 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
       MissMomKL[comp] = PhiMom[comp] - KchboostKL->at(comp) - KchrecKS->at(comp);
     }
 
-    PmissKS = sqrt(pow(MissMomKS[0], 2) + pow(MissMomKS[1], 2) + pow(MissMomKS[2], 2));
-    PmissKL = sqrt(pow(MissMomKL[0], 2) + pow(MissMomKL[1], 2) + pow(MissMomKL[2], 2));
+    PmissKS = std::sqrt(std::pow(MissMomKS[0], 2) + std::pow(MissMomKS[1], 2) + std::pow(MissMomKS[2], 2));
+    PmissKL = std::sqrt(std::pow(MissMomKL[0], 2) + std::pow(MissMomKL[1], 2) + std::pow(MissMomKL[2], 2));
 
     EmissKS = KchboostKS->at(3) - KchrecKS->at(3);
     EmissKL = KchboostKL->at(3) - KchrecKL->at(3);
@@ -332,8 +332,8 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
         KchrecKL_PhiCM[comp] += trkKL_PhiCM[part][comp];
       }
 
-    KchrecKSMom = sqrt(pow(KchrecKS_PhiCM[0], 2) + pow(KchrecKS_PhiCM[1], 2) + pow(KchrecKS_PhiCM[2], 2));
-    KchrecKLMom = sqrt(pow(KchrecKL_PhiCM[0], 2) + pow(KchrecKL_PhiCM[1], 2) + pow(KchrecKL_PhiCM[2], 2));
+    KchrecKSMom = std::sqrt(std::pow(KchrecKS_PhiCM[0], 2) + std::pow(KchrecKS_PhiCM[1], 2) + std::pow(KchrecKS_PhiCM[2], 2));
+    KchrecKLMom = std::sqrt(std::pow(KchrecKL_PhiCM[0], 2) + std::pow(KchrecKL_PhiCM[1], 2) + std::pow(KchrecKL_PhiCM[2], 2));
 
     // Finding Ks from KSKL->pi+pi-pi+pi-
     int
@@ -393,17 +393,17 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
         baseKin.KchrecKSTwoBody[k] = trkKSTwoBody1[k] + trkKSTwoBody2[k];
       }
 
-      baseKin.KchrecKLTwoBody[4] = sqrt(pow(baseKin.KchrecKLTwoBody[0], 2) +
-                                        pow(baseKin.KchrecKLTwoBody[1], 2) +
-                                        pow(baseKin.KchrecKLTwoBody[2], 2));
-      baseKin.KchrecKLTwoBody[5] = sqrt(pow(baseKin.KchrecKLTwoBody[3], 2) -
-                                        pow(baseKin.KchrecKLTwoBody[4], 2));
+      baseKin.KchrecKLTwoBody[4] = std::sqrt(std::pow(baseKin.KchrecKLTwoBody[0], 2) +
+                                        std::pow(baseKin.KchrecKLTwoBody[1], 2) +
+                                        std::pow(baseKin.KchrecKLTwoBody[2], 2));
+      baseKin.KchrecKLTwoBody[5] = std::sqrt(std::pow(baseKin.KchrecKLTwoBody[3], 2) -
+                                        std::pow(baseKin.KchrecKLTwoBody[4], 2));
 
-      baseKin.KchrecKSTwoBody[4] = sqrt(pow(baseKin.KchrecKSTwoBody[0], 2) +
-                                        pow(baseKin.KchrecKSTwoBody[1], 2) +
-                                        pow(baseKin.KchrecKSTwoBody[2], 2));
-      baseKin.KchrecKSTwoBody[5] = sqrt(pow(baseKin.KchrecKSTwoBody[3], 2) -
-                                        pow(baseKin.KchrecKSTwoBody[4], 2));
+      baseKin.KchrecKSTwoBody[4] = std::sqrt(std::pow(baseKin.KchrecKSTwoBody[0], 2) +
+                                        std::pow(baseKin.KchrecKSTwoBody[1], 2) +
+                                        std::pow(baseKin.KchrecKSTwoBody[2], 2));
+      baseKin.KchrecKSTwoBody[5] = std::sqrt(std::pow(baseKin.KchrecKSTwoBody[3], 2) -
+                                        std::pow(baseKin.KchrecKSTwoBody[4], 2));
 
       for (Int_t k = 0; k < 4; k++)
       {
@@ -954,17 +954,17 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
 ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Double_t> *Kchboost, std::vector<Double_t> *ip, std::vector<Double_t> *trk[2], KLOE::pm00 &Obj, std::vector<Double_t> &KchrecTwoBody, Double_t &gamma, TLorentzVector PiKaon4VecLAB[2], TLorentzVector trk4VecLAB[2])
 {
   // 2. Calculation of KL flight direction
-  // Double_t KLpath = sqrt(pow(Kchboost->at(6) - ip->at(0), 2) +
-  //                        pow(Kchboost->at(7) - ip->at(1), 2) +
-  //                        pow(Kchboost->at(8) - ip->at(2), 2));
+  // Double_t KLpath = std::sqrt(std::pow(Kchboost->at(6) - ip->at(0), 2) +
+  //                        std::pow(Kchboost->at(7) - ip->at(1), 2) +
+  //                        std::pow(Kchboost->at(8) - ip->at(2), 2));
   // TVector3 KLflightDirection = {(Kchboost->at(6) - ip->at(0)) / KLpath,
   //                               (Kchboost->at(7) - ip->at(1)) / KLpath,
   //                               (Kchboost->at(8) - ip->at(2)) / KLpath};
 
   // // // 2.1 Calculation of KL momentum magnitude
-  // Double_t KLmomMag = sqrt(pow(Kchboost->at(0), 2) +
-  //                          pow(Kchboost->at(1), 2) +
-  //                          pow(Kchboost->at(2), 2));
+  // Double_t KLmomMag = std::sqrt(std::pow(Kchboost->at(0), 2) +
+  //                          std::pow(Kchboost->at(1), 2) +
+  //                          std::pow(Kchboost->at(2), 2));
 
   // 2.2 Calculation of KL momentum from 2 body decay
   for (Int_t j = 0; j < 3; j++)
@@ -976,12 +976,12 @@ ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Double_t> *Kchboost,
   KchrecTwoBody[3] = Kchboost->at(3);
 
   // Calculate the magnitude of the KL momentum
-  KchrecTwoBody[4] = sqrt(pow(KchrecTwoBody[0], 2) +
-                          pow(KchrecTwoBody[1], 2) +
-                          pow(KchrecTwoBody[2], 2));
+  KchrecTwoBody[4] = std::sqrt(std::pow(KchrecTwoBody[0], 2) +
+                          std::pow(KchrecTwoBody[1], 2) +
+                          std::pow(KchrecTwoBody[2], 2));
   // Calculate the invariant mass of the KL
-  KchrecTwoBody[5] = sqrt(pow(KchrecTwoBody[3], 2) -
-                          pow(KchrecTwoBody[4], 2));
+  KchrecTwoBody[5] = std::sqrt(std::pow(KchrecTwoBody[3], 2) -
+                          std::pow(KchrecTwoBody[4], 2));
 
   // Copy the rest of the KL vertex components from the original KL vertex
   KchrecTwoBody[6] = Kchboost->at(6);
@@ -1083,8 +1083,8 @@ ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Double_t> *Kchboost,
                           PiMomMagKaonCM1 * sin(theta2) * sin(angle2 + gamma),
                           PiMomMagKaonCM1 * cos(theta2));
 
-  PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], sqrt(pow(PiMomKaonCM[0][0], 2) + pow(PiMomKaonCM[0][1], 2) + pow(PiMomKaonCM[0][2], 2) + pow(PhysicsConstants::mPiCh, 2)));
-  PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], sqrt(pow(PiMomKaonCM[1][0], 2) + pow(PiMomKaonCM[1][1], 2) + pow(PiMomKaonCM[1][2], 2) + pow(PhysicsConstants::mPiCh, 2)));
+  PiKaon4VecKaonCM[0].SetPxPyPzE(PiMomKaonCM[0][0], PiMomKaonCM[0][1], PiMomKaonCM[0][2], std::sqrt(std::pow(PiMomKaonCM[0][0], 2) + std::pow(PiMomKaonCM[0][1], 2) + std::pow(PiMomKaonCM[0][2], 2) + std::pow(PhysicsConstants::mPiCh, 2)));
+  PiKaon4VecKaonCM[1].SetPxPyPzE(PiMomKaonCM[1][0], PiMomKaonCM[1][1], PiMomKaonCM[1][2], std::sqrt(std::pow(PiMomKaonCM[1][0], 2) + std::pow(PiMomKaonCM[1][1], 2) + std::pow(PiMomKaonCM[1][2], 2) + std::pow(PhysicsConstants::mPiCh, 2)));
 
   kaonMomLAB = -kaonMomLAB; // Invert the boost direction for the pions
   Obj.lorentz_transf(kaonMomLAB, PiKaon4VecKaonCM[0], PiKaon4VecLAB[0]);
@@ -1115,11 +1115,11 @@ ErrorHandling::ErrorCodes TwoBodyReconstruction(std::vector<Double_t> *Kchboost,
   PiKaon4VecLAB[0].SetPxPyPzE(PiMomKaonLAB[0][0],
                               PiMomKaonLAB[0][1],
                               PiMomKaonLAB[0][2],
-                              sqrt(PiMomKaonLAB[0].Mag2() + pow(PhysicsConstants::mPiCh, 2)));
+                              std::sqrt(PiMomKaonLAB[0].Mag2() + std::pow(PhysicsConstants::mPiCh, 2)));
   PiKaon4VecLAB[1].SetPxPyPzE(PiMomKaonLAB[1][0],
                               PiMomKaonLAB[1][1],
                               PiMomKaonLAB[1][2],
-                              sqrt(PiMomKaonLAB[1].Mag2() + pow(PhysicsConstants::mPiCh, 2)));
+                              std::sqrt(PiMomKaonLAB[1].Mag2() + std::pow(PhysicsConstants::mPiCh, 2)));
 
   trk4VecLAB[0].SetPxPyPzE(trkMomVecLAB[0][0],
                            trkMomVecLAB[0][1],

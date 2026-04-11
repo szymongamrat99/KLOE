@@ -279,8 +279,8 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	chain.Draw("(Kchrec[8] - Bz)>>hist_control_5", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
 	chain.Draw("omegatree.omega[5]>>hist_control_6", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
 	chain.Draw("omegatree.omega[6]>>hist_control_7", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
-	chain.Draw("sqrt(pow(omegatree.NeuVtxAvg[0] - Bx, 2) + pow(omegatree.NeuVtxAvg[1] - By, 2))>>hist_control_8", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
-	chain.Draw("sqrt(pow(Kchrec[6] - Bx, 2) + pow(Kchrec[7] - By, 2))>>hist_control_9", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
+	chain.Draw("std::sqrt(std::pow(omegatree.NeuVtxAvg[0] - Bx, 2) + std::pow(omegatree.NeuVtxAvg[1] - By, 2))>>hist_control_8", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
+	chain.Draw("std::sqrt(std::pow(Kchrec[6] - Bx, 2) + std::pow(Kchrec[7] - By, 2))>>hist_control_9", "omegatree.doneomega == 1 && mctruthtree.mctruth == 4");
 
 	std::vector<TString> xTitleCont = {
 			"x_{#pi^{0}#pi^{0}} - x_{IP} [cm]",
@@ -291,8 +291,8 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 			"z_{#pi^{+}#pi^{-}} - z_{IP} [cm]",
 			"m^{inv}_{#pi^{+}#pi^{-}#pi^{0}} [MeV/c^{2}]",
 			"T_{#pi^{0}_{#omega}} [MeV]",
-			"#sqrt{(x_{#pi^{0}#pi^{0}} - x_{IP})^{2} +(y_{#pi^{0}#pi^{0}} - y_{IP})^{2}} [cm]",
-			"#sqrt{(x_{#pi^{+}#pi^{-}} - x_{IP})^{2} +(y_{#pi^{+}#pi^{-}} - y_{IP})^{2}} [cm]"};
+			"#std::sqrt{(x_{#pi^{0}#pi^{0}} - x_{IP})^{2} +(y_{#pi^{0}#pi^{0}} - y_{IP})^{2}} [cm]",
+			"#std::sqrt{(x_{#pi^{+}#pi^{-}} - x_{IP})^{2} +(y_{#pi^{+}#pi^{-}} - y_{IP})^{2}} [cm]"};
 
 	Float_t
 			parameter[3];
@@ -861,7 +861,7 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 	Double_t sigma = gaus->GetParameter(2);
 	Double_t sigmaErr = gaus->GetParError(2);
 
-	Double_t normFactor = 3 * sigma / sqrt(a * a + 1); // Norm of normal vector
+	Double_t normFactor = 3 * sigma / std::sqrt(a * a + 1); // Norm of normal vector
 	Double_t normalX = -a * normFactor;
 	Double_t normalY = normFactor;
 
@@ -876,8 +876,8 @@ int plots(TChain &chain, Short_t &loopcount, Short_t &numOfConstraints, Short_t 
 
 	lineplus3sigma->SetParameter(0, a);
 	lineminus3sigma->SetParameter(0, a);
-	lineplus3sigma->SetParameter(1, b + (1 - pow(a, 2)) * normFactor);
-	lineminus3sigma->SetParameter(1, b - (1 - pow(a, 2)) * normFactor);
+	lineplus3sigma->SetParameter(1, b + (1 - std::pow(a, 2)) * normFactor);
+	lineminus3sigma->SetParameter(1, b - (1 - std::pow(a, 2)) * normFactor);
 
 	// Rysowanie
 	TCanvas *c1 = new TCanvas("c1", "Rotacja TH2D", 1200, 600);

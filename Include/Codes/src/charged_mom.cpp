@@ -26,11 +26,11 @@ namespace KLOE
     mom_vec[2] = CotvOld * 1000. / std::abs(CurvOld);
 
     if (mode == 1)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
     else if (mode == 2)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mElec, 2));
+      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mElec, 2));
     else if (mode == 3)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mMuon, 2));
+      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mMuon, 2));
   }
 
   template <typename F, typename T>
@@ -48,11 +48,11 @@ namespace KLOE
     mom_vec[2] = _CotV[i] * 1000. / std::abs(_CurV[i]);
 
     if (_mode == 1)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
     else if (_mode == 2)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mElec, 2));
+      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mElec, 2));
     else if (_mode == 3)
-      mom_vec[3] = sqrt(pow(mom_vec[0], 2) + pow(mom_vec[1], 2) + pow(mom_vec[2], 2) + pow(PhysicsConstants::mMuon, 2));
+      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mMuon, 2));
   }
 
   template <typename F, typename T>
@@ -135,17 +135,17 @@ namespace KLOE
                   momVecSmeared[5] = mom_vec2Tmp[2];
                 }
 
-                energyPion[0] = sqrt(pow(momVecSmeared[0], 2) + pow(momVecSmeared[1], 2) + pow(momVecSmeared[2], 2) + pow(PhysicsConstants::mPiCh, 2));
-                energyPion[1] = sqrt(pow(momVecSmeared[3], 2) + pow(momVecSmeared[4], 2) + pow(momVecSmeared[5], 2) + pow(PhysicsConstants::mPiCh, 2));
+                energyPion[0] = std::sqrt(std::pow(momVecSmeared[0], 2) + std::pow(momVecSmeared[1], 2) + std::pow(momVecSmeared[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
+                energyPion[1] = std::sqrt(std::pow(momVecSmeared[3], 2) + std::pow(momVecSmeared[4], 2) + std::pow(momVecSmeared[5], 2) + std::pow(PhysicsConstants::mPiCh, 2));
 
                 for (Int_t k = 0; k < 3; k++)
                   KchTmp[k] = momVecSmeared[k] + momVecSmeared[k + 3];
 
                 KchTmp[3] = energyPion[0] + energyPion[1];
 
-                KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
-                KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
-                KchTmp[4] = sqrt(KchTmp[4]);
+                KchTmp[4] = std::pow(KchTmp[0], 2) + std::pow(KchTmp[1], 2) + std::pow(KchTmp[2], 2);
+                KchTmp[5] = std::sqrt(std::pow(KchTmp[3], 2) - KchTmp[4]);
+                KchTmp[4] = std::sqrt(KchTmp[4]);
 
                 if (vtaken[0] <= -1 || std::abs(KchTmp[5] - PhysicsConstants::mK0) < std::abs(KchRec[5] - PhysicsConstants::mK0))
                 {
@@ -262,17 +262,17 @@ namespace KLOE
                   momVecSmeared[5] = mom_vec2Tmp[2];
                 }
 
-                energyPion[0] = sqrt(pow(momVecSmeared[0], 2) + pow(momVecSmeared[1], 2) + pow(momVecSmeared[2], 2) + pow(PhysicsConstants::mPiCh, 2));
-                energyPion[1] = sqrt(pow(momVecSmeared[3], 2) + pow(momVecSmeared[4], 2) + pow(momVecSmeared[5], 2) + pow(PhysicsConstants::mPiCh, 2));
+                energyPion[0] = std::sqrt(std::pow(momVecSmeared[0], 2) + std::pow(momVecSmeared[1], 2) + std::pow(momVecSmeared[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
+                energyPion[1] = std::sqrt(std::pow(momVecSmeared[3], 2) + std::pow(momVecSmeared[4], 2) + std::pow(momVecSmeared[5], 2) + std::pow(PhysicsConstants::mPiCh, 2));
 
                 for (Int_t k = 0; k < 3; k++)
                   KchTmp[k] = momVecSmeared[k] + momVecSmeared[k + 3];
 
                 KchTmp[3] = energyPion[0] + energyPion[1];
 
-                KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
-                KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
-                KchTmp[4] = sqrt(KchTmp[4]);
+                KchTmp[4] = std::pow(KchTmp[0], 2) + std::pow(KchTmp[1], 2) + std::pow(KchTmp[2], 2);
+                KchTmp[5] = std::sqrt(std::pow(KchTmp[3], 2) - KchTmp[4]);
+                KchTmp[4] = std::sqrt(KchTmp[4]);
                 if (vtaken[0] <= -1 || std::abs(KchTmp[5] - PhysicsConstants::mK0) < std::abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
@@ -290,8 +290,8 @@ namespace KLOE
                     trk2[k] = momVecSmeared[k + 3];
                   }
 
-                  trk1[3] = sqrt(pow(trk1[0], 2) + pow(trk1[1], 2) + pow(trk1[2], 2) + pow(PhysicsConstants::mPiCh, 2));
-                  trk2[3] = sqrt(pow(trk2[0], 2) + pow(trk2[1], 2) + pow(trk2[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+                  trk1[3] = std::sqrt(std::pow(trk1[0], 2) + std::pow(trk1[1], 2) + std::pow(trk1[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
+                  trk2[3] = std::sqrt(std::pow(trk2[0], 2) + std::pow(trk2[1], 2) + std::pow(trk2[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
 
                   found = true;
                 }
@@ -325,7 +325,7 @@ namespace KLOE
 
     for (Int_t i = 0; i < _nv; i++)
     {
-      cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2));
+      cyl_vol[0] = std::sqrt(std::pow(_xv[i] - _IP[0], 2) + std::pow(_yv[i] - _IP[1], 2));
       cyl_vol[1] = std::abs(_zv[i] - _IP[2]);
       if (kaonFlag == 16)
       {
@@ -354,9 +354,9 @@ namespace KLOE
                 ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
                 for (Int_t k = 0; k < 4; k++)
                   KchTmp[k] = mom_vec1Tmp[k] + mom_vec2Tmp[k];
-                KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
-                KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
-                KchTmp[4] = sqrt(KchTmp[4]);
+                KchTmp[4] = std::pow(KchTmp[0], 2) + std::pow(KchTmp[1], 2) + std::pow(KchTmp[2], 2);
+                KchTmp[5] = std::sqrt(std::pow(KchTmp[3], 2) - KchTmp[4]);
+                KchTmp[4] = std::sqrt(KchTmp[4]);
                 if (vtaken[0] <= -1 || std::abs(KchTmp[5] - PhysicsConstants::mK0) < std::abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
@@ -406,7 +406,7 @@ namespace KLOE
 
     for (Int_t i = 0; i < _nv; i++)
     {
-      cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2));
+      cyl_vol[0] = std::sqrt(std::pow(_xv[i] - _IP[0], 2) + std::pow(_yv[i] - _IP[1], 2));
       cyl_vol[1] = std::abs(_zv[i] - _IP[2]);
       if (kaonFlag == 16)
       {
@@ -436,12 +436,12 @@ namespace KLOE
                   mom_vec1Tmp[0] = _PxTv[j1];
                   mom_vec1Tmp[1] = _PyTv[j1];
                   mom_vec1Tmp[2] = _PzTv[j1];
-                  mom_vec1Tmp[3] = sqrt(pow(mom_vec1Tmp[0], 2) + pow(mom_vec1Tmp[1], 2) + pow(mom_vec1Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+                  mom_vec1Tmp[3] = std::sqrt(std::pow(mom_vec1Tmp[0], 2) + std::pow(mom_vec1Tmp[1], 2) + std::pow(mom_vec1Tmp[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
 
                   mom_vec2Tmp[0] = _PxTv[j2];
                   mom_vec2Tmp[1] = _PyTv[j2];
                   mom_vec2Tmp[2] = _PzTv[j2];
-                  mom_vec2Tmp[3] = sqrt(pow(mom_vec2Tmp[0], 2) + pow(mom_vec2Tmp[1], 2) + pow(mom_vec2Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+                  mom_vec2Tmp[3] = std::sqrt(std::pow(mom_vec2Tmp[0], 2) + std::pow(mom_vec2Tmp[1], 2) + std::pow(mom_vec2Tmp[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
                 }
                 else if (_CurV != nullptr && _CotV != nullptr && _PhiV != nullptr)
                 {
@@ -457,9 +457,9 @@ namespace KLOE
 
                 for (Int_t k = 0; k < 4; k++)
                   KchTmp[k] = mom_vec1Tmp[k] + mom_vec2Tmp[k];
-                KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
-                KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
-                KchTmp[4] = sqrt(KchTmp[4]);
+                KchTmp[4] = std::pow(KchTmp[0], 2) + std::pow(KchTmp[1], 2) + std::pow(KchTmp[2], 2);
+                KchTmp[5] = std::sqrt(std::pow(KchTmp[3], 2) - KchTmp[4]);
+                KchTmp[4] = std::sqrt(KchTmp[4]);
                 if (vtaken[0] <= -1 || std::abs(KchTmp[5] - PhysicsConstants::mK0) < std::abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
@@ -505,7 +505,7 @@ namespace KLOE
 
     for (Int_t i = 0; i < _nv; i++)
     {
-      cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2) + pow(_zv[i] - _IP[2], 2));
+      cyl_vol[0] = std::sqrt(std::pow(_xv[i] - _IP[0], 2) + std::pow(_yv[i] - _IP[1], 2) + std::pow(_zv[i] - _IP[2], 2));
       cyl_vol[1] = std::abs(_zv[i] - _IP[2]);
       if (mapTmp[_iv[i]] == 2)
       {
@@ -520,9 +520,9 @@ namespace KLOE
                 ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
                 for (Int_t k = 0; k < 4; k++)
                   KchTmp[k] = mom_vec1Tmp[k] + mom_vec2Tmp[k];
-                KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
-                KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
-                KchTmp[4] = sqrt(KchTmp[4]);
+                KchTmp[4] = std::pow(KchTmp[0], 2) + std::pow(KchTmp[1], 2) + std::pow(KchTmp[2], 2);
+                KchTmp[5] = std::sqrt(std::pow(KchTmp[3], 2) - KchTmp[4]);
+                KchTmp[4] = std::sqrt(KchTmp[4]);
                 if (vtaken[0] <= -1 || cyl_vol[0] < distCyl)
                 {
                   distCyl = cyl_vol[0];
@@ -571,7 +571,7 @@ namespace KLOE
 
     for (Int_t i = 0; i < _nv; i++)
     {
-      cyl_vol[0] = sqrt(pow(_xv[i] - _IP[0], 2) + pow(_yv[i] - _IP[1], 2) + pow(_zv[i] - _IP[2], 2));
+      cyl_vol[0] = std::sqrt(std::pow(_xv[i] - _IP[0], 2) + std::pow(_yv[i] - _IP[1], 2) + std::pow(_zv[i] - _IP[2], 2));
       cyl_vol[1] = std::abs(_zv[i] - _IP[2]);
       if (mapTmp[_iv[i]] == 2)
       {
@@ -587,12 +587,12 @@ namespace KLOE
                   mom_vec1Tmp[0] = _PxTv[j1];
                   mom_vec1Tmp[1] = _PyTv[j1];
                   mom_vec1Tmp[2] = _PzTv[j1];
-                  mom_vec1Tmp[3] = sqrt(pow(mom_vec1Tmp[0], 2) + pow(mom_vec1Tmp[1], 2) + pow(mom_vec1Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+                  mom_vec1Tmp[3] = std::sqrt(std::pow(mom_vec1Tmp[0], 2) + std::pow(mom_vec1Tmp[1], 2) + std::pow(mom_vec1Tmp[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
 
                   mom_vec2Tmp[0] = _PxTv[j2];
                   mom_vec2Tmp[1] = _PyTv[j2];
                   mom_vec2Tmp[2] = _PzTv[j2];
-                  mom_vec2Tmp[3] = sqrt(pow(mom_vec2Tmp[0], 2) + pow(mom_vec2Tmp[1], 2) + pow(mom_vec2Tmp[2], 2) + pow(PhysicsConstants::mPiCh, 2));
+                  mom_vec2Tmp[3] = std::sqrt(std::pow(mom_vec2Tmp[0], 2) + std::pow(mom_vec2Tmp[1], 2) + std::pow(mom_vec2Tmp[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
                 }
                 else if (_CurV != nullptr && _CotV != nullptr && _PhiV != nullptr)
                 {
@@ -608,9 +608,9 @@ namespace KLOE
 
                 for (Int_t k = 0; k < 4; k++)
                   KchTmp[k] = mom_vec1Tmp[k] + mom_vec2Tmp[k];
-                KchTmp[4] = pow(KchTmp[0], 2) + pow(KchTmp[1], 2) + pow(KchTmp[2], 2);
-                KchTmp[5] = sqrt(pow(KchTmp[3], 2) - KchTmp[4]);
-                KchTmp[4] = sqrt(KchTmp[4]);
+                KchTmp[4] = std::pow(KchTmp[0], 2) + std::pow(KchTmp[1], 2) + std::pow(KchTmp[2], 2);
+                KchTmp[5] = std::sqrt(std::pow(KchTmp[3], 2) - KchTmp[4]);
+                KchTmp[4] = std::sqrt(KchTmp[4]);
                 if (vtaken[0] <= -1 || cyl_vol[0] < distCyl)
                 {
                   distCyl = cyl_vol[0];
@@ -662,28 +662,28 @@ namespace KLOE
 
     for (Int_t i = 0; i < 3; i++)
     {
-      pb_mod += pow(pboost[i], 2);
-      pK_mod += pow(pKaon[i], 2);
+      pb_mod += std::pow(pboost[i], 2);
+      pK_mod += std::pow(pKaon[i], 2);
       dot += pKaon[i] * pboost[i];
     }
 
-    cosb_sq = pow(dot, 2) / (pb_mod * pK_mod);
+    cosb_sq = std::pow(dot, 2) / (pb_mod * pK_mod);
 
-    pb_mod = sqrt(pb_mod);
-    pK_mod = sqrt(pK_mod);
+    pb_mod = std::sqrt(pb_mod);
+    pK_mod = std::sqrt(pK_mod);
 
-    beta_sq = pow(pb_mod / pboost[3], 2);
-    beta_gamma_sq = pow(pb_mod, 2) / (pow(pboost[3], 2) - pow(pb_mod, 2));
+    beta_sq = std::pow(pb_mod / pboost[3], 2);
+    beta_gamma_sq = std::pow(pb_mod, 2) / (std::pow(pboost[3], 2) - std::pow(pb_mod, 2));
     gamma_sq = 1. + beta_gamma_sq;
 
-    pcm_sq = 0.25 * (pow(pboost[3], 2) - pow(pb_mod, 2)) - pow(PhysicsConstants::mK0, 2);
+    pcm_sq = 0.25 * (std::pow(pboost[3], 2) - std::pow(pb_mod, 2)) - std::pow(PhysicsConstants::mK0, 2);
 
-    C = pow(beta_gamma_sq * pow(PhysicsConstants::mK0, 2) - pcm_sq, 2);
-    A = pow(gamma_sq * (1. - beta_sq * cosb_sq), 2);
-    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * pow(PhysicsConstants::mK0, 2) - pcm_sq) - 2. * beta_gamma_sq * pow(PhysicsConstants::mK0, 2) * cosb_sq);
+    C = std::pow(beta_gamma_sq * std::pow(PhysicsConstants::mK0, 2) - pcm_sq, 2);
+    A = std::pow(gamma_sq * (1. - beta_sq * cosb_sq), 2);
+    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * std::pow(PhysicsConstants::mK0, 2) - pcm_sq) - 2. * beta_gamma_sq * std::pow(PhysicsConstants::mK0, 2) * cosb_sq);
 
     F
-        disc = pow(B, 2) - A * C;
+        disc = std::pow(B, 2) - A * C;
 
     try
     {
@@ -704,28 +704,28 @@ namespace KLOE
       return Int_t(err);
     }
 
-    disc = sqrt(disc);
+    disc = std::sqrt(disc);
 
     F
         P1 = (-B + disc) / A,
         P2 = (-B - disc) / A;
 
     if (P1 > 0. && P2 < 0.)
-      pK_from_boost = sqrt(P1);
+      pK_from_boost = std::sqrt(P1);
     else if (P2 > 0. && P1 < 0.)
-      pK_from_boost = sqrt(P2);
+      pK_from_boost = std::sqrt(P2);
     else if (P1 > 0. && P2 > 0.)
     {
       if (dot < 0.)
-        pK_from_boost = sqrt(std::min(P1, P2));
+        pK_from_boost = std::sqrt(std::min(P1, P2));
       else
-        pK_from_boost = sqrt(std::max(P1, P2));
+        pK_from_boost = std::sqrt(std::max(P1, P2));
     }
 
     for (Int_t i = 0; i < 3; i++)
       pKaonBoost[i] = pKaon[i] * (pK_from_boost / pK_mod);
 
-    pKaonBoost[3] = sqrt(pow(pK_from_boost, 2) + pow(PhysicsConstants::mK0, 2));
+    pKaonBoost[3] = std::sqrt(std::pow(pK_from_boost, 2) + std::pow(PhysicsConstants::mK0, 2));
     pKaonBoost[4] = pK_from_boost;
     pKaonBoost[5] = PhysicsConstants::mK0;
     pKaonBoost[6] = pKaon[6];
@@ -753,28 +753,28 @@ namespace KLOE
 
     for (Int_t i = 0; i < 3; i++)
     {
-      pb_mod += pow(pboost[i], 2);
-      pK_mod += pow(pKaon[i], 2);
+      pb_mod += std::pow(pboost[i], 2);
+      pK_mod += std::pow(pKaon[i], 2);
       dot += pKaon[i] * pboost[i];
     }
 
-    cosb_sq = pow(dot, 2) / (pb_mod * pK_mod);
+    cosb_sq = std::pow(dot, 2) / (pb_mod * pK_mod);
 
-    pb_mod = sqrt(pb_mod);
-    pK_mod = sqrt(pK_mod);
+    pb_mod = std::sqrt(pb_mod);
+    pK_mod = std::sqrt(pK_mod);
 
-    beta_sq = pow(pb_mod / pboost[3], 2);
-    beta_gamma_sq = pow(pb_mod, 2) / (pow(pboost[3], 2) - pow(pb_mod, 2));
+    beta_sq = std::pow(pb_mod / pboost[3], 2);
+    beta_gamma_sq = std::pow(pb_mod, 2) / (std::pow(pboost[3], 2) - std::pow(pb_mod, 2));
     gamma_sq = 1. + beta_gamma_sq;
 
-    pcm_sq = 0.25 * (pow(pboost[3], 2) - pow(pb_mod, 2)) - pow(PhysicsConstants::mK0, 2);
+    pcm_sq = 0.25 * (std::pow(pboost[3], 2) - std::pow(pb_mod, 2)) - std::pow(PhysicsConstants::mK0, 2);
 
-    C = pow(beta_gamma_sq * pow(PhysicsConstants::mK0, 2) - pcm_sq, 2);
-    A = pow(gamma_sq * (1. - beta_sq * cosb_sq), 2);
-    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * pow(PhysicsConstants::mK0, 2) - pcm_sq) - 2. * beta_gamma_sq * pow(PhysicsConstants::mK0, 2) * cosb_sq);
+    C = std::pow(beta_gamma_sq * std::pow(PhysicsConstants::mK0, 2) - pcm_sq, 2);
+    A = std::pow(gamma_sq * (1. - beta_sq * cosb_sq), 2);
+    B = gamma_sq * ((1. + beta_sq * cosb_sq) * (beta_gamma_sq * std::pow(PhysicsConstants::mK0, 2) - pcm_sq) - 2. * beta_gamma_sq * std::pow(PhysicsConstants::mK0, 2) * cosb_sq);
 
     F
-        disc = pow(B, 2) - A * C;
+        disc = std::pow(B, 2) - A * C;
 
     try
     {
@@ -794,28 +794,28 @@ namespace KLOE
       return Int_t(err);
     }
 
-    disc = sqrt(disc);
+    disc = std::sqrt(disc);
 
     F
         P1 = (-B + disc) / A,
         P2 = (-B - disc) / A;
 
     if (P1 > 0. && P2 < 0.)
-      pK_from_boost = sqrt(P1);
+      pK_from_boost = std::sqrt(P1);
     else if (P2 > 0. && P1 < 0.)
-      pK_from_boost = sqrt(P2);
+      pK_from_boost = std::sqrt(P2);
     else if (P1 > 0. && P2 > 0.)
     {
       if (dot < 0.)
-        pK_from_boost = sqrt(std::min(P1, P2));
+        pK_from_boost = std::sqrt(std::min(P1, P2));
       else
-        pK_from_boost = sqrt(std::max(P1, P2));
+        pK_from_boost = std::sqrt(std::max(P1, P2));
     }
 
     for (Int_t i = 0; i < 3; i++)
       pKaonBoost[i] = pKaon[i] * (pK_from_boost / pK_mod);
 
-    pKaonBoost[3] = sqrt(pow(pK_from_boost, 2) + pow(PhysicsConstants::mK0, 2));
+    pKaonBoost[3] = std::sqrt(std::pow(pK_from_boost, 2) + std::pow(PhysicsConstants::mK0, 2));
     pKaonBoost[4] = pK_from_boost;
     pKaonBoost[5] = PhysicsConstants::mK0;
     pKaonBoost[6] = pKaon[6];

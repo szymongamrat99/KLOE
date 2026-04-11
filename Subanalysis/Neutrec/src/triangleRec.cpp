@@ -58,7 +58,7 @@ ErrorHandling::ErrorCodes TriangleRec(std::vector<Int_t> g4taken_kinfit, std::ve
 
     neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip.data(), bhabha_mom.data(), Knerec, neu_vtx, trc, logger);
 
-    if (sqrt(pow(vtxSigma, 2) + pow(TrcSum, 2)) < sqrt(pow(vtxSigmaMin, 2) + pow(TrcSumMin, 2)))
+    if (std::sqrt(std::pow(vtxSigma, 2) + std::pow(TrcSum, 2)) < std::sqrt(std::pow(vtxSigmaMin, 2) + std::pow(TrcSumMin, 2)))
     {
       vtxSigmaMin = vtxSigma;
       TrcSumMin = TrcSum;
@@ -78,19 +78,19 @@ ErrorHandling::ErrorCodes TriangleRec(std::vector<Int_t> g4taken_kinfit, std::ve
         trcfinal[l] = trc[l];
       }
 
-      minv4gam = sqrt(pow(gammatriangle[0][3] + gammatriangle[1][3] + gammatriangle[2][3] + gammatriangle[3][3], 2) -
-                      pow(gammatriangle[0][0] + gammatriangle[1][0] + gammatriangle[2][0] + gammatriangle[3][0], 2) -
-                      pow(gammatriangle[0][1] + gammatriangle[1][1] + gammatriangle[2][1] + gammatriangle[3][1], 2) -
-                      pow(gammatriangle[0][2] + gammatriangle[1][2] + gammatriangle[2][2] + gammatriangle[3][2], 2));
+      minv4gam = std::sqrt(std::pow(gammatriangle[0][3] + gammatriangle[1][3] + gammatriangle[2][3] + gammatriangle[3][3], 2) -
+                      std::pow(gammatriangle[0][0] + gammatriangle[1][0] + gammatriangle[2][0] + gammatriangle[3][0], 2) -
+                      std::pow(gammatriangle[0][1] + gammatriangle[1][1] + gammatriangle[2][1] + gammatriangle[3][1], 2) -
+                      std::pow(gammatriangle[0][2] + gammatriangle[1][2] + gammatriangle[2][2] + gammatriangle[3][2], 2));
 
       Knetriangle[4] = 0.;
       for (Int_t l = 0; l < 3; l++)
       {
-        Knetriangle[4] += pow(Knetriangle[l], 2);
+        Knetriangle[4] += std::pow(Knetriangle[l], 2);
       }
 
-      Knetriangle[5] = sqrt(pow(Knetriangle[3], 2) - Knetriangle[4]);
-      Knetriangle[4] = sqrt(Knetriangle[4]);
+      Knetriangle[5] = std::sqrt(std::pow(Knetriangle[3], 2) - Knetriangle[4]);
+      Knetriangle[4] = std::sqrt(Knetriangle[4]);
     }
   }
 

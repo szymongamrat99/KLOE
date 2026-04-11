@@ -51,10 +51,10 @@ void ConstraintsOmega::SetParameters(Double_t *p)
     fpionCh[i].fourMom[0] = p[20 + i * 3];
     fpionCh[i].fourMom[1] = p[20 + i * 3 + 1];
     fpionCh[i].fourMom[2] = p[20 + i * 3 + 2];
-    fpionCh[i].fourMom[3] = sqrt(pow(fpionCh[i].fourMom[0], 2) +
-                                 pow(fpionCh[i].fourMom[1], 2) +
-                                 pow(fpionCh[i].fourMom[2], 2) +
-                                 pow(PhysicsConstants::mPiCh, 2));
+    fpionCh[i].fourMom[3] = std::sqrt(std::pow(fpionCh[i].fourMom[0], 2) +
+                                 std::pow(fpionCh[i].fourMom[1], 2) +
+                                 std::pow(fpionCh[i].fourMom[2], 2) +
+                                 std::pow(PhysicsConstants::mPiCh, 2));
 
     pionCh[i].fourMomFilled = true;
   }
@@ -141,10 +141,10 @@ void ConstraintsOmega::IntermediateReconstruction(Double_t *p)
     fpionCh.at(i).fourMom[0] = p[20 + i * 3];
     fpionCh.at(i).fourMom[1] = p[20 + i * 3 + 1];
     fpionCh.at(i).fourMom[2] = p[20 + i * 3 + 2];
-    fpionCh.at(i).fourMom[3] = sqrt(pow(fpionCh.at(i).fourMom[0], 2) +
-                                 pow(fpionCh.at(i).fourMom[1], 2) +
-                                 pow(fpionCh.at(i).fourMom[2], 2) +
-                                 pow(PhysicsConstants::mPiCh, 2));
+    fpionCh.at(i).fourMom[3] = std::sqrt(std::pow(fpionCh.at(i).fourMom[0], 2) +
+                                 std::pow(fpionCh.at(i).fourMom[1], 2) +
+                                 std::pow(fpionCh.at(i).fourMom[2], 2) +
+                                 std::pow(PhysicsConstants::mPiCh, 2));
 
     fpionCh.at(i).fourMomFilled = true;
   }

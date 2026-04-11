@@ -251,36 +251,36 @@ Double_t fitowana(const Double_t *xx)
     Int_t far_right_regen_bin_start = h1->FindBin(30.0);
 
     for (Int_t i = 0; i < far_left_regen_bin_end; i++)
-        value += pow(b0[i] - N_signal * b[i] - N_regen_left_far * bregen[i] - N_omega * bomega[i] -
+        value += std::pow(b0[i] - N_signal * b[i] - N_regen_left_far * bregen[i] - N_omega * bomega[i] -
                          N_three * bthree[i] - N_semi * bsemi[i] - N_elsee * belsee[i],
                      2) /
-                 (pow(e0[i], 2) +
-                  pow(N_signal * e[i], 2) + pow(N_regen_left_far, 2) * bregen[i] + pow(N_omega, 2) * bomega[i] +
-                  pow(N_three, 2) * bthree[i] + pow(N_semi, 2) * bsemi[i] + pow(N_elsee, 2) * belsee[i]);
+                 (std::pow(e0[i], 2) +
+                  std::pow(N_signal * e[i], 2) + std::pow(N_regen_left_far, 2) * bregen[i] + std::pow(N_omega, 2) * bomega[i] +
+                  std::pow(N_three, 2) * bthree[i] + std::pow(N_semi, 2) * bsemi[i] + std::pow(N_elsee, 2) * belsee[i]);
 
     for (Int_t i = close_left_regen_bin_start; i < close_left_regen_bin_end; i++)
-        value += pow(b0[i] - N_signal * b[i] - N_regen_left_close * bregen[i] - N_omega * bomega[i] -
+        value += std::pow(b0[i] - N_signal * b[i] - N_regen_left_close * bregen[i] - N_omega * bomega[i] -
                          N_three * bthree[i] - N_semi * bsemi[i] - N_elsee * belsee[i],
                      2) /
-                 (pow(e0[i], 2) +
-                  pow(N_signal * e[i], 2) + pow(N_regen_left_close, 2) * bregen[i] + pow(N_omega, 2) * bomega[i] +
-                  pow(N_three, 2) * bthree[i] + pow(N_semi, 2) * bsemi[i] + pow(N_elsee, 2) * belsee[i]);
+                 (std::pow(e0[i], 2) +
+                  std::pow(N_signal * e[i], 2) + std::pow(N_regen_left_close, 2) * bregen[i] + std::pow(N_omega, 2) * bomega[i] +
+                  std::pow(N_three, 2) * bthree[i] + std::pow(N_semi, 2) * bsemi[i] + std::pow(N_elsee, 2) * belsee[i]);
 
     for (Int_t i = close_right_regen_bin_start; i < close_right_regen_bin_end; i++)
-        value += pow(b0[i] - N_signal * b[i] - N_regen_right_close * bregen[i] - N_omega * bomega[i] -
+        value += std::pow(b0[i] - N_signal * b[i] - N_regen_right_close * bregen[i] - N_omega * bomega[i] -
                          N_three * bthree[i] - N_semi * bsemi[i] - N_elsee * belsee[i],
                      2) /
-                 (pow(e0[i], 2) +
-                  pow(N_signal * e[i], 2) + pow(N_regen_right_close, 2) * bregen[i] + pow(N_omega, 2) * bomega[i] +
-                  pow(N_three, 2) * bthree[i] + pow(N_semi, 2) * bsemi[i] + pow(N_elsee, 2) * belsee[i]);
+                 (std::pow(e0[i], 2) +
+                  std::pow(N_signal * e[i], 2) + std::pow(N_regen_right_close, 2) * bregen[i] + std::pow(N_omega, 2) * bomega[i] +
+                  std::pow(N_three, 2) * bthree[i] + std::pow(N_semi, 2) * bsemi[i] + std::pow(N_elsee, 2) * belsee[i]);
 
     for (Int_t i = far_right_regen_bin_start; i < binn; i++)
-        value += pow(b0[i] - N_signal * b[i] - N_regen_right_far * bregen[i] - N_omega * bomega[i] -
+        value += std::pow(b0[i] - N_signal * b[i] - N_regen_right_far * bregen[i] - N_omega * bomega[i] -
                          N_three * bthree[i] - N_semi * bsemi[i] - N_elsee * belsee[i],
                      2) /
-                 (pow(e0[i], 2) +
-                  pow(N_signal * e[i], 2) + pow(N_regen_right_far, 2) * bregen[i] + pow(N_omega, 2) * bomega[i] +
-                  pow(N_three, 2) * bthree[i] + pow(N_semi, 2) * bsemi[i] + pow(N_elsee, 2) * belsee[i]);
+                 (std::pow(e0[i], 2) +
+                  std::pow(N_signal * e[i], 2) + std::pow(N_regen_right_far, 2) * bregen[i] + std::pow(N_omega, 2) * bomega[i] +
+                  std::pow(N_three, 2) * bthree[i] + std::pow(N_semi, 2) * bsemi[i] + std::pow(N_elsee, 2) * belsee[i]);
 
     h1->Delete();
     h1omega->Delete();

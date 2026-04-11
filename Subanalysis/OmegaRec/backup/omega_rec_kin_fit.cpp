@@ -293,40 +293,40 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									X_init(k * 5 + 3) = cluster[3][baseKin.ncll[ind_gam[k]] - 1];
 									X_init(k * 5 + 4) = cluster[4][baseKin.ncll[ind_gam[k]] - 1];
 
-									V(k * 5, k * 5) = pow(clu_x_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
-									V(k * 5 + 1, k * 5 + 1) = pow(clu_y_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
-									V(k * 5 + 2, k * 5 + 2) = pow(clu_z_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2); // cm
-									V(k * 5 + 3, k * 5 + 3) = pow(clu_time_error(X_init(k * 5 + 4)), 2);																									 // ns
-									V(k * 5 + 4, k * 5 + 4) = pow(clu_ene_error(X_init(k * 5 + 4)), 2);																										 // MeV
+									V(k * 5, k * 5) = std::pow(clu_x_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
+									V(k * 5 + 1, k * 5 + 1) = std::pow(clu_y_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
+									V(k * 5 + 2, k * 5 + 2) = std::pow(clu_z_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2); // cm
+									V(k * 5 + 3, k * 5 + 3) = std::pow(clu_time_error(X_init(k * 5 + 4)), 2);																									 // ns
+									V(k * 5 + 4, k * 5 + 4) = std::pow(clu_ene_error(X_init(k * 5 + 4)), 2);																										 // MeV
 								}
 
 								X_init(20) = baseKin.Kchrec[6];
 								X_init(21) = baseKin.Kchrec[7];
 								X_init(22) = baseKin.Kchrec[8];
 
-								V(20, 20) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["vtxCharged"][0]), 2);
-								V(21, 21) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["vtxCharged"][1]), 2);
-								V(22, 22) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["vtxCharged"][2]), 2);
+								V(20, 20) = std::pow(Double_t(Utils::properties["variables"]["Resolutions"]["vtxCharged"][0]), 2);
+								V(21, 21) = std::pow(Double_t(Utils::properties["variables"]["Resolutions"]["vtxCharged"][1]), 2);
+								V(22, 22) = std::pow(Double_t(Utils::properties["variables"]["Resolutions"]["vtxCharged"][2]), 2);
 
 								X_init(23) = baseKin.Kchrec[0];
 								X_init(24) = baseKin.Kchrec[1];
 								X_init(25) = baseKin.Kchrec[2];
 								X_init(26) = baseKin.Kchrec[3];
 
-								V(23, 23) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][0]), 2);
-								V(24, 24) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][1]), 2);
-								V(25, 25) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][2]), 2);
-								V(26, 26) = pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][3]), 2);
+								V(23, 23) = std::pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][0]), 2);
+								V(24, 24) = std::pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][1]), 2);
+								V(25, 25) = std::pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][2]), 2);
+								V(26, 26) = std::pow(Double_t(Utils::properties["variables"]["Resolutions"]["momCharged"][3]), 2);
 
 								X_init(27) = bhabha_mom[0];
 								X_init(28) = bhabha_mom[1];
 								X_init(29) = bhabha_mom[2];
 								X_init(30) = bhabha_mom[3];
 
-								V(27, 27) = pow(bhabha_mom_err[0], 2);
-								V(28, 28) = pow(bhabha_mom_err[1], 2);
-								V(29, 29) = pow(bhabha_mom_err[2], 2);
-								V(30, 30) = pow(bhabha_mom_err[3], 2);
+								V(27, 27) = std::pow(bhabha_mom_err[0], 2);
+								V(28, 28) = std::pow(bhabha_mom_err[1], 2);
+								V(29, 29) = std::pow(bhabha_mom_err[2], 2);
+								V(30, 30) = std::pow(bhabha_mom_err[3], 2);
 
 								fail = 0;
 								CHISQR = 999999.;
@@ -467,17 +467,17 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									for (Int_t k = 0; k < 4; k++)
 									{
 										lengthPhoton[k] = cluster[3][baseKin.ncll[g4takenomega[k]] - 1] -
-																			(sqrt(pow(cluster[0][baseKin.ncll[g4takenomega[k]] - 1] - bhabha_vtx[0], 2) +
-																						pow(cluster[1][baseKin.ncll[g4takenomega[k]] - 1] - bhabha_vtx[1], 2) +
-																						pow(cluster[2][baseKin.ncll[g4takenomega[k]] - 1] - baseKin.Kchrec[8], 2)) /
+																			(std::sqrt(std::pow(cluster[0][baseKin.ncll[g4takenomega[k]] - 1] - bhabha_vtx[0], 2) +
+																						std::pow(cluster[1][baseKin.ncll[g4takenomega[k]] - 1] - bhabha_vtx[1], 2) +
+																						std::pow(cluster[2][baseKin.ncll[g4takenomega[k]] - 1] - baseKin.Kchrec[8], 2)) /
 																			 PhysicsConstants::cVel);
 
 										totEnergy += cluster[4][baseKin.ncll[g4takenomega[k]] - 1];
 
-										lengthPhotonAvg += pow(cluster[4][baseKin.ncll[g4takenomega[k]] - 1] * lengthPhoton[k], 2);
+										lengthPhotonAvg += std::pow(cluster[4][baseKin.ncll[g4takenomega[k]] - 1] * lengthPhoton[k], 2);
 									}
 
-									lengthPhotonAvg = sqrt(lengthPhotonAvg) / totEnergy;
+									lengthPhotonAvg = std::sqrt(lengthPhotonAvg) / totEnergy;
 
 									lengthPhotonMin[0] = lengthPhoton[0];
 									lengthPhotonMin[1] = lengthPhoton[1];
@@ -496,7 +496,7 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									kaonMom[3] = bhabha_mom[3] - baseKin.Kchrec[3];
 
 									Float_t
-											kaonMomTot = sqrt(pow(kaonMom[0], 2) + pow(kaonMom[1], 2) + pow(kaonMom[2], 2)),
+											kaonMomTot = std::sqrt(std::pow(kaonMom[0], 2) + std::pow(kaonMom[1], 2) + std::pow(kaonMom[2], 2)),
 											kaonVelTot = PhysicsConstants::cVel * (kaonMomTot / kaonMom[3]);
 
 									for (Int_t k = 0; k < 3; k++)
@@ -505,10 +505,10 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 									// Calculation of pi+pi-pi0 invariant mass - best option chosen by quadrature.
 									for (Int_t j = 0; j < 2; j++)
 									{
-										M_omega_tmp[j] = sqrt(pow(PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[j][3], 2) -
-																					pow(PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[j][0], 2) -
-																					pow(PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[j][1], 2) -
-																					pow(PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[j][2], 2));
+										M_omega_tmp[j] = std::sqrt(std::pow(PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[j][3], 2) -
+																					std::pow(PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[j][0], 2) -
+																					std::pow(PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[j][1], 2) -
+																					std::pow(PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[j][2], 2));
 										M_omega_diff[j] = M_omega_tmp[j] - PhysicsConstants::mOmega;
 									}
 
@@ -525,22 +525,22 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 											Omegarec[1] = PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[0][1];
 											Omegarec[2] = PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[0][2];
 											Omegarec[3] = PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[0][3];
-											Omegarec[4] = sqrt(pow(Omegarec[0], 2) + pow(Omegarec[1], 2) + pow(Omegarec[2], 2));
+											Omegarec[4] = std::sqrt(std::pow(Omegarec[0], 2) + std::pow(Omegarec[1], 2) + std::pow(Omegarec[2], 2));
 											Omegarec[5] = M_omega_tmp[0];
 
 											Omegapi0[0] = Pi0Mom[0][0];
 											Omegapi0[1] = Pi0Mom[0][1];
 											Omegapi0[2] = Pi0Mom[0][2];
 											Omegapi0[3] = Pi0Mom[0][3];
-											Omegapi0[4] = sqrt(pow(Pi0Mom[0][0], 2) + pow(Pi0Mom[0][1], 2) + pow(Pi0Mom[0][2], 2));
-											Omegapi0[5] = sqrt(pow(Omegapi0[3], 2) - pow(Omegapi0[4], 2));
+											Omegapi0[4] = std::sqrt(std::pow(Pi0Mom[0][0], 2) + std::pow(Pi0Mom[0][1], 2) + std::pow(Pi0Mom[0][2], 2));
+											Omegapi0[5] = std::sqrt(std::pow(Omegapi0[3], 2) - std::pow(Omegapi0[4], 2));
 
 											Pi0[0] = Pi0Mom[1][0];
 											Pi0[1] = Pi0Mom[1][1];
 											Pi0[2] = Pi0Mom[1][2];
 											Pi0[3] = Pi0Mom[1][3];
-											Pi0[4] = sqrt(pow(Pi0Mom[1][0], 2) + pow(Pi0Mom[1][1], 2) + pow(Pi0Mom[1][2], 2));
-											Pi0[5] = sqrt(pow(Pi0[3], 2) - pow(Pi0[4], 2));
+											Pi0[4] = std::sqrt(std::pow(Pi0Mom[1][0], 2) + std::pow(Pi0Mom[1][1], 2) + std::pow(Pi0Mom[1][2], 2));
+											Pi0[5] = std::sqrt(std::pow(Pi0[3], 2) - std::pow(Pi0[4], 2));
 										}
 										else
 										{
@@ -548,22 +548,22 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 											Omegarec[1] = PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[1][1];
 											Omegarec[2] = PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[1][2];
 											Omegarec[3] = PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[1][3];
-											Omegarec[4] = sqrt(pow(Omegarec[0], 2) + pow(Omegarec[1], 2) + pow(Omegarec[2], 2));
+											Omegarec[4] = std::sqrt(std::pow(Omegarec[0], 2) + std::pow(Omegarec[1], 2) + std::pow(Omegarec[2], 2));
 											Omegarec[5] = M_omega_tmp[1];
 
 											Omegapi0[0] = Pi0Mom[1][0];
 											Omegapi0[1] = Pi0Mom[1][1];
 											Omegapi0[2] = Pi0Mom[1][2];
 											Omegapi0[3] = Pi0Mom[1][3];
-											Omegapi0[4] = sqrt(pow(Pi0Mom[1][0], 2) + pow(Pi0Mom[1][1], 2) + pow(Pi0Mom[1][2], 2));
-											Omegapi0[5] = sqrt(pow(Omegapi0[3], 2) - pow(Omegapi0[4], 2));
+											Omegapi0[4] = std::sqrt(std::pow(Pi0Mom[1][0], 2) + std::pow(Pi0Mom[1][1], 2) + std::pow(Pi0Mom[1][2], 2));
+											Omegapi0[5] = std::sqrt(std::pow(Omegapi0[3], 2) - std::pow(Omegapi0[4], 2));
 
 											Pi0[0] = Pi0Mom[0][0];
 											Pi0[1] = Pi0Mom[0][1];
 											Pi0[2] = Pi0Mom[0][2];
 											Pi0[3] = Pi0Mom[0][3];
-											Pi0[4] = sqrt(pow(Pi0Mom[0][0], 2) + pow(Pi0Mom[0][1], 2) + pow(Pi0Mom[0][2], 2));
-											Pi0[5] = sqrt(pow(Pi0[3], 2) - pow(Pi0[4], 2));
+											Pi0[4] = std::sqrt(std::pow(Pi0Mom[0][0], 2) + std::pow(Pi0Mom[0][1], 2) + std::pow(Pi0Mom[0][2], 2));
+											Pi0[5] = std::sqrt(std::pow(Pi0[3], 2) - std::pow(Pi0[4], 2));
 										}
 
 										Float_t
@@ -624,9 +624,9 @@ int omegarec_kin_fit(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 										anglePhiOmega = phi.Angle(omega) * 180. / M_PI;
 
 										rho_00 = 0.;
-										rho_00_IP = sqrt(pow(neu_vtx_avg[0] - IP_vtx[0], 2) + pow(neu_vtx_avg[1] - IP_vtx[1], 2));
-										rho_pm_IP = sqrt(pow(baseKin.Kchrec[6] - IP_vtx[0], 2) + pow(baseKin.Kchrec[7] - IP_vtx[1], 2));
-										rho = sqrt(pow(rho_00_IP, 2) + pow(rho_pm_IP, 2));
+										rho_00_IP = std::sqrt(std::pow(neu_vtx_avg[0] - IP_vtx[0], 2) + std::pow(neu_vtx_avg[1] - IP_vtx[1], 2));
+										rho_pm_IP = std::sqrt(std::pow(baseKin.Kchrec[6] - IP_vtx[0], 2) + std::pow(baseKin.Kchrec[7] - IP_vtx[1], 2));
+										rho = std::sqrt(std::pow(rho_00_IP, 2) + std::pow(rho_pm_IP, 2));
 									}
 								}
 							}

@@ -104,12 +104,12 @@ namespace KLOE
         Double_t pz = _Photons[indices[i * 2]].fourMom[2] + _Photons[indices[i * 2 + 1]].fourMom[2];
         Double_t E = _Photons[indices[i * 2]].fourMom[3] + _Photons[indices[i * 2 + 1]].fourMom[3];
 
-        invMass[i] = sqrt(E * E - px * px - py * py - pz * pz);
+        invMass[i] = std::sqrt(E * E - px * px - py * py - pz * pz);
 
-        chi2_pi0s += pow(invMass[i] - PhysicsConstants::mPi0, 2);
+        chi2_pi0s += std::pow(invMass[i] - PhysicsConstants::mPi0, 2);
       }
 
-      chi2_pi0s = sqrt(chi2_pi0s);
+      chi2_pi0s = std::sqrt(chi2_pi0s);
 
       if (chi2_pi0s < _invMassDiffMin)
       {
@@ -144,9 +144,9 @@ namespace KLOE
         Double_t pz = _Photons[indices[i * 2]].fourMom[2] + _Photons[indices[i * 2 + 1]].fourMom[2];
         Double_t E = _Photons[indices[i * 2]].fourMom[3] + _Photons[indices[i * 2 + 1]].fourMom[3];
 
-        invMass[i] = sqrt(E * E - px * px - py * py - pz * pz);
+        invMass[i] = std::sqrt(E * E - px * px - py * py - pz * pz);
 
-        chi2_pi0s += pow((invMass[i] - PhysicsConstants::mPi0) / mPi0Sigma, 2);
+        chi2_pi0s += std::pow((invMass[i] - PhysicsConstants::mPi0) / mPi0Sigma, 2);
       }
 
       _Pi0ReconstructionCore(std::vector<Int_t>(indices.begin(), indices.end()));
@@ -155,7 +155,7 @@ namespace KLOE
       {
         _OmegaReconstructionCore(pionIdx);
 
-        Double_t chi2_omega = pow((_omega.mass - PhysicsConstants::mOmega) / mOmegaSigma, 2);
+        Double_t chi2_omega = std::pow((_omega.mass - PhysicsConstants::mOmega) / mOmegaSigma, 2);
         Double_t chi2_total = chi2_pi0s + chi2_omega;
 
         if (chi2_total < _invMassDiffMin)

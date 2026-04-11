@@ -31,10 +31,10 @@ namespace KLOE
 
           for(Int_t j = 0; j < _N; j++)
           {
-            if(i == j) _V(i,j) = pow(sigmas[i],2);
+            if(i == j) _V(i,j) = std::pow(sigmas[i],2);
             else _V(i,j) = 0.;
 
-            if(i == j) _V0(i,j) = pow(sigmas[i],2);
+            if(i == j) _V0(i,j) = std::pow(sigmas[i],2);
             else _V0(i,j) = 0.;
           }
         }

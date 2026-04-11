@@ -200,10 +200,10 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
     fpionCh.at(i).fourMom[0] = p[23 + i * 3];
     fpionCh.at(i).fourMom[1] = p[23 + i * 3 + 1];
     fpionCh.at(i).fourMom[2] = p[23 + i * 3 + 2];
-    fpionCh.at(i).fourMom[3] = sqrt(pow(fpionCh.at(i).fourMom[0], 2) +
-                                 pow(fpionCh.at(i).fourMom[1], 2) +
-                                 pow(fpionCh.at(i).fourMom[2], 2) +
-                                 pow(PhysicsConstants::mPiCh, 2));
+    fpionCh.at(i).fourMom[3] = std::sqrt(std::pow(fpionCh.at(i).fourMom[0], 2) +
+                                 std::pow(fpionCh.at(i).fourMom[1], 2) +
+                                 std::pow(fpionCh.at(i).fourMom[2], 2) +
+                                 std::pow(PhysicsConstants::mPiCh, 2));
   }
 
   for (Int_t i = 0; i < 4; i++)

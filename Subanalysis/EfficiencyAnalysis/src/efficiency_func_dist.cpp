@@ -73,13 +73,13 @@ void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
 
         if((mctruth == 1 || mctruth == 2) && done4 == 1)
         {
-            velocity_kch = PhysicsConstants::cVel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
+            velocity_kch = PhysicsConstants::cVel*std::sqrt(std::pow(Kchboost[0],2) + std::pow(Kchboost[1],2) + std::pow(Kchboost[2],2))/Kchboost[3];
 
             velocity_kne = fourKnetri[4]/fourKnetri[3];
 
-            k_path00_tri = sqrt(pow(fourKnetri[6] - iptri_kinfit[0],2) + pow(fourKnetri[7] - iptri_kinfit[1],2) + pow(fourKnetri[8] - iptri_kinfit[2],2));
+            k_path00_tri = std::sqrt(std::pow(fourKnetri[6] - iptri_kinfit[0],2) + std::pow(fourKnetri[7] - iptri_kinfit[1],2) + std::pow(fourKnetri[8] - iptri_kinfit[2],2));
             
-            tch_LAB = sqrt(pow(Kchboost[6] - ip[0],2) + pow(Kchboost[7] - ip[1],2) + pow(Kchboost[8] - ip[2],2))/velocity_kch;
+            tch_LAB = std::sqrt(std::pow(Kchboost[6] - ip[0],2) + std::pow(Kchboost[7] - ip[1],2) + std::pow(Kchboost[8] - ip[2],2))/velocity_kch;
             tne_LAB = fourKnetri[9];
 
             Kch_LAB[0] = Kchboost[6] - ip[0];
@@ -128,7 +128,7 @@ void efficiency_func_dist(UInt_t first_file, UInt_t last_file)
 
             Dtboostlor = (Kch_CMCM[3] - Kne_CMCM[3])/(PhysicsConstants::cVel * PhysicsConstants::tau_S_nonCPT);
 
-            for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[g4takentri_kinfit[i]-1] - (sqrt(pow(Xcl[g4takentri_kinfit[i]-1] - fourKnetri[6],2) + pow(Ycl[g4takentri_kinfit[i]-1] - fourKnetri[7],2) + pow(Zcl[g4takentri_kinfit[i]-1] - fourKnetri[8],2))/PhysicsConstants::cVel) - fourKnetri[9];
+            for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[g4takentri_kinfit[i]-1] - (std::sqrt(std::pow(Xcl[g4takentri_kinfit[i]-1] - fourKnetri[6],2) + std::pow(Ycl[g4takentri_kinfit[i]-1] - fourKnetri[7],2) + std::pow(Zcl[g4takentri_kinfit[i]-1] - fourKnetri[8],2))/PhysicsConstants::cVel) - fourKnetri[9];
 
             trcv_sum = (TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3]);
 

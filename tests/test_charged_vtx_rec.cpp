@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE(single_vtx_two_opposite_tracks)
   BOOST_CHECK_CLOSE(KchRec[1], 200.0 + (-100.0), 1e-4);
   BOOST_CHECK_CLOSE(KchRec[2], 50.0 + 80.0, 1e-4);
 
-  // KchRec[3] = suma energii (E_pi = sqrt(p^2 + m_pi^2))
+  // KchRec[3] = suma energii (E_pi = std::sqrt(p^2 + m_pi^2))
   double E1 = std::sqrt(100.*100. + 200.*200. + 50.*50. + PhysicsConstants::mPiCh * PhysicsConstants::mPiCh);
   double E2 = std::sqrt(150.*150. + 100.*100. + 80.*80. + PhysicsConstants::mPiCh * PhysicsConstants::mPiCh);
   BOOST_CHECK_CLOSE(KchRec[3], E1 + E2, 1e-4);
@@ -283,7 +283,7 @@ BOOST_AUTO_TEST_CASE(single_vtx_two_opposite_tracks)
   double ptot = std::sqrt(KchRec[0]*KchRec[0] + KchRec[1]*KchRec[1] + KchRec[2]*KchRec[2]);
   BOOST_CHECK_CLOSE(KchRec[4], ptot, 1e-4);
 
-  // KchRec[5] = masa inwariantna = sqrt(E^2 - p^2)
+  // KchRec[5] = masa inwariantna = std::sqrt(E^2 - p^2)
   double minv = std::sqrt(KchRec[3]*KchRec[3] - ptot*ptot);
   BOOST_CHECK_CLOSE(KchRec[5], minv, 1e-4);
 
@@ -411,7 +411,7 @@ BOOST_AUTO_TEST_CASE(basic_positive_result)
   // Wynik: pKaonBoost powinien mieć sensowną masę = mK0
   BOOST_CHECK_CLOSE(pKaonBoost[5], PhysicsConstants::mK0, 1e-4);
 
-  // Energia: E = sqrt(p^2 + mK0^2)
+  // Energia: E = std::sqrt(p^2 + mK0^2)
   double p_mod = pKaonBoost[4];
   double E_expected = std::sqrt(p_mod * p_mod + PhysicsConstants::mK0 * PhysicsConstants::mK0);
   BOOST_CHECK_CLOSE(pKaonBoost[3], E_expected, 1e-4);

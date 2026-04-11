@@ -308,7 +308,7 @@ void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, const Int_t *mother, 
   {
     if ((mother[vtxmc[j] - 1] == 7) && pidmc[j] == 1)
     {
-      Double_t auxEne = sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2) + pow(pzmc[j], 2));
+      Double_t auxEne = std::sqrt(std::pow(pxmc[j], 2) + std::pow(pymc[j], 2) + std::pow(pzmc[j], 2));
       std::vector<Double_t> pgammaAux = {pxmc[j], pymc[j], pzmc[j], auxEne};
 
       neu_vtx[0] = Knemc[6];
@@ -319,13 +319,13 @@ void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, const Int_t *mother, 
 
       Double_t
           beta_c = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
-          length = sqrt(pow(Knemc[6] - ipmc[0], 2) +
-                        pow(Knemc[7] - ipmc[1], 2) +
-                        pow(Knemc[8] - ipmc[2], 2)),
+          length = std::sqrt(std::pow(Knemc[6] - ipmc[0], 2) +
+                        std::pow(Knemc[7] - ipmc[1], 2) +
+                        std::pow(Knemc[8] - ipmc[2], 2)),
           time_K = length / beta_c,
-          length_clus = sqrt(pow(cluster[0] - Knemc[6], 2) +
-                             pow(cluster[1] - Knemc[7], 2) +
-                             pow(cluster[2] - Knemc[8], 2));
+          length_clus = std::sqrt(std::pow(cluster[0] - Knemc[6], 2) +
+                             std::pow(cluster[1] - Knemc[7], 2) +
+                             std::pow(cluster[2] - Knemc[8], 2));
 
       Double_t auxTim = time_K + (length_clus / PhysicsConstants::cVel);
       std::vector<Double_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, cluster[0], cluster[1], cluster[2], auxTim};
@@ -350,18 +350,18 @@ void GeneratedVariables::GeneratedClusterFinder(Int_t nclu, Int_t ind_gam[4], co
           for (Int_t k = 0; k < max_count; k++)
           {
 
-            clus_diff.push_back(sqrt(pow(cluster_rec[0][ind_gam[0]] - pgammaMC[mc_ind[0]][4], 2) +
-                                     pow(cluster_rec[1][ind_gam[0]] - pgammaMC[mc_ind[0]][5], 2) +
-                                     pow(cluster_rec[2][ind_gam[0]] - pgammaMC[mc_ind[0]][6], 2)) +
-                                sqrt(pow(cluster_rec[0][ind_gam[1]] - pgammaMC[mc_ind[1]][4], 2) +
-                                     pow(cluster_rec[1][ind_gam[1]] - pgammaMC[mc_ind[1]][5], 2) +
-                                     pow(cluster_rec[2][ind_gam[1]] - pgammaMC[mc_ind[1]][6], 2)) +
-                                sqrt(pow(cluster_rec[0][ind_gam[2]] - pgammaMC[mc_ind[2]][4], 2) +
-                                     pow(cluster_rec[1][ind_gam[2]] - pgammaMC[mc_ind[2]][5], 2) +
-                                     pow(cluster_rec[2][ind_gam[2]] - pgammaMC[mc_ind[2]][6], 2)) +
-                                sqrt(pow(cluster_rec[0][ind_gam[3]] - pgammaMC[mc_ind[3]][4], 2) +
-                                     pow(cluster_rec[1][ind_gam[3]] - pgammaMC[mc_ind[3]][5], 2) +
-                                     pow(cluster_rec[2][ind_gam[3]] - pgammaMC[mc_ind[3]][6], 2)));
+            clus_diff.push_back(std::sqrt(std::pow(cluster_rec[0][ind_gam[0]] - pgammaMC[mc_ind[0]][4], 2) +
+                                     std::pow(cluster_rec[1][ind_gam[0]] - pgammaMC[mc_ind[0]][5], 2) +
+                                     std::pow(cluster_rec[2][ind_gam[0]] - pgammaMC[mc_ind[0]][6], 2)) +
+                                std::sqrt(std::pow(cluster_rec[0][ind_gam[1]] - pgammaMC[mc_ind[1]][4], 2) +
+                                     std::pow(cluster_rec[1][ind_gam[1]] - pgammaMC[mc_ind[1]][5], 2) +
+                                     std::pow(cluster_rec[2][ind_gam[1]] - pgammaMC[mc_ind[1]][6], 2)) +
+                                std::sqrt(std::pow(cluster_rec[0][ind_gam[2]] - pgammaMC[mc_ind[2]][4], 2) +
+                                     std::pow(cluster_rec[1][ind_gam[2]] - pgammaMC[mc_ind[2]][5], 2) +
+                                     std::pow(cluster_rec[2][ind_gam[2]] - pgammaMC[mc_ind[2]][6], 2)) +
+                                std::sqrt(std::pow(cluster_rec[0][ind_gam[3]] - pgammaMC[mc_ind[3]][4], 2) +
+                                     std::pow(cluster_rec[1][ind_gam[3]] - pgammaMC[mc_ind[3]][5], 2) +
+                                     std::pow(cluster_rec[2][ind_gam[3]] - pgammaMC[mc_ind[3]][6], 2)));
 
             clus_time.push_back(pgammaMC[mc_ind[0]][7] > 0. && pgammaMC[mc_ind[1]][7] > 0. && pgammaMC[mc_ind[2]][7] > 0. && pgammaMC[mc_ind[3]][7] > 0.);
 
@@ -442,17 +442,17 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
 
     if ((mother[vtxmc[j] - 1] == 10) && (pidmc[j] == 8 || pidmc[j] == 9))
     {
-      Double_t auxEne = sqrt(pow(pxmc[j], 2) +
-                            pow(pymc[j], 2) +
-                            pow(pzmc[j], 2) +
-                            pow(PhysicsConstants::mPiCh, 2));
+      Double_t auxEne = std::sqrt(std::pow(pxmc[j], 2) +
+                            std::pow(pymc[j], 2) +
+                            std::pow(pzmc[j], 2) +
+                            std::pow(PhysicsConstants::mPiCh, 2));
       std::vector<Double_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 10};
 
       trkMC.push_back(auxiliaryVec);
 
-      CurvMC.push_back(1000. / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2)));
+      CurvMC.push_back(1000. / std::sqrt(std::pow(pxmc[j], 2) + std::pow(pymc[j], 2)));
       PhivMC.push_back(atan2(pymc[j], pxmc[j]));
-      CotvMC.push_back(pzmc[j] / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2)));
+      CotvMC.push_back(pzmc[j] / std::sqrt(std::pow(pxmc[j], 2) + std::pow(pymc[j], 2)));
 
       if (pidmc[j] == 9)
       {
@@ -475,17 +475,17 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
 
     if ((mother[vtxmc[j] - 1] == 16) && (pidmc[j] == 8 || pidmc[j] == 9))
     {
-      Double_t auxEne = sqrt(pow(pxmc[j], 2) +
-                            pow(pymc[j], 2) +
-                            pow(pzmc[j], 2) +
-                            pow(PhysicsConstants::mPiCh, 2));
+      Double_t auxEne = std::sqrt(std::pow(pxmc[j], 2) +
+                            std::pow(pymc[j], 2) +
+                            std::pow(pzmc[j], 2) +
+                            std::pow(PhysicsConstants::mPiCh, 2));
       std::vector<Double_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 16};
 
       trkMC.push_back(auxiliaryVec);
 
-      CurvMC.push_back(1000. / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2)));
+      CurvMC.push_back(1000. / std::sqrt(std::pow(pxmc[j], 2) + std::pow(pymc[j], 2)));
       PhivMC.push_back(atan2(pymc[j], pxmc[j]));
-      CotvMC.push_back(pzmc[j] / sqrt(pow(pxmc[j], 2) + pow(pymc[j], 2)));
+      CotvMC.push_back(pzmc[j] / std::sqrt(std::pow(pxmc[j], 2) + std::pow(pymc[j], 2)));
 
       if (pidmc[j] == 9)
       {
@@ -538,9 +538,9 @@ void GeneratedVariables::KSLGenerated(Int_t nvtxmc, const Int_t *mother, Double_
       Kl[1] = pymc[j];
       Kl[2] = pzmc[j];
       Kl[5] = PhysicsConstants::mK0;
-      Kl[4] = pow(Kl[0], 2) + pow(Kl[1], 2) + pow(Kl[2], 2);
-      Kl[3] = sqrt(Kl[4] + pow(Kl[5], 2));
-      Kl[4] = sqrt(Kl[4]);
+      Kl[4] = std::pow(Kl[0], 2) + std::pow(Kl[1], 2) + std::pow(Kl[2], 2);
+      Kl[3] = std::sqrt(Kl[4] + std::pow(Kl[5], 2));
+      Kl[4] = std::sqrt(Kl[4]);
     }
   }
 
@@ -552,9 +552,9 @@ void GeneratedVariables::KSLGenerated(Int_t nvtxmc, const Int_t *mother, Double_
       Ks[1] = pymc[j];
       Ks[2] = pzmc[j];
       Ks[5] = PhysicsConstants::mK0;
-      Ks[4] = pow(Ks[0], 2) + pow(Ks[1], 2) + pow(Ks[2], 2);
-      Ks[3] = sqrt(Ks[4] + pow(Ks[5], 2));
-      Ks[4] = sqrt(Ks[4]);
+      Ks[4] = std::pow(Ks[0], 2) + std::pow(Ks[1], 2) + std::pow(Ks[2], 2);
+      Ks[3] = std::sqrt(Ks[4] + std::pow(Ks[5], 2));
+      Ks[4] = std::sqrt(Ks[4]);
     }
   }
 }

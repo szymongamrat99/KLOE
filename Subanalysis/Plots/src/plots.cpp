@@ -540,7 +540,7 @@ int plots(int first_file, int last_file, int loopcount, int M, int range, Contro
 		hist2d[j]->SetMarkerSize(2);
 
 		hist2d[j]->GetXaxis()->SetTitle("#chi^{2}_{#omega#pi^{0}} [-]");
-		hist2d[j]->GetYaxis()->SetTitle("#sqrt{#rho_{+-}^{2} + #rho_{00}^{2}} [cm]");
+		hist2d[j]->GetYaxis()->SetTitle("#std::sqrt{#rho_{+-}^{2} + #rho_{00}^{2}} [cm]");
 		hist2d[j]->Draw("COLZ");
 
 		canva2d[j]->Print(img_dir + "OmegaRec/angle_2d_kaon_cm_" + channName[j] + ext_img);

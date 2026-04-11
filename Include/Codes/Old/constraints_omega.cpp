@@ -145,9 +145,9 @@ namespace OmegaConstraints
         cluster[i][j] = p[i * 5 + j];
     }
 
-    R_gamma = sqrt(pow(cluster[0][0] - neu_vtx[0], 2) + 
-                   pow(cluster[0][1] - neu_vtx[1], 2) +
-                   pow(cluster[0][2] - neu_vtx[2], 2) );
+    R_gamma = std::sqrt(std::pow(cluster[0][0] - neu_vtx[0], 2) + 
+                   std::pow(cluster[0][1] - neu_vtx[1], 2) +
+                   std::pow(cluster[0][2] - neu_vtx[2], 2) );
     
 
     value_min = PhysicsConstants::cVel * cluster[0][3] - R_gamma;
@@ -174,9 +174,9 @@ namespace OmegaConstraints
         cluster[i][j] = p[i * 5 + j];
     }
 
-    R_gamma = sqrt(pow(cluster[1][0] - neu_vtx[0], 2) + 
-                   pow(cluster[1][1] - neu_vtx[1], 2) +
-                   pow(cluster[1][2] - neu_vtx[2], 2) );
+    R_gamma = std::sqrt(std::pow(cluster[1][0] - neu_vtx[0], 2) + 
+                   std::pow(cluster[1][1] - neu_vtx[1], 2) +
+                   std::pow(cluster[1][2] - neu_vtx[2], 2) );
     
 
     value_min = PhysicsConstants::cVel * cluster[1][3] - R_gamma;
@@ -203,9 +203,9 @@ namespace OmegaConstraints
         cluster[i][j] = p[i * 5 + j];
     }
 
-    R_gamma = sqrt(pow(cluster[2][0] - neu_vtx[0], 2) + 
-                   pow(cluster[2][1] - neu_vtx[1], 2) +
-                   pow(cluster[2][2] - neu_vtx[2], 2) );
+    R_gamma = std::sqrt(std::pow(cluster[2][0] - neu_vtx[0], 2) + 
+                   std::pow(cluster[2][1] - neu_vtx[1], 2) +
+                   std::pow(cluster[2][2] - neu_vtx[2], 2) );
     
 
     value_min = PhysicsConstants::cVel * cluster[2][3] - R_gamma;
@@ -232,9 +232,9 @@ namespace OmegaConstraints
         cluster[i][j] = p[i * 5 + j];
     }
 
-    R_gamma = sqrt(pow(cluster[3][0] - neu_vtx[0], 2) + 
-                   pow(cluster[3][1] - neu_vtx[1], 2) +
-                   pow(cluster[3][2] - neu_vtx[2], 2) );
+    R_gamma = std::sqrt(std::pow(cluster[3][0] - neu_vtx[0], 2) + 
+                   std::pow(cluster[3][1] - neu_vtx[1], 2) +
+                   std::pow(cluster[3][2] - neu_vtx[2], 2) );
     
 
     value_min = PhysicsConstants::cVel * cluster[3][3] - R_gamma;

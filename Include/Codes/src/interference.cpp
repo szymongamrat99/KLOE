@@ -64,7 +64,7 @@ namespace KLOE
                    3. * ImPart * sin(DMass * std::abs(dt)));
     }
 
-    return (pow(Epsilon, 2) / (2. * Gamma)) * Value * 100000;
+    return (std::pow(Epsilon, 2) / (2. * Gamma)) * Value * 100000;
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,35 +232,35 @@ namespace KLOE
           if (j + 1 < _frac[name.second]->FindBin(left_x_split))
           {
             b["MC sum"][j] += Norm[name.second][0] * b[name.second][j];
-            e["MC sum"][j] += pow(Norm[name.second][0] * e[name.second][j], 2);
+            e["MC sum"][j] += std::pow(Norm[name.second][0] * e[name.second][j], 2);
           }
           else if (j + 1 > _frac[name.second]->FindBin(left_x_split) && j + 1 < _frac[name.second]->FindBin(center_x_split))
           {
             b["MC sum"][j] += Norm[name.second][1] * b[name.second][j];
-            e["MC sum"][j] += pow(Norm[name.second][1] * e[name.second][j], 2);
+            e["MC sum"][j] += std::pow(Norm[name.second][1] * e[name.second][j], 2);
           }
           else if (j + 1 > _frac[name.second]->FindBin(center_x_split) && j + 1 < _frac[name.second]->FindBin(right_x_split))
           {
             b["MC sum"][j] += Norm[name.second][2] * b[name.second][j];
-            e["MC sum"][j] += pow(Norm[name.second][2] * e[name.second][j], 2);
+            e["MC sum"][j] += std::pow(Norm[name.second][2] * e[name.second][j], 2);
           }
           else if (j + 1 > _frac[name.second]->FindBin(right_x_split))
           {
             b["MC sum"][j] += Norm[name.second][3] * b[name.second][j];
-            e["MC sum"][j] += pow(Norm[name.second][3] * e[name.second][j], 2);
+            e["MC sum"][j] += std::pow(Norm[name.second][3] * e[name.second][j], 2);
           }
         }
         else
         {
           b["MC sum"][j] += Norm[name.second][0] * b[name.second][j];
-          e["MC sum"][j] += pow(Norm[name.second][0] * e[name.second][j], 2);
+          e["MC sum"][j] += std::pow(Norm[name.second][0] * e[name.second][j], 2);
         }
       }
     }
 
     for (Int_t i = 0; i < _bin_number; i++)
     {
-      value += pow(b["Data"][i] - b["MC sum"][i], 2) / (pow(e["Data"][i], 2) + (e["MC sum"][i]));
+      value += std::pow(b["Data"][i] - b["MC sum"][i], 2) / (std::pow(e["Data"][i], 2) + (e["MC sum"][i]));
     }
 
     return value;
@@ -318,11 +318,11 @@ namespace KLOE
       for (Int_t j = 0; j < _bin_number; j++)
       {
         bin_sum[j] += Norm[i] * b[i][j];
-        err_sum[j] += pow(Norm[i] * e[i][j], 2);
+        err_sum[j] += std::pow(Norm[i] * e[i][j], 2);
       }
 
     for (Int_t i = 0; i < _bin_number; i++)
-      value += pow(b[6][i] - bin_sum[i], 2) / (pow(e[6][i], 2) + err_sum[i] / 2.);
+      value += std::pow(b[6][i] - bin_sum[i], 2) / (std::pow(e[6][i], 2) + err_sum[i] / 2.);
 
     return value;
   };
@@ -367,11 +367,11 @@ namespace KLOE
     for (Int_t j = 0; j < _bin_number; j++)
     {
       b["MC sum"][j] += Norm * b["Signal"][j];
-      e["MC sum"][j] += pow(Norm * e["Signal"][j], 2);
+      e["MC sum"][j] += std::pow(Norm * e["Signal"][j], 2);
     }
 
     for (Int_t i = 0; i < _bin_number; i++)
-      value += pow(b["Data"][i] - b["MC sum"][i], 2) / (pow(e["Data"][i], 2) + e["MC sum"][i]);
+      value += std::pow(b["Data"][i] - b["MC sum"][i], 2) / (std::pow(e["Data"][i], 2) + e["MC sum"][i]);
 
     return value;
   };
@@ -482,12 +482,12 @@ namespace KLOE
     for (Int_t j = 0; j < _bin_number; j++)
     {
       b["MC sum"][j] += Norm["Signal"][0] * b["Signal"][j];
-      e["MC sum"][j] += pow(Norm["Signal"][0] * e["Signal"][j], 2);
+      e["MC sum"][j] += std::pow(Norm["Signal"][0] * e["Signal"][j], 2);
     }
 
     for (Int_t i = 0; i < _bin_number; i++)
     {
-      value += pow(b["Data"][i] - b["MC sum"][i], 2) / (pow(e["Data"][i], 2) + e["MC sum"][i]);
+      value += std::pow(b["Data"][i] - b["MC sum"][i], 2) / (std::pow(e["Data"][i], 2) + e["MC sum"][i]);
     }
 
     return value;
@@ -549,11 +549,11 @@ namespace KLOE
       for (Int_t j = 0; j < _bin_number; j++)
       {
         b["MC sum"][j] += Norm[i] * b[i][j];
-        e["MC sum"][j] += pow(Norm[i] * e[i][j], 2);
+        e["MC sum"][j] += std::pow(Norm[i] * e[i][j], 2);
       }
 
     for (Int_t i = 0; i < _bin_number; i++)
-      value += pow(b["Data"][i] - b["MC sum"][i], 2) / (pow(e["Data"][i], 2) + e["MC sum"][i]);
+      value += std::pow(b["Data"][i] - b["MC sum"][i], 2) / (std::pow(e["Data"][i], 2) + e["MC sum"][i]);
 
     return value;
   };

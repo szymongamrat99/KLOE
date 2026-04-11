@@ -47,7 +47,7 @@ Double_t interf_function(const Double_t *x, const Double_t *par)
                  3. * ImPart * sin(DMass * std::abs(dt)));
   }
 
-  return (pow(Epsilon, 2) / (2. * Gamma)) * Value * 1000000;
+  return (std::pow(Epsilon, 2) / (2. * Gamma)) * Value * 1000000;
 }
 
 Double_t interf_function_00pm(const Double_t *x, const Double_t *par)
@@ -83,7 +83,7 @@ Double_t interf_function_00pm(const Double_t *x, const Double_t *par)
               ((1. - RePart) * cos(DMass * dt) +
                3. * ImPart * sin(DMass * dt));
 
-  return 0.5 * pow(Epsilon, 2) * Value;// * PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pi0pi0;
+  return 0.5 * std::pow(Epsilon, 2) * Value;// * PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pi0pi0;
 }
 
 Double_t interf_function_pm00(const Double_t *x, const Double_t *par)
@@ -119,7 +119,7 @@ Double_t interf_function_pm00(const Double_t *x, const Double_t *par)
               ((1. - RePart) * cos(DMass * dt) -
                3. * ImPart * sin(DMass * dt));
 
-  return 0.5 * pow(Epsilon, 2) * Value;// * PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pi0pi0;
+  return 0.5 * std::pow(Epsilon, 2) * Value;// * PhysicsConstants::br_ks_pippim * PhysicsConstants::br_ks_pi0pi0;
 }
 
 Double_t interf_function_pmpm(const Double_t *x, const Double_t *par)
@@ -152,7 +152,7 @@ Double_t interf_function_pmpm(const Double_t *x, const Double_t *par)
                                 exp(-GammaKs * t1 - GammaKl * t2) -
                                 2. * exp(-0.5 * Gamma * (t1 + t2)) * cos(DMass * dt));
 
-  return 0.5 * pow(Epsilon, 2) * Value;// * pow(PhysicsConstants::br_ks_pippim, 2);
+  return 0.5 * std::pow(Epsilon, 2) * Value;// * std::pow(PhysicsConstants::br_ks_pippim, 2);
 }
 
 Double_t double_exponential(const Double_t *x, const Double_t *par)

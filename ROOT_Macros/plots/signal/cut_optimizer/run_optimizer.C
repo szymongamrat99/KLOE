@@ -210,7 +210,7 @@ TCanvas *CreateJointGraph(TString name = "default", TString title = "default", T
   canva->Update();
   gPad->Update();
 
-  significanceGraph->GetYaxis()->SetTitle("S/#sqrt{S+B}");
+  significanceGraph->GetYaxis()->SetTitle("S/#std::sqrt{S+B}");
   significanceGraph->GetYaxis()->SetTitleColor(kBlack);
   significanceGraph->GetYaxis()->SetLabelColor(kBlack);
   significanceGraph->GetYaxis()->SetTitleOffset(1.2);
@@ -276,7 +276,7 @@ TCanvas *CreateJointGraph(TString name = "default", TString title = "default", T
     // ✅ LEGENDA W WSPÓŁRZĘDNYCH NDC (Normalized Device Coordinates)
   // Dla marginesu prawego 0.25: obszar od 0.75 do 1.0
   TLegend *legend = new TLegend(0.82, 0.15, 0.98, 0.35);  // NDC coordinates
-  legend->AddEntry(significanceGraph, "S/#sqrt{S+B}", "LP");
+  legend->AddEntry(significanceGraph, "S/#std::sqrt{S+B}", "LP");
   legend->AddEntry(efficiencyGraph, "Efficiency", "LP");
   legend->AddEntry(purityGraph, "Purity", "LP");
   legend->SetBorderSize(1);

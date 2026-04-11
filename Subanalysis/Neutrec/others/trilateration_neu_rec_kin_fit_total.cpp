@@ -221,11 +221,11 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 									X_init(k * 5 + 3) = cluster[3][ind_gam[k]];
 									X_init(k * 5 + 4) = cluster[4][ind_gam[k]];
 
-									V(k * 5, k * 5) = pow(clu_x_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
-									V(k * 5 + 1, k * 5 + 1) = pow(clu_y_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
-									V(k * 5 + 2, k * 5 + 2) = pow(clu_z_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2); // cm
-									V(k * 5 + 3, k * 5 + 3) = pow(clu_time_error(X_init(k * 5 + 4)), 2);																									 // ns
-									V(k * 5 + 4, k * 5 + 4) = pow(clu_ene_error(X_init(k * 5 + 4)), 2);																										 // MeV
+									V(k * 5, k * 5) = std::pow(clu_x_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
+									V(k * 5 + 1, k * 5 + 1) = std::pow(clu_y_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2);
+									V(k * 5 + 2, k * 5 + 2) = std::pow(clu_z_error(X_init(k * 5), X_init(k * 5 + 1), X_init(k * 5 + 2), X_init(k * 5 + 4)), 2); // cm
+									V(k * 5 + 3, k * 5 + 3) = std::pow(clu_time_error(X_init(k * 5 + 4)), 2);																									 // ns
+									V(k * 5 + 4, k * 5 + 4) = std::pow(clu_ene_error(X_init(k * 5 + 4)), 2);																										 // MeV
 								}
 
 								X_init(20) = bhabha_mom[0];
@@ -233,10 +233,10 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 								X_init(22) = bhabha_mom[2];
 								X_init(23) = bhabha_mom[3];
 
-								V(20, 20) = pow(bhabha_mom_err[0], 2);
-								V(21, 21) = pow(bhabha_mom_err[1], 2);
-								V(22, 22) = pow(bhabha_mom_err[2], 2);
-								V(23, 23) = pow(bhabha_mom_err[3], 2);
+								V(20, 20) = std::pow(bhabha_mom_err[0], 2);
+								V(21, 21) = std::pow(bhabha_mom_err[1], 2);
+								V(22, 22) = std::pow(bhabha_mom_err[2], 2);
+								V(23, 23) = std::pow(bhabha_mom_err[3], 2);
 
 								X_init(24) = bhabha_vtx[0];
 								X_init(25) = bhabha_vtx[1];
@@ -364,9 +364,9 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 
 										for (Int_t l = 0; l < 4; l++)
 										{
-											distance[l] = sqrt(pow(X[l * 5] - neu_vtx[k][0], 2) +
-																				 pow(X[l * 5 + 1] - neu_vtx[k][1], 2) +
-																				 pow(X[l * 5 + 2] - neu_vtx[k][2], 2));
+											distance[l] = std::sqrt(std::pow(X[l * 5] - neu_vtx[k][0], 2) +
+																				 std::pow(X[l * 5 + 1] - neu_vtx[k][1], 2) +
+																				 std::pow(X[l * 5 + 2] - neu_vtx[k][2], 2));
 
 											gamma_mom_tmp[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[k][0]) / distance[l]);
 											gamma_mom_tmp[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[k][1]) / distance[l]);
@@ -384,8 +384,8 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 										fourKnetri_tmp[k][2] = gamma_mom_tmp[0][2] + gamma_mom_tmp[1][2] + gamma_mom_tmp[2][2] + gamma_mom_tmp[3][2];
 										fourKnetri_tmp[k][3] = gamma_mom_tmp[0][3] + gamma_mom_tmp[1][3] + gamma_mom_tmp[2][3] + gamma_mom_tmp[3][3];
 
-										fourKnetri_tmp[k][4] = sqrt(pow(fourKnetri_tmp[k][0], 2) + pow(fourKnetri_tmp[k][1], 2) + pow(fourKnetri_tmp[k][2], 2));
-										fourKnetri_tmp[k][5] = sqrt(pow(fourKnetri_tmp[k][3], 2) - pow(fourKnetri_tmp[k][4], 2));
+										fourKnetri_tmp[k][4] = std::sqrt(std::pow(fourKnetri_tmp[k][0], 2) + std::pow(fourKnetri_tmp[k][1], 2) + std::pow(fourKnetri_tmp[k][2], 2));
+										fourKnetri_tmp[k][5] = std::sqrt(std::pow(fourKnetri_tmp[k][3], 2) - std::pow(fourKnetri_tmp[k][4], 2));
 
 										kaon_vel_tmp[k] = PhysicsConstants::cVel * fourKnetri_tmp[k][4] / fourKnetri_tmp[k][3];
 
@@ -400,11 +400,11 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 										if (std::abs(ip_tmp[k][2] - bhabha_vtx[2]) > 2)
 											ip_tmp[k][2] = bhabha_vtx[2];
 
-										dist_tmp[k] = sqrt(pow(neu_vtx[k][0] - ip_tmp[k][0], 2) +
-																			 pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
-																			 pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
+										dist_tmp[k] = std::sqrt(std::pow(neu_vtx[k][0] - ip_tmp[k][0], 2) +
+																			 std::pow(neu_vtx[k][1] - ip_tmp[k][1], 2) +
+																			 std::pow(neu_vtx[k][2] - ip_tmp[k][2], 2));
 
-										value[k] = sqrt(pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + pow(fourKnetri_tmp[k][5] - PhysicsConstants::mK0, 2));
+										value[k] = std::sqrt(std::pow(neu_vtx[k][3] - (dist_tmp[k] / kaon_vel_tmp[k]), 2) + std::pow(fourKnetri_tmp[k][5] - PhysicsConstants::mK0, 2));
 
 										if (TMath::IsNaN(value[k]))
 											value[k] = 999999.;
@@ -441,9 +441,9 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 
 											for (Int_t l = 0; l < 4; l++)
 											{
-												distance[l] = sqrt(pow(X[l * 5] - neu_vtx[0][0], 2) +
-																					 pow(X[l * 5 + 1] - neu_vtx[0][1], 2) +
-																					 pow(X[l * 5 + 2] - neu_vtx[0][2], 2));
+												distance[l] = std::sqrt(std::pow(X[l * 5] - neu_vtx[0][0], 2) +
+																					 std::pow(X[l * 5 + 1] - neu_vtx[0][1], 2) +
+																					 std::pow(X[l * 5 + 2] - neu_vtx[0][2], 2));
 
 												gamma_mom_final[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[0][0]) / distance[l]);
 												gamma_mom_final[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[0][1]) / distance[l]);
@@ -459,8 +459,8 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 											fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
 											fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
 											fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
-											fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
-											fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
+											fourKnetri_kinfit[4] = std::sqrt(std::pow(fourKnetri_kinfit[0], 2) + std::pow(fourKnetri_kinfit[1], 2) + std::pow(fourKnetri_kinfit[2], 2));
+											fourKnetri_kinfit[5] = std::sqrt(std::pow(fourKnetri_kinfit[3], 2) - std::pow(fourKnetri_kinfit[4], 2));
 											fourKnetri_kinfit[6] = neu_vtx_min[0];
 											fourKnetri_kinfit[7] = neu_vtx_min[1];
 											fourKnetri_kinfit[8] = neu_vtx_min[2];
@@ -497,9 +497,9 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 
 											for (Int_t l = 0; l < 4; l++)
 											{
-												distance[l] = sqrt(pow(X[l * 5] - neu_vtx[1][0], 2) +
-																					 pow(X[l * 5 + 1] - neu_vtx[1][1], 2) +
-																					 pow(X[l * 5 + 2] - neu_vtx[1][2], 2));
+												distance[l] = std::sqrt(std::pow(X[l * 5] - neu_vtx[1][0], 2) +
+																					 std::pow(X[l * 5 + 1] - neu_vtx[1][1], 2) +
+																					 std::pow(X[l * 5 + 2] - neu_vtx[1][2], 2));
 
 												gamma_mom_final[l][0] = X[l * 5 + 4] * ((X[l * 5] - neu_vtx[1][0]) / distance[l]);
 												gamma_mom_final[l][1] = X[l * 5 + 4] * ((X[l * 5 + 1] - neu_vtx[1][1]) / distance[l]);
@@ -515,8 +515,8 @@ void tri_neurec_kinfit_corr(Short_t ind_data_mc, Int_t first_file, Int_t last_fi
 											fourKnetri_kinfit[1] = gamma_mom_final[0][1] + gamma_mom_final[1][1] + gamma_mom_final[2][1] + gamma_mom_final[3][1];
 											fourKnetri_kinfit[2] = gamma_mom_final[0][2] + gamma_mom_final[1][2] + gamma_mom_final[2][2] + gamma_mom_final[3][2];
 											fourKnetri_kinfit[3] = gamma_mom_final[0][3] + gamma_mom_final[1][3] + gamma_mom_final[2][3] + gamma_mom_final[3][3];
-											fourKnetri_kinfit[4] = sqrt(pow(fourKnetri_kinfit[0], 2) + pow(fourKnetri_kinfit[1], 2) + pow(fourKnetri_kinfit[2], 2));
-											fourKnetri_kinfit[5] = sqrt(pow(fourKnetri_kinfit[3], 2) - pow(fourKnetri_kinfit[4], 2));
+											fourKnetri_kinfit[4] = std::sqrt(std::pow(fourKnetri_kinfit[0], 2) + std::pow(fourKnetri_kinfit[1], 2) + std::pow(fourKnetri_kinfit[2], 2));
+											fourKnetri_kinfit[5] = std::sqrt(std::pow(fourKnetri_kinfit[3], 2) - std::pow(fourKnetri_kinfit[4], 2));
 											fourKnetri_kinfit[6] = neu_vtx_min[0];
 											fourKnetri_kinfit[7] = neu_vtx_min[1];
 											fourKnetri_kinfit[8] = neu_vtx_min[2];

@@ -144,7 +144,7 @@ rdf_sig = rdf[1].Filter("Chi2SignalKinFit < 30").Define("Pi0Mass1", "pi01Fit[5]"
 
 modelComb = ROOT.RDF.TH1DModel(
   "hCombpi0Mass",
-  "Combined pi0 mass error;#sqrt{(m_{#pi^{0}_{1}}-m_{#pi^{0}})^{2} + (m_{#pi^{0}_{2}}-m_{#pi^{0}})^{2}} [MeV/c^{2}];Counts",
+  "Combined pi0 mass error;#std::sqrt{(m_{#pi^{0}_{1}}-m_{#pi^{0}})^{2} + (m_{#pi^{0}_{2}}-m_{#pi^{0}})^{2}} [MeV/c^{2}];Counts",
   100,
   0,
   15,
@@ -264,22 +264,22 @@ dy = "(Pi0Mass2 - {})/{}".format(meanPi0Mass2, minSigma2)
 
 rho_factor = "1 / (1 - {})".format(rho**2)
 
-rnorm = "sqrt({}*(pow({}, 2) + pow({}, 2) - 2*{}*{}*{}))".format(rho_factor, dx, dy, rho, dx, dy)
+rnorm = "std::sqrt({}*(std::pow({}, 2) + std::pow({}, 2) - 2*{}*{}*{}))".format(rho_factor, dx, dy, rho, dx, dy)
 
 ## Square cut
 
-u = "((Pi0Mass1 - {}) + (Pi0Mass2 - {})) / sqrt(2)".format(meanPi0Mass1, meanPi0Mass2)
-v = "((Pi0Mass1 - {}) - (Pi0Mass2 - {})) / sqrt(2)".format(meanPi0Mass1, meanPi0Mass2)
+u = "((Pi0Mass1 - {}) + (Pi0Mass2 - {})) / std::sqrt(2)".format(meanPi0Mass1, meanPi0Mass2)
+v = "((Pi0Mass1 - {}) - (Pi0Mass2 - {})) / std::sqrt(2)".format(meanPi0Mass1, meanPi0Mass2)
 
 varu = "0.5 * ({}^2 + {}^2 + 2*{}*{}*{})".format(minSigma1, minSigma2, rho, minSigma1, minSigma2)
 varv = "0.5 * ({}^2 + {}^2 - 2*{}*{}*{})".format(minSigma1, minSigma2, rho, minSigma1, minSigma2)
 
-sigmau = "sqrt({})".format(varu)
-sigmav = "sqrt({})".format(varv)
+sigmau = "std::sqrt({})".format(varu)
+sigmav = "std::sqrt({})".format(varv)
 
 # Numeric values for quick logging (the string expressions above are used in RDF filters).
-sigmau_val = math.sqrt(0.5 * (minSigma1**2 + minSigma2**2 + 2 * rho * minSigma1 * minSigma2))
-sigmav_val = math.sqrt(0.5 * (minSigma1**2 + minSigma2**2 - 2 * rho * minSigma1 * minSigma2))
+sigmau_val = math.std::sqrt(0.5 * (minSigma1**2 + minSigma2**2 + 2 * rho * minSigma1 * minSigma2))
+sigmav_val = math.std::sqrt(0.5 * (minSigma1**2 + minSigma2**2 - 2 * rho * minSigma1 * minSigma2))
 
 print("sigmau expression:", sigmau)
 print("sigmav expression:", sigmav)
@@ -290,8 +290,8 @@ squareCut = "std::abs({}) < 3 * {} && std::abs({}) < 3 * {}".format(u, sigmau, v
 
 ## Display the rectangle
 
-u_max = 3 * math.sqrt(0.5 * (minSigma1**2 + minSigma2**2 + 2 * rho * minSigma1 * minSigma2))
-v_max = 3 * math.sqrt(0.5 * (minSigma1**2 + minSigma2**2 - 2 * rho * minSigma1 * minSigma2))
+u_max = 3 * math.std::sqrt(0.5 * (minSigma1**2 + minSigma2**2 + 2 * rho * minSigma1 * minSigma2))
+v_max = 3 * math.std::sqrt(0.5 * (minSigma1**2 + minSigma2**2 - 2 * rho * minSigma1 * minSigma2))
 
 x_coords = []
 y_coords = []
@@ -300,8 +300,8 @@ for u_sign, v_sign in [(1,1), (-1,1), (-1,-1), (1,-1), (1,1)]:
   u_cut = u_sign * u_max
   v_cut = v_sign * v_max
 
-  x_coords.append(meanPi0Mass1 + (u_cut + v_cut) / math.sqrt(2))
-  y_coords.append(meanPi0Mass2 + (u_cut - v_cut) / math.sqrt(2))
+  x_coords.append(meanPi0Mass1 + (u_cut + v_cut) / math.std::sqrt(2))
+  y_coords.append(meanPi0Mass2 + (u_cut - v_cut) / math.std::sqrt(2))
 
 x_coords = np.array(x_coords)
 y_coords = np.array(y_coords)

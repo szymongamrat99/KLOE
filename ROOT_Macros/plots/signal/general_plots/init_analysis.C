@@ -527,10 +527,10 @@ Bool_t init_analysis::Process(Long64_t entry)
    {
       if (*mcflag == 1)
       {
-         Float_t minv4gam_tri = sqrt(pow(KnereclorFit[3], 2) - pow(KnereclorFit[0], 2) - pow(KnereclorFit[1], 2) - pow(KnereclorFit[2], 2));
+         Float_t minv4gam_tri = std::sqrt(std::pow(KnereclorFit[3], 2) - std::pow(KnereclorFit[0], 2) - std::pow(KnereclorFit[1], 2) - std::pow(KnereclorFit[2], 2));
 
-         Float_t distance = sqrt(pow(KneTriangle[6] - ip[0], 2) + pow(KneTriangle[7] - ip[1], 2) + pow(KneTriangle[8] - ip[2], 2)),
-                 velocity = PhysicsConstants::cVel * sqrt(pow(KneTriangle[0], 2) + pow(KneTriangle[1], 2) + pow(KneTriangle[2], 2)) / KneTriangle[3],
+         Float_t distance = std::sqrt(std::pow(KneTriangle[6] - ip[0], 2) + std::pow(KneTriangle[7] - ip[1], 2) + std::pow(KneTriangle[8] - ip[2], 2)),
+                 velocity = PhysicsConstants::cVel * std::sqrt(std::pow(KneTriangle[0], 2) + std::pow(KneTriangle[1], 2) + std::pow(KneTriangle[2], 2)) / KneTriangle[3],
                  timeOfFlight = (distance / velocity) / (tau_S);
 
          histMgr->Fill1D("invMassKch", *mctruth, KchrecFit[5], weight);
@@ -547,12 +547,12 @@ Bool_t init_analysis::Process(Long64_t entry)
             histMgr->Fill1D("zchMC", *mctruth, KchboostFit[8] - Kchmc[8], weight);
 
             Float_t
-                testcharged00 = sqrt(pow(std::abs(*CurvSmeared1) - std::abs(CurvMC[0]), 2) + pow(std::abs(*PhivSmeared1) - std::abs(PhivMC[0]), 2) + pow(std::abs(*CotvSmeared1) - std::abs(CotvMC[0]), 2)),
-                testcharged11 = sqrt(pow(std::abs(*CurvSmeared2) - std::abs(CurvMC[0]), 2) + pow(std::abs(*PhivSmeared2) - std::abs(PhivMC[0]), 2) + pow(std::abs(*CotvSmeared2) - std::abs(CotvMC[0]), 2));
+                testcharged00 = std::sqrt(std::pow(std::abs(*CurvSmeared1) - std::abs(CurvMC[0]), 2) + std::pow(std::abs(*PhivSmeared1) - std::abs(PhivMC[0]), 2) + std::pow(std::abs(*CotvSmeared1) - std::abs(CotvMC[0]), 2)),
+                testcharged11 = std::sqrt(std::pow(std::abs(*CurvSmeared2) - std::abs(CurvMC[0]), 2) + std::pow(std::abs(*PhivSmeared2) - std::abs(PhivMC[0]), 2) + std::pow(std::abs(*CotvSmeared2) - std::abs(CotvMC[0]), 2));
 
             // Float_t
-            //     testchargednotsmeared00 = sqrt(pow(std::abs(Curv[vtaken[1] - 1]) - std::abs(CurvMC[0]), 2) + pow(std::abs(Phiv[vtaken[1] - 1]) - std::abs(PhivMC[0]), 2) + pow(std::abs(Cotv[vtaken[1] - 1]) - std::abs(CotvMC[0]), 2)),
-            //     testchargednotsmeared11 = sqrt(pow(std::abs(Curv[vtaken[2] - 1]) - std::abs(CurvMC[0]), 2) + pow(std::abs(Phiv[vtaken[2] - 1]) - std::abs(PhivMC[0]), 2) + pow(std::abs(Cotv[vtaken[2] - 1]) - std::abs(CotvMC[0]), 2));
+            //     testchargednotsmeared00 = std::sqrt(std::pow(std::abs(Curv[vtaken[1] - 1]) - std::abs(CurvMC[0]), 2) + std::pow(std::abs(Phiv[vtaken[1] - 1]) - std::abs(PhivMC[0]), 2) + std::pow(std::abs(Cotv[vtaken[1] - 1]) - std::abs(CotvMC[0]), 2)),
+            //     testchargednotsmeared11 = std::sqrt(std::pow(std::abs(Curv[vtaken[2] - 1]) - std::abs(CurvMC[0]), 2) + std::pow(std::abs(Phiv[vtaken[2] - 1]) - std::abs(PhivMC[0]), 2) + std::pow(std::abs(Cotv[vtaken[2] - 1]) - std::abs(CotvMC[0]), 2));
 
             if (testcharged00 < testcharged11)
             {

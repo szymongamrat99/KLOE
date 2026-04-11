@@ -39,7 +39,7 @@ int main()
     // TString name_0, name_1;
 
     // const Int_t expRe = floor(log10(std::abs(0.005))), expIm = floor(log10(std::abs(0.05)));
-    // const Double_t frontRe = 0.005 / pow(10, expRe), frontIm = 0.05 / pow(10, expIm);  
+    // const Double_t frontRe = 0.005 / std::pow(10, expRe), frontIm = 0.05 / std::pow(10, expIm);  
 
     // name_0 = "#varepsilon'/#varepsilon = 0";
     // name_1 = Form("#splitline{Re(#varepsilon'/#varepsilon) = %.2f#times10^{%d}}{Im(#varepsilon'/#varepsilon) = %.2f#times10^{%d}}",frontRe,expRe,frontIm,expIm);

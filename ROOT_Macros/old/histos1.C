@@ -151,16 +151,16 @@ Bool_t histos1::Process(Long64_t entry)
 
    fReader.SetLocalEntry(entry);
 
-   k_beta00 = sqrt(pow(fourKnetri[0],2) + pow(fourKnetri[1],2) + pow(fourKnetri[2],2))/fourKnetri[3];
-   k_path00 = sqrt(pow(fourKnetri[6] - *Bx,2) + pow(fourKnetri[7] - *By,2) + pow(fourKnetri[8] - *Bz,2));
+   k_beta00 = std::sqrt(std::pow(fourKnetri[0],2) + std::pow(fourKnetri[1],2) + std::pow(fourKnetri[2],2))/fourKnetri[3];
+   k_path00 = std::sqrt(std::pow(fourKnetri[6] - *Bx,2) + std::pow(fourKnetri[7] - *By,2) + std::pow(fourKnetri[8] - *Bz,2));
 
-   for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (sqrt(pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/PhysicsConstants::cVel) - (k_path00/(k_beta00*PhysicsConstants::cVel));
+   for(Int_t i = 0; i < 4; i++) TRCV[i] = TclOld[fourg4taken[i]] - (std::sqrt(std::pow(Xcl[fourg4taken[i]] - fourKnetri[6],2) + std::pow(Ycl[fourg4taken[i]] - fourKnetri[7],2) + std::pow(Zcl[fourg4taken[i]] - fourKnetri[8],2))/PhysicsConstants::cVel) - (k_path00/(k_beta00*PhysicsConstants::cVel));
 
    trcv_sum = TRCV[0] + TRCV[1] + TRCV[2] + TRCV[3];
 	
-   k_betapm = sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
+   k_betapm = std::sqrt(std::pow(Kchboost[0],2) + std::pow(Kchboost[1],2) + std::pow(Kchboost[2],2))/Kchboost[3];
 
-   k_pathpm = sqrt(pow(Kchboost[6] - *Bx,2) + pow(Kchboost[7] - *By,2) + pow(Kchboost[8] - *Bz,2));
+   k_pathpm = std::sqrt(std::pow(Kchboost[6] - *Bx,2) + std::pow(Kchboost[7] - *By,2) + std::pow(Kchboost[8] - *Bz,2));
 
    //Calculation of time difference
 
@@ -185,24 +185,24 @@ Bool_t histos1::Process(Long64_t entry)
 
    trcv_sum_signal = trcv[ncll[g4taken[0]-1]-1] + trcv[ncll[g4taken[1]-1]-1] + trcv[ncll[g4taken[2]-1]-1] + trcv[ncll[g4taken[3]-1]-1];
 
-   if(sqrt(pow(Kchrec1[6] - *Bx,2) + pow(Kchrec1[7] - *By,2) + pow(Kchrec1[8] - *Bz,2)) < sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2)))
+   if(std::sqrt(std::pow(Kchrec1[6] - *Bx,2) + std::pow(Kchrec1[7] - *By,2) + std::pow(Kchrec1[8] - *Bz,2)) < std::sqrt(std::pow(Kchrec2[6] - *Bx,2) + std::pow(Kchrec2[7] - *By,2) + std::pow(Kchrec2[8] - *Bz,2)))
    {
-	k_pathks = sqrt(pow(Kchrec1[6] - *Bx,2) + pow(Kchrec1[7] - *By,2) + pow(Kchrec1[8] - *Bz,2));
-	k_pathkl = sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2));
+	k_pathks = std::sqrt(std::pow(Kchrec1[6] - *Bx,2) + std::pow(Kchrec1[7] - *By,2) + std::pow(Kchrec1[8] - *Bz,2));
+	k_pathkl = std::sqrt(std::pow(Kchrec2[6] - *Bx,2) + std::pow(Kchrec2[7] - *By,2) + std::pow(Kchrec2[8] - *Bz,2));
 
-	k_betaks = sqrt(pow(Kchrec1[0],2) + pow(Kchrec1[1],2) + pow(Kchrec1[2],2))/Kchrec1[3];	
-	k_betakl = sqrt(pow(Kchrec2[0],2) + pow(Kchrec2[1],2) + pow(Kchrec2[2],2))/Kchrec2[3];
+	k_betaks = std::sqrt(std::pow(Kchrec1[0],2) + std::pow(Kchrec1[1],2) + std::pow(Kchrec1[2],2))/Kchrec1[3];	
+	k_betakl = std::sqrt(std::pow(Kchrec2[0],2) + std::pow(Kchrec2[1],2) + std::pow(Kchrec2[2],2))/Kchrec2[3];
 
 	tks = k_pathks/(PhysicsConstants::cVel*k_betaks*PhysicsConstants::tau_S_nonCPT);
         tkl = k_pathkl/(PhysicsConstants::cVel*k_betakl*PhysicsConstants::tau_S_nonCPT);	
    }
    else
    {
-	k_pathks = sqrt(pow(Kchrec2[6] - *Bx,2) + pow(Kchrec2[7] - *By,2) + pow(Kchrec2[8] - *Bz,2));
-	k_pathkl = sqrt(pow(Kchrec1[6] - *Bx,2) + pow(Kchrec1[7] - *By,2) + pow(Kchrec1[8] - *Bz,2));
+	k_pathks = std::sqrt(std::pow(Kchrec2[6] - *Bx,2) + std::pow(Kchrec2[7] - *By,2) + std::pow(Kchrec2[8] - *Bz,2));
+	k_pathkl = std::sqrt(std::pow(Kchrec1[6] - *Bx,2) + std::pow(Kchrec1[7] - *By,2) + std::pow(Kchrec1[8] - *Bz,2));
 
-	k_betaks = sqrt(pow(Kchrec2[0],2) + pow(Kchrec2[1],2) + pow(Kchrec2[2],2))/Kchrec2[3];	
-	k_betakl = sqrt(pow(Kchrec1[0],2) + pow(Kchrec1[1],2) + pow(Kchrec1[2],2))/Kchrec1[3];
+	k_betaks = std::sqrt(std::pow(Kchrec2[0],2) + std::pow(Kchrec2[1],2) + std::pow(Kchrec2[2],2))/Kchrec2[3];	
+	k_betakl = std::sqrt(std::pow(Kchrec1[0],2) + std::pow(Kchrec1[1],2) + std::pow(Kchrec1[2],2))/Kchrec1[3];
 
 	tks = k_pathks/(PhysicsConstants::cVel*k_betaks*PhysicsConstants::tau_S_nonCPT);
         tkl = k_pathkl/(PhysicsConstants::cVel*k_betakl*PhysicsConstants::tau_S_nonCPT);	

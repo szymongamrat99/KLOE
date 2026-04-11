@@ -49,34 +49,34 @@ Int_t Pi0PhotonPair(Int_t ClusterIndex[4], Double_t PhotonMom[4][8], Int_t Clust
       }
     }
 
-    InvMassPi01[i * 2] = sqrt(pow(Pi0FourMom1[i * 2][3], 2) -
-                              pow(Pi0FourMom1[i * 2][0], 2) -
-                              pow(Pi0FourMom1[i * 2][1], 2) -
-                              pow(Pi0FourMom1[i * 2][2], 2));
-    InvMassPi01[i * 2 + 1] = sqrt(pow(Pi0FourMom1[i * 2 + 1][3], 2) -
-                                  pow(Pi0FourMom1[i * 2 + 1][0], 2) -
-                                  pow(Pi0FourMom1[i * 2 + 1][1], 2) -
-                                  pow(Pi0FourMom1[i * 2 + 1][2], 2));
+    InvMassPi01[i * 2] = std::sqrt(std::pow(Pi0FourMom1[i * 2][3], 2) -
+                              std::pow(Pi0FourMom1[i * 2][0], 2) -
+                              std::pow(Pi0FourMom1[i * 2][1], 2) -
+                              std::pow(Pi0FourMom1[i * 2][2], 2));
+    InvMassPi01[i * 2 + 1] = std::sqrt(std::pow(Pi0FourMom1[i * 2 + 1][3], 2) -
+                                  std::pow(Pi0FourMom1[i * 2 + 1][0], 2) -
+                                  std::pow(Pi0FourMom1[i * 2 + 1][1], 2) -
+                                  std::pow(Pi0FourMom1[i * 2 + 1][2], 2));
 
-    InvMassPi02[i * 2] = sqrt(pow(Pi0FourMom2[i * 2][3], 2) -
-                              pow(Pi0FourMom2[i * 2][0], 2) -
-                              pow(Pi0FourMom2[i * 2][1], 2) -
-                              pow(Pi0FourMom2[i * 2][2], 2));
-    InvMassPi02[i * 2 + 1] = sqrt(pow(Pi0FourMom2[i * 2 + 1][3], 2) -
-                                  pow(Pi0FourMom2[i * 2 + 1][0], 2) -
-                                  pow(Pi0FourMom2[i * 2 + 1][1], 2) -
-                                  pow(Pi0FourMom2[i * 2 + 1][2], 2));
+    InvMassPi02[i * 2] = std::sqrt(std::pow(Pi0FourMom2[i * 2][3], 2) -
+                              std::pow(Pi0FourMom2[i * 2][0], 2) -
+                              std::pow(Pi0FourMom2[i * 2][1], 2) -
+                              std::pow(Pi0FourMom2[i * 2][2], 2));
+    InvMassPi02[i * 2 + 1] = std::sqrt(std::pow(Pi0FourMom2[i * 2 + 1][3], 2) -
+                                  std::pow(Pi0FourMom2[i * 2 + 1][0], 2) -
+                                  std::pow(Pi0FourMom2[i * 2 + 1][1], 2) -
+                                  std::pow(Pi0FourMom2[i * 2 + 1][2], 2));
 
     if (OmegaFlag == true)
     {
-      InvMassOmega[i * 2] = sqrt(pow(OmegaFourMom[i * 2][3], 2) -
-                                 pow(OmegaFourMom[i * 2][0], 2) -
-                                 pow(OmegaFourMom[i * 2][1], 2) -
-                                 pow(OmegaFourMom[i * 2][2], 2));
-      InvMassOmega[i * 2 + 1] = sqrt(pow(OmegaFourMom[i * 2 + 1][3], 2) -
-                                     pow(OmegaFourMom[i * 2 + 1][0], 2) -
-                                     pow(OmegaFourMom[i * 2 + 1][1], 2) -
-                                     pow(OmegaFourMom[i * 2 + 1][2], 2));
+      InvMassOmega[i * 2] = std::sqrt(std::pow(OmegaFourMom[i * 2][3], 2) -
+                                 std::pow(OmegaFourMom[i * 2][0], 2) -
+                                 std::pow(OmegaFourMom[i * 2][1], 2) -
+                                 std::pow(OmegaFourMom[i * 2][2], 2));
+      InvMassOmega[i * 2 + 1] = std::sqrt(std::pow(OmegaFourMom[i * 2 + 1][3], 2) -
+                                     std::pow(OmegaFourMom[i * 2 + 1][0], 2) -
+                                     std::pow(OmegaFourMom[i * 2 + 1][1], 2) -
+                                     std::pow(OmegaFourMom[i * 2 + 1][2], 2));
     }
     else
     {
@@ -87,8 +87,8 @@ Int_t Pi0PhotonPair(Int_t ClusterIndex[4], Double_t PhotonMom[4][8], Int_t Clust
 
   for (Int_t i = 0; i < 3; i++)
   {
-    PseudoChi2[i * 2] = pow((InvMassPi01[i * 2] - PhysicsConstants::mPi0) / 17.0, 2) + pow((InvMassPi02[i * 2] - PhysicsConstants::mPi0) / 17.0, 2) + pow((InvMassOmega[i * 2] - PhysicsConstants::mOmega) / 20.0, 2);
-    PseudoChi2[i * 2 + 1] = pow((InvMassPi01[i * 2 + 1] - PhysicsConstants::mPi0) / 17.0, 2) + pow((InvMassPi02[i * 2 + 1] - PhysicsConstants::mPi0) / 17.0, 2) + pow((InvMassOmega[i * 2 + 1] - PhysicsConstants::mOmega) / 20.0, 2);
+    PseudoChi2[i * 2] = std::pow((InvMassPi01[i * 2] - PhysicsConstants::mPi0) / 17.0, 2) + std::pow((InvMassPi02[i * 2] - PhysicsConstants::mPi0) / 17.0, 2) + std::pow((InvMassOmega[i * 2] - PhysicsConstants::mOmega) / 20.0, 2);
+    PseudoChi2[i * 2 + 1] = std::pow((InvMassPi01[i * 2 + 1] - PhysicsConstants::mPi0) / 17.0, 2) + std::pow((InvMassPi02[i * 2 + 1] - PhysicsConstants::mPi0) / 17.0, 2) + std::pow((InvMassOmega[i * 2 + 1] - PhysicsConstants::mOmega) / 20.0, 2);
   }
 
   Int_t min_iter = std::distance(PseudoChi2.begin(), std::min_element(PseudoChi2.begin(), PseudoChi2.end()));

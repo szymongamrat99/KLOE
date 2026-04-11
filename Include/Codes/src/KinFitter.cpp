@@ -69,7 +69,7 @@ Int_t KinFitter::ParameterInitialization(Float_t *Params, Float_t *Errors)
     _X_init(i) = Params[i];
 
     // Under assumption that there are no cross-correlations between variables
-    _V_init(i, i) = pow(Errors[i], 2);
+    _V_init(i, i) = std::pow(Errors[i], 2);
 
     if (std::isnan(_V_init(i, i)))
       _err_flag = true;
@@ -96,7 +96,7 @@ Int_t KinFitter::ParameterInitialization(Double_t *Params, Double_t *Errors)
     _X_init(i) = Params[i];
 
     // Under assumption that there are now cross-correlations between variables
-    _V_init(i, i) = pow(Errors[i], 2);
+    _V_init(i, i) = std::pow(Errors[i], 2);
 
     if (std::isnan(_V_init(i, i)))
       _err_flag = true;
@@ -163,7 +163,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
           {
             // Explicit central-difference numerical gradient
             // (bypasses TF1::GradientPar / Clad for ROOT 6.36+ compatibility)
-            Double_t eps_step = 0.01 * sqrt(_V(m, m));
+            Double_t eps_step = 0.01 * std::sqrt(_V(m, m));
             if (eps_step < 1e-12) eps_step = 1e-6;
 
             // Double_t parOrig = _constraints[l]->GetParameter(m);
@@ -281,10 +281,10 @@ Double_t KinFitter::EnergyCalc(Double_t *p, Double_t mass)
   Double_t energy = 0.;
 
   for (Int_t i = 0; i < 3; i++)
-    energy += pow(p[i], 2);
+    energy += std::pow(p[i], 2);
 
-  energy += pow(mass, 2);
-  energy = sqrt(energy);
+  energy += std::pow(mass, 2);
+  energy = std::sqrt(energy);
 
   return energy;
 };
@@ -294,10 +294,10 @@ Double_t KinFitter::EnergyCalc(TLorentzVector p, Double_t mass)
   Double_t energy = 0.;
 
   for (Int_t i = 0; i < 3; i++)
-    energy += pow(p[i], 2);
+    energy += std::pow(p[i], 2);
 
-  energy += pow(mass, 2);
-  energy = sqrt(energy);
+  energy += std::pow(mass, 2);
+  energy = std::sqrt(energy);
 
   return energy;
 };
@@ -438,7 +438,7 @@ Double_t KinFitter::DerivativeCalc(Int_t i, Int_t j)
   }
   else
   {
-    step = 0.01 * sqrt(V_aux(j, j));
+    step = 0.01 * std::sqrt(V_aux(j, j));
 
     Int_t L = 0;
 

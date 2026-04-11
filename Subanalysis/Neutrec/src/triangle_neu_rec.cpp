@@ -226,7 +226,7 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
 
             neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip, bhabha_mom, Knerec, neu_vtx, trc, logger);
 
-            if (sqrt(pow(vtxSigma, 2) + pow(TrcSum, 2)) < sqrt(pow(vtxSigmaMin, 2) + pow(TrcSumMin, 2)))
+            if (std::sqrt(std::pow(vtxSigma, 2) + std::pow(TrcSum, 2)) < std::sqrt(std::pow(vtxSigmaMin, 2) + std::pow(TrcSumMin, 2)))
             {
               vtxSigmaMin = vtxSigma;
               TrcSumMin = TrcSum;
@@ -248,28 +248,28 @@ Int_t TriangleNeurec(TChain &chain, Controls::DataType &dataType, ErrorHandling:
                 neutral_mom(cluster[0][ncll[ind_gam[l]] - 1], cluster[1][ncll[ind_gam[l]] - 1], cluster[2][ncll[ind_gam[l]] - 1], cluster[4][ncll[ind_gam[l]] - 1], neu_vtx, gammatriangle[l]);
               }
 
-              minv4gam = sqrt(pow(gammatriangle[0][3] + gammatriangle[1][3] + gammatriangle[2][3] + gammatriangle[3][3], 2) -
-                              pow(gammatriangle[0][0] + gammatriangle[1][0] + gammatriangle[2][0] + gammatriangle[3][0], 2) -
-                              pow(gammatriangle[0][1] + gammatriangle[1][1] + gammatriangle[2][1] + gammatriangle[3][1], 2) -
-                              pow(gammatriangle[0][2] + gammatriangle[1][2] + gammatriangle[2][2] + gammatriangle[3][2], 2));
+              minv4gam = std::sqrt(std::pow(gammatriangle[0][3] + gammatriangle[1][3] + gammatriangle[2][3] + gammatriangle[3][3], 2) -
+                              std::pow(gammatriangle[0][0] + gammatriangle[1][0] + gammatriangle[2][0] + gammatriangle[3][0], 2) -
+                              std::pow(gammatriangle[0][1] + gammatriangle[1][1] + gammatriangle[2][1] + gammatriangle[3][1], 2) -
+                              std::pow(gammatriangle[0][2] + gammatriangle[1][2] + gammatriangle[2][2] + gammatriangle[3][2], 2));
 
               Knetriangle[4] = 0.;
               for (Int_t l = 0; l < 3; l++)
               {
-                Knetriangle[4] += pow(Knetriangle[l], 2);
+                Knetriangle[4] += std::pow(Knetriangle[l], 2);
                 ip_triangle[l] = ip[l];
               }
 
-              Knetriangle[5] = sqrt(pow(Knetriangle[3], 2) - Knetriangle[4]);
-              Knetriangle[4] = sqrt(Knetriangle[4]);
+              Knetriangle[5] = std::sqrt(std::pow(Knetriangle[3], 2) - Knetriangle[4]);
+              Knetriangle[4] = std::sqrt(Knetriangle[4]);
             }
           }
         }
 
         Double_t vKne = PhysicsConstants::cVel * (Knereclor[4] / Knereclor[3]);
-        Double_t trec = sqrt(pow(Knereclor[6] - ip[0], 2) +
-                             pow(Knereclor[7] - ip[1], 2) +
-                             pow(Knereclor[8] - ip[2], 2)) /
+        Double_t trec = std::sqrt(std::pow(Knereclor[6] - ip[0], 2) +
+                             std::pow(Knereclor[7] - ip[1], 2) +
+                             std::pow(Knereclor[8] - ip[2], 2)) /
                         vKne;
       }
 

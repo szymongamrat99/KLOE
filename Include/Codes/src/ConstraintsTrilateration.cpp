@@ -171,8 +171,8 @@ namespace KLOE
         KnerecTmp[i].fourPos[3] = S.sol[i][3];
         KnerecTmp[i].total[9] = S.sol[i][3];
 
-        value[i] = sqrt(pow(KnerecTmp[i].total[5] - PhysicsConstants::mK0, 2) +
-                        pow(KnerecTmp[i].fourPos[3] - KnerecTmp[i].lifetimeLAB, 2));
+        value[i] = std::sqrt(std::pow(KnerecTmp[i].total[5] - PhysicsConstants::mK0, 2) +
+                        std::pow(KnerecTmp[i].fourPos[3] - KnerecTmp[i].lifetimeLAB, 2));
       }
       else
       {
@@ -346,8 +346,8 @@ namespace KLOE
         KnerecTmp[i].fourPos[3] = S.sol[i][3];
         KnerecTmp[i].total[9] = S.sol[i][3];
 
-        value[i] = sqrt(pow(KnerecTmp[i].total[5] - PhysicsConstants::mK0, 2) +
-                        pow(KnerecTmp[i].fourPos[3] - KnerecTmp[i].lifetimeLAB, 2));
+        value[i] = std::sqrt(std::pow(KnerecTmp[i].total[5] - PhysicsConstants::mK0, 2) +
+                        std::pow(KnerecTmp[i].fourPos[3] - KnerecTmp[i].lifetimeLAB, 2));
 
       }
       else

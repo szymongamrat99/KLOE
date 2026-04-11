@@ -87,7 +87,7 @@ Double_t trilateration_chi_square(const Double_t *x)
 	//! Values without constraints
 	for (Int_t j = 0; j < N; j++)
 	{
-		value[0] += pow((x[j] - x[j + N]) / x[j + 2 * N], 2);
+		value[0] += std::pow((x[j] - x[j + N]) / x[j + 2 * N], 2);
 	}
 	value[1] = value[0];
 	//!
@@ -100,7 +100,7 @@ Double_t trilateration_chi_square(const Double_t *x)
 		for (Int_t j = 0; j < 4; j++)
 		{
 			neutral_mom(clusters[0][j], clusters[1][j], clusters[2][j], clusters[4][j], neu_vtx[i], gamma_mom[i][j]);
-			gamma_path[i][j] = sqrt(pow(clusters[0][j] - neu_vtx[i][0], 2) + pow(clusters[1][j] - neu_vtx[i][1], 2) + pow(clusters[2][j] - neu_vtx[i][2], 2));
+			gamma_path[i][j] = std::sqrt(std::pow(clusters[0][j] - neu_vtx[i][0], 2) + std::pow(clusters[1][j] - neu_vtx[i][1], 2) + std::pow(clusters[2][j] - neu_vtx[i][2], 2));
 		}
 	//!
 
@@ -115,9 +115,9 @@ Double_t trilateration_chi_square(const Double_t *x)
 		kaon_velocity[i][1] = PhysicsConstants::cVel * kaon_mom_vec[i][1] / kaon_mom_vec[i][3];
 		kaon_velocity[i][2] = PhysicsConstants::cVel * kaon_mom_vec[i][2] / kaon_mom_vec[i][3];
 
-		kaon_mom[i] = sqrt(pow(kaon_mom_vec[i][0], 2) + pow(kaon_mom_vec[i][1], 2) + pow(kaon_mom_vec[i][2], 2));
+		kaon_mom[i] = std::sqrt(std::pow(kaon_mom_vec[i][0], 2) + std::pow(kaon_mom_vec[i][1], 2) + std::pow(kaon_mom_vec[i][2], 2));
 
-		kaon_inv_mass[i] = pow(kaon_mom_vec[i][3], 2) - pow(kaon_mom[i], 2);
+		kaon_inv_mass[i] = std::pow(kaon_mom_vec[i][3], 2) - std::pow(kaon_mom[i], 2);
 
 		plane_intersection(bhabha_vtx, y_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Plane rec
 		// closest_approach(bhabha_vtx, z_axis, neu_vtx[i], kaon_mom_vec[i], ip_rec[i]); //! Closest approach
@@ -136,18 +136,18 @@ Double_t trilateration_chi_square(const Double_t *x)
 
 		lorentz_transf(boost_vec, kaon_mom_vec[i], kaon_mom_vec_lor[i]); //! Lorentz transformation
 
-    constraints[i][0] = pow(kaon_velocity[i][0] * neu_vtx[i][3] - kaon_path[i][0], 2);
-		constraints[i][1] = pow(kaon_velocity[i][1] * neu_vtx[i][3] - kaon_path[i][1], 2);
-		constraints[i][2] = pow(kaon_velocity[i][2] * neu_vtx[i][3] - kaon_path[i][2], 2);
+    constraints[i][0] = std::pow(kaon_velocity[i][0] * neu_vtx[i][3] - kaon_path[i][0], 2);
+		constraints[i][1] = std::pow(kaon_velocity[i][1] * neu_vtx[i][3] - kaon_path[i][1], 2);
+		constraints[i][2] = std::pow(kaon_velocity[i][2] * neu_vtx[i][3] - kaon_path[i][2], 2);
 
-		constraints[i][3] = pow(pow(kaon_inv_mass[i],2) - pow(PhysicsConstants::mK0,2), 2);
+		constraints[i][3] = std::pow(std::pow(kaon_inv_mass[i],2) - std::pow(PhysicsConstants::mK0,2), 2);
 
-		constraints[i][4] = pow(kaon_mom_vec_lor[i][3] - (phi_mom[3] / 2.), 2);
+		constraints[i][4] = std::pow(kaon_mom_vec_lor[i][3] - (phi_mom[3] / 2.), 2);
 
-		constraints[i][5] = pow(clusters[3][0] - neu_vtx[i][3] - (gamma_path[i][0] / PhysicsConstants::cVel),2);
-		constraints[i][6] = pow(clusters[3][1] - neu_vtx[i][3] - (gamma_path[i][1] / PhysicsConstants::cVel),2);
-		constraints[i][7] = pow(clusters[3][2] - neu_vtx[i][3] - (gamma_path[i][2] / PhysicsConstants::cVel),2);
-		constraints[i][8] = pow(clusters[3][3] - neu_vtx[i][3] - (gamma_path[i][3] / PhysicsConstants::cVel),2);
+		constraints[i][5] = std::pow(clusters[3][0] - neu_vtx[i][3] - (gamma_path[i][0] / PhysicsConstants::cVel),2);
+		constraints[i][6] = std::pow(clusters[3][1] - neu_vtx[i][3] - (gamma_path[i][1] / PhysicsConstants::cVel),2);
+		constraints[i][7] = std::pow(clusters[3][2] - neu_vtx[i][3] - (gamma_path[i][2] / PhysicsConstants::cVel),2);
+		constraints[i][8] = std::pow(clusters[3][3] - neu_vtx[i][3] - (gamma_path[i][3] / PhysicsConstants::cVel),2);
 
 		value[i] += lambda[0] * constraints[i][0] + // X-axis path
 								lambda[1] * constraints[i][1] + // Y-axis path

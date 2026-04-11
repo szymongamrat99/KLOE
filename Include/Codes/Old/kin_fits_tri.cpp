@@ -18,10 +18,10 @@ void kin_fits::FillConstructors(Double_t *par, Double_t *sigmas)
 
     for(Int_t j = 0; j < _N; j++)
     {
-      if(i == j) _V(i,j) = pow(sigmas[i],2);
+      if(i == j) _V(i,j) = std::pow(sigmas[i],2);
       else _V(i,j) = 0.;
 
-      if(i == j) _V0(i,j) = pow(sigmas[i],2);
+      if(i == j) _V0(i,j) = std::pow(sigmas[i],2);
       else _V0(i,j) = 0.;
     }
   }
@@ -198,17 +198,17 @@ Double_t kin_fits::cluster_time_cons_first(const Double_t *xx, const Double_t *p
 
   Double_t path_gamma, time_gamma, path_kaon, vK, time_kaon, time_diff;
 
-  path_kaon = sqrt(pow(neu_vtx[0] - ip_vtx[0],2) + pow(neu_vtx[1] - ip_vtx[1],2) + pow(neu_vtx[2] - ip_vtx[2],2));
-  vK = PhysicsConstants::cVel*sqrt(pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0], 2) + 
-                  pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1], 2) +
-                  pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2], 2))/(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3]);
+  path_kaon = std::sqrt(std::pow(neu_vtx[0] - ip_vtx[0],2) + std::pow(neu_vtx[1] - ip_vtx[1],2) + std::pow(neu_vtx[2] - ip_vtx[2],2));
+  vK = PhysicsConstants::cVel*std::sqrt(std::pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0], 2) + 
+                  std::pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1], 2) +
+                  std::pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2], 2))/(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3]);
 
   time_kaon = path_kaon/vK;
 
   Double_t value = 0.;
 
 
-  path_gamma = sqrt(pow(pp[10] - neu_vtx[0],2) + pow(pp[11] - neu_vtx[1],2) + pow(pp[12] - neu_vtx[2],2));
+  path_gamma = std::sqrt(std::pow(pp[10] - neu_vtx[0],2) + std::pow(pp[11] - neu_vtx[1],2) + std::pow(pp[12] - neu_vtx[2],2));
   time_gamma = path_gamma/PhysicsConstants::cVel;
 
   time_diff = time_gamma + time_kaon - pp[13];
@@ -236,16 +236,16 @@ Double_t kin_fits::cluster_time_cons_second(const Double_t *xx, const Double_t *
 
   Double_t path_gamma, time_gamma, path_kaon, vK, time_kaon, time_diff;
 
-  path_kaon = sqrt(pow(neu_vtx[0] - ip_vtx[0],2) + pow(neu_vtx[1] - ip_vtx[1],2) + pow(neu_vtx[2] - ip_vtx[2],2));
-  vK = PhysicsConstants::cVel*sqrt(pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0], 2) + 
-                  pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1], 2) +
-                  pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2], 2))/(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3]);
+  path_kaon = std::sqrt(std::pow(neu_vtx[0] - ip_vtx[0],2) + std::pow(neu_vtx[1] - ip_vtx[1],2) + std::pow(neu_vtx[2] - ip_vtx[2],2));
+  vK = PhysicsConstants::cVel*std::sqrt(std::pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0], 2) + 
+                  std::pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1], 2) +
+                  std::pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2], 2))/(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3]);
 
   time_kaon = path_kaon/vK;
 
   Double_t value = 0.;
 
-  path_gamma = sqrt(pow(pp[15] - neu_vtx[0],2) + pow(pp[16] - neu_vtx[1],2) + pow(pp[17] - neu_vtx[2],2));
+  path_gamma = std::sqrt(std::pow(pp[15] - neu_vtx[0],2) + std::pow(pp[16] - neu_vtx[1],2) + std::pow(pp[17] - neu_vtx[2],2));
   time_gamma = path_gamma/PhysicsConstants::cVel;
 
   time_diff = time_gamma + time_kaon - pp[18];
@@ -273,16 +273,16 @@ Double_t kin_fits::cluster_time_cons_third(const Double_t *xx, const Double_t *p
 
   Double_t path_gamma, time_gamma, path_kaon, vK, time_kaon, time_diff;
 
-  path_kaon = sqrt(pow(neu_vtx[0] - ip_vtx[0],2) + pow(neu_vtx[1] - ip_vtx[1],2) + pow(neu_vtx[2] - ip_vtx[2],2));
-  vK = PhysicsConstants::cVel*sqrt(pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0], 2) + 
-                  pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1], 2) +
-                  pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2], 2))/(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3]);
+  path_kaon = std::sqrt(std::pow(neu_vtx[0] - ip_vtx[0],2) + std::pow(neu_vtx[1] - ip_vtx[1],2) + std::pow(neu_vtx[2] - ip_vtx[2],2));
+  vK = PhysicsConstants::cVel*std::sqrt(std::pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0], 2) + 
+                  std::pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1], 2) +
+                  std::pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2], 2))/(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3]);
 
   time_kaon = path_kaon/vK;
 
   Double_t value = 0.;
 
-  path_gamma = sqrt(pow(pp[20] - neu_vtx[0],2) + pow(pp[21] - neu_vtx[1],2) + pow(pp[22] - neu_vtx[2],2));
+  path_gamma = std::sqrt(std::pow(pp[20] - neu_vtx[0],2) + std::pow(pp[21] - neu_vtx[1],2) + std::pow(pp[22] - neu_vtx[2],2));
   time_gamma = path_gamma/PhysicsConstants::cVel;
 
   time_diff = time_gamma + time_kaon - pp[23];
@@ -310,16 +310,16 @@ Double_t kin_fits::cluster_time_cons_fourth(const Double_t *xx, const Double_t *
 
   Double_t path_gamma, time_gamma, path_kaon, vK, time_kaon, time_diff;
 
-  path_kaon = sqrt(pow(neu_vtx[0] - ip_vtx[0],2) + pow(neu_vtx[1] - ip_vtx[1],2) + pow(neu_vtx[2] - ip_vtx[2],2));
-  vK = PhysicsConstants::cVel*sqrt(pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0], 2) + 
-                  pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1], 2) +
-                  pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2], 2))/(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3]);
+  path_kaon = std::sqrt(std::pow(neu_vtx[0] - ip_vtx[0],2) + std::pow(neu_vtx[1] - ip_vtx[1],2) + std::pow(neu_vtx[2] - ip_vtx[2],2));
+  vK = PhysicsConstants::cVel*std::sqrt(std::pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0], 2) + 
+                  std::pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1], 2) +
+                  std::pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2], 2))/(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3]);
 
   time_kaon = path_kaon/vK;
 
   Double_t value = 0.;
 
-  path_gamma = sqrt(pow(pp[25] - neu_vtx[0],2) + pow(pp[26] - neu_vtx[1],2) + pow(pp[27] - neu_vtx[2],2));
+  path_gamma = std::sqrt(std::pow(pp[25] - neu_vtx[0],2) + std::pow(pp[26] - neu_vtx[1],2) + std::pow(pp[27] - neu_vtx[2],2));
   time_gamma = path_gamma/PhysicsConstants::cVel;
 
   time_diff = time_gamma + time_kaon - pp[28];
@@ -346,10 +346,10 @@ Double_t kin_fits::minv_neu_cons(const Double_t *xx, const Double_t *pp)
 
   Double_t value = 0.;
 
-  value = sqrt(pow(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3],2) - 
-               pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0],2) -
-               pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1],2) -
-               pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2],2)) - PhysicsConstants::mK0;
+  value = std::sqrt(std::pow(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3],2) - 
+               std::pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0],2) -
+               std::pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1],2) -
+               std::pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2],2)) - PhysicsConstants::mK0;
 
   return value;
 
@@ -371,10 +371,10 @@ Double_t kin_fits::minv_ch_cons(const Double_t *xx, const Double_t *pp)
 
   Double_t value = 0.;
 
-  value = sqrt(pow(mom_ch[0][3] + mom_ch[1][3], 2) - 
-               pow(mom_ch[0][0] + mom_ch[1][0], 2) -
-               pow(mom_ch[0][1] + mom_ch[1][1], 2) -
-               pow(mom_ch[0][2] + mom_ch[1][2], 2)) - PhysicsConstants::mK0;
+  value = std::sqrt(std::pow(mom_ch[0][3] + mom_ch[1][3], 2) - 
+               std::pow(mom_ch[0][0] + mom_ch[1][0], 2) -
+               std::pow(mom_ch[0][1] + mom_ch[1][1], 2) -
+               std::pow(mom_ch[0][2] + mom_ch[1][2], 2)) - PhysicsConstants::mK0;
 
   return value;
 
@@ -415,9 +415,9 @@ Double_t kin_fits::tri_kaon_path(const Double_t *xx, const Double_t *pp)
   neutral_mom(pp[10], pp[11], pp[12], pp[14], neu_vtx_tri, mom_neu[2]);
   neutral_mom(pp[15], pp[16], pp[17], pp[19], neu_vtx_tri, mom_neu[3]);
 
-  vK = PhysicsConstants::cVel * sqrt(pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0],2) + pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1],2) + pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2],2))/(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3]);
+  vK = PhysicsConstants::cVel * std::sqrt(std::pow(mom_neu[0][0] + mom_neu[1][0] + mom_neu[2][0] + mom_neu[3][0],2) + std::pow(mom_neu[0][1] + mom_neu[1][1] + mom_neu[2][1] + mom_neu[3][1],2) + std::pow(mom_neu[0][2] + mom_neu[1][2] + mom_neu[2][2] + mom_neu[3][2],2))/(mom_neu[0][3] + mom_neu[1][3] + mom_neu[2][3] + mom_neu[3][3]);
 
-  path_length = sqrt(pow(neu_vtx_tri[0] - Phi_vtx[0],2) + pow(neu_vtx_tri[1] - Phi_vtx[1],2) + pow(neu_vtx_tri[2] - Phi_vtx[2],2));
+  path_length = std::sqrt(std::pow(neu_vtx_tri[0] - Phi_vtx[0],2) + std::pow(neu_vtx_tri[1] - Phi_vtx[1],2) + std::pow(neu_vtx_tri[2] - Phi_vtx[2],2));
 
   Double_t value = 0.;
 

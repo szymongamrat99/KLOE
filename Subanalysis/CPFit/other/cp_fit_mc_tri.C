@@ -77,11 +77,11 @@ void cp_fit(Bool_t check = false, TString mode = "")
 
         if(done4 == 1)// && Chi2 < 40 && std::abs(fourKnetri[5] - PhysicsConstants::mK0) < 76 && std::abs(Kchrec[5] - PhysicsConstants::mK0) < 1.2 && Qmiss < 3.75)
         {
-            velocity_kch = PhysicsConstants::cVel*sqrt(pow(Kchboost[0],2) + pow(Kchboost[1],2) + pow(Kchboost[2],2))/Kchboost[3];
+            velocity_kch = PhysicsConstants::cVel*std::sqrt(std::pow(Kchboost[0],2) + std::pow(Kchboost[1],2) + std::pow(Kchboost[2],2))/Kchboost[3];
 
-            velocity_kne = PhysicsConstants::cVel*sqrt(pow(fourKnetri[0],2) + pow(fourKnetri[1],2) + pow(fourKnetri[2],2))/fourKnetri[3];
+            velocity_kne = PhysicsConstants::cVel*std::sqrt(std::pow(fourKnetri[0],2) + std::pow(fourKnetri[1],2) + std::pow(fourKnetri[2],2))/fourKnetri[3];
 
-            Dtboostlor = ((sqrt(pow(Kchboost[6] - ip[0],2) + pow(Kchboost[7] - ip[1],2) + pow(Kchboost[8] - ip[2],2))/velocity_kch) - (sqrt(pow(fourKnetri[6] - ip[0],2) + pow(fourKnetri[7] - ip[1],2) + pow(fourKnetri[8] - ip[2],2))/velocity_kne))/PhysicsConstants::tau_S_nonCPT;
+            Dtboostlor = ((std::sqrt(std::pow(Kchboost[6] - ip[0],2) + std::pow(Kchboost[7] - ip[1],2) + std::pow(Kchboost[8] - ip[2],2))/velocity_kch) - (std::sqrt(std::pow(fourKnetri[6] - ip[0],2) + std::pow(fourKnetri[7] - ip[1],2) + std::pow(fourKnetri[8] - ip[2],2))/velocity_kne))/PhysicsConstants::tau_S_nonCPT;
 
             if(mcflag == 1)
             {

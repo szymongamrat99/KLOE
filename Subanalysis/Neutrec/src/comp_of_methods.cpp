@@ -589,30 +589,30 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
       {
 
-        lengthch_mc = sqrt(pow(baseKin.KchmcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KchmcOld[7] - baseKin.ipmcOld[1], 2) + pow(baseKin.KchmcOld[8] - baseKin.ipmcOld[2], 2));
-        Rtch_mc = sqrt(pow(baseKin.KchmcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KchmcOld[7] - baseKin.ipmcOld[1], 2));
-        lengthneu_mc = sqrt(pow(baseKin.KnemcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KnemcOld[7] - baseKin.ipmcOld[1], 2) + pow(baseKin.KnemcOld[8] - baseKin.ipmcOld[2], 2));
-        Rtneu_mc = sqrt(pow(baseKin.KnemcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KnemcOld[7] - baseKin.ipmcOld[1], 2));
+        lengthch_mc = std::sqrt(std::pow(baseKin.KchmcOld[6] - baseKin.ipmcOld[0], 2) + std::pow(baseKin.KchmcOld[7] - baseKin.ipmcOld[1], 2) + std::pow(baseKin.KchmcOld[8] - baseKin.ipmcOld[2], 2));
+        Rtch_mc = std::sqrt(std::pow(baseKin.KchmcOld[6] - baseKin.ipmcOld[0], 2) + std::pow(baseKin.KchmcOld[7] - baseKin.ipmcOld[1], 2));
+        lengthneu_mc = std::sqrt(std::pow(baseKin.KnemcOld[6] - baseKin.ipmcOld[0], 2) + std::pow(baseKin.KnemcOld[7] - baseKin.ipmcOld[1], 2) + std::pow(baseKin.KnemcOld[8] - baseKin.ipmcOld[2], 2));
+        Rtneu_mc = std::sqrt(std::pow(baseKin.KnemcOld[6] - baseKin.ipmcOld[0], 2) + std::pow(baseKin.KnemcOld[7] - baseKin.ipmcOld[1], 2));
       }
       else if (baseKin.mctruth == 6)
       {
-        lengthch_mc = sqrt(pow(Kchmc_bcg[6] - ipmc_bcg[0], 2) + pow(Kchmc_bcg[7] - ipmc_bcg[1], 2) + pow(Kchmc_bcg[8] - ipmc_bcg[2], 2));
-        lengthneu_mc = sqrt(pow(Knemc_bcg[6] - ipmc_bcg[0], 2) + pow(Knemc_bcg[7] - ipmc_bcg[1], 2) + pow(Knemc_bcg[8] - ipmc_bcg[2], 2));
-        Rtneu_mc = sqrt(pow(Knemc_bcg[6] - ipmc_bcg[0], 2) + pow(Knemc_bcg[7] - ipmc_bcg[1], 2));
+        lengthch_mc = std::sqrt(std::pow(Kchmc_bcg[6] - ipmc_bcg[0], 2) + std::pow(Kchmc_bcg[7] - ipmc_bcg[1], 2) + std::pow(Kchmc_bcg[8] - ipmc_bcg[2], 2));
+        lengthneu_mc = std::sqrt(std::pow(Knemc_bcg[6] - ipmc_bcg[0], 2) + std::pow(Knemc_bcg[7] - ipmc_bcg[1], 2) + std::pow(Knemc_bcg[8] - ipmc_bcg[2], 2));
+        Rtneu_mc = std::sqrt(std::pow(Knemc_bcg[6] - ipmc_bcg[0], 2) + std::pow(Knemc_bcg[7] - ipmc_bcg[1], 2));
       }
 
-      lengthch_rec = sqrt(pow(baseKin.Kchrec[6] - baseKin.ip[0], 2) + pow(baseKin.Kchrec[7] - baseKin.ip[1], 2) + pow(baseKin.Kchrec[8] - baseKin.ip[2], 2));
+      lengthch_rec = std::sqrt(std::pow(baseKin.Kchrec[6] - baseKin.ip[0], 2) + std::pow(baseKin.Kchrec[7] - baseKin.ip[1], 2) + std::pow(baseKin.Kchrec[8] - baseKin.ip[2], 2));
 
-      lengthneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2) + pow(Knetri_kinfit[8] - ip_kinfit[2], 2));
-      lengthneu_rec = sqrt(pow(Knereclor[6] - baseKin.ip[0], 2) + pow(Knereclor[7] - baseKin.ip[1], 2) + pow(Knereclor[8] - baseKin.ip[2], 2));
+      lengthneu_tri = std::sqrt(std::pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + std::pow(Knetri_kinfit[7] - ip_kinfit[1], 2) + std::pow(Knetri_kinfit[8] - ip_kinfit[2], 2));
+      lengthneu_rec = std::sqrt(std::pow(Knereclor[6] - baseKin.ip[0], 2) + std::pow(Knereclor[7] - baseKin.ip[1], 2) + std::pow(Knereclor[8] - baseKin.ip[2], 2));
 
       //
       // Kaon transverse radius
-      // Rtneu_mc = sqrt(pow(baseKin.KnemcOld[6] - baseKin.ipmcOld[0], 2) + pow(baseKin.KnemcOld[7] - baseKin.ipmcOld[1], 2));
-      Rtneu_tri = sqrt(pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + pow(Knetri_kinfit[7] - ip_kinfit[1], 2));
-      Rtneu_rec = sqrt(pow(Knereclor[6] - baseKin.ip[0], 2) + pow(Knereclor[7] - baseKin.ip[1], 2));
+      // Rtneu_mc = std::sqrt(std::pow(baseKin.KnemcOld[6] - baseKin.ipmcOld[0], 2) + std::pow(baseKin.KnemcOld[7] - baseKin.ipmcOld[1], 2));
+      Rtneu_tri = std::sqrt(std::pow(Knetri_kinfit[6] - ip_kinfit[0], 2) + std::pow(Knetri_kinfit[7] - ip_kinfit[1], 2));
+      Rtneu_rec = std::sqrt(std::pow(Knereclor[6] - baseKin.ip[0], 2) + std::pow(Knereclor[7] - baseKin.ip[1], 2));
 
-      Rtch_rec = sqrt(pow(baseKin.Kchrec[6] - baseKin.ip[0], 2) + pow(baseKin.Kchrec[7] - baseKin.ip[1], 2));
+      Rtch_rec = std::sqrt(std::pow(baseKin.Kchrec[6] - baseKin.ip[0], 2) + std::pow(baseKin.Kchrec[7] - baseKin.ip[1], 2));
       //
       // Kaon velocity
       if (baseKin.mctruth == 1 || baseKin.mctruth == 2)
@@ -627,7 +627,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
       else
         v_Kneumc = PhysicsConstants::cVel * Knemc_bcg[4] / Knemc_bcg[3];
 
-      v_Kneutri = PhysicsConstants::cVel * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)) / Knetri_kinfit[3];
+      v_Kneutri = PhysicsConstants::cVel * std::sqrt(std::pow(Knetri_kinfit[0], 2) + std::pow(Knetri_kinfit[1], 2) + std::pow(Knetri_kinfit[2], 2)) / Knetri_kinfit[3];
       v_Kneurec = PhysicsConstants::cVel * Knereclor[4] / Knereclor[3];
       //
       // Kaon flight times
@@ -641,7 +641,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
       //
       // Angle between vector between IP and neuvtx and Kaon's momentum vector
-      cos_path_mom = ((Knetri_kinfit[6] - ip_kinfit[0]) * Knetri_kinfit[0] + (Knetri_kinfit[7] - ip_kinfit[1]) * Knetri_kinfit[1] + (Knetri_kinfit[8] - ip_kinfit[2]) * Knetri_kinfit[2]) / (lengthneu_tri * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)));
+      cos_path_mom = ((Knetri_kinfit[6] - ip_kinfit[0]) * Knetri_kinfit[0] + (Knetri_kinfit[7] - ip_kinfit[1]) * Knetri_kinfit[1] + (Knetri_kinfit[8] - ip_kinfit[2]) * Knetri_kinfit[2]) / (lengthneu_tri * std::sqrt(std::pow(Knetri_kinfit[0], 2) + std::pow(Knetri_kinfit[1], 2) + std::pow(Knetri_kinfit[2], 2)));
 
       angle_path_mom = M_PI * acos(cos_path_mom) / 180.;
       //
@@ -666,13 +666,13 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
       Obj.lorentz_transf(boost, vec_before, vec_after);
 
-      lengthneu_tri_CM = sqrt(pow(vec_after[0], 2) + pow(vec_after[1], 2) + pow(vec_after[2], 2));
+      lengthneu_tri_CM = std::sqrt(std::pow(vec_after[0], 2) + std::pow(vec_after[1], 2) + std::pow(vec_after[2], 2));
       v_Kneutri_CM = lengthneu_tri_CM / vec_after[3];
       //!
 
       // Boost - kaon momentum angle
 
-      cos_boost_kaon_mom = (baseKin.phi_mom[0] * Knetri_kinfit[0] + baseKin.phi_mom[1] * Knetri_kinfit[1] + baseKin.phi_mom[2] * Knetri_kinfit[2]) / (sqrt(pow(baseKin.phi_mom[0], 2) + pow(baseKin.phi_mom[1], 2) + pow(baseKin.phi_mom[2], 2)) * sqrt(pow(Knetri_kinfit[0], 2) + pow(Knetri_kinfit[1], 2) + pow(Knetri_kinfit[2], 2)));
+      cos_boost_kaon_mom = (baseKin.phi_mom[0] * Knetri_kinfit[0] + baseKin.phi_mom[1] * Knetri_kinfit[1] + baseKin.phi_mom[2] * Knetri_kinfit[2]) / (std::sqrt(std::pow(baseKin.phi_mom[0], 2) + std::pow(baseKin.phi_mom[1], 2) + std::pow(baseKin.phi_mom[2], 2)) * std::sqrt(std::pow(Knetri_kinfit[0], 2) + std::pow(Knetri_kinfit[1], 2) + std::pow(Knetri_kinfit[2], 2)));
 
       angle_boost_kaon_mom = 180. * acos(cos_boost_kaon_mom) / M_PI;
 
@@ -693,21 +693,21 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
                      gamma_kinfit[k1][1] * gamma_kinfit[k2][1] +
                      gamma_kinfit[k1][2] * gamma_kinfit[k2][2]);
 
-              den = sqrt(pow(gamma_kinfit[k1][0], 2) +
-                         pow(gamma_kinfit[k1][1], 2) +
-                         pow(gamma_kinfit[k1][2], 2)) *
-                    sqrt(pow(gamma_kinfit[k2][0], 2) +
-                         pow(gamma_kinfit[k2][1], 2) +
-                         pow(gamma_kinfit[k2][2], 2));
+              den = std::sqrt(std::pow(gamma_kinfit[k1][0], 2) +
+                         std::pow(gamma_kinfit[k1][1], 2) +
+                         std::pow(gamma_kinfit[k1][2], 2)) *
+                    std::sqrt(std::pow(gamma_kinfit[k2][0], 2) +
+                         std::pow(gamma_kinfit[k2][1], 2) +
+                         std::pow(gamma_kinfit[k2][2], 2));
 
               cos_tmp = num / den;
 
               angle[count_angle] = 180. * acos(cos_tmp) / M_PI;
               angle_180[count_angle] = 180 - angle[count_angle];
 
-              dist[count_angle] = sqrt(pow(gamma_kinfit[k1][4] - gamma_kinfit[k2][4], 2) +
-                                       pow(gamma_kinfit[k1][5] - gamma_kinfit[k2][5], 2) +
-                                       pow(gamma_kinfit[k1][6] - gamma_kinfit[k2][6], 2));
+              dist[count_angle] = std::sqrt(std::pow(gamma_kinfit[k1][4] - gamma_kinfit[k2][4], 2) +
+                                       std::pow(gamma_kinfit[k1][5] - gamma_kinfit[k2][5], 2) +
+                                       std::pow(gamma_kinfit[k1][6] - gamma_kinfit[k2][6], 2));
               count_angle++;
             }
 
@@ -742,17 +742,17 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
           Float_t
               costrk_num = trk_after[0][0] * trk_after[1][0] + trk_after[0][1] * trk_after[1][1] + trk_after[0][2] * trk_after[1][2],
-              costrk_den = sqrt(pow(trk_after[0][0], 2) + pow(trk_after[0][1], 2) + pow(trk_after[0][2], 2)) * sqrt(pow(trk_after[1][0], 2) + pow(trk_after[1][1], 2) + pow(trk_after[1][2], 2)),
+              costrk_den = std::sqrt(std::pow(trk_after[0][0], 2) + std::pow(trk_after[0][1], 2) + std::pow(trk_after[0][2], 2)) * std::sqrt(std::pow(trk_after[1][0], 2) + std::pow(trk_after[1][1], 2) + std::pow(trk_after[1][2], 2)),
               costrk = costrk_num / costrk_den;
 
           Bool_t
               cut_trcsum = 1,   //= trcsum > -1.,
               cut_Kneuminv = 1, //= (minv4gam - PhysicsConstants::mK0) < 76,
               cut_Kchminv = 1,  //= (baseKin.Kchrec[5] - PhysicsConstants::mK0) < 1.2,
-              cut_Qmiss = 1,    //= sqrt(pow(baseKin.Kchboost[3] - baseKin.Kchrec[3], 2) +
-                                //  pow(baseKin.Kchboost[0] - baseKin.Kchrec[0], 2) +
-                                //  pow(baseKin.Kchboost[1] - baseKin.Kchrec[1], 2) +
-                                //  pow(baseKin.Kchboost[2] - baseKin.Kchrec[2], 2)) < 3.75,
+              cut_Qmiss = 1,    //= std::sqrt(std::pow(baseKin.Kchboost[3] - baseKin.Kchrec[3], 2) +
+                                //  std::pow(baseKin.Kchboost[0] - baseKin.Kchrec[0], 2) +
+                                //  std::pow(baseKin.Kchboost[1] - baseKin.Kchrec[1], 2) +
+                                //  std::pow(baseKin.Kchboost[2] - baseKin.Kchrec[2], 2)) < 3.75,
               cut_costrk = 1;   //= costrk < -0.8;
 
           if (j == 0 /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
@@ -924,7 +924,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
             pulls[j][9]->Fill(lengthneu_tri - lengthneu_mc);
           }
 
-          d_cl = sqrt(pow(baseKin.cluster[0][0] - baseKin.bhabha_vtx[0], 2) + pow(baseKin.cluster[1][0] - baseKin.bhabha_vtx[1], 2) + pow(baseKin.cluster[2][0] - baseKin.bhabha_vtx[2], 2));
+          d_cl = std::sqrt(std::pow(baseKin.cluster[0][0] - baseKin.bhabha_vtx[0], 2) + std::pow(baseKin.cluster[1][0] - baseKin.bhabha_vtx[1], 2) + std::pow(baseKin.cluster[2][0] - baseKin.bhabha_vtx[2], 2));
 
           if (isEqual >= 0 && chosen_bunch /*&& (lengthneu_tri < 50 && lengthch_rec < 50)*/ && (errId > 3 || errId == 0) && done_kinfit == 1 && cut_trcsum && cut_Kneuminv && cut_Kchminv && cut_Qmiss && cut_costrk)
           {
@@ -943,7 +943,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
             for (Int_t k = 0; k < 4; k++)
             {
-              tcl = gamma_kinfit[k][7] - (sqrt(pow(gamma_kinfit[k][4] - Knetri_kinfit[6], 2) + pow(gamma_kinfit[k][5] - Knetri_kinfit[7], 2) + pow(gamma_kinfit[k][6] - Knetri_kinfit[8], 2)) / PhysicsConstants::cVel) - t_neutri;
+              tcl = gamma_kinfit[k][7] - (std::sqrt(std::pow(gamma_kinfit[k][4] - Knetri_kinfit[6], 2) + std::pow(gamma_kinfit[k][5] - Knetri_kinfit[7], 2) + std::pow(gamma_kinfit[k][6] - Knetri_kinfit[8], 2)) / PhysicsConstants::cVel) - t_neutri;
               tcl_hist[j]->Fill(tcl);
 
               cluscorr_hist[j][0]->Fill(gamma_kinfit[0][4], gamma_kinfit[1][4]);
@@ -1030,7 +1030,7 @@ Int_t CompOfMethods(TChain &chain, Controls::DataType &dataType, ErrorHandling::
 
   Float_t parameter[3];
 
-  TF1 *func = new TF1("f1", "[0]*exp(-0.5*pow((x-[1])/[2],2))", -200, 200);
+  TF1 *func = new TF1("f1", "[0]*exp(-0.5*std::pow((x-[1])/[2],2))", -200, 200);
   func->SetParNames("Constant", "Mean", "Sigma");
 
   Color_t res_color[5] = {kRed, kBlue, kGreen, kBlack, kBlack};

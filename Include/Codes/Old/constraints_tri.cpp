@@ -119,7 +119,7 @@ Double_t minv_consv(Double_t *x, Double_t *p)
       kaon_mom[2] = gamma_mom[0][2] + gamma_mom[1][2] + gamma_mom[2][2] + gamma_mom[3][2];
       kaon_mom[3] = gamma_mom[0][3] + gamma_mom[1][3] + gamma_mom[2][3] + gamma_mom[3][3];
 
-      inv_mass_kaon = sqrt(pow(kaon_mom[3], 2) - pow(kaon_mom[0], 2) - pow(kaon_mom[1], 2) - pow(kaon_mom[2], 2));
+      inv_mass_kaon = std::sqrt(std::pow(kaon_mom[3], 2) - std::pow(kaon_mom[0], 2) - std::pow(kaon_mom[1], 2) - std::pow(kaon_mom[2], 2));
 
       value[i] = inv_mass_kaon - PhysicsConstants::mK0;
     }
@@ -199,8 +199,8 @@ Double_t x_consv(Double_t *x, Double_t *p)
       kaon_vel[1] = PhysicsConstants::cVel * kaon_mom[1] / kaon_mom[3];
       kaon_vel[2] = PhysicsConstants::cVel * kaon_mom[2] / kaon_mom[3];
 
-      tot_length = sqrt(pow(dist[0], 2) + pow(dist[1], 2) + pow(dist[2], 2));
-      tot_vel = sqrt(pow(kaon_vel[0], 2) + pow(kaon_vel[1], 2) + pow(kaon_vel[2], 2));
+      tot_length = std::sqrt(std::pow(dist[0], 2) + std::pow(dist[1], 2) + std::pow(dist[2], 2));
+      tot_vel = std::sqrt(std::pow(kaon_vel[0], 2) + std::pow(kaon_vel[1], 2) + std::pow(kaon_vel[2], 2));
 
       value[i] = neu_vtx[3] - (dist[0] / kaon_vel[0]);
     }
@@ -428,7 +428,7 @@ Double_t gamma1_consv(Double_t *x, Double_t *p)
       if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
-      Float_t gamma_path = sqrt(pow(p[0] - neu_vtx[0], 2) + pow(p[1] - neu_vtx[1], 2) + pow(p[2] - neu_vtx[2], 2));
+      Float_t gamma_path = std::sqrt(std::pow(p[0] - neu_vtx[0], 2) + std::pow(p[1] - neu_vtx[1], 2) + std::pow(p[2] - neu_vtx[2], 2));
 
       value[i] = p[3] + T0 - (gamma_path / PhysicsConstants::cVel) - neu_vtx[3];
     }
@@ -500,7 +500,7 @@ Double_t gamma2_consv(Double_t *x, Double_t *p)
       if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
-      Float_t gamma_path = sqrt(pow(p[5] - neu_vtx[0], 2) + pow(p[6] - neu_vtx[1], 2) + pow(p[7] - neu_vtx[2], 2));
+      Float_t gamma_path = std::sqrt(std::pow(p[5] - neu_vtx[0], 2) + std::pow(p[6] - neu_vtx[1], 2) + std::pow(p[7] - neu_vtx[2], 2));
 
       value[i] = p[8] + T0 - (gamma_path / PhysicsConstants::cVel) - neu_vtx[3];
     }
@@ -572,7 +572,7 @@ Double_t gamma3_consv(Double_t *x, Double_t *p)
       if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
-      Float_t gamma_path = sqrt(pow(p[10] - neu_vtx[0], 2) + pow(p[11] - neu_vtx[1], 2) + pow(p[12] - neu_vtx[2], 2));
+      Float_t gamma_path = std::sqrt(std::pow(p[10] - neu_vtx[0], 2) + std::pow(p[11] - neu_vtx[1], 2) + std::pow(p[12] - neu_vtx[2], 2));
 
       value[i] = p[13] + T0 - (gamma_path / PhysicsConstants::cVel) - neu_vtx[3];
     }
@@ -644,7 +644,7 @@ Double_t gamma4_consv(Double_t *x, Double_t *p)
       if (std::abs(p[26] - ip[2]) > 2)
         ip[2] = p[26];
 
-      Float_t gamma_path = sqrt(pow(p[15] - neu_vtx[0], 2) + pow(p[16] - neu_vtx[1], 2) + pow(p[17] - neu_vtx[2], 2));
+      Float_t gamma_path = std::sqrt(std::pow(p[15] - neu_vtx[0], 2) + std::pow(p[16] - neu_vtx[1], 2) + std::pow(p[17] - neu_vtx[2], 2));
 
       value[i] = p[18] + T0 - (gamma_path / PhysicsConstants::cVel) - neu_vtx[3];
     }

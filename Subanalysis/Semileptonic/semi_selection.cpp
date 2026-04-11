@@ -50,19 +50,19 @@ void semi_selection(UInt_t filenumber = 1, TString directory = "230531_data", TS
         if(1)
         {
             //Lorentz invariant quantity
-            Qmiss_inv = sqrt( pow(Kchboost[3] - Kchrec[3], 2) -
-                        pow(Kchboost[0] - Kchrec[0], 2) -
-                        pow(Kchboost[1] - Kchrec[1], 2) -
-                        pow(Kchboost[2] - Kchrec[2], 2) );
+            Qmiss_inv = std::sqrt( std::pow(Kchboost[3] - Kchrec[3], 2) -
+                        std::pow(Kchboost[0] - Kchrec[0], 2) -
+                        std::pow(Kchboost[1] - Kchrec[1], 2) -
+                        std::pow(Kchboost[2] - Kchrec[2], 2) );
 
             //Another method to calculate charged kaon's momentum
             //Calculation using boosted variables, so semileptonic should be worse than others
 
-            kch_length_LAB = sqrt( pow(Kchboost[6] - ip[0],2) + pow(Kchboost[7] - ip[1],2) + pow(Kchboost[8] - ip[2],2) );
+            kch_length_LAB = std::sqrt( std::pow(Kchboost[6] - ip[0],2) + std::pow(Kchboost[7] - ip[1],2) + std::pow(Kchboost[8] - ip[2],2) );
 
-            Kchanother[0] = sqrt(pow(Kchboost[3],2) - pow(PhysicsConstants::mK0,2))*(Kchboost[6] - ip[0])/kch_length_LAB;
-            Kchanother[1] = sqrt(pow(Kchboost[3],2) - pow(PhysicsConstants::mK0,2))*(Kchboost[7] - ip[1])/kch_length_LAB;
-            Kchanother[2] = sqrt(pow(Kchboost[3],2) - pow(PhysicsConstants::mK0,2))*(Kchboost[8] - ip[2])/kch_length_LAB;
+            Kchanother[0] = std::sqrt(std::pow(Kchboost[3],2) - std::pow(PhysicsConstants::mK0,2))*(Kchboost[6] - ip[0])/kch_length_LAB;
+            Kchanother[1] = std::sqrt(std::pow(Kchboost[3],2) - std::pow(PhysicsConstants::mK0,2))*(Kchboost[7] - ip[1])/kch_length_LAB;
+            Kchanother[2] = std::sqrt(std::pow(Kchboost[3],2) - std::pow(PhysicsConstants::mK0,2))*(Kchboost[8] - ip[2])/kch_length_LAB;
             Kchanother[3] = Kchboost[3];
 
             //Initialization of Lorentz vectors
@@ -107,8 +107,8 @@ void semi_selection(UInt_t filenumber = 1, TString directory = "230531_data", TS
             pich2_mom.Boost(boost_kaon);
             kchanother_mom.Boost(boost_kaon);
 
-            pich1_momlength = sqrt(pow(pich1_mom(0),2)+pow(pich1_mom(1),2)+pow(pich1_mom(2),2));
-            pich2_momlength = sqrt(pow(pich2_mom(0),2)+pow(pich2_mom(1),2)+pow(pich2_mom(2),2));
+            pich1_momlength = std::sqrt(std::pow(pich1_mom(0),2)+std::pow(pich1_mom(1),2)+std::pow(pich1_mom(2),2));
+            pich2_momlength = std::sqrt(std::pow(pich2_mom(0),2)+std::pow(pich2_mom(1),2)+std::pow(pich2_mom(2),2));
 
             denominator = pich1_momlength*pich2_momlength;
             nominator = pich1_mom(0)*pich2_mom(0) + pich1_mom(1)*pich2_mom(1) + pich1_mom(2)*pich2_mom(2);

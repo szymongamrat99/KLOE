@@ -174,22 +174,22 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 
 	auto getAngleZAxis = [](ROOT::RVec<Float_t> &v)
 	{
-		return acos(v[2] / sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2], 2))) * 180. / M_PI;
+		return acos(v[2] / std::sqrt(std::pow(v[0], 2) + std::pow(v[1], 2) + std::pow(v[2], 2))) * 180. / M_PI;
 	};
 
 	auto getAngleVector = [](ROOT::RVec<Float_t> &v, ROOT::RVec<Float_t> &w)
 	{
-		return acos((v[0] * w[0] + v[1] * w[1] + v[2] * w[2]) / (sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2], 2)) * sqrt(pow(w[0], 2) + pow(w[1], 2) + pow(w[2], 2)))) * 180. / M_PI;
+		return acos((v[0] * w[0] + v[1] * w[1] + v[2] * w[2]) / (std::sqrt(std::pow(v[0], 2) + std::pow(v[1], 2) + std::pow(v[2], 2)) * std::sqrt(std::pow(w[0], 2) + std::pow(w[1], 2) + std::pow(w[2], 2)))) * 180. / M_PI;
 	};
 
 	auto getAngleComponents = [](ROOT::RVec<Float_t> &v, Float_t w1, Float_t w2, Float_t w3)
 	{
-		return acos((v[0] * w1 + v[1] * w2 + v[2] * w3) / (sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2], 2)) * sqrt(pow(w1, 2) + pow(w2, 2) + pow(w3, 2)))) * 180. / M_PI;
+		return acos((v[0] * w1 + v[1] * w2 + v[2] * w3) / (std::sqrt(std::pow(v[0], 2) + std::pow(v[1], 2) + std::pow(v[2], 2)) * std::sqrt(std::pow(w1, 2) + std::pow(w2, 2) + std::pow(w3, 2)))) * 180. / M_PI;
 	};
 
 	auto getDistanceComponents = [](ROOT::RVec<Float_t> &v, Float_t w1, Float_t w2, Float_t w3)
 	{
-		return sqrt(pow(v[0] - w1, 2) + pow(v[1] - w2, 2) + pow(v[2] - w3, 2));
+		return std::sqrt(std::pow(v[0] - w1, 2) + std::pow(v[1] - w2, 2) + std::pow(v[2] - w3, 2));
 	};
 
 	auto setLorentzVectorMom = [](ROOT::RVec<Float_t> &v)
@@ -216,8 +216,8 @@ int plotsNorm(int first_file, int last_file, int loopcount, int M, int range, Co
 	auto getTimeCh = [](ROOT::RVec<Float_t> &v, ROOT::RVec<Float_t> &w)
 	{
 		Float_t 
-			boost = PhysicsConstants::cVel * sqrt(pow(v[0], 2) + pow(v[1], 2) + pow(v[2], 2)) / v[3],
-			time = sqrt(pow(v[6] - w[0], 2) + pow(v[7] - w[1], 2) + pow(v[8] - w[2], 2)) / boost;
+			boost = PhysicsConstants::cVel * std::sqrt(std::pow(v[0], 2) + std::pow(v[1], 2) + std::pow(v[2], 2)) / v[3],
+			time = std::sqrt(std::pow(v[6] - w[0], 2) + std::pow(v[7] - w[1], 2) + std::pow(v[8] - w[2], 2)) / boost;
 
 		return time;
 	};

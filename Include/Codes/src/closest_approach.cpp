@@ -13,7 +13,7 @@ void closest_approach(Double_t point1[3], Double_t vector1[3],
     n[1] = vector1[2]*vector2[0] - vector1[0]*vector2[2];
     n[2] = vector1[0]*vector2[1] - vector1[1]*vector2[0];
 
-    n_len_2 = pow(n[0],2) + pow(n[1],2) + pow(n[2],2);
+    n_len_2 = std::pow(n[0],2) + std::pow(n[1],2) + std::pow(n[2],2);
 
     vector1xn[0] = vector1[1]*n[2] - vector1[2]*n[1];
     vector1xn[1] = vector1[2]*n[0] - vector1[0]*n[2];

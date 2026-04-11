@@ -191,9 +191,9 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 		{
 			std::cout << 100 * i / (Float_t)nentries << "% done" << std::endl;
 
-			lengthKch = sqrt(pow(baseKin.Kchrec[6] - bhabha_vtx[0], 2) +
-											 pow(baseKin.Kchrec[7] - bhabha_vtx[1], 2) +
-											 pow(baseKin.Kchrec[8] - bhabha_vtx[2], 2));
+			lengthKch = std::sqrt(std::pow(baseKin.Kchrec[6] - bhabha_vtx[0], 2) +
+											 std::pow(baseKin.Kchrec[7] - bhabha_vtx[1], 2) +
+											 std::pow(baseKin.Kchrec[8] - bhabha_vtx[2], 2));
 
 			for (Int_t j1 = 0; j1 < nclu - 3; j1++)
 				for (Int_t j2 = j1 + 1; j2 < nclu - 2; j2++)
@@ -219,17 +219,17 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 							for (Int_t k = 0; k < 4; k++)
 							{
 								lengthPhoton[k] = cluster[3][baseKin.ncll[ind_gam[k]] - 1] -
-																	(sqrt(pow(cluster[0][baseKin.ncll[ind_gam[k]] - 1] - bhabha_vtx[0], 2) +
-																				pow(cluster[1][baseKin.ncll[ind_gam[k]] - 1] - bhabha_vtx[1], 2) +
-																				pow(cluster[2][baseKin.ncll[ind_gam[k]] - 1] - baseKin.Kchrec[8], 2)) /
+																	(std::sqrt(std::pow(cluster[0][baseKin.ncll[ind_gam[k]] - 1] - bhabha_vtx[0], 2) +
+																				std::pow(cluster[1][baseKin.ncll[ind_gam[k]] - 1] - bhabha_vtx[1], 2) +
+																				std::pow(cluster[2][baseKin.ncll[ind_gam[k]] - 1] - baseKin.Kchrec[8], 2)) /
 																	 PhysicsConstants::cVel);
 
 								totEnergy += cluster[4][baseKin.ncll[ind_gam[k]] - 1];
 
-								lengthPhotonAvg += pow(cluster[4][baseKin.ncll[ind_gam[k]] - 1] * lengthPhoton[k],2);
+								lengthPhotonAvg += std::pow(cluster[4][baseKin.ncll[ind_gam[k]] - 1] * lengthPhoton[k],2);
 							}
 
-							lengthPhotonAvg = sqrt(lengthPhotonAvg) / totEnergy;
+							lengthPhotonAvg = std::sqrt(lengthPhotonAvg) / totEnergy;
 
 							if (std::abs(lengthPhotonAvg) < std::abs(lengthPhotonMinAvg) && cond_ene && cond_clus[0] && cond_clus[1] && cond_clus[2] && cond_clus[3])
 							{
@@ -277,7 +277,7 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 
 
 			Float_t 
-						kaonMomTot = sqrt(pow(kaonMom[0],2) + pow(kaonMom[1],2) + pow(kaonMom[2],2)),
+						kaonMomTot = std::sqrt(std::pow(kaonMom[0],2) + std::pow(kaonMom[1],2) + std::pow(kaonMom[2],2)),
 						kaonVelTot = PhysicsConstants::cVel *(kaonMomTot / kaonMom[3]);
 
 			neu_vtx_avg[0] = lengthPhotonMinAvg * kaonVelTot * (kaonMom[0]/kaonMomTot) + IP_vtx[0];
@@ -306,10 +306,10 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 			// Calculation of pi+pi-pi0 invariant mass - best option chosen by quadrature.
 			for (Int_t j = 0; j < 2; j++)
 			{
-				M_omega_tmp[j] = sqrt(pow(PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[j][3], 2) -
-															pow(PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[j][0], 2) -
-															pow(PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[j][1], 2) -
-															pow(PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[j][2], 2));
+				M_omega_tmp[j] = std::sqrt(std::pow(PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[j][3], 2) -
+															std::pow(PichFourMom[0][0] + PichFourMom[1][0] + Pi0Mom[j][0], 2) -
+															std::pow(PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[j][1], 2) -
+															std::pow(PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[j][2], 2));
 				M_omega_diff[j] = M_omega_tmp[j] - PhysicsConstants::mOmega;
 			}
 
@@ -327,22 +327,22 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 					Omegarec[1] = PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[0][1];
 					Omegarec[2] = PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[0][2];
 					Omegarec[3] = PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[0][3];
-					Omegarec[4] = sqrt(pow(Omegarec[0], 2) + pow(Omegarec[1], 2) + pow(Omegarec[2], 2));
+					Omegarec[4] = std::sqrt(std::pow(Omegarec[0], 2) + std::pow(Omegarec[1], 2) + std::pow(Omegarec[2], 2));
 					Omegarec[5] = M_omega_tmp[0];
 
 					Omegapi0[0] = Pi0Mom[0][0];
 					Omegapi0[1] = Pi0Mom[0][1];
 					Omegapi0[2] = Pi0Mom[0][2];
 					Omegapi0[3] = Pi0Mom[0][3];
-					Omegapi0[4] = sqrt(pow(Pi0Mom[0][0], 2) + pow(Pi0Mom[0][1], 2) + pow(Pi0Mom[0][2], 2));
-					Omegapi0[5] = sqrt(pow(Omegapi0[3], 2) - pow(Omegapi0[4], 2));
+					Omegapi0[4] = std::sqrt(std::pow(Pi0Mom[0][0], 2) + std::pow(Pi0Mom[0][1], 2) + std::pow(Pi0Mom[0][2], 2));
+					Omegapi0[5] = std::sqrt(std::pow(Omegapi0[3], 2) - std::pow(Omegapi0[4], 2));
 
 					Pi0[0] = Pi0Mom[1][0];
 					Pi0[1] = Pi0Mom[1][1];
 					Pi0[2] = Pi0Mom[1][2];
 					Pi0[3] = Pi0Mom[1][3];
-					Pi0[4] = sqrt(pow(Pi0Mom[1][0], 2) + pow(Pi0Mom[1][1], 2) + pow(Pi0Mom[1][2], 2));
-					Pi0[5] = sqrt(pow(Pi0[3], 2) - pow(Pi0[4], 2));
+					Pi0[4] = std::sqrt(std::pow(Pi0Mom[1][0], 2) + std::pow(Pi0Mom[1][1], 2) + std::pow(Pi0Mom[1][2], 2));
+					Pi0[5] = std::sqrt(std::pow(Pi0[3], 2) - std::pow(Pi0[4], 2));
 				}
 				else
 				{
@@ -350,22 +350,22 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 					Omegarec[1] = PichFourMom[0][1] + PichFourMom[1][1] + Pi0Mom[1][1];
 					Omegarec[2] = PichFourMom[0][2] + PichFourMom[1][2] + Pi0Mom[1][2];
 					Omegarec[3] = PichFourMom[0][3] + PichFourMom[1][3] + Pi0Mom[1][3];
-					Omegarec[4] = sqrt(pow(Omegarec[0], 2) + pow(Omegarec[1], 2) + pow(Omegarec[2], 2));
+					Omegarec[4] = std::sqrt(std::pow(Omegarec[0], 2) + std::pow(Omegarec[1], 2) + std::pow(Omegarec[2], 2));
 					Omegarec[5] = M_omega_tmp[1];
 
 					Omegapi0[0] = Pi0Mom[1][0];
 					Omegapi0[1] = Pi0Mom[1][1];
 					Omegapi0[2] = Pi0Mom[1][2];
 					Omegapi0[3] = Pi0Mom[1][3];
-					Omegapi0[4] = sqrt(pow(Pi0Mom[1][0], 2) + pow(Pi0Mom[1][1], 2) + pow(Pi0Mom[1][2], 2));
-					Omegapi0[5] = sqrt(pow(Omegapi0[3], 2) - pow(Omegapi0[4], 2));
+					Omegapi0[4] = std::sqrt(std::pow(Pi0Mom[1][0], 2) + std::pow(Pi0Mom[1][1], 2) + std::pow(Pi0Mom[1][2], 2));
+					Omegapi0[5] = std::sqrt(std::pow(Omegapi0[3], 2) - std::pow(Omegapi0[4], 2));
 
 					Pi0[0] = Pi0Mom[0][0];
 					Pi0[1] = Pi0Mom[0][1];
 					Pi0[2] = Pi0Mom[0][2];
 					Pi0[3] = Pi0Mom[0][3];
-					Pi0[4] = sqrt(pow(Pi0Mom[0][0], 2) + pow(Pi0Mom[0][1], 2) + pow(Pi0Mom[0][2], 2));
-					Pi0[5] = sqrt(pow(Pi0[3], 2) - pow(Pi0[4], 2));
+					Pi0[4] = std::sqrt(std::pow(Pi0Mom[0][0], 2) + std::pow(Pi0Mom[0][1], 2) + std::pow(Pi0Mom[0][2], 2));
+					Pi0[5] = std::sqrt(std::pow(Pi0[3], 2) - std::pow(Pi0[4], 2));
 				}
 
 				Float_t
@@ -426,9 +426,9 @@ int omegarec(Int_t first_file, Int_t last_file, Controls::DataType data_type)
 				anglePhiOmega = phi.Angle(omega) * 180. / M_PI;
 
 				rho_00 = 0.;
-				rho_00_IP = sqrt(pow(neu_vtx_avg[0] - IP_vtx[0], 2) + pow(neu_vtx_avg[1] - IP_vtx[1], 2));
-				rho_pm_IP = sqrt(pow(baseKin.Kchrec[6] - IP_vtx[0], 2) + pow(baseKin.Kchrec[7] - IP_vtx[1], 2));
-				rho = sqrt(pow(rho_00_IP, 2) + pow(rho_pm_IP, 2));
+				rho_00_IP = std::sqrt(std::pow(neu_vtx_avg[0] - IP_vtx[0], 2) + std::pow(neu_vtx_avg[1] - IP_vtx[1], 2));
+				rho_pm_IP = std::sqrt(std::pow(baseKin.Kchrec[6] - IP_vtx[0], 2) + std::pow(baseKin.Kchrec[7] - IP_vtx[1], 2));
+				rho = std::sqrt(std::pow(rho_00_IP, 2) + std::pow(rho_pm_IP, 2));
 			}
 		}
 

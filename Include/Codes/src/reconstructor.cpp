@@ -82,8 +82,8 @@ Solution Reconstructor::MySolve(Int_t *selected)
   // Double_t delta;
   // delta = p*p - 2.*denom*q;
 
-  S.sol[0][3] = (p - sqrt(p * p - 2. * denom * q)) / denom;
-  S.sol[1][3] = (p + sqrt(p * p - 2. * denom * q)) / denom;
+  S.sol[0][3] = (p - std::sqrt(p * p - 2. * denom * q)) / denom;
+  S.sol[1][3] = (p + std::sqrt(p * p - 2. * denom * q)) / denom;
 
   for (Int_t i = 0; i < 2; i++)
   {
@@ -129,7 +129,7 @@ Double_t rsq(const Double_t *x)
 
   for (Int_t i = 0; i < 6; i++)
   {
-    sum += pow(r->ResidualErr(i, x), 2.);
+    sum += std::pow(r->ResidualErr(i, x), 2.);
   }
   return sum;
 }
@@ -146,9 +146,9 @@ Solution Reconstructor::MinuitSolve(Double_t *x0)
 Double_t Reconstructor::ResidualErr(Int_t i, const Double_t *x)
 {
   Double_t err = 0;
-  err = sqrt(pow(_clu[i][0] - x[0], 2.) +
-             pow(_clu[i][1] - x[1], 2.) +
-             pow(_clu[i][2] - x[2], 2.)) -
+  err = std::sqrt(std::pow(_clu[i][0] - x[0], 2.) +
+             std::pow(_clu[i][1] - x[1], 2.) +
+             std::pow(_clu[i][2] - x[2], 2.)) -
         c * (_clu[i][3] - x[3]);
 
   return fabs(err);
@@ -206,9 +206,9 @@ Double_t Reconstructor::GetInvMasses(Double_t *sol, Int_t *comb,
     for (Int_t j = 0; j < 3; j++)
     { // over coordinates
       p[i][j] = _clu[i][j] - sol[j];
-      tot += pow(p[i][j], 2.);
+      tot += std::pow(p[i][j], 2.);
     }
-    tot = sqrt(tot);
+    tot = std::sqrt(tot);
     for (Int_t j = 0; j < 3; j++)
     { // over coordinates
       p[i][j] = p[i][j] * _ene[i] / tot;
@@ -218,17 +218,17 @@ Double_t Reconstructor::GetInvMasses(Double_t *sol, Int_t *comb,
   // calculate gg invariant masses
   for (Int_t i = 0; i < 3; i++)
   {
-    Minvgg[i] = sqrt(pow(_ene[comb[2 * i] - 1] + _ene[comb[2 * i + 1] - 1], 2.) -
-                     pow(p[comb[2 * i] - 1][0] + p[comb[2 * i + 1] - 1][0], 2.) -
-                     pow(p[comb[2 * i] - 1][1] + p[comb[2 * i + 1] - 1][1], 2.) -
-                     pow(p[comb[2 * i] - 1][2] + p[comb[2 * i + 1] - 1][2], 2.));
+    Minvgg[i] = std::sqrt(std::pow(_ene[comb[2 * i] - 1] + _ene[comb[2 * i + 1] - 1], 2.) -
+                     std::pow(p[comb[2 * i] - 1][0] + p[comb[2 * i + 1] - 1][0], 2.) -
+                     std::pow(p[comb[2 * i] - 1][1] + p[comb[2 * i + 1] - 1][1], 2.) -
+                     std::pow(p[comb[2 * i] - 1][2] + p[comb[2 * i + 1] - 1][2], 2.));
   }
 
   // calculate 6g invariant mass
-  Double_t M6g = sqrt(pow(_ene[0] + _ene[1] + _ene[2] + _ene[3] + _ene[4] + _ene[5], 2.) -
-                   pow(p[0][0] + p[1][0] + p[2][0] + p[3][0] + p[4][0] + p[5][0], 2.) -
-                   pow(p[0][1] + p[1][1] + p[2][1] + p[3][1] + p[4][1] + p[5][1], 2.) -
-                   pow(p[0][2] + p[1][2] + p[2][2] + p[3][2] + p[4][2] + p[5][2], 2.));
+  Double_t M6g = std::sqrt(std::pow(_ene[0] + _ene[1] + _ene[2] + _ene[3] + _ene[4] + _ene[5], 2.) -
+                   std::pow(p[0][0] + p[1][0] + p[2][0] + p[3][0] + p[4][0] + p[5][0], 2.) -
+                   std::pow(p[0][1] + p[1][1] + p[2][1] + p[3][1] + p[4][1] + p[5][1], 2.) -
+                   std::pow(p[0][2] + p[1][2] + p[2][2] + p[3][2] + p[4][2] + p[5][2], 2.));
 
   return M6g;
 }
@@ -245,16 +245,16 @@ Double_t Reconstructor::GetInvMassDiscrepancy(Double_t *sol, Int_t *comb) const
   Double_t dE[6];
   for (Int_t i = 0; i < 6; i++)
   {
-    dE[i] = 0.057 * _ene[i] / sqrt(_ene[i] / 1000.);
+    dE[i] = 0.057 * _ene[i] / std::sqrt(_ene[i] / 1000.);
   }
   // calculate sigmas of invariant masses
   Double_t dM[3];
   for (Int_t i = 0; i < 3; i++)
   {
-    dM[i] = 0.5 * sqrt((_ene[comb[2 * i + 1] - 1] / _ene[comb[2 * i] - 1]) *
-                           pow(dE[2 * i], 2.) +
+    dM[i] = 0.5 * std::sqrt((_ene[comb[2 * i + 1] - 1] / _ene[comb[2 * i] - 1]) *
+                           std::pow(dE[2 * i], 2.) +
                        (_ene[comb[2 * i] - 1] / _ene[comb[2 * i + 1] - 1]) *
-                           pow(dE[2 * i + 1], 2.));
+                           std::pow(dE[2 * i + 1], 2.));
   }
 
   // finally calculate discrepancy
@@ -262,7 +262,7 @@ Double_t Reconstructor::GetInvMassDiscrepancy(Double_t *sol, Int_t *comb) const
   for (Int_t i = 0; i < 3; i++)
   {
     d += std::abs(mgg[i] - PhysicsConstants::mPi0) / dM[i];
-    //    d += std::abs( mgg[i] - PhysicsConstants::mPi0 ) * pow( _ene[comb[2*i+1]-1] + _ene[comb[2*i]-1], -2. );
+    //    d += std::abs( mgg[i] - PhysicsConstants::mPi0 ) * std::pow( _ene[comb[2*i+1]-1] + _ene[comb[2*i]-1], -2. );
   }
 
   return d;
@@ -290,9 +290,9 @@ void Reconstructor::GetKmomentum(const Double_t *sol, Double_t *p) const
     for (Int_t j = 0; j < 3; j++)
     { // over coordinates
       pgam[i][j] = _clu[i][j] - sol[j];
-      tot += pow(pgam[i][j], 2.);
+      tot += std::pow(pgam[i][j], 2.);
     }
-    tot = sqrt(tot);
+    tot = std::sqrt(tot);
     for (Int_t j = 0; j < 3; j++)
     { // over coordinates
       pgam[i][j] = pgam[i][j] * _ene[i] / tot;
@@ -310,6 +310,6 @@ void Reconstructor::GetKmomentum(const Double_t *sol, Double_t *p) const
     }
     p[4] += p[j] * p[j];
   }
-  p[3] = sqrt(p[4] + PhysicsConstants::mK0 * PhysicsConstants::mK0);
-  p[4] = sqrt(p[4]);
+  p[3] = std::sqrt(p[4] + PhysicsConstants::mK0 * PhysicsConstants::mK0);
+  p[4] = std::sqrt(p[4]);
 }

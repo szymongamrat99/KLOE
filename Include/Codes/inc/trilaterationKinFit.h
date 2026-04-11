@@ -120,7 +120,7 @@ namespace KLOE
 
 			for (Int_t i = 0; i < _X_min.GetNrows(); i++)
 			{
-				pulls.push_back((_X_init_min[i] - _X_min[i]) / sqrt(_V_init[i][i] - _V_min[i][i]));
+				pulls.push_back((_X_init_min[i] - _X_min[i]) / std::sqrt(_V_init[i][i] - _V_min[i][i]));
 			}
 		}
 

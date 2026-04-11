@@ -313,7 +313,7 @@ namespace KLOE
     KneTotMom = pK.Mag();
     BetaK = KneTotMom / Kne4Mom[3];
 
-    A = (1 - pow(BetaK, 2)) / pow(BetaK, 2);
+    A = (1 - std::pow(BetaK, 2)) / std::pow(BetaK, 2);
 
     for (Int_t i = 0; i < 4; i++)
     {
@@ -327,9 +327,9 @@ namespace KLOE
       CosPkD[i] = (D[i].Dot(pK)) / (DTot[i] * KneTotMom);
 
       B[i] = 2 * (DTot[i] * CosPkD[i] - (PhysicsConstants::cVel * Clu5Vec[i][3] / BetaK));
-      C[i] = pow(PhysicsConstants::cVel * Clu5Vec[i][3], 2) - pow(DTot[i], 2);
+      C[i] = std::pow(PhysicsConstants::cVel * Clu5Vec[i][3], 2) - std::pow(DTot[i], 2);
 
-      Delta[i] = pow(B[i], 2) - 4 * A * C[i];
+      Delta[i] = std::pow(B[i], 2) - 4 * A * C[i];
 
       try
       {
@@ -343,8 +343,8 @@ namespace KLOE
         }
         else
         {
-          lK[i][0] = (-B[i] - sqrt(Delta[i])) / (2. * A);
-          lK[i][1] = (-B[i] + sqrt(Delta[i])) / (2. * A);
+          lK[i][0] = (-B[i] - std::sqrt(Delta[i])) / (2. * A);
+          lK[i][1] = (-B[i] + std::sqrt(Delta[i])) / (2. * A);
 
           for (Int_t j = 0; j < 2; j++)
           {
@@ -353,9 +353,9 @@ namespace KLOE
 
             NeuVtxTmp[i][j][3] = (lK[i][j] / (PhysicsConstants::cVel * BetaK));
 
-            lGamma[i][j] = sqrt(pow(Clu5Vec[i][0] - NeuVtxTmp[i][j][0], 2) +
-                                pow(Clu5Vec[i][1] - NeuVtxTmp[i][j][1], 2) +
-                                pow(Clu5Vec[i][2] - NeuVtxTmp[i][j][2], 2));
+            lGamma[i][j] = std::sqrt(std::pow(Clu5Vec[i][0] - NeuVtxTmp[i][j][0], 2) +
+                                std::pow(Clu5Vec[i][1] - NeuVtxTmp[i][j][1], 2) +
+                                std::pow(Clu5Vec[i][2] - NeuVtxTmp[i][j][2], 2));
 
             trctmp[i][j] = Clu5Vec[i][3] - NeuVtxTmp[i][j][3] - (lGamma[i][j] / PhysicsConstants::cVel);
           }
@@ -388,19 +388,19 @@ namespace KLOE
     for (Int_t j = 0; j < 3; j++)
       NeuVtxAvg[j] = NeuVtxAvg[j] / EneTot;
 
-    NeuVtxAvg[3] = sqrt(pow(NeuVtxAvg[0] - ip[0], 2) +
-                        pow(NeuVtxAvg[1] - ip[1], 2) +
-                        pow(NeuVtxAvg[2] - ip[2], 2)) /
+    NeuVtxAvg[3] = std::sqrt(std::pow(NeuVtxAvg[0] - ip[0], 2) +
+                        std::pow(NeuVtxAvg[1] - ip[1], 2) +
+                        std::pow(NeuVtxAvg[2] - ip[2], 2)) /
                    (BetaK * PhysicsConstants::cVel);
 
     for (Int_t i = 0; i < 4; i++)
     {
-      lGammaFinal[i] = sqrt(pow(Clu5Vec[i][0] - NeuVtxAvg[0], 2) +
-                            pow(Clu5Vec[i][1] - NeuVtxAvg[1], 2) +
-                            pow(Clu5Vec[i][2] - NeuVtxAvg[2], 2));
+      lGammaFinal[i] = std::sqrt(std::pow(Clu5Vec[i][0] - NeuVtxAvg[0], 2) +
+                            std::pow(Clu5Vec[i][1] - NeuVtxAvg[1], 2) +
+                            std::pow(Clu5Vec[i][2] - NeuVtxAvg[2], 2));
       trc[i] = Clu5Vec[i][3] - NeuVtxAvg[3] - (lGammaFinal[i] / PhysicsConstants::cVel);
 
-      vtxSigma += Clu5Vec[i][4] * sqrt(pow(NeuVtxTrueClu[i][0] - NeuVtxAvg[0], 2) + pow(NeuVtxTrueClu[i][1] - NeuVtxAvg[1], 2) + pow(NeuVtxTrueClu[i][2] - NeuVtxAvg[2], 2)) / EneTot;
+      vtxSigma += Clu5Vec[i][4] * std::sqrt(std::pow(NeuVtxTrueClu[i][0] - NeuVtxAvg[0], 2) + std::pow(NeuVtxTrueClu[i][1] - NeuVtxAvg[1], 2) + std::pow(NeuVtxTrueClu[i][2] - NeuVtxAvg[2], 2)) / EneTot;
     }
 
     Kne4Vec[0] = NeuVtxAvg[0];
@@ -442,7 +442,7 @@ namespace KLOE
     KneTotMom = pK.Mag();
     BetaK = KneTotMom / Kne4Mom->E();
 
-    A = (1 - pow(BetaK, 2)) / pow(BetaK, 2);
+    A = (1 - std::pow(BetaK, 2)) / std::pow(BetaK, 2);
 
     for (Int_t i = 0; i < Clu4Vec->size(); i++)
     {
@@ -456,9 +456,9 @@ namespace KLOE
       CosPkD[i] = (D[i].Dot(pK)) / (DTot[i] * KneTotMom);
 
       B[i] = 2 * (DTot[i] * CosPkD[i] - (PhysicsConstants::cVel * (*Clu4Vec)[i][3] / BetaK));
-      C[i] = pow(PhysicsConstants::cVel * (*Clu4Vec)[i][3], 2) - pow(DTot[i], 2);
+      C[i] = std::pow(PhysicsConstants::cVel * (*Clu4Vec)[i][3], 2) - std::pow(DTot[i], 2);
 
-      Delta[i] = pow(B[i], 2) - 4 * A * C[i];
+      Delta[i] = std::pow(B[i], 2) - 4 * A * C[i];
 
       try
       {
@@ -472,8 +472,8 @@ namespace KLOE
         }
         else
         {
-          lK[i][0] = (-B[i] - sqrt(Delta[i])) / (2. * A);
-          lK[i][1] = (-B[i] + sqrt(Delta[i])) / (2. * A);
+          lK[i][0] = (-B[i] - std::sqrt(Delta[i])) / (2. * A);
+          lK[i][1] = (-B[i] + std::sqrt(Delta[i])) / (2. * A);
 
           for (Int_t j = 0; j < 2; j++)
           {
@@ -482,9 +482,9 @@ namespace KLOE
 
             NeuVtxTmp[i][j][3] = (lK[i][j] / (PhysicsConstants::cVel * BetaK));
 
-            lGamma[i][j] = sqrt(pow((*Clu4Vec)[i][0] - NeuVtxTmp[i][j][0], 2) +
-                                pow((*Clu4Vec)[i][1] - NeuVtxTmp[i][j][1], 2) +
-                                pow((*Clu4Vec)[i][2] - NeuVtxTmp[i][j][2], 2));
+            lGamma[i][j] = std::sqrt(std::pow((*Clu4Vec)[i][0] - NeuVtxTmp[i][j][0], 2) +
+                                std::pow((*Clu4Vec)[i][1] - NeuVtxTmp[i][j][1], 2) +
+                                std::pow((*Clu4Vec)[i][2] - NeuVtxTmp[i][j][2], 2));
 
             trctmp[i][j] = (*Clu4Vec)[i][3] - NeuVtxTmp[i][j][3] - (lGamma[i][j] / PhysicsConstants::cVel);
           }
@@ -517,19 +517,19 @@ namespace KLOE
     for (Int_t j = 0; j < 3; j++)
       NeuVtxAvg[j] = NeuVtxAvg[j] / EneTot;
 
-    NeuVtxAvg[3] = sqrt(pow(NeuVtxAvg[0] - ip[0], 2) +
-                        pow(NeuVtxAvg[1] - ip[1], 2) +
-                        pow(NeuVtxAvg[2] - ip[2], 2)) /
+    NeuVtxAvg[3] = std::sqrt(std::pow(NeuVtxAvg[0] - ip[0], 2) +
+                        std::pow(NeuVtxAvg[1] - ip[1], 2) +
+                        std::pow(NeuVtxAvg[2] - ip[2], 2)) /
                    (BetaK * PhysicsConstants::cVel);
 
     for (Int_t i = 0; i < 4; i++)
     {
-      lGammaFinal[i] = sqrt(pow((*Clu4Vec)[i][0] - NeuVtxAvg[0], 2) +
-                            pow((*Clu4Vec)[i][1] - NeuVtxAvg[1], 2) +
-                            pow((*Clu4Vec)[i][2] - NeuVtxAvg[2], 2));
+      lGammaFinal[i] = std::sqrt(std::pow((*Clu4Vec)[i][0] - NeuVtxAvg[0], 2) +
+                            std::pow((*Clu4Vec)[i][1] - NeuVtxAvg[1], 2) +
+                            std::pow((*Clu4Vec)[i][2] - NeuVtxAvg[2], 2));
       trc[i] = (*Clu4Vec)[i][3] - NeuVtxAvg[3] - (lGammaFinal[i] / PhysicsConstants::cVel);
 
-      vtxSigma += (*Clu4Mom)[i][3] * sqrt(pow(NeuVtxTrueClu[i][0] - NeuVtxAvg[0], 2) + pow(NeuVtxTrueClu[i][1] - NeuVtxAvg[1], 2) + pow(NeuVtxTrueClu[i][2] - NeuVtxAvg[2], 2)) / EneTot;
+      vtxSigma += (*Clu4Mom)[i][3] * std::sqrt(std::pow(NeuVtxTrueClu[i][0] - NeuVtxAvg[0], 2) + std::pow(NeuVtxTrueClu[i][1] - NeuVtxAvg[1], 2) + std::pow(NeuVtxTrueClu[i][2] - NeuVtxAvg[2], 2)) / EneTot;
     }
 
     (*Kne4Vec)[0] = NeuVtxAvg[0];
@@ -711,7 +711,7 @@ namespace KLOE
       sumWeights += weight;
     }
 
-    return sqrt(1.0 / sumWeights);
+    return std::sqrt(1.0 / sumWeights);
   }
 
   Double_t pm00::WeightedAverageAsymmetric(std::vector<Double_t> &values, std::vector<Double_t> &errorsLow, std::vector<Double_t> &errorsUp)
@@ -743,7 +743,7 @@ namespace KLOE
       sumWeights += weight;
     }
 
-    return sqrt(1.0 / sumWeights);
+    return std::sqrt(1.0 / sumWeights);
   }
 
   Double_t pm00::TwoBodyDecayMass(Double_t M, Double_t m1, Double_t m2)
@@ -758,8 +758,8 @@ namespace KLOE
     }
 
     Double_t
-        lambda = (pow(M, 4) + pow(m1, 4) + pow(m2, 4) - 2 * pow(M, 2) * pow(m1, 2) - 2 * pow(M, 2) * pow(m2, 2) - 2 * pow(m1, 2) * pow(m2, 2)),
-        p = sqrt(lambda) / (2 * M);
+        lambda = (std::pow(M, 4) + std::pow(m1, 4) + std::pow(m2, 4) - 2 * std::pow(M, 2) * std::pow(m1, 2) - 2 * std::pow(M, 2) * std::pow(m2, 2) - 2 * std::pow(m1, 2) * std::pow(m2, 2)),
+        p = std::sqrt(lambda) / (2 * M);
 
     return p;
   }
@@ -868,7 +868,7 @@ namespace KLOE
 
       // neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip.data(), bhabha_mom.data(), Knerec, neu_vtx, trc);
 
-      if (sqrt(pow(vtxSigma, 2) + pow(TrcSum, 2)) < sqrt(pow(vtxSigmaMin, 2) + pow(TrcSumMin, 2)))
+      if (std::sqrt(std::pow(vtxSigma, 2) + std::pow(TrcSum, 2)) < std::sqrt(std::pow(vtxSigmaMin, 2) + std::pow(TrcSumMin, 2)))
       {
         vtxSigmaMin = vtxSigma;
         TrcSumMin = TrcSum;
@@ -888,19 +888,19 @@ namespace KLOE
           neutral_mom(cluster[0][Asscl[ind_gam[l]] - 1], cluster[1][Asscl[ind_gam[l]] - 1], cluster[2][Asscl[ind_gam[l]] - 1], cluster[4][Asscl[ind_gam[l]] - 1], neu_vtx, gammatriangle[l].data());
         }
 
-        minv4gam = sqrt(pow(gammatriangle[0][3] + gammatriangle[1][3] + gammatriangle[2][3] + gammatriangle[3][3], 2) -
-                        pow(gammatriangle[0][0] + gammatriangle[1][0] + gammatriangle[2][0] + gammatriangle[3][0], 2) -
-                        pow(gammatriangle[0][1] + gammatriangle[1][1] + gammatriangle[2][1] + gammatriangle[3][1], 2) -
-                        pow(gammatriangle[0][2] + gammatriangle[1][2] + gammatriangle[2][2] + gammatriangle[3][2], 2));
+        minv4gam = std::sqrt(std::pow(gammatriangle[0][3] + gammatriangle[1][3] + gammatriangle[2][3] + gammatriangle[3][3], 2) -
+                        std::pow(gammatriangle[0][0] + gammatriangle[1][0] + gammatriangle[2][0] + gammatriangle[3][0], 2) -
+                        std::pow(gammatriangle[0][1] + gammatriangle[1][1] + gammatriangle[2][1] + gammatriangle[3][1], 2) -
+                        std::pow(gammatriangle[0][2] + gammatriangle[1][2] + gammatriangle[2][2] + gammatriangle[3][2], 2));
 
         Knetriangle[4] = 0.;
         for (Int_t l = 0; l < 3; l++)
         {
-          Knetriangle[4] += pow(Knetriangle[l], 2);
+          Knetriangle[4] += std::pow(Knetriangle[l], 2);
         }
 
-        Knetriangle[5] = sqrt(pow(Knetriangle[3], 2) - Knetriangle[4]);
-        Knetriangle[4] = sqrt(Knetriangle[4]);
+        Knetriangle[5] = std::sqrt(std::pow(Knetriangle[3], 2) - Knetriangle[4]);
+        Knetriangle[4] = std::sqrt(Knetriangle[4]);
       }
     }
 
@@ -956,7 +956,7 @@ namespace KLOE
 
       neu_triangle(&TrcSum, &vtxSigma, Clu5Vec, ip, phi.fourMom.data(), Knerec, neu_vtx, trc);
 
-      if (sqrt(pow(vtxSigma, 2) + pow(TrcSum, 2)) < sqrt(pow(vtxSigmaMin, 2) + pow(TrcSumMin, 2)))
+      if (std::sqrt(std::pow(vtxSigma, 2) + std::pow(TrcSum, 2)) < std::sqrt(std::pow(vtxSigmaMin, 2) + std::pow(TrcSumMin, 2)))
       {
         vtxSigmaMin = vtxSigma;
         TrcSumMin = TrcSum;
@@ -1030,12 +1030,12 @@ namespace KLOE
         pz[i] = photonMom[indices[i * intPi0]][2] + photonMom[indices[i * intPi0 + 1]][2];
         E[i] = photonMom[indices[i * intPi0]][3] + photonMom[indices[i * intPi0 + 1]][3];
 
-        invMassDiff[i] = sqrt(pow(E[i], 2) - pow(px[i], 2) - pow(py[i], 2) - pow(pz[i], 2));
+        invMassDiff[i] = std::sqrt(std::pow(E[i], 2) - std::pow(px[i], 2) - std::pow(py[i], 2) - std::pow(pz[i], 2));
 
-        invMassDiffTot += pow(invMassDiff[i] - PhysicsConstants::mPi0, 2);
+        invMassDiffTot += std::pow(invMassDiff[i] - PhysicsConstants::mPi0, 2);
       }
 
-      invMassDiffTot = sqrt(invMassDiffTot);
+      invMassDiffTot = std::sqrt(invMassDiffTot);
 
       if (invMassDiffTot < invMassDiffMin)
       {
@@ -1093,9 +1093,9 @@ namespace KLOE
                            -kaonMom[2] / kaonMom[3]};
 
     // Oblicz drogę kaona w układzie LAB
-    Double_t kaonPathLAB = sqrt(pow(kaonPos[0] - ipPos[0], 2) +
-                                pow(kaonPos[1] - ipPos[1], 2) +
-                                pow(kaonPos[2] - ipPos[2], 2));
+    Double_t kaonPathLAB = std::sqrt(std::pow(kaonPos[0] - ipPos[0], 2) +
+                                std::pow(kaonPos[1] - ipPos[1], 2) +
+                                std::pow(kaonPos[2] - ipPos[2], 2));
 
     // Prędkość kaona w układzie LAB
     Double_t kaonTotalBetaLAB = kaonBetaLAB.Mag();
