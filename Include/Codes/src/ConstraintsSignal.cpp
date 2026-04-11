@@ -124,7 +124,7 @@ void ConstraintsSignal::IntermediateReconstruction()
   ip[0] = phi.vtxPos[0];
   ip[1] = phi.vtxPos[1];
   // // ip[2] is fitted
-  if (abs(ip[2] - phi.vtxPos[2]) > 2.)
+  if (std::abs(ip[2] - phi.vtxPos[2]) > 2.)
     ip[2] = phi.vtxPos[2];
 
   Kchrec.calculatePath(ip.data());
@@ -248,7 +248,7 @@ void ConstraintsSignal::IntermediateReconstruction(Double_t *p)
   fip[0] = fphi.vtxPos[0];
   fip[1] = fphi.vtxPos[1];
   // fip[2] is fitted
-  if (abs(fip[2] - fphi.vtxPos[2]) > 2.8)
+  if (std::abs(fip[2] - fphi.vtxPos[2]) > 2.8)
     fip[2] = fphi.vtxPos[2];
 
   fKchrec.calculatePath(fip.data());

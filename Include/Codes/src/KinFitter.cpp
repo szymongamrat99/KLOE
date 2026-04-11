@@ -223,12 +223,12 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
       Double_t maxDeltaX = 0;
       for (int j = 0; j < _CORR.GetNrows(); j++)
       {
-        double relChange = abs(_CORR(j) / (_X(j) + 1e-9)); // 1e-9 zapobiega /0
+        double relChange = std::abs(_CORR(j) / (_X(j) + 1e-9)); // 1e-9 zapobiega /0
         if (relChange > maxDeltaX)
           maxDeltaX = relChange;
       }
 
-      if (abs(_CHISQR - _CHISQRTMP) < _CHISQRSTEP || maxDeltaX < 1e-5)
+      if (std::abs(_CHISQR - _CHISQRTMP) < _CHISQRSTEP || maxDeltaX < 1e-5)
         break;
 
       _L_aux = _L;
@@ -444,7 +444,7 @@ Double_t KinFitter::DerivativeCalc(Int_t i, Int_t j)
 
     Int_t L = 0;
 
-    while (abs(derivativeAux - derivative) > 0.01 * abs(derivative) || L < 1)
+    while (std::abs(derivativeAux - derivative) > 0.01 * std::abs(derivative) || L < 1)
     {
       derivativeAux = derivative;
 

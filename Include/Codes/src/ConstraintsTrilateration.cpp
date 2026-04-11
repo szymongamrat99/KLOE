@@ -162,7 +162,7 @@ namespace KLOE
         ipTmp[i][0] = phi.vtxPos[0];
         ipTmp[i][1] = phi.vtxPos[1];
         // // ip[2] is fitted
-        if (abs(ipTmp[i][2] - phi.vtxPos[2]) > 2.)
+        if (std::abs(ipTmp[i][2] - phi.vtxPos[2]) > 2.)
           ipTmp[i][2] = phi.vtxPos[2];
 
         KnerecTmp[i].calculatePath(ipTmp[i]);
@@ -337,7 +337,7 @@ namespace KLOE
         ipTmp[i][0] = fphi.vtxPos[0];
         ipTmp[i][1] = fphi.vtxPos[1];
         // // ip[2] is fitted
-        if (abs(ipTmp[i][2] - fphi.vtxPos[2]) > 2.)
+        if (std::abs(ipTmp[i][2] - fphi.vtxPos[2]) > 2.)
           ipTmp[i][2] = fphi.vtxPos[2];
 
         KnerecTmp[i].calculatePath(ipTmp.at(i).data());
@@ -428,9 +428,9 @@ namespace KLOE
   {
     IntermediateReconstruction(p);
 
-    Double_t pathComp = (Double_t)abs(fKnerec.fourPos[_chosenComponent] -
+    Double_t pathComp = std::abs(fKnerec.fourPos[_chosenComponent] -
                             fip[_chosenComponent]),
-             kneVelComp = (Double_t)abs(fKnerec.fourMom[_chosenComponent] / fKnerec.fourMom[3] * PhysicsConstants::cVel);
+             kneVelComp = std::abs(fKnerec.fourMom[_chosenComponent] / fKnerec.fourMom[3] * PhysicsConstants::cVel);
 
              std::cout << "Path component: " << pathComp << ", Velocity component: " << kneVelComp << std::endl;
              std::cout << "Knerec: " << fKnerec.fourPos[_chosenComponent] << ", IP: " << fip[_chosenComponent] << ", Knerec momentum: " << fKnerec.fourMom[_chosenComponent] << ", Knerec energy: " << fKnerec.fourMom[3] << std::endl;

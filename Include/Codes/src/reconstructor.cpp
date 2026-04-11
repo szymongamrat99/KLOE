@@ -261,7 +261,7 @@ Double_t Reconstructor::GetInvMassDiscrepancy(Double_t *sol, Int_t *comb) const
   Double_t d = 0;
   for (Int_t i = 0; i < 3; i++)
   {
-    d += abs(mgg[i] - PhysicsConstants::mPi0) / dM[i];
+    d += std::abs(mgg[i] - PhysicsConstants::mPi0) / dM[i];
     //    d += abs( mgg[i] - PhysicsConstants::mPi0 ) * pow( _ene[comb[2*i+1]-1] + _ene[comb[2*i]-1], -2. );
   }
 
