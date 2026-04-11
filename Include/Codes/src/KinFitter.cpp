@@ -166,17 +166,17 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
             Double_t eps_step = 0.01 * sqrt(_V(m, m));
             if (eps_step < 1e-12) eps_step = 1e-6;
 
-            Double_t parOrig = _constraints[l]->GetParameter(m);
+            // Double_t parOrig = _constraints[l]->GetParameter(m);
 
-            _constraints[l]->SetParameter(m, parOrig + eps_step);
-            Double_t fPlus = _constraints[l]->EvalPar(0, _constraints[l]->GetParameters());
+            // _constraints[l]->SetParameter(m, parOrig + eps_step);
+            // Double_t fPlus = _constraints[l]->EvalPar(0, _constraints[l]->GetParameters());
 
-            _constraints[l]->SetParameter(m, parOrig - eps_step);
-            Double_t fMinus = _constraints[l]->EvalPar(0, _constraints[l]->GetParameters());
+            // _constraints[l]->SetParameter(m, parOrig - eps_step);
+            // Double_t fMinus = _constraints[l]->EvalPar(0, _constraints[l]->GetParameters());
 
-            _constraints[l]->SetParameter(m, parOrig); // restore original
+            // _constraints[l]->SetParameter(m, parOrig); // restore original
 
-            auxVal = (fPlus - fMinus) / (2.0 * eps_step);
+            auxVal = _constraints[l]->GradientPar(m, 0, eps_step);//(fPlus - fMinus) / (2.0 * eps_step);
 
             _D(l, m) = auxVal;
           }
