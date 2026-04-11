@@ -867,3 +867,201 @@ cd Subanalysis/InterfFunction/
 nohup ./hist_sample_draw < params.txt > nohup.log &
 cd Subanalysis/InterfFunction/
 ls
+ps -e | grep hist_sample
+ps -e | grep hist_sample_draw
+ps -e
+cd Subanalysis/InterfFunction/
+./hist_fits_integral_range 
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+git add .
+git commit -m "Scaling"
+git push
+cd Subanalysis/InitialAnalysis/
+cd co
+cd ..
+cd InterfFunction/
+cd config/
+cat config.json 
+cd ../img/theoretical_plots/integralLimit_300_samples_10000000000_Re_0.00166_Im_-0.00198_tmp/
+ls
+root
+ls
+cd Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_20_t2Min_0_t2Max_20_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ls
+rm -fr *
+cd ..
+rm -fr *
+ls
+cd ../../
+cd ..
+nohup parallel -j 6 ./bttf_sample {#} ::: {1..6} > parallel_output.log 2>&1 & 
+cd root_files/sampling/DoubleExponential/t1Min_0_t1Max_300_t2Min_0_t2Max_300_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ls
+ls -hl
+cd Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_300_t2Min_0_t2Max_300_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ll
+ls -hl
+cd Subanalysis/InterfFunction/
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+./bttf_histo
+./hist_sample_draw 
+./compile.sh 
+./hist_sample_draw /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots/integralLimit_300_samples_10000000000_Re_0.00166_Im_-0.00198_tmp/sampling_results_300.root
+./compile.sh 
+./hist_sample_draw /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots/integralLimit_300_samples_10000000000_Re_0.00166_Im_-0.00198_tmp/sampling_results_300.root
+./compile.sh 
+./hist_sample_draw /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots/integralLimit_300_samples_10000000000_Re_0.00166_Im_-0.00198_tmp/sampling_results_300.root
+./compile.sh 
+./hist_sample_draw /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots/integralLimit_300_samples_10000000000_Re_0.00166_Im_-0.00198_tmp/sampling_results_300.root
+./compile.sh 
+./hist_sample_draw /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots/integralLimit_300_samples_10000000000_Re_0.00166_Im_-0.00198_tmp/sampling_results_300.root
+./compile.sh 
+./hist_sample_draw /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots/integralLimit_300_samples_10000000000_Re_0.00166_Im_-0.00198_tmp/sampling_results_300.root
+cd Subanalysis/InterfFunction/root_files/filled_sampled_histograms/exp_corrected/
+ls
+r, histograms2D_6452077916_0_exp_corrected_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00_dcbe301d9fb7d7d8.root 
+rm histograms2D_6452077916_0_exp_corrected_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00_dcbe301d9fb7d7d8.root 
+cd ..
+ls
+cd exp_corrected/
+ls
+rm histograms2D_6452077916_0_exp_corrected_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00_dcbe301d9fb7d7d8.root 
+cd ../
+rm -fr *
+ls
+cd exp_corrected/
+ls
+cd re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/
+ls
+cd ..
+rm -fr *
+cd ../
+ls
+find /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/img/theoretical_plots/integralLimit_300_samples_10000000000_Re_0.00166_Im_-0.00198_tmp -name "*.root" | sort > inputs.txt
+cat inputs.txt 
+cd ..
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} > nohup_sigmat_1.0.log
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} > nohup_sigmat_1.0.log &
+cat nohup_sigmat_1.0.log 
+pgrep nohup
+pgrep hist_sample_dra 
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.5> nohup_sigmat_0.5.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.2> nohup_sigmat_0.2.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.8> nohup_sigmat_0.8.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.1> nohup_sigmat_0.1.log &
+killall hist_sample_draw 
+pgrep hist_sample_dra 
+./compile.sh 
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} > nohup_sigmat_1.0.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.5> nohup_sigmat_0.5.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.2> nohup_sigmat_0.2.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.8> nohup_sigmat_0.8.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.1> nohup_sigmat_0.1.log &
+killall hist_sample_draw 
+nohup parallel --line-buffer -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} > nohup_sigmat_1.0.log 2>&1 &
+nohup parallel --line-buffer -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.1 > nohup_sigmat_0.1.log 2>&1 &
+nohup parallel --line-buffer -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.2 > nohup_sigmat_0.2.log 2>&1 &
+nohup parallel --line-buffer -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.5 > nohup_sigmat_0.5.log 2>&1 &
+nohup parallel --line-buffer -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw {} 1 0.8 > nohup_sigmat_0.8.log 2>&1 &
+pgrep hist_sample_dra 
+cd Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_300_t2Min_0_t2Max_300_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ll
+ls -hl
+cd Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_300_t2Min_0_t2Max_300_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198/
+ls -hl
+pgrep bttf_sample
+ls -hl
+root sampling_results_job_6_tmp_1_5.root
+cd ../../
+cd ..
+ls
+cd filled_sampled_histograms/
+find /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_300_t2Min_0_t2Max_300_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198 -name "*job_1*.root" | sort > inputs1.txt
+find /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_300_t2Min_0_t2Max_300_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198 -name "*job_2*.root" | sort > inputs2.txt
+find /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_300_t2Min_0_t2Max_300_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198 -name "*job_3*.root" | sort > inputs3.txt
+find /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_300_t2Min_0_t2Max_300_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198 -name "*job_4*.root" | sort > inputs4.txt
+find /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_300_t2Min_0_t2Max_300_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198 -name "*job_5*.root" | sort > inputs5.txt
+find /data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/root_files/sampling/DoubleExponential/t1Min_0_t1Max_300_t2Min_0_t2Max_300_nSamples_10000000000_customParamsFlag_false_ReParam_0.00166_ImParam_-0.00198 -name "*job_6*.root" | sort > inputs6.txt
+ls
+cat inputs6.txt 
+cd ../../
+nohup parallel -a root_files/filled_sampled_histograms/inputs1.txt -j 6 ./hist_sample_draw {} > nohup_sigmat_1.0_1.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs2.txt -j 6 ./hist_sample_draw {} > nohup_sigmat_1.0_2.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs3.txt -j 6 ./hist_sample_draw {} > nohup_sigmat_1.0_3.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs4.txt -j 6 ./hist_sample_draw {} > nohup_sigmat_1.0_4.log &
+nohup parallel -a root_files/filled_sampled_histograms/[Btograms/inputs5.txt -j 6 ./hist_sample_draw {} > nohup_sigmat_1.0_6.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs6.txt -j 6 ./hist_sample_draw {} > nohup_sigmat_1.0_6.log &
+cd root_files/filled_sampled_histograms/exp_corrected/re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/
+ls
+ls -hl
+pgrep hist_sample_draw
+pgrep hist_sample
+pgrep hist_sample_
+pgrep hist_sample_d
+pgrep hist_sample_dr
+pgrep hist_sample_dra
+pgrep hist_sample_draw
+ls
+ls -hl
+cd Subanalysis/InterfFunction/root_files/filled_sampled_histograms/exp_corrected/re0.00166_im-0.00198_sigmat
+cd Subanalysis/InterfFunction/root_files/filled_sampled_histograms/exp_corrected/re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/
+ls
+ls -hl
+pgrep hist_sample_d
+ls -hl
+pgrep hist_sample_d
+cd ../../../
+cd ..
+nohup parallel -a root_files/filled_sampled_histograms/inputs1.txt -j 6 ./hist_sample_draw {} 1 0.1 > nohup_sigmat_0.1_1.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs2.txt -j 6 ./hist_sample_draw {} 1 0.1 > nohup_sigmat_0.1_2.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs3.txt -j 6 ./hist_sample_draw {} 1 0.1 > nohup_sigmat_0.1_3.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs4.txt -j 6 ./hist_sample_draw {} 1 0.1 > nohup_sigmat_0.1_4.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs5.txt -j 6 ./hist_sample_draw {} 1 0.1 > nohup_sigmat_0.1_5.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs6.txt -j 6 ./hist_sample_draw {} 1 0.1 > nohup_sigmat_0.1_6.log &
+ls
+cd root_files/filled_sampled_histograms/exp_corrected/re0.00166_im-0.00198_sigmat0.10_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/
+ls
+ls -hl
+ls
+cd Subanalysis/InterfFunction/root_files/filled_sampled_histograms/exp_corrected/re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/
+ls
+hadd -f merged_2DHist.root *.root
+root merged_2DHist.root 
+cd ../../../../
+./compile.sh 
+./hist_fits_integral_range 
+cd root_files/filled_sampled_histograms/exp_corrected/re0.00166_im-0.00198_sigmat0.10_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/
+ls
+ls -hl
+hadd -f merged_2DHist.root *.root
+cd ../../../
+cd ..
+./compile.sh 
+./hist_fits_integral_range 
+./compile.sh 
+nohup parallel -a root_files/filled_sampled_histograms/inputs1.txt -j 6 ./hist_sample_draw {} 1 0.5 > nohup_sigmat_0.5_1.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs2.txt -j 6 ./hist_sample_draw {} 1 0.5 > nohup_sigmat_0.5_2.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs3.txt -j 6 ./hist_sample_draw {} 1 0.5 > nohup_sigmat_0.5_3.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs4.txt -j 6 ./hist_sample_draw {} 1 0.5 > nohup_sigmat_0.5_4.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs5.txt -j 6 ./hist_sample_draw {} 1 0.5 > nohup_sigmat_0.5_5.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs6.txt -j 6 ./hist_sample_draw {} 1 0.5 > nohup_sigmat_0.5_6.log &
+ls -hl root_files/filled_sampled_histograms/exp_corrected/re0.00166_im-0.00198_sigmat0.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/
+ls -hl root_files/filled_sampled_histograms/exp_corrected/
+nohup parallel -a root_files/filled_sampled_histograms/inputs1.txt -j 6 ./hist_sample_draw {} 1 0.8 > nohup_sigmat_0.8_1.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs2.txt -j 6 ./hist_sample_draw {} 1 0.8 > nohup_sigmat_0.8_2.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs3.txt -j 6 ./hist_sample_draw {} 1 0.8 > nohup_sigmat_0.8_3.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs4.txt -j 6 ./hist_sample_draw {} 1 0.8 > nohup_sigmat_0.8_4.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs5.txt -j 6 ./hist_sample_draw {} 1 0.8 > nohup_sigmat_0.8_5.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs6.txt -j 6 ./hist_sample_draw {} 1 0.8 > nohup_sigmat_0.8_6.log &

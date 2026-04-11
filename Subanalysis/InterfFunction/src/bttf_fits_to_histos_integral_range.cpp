@@ -134,6 +134,130 @@ std::map<Long64_t, TString> parseHistogramFiles(const std::string &folderPath)
   return fileParams;
 }
 
+Bool_t ScaleCoreRegionToEdgeDensity(TH2 *hist2D, const TString &histName,
+                                    Double_t stripMax = 7.0,
+                                    Double_t coreMax = 20.0)
+{
+  if (!hist2D)
+  {
+    std::cerr << "ERROR: Null histogram passed to ScaleCoreRegionToEdgeDensity for " << histName << std::endl;
+    return kFALSE;
+  }
+
+  const Int_t nx = hist2D->GetNbinsX();
+  const Int_t ny = hist2D->GetNbinsY();
+
+  const Int_t xEdgeInsideBin = hist2D->GetXaxis()->FindBin(coreMax - 1e-9);
+  const Int_t xEdgeOutsideBin = hist2D->GetXaxis()->FindBin(coreMax + 1e-9);
+  const Int_t yEdgeInsideBin = hist2D->GetYaxis()->FindBin(coreMax - 1e-9);
+  const Int_t yEdgeOutsideBin = hist2D->GetYaxis()->FindBin(coreMax + 1e-9);
+
+  Double_t insideCountsHorizontal = 0.0;
+  Double_t insideAreaHorizontal = 0.0;
+  Double_t outsideCountsHorizontal = 0.0;
+  Double_t outsideAreaHorizontal = 0.0;
+
+  Double_t insideCountsVertical = 0.0;
+  Double_t insideAreaVertical = 0.0;
+  Double_t outsideCountsVertical = 0.0;
+  Double_t outsideAreaVertical = 0.0;
+
+  for (Int_t ix = 1; ix <= nx; ++ix)
+  {
+    const Double_t xCenter = hist2D->GetXaxis()->GetBinCenter(ix);
+    const Double_t dx = hist2D->GetXaxis()->GetBinWidth(ix);
+
+    for (Int_t iy = 1; iy <= ny; ++iy)
+    {
+      const Double_t yCenter = hist2D->GetYaxis()->GetBinCenter(iy);
+      const Double_t dy = hist2D->GetYaxis()->GetBinWidth(iy);
+      const Double_t binArea = dx * dy;
+      const Double_t content = hist2D->GetBinContent(ix, iy);
+
+      const Bool_t inHorizontalStrip = (xCenter >= 0.0 && xCenter < stripMax);
+      const Bool_t inVerticalStrip = (yCenter >= 0.0 && yCenter < stripMax);
+
+      if (inHorizontalStrip && iy == yEdgeInsideBin)
+      {
+        insideCountsHorizontal += content;
+        insideAreaHorizontal += binArea;
+      }
+
+      if (inHorizontalStrip && iy == yEdgeOutsideBin)
+      {
+        outsideCountsHorizontal += content;
+        outsideAreaHorizontal += binArea;
+      }
+
+      if (inVerticalStrip && ix == xEdgeInsideBin)
+      {
+        insideCountsVertical += content;
+        insideAreaVertical += binArea;
+      }
+
+      if (inVerticalStrip && ix == xEdgeOutsideBin)
+      {
+        outsideCountsVertical += content;
+        outsideAreaVertical += binArea;
+      }
+    }
+  }
+
+  if (insideAreaHorizontal <= 0.0 || outsideAreaHorizontal <= 0.0 ||
+      insideAreaVertical <= 0.0 || outsideAreaVertical <= 0.0 ||
+      insideCountsHorizontal <= 0.0 || outsideCountsHorizontal <= 0.0 ||
+      insideCountsVertical <= 0.0 || outsideCountsVertical <= 0.0)
+  {
+    std::cerr << "WARNING: Cannot scale edge densities for " << histName
+              << " (insideAreaHorizontal=" << insideAreaHorizontal
+              << ", outsideAreaHorizontal=" << outsideAreaHorizontal
+              << ", insideAreaVertical=" << insideAreaVertical
+              << ", outsideAreaVertical=" << outsideAreaVertical << ")" << std::endl;
+    return kFALSE;
+  }
+
+  const Double_t insideDensityHorizontal = insideCountsHorizontal / insideAreaHorizontal;
+  const Double_t outsideDensityHorizontal = outsideCountsHorizontal / outsideAreaHorizontal;
+  const Double_t insideDensityVertical = insideCountsVertical / insideAreaVertical;
+  const Double_t outsideDensityVertical = outsideCountsVertical / outsideAreaVertical;
+
+  const Double_t scaleHorizontal = outsideDensityHorizontal / insideDensityHorizontal;
+  const Double_t scaleVertical = outsideDensityVertical / insideDensityVertical;
+  const Double_t scale = 0.5 * (scaleHorizontal + scaleVertical);
+
+  for (Int_t ix = 1; ix <= nx; ++ix)
+  {
+    const Double_t xCenter = hist2D->GetXaxis()->GetBinCenter(ix);
+
+    for (Int_t iy = 1; iy <= ny; ++iy)
+    {
+      const Double_t yCenter = hist2D->GetYaxis()->GetBinCenter(iy);
+      const Bool_t inCoreHorizontal = (xCenter >= 0.0 && xCenter < stripMax && yCenter >= 0.0 && yCenter < coreMax);
+      const Bool_t inCoreVertical = (xCenter >= 0.0 && xCenter < coreMax && yCenter >= 0.0 && yCenter < stripMax);
+
+      if (!(inCoreHorizontal || inCoreVertical))
+        continue;
+
+      const Double_t oldContent = hist2D->GetBinContent(ix, iy);
+      const Double_t oldError = hist2D->GetBinError(ix, iy);
+      hist2D->SetBinContent(ix, iy, oldContent * scale);
+      hist2D->SetBinError(ix, iy, oldError * scale);
+    }
+  }
+
+  std::cout << "Scaled L-shape core for " << histName
+            << " using edge densities across boundary t=" << coreMax
+            << ": insideHorizontal=" << insideDensityHorizontal
+            << ", outsideHorizontal=" << outsideDensityHorizontal
+            << ", insideVertical=" << insideDensityVertical
+            << ", outsideVertical=" << outsideDensityVertical
+            << ", scaleHorizontal=" << scaleHorizontal
+            << ", scaleVertical=" << scaleVertical
+            << ", scale=" << scale << std::endl;
+
+  return kTRUE;
+}
+
 using json = nlohmann::json;
 
 int main()
@@ -211,43 +335,43 @@ int main()
     return Form("1e%d", exp10);
   };
 
-  TString fileMethodAddition[3] = {"exp_not_corrected", "exp_corrected", "uniform_weighted"};
+  // TString fileMethodAddition[3] = {"exp_not_corrected", "exp_corrected", "uniform_weighted"};
 
-  std::cout << "Choose method: " << std::endl;
-  std::cout << "  [0] Use exponentially generated times (no initial weight correction)." << std::endl;
-  std::cout << "  [1] Use exponentially generated times (corrected weight)." << std::endl;
-  std::cout << "  [2] Use unifomly generated times weighted with interference." << std::endl;
-  int methodChoice = 0;
-  std::cin >> methodChoice;
+  // std::cout << "Choose method: " << std::endl;
+  // std::cout << "  [0] Use exponentially generated times (no initial weight correction)." << std::endl;
+  // std::cout << "  [1] Use exponentially generated times (corrected weight)." << std::endl;
+  // std::cout << "  [2] Use unifomly generated times weighted with interference." << std::endl;
+  // int methodChoice = 0;
+  // std::cin >> methodChoice;
 
-  if (methodChoice < 0 || methodChoice > 2)
-  {
-    std::cerr << "Błąd: nieprawidłowy wybór metody!" << std::endl;
-    return 1;
-  }
+  // if (methodChoice < 0 || methodChoice > 2)
+  // {
+  //   std::cerr << "Błąd: nieprawidłowy wybór metody!" << std::endl;
+  //   return 1;
+  // }
 
-  std::string rootFolder = "root_files/" + (std::string)fileMethodAddition[methodChoice];
-  std::map<Long64_t, TString> files = parseHistogramFiles(rootFolder);
+  // std::string rootFolder = "root_files/" + (std::string)fileMethodAddition[methodChoice];
+  // std::map<Long64_t, TString> files = parseHistogramFiles(rootFolder);
 
-  // Guard clause - sprawdź czy są pliki
-  if (files.empty())
-  {
-    std::cerr << "ERROR: No files found!" << std::endl;
-    return 1;
-  }
+  // // Guard clause - sprawdź czy są pliki
+  // if (files.empty())
+  // {
+  //   std::cerr << "ERROR: No files found!" << std::endl;
+  //   return 1;
+  // }
 
-  // Weź plik z największą liczbą zliczeń
-  auto maxEntry = *files.rbegin();
-  Long64_t maxEvents = maxEntry.first;
-  TString maxFileName = maxEntry.second;
-  TString maxEventsTitle = formatExpTitle(maxEvents);
-  TString maxEventsFile = formatExpFile(maxEvents);
+  // // Weź plik z największą liczbą zliczeń
+  // auto maxEntry = *files.rbegin();
+  // Long64_t maxEvents = maxEntry.first;
+  // TString maxFileName = maxEntry.second;
+  // TString maxEventsTitle = formatExpTitle(maxEvents);
+  // TString maxEventsFile = formatExpFile(maxEvents);
 
-  std::cout << "Processing file with max events: " << maxFileName
-            << " (" << maxEvents << " events)" << std::endl;
+  // std::cout << "Processing file with max events: " << maxFileName
+  //           << " (" << maxEvents << " events)" << std::endl;
 
   // Wczytaj histogramy 2D z pliku z max zliczeniami
-  TString filePath = Form("%s/%s", rootFolder.c_str(), maxFileName.Data());
+  TString filePath = "/data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/root_files/filled_sampled_histograms/exp_corrected/re0.00166_im-0.00198_sigmat0.10_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/merged_2DHist.root";//Form("%s/%s", rootFolder.c_str(), maxFileName.Data());
   TFile *file = TFile::Open(filePath);
   if (!file || file->IsZombie())
   {
@@ -378,21 +502,21 @@ int main()
   TCanvas *c2D = new TCanvas("c2D", "2D Histograms", 1800, 600);
   c2D->Divide(3, 1);
   c2D->cd(1);
-  hist_00pm2D_base->SetTitle(Form("h_00pm - %s events", maxEventsTitle.Data()));
+  hist_00pm2D_base->SetTitle(Form("h_00pm - %s events", "much"));
   hist_00pm2D_base->GetXaxis()->SetRangeUser(0, 300.0);
   hist_00pm2D_base->GetYaxis()->SetRangeUser(0, 300.0);
   hist_00pm2D_base->Draw("COLZ");
   c2D->cd(2);
-  hist_pm002D_base->SetTitle(Form("h_pm00 - %s events", maxEventsTitle.Data()));
+  hist_pm002D_base->SetTitle(Form("h_pm00 - %s events", "much"));
   hist_pm002D_base->GetXaxis()->SetRangeUser(0, 300.0);
   hist_pm002D_base->GetYaxis()->SetRangeUser(0, 300.0);
   hist_pm002D_base->Draw("COLZ");
   c2D->cd(3);
-  hist_pmpm2D_base->SetTitle(Form("h_pmpm - %s events", maxEventsTitle.Data()));
+  hist_pmpm2D_base->SetTitle(Form("h_pmpm - %s events", "much"));
   hist_pmpm2D_base->GetXaxis()->SetRangeUser(0, 300.0);
   hist_pmpm2D_base->GetYaxis()->SetRangeUser(0, 300.0);
   hist_pmpm2D_base->Draw("COLZ");
-  c2D->SaveAs(Form(imgFolderPath + "/2D_histograms_%s.svg", maxEventsFile.Data()));
+  c2D->SaveAs(Form(imgFolderPath + "/2D_histograms_%s.svg", "much"));
 
   // Rysuj projekcje 1D dla różnych t2Max
   TCanvas *cProjX = new TCanvas("cProjX", "1D Projections", 1800, 600);
@@ -696,8 +820,8 @@ int main()
         sliceResid->Draw("HIST");
       }
 
-      cSlices->SaveAs(Form(imgFolderPath + "/%s_slices_%s_%s_%d.svg", tag.Data(), xSlices ? "x" : "y", maxEventsFile.Data(), canvasIndex));
-      cResiduals->SaveAs(Form(imgFolderPath + "/%s_residual_slices_%s_%s_%d.svg", tag.Data(), xSlices ? "x" : "y", maxEventsFile.Data(), canvasIndex));
+      cSlices->SaveAs(Form(imgFolderPath + "/%s_slices_%s_%s_%d.svg", tag.Data(), xSlices ? "x" : "y", "much", canvasIndex));
+      cResiduals->SaveAs(Form(imgFolderPath + "/%s_residual_slices_%s_%s_%d.svg", tag.Data(), xSlices ? "x" : "y", "much", canvasIndex));
       ++canvasIndex;
     }
   };
@@ -727,7 +851,7 @@ int main()
     st->SetY1NDC(0.77);
     st->SetY2NDC(0.93);
   }
-  cRes00pm->SaveAs(Form(imgFolderPath + "/residuals_00pm_%s.svg", maxEventsFile.Data()));
+  cRes00pm->SaveAs(Form(imgFolderPath + "/residuals_00pm_%s.svg", "much"));
 
   TCanvas *cRespm00 = new TCanvas("cRespm00", "Residuals pm00", 800, 600);
   hResiduals_pm00->Draw();
@@ -739,7 +863,7 @@ int main()
     st->SetY1NDC(0.77);
     st->SetY2NDC(0.93);
   }
-  cRespm00->SaveAs(Form(imgFolderPath + "/residuals_pm00_%s.svg", maxEventsFile.Data()));
+  cRespm00->SaveAs(Form(imgFolderPath + "/residuals_pm00_%s.svg", "much"));
 
   TCanvas *cRespmpm = new TCanvas("cRespmpm", "Residuals pmpm", 800, 600);
   hResiduals_pmpm->Draw();
@@ -751,28 +875,28 @@ int main()
     st->SetY1NDC(0.77);
     st->SetY2NDC(0.93);
   }
-  cRespmpm->SaveAs(Form(imgFolderPath + "/residuals_pmpm_%s.svg", maxEventsFile.Data()));
+  cRespmpm->SaveAs(Form(imgFolderPath + "/residuals_pmpm_%s.svg", "much"));
 
   TCanvas *cRes2D_00pm = new TCanvas("cRes2D_00pm", "Residuals 2D 00pm", 800, 600);
   cRes2D_00pm->SetLogz(0);
   hResiduals2D_00pm->GetXaxis()->SetRangeUser(0, t1MaxMax);
   hResiduals2D_00pm->GetYaxis()->SetRangeUser(0, t1MaxMax);
   hResiduals2D_00pm->Draw("COLZ");
-  cRes2D_00pm->SaveAs(Form(imgFolderPath + "/residuals2D_00pm_%s.svg", maxEventsFile.Data()));
+  cRes2D_00pm->SaveAs(Form(imgFolderPath + "/residuals2D_00pm_%s.svg", "much"));
 
   TCanvas *cRes2D_pm00 = new TCanvas("cRes2D_pm00", "Residuals 2D pm00", 800, 600);
   cRes2D_pm00->SetLogz(0);
   hResiduals2D_pm00->GetXaxis()->SetRangeUser(0, t1MaxMax);
   hResiduals2D_pm00->GetYaxis()->SetRangeUser(0, t1MaxMax);
   hResiduals2D_pm00->Draw("COLZ");
-  cRes2D_pm00->SaveAs(Form(imgFolderPath + "/residuals2D_pm00_%s.svg", maxEventsFile.Data()));
+  cRes2D_pm00->SaveAs(Form(imgFolderPath + "/residuals2D_pm00_%s.svg", "much"));
 
   TCanvas *cRes2D_pmpm = new TCanvas("cRes2D_pmpm", "Residuals 2D pmpm", 800, 600);
   cRes2D_pmpm->SetLogz(0);
   hResiduals2D_pmpm->GetXaxis()->SetRangeUser(0, t1MaxMax);
   hResiduals2D_pmpm->GetYaxis()->SetRangeUser(0, t1MaxMax);
   hResiduals2D_pmpm->Draw("COLZ");
-  cRes2D_pmpm->SaveAs(Form(imgFolderPath + "/residuals2D_pmpm_%s.svg", maxEventsFile.Data()));
+  cRes2D_pmpm->SaveAs(Form(imgFolderPath + "/residuals2D_pmpm_%s.svg", "much"));
 
   auto func_00pm_1D = [&](Double_t *x, Double_t *par)
   {
@@ -1372,7 +1496,7 @@ int main()
     linesRe["Max"]->Draw("SAME");
   }
 
-  cGraphRe_RA->SaveAs(Form(imgFolderPath + "/Fitted_Re_RA_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphRe_RA->SaveAs(Form(imgFolderPath + "/Fitted_Re_RA_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphRe_RB = new TCanvas("cGraphRe_RB", "Fitted Re parameter for R_{B} vs t2Max", 800, 600);
   graphRe_RB->SetMinimum(-0.04e-3);
@@ -1385,7 +1509,7 @@ int main()
     linesRe["Min"]->Draw("SAME");
     linesRe["Max"]->Draw("SAME");
   }
-  cGraphRe_RB->SaveAs(Form(imgFolderPath + "/Fitted_Re_RB_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphRe_RB->SaveAs(Form(imgFolderPath + "/Fitted_Re_RB_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphRe_RC = new TCanvas("cGraphRe_RC", "Fitted Re parameter for R_{C} vs t2Max", 800, 600);
   graphRe_RC->SetMinimum(-0.04e-3);
@@ -1398,7 +1522,7 @@ int main()
     linesRe["Min"]->Draw("SAME");
     linesRe["Max"]->Draw("SAME");
   }
-  cGraphRe_RC->SaveAs(Form(imgFolderPath + "/Fitted_Re_RC_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphRe_RC->SaveAs(Form(imgFolderPath + "/Fitted_Re_RC_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphIm_RA = new TCanvas("cGraphIm_RA", "Fitted Im parameter for R_{A} vs t2Max", 800, 600);
   graphIm_RA->SetMinimum(-0.003);
@@ -1411,7 +1535,7 @@ int main()
     linesIm["Min"]->Draw("SAME");
     linesIm["Max"]->Draw("SAME");
   }
-  cGraphIm_RA->SaveAs(Form(imgFolderPath + "/Fitted_Im_RA_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphIm_RA->SaveAs(Form(imgFolderPath + "/Fitted_Im_RA_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphIm_RB = new TCanvas("cGraphIm_RB", "Fitted Im parameter for R_{B} vs t2Max", 800, 600);
   graphIm_RB->SetMinimum(-0.003);
@@ -1424,7 +1548,7 @@ int main()
     linesIm["Min"]->Draw("SAME");
     linesIm["Max"]->Draw("SAME");
   }
-  cGraphIm_RB->SaveAs(Form(imgFolderPath + "/Fitted_Im_RB_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphIm_RB->SaveAs(Form(imgFolderPath + "/Fitted_Im_RB_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphIm_RC = new TCanvas("cGraphIm_RC", "Fitted Im parameter for R_{C} vs t2Max", 800, 600);
   graphIm_RC->SetMinimum(-0.003);
@@ -1437,7 +1561,7 @@ int main()
     linesIm["Min"]->Draw("SAME");
     linesIm["Max"]->Draw("SAME");
   }
-  cGraphIm_RC->SaveAs(Form(imgFolderPath + "/Fitted_Im_RC_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphIm_RC->SaveAs(Form(imgFolderPath + "/Fitted_Im_RC_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphRange_RA = new TCanvas("cGraphRange_RA", "Fitted Range parameter for R_{A} vs t2Max", 800, 600);
   graphRange_RA->SetMinimum(-150);
@@ -1450,7 +1574,7 @@ int main()
     linesRange["Min"]->Draw("SAME");
     linesRange["Max"]->Draw("SAME");
   }
-  cGraphRange_RA->SaveAs(Form(imgFolderPath + "/Fitted_Range_RA_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphRange_RA->SaveAs(Form(imgFolderPath + "/Fitted_Range_RA_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphRange_RB = new TCanvas("cGraphRange_RB", "Fitted Range parameter for R_{B} vs t2Max", 800, 600);
   graphRange_RB->SetMinimum(-150);
@@ -1463,7 +1587,7 @@ int main()
     linesRange["Min"]->Draw("SAME");
     linesRange["Max"]->Draw("SAME");
   }
-  cGraphRange_RB->SaveAs(Form(imgFolderPath + "/Fitted_Range_RB_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphRange_RB->SaveAs(Form(imgFolderPath + "/Fitted_Range_RB_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphRange_RC = new TCanvas("cGraphRange_RC", "Fitted Range parameter for R_{C} vs t2Max", 800, 600);
   graphRange_RC->SetMinimum(-150);
@@ -1476,7 +1600,7 @@ int main()
     linesRange["Min"]->Draw("SAME");
     linesRange["Max"]->Draw("SAME");
   }
-  cGraphRange_RC->SaveAs(Form(imgFolderPath + "/Fitted_Range_RC_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphRange_RC->SaveAs(Form(imgFolderPath + "/Fitted_Range_RC_vs_t2Max.svg", "much"));
 
   //
   Double_t reErrorMax = getGraphLimit(kTRUE, graphReError_RA, graphReError_RB, graphReError_RC);
@@ -1489,66 +1613,66 @@ int main()
 
   TCanvas *cGraphReError_RA = new TCanvas("cGraphReError_RA", "Error on Re parameter for R_{A} vs t2Max", 800, 600);
   graphReError_RA->SetMinimum(reErrorMin);
-  graphReError_RA->SetMaximum(0.05e-3);
+  graphReError_RA->SetMaximum(0.01e-3);
   graphReError_RA->GetXaxis()->SetLimits(0, 320);
   graphReError_RA->Draw("AP");
-  cGraphReError_RA->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RA_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphReError_RA->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RA_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphReError_RB = new TCanvas("cGraphReError_RB", "Error on Re parameter for R_{B} vs t2Max", 800, 600);
   graphReError_RB->SetMinimum(reErrorMin);
-  graphReError_RB->SetMaximum(0.05e-3);
+  graphReError_RB->SetMaximum(0.01e-3);
   graphReError_RB->GetXaxis()->SetLimits(0, 320);
   graphReError_RB->Draw("AP");
-  cGraphReError_RB->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RB_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphReError_RB->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RB_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphReError_RC = new TCanvas("cGraphReError_RC", "Error on Re parameter for R_{C} vs t2Max", 800, 600);
   graphReError_RC->SetMinimum(reErrorMin);
-  graphReError_RC->SetMaximum(0.05e-3);
+  graphReError_RC->SetMaximum(0.01e-3);
   graphReError_RC->GetXaxis()->SetLimits(0, 320);
   graphReError_RC->Draw("AP");
-  cGraphReError_RC->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RC_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphReError_RC->SaveAs(Form(imgFolderPath + "/Fitted_ReError_RC_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphImError_RA = new TCanvas("cGraphImError_RA", "Error on Im parameter for R_{A} vs t2Max", 800, 600);
   graphImError_RA->SetMinimum(imErrorMin);
   graphImError_RA->SetMaximum(imErrorMax);
   graphImError_RA->GetXaxis()->SetLimits(0, 320);
   graphImError_RA->Draw("AP");
-  cGraphImError_RA->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RA_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphImError_RA->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RA_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphImError_RB = new TCanvas("cGraphImError_RB", "Error on Im parameter for R_{B} vs t2Max", 800, 600);
   graphImError_RB->SetMinimum(imErrorMin);
   graphImError_RB->SetMaximum(imErrorMax);
   graphImError_RB->GetXaxis()->SetLimits(0, 320);
   graphImError_RB->Draw("AP");
-  cGraphImError_RB->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RB_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphImError_RB->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RB_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphImError_RC = new TCanvas("cGraphImError_RC", "Error on Im parameter for R_{C} vs t2Max", 800, 600);
   graphImError_RC->SetMinimum(imErrorMin);
   graphImError_RC->SetMaximum(imErrorMax);
   graphImError_RC->GetXaxis()->SetLimits(0, 320);
   graphImError_RC->Draw("AP");
-  cGraphImError_RC->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RC_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphImError_RC->SaveAs(Form(imgFolderPath + "/Fitted_ImError_RC_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphRangeError_RA = new TCanvas("cGraphRangeError_RA", "Error on Range parameter for R_{A} vs t2Max", 800, 600);
   graphRangeError_RA->SetMinimum(rangeErrorMin);
   graphRangeError_RA->SetMaximum(rangeErrorMax);
   graphRangeError_RA->GetXaxis()->SetLimits(0, 320);
   graphRangeError_RA->Draw("AP");
-  cGraphRangeError_RA->SaveAs(Form(imgFolderPath + "/Fitted_RangeError_RA_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphRangeError_RA->SaveAs(Form(imgFolderPath + "/Fitted_RangeError_RA_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphRangeError_RB = new TCanvas("cGraphRangeError_RB", "Error on Range parameter for R_{B} vs t2Max", 800, 600);
   graphRangeError_RB->SetMinimum(rangeErrorMin);
   graphRangeError_RB->SetMaximum(rangeErrorMax);
   graphRangeError_RB->GetXaxis()->SetLimits(0, 320);
   graphRangeError_RB->Draw("AP");
-  cGraphRangeError_RB->SaveAs(Form(imgFolderPath + "/Fitted_RangeError_RB_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphRangeError_RB->SaveAs(Form(imgFolderPath + "/Fitted_RangeError_RB_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphRangeError_RC = new TCanvas("cGraphRangeError_RC", "Error on Range parameter for R_{C} vs t2Max", 800, 600);
   graphRangeError_RC->SetMinimum(rangeErrorMin);
   graphRangeError_RC->SetMaximum(rangeErrorMax);
   graphRangeError_RC->GetXaxis()->SetLimits(0, 320);
   graphRangeError_RC->Draw("AP");
-  cGraphRangeError_RC->SaveAs(Form(imgFolderPath + "/Fitted_RangeError_RC_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphRangeError_RC->SaveAs(Form(imgFolderPath + "/Fitted_RangeError_RC_vs_t2Max.svg", "much"));
 
   TString chi2TitleRA = Form("Chi2/NDF vs t_{2}^{max} for %d NDF", ndfRA),
           chi2TitleRB = Form("Chi2/NDF vs t_{2}^{max} for %d NDF", ndfRB),
@@ -1560,7 +1684,7 @@ int main()
   graphChi2_RA->SetMaximum(2); // Ustaw górną granicę na 5, można dostosować w zależności od wyników
   graphChi2_RA->GetXaxis()->SetLimits(0, 320);
   graphChi2_RA->Draw("AP");
-  cGraphChi2_RA->SaveAs(Form(imgFolderPath + "/Chi2_RA_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphChi2_RA->SaveAs(Form(imgFolderPath + "/Chi2_RA_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphChi2_RB = new TCanvas("cGraphChi2_RB", chi2TitleRB, 800, 600);
   graphChi2_RB->SetTitle(chi2TitleRB);
@@ -1568,7 +1692,7 @@ int main()
   graphChi2_RB->SetMaximum(2); // Ustaw górną granicę na 5, można dostosować w zależności od wyników
   graphChi2_RB->GetXaxis()->SetLimits(0, 320);
   graphChi2_RB->Draw("AP");
-  cGraphChi2_RB->SaveAs(Form(imgFolderPath + "/Chi2_RB_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphChi2_RB->SaveAs(Form(imgFolderPath + "/Chi2_RB_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphChi2_RC = new TCanvas("cGraphChi2_RC", chi2TitleRC, 800, 600);
   graphChi2_RC->SetTitle(chi2TitleRC);
@@ -1576,13 +1700,13 @@ int main()
   graphChi2_RC->SetMaximum(2); // Ustaw górną granicę na 5, można dostosować w zależności od wyników
   graphChi2_RC->GetXaxis()->SetLimits(0, 320);
   graphChi2_RC->Draw("AP");
-  cGraphChi2_RC->SaveAs(Form(imgFolderPath + "/Chi2_RC_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphChi2_RC->SaveAs(Form(imgFolderPath + "/Chi2_RC_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphCounts = new TCanvas("cGraphCounts", "Entries vs t2Max", 800, 600);
   graphCounts->SetTitle("Entries vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Entries");
   graphCounts->GetXaxis()->SetLimits(0, 320);
   graphCounts->Draw("AP");
-  cGraphCounts->SaveAs(Form(imgFolderPath + "/Entries_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphCounts->SaveAs(Form(imgFolderPath + "/Entries_vs_t2Max.svg", "much"));
 
   // Wykresy zbiorowe - wszystkie Re i Im na jednym wykresie
   TCanvas *cGraphRe_All = new TCanvas("cGraphRe_All", "Fitted Re parameter vs t2Max", 1200, 800);
@@ -1596,7 +1720,7 @@ int main()
   legRe->AddEntry(graphRe_RB, "R_{B}", "lp");
   legRe->AddEntry(graphRe_RC, "R_{C}", "lp");
   legRe->Draw();
-  cGraphRe_All->SaveAs(Form(imgFolderPath + "/Fitted_Re_All_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphRe_All->SaveAs(Form(imgFolderPath + "/Fitted_Re_All_vs_t2Max.svg", "much"));
 
   TCanvas *cGraphIm_All = new TCanvas("cGraphIm_All", "Fitted Im parameter vs t2Max", 1200, 800);
   graphIm_RA->SetTitle("Fitted Im parameter vs t_{2}^{max};t_{2}^{max} [#tau_{S}];Fitted Im");
@@ -1609,7 +1733,7 @@ int main()
   legIm->AddEntry(graphIm_RB, "R_{B}", "lp");
   legIm->AddEntry(graphIm_RC, "R_{C}", "lp");
   legIm->Draw();
-  cGraphIm_All->SaveAs(Form(imgFolderPath + "/Fitted_Im_All_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphIm_All->SaveAs(Form(imgFolderPath + "/Fitted_Im_All_vs_t2Max.svg", "much"));
 
   // Wykresy zbiorowe - wszystkie błędy Re na jednym wykresie
   TCanvas *cGraphReError_All = new TCanvas("cGraphReError_All", "Error on Re parameter vs t2Max", 1200, 800);
@@ -1623,7 +1747,7 @@ int main()
   legReError->AddEntry(graphReError_RB, "R_{B}", "lp");
   legReError->AddEntry(graphReError_RC, "R_{C}", "lp");
   legReError->Draw();
-  cGraphReError_All->SaveAs(Form(imgFolderPath + "/Fitted_ReError_All_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphReError_All->SaveAs(Form(imgFolderPath + "/Fitted_ReError_All_vs_t2Max.svg", "much"));
 
   // Wykresy zbiorowe - wszystkie błędy Im na jednym wykresie
   TCanvas *cGraphImError_All = new TCanvas("cGraphImError_All", "Error on Im parameter vs t2Max", 1200, 800);
@@ -1637,43 +1761,43 @@ int main()
   legImError->AddEntry(graphImError_RB, "R_{B}", "lp");
   legImError->AddEntry(graphImError_RC, "R_{C}", "lp");
   legImError->Draw();
-  cGraphImError_All->SaveAs(Form(imgFolderPath + "/Fitted_ImError_All_vs_t2Max.svg", maxEventsFile.Data()));
+  cGraphImError_All->SaveAs(Form(imgFolderPath + "/Fitted_ImError_All_vs_t2Max.svg", "much"));
 
   TCanvas *cSingleTimes00pm = new TCanvas("cSingleTimes00pm", "Single Times Histograms", 1200, 600);
   cSingleTimes00pm->Divide(2, 1);
   cSingleTimes00pm->cd(1);
   gPad->SetLogy();
-  hist_00->SetTitle(Form("t_{00} - %s events", maxEventsTitle.Data()));
+  hist_00->SetTitle(Form("t_{00} - %s events", "much"));
   hist_00->GetYaxis()->SetRangeUser(1, 100.0 * hist_00->GetMaximum());
   hist_00->GetXaxis()->SetRangeUser(0, 50.0);
   hist_00->SetLineColor(kRed);
   hist_00->Draw();
   cSingleTimes00pm->cd(2);
   gPad->SetLogy();
-  hist_pm->SetTitle(Form("t_{+-} - %s events", maxEventsTitle.Data()));
+  hist_pm->SetTitle(Form("t_{+-} - %s events", "much"));
   hist_pm->GetYaxis()->SetRangeUser(1, 100.0 * hist_pm->GetMaximum());
   hist_pm->GetXaxis()->SetRangeUser(0, 50.0);
   hist_pm->SetLineColor(kRed);
   hist_pm->Draw();
-  cSingleTimes00pm->SaveAs(Form(imgFolderPath + "/single_times_00pm_%s.svg", maxEventsFile.Data()));
+  cSingleTimes00pm->SaveAs(Form(imgFolderPath + "/single_times_00pm_%s.svg", "much"));
 
   TCanvas *cSingleTimes12 = new TCanvas("cSingleTimes12", "Single Times Histograms", 1200, 600);
   cSingleTimes12->Divide(2, 1);
   cSingleTimes12->cd(1);
   gPad->SetLogy();
-  hist_1->SetTitle(Form("t_{1} - %s events", maxEventsTitle.Data()));
+  hist_1->SetTitle(Form("t_{1} - %s events", "much"));
   hist_1->GetYaxis()->SetRangeUser(1, 100.0 * hist_1->GetMaximum());
   hist_1->GetXaxis()->SetRangeUser(0, 50.0);
   hist_1->SetLineColor(kRed);
   hist_1->Draw();
   cSingleTimes12->cd(2);
   gPad->SetLogy();
-  hist_2->SetTitle(Form("t_{2} - %s events", maxEventsTitle.Data()));
+  hist_2->SetTitle(Form("t_{2} - %s events", "much"));
   hist_2->GetYaxis()->SetRangeUser(1, 100.0 * hist_2->GetMaximum());
   hist_2->GetXaxis()->SetRangeUser(0, 50.0);
   hist_2->SetLineColor(kRed);
   hist_2->Draw();
-  cSingleTimes12->SaveAs(Form(imgFolderPath + "/single_times_12_%s.svg", maxEventsFile.Data()));
+  cSingleTimes12->SaveAs(Form(imgFolderPath + "/single_times_12_%s.svg", "much"));
 
   return 0;
 }

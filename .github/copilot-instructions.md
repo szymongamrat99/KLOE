@@ -2,9 +2,9 @@
 
 ## Project Overview
 KLOE physics analysis framework for particle physics data processing using ROOT, RooFit, and custom kinematic fitting algorithms. The project combines:
-- **Data Processing**: ROOT TChain analysis with TSelector-based event processing
-- **Kinematic Fitting**: Custom constraint-based fitting (Signal, Trilateration, Omega modes)
-- **Physics Reconstruction**: Neutral/charged particle reconstruction, PCA correlation analysis
+- **Data Processing**: ROOT TChain analysis with TSelector-based event processing. **Auxiliary analysis**
+- **Kinematic Fitting**: Custom constraint-based fitting (Signal, Trilateration, Omega modes). **Critical in the pipeline. Need to be checked for compatibility with ROOT version 6.36 and 6.24.** 
+- **Physics Reconstruction**: Neutral/charged particle reconstruction, main function `initanalysis_full.cpp`, which ends with ROOT file output and logging summaries
 - **Visualization**: ROOT histogram management with statistical analysis and fit result display
 
 ## Architecture Quick Reference
@@ -14,12 +14,14 @@ KLOE physics analysis framework for particle physics data processing using ROOT,
    - Base class for kinematic fitting with Newton-Raphson optimization
    - Critical: Uses `_constraints` vector of `TF1` objects (ROOT memory management required)
    - Output: `_X` (fitted parameters), `_chiSqr` (optimization metric)
-   - Performance bottleneck: ~600-800ms per event (matrix operations, gradient calculations)
+   - Compatibility: Ensure that GradientPar and the pipelines are consistent with ROOT 6.36.
 
 2. **Constraint Classes** (`Include/Codes/src/ConstraintsSignal.cpp`, etc.)
    - Derived from `ConstraintsBase` or standalone
    - Key methods: `IntermediateReconstruction(Double_t *p)` - must initialize all member vectors
    - Common crash: `std::vector<float>::operator=` in reconstruction → validate vector sizes
+   - Performance: Avoid dynamic memory in hot paths, prefer pre-allocated member buffers
+   - Compatibility: Ensure that GradientPar and the pipelines are consistent with ROOT 6.36.
 
 3. **Analysis Entry Points** (`Subanalysis/InitialAnalysis/src/initanalysis_full.cpp`)
    - Sequential execution: `SignalKinFit::Reconstruct()` → `TrilerationKinFit::Reconstruct()` → `OmegaKinFit::Reconstruct()`
@@ -50,7 +52,7 @@ TChain.Process(TSelector)
 
 ### Kinematic Fitting
 - **Direct constraints disabled by default**: `_useDirectConstraints = false` (guard against null pointers)
-- **Performance**: Numerical gradient calculation is 10-20× slower than analytical - prioritize `FitFunctionParallel` with internal OpenMP
+- **Performance**: Numerical gradient calculation is 10-20× slower than analytical
 - **Convergence**: Add timeout protection (~1000ms) to catch ill-conditioned matrices
 - **Early termination**: Break loop if `chi2 < target_threshold` after N iterations
 
@@ -88,7 +90,6 @@ cd /data/ssd/gamrat/KLOE/build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j$(nproc)
 ```
-- **OpenMP**: Configured in CMakeLists.txt, enabled via `#pragma omp` or `_OPENMP` checks
 - **RooFit**: Requires ROOT compiled with RooFit support (check `root-config --features`)
 
 ### Debugging Commands
@@ -116,7 +117,7 @@ gdb --args ./bin/KLSPM00
 - **Config**: `Subanalysis/Properties/histogram_conf/histogram*.conf`
 - **Utilities**: `Include/Codes/src/const.cpp` (histogram creation, cut loading)
 - **Analysis**: `Subanalysis/InitialAnalysis/src/initanalysis_full.cpp` (main workflow)
-- **Framework**: `Include/Codes/src/KinFitter.cpp` (core fitting engine)
+- **Framework**: `Include/Codes/src/KinFitter.cpp` (core fitting engine), `Include/Codes/src/ConstraintsTrilateration.cpp` (constraints for trilateration hypothesis), `Include/Codes/src/ConstraintsSignal.cpp` (constraints for signal hypothesis), `Include/Codes/src/ConstraintsOmega.cpp` (constraints for omega hypothesis)
 
 ## Useful ROOT/Physics Commands
 ```cpp
@@ -141,3 +142,34 @@ Double_t efficiency = (Double_t)signal_passing / signal_total;
 3. **Test with empty data** - ensure code handles `GetEntries() == 0`
 4. **Check memory with valgrind** - before committing multi-histogram changes
 5. **Validate against physics** - check counts match expected signal/background ratios
+
+## Static Analysis & Error Prevention
+- **Division by Zero:** Before every division or modulo operation, always check the divisor.
+  - *Pattern:* `if (std::abs(divisor) > 1e-9) { ... } else { /* handle error */ }`
+  - Never allow raw division on variables that could be zero (e.g., event counts, track densities).
+- **Allocation Auditing:**
+  - Detect and flag `new/delete` inside `Process()` or `KinFitter::Iterate()`.
+  - Suggest replacing local `std::vector` with pre-allocated member buffers or `std::array` if the size is constant.
+  - Warn if `TCloneArray::Clear("C")` is missing when reusing memory in loops.
+
+## Error Handling & Logging (KLOE Standard)
+- **Try-Catch Blocks:** Surround risky operations (Matrix inversion, File I/O, Root Fits) with try-catch blocks.
+- **Logger Integration:** Use the internal `ErrorHandling::ErrorLogs` for all caught exceptions.
+  - *Standard Format:*
+    ```cpp
+    try {
+        // Critical operation
+    } catch (const std::exception& e) {
+        ErrorHandling::ErrorLogs("ClassName::MethodName", e.what());
+        // Return safe default or continue
+    }
+    ```
+- **Guard Clauses:** Prefer early returns with a log message over deep `if-else` nesting.
+
+## ROOT Cross-Version Compatibility (6.24 to 6.36+)
+- **Dictionary Generation:** Ensure all custom classes in `Include/` use `ClassDef(ClassName, Version)` macro. For 6.36+, prefer explicit `std::vector` headers in `LinkDef.h` to avoid cling errors.
+- **Math & Stat:** - Use `ROOT::Math::` namespace instead of legacy global functions where possible.
+  - In 6.36, some `TMath` functions are strictly `constexpr`. Ensure no non-const global state is passed to them.
+- **RooFit Changes:** - Version 6.26+ introduced a new RooFit interface. When generating fit code, use the legacy-compatible `RooAbsPdf::fitTo` arguments (e.g., `RooFit::Save()`) rather than the newer, version-specific pipe syntax unless wrapped in `#if ROOT_VERSION_CODE`.
+- **Header Guards:** Always use `ROOT_VERSION_CODE` and `ROOT_VERSION` macros from `RStore.h` for conditional API calls.
+  - *Example:* `#if ROOT_VERSION_CODE >= ROOT_VERSION(6,30,0)`

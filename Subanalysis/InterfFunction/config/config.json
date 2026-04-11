@@ -1,7 +1,7 @@
 {
   "integralRange": {
     "fixRe": false,
-    "fixIm": true,
+    "fixIm": false,
     "fixRange": true,
     "fixOffset": true,
     "isReLimited": false,
@@ -25,8 +25,8 @@
     },
     "samplingMethod": 3,
     "t1Min": 0.0,
-    "t1Max": 20.0,
+    "t1Max": 300.0,
     "t2Min": 0.0,
-    "t2Max": 20.0
+    "t2Max": 300.0
   }
 }

@@ -8,6 +8,103 @@
 #include <const.h>
 #include <interf_function.h>
 
+Bool_t NormalizeOversampledRegion(TH2 *hist2D, const TString &histName,
+                                   Double_t oversampleMax = 20.0,
+                                   Double_t neighborhoodMax = 300.0)
+{
+  if (!hist2D)
+  {
+    std::cerr << "ERROR: Null histogram passed to NormalizeOversampledRegion for " << histName << std::endl;
+    return kFALSE;
+  }
+
+  const Int_t nx = hist2D->GetNbinsX();
+  const Int_t ny = hist2D->GetNbinsY();
+
+  Double_t oversampleCounts = 0.0;
+  Double_t oversampleArea = 0.0;
+  Double_t neighborhoodCounts = 0.0;
+  Double_t neighborhoodArea = 0.0;
+
+  for (Int_t ix = 1; ix <= nx; ++ix)
+  {
+    const Double_t xCenter = hist2D->GetXaxis()->GetBinCenter(ix);
+    const Double_t dx = hist2D->GetXaxis()->GetBinWidth(ix);
+
+    for (Int_t iy = 1; iy <= ny; ++iy)
+    {
+      const Double_t yCenter = hist2D->GetYaxis()->GetBinCenter(iy);
+      const Double_t dy = hist2D->GetYaxis()->GetBinWidth(iy);
+      const Double_t binArea = dx * dy;
+      const Double_t content = hist2D->GetBinContent(ix, iy);
+
+      // Oversampled region: [0, oversampleMax] x [0, oversampleMax]
+      const Bool_t inOversample = (xCenter >= 0.0 && xCenter < oversampleMax && 
+                                   yCenter >= 0.0 && yCenter < oversampleMax);
+
+      // Neighborhood: [0, oversampleMax] x [oversampleMax, neighborhoodMax]
+      //           or [oversampleMax, neighborhoodMax] x [0, oversampleMax]
+      const Bool_t inHorizontalNeighbor = (xCenter >= 0.0 && xCenter < oversampleMax && 
+                                           yCenter >= oversampleMax && yCenter <= neighborhoodMax);
+      const Bool_t inVerticalNeighbor = (xCenter >= oversampleMax && xCenter <= neighborhoodMax && 
+                                        yCenter >= 0.0 && yCenter < oversampleMax);
+
+      if (inOversample)
+      {
+        oversampleCounts += content;
+        oversampleArea += binArea;
+      }
+
+      if (inHorizontalNeighbor || inVerticalNeighbor)
+      {
+        neighborhoodCounts += content;
+        neighborhoodArea += binArea;
+      }
+    }
+  }
+
+  if (oversampleArea <= 0.0 || neighborhoodArea <= 0.0 || oversampleCounts <= 0.0 || neighborhoodCounts <= 0.0)
+  {
+    std::cerr << "WARNING: Cannot normalize " << histName
+              << " (oversampleArea=" << oversampleArea
+              << ", neighborhoodArea=" << neighborhoodArea
+              << ", oversampleCounts=" << oversampleCounts
+              << ", neighborhoodCounts=" << neighborhoodCounts << ")" << std::endl;
+    return kFALSE;
+  }
+
+  const Double_t oversampleDensity = oversampleCounts / oversampleArea;
+  const Double_t neighborhoodDensity = neighborhoodCounts / neighborhoodArea;
+  const Double_t scale = neighborhoodDensity / oversampleDensity;
+
+  // Scale only the oversampled region
+  for (Int_t ix = 1; ix <= nx; ++ix)
+  {
+    const Double_t xCenter = hist2D->GetXaxis()->GetBinCenter(ix);
+    if (!(xCenter >= 0.0 && xCenter < oversampleMax))
+      continue;
+
+    for (Int_t iy = 1; iy <= ny; ++iy)
+    {
+      const Double_t yCenter = hist2D->GetYaxis()->GetBinCenter(iy);
+      if (!(yCenter >= 0.0 && yCenter < oversampleMax))
+        continue;
+
+      const Double_t oldContent = hist2D->GetBinContent(ix, iy);
+      const Double_t oldError = hist2D->GetBinError(ix, iy);
+      hist2D->SetBinContent(ix, iy, oldContent * scale);
+      hist2D->SetBinError(ix, iy, oldError * scale);
+    }
+  }
+
+  std::cout << "Normalized oversampled region [0," << oversampleMax << "]x[0," << oversampleMax << "] for " << histName
+            << " to neighborhood density: oversampleDensity=" << oversampleDensity
+            << ", neighborhoodDensity=" << neighborhoodDensity
+            << ", scale=" << scale << std::endl;
+
+  return kTRUE;
+}
+
 struct Config
 {
   Double_t tMinX = 0.0,
@@ -209,6 +306,10 @@ int main(int argc, char *argv[])
   h_00pm_2D->Scale(h_00pm_2D->GetEntries() / h_00pm_2D->Integral(0, h_00pm_2D->GetNbinsX() + 1, 0, h_00pm_2D->GetNbinsY() + 1));
   h_pm00_2D->Scale(h_pm00_2D->GetEntries() / h_pm00_2D->Integral(0, h_pm00_2D->GetNbinsX() + 1, 0, h_pm00_2D->GetNbinsY() + 1));
   h_pmpm_2D->Scale(h_pmpm_2D->GetEntries() / h_pmpm_2D->Integral(0, h_pmpm_2D->GetNbinsX() + 1, 0, h_pmpm_2D->GetNbinsY() + 1));
+
+  NormalizeOversampledRegion(h_00pm_2D, "h_00pm_2D", 20.0, 300.0);
+  NormalizeOversampledRegion(h_pm00_2D, "h_pm00_2D", 20.0, 300.0);
+  NormalizeOversampledRegion(h_pmpm_2D, "h_pmpm_2D", 20.0, 300.0);
 
   Int_t binypmpmForpm00 = -1, binypmpmFor00pm = -1, binypm00 = -1, biny00pm = -1;
 
