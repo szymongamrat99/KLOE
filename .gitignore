@@ -5,6 +5,7 @@ img/
 *.o
 *.so
 *.a
+*.exe
 *.root
 root_files/
 log/

@@ -1,7 +1,7 @@
 {
   "integralRange": {
     "fixRe": false,
-    "fixIm": false,
+    "fixIm": true,
     "fixRange": true,
     "fixOffset": true,
     "isReLimited": false,
@@ -12,6 +12,10 @@
       "Re": 1.0,
       "Im": 1.0,
       "Range": 1.0
+    },
+    "path":
+    {
+      "base": "/data/ssd/gamrat/KLOE/Subanalysis/InterfFunction/root_files/filled_sampled_histograms/"
     }
   },
   "sampling": {

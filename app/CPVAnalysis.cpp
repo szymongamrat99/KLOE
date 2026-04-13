@@ -16,8 +16,6 @@ using namespace std::chrono;
 
 int main(int argc, char *argv[])
 {
-  ROOT::EnableImplicitMT(16); // Użyj do 16 wątków
-
   bool
       firstFileRangeErr,
       lastFileRangeErr,

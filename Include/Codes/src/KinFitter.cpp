@@ -56,7 +56,11 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
 
 KinFitter::~KinFitter()
 {
-  // No need to manually delete unique_ptr objects
+  // TF1 objects hold raw pointers to constraint objects (_objSignal, etc.).
+  // In ROOT 6.36+, TF1's internal functor uses shared_ptr-based ref counting.
+  // We must destroy TF1s BEFORE the constraint objects (unique_ptrs) are destroyed
+  // to avoid dangling references and corrupted vtables.
+  _constraints.clear();
 }
 
 Int_t KinFitter::ParameterInitialization(Float_t *Params, Float_t *Errors)
@@ -153,8 +157,8 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
       for (Int_t l = 0; l < _M; l++)
       {
-        _constraints[l]->SetParameters(_X.GetMatrixArray());
-        _C(l) = _constraints[l]->EvalPar(0, _X.GetMatrixArray());
+        _constraints[l].SetParameters(_X.GetMatrixArray());
+        _C(l) = _constraints[l].EvalPar(0, _X.GetMatrixArray());
         for (Int_t m = 0; m < _N_free + _N_const; m++)
         {
           Double_t auxVal = 0.;
@@ -176,7 +180,7 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
 
             // _constraints[l]->SetParameter(m, parOrig); // restore original
 
-            auxVal = _constraints[l]->GradientPar(m, 0, eps_step);//(fPlus - fMinus) / (2.0 * eps_step);
+            auxVal = _constraints[l].GradientPar(m, 0, eps_step);//(fPlus - fMinus) / (2.0 * eps_step);
 
             _D(l, m) = auxVal;
           }
@@ -312,13 +316,13 @@ Int_t KinFitter::ConstraintSet(std::vector<std::string> ConstSet)
                    ::tolower);
 
     if (_mode == "SignalGlobal")
-      _constraints.push_back(std::make_unique<TF1>(ConstSet[i].c_str(), _objSignal.get(), constraintMapSignal[ConstSet[i]], 0, 1, _N_free + _N_const));
+      _constraints.push_back(TF1(ConstSet[i].c_str(), _objSignal.get(), constraintMapSignal[ConstSet[i]], 0, 1, _N_free + _N_const));
     else if (_mode == "Trilateration")
-      _constraints.push_back(std::make_unique<TF1>(ConstSet[i].c_str(), _objTrilateration.get(), constraintMapTrilateration[ConstSet[i]], 0, 1, _N_free + _N_const));
+      _constraints.push_back(TF1(ConstSet[i].c_str(), _objTrilateration.get(), constraintMapTrilateration[ConstSet[i]], 0, 1, _N_free + _N_const));
     else if (_mode == "Omega")
-      _constraints.push_back(std::make_unique<TF1>(ConstSet[i].c_str(), _objOmega.get(), constraintMapOmega[ConstSet[i]], 0, 1, _N_free + _N_const));
+      _constraints.push_back(TF1(ConstSet[i].c_str(), _objOmega.get(), constraintMapOmega[ConstSet[i]], 0, 1, _N_free + _N_const));
     else
-      _constraints.push_back(std::make_unique<TF1>(ConstSet[i].c_str(), _baseObj.get(), constraintMap[ConstSet[i]], 0, 1, _N_free + _N_const));
+      _constraints.push_back(TF1(ConstSet[i].c_str(), _baseObj.get(), constraintMap[ConstSet[i]], 0, 1, _N_free + _N_const));
   }
 
   return 0;
@@ -449,8 +453,8 @@ Double_t KinFitter::DerivativeCalc(Int_t i, Int_t j)
       X_aux_plus[j] = _X[j] + step;
       X_aux_minus[j] = _X[j] - step;
 
-      Double_t f_plus = _constraints[i]->EvalPar(0, X_aux_plus.GetMatrixArray());
-      Double_t f_minus = _constraints[i]->EvalPar(0, X_aux_minus.GetMatrixArray());
+      Double_t f_plus = _constraints[i].EvalPar(0, X_aux_plus.GetMatrixArray());
+      Double_t f_minus = _constraints[i].EvalPar(0, X_aux_minus.GetMatrixArray());
 
       derivative = (f_plus - f_minus) / (2 * step);
 

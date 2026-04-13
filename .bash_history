@@ -1065,3 +1065,127 @@ nohup parallel -a root_files/filled_sampled_histograms/inputs3.txt -j 6 ./hist_s
 nohup parallel -a root_files/filled_sampled_histograms/inputs4.txt -j 6 ./hist_sample_draw {} 1 0.8 > nohup_sigmat_0.8_4.log &
 nohup parallel -a root_files/filled_sampled_histograms/inputs5.txt -j 6 ./hist_sample_draw {} 1 0.8 > nohup_sigmat_0.8_5.log &
 nohup parallel -a root_files/filled_sampled_histograms/inputs6.txt -j 6 ./hist_sample_draw {} 1 0.8 > nohup_sigmat_0.8_6.log &
+git add .
+git commit -m "Test"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Test"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Test"
+git push
+./execute_analysis.sh 
+git add .
+git push
+git commit -m "Test"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Test"
+git push
+git add .
+git commit -m "Test"
+git push
+./execute_analysis.sh 
+ls
+cat job_v26_all_phys3_1_inv_pb_1.txt 
+git add .
+git commit -m "Test"
+git push
+cd build/bin/
+./KLSPM00 ../../job_v26_all_phys3_1_inv_pb_1.txt 
+cd ../../
+./execute_analysis.sh 
+cd build/bin/
+./KLSPM00 ../../job_v26_all_phys3_1_inv_pb_1.txt 
+pgrep sample
+pgrep bttf
+pgrep hist
+git add .
+git commit -m "Test"
+cd ../../
+cd ../
+cd KLOE/
+git add .
+git commit -m "Test"
+git push
+nohup parallel -a root_files/filled_sampled_histograms/inputs1.txt -j 6 ./hist_sample_draw {} 1 1.5 > nohup_sigmat_1.5_1.log &
+cd Subanalysis/InterfFunction/
+./compile.sh 
+nohup parallel -a root_files/filled_sampled_histograms/inputs1.txt -j 6 ./hist_sample_draw {} 1 1.5 > nohup_sigmat_1.5_1.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs2.txt -j 6 ./hist_sample_draw {} 1 1.5 > nohup_sigmat_1.5_2.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs3.txt -j 6 ./hist_sample_draw {} 1 1.5 > nohup_sigmat_1.5_3.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs4.txt -j 6 ./hist_sample_draw {} 1 1.5 > nohup_sigmat_1.5_4.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs5.txt -j 6 ./hist_sample_draw {} 1 1.5 > nohup_sigmat_1.5_5.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs6.txt -j 6 ./hist_sample_draw {} 1 1.5 > nohup_sigmat_1.5_6.log &
+htop
+./compile.sh 
+ls
+./hist_fits_integral_range.exe 
+./hist_fits_integral_range.exe exp_corrected re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00
+./compile.sh 
+./hist_fits_integral_range.exe exp_corrected re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00
+./compile.sh 
+./hist_fits_integral_range.exe exp_corrected re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00
+./hist_fits_integral_range.exe exp_corrected re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 test
+./compile.sh 
+./hist_fits_integral_range.exe exp_corrected re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 test
+nohup parallel -a root_files/filled_sampled_histograms/inputs5.txt -j 6 ./hist_sample_draw {} 1 1.5 > nohup_sigmat_1.5_5.log &
+nohup parallel -a root_files/filled_sampled_histograms/inputs.txt -j 6 ./hist_sample_draw.exe {} 1 1.5 > nohup_sigmat_1.5.log &
+ls
+chmod +x exec_int_range.sh 
+./exec_int_range.sh 
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_both_free_sigma_1.0 0 300 0.5 300 150
+cat nohup_150_points_both_free_sigma_1.0.log 
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_re_fixed_sigma_1.0 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat1.00_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_im_fixed_sigma_1.0 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.10_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_im_fixed_sigma_0.1 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.10_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_re_fixed_sigma_0.1 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.10_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_both_free_sigma_0.1 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_both_free_sigma_0.5 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.80_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_both_free_sigma_0.8 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.80_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_re_fixed_sigma_0.8 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_re_fixed_sigma_0.5 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_im_fixed_sigma_0.5 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.80_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_im_fixed_sigma_0.8 0 300 0.5 300 150
+cd img/integral_range/150_points_both_free_sigma_0.8/
+ls
+cd ../../
+cd ..
+cat nohup_150_points_both_free_sigma_0.5.log 
+cd root_files/filled_sampled_histograms/
+ls
+cd exp_corrected/
+ls
+cd re0.00166_im-0.00198_sigmat0.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/
+hadd merged_2DHist.root *.root
+cd ../re0.00166_im-0.00198_sigmat0.80_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/
+hadd merged_2DHist.root *.root
+cd ../../
+cd ../../../
+cd InterfFunction/
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_im_fixed_sigma_0.5 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.80_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_im_fixed_sigma_0.8 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_re_fixed_sigma_0.5 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.80_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_re_fixed_sigma_0.8 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_both_free_sigma_0.5 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat0.80_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_both_free_sigma_0.8 0 300 0.5 300 150
+cd Subanalysis/InterfFunction/root_files/filled_sampled_histograms/exp_corrected/re0.00166_im-0.00198_sigmat1.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00/
+ls
+ls -hl
+hadd merged_2DHist.root *.root
+ls -hl
+cd ../
+cd ../../
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat1.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_both_free_sigma_1.5 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat1.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_re_fixed_sigma_1.5 0 300 0.5 300 150
+./exec_int_range.sh exp_corrected re0.00166_im-0.00198_sigmat1.50_t10.00_300.00_t20.00_300.00_tch0.00_300.00_tne0.00_300.00 150_points_im_fixed_sigma_1.5 0 300 0.5 300 150
+ssh tier1-cnaf 
+cd build/bin/
+gdb KLSPM00 
+valgrind KLSPM00_EXECUTE 
+valgrind KLSPM00
+cd ../../
+./execute_analysis.sh 

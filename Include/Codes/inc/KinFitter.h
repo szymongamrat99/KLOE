@@ -146,7 +146,7 @@ namespace KLOE
 
     ErrorHandling::ErrorCodes _err_code = ErrorHandling::ErrorCodes::NO_ERROR;
 
-    std::vector<std::unique_ptr<TF1>> _constraints;
+    std::vector<TF1> _constraints;
     Double_t _value_min;
 
     std::vector<Int_t> _chosen;
