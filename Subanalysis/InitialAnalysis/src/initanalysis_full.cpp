@@ -173,7 +173,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::string fileTypeStr = fileTypeToString(fileTypeOpt);
 
   std::string
-      dirname = (std::string)Paths::initialanalysis_dir + (std::string)Paths::root_files_dir,
+      dirname = Paths::customRootResultsPath,
+      //(std::string)Paths::initialanalysis_dir + (std::string)Paths::root_files_dir,
       resultDirName = "",
       log_file_writer_lumi = "";
 

@@ -43,6 +43,7 @@ namespace Paths
   std::string cutlimitsName = propertiesPath + "/cut-limits.json";
   std::string reportConfigPath = propertiesPath + "/report-config.json";
   std::string pathsExtensionsPath = propertiesPath + "/paths-extensions.json";
+  std::string customRootResultsPath = getenv("ROOT_RESULTS_PATH");
 
   TString path_tmp = "";
   TString path_cs = "";

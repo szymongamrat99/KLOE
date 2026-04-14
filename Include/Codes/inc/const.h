@@ -32,6 +32,7 @@ namespace Paths
   extern std::string cutlimitsName;
   extern std::string reportConfigPath;
   extern std::string pathsExtensionsPath;
+  extern std::string customRootResultsPath;
 
   extern TString path_tmp;
   extern TString path_cs;
