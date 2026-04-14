@@ -1189,3 +1189,41 @@ valgrind KLSPM00_EXECUTE
 valgrind KLSPM00
 cd ../../
 ./execute_analysis.sh 
+llq
+ll
+find /usr/lib64 /usr/lib -name "libasan.so*"
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 10
+./execute_analysis.sh
+./execute_analysis.sh 
+cd build/bin/
+gdb ./KLSPM00 
+cd ../../
+./execute_analysis.sh 
+export ASAN_OPTIONS=print_stacktrace=1
+./execute_analysis.sh 
+git add .
+git commit -m "Fix"
+git push
+./execute_analysis.sh 
+git checkout -- .
+./execute_analysis.sh 
+export ASAN_OPTIONS=symbolize=1
+./execute_analysis.sh 
+cd build/bin/
+valgrind --tool=memcheck          --leak-check=full          --show-leak-kinds=all          --track-origins=yes          --verbose          ./KLSPM00
+valgrind --tool=memcheck          --suppressions=$ROOTSYS/etc/valgrind-root.supp          --leak-check=full          ./KLSPM00
+cd ../../
+./execute_analysis.sh 
+git add .
+git commit -m "Fix"
+git pus
+git push
+./execute_analysis.sh 
+cd Subanalysis/Properties/
+code properties.json 
+code analysis_config.json 
+cd ../../
+./execute_analysis.sh 

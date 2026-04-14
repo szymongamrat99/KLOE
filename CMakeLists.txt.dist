@@ -11,23 +11,22 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Optymalizacje kompilaitora
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG -ffast-math")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -Wextra -Wpedantic -fsanitize=address -fsanitize=undefined")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG -march=native")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG -march=x86-64")
 
 set(CMAKE_INCLUDE_PATH $ENV{CMAKE_INCLUDE_PATH})
 
 # Set-up required packages
-find_package(ROOT REQUIRED COMPONENTS Tree Physics MathCore Matrix TMVA Hist Graf RooFit RooFitCore)
+find_package(ROOT REQUIRED COMPONENTS Core RIO Tree Physics MathCore Matrix TMVA Hist Graf RooFit RooFitCore)
 find_package(Boost REQUIRED COMPONENTS system filesystem unit_test_framework)
 find_package(CURL REQUIRED)
 find_package(LAPACK REQUIRED)
 find_package(BLAS REQUIRED)
 
-
 # Enable tests for the files
+include(CTest)
 enable_testing()
-
 
 # Inclusion of directories to the project 
 add_subdirectory(Subanalysis/CovarianceMatrix)
@@ -47,7 +46,9 @@ add_subdirectory(Include/MainMenuHandler)
 # add_subdirectory(Subanalysis/Plots)
 # add_subdirectory(Subanalysis/RegenerationAnalysis)
 # add_subdirectory(Subanalysis/Semileptonic)
-add_subdirectory(tests)
+# if(BUILD_TESTING)
+#   add_subdirectory(tests)
+# endif()
 
 
 # What should be the result of compilation
@@ -71,7 +72,7 @@ target_include_directories(KLSPM00 PRIVATE
   )
 
 link_directories(${CERNLIB_DIR})
-target_link_libraries(KLSPM00 PRIVATE
+target_link_libraries(KLSPM00 PUBLIC
   CovMatrix
   NeutRec
   KchRec
