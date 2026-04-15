@@ -38,7 +38,7 @@ namespace Paths
   std::string histogramConfig1DPath = histogramConfigDir + "/histogram1D.csv";
   std::string histogramConfig2DPath = histogramConfigDir + "/histogram2D.csv";
   std::string propName = propertiesPath + "/properties.json";
-  std::string analysisConfigPath = propertiesPath + "/analysis_config.json";
+  std::string analysisConfigPath = propertiesPath + "/" + getenv("ANALYSIS_CONFIG_FILE");
   std::string rootfilesName = propertiesPath + "/root-files.json";
   std::string cutlimitsName = propertiesPath + "/cut-limits.json";
   std::string reportConfigPath = propertiesPath + "/report-config.json";

@@ -1467,3 +1467,119 @@ cd ALL_PHYS_SIGNAL_NoSmearing/
 ls
 ls -hl
 exit
+vi run_parallel.sh 
+./execute_analysis.sh 
+./execute_analysis.sh 8 ../DBV-26/all_phys/20260415/job_v26_all_phys_4_inv_pb_13.txt 
+./execute_analysis.sh 8 ../../../DBV-26/all_phys/20260415/job_v26_all_phys_4_inv_pb_13.txt 
+./execute_analysis.sh 8 ../../DBV-26/all_phys/20260415/job_v26_all_phys_4_inv_pb_13.txt 
+./execute_analysis.sh 8 ../../DBV-26/all_phys/20260415/job_v26_all_phys_4_inv_pb_54.txt 
+./execute_analysis.sh 8 ../../DBV-26/all_phys/20260415/job_v26_all_phys_4_inv_pb_55.txt 
+./execute_analysis.sh 8 ../../DBV-26/all_phys/20260415/job_v26_all_phys_4_inv_pb_34.txt 
+./execute_analysis.sh 
+./execute_analysis.sh 8 ../../DBV-26/all_phys/20260415/job_v26_all_phys_4_inv_pb_55.txt 
+killall KLSPM00
+cd ../root_files/
+ls
+cd hal/
+rm -fr *
+cd ../kitt/
+rm -fr *
+cd ..
+cd ../KLOE/
+./execute_analysis.sh 
+git add .
+git commit -m "Fixed fast(free)"
+git restore --staged .
+git reset 
+git rm -r --cached parallel_logs*
+git add .
+git commit -m "Fixed fast(free)"
+git push
+rm -r parallel_logs*
+./run_parallel.sh all_phys2 20260415 1 5
+pgrep KLSPM00
+cd ../root_files/hal/
+ls
+cd ALL_PHYS2_SIGNAL_NoSmearing/
+ls -hl
+cd ../
+cd ../../
+cd KLOE/
+./run_parallel.sh all_phys 20260415 1 100
+htop
+killall KLSPM00
+cd ../
+cd ki
+cd root_files/kitt/
+ls -hl
+cd ../
+cd hal/
+rm -fr *
+cd ../../KLOE/
+./execute_analysis.sh 
+./run_parallel.sh all_phys2 20260415 1 5
+./run_parallel.sh all_phys2 20260415 1 5 3
+./run_parallel.sh all_phys 20260415 1 100 50
+htop
+cd ../root_files/hal/
+killall KLSPM00
+rm -fr *
+cd ../../
+cd KLOE/
+./run_parallel.sh all_phys2 20260415 1 5 3
+htop
+pgrep KLSPM00
+killall parallel
+killall nohup
+ps -e
+killall execute_analysis
+killall KLSPM00
+htop
+killall KLSPM00
+cd ../
+cd hal
+cd root_files/hal/
+ls
+rm -fr *
+ls
+cd ..
+cd kitt/
+ls
+cd ../../
+cd KLOE/
+ls
+./run_parallel.sh all_phys2 20260415 1 5 5
+killall KLSPM00
+killall execute_analysis
+rm parallel_logs_all_phys*
+rm -r parallel_logs_all_phys*
+./run_parallel.sh all_phys2 20260415 1 5 5
+./run_parallel.sh all_phys 20260415 1 100 45
+htop
+git add .
+git commit -m "Possibility to choose nproc"
+git push
+cd ../root_files/kitt/
+ls
+cd ALL_PHYS3_SIGNAL_NoSmearing/
+ls
+ls -hl
+cd ../../hal/
+ls
+cd ALL_PHYS
+cd ALL_PHYS_SIGNAL_NoSmearing/
+ls -hl
+vi ~/.bashrc
+ls -hl
+cd ../root_files/hal/ALL_PHYS_SIGNAL_NoSmearing/
+ls -hl
+htop
+cd../../../
+cd ../
+cd ../../
+cd KLOE/
+cd parallel_logs_all_phys_1_100/
+cd 1/9/
+cat stderr
+cat stdout 
+exit
