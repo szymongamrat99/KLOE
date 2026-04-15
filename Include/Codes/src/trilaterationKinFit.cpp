@@ -254,7 +254,6 @@ namespace KLOE
       _fourKnetri_kinfit[6] = 999.;
       _fourKnetri_kinfit[7] = 999.;
       _fourKnetri_kinfit[8] = 999.;
-      _fourKnetri_kinfit[9] = 999.;
 
       _iptri_kinfit[0] = 999.;
       _iptri_kinfit[1] = 999.;

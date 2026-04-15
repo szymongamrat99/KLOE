@@ -1,0 +1,32 @@
+CMake Warning (dev) at CMakeLists.txt:22 (find_package):
+  Policy CMP0167 is not set: The FindBoost module is removed.  Run "cmake
+  --help-policy CMP0167" for policy details.  Use the cmake_policy command to
+  set the policy and suppress this warning.
+
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+cp: cannot create regular file '/opt/exp_software/kloe/users/gamrat/KLSPM00/bin/KLSPM00.exe': No such file or directory
+cp: cannot create regular file '/opt/exp_software/kloe/users/gamrat/KLSPM00/lib/.': No such file or directory
+cp: cannot create regular file '/opt/exp_software/kloe/users/gamrat/KLSPM00/lib/.': No such file or directory
+cp: cannot create regular file '/opt/exp_software/kloe/users/gamrat/KLSPM00/lib/.': No such file or directory
+cp: cannot create regular file '/opt/exp_software/kloe/users/gamrat/KLSPM00/lib/.': No such file or directory
+cp: cannot create regular file '/opt/exp_software/kloe/users/gamrat/KLSPM00/lib/.': No such file or directory
+cp: cannot create regular file '/opt/exp_software/kloe/users/gamrat/KLSPM00/lib/.': No such file or directory
+cp: cannot create regular file '/opt/exp_software/kloe/users/gamrat/KLSPM00/lib/.': No such file or directory
+cp: cannot create regular file '/opt/exp_software/kloe/users/gamrat/KLSPM00/lib/.': No such file or directory
+cp: cannot create regular file '/opt/exp_software/kloe/users/gamrat/KLSPM00/lib/.': No such file or directory
+Error in <TFile::Init>: file /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/bad/prod2root_mk0_all_phys_32508_v2.root is truncated at 688193536 bytes: should be 988580641, trying to recover
+Warning in <TFile::Init>: no keys recovered, file has been made a Zombie
+Error in <TFile::Init>: file /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/bad/prod2root_mk0_all_phys_32509_v2.root is truncated at 557891584 bytes: should be 560100595, trying to recover
+Info in <TFile::Recover>: /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/bad/prod2root_mk0_all_phys_32509_v2.root, recovered key TTree:h1 at address 557429669
+Warning in <TFile::Init>: successfully recovered 1 keys
+Error in <TFile::ReadBuffer>: error reading all requested bytes from file /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/bad/prod2root_mk0_all_phys_32509_v2.root, got 461915 of 2670926
+Error in <TKey::ReadFile>: Failed to read data.
+Error in <TChain::LoadTree>: Cannot find tree with name h1 in file /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/bad/prod2root_mk0_all_phys_32509_v2.root
+Error in <TFile::Init>: file /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/bad/prod2root_mk0_all_phys_32514_v2.root is truncated at 579715072 bytes: should be 898705223, trying to recover
+Warning in <TFile::Init>: no keys recovered, file has been made a Zombie
+Error in <TFile::Init>: file /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/bad/prod2root_mk0_all_phys_32522_v2.root is truncated at 393641984 bytes: should be 827329911, trying to recover
+Warning in <TFile::Init>: no keys recovered, file has been made a Zombie
+Error in <TFile::Init>: file /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/bad/prod2root_mk0_all_phys_32537_v2.root is truncated at 226213888 bytes: should be 819519177, trying to recover
+Warning in <TFile::Init>: no keys recovered, file has been made a Zombie
+Terminated

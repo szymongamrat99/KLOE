@@ -1227,3 +1227,243 @@ code properties.json
 code analysis_config.json 
 cd ../../
 ./execute_analysis.sh 
+cat ~/.bashrc 
+cd ..
+cd root_files/
+ls
+cd kitt/
+ls
+exit
+cd ../root_files/kitt/
+ls
+cd ../hal/
+ls
+cd ../kitt/
+ls
+cd ALL_PHYS3_SIGNAL_NoSmearing/
+ls
+ls -hl
+cd ..
+rm -fr *
+cd ..
+cd kitt/
+ls
+rm -fr *
+cd ..
+cd kitt/
+ls
+ALL_PHYS3_SIGNAL_NoSmearing/
+ls
+cd ALL_PHYS3_SIGNAL_NoSmearing/
+ls
+ls -hl
+git add .
+git commit -m "Fix"
+git push
+git pull
+vi ~/.bashrc 
+source ~/.bashrc 
+./execute_analysis.sh 
+git add .
+git commit -m "Custom root folder"
+git push
+vi ~/.bashrc 
+ls
+cd ..
+ls
+cd root_files/
+ls
+cd ..
+cd DBV-26/
+ls
+cd all_phys
+ls
+cd 20260315/
+ls
+cd ../
+ls
+cd ..
+ls
+cd ..
+ls
+./lumi_batch.sh 
+vi lumi_batch.sh 
+./lumi_batch.sh PROD2ROOT/MC/MK0 
+./lumi_batch.sh PROD2ROOT/MC/MK0 26 all_phys3 4 lumi_file/lumi_per_ev_nb.log 
+ls
+cd root_files/
+ls
+cd hal/
+ls
+cd 2026-04-14/
+ls
+cd ..
+cd kitt/
+ls
+cd 2026-04-14/
+ls
+cd ..
+rm -fr *
+cd ../hal/
+rm -fr *
+ll
+ls -hl
+cd ..
+ls
+cd kitt/
+ls
+cd ..
+cd ../
+cd DBV-26/all_phys3/
+ls
+cd 20260414
+ls
+cd ../
+cd ../../
+cd DBV-26/all_phys3/20260414/
+ls
+cat job_v26_all_phys3_4_inv_pb_1.txt 
+cd ../../
+cd ../
+./lumi_batch.sh /data/ssd/gamrat/PROD2ROOT/MC/MK0 all_phys3 
+./lumi_batch.sh /data/ssd/gamrat/PROD2ROOT/MC/MK0 26 all_phys3 4 lumi_file/lumi_per_ev_nb.log 
+cd DBV-26/
+cd all_phys3/
+rm -r 20260414/
+cd ../../
+./lumi_batch.sh /data/ssd/gamrat/PROD2ROOT/MC/MK0 26 all_phys3 4 lumi_file/lumi_per_ev_nb.log 
+cd DBV-26/all_phys3/20260414/
+ls
+cd ../../
+ls
+cd ../
+./lumi_batch.sh /data/ssd/gamrat/PROD2ROOT/MC/MK0 26 all_phys2 4 lumi_file/lumi_per_ev_nb.log 
+cd KLOE/
+./run_parallel.sh 
+./run_parallel.sh all_phys2 20260415 1 5
+ls
+cd ..
+llq
+htop
+cd root_files/hal/
+ls
+cd ..
+cd KLOE/
+rm -r para
+rm -r parallel_logs/
+./run_parallel.sh all_phys2 20260415 1 5
+cd ../
+htop
+cd root_files/hal/
+ls
+cd ..
+cd kitt/
+ls
+cd ../
+cd ../KLOE/parallel_logs/
+ls
+cd 1/1/
+ls
+cat seq
+cat stderr
+source ~/.bashrc
+cd ../../
+cd ..
+rm -r parallel_logs/
+./run_parallel.sh all_phys2 20260415 1 5
+cd parallel_logs/1/1
+cat stderr 
+cd ../../
+pgrep KLSPM00
+cd ..
+rm -r parallel_logs/
+vi run_parallel.sh 
+./run_parallel.sh all_phys2 20260415 1 5
+cd parallel_logs/1/1/
+cat stderr 
+cd ../../
+cd ../
+cd ..
+ls
+cd root_files/hal/ALL_PHYS2_SIGNAL_NoSmearing/
+ls
+ls -hl
+cd ../../
+cd kitt/ALL_PHYS3_SIGNAL_NoSmearing/
+ls -hl
+cd ../../
+cd ../
+cd KLOE/Subanalysis/Properties/
+cat analysis_config.json 
+cd ../../
+cd ../
+./lumi_batch.sh /data/ssd/gamrat/PROD2ROOT/MC/MK0 26 all_phys 4 lumi_file/lumi_per_ev_nb.log 
+cd root_files/kitt/
+ls
+cd ALL_PHYS
+cd ALL_PHYS_SIGNAL_NoSmearing/
+ls -hl
+htop
+ls /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/
+./lumi_batch.sh /data/tape_dump/gamrat/PROD2ROOT/MC/MK0 26 all_phys 4 lumi_file/lumi_per_ev_nb.log 
+cd ../../
+cd ..
+./lumi_batch.sh /data/tape_dump/gamrat/PROD2ROOT/MC/MK0 26 all_phys 4 lumi_file/lumi_per_ev_nb.log 
+nproc
+lscpu
+cd KLOE/
+nproc --all
+vi run_parallel.sh 
+./run_parallel.sh all_phys 20260415 2 80 
+cd ../root_files/hal/ALL_PHYS
+cd ../root_files/hal/ALL_PHYS_SIGNAL_NoSmearing/
+ls
+llq
+ll
+cd ../
+htop
+cd ..
+cd ../KLOE/
+ls
+cd parallel_logs_all_phys_2_80/
+ls
+cd 1/1
+ls
+cd 1
+ls
+cd 10/
+ls
+cat stdout
+exit
+ls -hl
+cd parallel_logs_all_phys_2_80/
+ls
+cd 1/
+ls
+cd 10
+ls
+cat stdout 
+exit
+cd ../root_files/hal/
+ls
+cd ALL_PHYS2_SIGNAL_NoSmearing/
+ls -hl
+cd ../ALL_PHYS_SIGNAL_NoSmearing/
+ls -hl
+llq
+cd ../../../KLOE/
+cd parallel_logs_all_phys_2_80/
+cd 1/13/
+ls
+cat stdout 
+cat stderr 
+cd ../../../
+cd ../
+cd root_files/
+ls
+cd hal/
+ls -hl
+cd ALL_PHYS_SIGNAL_NoSmearing/
+ls
+ls -hl
+exit
