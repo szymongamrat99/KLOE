@@ -25,3 +25,4 @@ Subanalysis/Properties/pdg_api/
 Subanalysis/Properties/schemas/
 *.txt
 .vscode/
+parallel_logs*/
