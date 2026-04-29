@@ -142,7 +142,10 @@ namespace KLOE
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Double_t interf_function(const Float_t x, Int_t check = 1, const Double_t *par = 0);
+    Double_t interf_function(const Double_t x, Int_t check = 1, const Double_t *par = 0);
+    Double_t double_exponential(const Double_t x, Int_t check = 1, const Double_t *par = 0);
+
+    Double_t fit_function(const Double_t x, Int_t check = 1, const Double_t *par = 0);
 
     Double_t interf_chi2_split(const Double_t *xx);
     Double_t interf_chi2_excluded(const Double_t *xx);
@@ -177,6 +180,8 @@ namespace KLOE
         return false;
     };
 
+    void SetParamIndex(TString name, Int_t index) { fParamIndices[name] = index; }
+
   private:
     TString _mode; //! "split", "window", "excluded, "mc", "bcg", "all"
     TGraphErrors *corr_factor, *eff_factor;
@@ -197,6 +202,8 @@ namespace KLOE
     UInt_t num_of_vars;
 
     Bool_t _corr_check;
+
+    std::map<TString, Int_t> fParamIndices;
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
   };

@@ -1,0 +1,676 @@
+#include <iostream>
+#include <fstream>
+
+#include <TROOT.h>
+#include <TTree.h>
+#include <TFile.h>
+#include <TChain.h>
+#include <Math/Minimizer.h>
+#include <Math/Factory.h>
+#include <Math/Functor.h>
+#include <TCanvas.h>
+#include <TMath.h>
+#include <TRatioPlot.h>
+#include <TStyle.h>
+#include <TGraphAsymmErrors.h>
+#include <TEfficiency.h>
+#include <TLegend.h>
+#include <TBufferJSON.h>
+#include <TTreeReader.h>
+#include <TTreeReaderValue.h>
+#include <TTreeReaderArray.h>
+#include <boost/progress.hpp>
+
+#include "../inc/cpfit.hpp"
+
+int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
+{
+  // =============================================================================
+  KLOE::BaseKinematics
+      baseKin;
+  Int_t
+      file_num;
+  TFile
+      *file_corr;
+  // =============================================================================
+  const TString cpfit_res_dir = Paths::cpfit_dir + Paths::result_dir;
+
+  Double_t *eff_vals;
+
+  if (check_corr == true)
+  {
+    file_corr = new TFile("../Efficiency_analysis/correction_factor.root");
+    TGraphAsymmErrors *eff_signal = (TGraphAsymmErrors *)file_corr->Get("correction_factor");
+    eff_vals = eff_signal->GetY();
+
+    delete eff_signal;
+  }
+
+  // ===========================================================================
+
+  TTreeReader reader(&chain);
+
+  TTreeReaderValue<Int_t> mcflag(reader, "mcflag");
+  TTreeReaderValue<Int_t> mctruth(reader, "mctruth");
+
+  TTreeReaderValue<Double_t> Chi2SignalKinFit(reader, "Chi2SignalKinFit");
+  TTreeReaderValue<Double_t> minv4gam(reader, "minv4gam");
+
+  TTreeReaderValue<Double_t> Qmiss(reader, "Qmiss");
+
+  TTreeReaderValue<Double_t> Bx(reader, "Bx");
+  TTreeReaderValue<Double_t> By(reader, "By");
+  TTreeReaderValue<Double_t> Bz(reader, "Bz");
+
+  TTreeReaderValue<Double_t> KaonChTimeCMMC(reader, "KaonChTimeCMMC");
+  TTreeReaderValue<Double_t> KaonNeTimeCMMC(reader, "KaonNeTimeCMMC");
+  TTreeReaderValue<Double_t> KaonChTimeCMSignalFit(reader, "KaonChTimeCMSignalFit");
+  TTreeReaderValue<Double_t> KaonNeTimeCMSignalFit(reader, "KaonNeTimeCMSignalFit");
+
+  TTreeReaderValue<Double_t> bestErrorSixGamma(reader, "bestErrorSixGamma");
+
+  TTreeReaderArray<Double_t> Knerec(reader, "Knerec");
+  TTreeReaderArray<Double_t> KnerecSix(reader, "KnerecSix");
+  TTreeReaderArray<Double_t> KchrecClosest(reader, "KchrecClosest");
+
+  TTreeReaderArray<Double_t> KnerecFit(reader, "KnerecFit");
+  TTreeReaderArray<Double_t> KchrecFit(reader, "KchrecFit");
+  TTreeReaderArray<Double_t> ipFit(reader, "ipFit");
+
+  TTreeReaderArray<Double_t> trk1Fit(reader, "trk1Fit");
+  TTreeReaderArray<Double_t> trk2Fit(reader, "trk2Fit");
+
+  TTreeReaderArray<Double_t> pi01Fit(reader, "pi01Fit");
+  TTreeReaderArray<Double_t> pi02Fit(reader, "pi02Fit");
+
+  // ===========================================================================
+
+  ///////////////////////////////////////
+  std::ifstream configFile(Paths::cpfit_dir + "config/config.json");
+  if (!configFile.is_open())
+  {
+    std::cerr << "ERROR: Could not open config file: " << Paths::cpfit_dir + "config/config.json" << std::endl;
+    return 1;
+  }
+
+  json config;
+  try
+  {
+    config = json::parse(configFile);
+  }
+  catch (const json::parse_error &e)
+  {
+    std::cerr << "ERROR: Failed to parse config file: " << e.what() << std::endl;
+    return 1;
+  }
+  /////////////////////////////////////
+  const Double_t
+      x_min = config.at("deltaT").at("rangeX").at(0),
+      x_max = config.at("deltaT").at("rangeX").at(1),
+      x_min_display = config.at("deltaT").at("xRangeDisplay").at(0),
+      x_max_display = config.at("deltaT").at("xRangeDisplay").at(1),
+      x_fit_range_min = config.at("deltaT").at("xFitRange").at(0),
+      x_fit_range_split1 = config.at("deltaT").at("xFitRange").at(1),
+      x_fit_range_split2 = config.at("deltaT").at("xFitRange").at(2),
+      x_fit_range_max = config.at("deltaT").at("xFitRange").at(3);
+  Double_t
+      res_deltaT = config.at("deltaT").at("resolution");
+  UInt_t
+      nbins = Int_t((x_max - x_min) / res_deltaT);
+
+  if (nbins % 2 == 0)
+    nbins += 1; // Ensure an odd number of bins for symmetry around zero
+
+  Double_t split[3] = {
+      config.at("regenerationSplit").at(0),
+      config.at("regenerationSplit").at(1),
+      config.at("regenerationSplit").at(2)};
+
+  // Get enabled variables for the fit
+  const auto &enabled_params = config.at("parameterSettings");
+  std::map<TString, TString> channel_to_param;
+  std::map<TString, Double_t> init_vars, step, limit_lower, limit_upper;
+  UInt_t num_of_vars = 11;
+
+  for (const auto &param : enabled_params.items())
+  {
+    if (!param.value().at("enabled").get<bool>())
+    {
+      std::cout << "Parameter " << param.key() << " is disabled for the fit." << std::endl;
+      init_vars[param.key()] = param.value().at("initialValue").get<Double_t>();
+
+      std::cout << "Parameter " << param.key() << ": initial value = " << init_vars[param.key()]
+                << ", step = " << 0.0
+                << ", limits = [none]" << std::endl;
+    }
+    else
+    {
+      if (param.key() == "Re" || param.key() == "Im")
+      {
+        init_vars[param.key()] = param.value().at("initialValue").get<Double_t>();
+        step[param.key()] = param.value().at("step").get<Double_t>();
+        limit_lower[param.key()] = param.value().at("limitLower").get<Double_t>();
+        limit_upper[param.key()] = param.value().at("limitUpper").get<Double_t>();
+
+        std::cout << "Parameter " << param.key() << ": initial value = " << init_vars[param.key()]
+                  << ", step = " << step[param.key()]
+                  << ", limits = [" << init_vars[param.key()] - limit_lower[param.key()] * init_vars[param.key()]
+                  << ", " << init_vars[param.key()] + limit_upper[param.key()] * init_vars[param.key()] << "]" << std::endl;
+      }
+      else if (param.key() == "A_bcg_group")
+      {
+          for (const auto &ch : enabled_params.items())
+      }
+    }
+  }
+
+  KLOE::interference event(mode, check_corr, nbins, x_min, x_max, split);
+
+  // ============================================================================================================
+  // Fitting procedure
+  // Get settings
+
+  std::string minimizer_type = config.at("fitSettings").at("minimizerType").get<std::string>(),
+              algo_type = config.at("fitSettings").at("minimizerAlgorithm").get<std::string>();
+
+  ROOT::Math::Minimizer *minimum =
+      ROOT::Math::Factory::CreateMinimizer(minimizer_type, algo_type);
+
+  Int_t max_calls = config.at("fitSettings").at("maxFunctionCalls").get<Int_t>();
+  Double_t tolerance = config.at("fitSettings").at("tolerance").get<Double_t>();
+  Int_t print_level = config.at("fitSettings").at("printLevel").get<Int_t>();
+  Int_t strategy = config.at("fitSettings").at("strategy").get<Int_t>();
+
+  // set tolerance , etc...
+  minimum->SetMaxFunctionCalls(max_calls); // for Minuit/Minuit2
+  minimum->SetTolerance(tolerance);
+  minimum->SetPrintLevel(print_level);
+  minimum->SetStrategy(strategy);
+
+  std::map<TString, Int_t> param_index_map;
+
+  Int_t par_num = 0;
+  for (const auto &param : init_vars)
+  {
+    std::string param_name = (std::string)param.first;
+
+    if (limit_lower.find(param.first) != limit_lower.end() && limit_upper.find(param.first) != limit_upper.end())
+    {
+      Double_t lower_limit = init_vars[param.first] - limit_lower[param.first] * init_vars[param.first];
+      Double_t upper_limit = init_vars[param.first] + limit_upper[param.first] * init_vars[param.first];
+
+      minimum->SetLimitedVariable(par_num, param_name, init_vars[param.first], step[param.first], lower_limit, upper_limit);
+      std::cout << "Parameter " << param_name << " has limits set. Using initial value = " << init_vars[param.first]
+                << ", step = " << step[param.first]
+                << ", limits = [" << lower_limit << ", " << upper_limit << "]" << std::endl;
+    }
+    else
+    {
+      minimum->SetVariable(par_num, param_name, init_vars[param.first], step[param.first]);
+      std::cout << "Parameter " << param_name << " has no limits set. Using initial value = " << init_vars[param.first]
+                << " and step = " << step[param.first] << std::endl;
+    }
+    event.SetParamIndex(param.first, par_num);
+    param_index_map[param.first] = par_num;
+
+    ++par_num;
+  }
+
+  ROOT::Math::Functor minimized_function(&event, &KLOE::interference::interf_chi2, num_of_vars);
+  minimum->SetFunction(minimized_function);
+  ////////////////////////////////////
+
+  TH1 *sig_total = new TH1D("sig_tot", ";#Delta t;Counts", nbins, x_min, x_max);
+  TH1 *sig_pass = new TH1D("sig_pass", ";#Delta t;Counts", nbins, x_min, x_max);
+
+  std::vector<Double_t> no_cuts_sig[2];
+
+  Long64_t nentries = reader.GetEntries(true);
+
+  boost::progress_display display(nentries);
+
+  double u0 = -92.9524, v0 = 7.1644, su = 33.7633, sv = 42.0163, rho = 0.556;
+  double n_sigma_cut = 2.5;
+
+  // Definicja lambdy
+  auto ellipse_cut = [=](double u, double v)
+  {
+    double du = u - u0;
+    double dv = v - v0;
+    double inv_rho2 = 1.0 / (1.0 - rho * rho);
+
+    double dist2 = inv_rho2 * ((du * du) / (su * su) +
+                               (dv * dv) / (sv * sv) -
+                               2.0 * rho * (du * dv) / (su * sv));
+
+    return std::sqrt(std::max(0.0, dist2)) > n_sigma_cut;
+  };
+
+  while (reader.Next())
+  {
+    // Cut setting
+    std::array<Double_t, 3> distNeutralCharged = {KchrecFit[6] - KnerecFit[6],
+                                                  KchrecFit[7] - KnerecFit[7],
+                                                  KchrecFit[8] - KnerecFit[8]},
+                            distNeutralIP = {Knerec[6] - *Bx,
+                                             Knerec[7] - *By,
+                                             Knerec[8] - KchrecClosest[8]},
+                            distChargedIP = {KchrecClosest[6] - *Bx,
+                                             KchrecClosest[7] - *By,
+                                             KchrecClosest[8] - *Bz};
+
+    Float_t
+        rho_pm = std::sqrt(distChargedIP[0] * distChargedIP[0] + distChargedIP[1] * distChargedIP[1]),
+        rho_00 = std::sqrt(distNeutralIP[0] * distNeutralIP[0] + distNeutralIP[1] * distNeutralIP[1]),
+        rho = std::sqrt(std::pow(rho_pm, 2) + std::pow(rho_00, 2));
+    ;
+
+    Double_t radius00 = std::sqrt(std::pow(Knerec[6] - *Bx, 2) +
+                                  std::pow(Knerec[7] - *By, 2)),
+             radiuspm = std::sqrt(std::pow(KchrecClosest[6] - *Bx, 2) +
+                                  std::pow(KchrecClosest[7] - *By, 2)),
+             zdist00 = std::abs(Knerec[8] - KchrecClosest[8]),
+             zdistpm = std::abs(KchrecClosest[8] - *Bz);
+
+    Double_t fiducialVolume = std::sqrt(std::pow(distNeutralCharged[0], 2) + std::pow(distNeutralCharged[1], 2)) < 2.05 && std::abs(distNeutralCharged[2]) < 2.45,
+             fiducialVolumeClose = radius00 < 1.5 && radiuspm < 2.0 && zdist00 < 1.5 && zdistpm < 1.5;
+
+    TVector3 KchrecVec = {KchrecFit[0], KchrecFit[1], KchrecFit[2]};
+    TVector3 trk1VecFit = {trk1Fit[0], trk1Fit[1], trk1Fit[2]};
+    TVector3 trk2VecFit = {trk2Fit[0], trk2Fit[1], trk2Fit[2]};
+
+    Double_t phiTrk1Angle = cos(trk1VecFit.Angle(KchrecVec)),
+             phiTrk2Angle = cos(trk2VecFit.Angle(KchrecVec));
+
+    Bool_t global_cut = ((fiducialVolume && (abs(phiTrk1Angle) < 0.8 || abs(phiTrk2Angle) < 0.8)) || !fiducialVolume) && ((fiducialVolumeClose && rho > 1.5) || !fiducialVolumeClose) && ellipse_cut(*minv4gam - PhysicsConstants::mK0, KnerecSix[5] - PhysicsConstants::mK0);
+
+    baseKin.Dtmc = *KaonChTimeCMMC - *KaonNeTimeCMMC;
+    baseKin.Dtboostlor = *KaonChTimeCMSignalFit - *KaonNeTimeCMSignalFit;
+
+    if (*mcflag == 1)
+    {
+      if (*mctruth == 1 || *mctruth == 0)
+      {
+        no_cuts_sig[0].push_back(baseKin.Dtmc);
+        no_cuts_sig[1].push_back(baseKin.Dtboostlor);
+      }
+
+      if (global_cut)
+      {
+        if (*mctruth == 1)
+        {
+          event.time_diff_gen.push_back(baseKin.Dtmc);
+          event.time_diff["Signal"].push_back(baseKin.Dtboostlor);
+        }
+
+        if (*mctruth == 2)
+        {
+          event.time_diff["Regeneration"].push_back(baseKin.Dtboostlor);
+        }
+
+        if (*mctruth == 3)
+        {
+          event.time_diff["Omega"].push_back(baseKin.Dtboostlor);
+        }
+
+        if (*mctruth == 4)
+        {
+          event.time_diff["3pi0"].push_back(baseKin.Dtboostlor);
+        }
+
+        if (*mctruth == 5)
+        {
+          event.time_diff["Semileptonic"].push_back(baseKin.Dtboostlor);
+        }
+
+        if (*mctruth == 6)
+        {
+          event.time_diff["Other"].push_back(baseKin.Dtboostlor);
+        }
+      }
+    }
+
+    if (*mcflag == 0 && global_cut)
+    {
+      event.time_diff["Data"].push_back(baseKin.Dtboostlor);
+    }
+
+    ++display;
+  }
+
+  minimum->Minimize();
+
+  std::vector<Double_t> par(num_of_vars), parErr(num_of_vars);
+
+  par[param_index_map["Re"]] = minimum->X()[param_index_map["Re"]];
+  par[param_index_map["Im"]] = minimum->X()[param_index_map["Im"]];
+  par[param_index_map["A_signal"]] = minimum->X()[param_index_map["A_signal"]];
+  par[param_index_map["A_regen_far_left"]] = minimum->X()[param_index_map["A_regen_far_left"]];
+  par[param_index_map["A_regen_near_left"]] = minimum->X()[param_index_map["A_regen_near_left"]];
+  par[param_index_map["A_regen_near_right"]] = minimum->X()[param_index_map["A_regen_near_right"]];
+  par[param_index_map["A_regen_far_right"]] = minimum->X()[param_index_map["A_regen_far_right"]];
+  par[param_index_map["A_omega"]] = minimum->X()[param_index_map["A_omega"]];
+  par[param_index_map["A_three"]] = minimum->X()[param_index_map["A_three"]];
+  par[param_index_map["A_semileptonic"]] = minimum->X()[param_index_map["A_semileptonic"]];
+  par[param_index_map["A_other"]] = minimum->X()[param_index_map["A_other"]];
+
+  parErr[param_index_map["Re"]] = minimum->Errors()[param_index_map["Re"]];
+  parErr[param_index_map["Im"]] = minimum->Errors()[param_index_map["Im"]];
+  parErr[param_index_map["A_signal"]] = minimum->Errors()[param_index_map["A_signal"]];
+  parErr[param_index_map["A_regen_far_left"]] = minimum->Errors()[param_index_map["A_regen_far_left"]];
+  parErr[param_index_map["A_regen_near_left"]] = minimum->Errors()[param_index_map["A_regen_near_left"]];
+  parErr[param_index_map["A_regen_near_right"]] = minimum->Errors()[param_index_map["A_regen_near_right"]];
+  parErr[param_index_map["A_regen_far_right"]] = minimum->Errors()[param_index_map["A_regen_far_right"]];
+  parErr[param_index_map["A_omega"]] = minimum->Errors()[param_index_map["A_omega"]];
+  parErr[param_index_map["A_three"]] = minimum->Errors()[param_index_map["A_three"]];
+  parErr[param_index_map["A_semileptonic"]] = minimum->Errors()[param_index_map["A_semileptonic"]];
+  parErr[param_index_map["A_other"]] = minimum->Errors()[param_index_map["A_other"]];
+
+  std::cout << "---------------------------------" << std::endl;
+  std::cout << "Wyniki minimizacji:" << std::endl;
+  std::cout << "Re(epsilon): " << par[param_index_map["Re"]] << " +/- " << parErr[param_index_map["Re"]] << std::endl;
+  std::cout << "Im(epsilon): " << par[param_index_map["Im"]] << " +/- " << parErr[param_index_map["Im"]] << std::endl;
+  std::cout << "---------------------------------" << std::endl;
+  std::cout << std::endl;
+  std::cout << "Norms of fitted components:" << std::endl;
+  std::cout << "Signal: " << par[param_index_map["A_signal"]] << " +/- " << parErr[param_index_map["A_signal"]] << std::endl;
+  std::cout << "Regeneration (far left): " << par[param_index_map["A_regen_far_left"]] << " +/- " << parErr[param_index_map["A_regen_far_left"]] << std::endl;
+  std::cout << "Regeneration (close left): " << par[param_index_map["A_regen_near_left"]] << " +/- " << parErr[param_index_map["A_regen_near_left"]] << std::endl;
+  std::cout << "Regeneration (close right): " << par[param_index_map["A_regen_near_right"]] << " +/- " << parErr[param_index_map["A_regen_near_right"]] << std::endl;
+  std::cout << "Regeneration (far right): " << par[param_index_map["A_regen_far_right"]] << " +/- " << parErr[param_index_map["A_regen_far_right"]] << std::endl;
+  std::cout << "Omega: " << par[param_index_map["A_omega"]] << " +/- " << parErr[param_index_map["A_omega"]] << std::endl;
+  std::cout << "3pi0: " << par[param_index_map["A_three"]] << " +/- " << parErr[param_index_map["A_three"]] << std::endl;
+  std::cout << "Semileptonic: " << par[param_index_map["A_semileptonic"]] << " +/- " << parErr[param_index_map["A_semileptonic"]] << std::endl;
+  std::cout << "Other background: " << par[param_index_map["A_other"]] << " +/- " << parErr[param_index_map["A_other"]] << std::endl;
+  std::cout << "---------------------------------" << std::endl;
+
+  Double_t sum_of_events = 0.;
+  std::map<TString, Double_t> fractions;
+
+  for (const auto &c : KLOE::channName)
+    sum_of_events += event.time_diff[c.second].size();
+
+  for (const auto &c : KLOE::channName)
+    fractions[c.second] = 100 * event.time_diff[c.second].size() / sum_of_events;
+  std::ofstream myfile_num;
+  myfile_num.open(cpfit_res_dir + "num_of_events.csv");
+  myfile_num << "Channel,Number of events,Fraction\n";
+  myfile_num << "Signal," << event.time_diff["Signal"].size() << "," << fractions["Signal"] << "%,\n";
+  myfile_num << "Regeneration," << event.time_diff["Regeneration"].size() << "," << fractions["Regeneration"] << "%,\n";
+  myfile_num << "Omega," << event.time_diff["Omega"].size() << "," << fractions["Omega"] << "%,\n";
+  myfile_num << "Three," << event.time_diff["3pi0"].size() << "," << fractions["3pi0"] << "%,\n";
+  myfile_num << "Semi," << event.time_diff["Semileptonic"].size() << "," << fractions["Semileptonic"] << "%,\n";
+  myfile_num << "Other bcg," << event.time_diff["Other"].size() << "," << fractions["Other"] << "%,\n";
+  myfile_num.close();
+
+  for (UInt_t i = 0; i < no_cuts_sig[1].size(); i++)
+  {
+    sig_total->Fill(no_cuts_sig[1][i]);
+  }
+
+  for (auto const &name : KLOE::channName)
+  {
+    if (name.second == "Data" || name.second == "MC sum" || event.time_diff[name.second].size() == 0)
+      continue;
+
+    for (UInt_t j = 0; j < event.time_diff[name.second].size(); j++)
+    {
+      if (name.second == "Signal")
+      {
+        sig_pass->Fill(event.time_diff["Signal"][j]);
+
+        event.getFracHistogram("Signal")->Fill(event.time_diff["Signal"][j], event.fit_function(event.time_diff_gen[j], 0, par.data()));
+      }
+      else if (name.second == "Regeneration")
+      {
+        if (event.time_diff["Regeneration"][j] < event.left_x_split)
+          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_far_left"]]);
+        else if (event.time_diff["Regeneration"][j] > event.left_x_split && event.time_diff["Regeneration"][j] < event.center_x_split)
+          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_near_left"]]);
+        else if (event.time_diff["Regeneration"][j] > event.center_x_split && event.time_diff["Regeneration"][j] < event.right_x_split)
+          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_near_right"]]);
+        else if (event.time_diff["Regeneration"][j] > event.right_x_split)
+          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_far_right"]]);
+      }
+      else
+      {
+        event.getFracHistogram(name.second)->Fill(event.time_diff[name.second][j]);
+      }
+    }
+  }
+
+  for (UInt_t j = 0; j < event.time_diff["Data"].size(); j++)
+  {
+    event.getFracHistogram("Data")->Fill(event.time_diff["Data"][j]);
+  }
+
+  event.getFracHistogram("Signal")->Scale(par[param_index_map["A_signal"]] * event.getFracHistogram("Signal")->GetEntries() / event.getFracHistogram("Signal")->Integral(0, nbins + 1));
+
+  if (check_corr == true)
+  {
+    for (Int_t i = 0; i < nbins; i++)
+    {
+      event.getFracHistogram("Signal")->SetBinContent(i + 1, event.getFracHistogram("Signal")->GetBinContent(i + 1) * event.corr_vals[i]);
+    }
+  }
+
+  event.getFracHistogram("Omega")->Scale(par[param_index_map["A_omega"]] * event.getFracHistogram("Omega")->GetEntries() / event.getFracHistogram("Omega")->Integral(0, nbins + 1));
+  event.getFracHistogram("3pi0")->Scale(par[param_index_map["A_three"]] * event.getFracHistogram("3pi0")->GetEntries() / event.getFracHistogram("3pi0")->Integral(0, nbins + 1));
+  event.getFracHistogram("Semileptonic")->Scale(par[param_index_map["A_semileptonic"]] * event.getFracHistogram("Semileptonic")->GetEntries() / event.getFracHistogram("Semileptonic")->Integral(0, nbins + 1));
+  event.getFracHistogram("Other")->Scale(par[param_index_map["A_other"]] * event.getFracHistogram("Other")->GetEntries() / event.getFracHistogram("Other")->Integral(0, nbins + 1));
+
+  // Build MC sum from all channels
+  for (auto const &name : KLOE::channName)
+  {
+    if (name.second == "Data" || name.second == "MC sum")
+      continue;
+
+    event.getFracHistogram("MC sum")->Add(event.getFracHistogram(name.second));
+  }
+
+  TCanvas *c1 = new TCanvas("c1", "", 790, 1200);
+
+  c1->SetBottomMargin(0.5);
+  c1->Draw();
+
+  TPad *padup_c1 = new TPad("pad_up_c1", "", 0.0, 0.3, 1.0, 1.0);
+  TPad *paddown_c1 = new TPad("pad_down_c1", "", 0.0, 0.0, 1.0, 0.3);
+  paddown_c1->SetBottomMargin(0.3);
+  paddown_c1->SetRightMargin(0.10);
+
+  gStyle->SetOptStat(0);
+
+  TGraphAsymmErrors *sig_eff = new TGraphAsymmErrors();
+
+  Double_t xMinRangeDisplay = x_min_display, xMaxRangeDisplay = x_max_display;
+
+  sig_eff->Divide(sig_pass, sig_total, "cl=0.683 b(1,1) mode");
+
+  Double_t
+      *yArr = sig_eff->GetY(),
+      *yErrLArr = sig_eff->GetEYlow(),
+      *yErrHArr = sig_eff->GetEYhigh();
+
+  Int_t n_bins = sig_eff->GetN();
+  std::vector<Double_t>
+      y(yArr, yArr + n_bins),
+      eyl(yErrLArr, yErrLArr + n_bins),
+      eyh(yErrHArr, yErrHArr + n_bins);
+
+  Double_t
+      weightedMean = Obj.WeightedAverageAsymmetric(y, eyl, eyh),
+      weightedMeanErr = Obj.WAvgAsymmError(eyl, eyh);
+
+  std::cout << "Weighted mean: " << weightedMean << " +/- " << weightedMeanErr << std::endl;
+
+  TLine
+      *lineAvg = new TLine(xMinRangeDisplay, weightedMean, xMaxRangeDisplay, weightedMean),
+      *lineDown = new TLine(xMinRangeDisplay, weightedMean - weightedMeanErr, xMaxRangeDisplay, weightedMean - weightedMeanErr),
+      *lineUp = new TLine(xMinRangeDisplay, weightedMean + weightedMeanErr, xMaxRangeDisplay, weightedMean + weightedMeanErr);
+
+  lineAvg->SetLineColor(kRed);
+  lineDown->SetLineColor(kRed);
+  lineUp->SetLineColor(kRed);
+  lineAvg->SetLineStyle(2); // np. przerywana
+  lineDown->SetLineStyle(2);
+  lineUp->SetLineStyle(2);
+  lineAvg->SetLineWidth(2);
+  lineDown->SetLineWidth(2);
+  lineUp->SetLineWidth(2);
+
+  c1->cd();
+  paddown_c1->Draw();
+  paddown_c1->cd();
+  sig_eff->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
+  sig_eff->GetYaxis()->SetRangeUser(0.0, 1.0);
+  sig_eff->GetXaxis()->SetTitle("#Deltat [#tau_{S}]");
+  sig_eff->GetYaxis()->SetTitle("#varepsilon(#Deltat)");
+
+  sig_eff->GetYaxis()->SetTitleSize(0.1);
+  sig_eff->GetYaxis()->SetTitleOffset(0.5);
+  sig_eff->GetXaxis()->SetTitleSize(0.1);
+  sig_eff->GetYaxis()->SetLabelSize(0.05);
+  sig_eff->GetXaxis()->SetLabelSize(0.08);
+
+  sig_eff->Draw("APE");
+  lineAvg->Draw("SAME");
+  lineDown->Draw("SAME");
+  lineUp->Draw("SAME");
+
+  event.getFracHistogram("Data")->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
+  event.getFracHistogram("MC sum")->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
+  event.getFracHistogram("Signal")->GetXaxis()->SetRangeUser(xMinRangeDisplay, xMaxRangeDisplay);
+
+  // Set marker style for Data
+  event.getFracHistogram("Data")->SetMarkerStyle(20);
+  event.getFracHistogram("Data")->SetMarkerSize(0.8);
+  event.getFracHistogram("Data")->SetLineColor(kBlack);
+
+  TRatioPlot *rp = new TRatioPlot(event.getFracHistogram("MC sum"), event.getFracHistogram("Data"), "diffsig");
+
+  c1->cd();
+  padup_c1->Draw();
+  padup_c1->cd();
+
+  rp->Draw();
+
+  rp->SetSplitFraction(0.2);
+
+  rp->GetLowerRefGraph()->SetMinimum(-5);
+  rp->GetLowerRefGraph()->SetMaximum(5);
+  rp->GetLowerRefGraph()->SetLineWidth(3);
+
+  rp->SetLowBottomMargin(0.0);
+  rp->SetLeftMargin(0.15);
+
+  rp->GetLowerRefYaxis()->SetLabelSize(0.02);
+  rp->GetLowerRefXaxis()->SetLabelSize(0.0);
+
+  Double_t max_height = event.getFracHistogram("Data")->GetMaximum();
+
+  rp->GetUpperRefYaxis()->SetRangeUser(0.0, 2 * max_height);
+  rp->GetUpperRefYaxis()->SetTitle(Form("Counts / %.2f #tau_{S}", res_deltaT));
+
+  rp->GetLowerRefYaxis()->SetTitleSize(0.03);
+  rp->GetLowerRefYaxis()->SetTitle("Residuals");
+
+  rp->GetUpperPad()->cd();
+
+  // Draw Signal as separate line
+  event.getFracHistogram("Signal")->Draw("HIST SAME");
+
+  // Draw other background channels
+  for (auto const &name : KLOE::channName)
+  {
+    if (name.second == "Data" || name.second == "MC sum" || name.second == "Signal")
+      continue;
+
+    event.getFracHistogram(name.second)->Draw("HIST SAME");
+  }
+
+  TLegend *legend_chann = new TLegend(0.58, 0.48, 0.88, 0.88);
+  legend_chann->SetFillColor(kWhite);
+  legend_chann->AddEntry(event.getFracHistogram("Data"), KLOE::channTitle.at("Data"), "pe");
+
+  for (auto const &name : KLOE::channName)
+  {
+    if (name.second == "Data" || name.second == "pi+pi-pi+pi-")
+      continue;
+
+    legend_chann->AddEntry(event.getFracHistogram(name.second), KLOE::channTitle.at(name.second), "l");
+  }
+
+  legend_chann->Draw();
+
+  c1->Print(Paths::cpfit_dir + Paths::img_dir + "split_fit_with_corr" + Paths::ext_img);
+
+  // Residuals graph
+  TCanvas *c2 = new TCanvas("c2", "", 790, 790);
+  TH1 *residuals_hist = new TH1D("Residuals hist", "", 51, -5., 5.);
+
+  event.resi_vals = rp->GetLowerRefGraph()->GetY();
+
+  for (Int_t i = 0; i < event.getBinNumber(); i++)
+  {
+    residuals_hist->Fill(event.resi_vals[i]);
+  }
+
+  residuals_hist->GetYaxis()->SetRangeUser(0, 1.2 * residuals_hist->GetMaximum());
+  residuals_hist->Fit("gaus");
+
+  c2->cd();
+
+  residuals_hist->SetXTitle("Residuals");
+  residuals_hist->SetYTitle("Counts");
+  residuals_hist->SetLineWidth(5);
+  residuals_hist->Draw();
+  residuals_hist->SetStats(1);
+  gStyle->SetOptStat(1);
+  gStyle->SetOptFit(1);
+
+  residuals_hist->Draw();
+
+  c2->Print(Paths::cpfit_dir + Paths::img_dir + "residuals_hist" + Paths::ext_img);
+
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Re"] = par[0];
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Im"] = par[1];
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Signal"] = par[2];
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarLeft"] = par[3];
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseLeft"] = par[4];
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseRight"] = par[5];
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarRight"] = par[6];
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Omegapi0"] = par[7];
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Threepi0"] = par[8];
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Semileptonic"] = par[9];
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Other"] = par[10];
+
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["PhysicsConstants::Re"] = parErr[0];
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Im"] = parErr[1];
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Signal"] = parErr[2];
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarLeft"] = parErr[3];
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseLeft"] = parErr[4];
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseRight"] = parErr[5];
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarRight"] = parErr[6];
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Omegapi0"] = parErr[7];
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Threepi0"] = parErr[8];
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Semileptonic"] = parErr[9];
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Other"] = parErr[10];
+
+  Utils::properties["variables"]["CPFit"]["result"]["chi2"] = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "UW CHI2");
+  Utils::properties["variables"]["CPFit"]["result"]["normChi2"] = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "UW CHI2/NDF");
+
+  delete residuals_hist;
+  delete c1;
+  delete c2;
+
+  delete rp;
+
+  Utils::properties["lastScript"] = "Final CP Parameters normalization";
+  Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();
+
+  std::ofstream outfile(Paths::propName);
+  outfile << Utils::properties.dump(4);
+  outfile.close();
+
+  return 0;
+}

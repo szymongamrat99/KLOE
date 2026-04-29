@@ -1583,3 +1583,125 @@ cd 1/9/
 cat stderr
 cat stdout 
 exit
+ls -hl
+vi ~/.bashrc 
+ls Subanalysis/Properties/
+htop
+source ~/.bashrc 
+vi ~/.bashrc 
+./execute_analysis.sh 
+./execute_analysis.sh 5
+git add .
+git commit -m "Customizable analysis config"
+git push
+htop
+vi ~/.bashrc
+cat ~/.bashrc 
+ls
+cd ..
+ls
+cd CNAF_Produced_Files/
+ls
+cd root_files/
+ls
+rm -fr *
+ls
+cd ..
+rm -fr root_files/
+scp -r tier1-cnaf:~/root_files .
+llq
+ll
+ls -hl
+cd root_files/
+ls -hl
+cd 2026-04-17/
+ls
+cd Signal/
+ls
+cd ALL_PHYS_SIGNAL_NoSmearing/
+ls
+exit
+cd ../CNAF_Produced_Files/root_files/2026-04-17/Signal/
+ls
+cd DATA_SIGNAL_NoSmearing/
+ls
+cd ../
+ls
+cd ALL_PHYS_SIGNAL_NoSmearing/
+ls -l
+cd ..
+cd ALL_PHYS2_SIGNAL_NoSmearing/
+ls -l
+cd ../ALL_PHYS3_SIGNAL_NoSmearing/
+ls
+cd ..
+ls
+cd ../CNAF_Produced_Files/root_files/2026-04-17/
+ls
+cd Signal/
+ls
+cd ALL_PHYS_SIGNAL_NoSmearing/
+ls
+cd ..
+cd log/
+ls
+cd all_phys
+ls
+cd 1
+ls
+cat cut.analysis.log 
+cd ../
+ls
+cd ..
+ls
+vi calculate_purity_eff.sh
+chmod +x calculate_purity_eff.sh 
+./calculate_purity_eff.sh 
+vi calculate_purity_eff.sh
+rm calculate_purity_eff.sh 
+vi calculate.sh
+chmod +x calculate.sh 
+./calculate.sh 
+cd all_phys/1
+cat analysis.config.log 
+cat cut.analysis.log 
+cd ../../
+rm calculate.sh 
+vi calculate.sh
+chmod +x calculate.sh 
+./calculate.sh 
+rm calculate.sh 
+vi calculate.sh
+chmod +x calculate.sh 
+./calculate.sh 
+vi calculate.sh
+rm calculate.sh 
+vi calculate.sh
+chmod +x calculate.sh 
+./calculate.sh 
+cd data/1/
+cat cut.analysis.log 
+cd ../../
+ls
+cd data/
+ls
+cd 1
+ls
+cat cut.analysis.log 
+cd ../../
+vi calculate_total.sh
+chmod +x calculate_total.sh 
+./calculate_total.sh 
+./calculate.sh 
+ls
+cp *.sh ../../4pi/log/.
+cd ../../4pi/log/
+./calculate
+./calculate.sh 
+vi calculate.sh 
+vi calculate_total.sh 
+./calculate.sh 
+./execute_analysis.sh 
+./execute_analysis.sh 
+root
+./execute_analysis.sh 

@@ -1,0 +1,106 @@
+{
+  "deltaT": {
+    "rangeX": [-300.0, 300.0],
+    "xRangeDisplay": [-90.0, 90.0],
+    "xFitRange": [-300.0, 20.0, 20.0, 300.0],
+    "resolution": 1.5
+  },
+  "regenerationSplit": [-30.0, 0.0, 30.0],
+  "fitSettings": {
+    "maxFunctionCalls": 10000000,
+    "tolerance": 1e-6,
+    "printLevel": 1,
+    "strategy": 2,
+    "minimizerType": "Minuit2",
+    "minimizerAlgorithm": "Migrad"
+  },
+  "parameterSettings":
+  {
+    "Re": {
+      "enabled": true,
+      "initialValue": 1.66e-3,
+      "limitLower": 50.0,
+      "limitUpper": 50.0,
+      "step": 1e-4
+    },
+    "Im": {
+      "enabled": true,
+      "initialValue": -1.98e-3,
+      "limitLower": 50.0,
+      "limitUpper": 50.0,
+      "step": 1e-4
+    },
+    "A_signal": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 0.2,
+      "limitUpper": 0.2,
+      "step": 0.01
+    },
+    "A_regen_far_left": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 2.5,
+      "step": 0.01
+    },
+    "A_regen_far_right": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 2.5,
+      "step": 0.01
+    },
+    "A_regen_near_left": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 5.0,
+      "step": 0.01
+    },
+    "A_regen_near_right": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 5.0,
+      "step": 0.01
+    },
+    "A_three": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 2.5,
+      "step": 0.01
+    },
+    "A_omega": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 2.5,
+      "step": 0.01
+    },
+    "A_semileptonic": {
+      "enabled": false,
+      "initialValue": 0.0,
+      "limitLower": 1.0,
+      "limitUpper": 2.5,
+      "step": 0.01
+    },
+    "A_other": {
+      "enabled": false,
+      "initialValue": 0.0,
+      "limitLower": 1.0,
+      "limitUpper": 2.5,
+      "step": 0.01
+    },
+    "A_bcg_group": {
+      "enabled": true,
+      "groupName": "A_bcg",
+      "initialValue": 1.0,
+      "step": 0.01,
+      "limitLower": 0.0,
+      "limitUpper": 10.0,
+      "channels": ["3pi0", "Semileptonic", "Other"]
+    }
+  }
+}

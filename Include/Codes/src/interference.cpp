@@ -13,27 +13,26 @@
 
 namespace KLOE
 {
-  Double_t interference::interf_function(const Float_t x, Int_t check, const Double_t *par)
+  Double_t interference::interf_function(const Double_t x, Int_t check, const Double_t *par)
   {
     Double_t Value = 0;
     Double_t Epsilon = 0, RePart = 0, Dphi = 0, TauKs = 0, TauKl = 0, MassDiff = 0;
     Double_t ImPart = 0, GammaKl = 0, GammaKs = 0, Gamma = 0, DMass = 0;
 
-    Float_t dt = x;
+    Double_t dt = x;
 
     // Parameters from PDG2023
 
     Epsilon = PhysicsConstants::mod_epsilon;
     Dphi = PhysicsConstants::phi_pm_nonCPT - PhysicsConstants::phi_00_nonCPT; // phi(+-)-phi(00) (degrees)
-    TauKs = PhysicsConstants::tau_S_nonCPT;                     // PDG fit not assuming CPT (s)
-    TauKl = PhysicsConstants::tau_L;                            // Kl mean life (s)
+    TauKs = PhysicsConstants::tau_S_nonCPT;                                   // PDG fit not assuming CPT (s)
+    TauKl = PhysicsConstants::tau_L;                                          // Kl mean life (s)
     MassDiff = PhysicsConstants::delta_mass_nonCPT;                           // M(Kl)-M(Ks) ( (h/2pi)s-1 ):
-                                                                              // PDG fit not assuming CPT
 
     if (check == 0)
     {
-      RePart = par[0];
-      ImPart = par[1];
+      RePart = par[fParamIndices["Re"]];
+      ImPart = par[fParamIndices["Im"]];
     }
     else
     {
@@ -65,6 +64,48 @@ namespace KLOE
     }
 
     return (std::pow(Epsilon, 2) / (2. * Gamma)) * Value * 100000;
+  }
+
+  Double_t interference::double_exponential(const Double_t x, Int_t check, const Double_t *par)
+  {
+    Double_t tau_S_org = 0.0587;
+    Double_t tau_L_org = 49.75;
+
+    Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
+    Double_t gammaL = tau_S_org / tau_L_org; // Wartość gamma_L do ustawienia zakresów
+
+    Double_t dt = x * PhysicsConstants::tau_S_nonCPT / tau_S_org;
+
+    Double_t RePart = 0;
+
+    if (check == 0)
+    {
+      RePart = par[fParamIndices["Re"]];
+    }
+    else
+    {
+      RePart = 0.0; //PhysicsConstants::Re;
+    }
+
+    Double_t value = 0.;
+
+    if (dt >= 0)
+    {
+      value = (1. + 2. * RePart) * exp(-gammaL * dt) +
+              (1. - 4. * RePart) * exp(-gammaS * dt);
+    }
+    else
+    {
+      value = (1. + 2. * RePart) * exp(-gammaS * std::abs(dt)) +
+              (1. - 4. * RePart) * exp(-gammaL * std::abs(dt));
+    }
+
+    return value;
+  }
+
+  Double_t interference::fit_function(const Double_t x, Int_t check, const Double_t *par)
+  {
+    return interf_function(x, check, par) / double_exponential(x, 1, par);
   }
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -123,53 +164,50 @@ namespace KLOE
   //! Fitting with splitted regeneration into 4 parts
   Double_t interference::interf_chi2_split(const Double_t *xx)
   {
-
-    Double_t ReFit = xx[0];
-    Double_t ImFit = xx[1];
-
     std::map<TString, std::vector<Double_t>> Norm;
 
     for (const auto &name : KLOE::channName)
     {
       if (name.second == "Signal")
       {
-        Norm[name.second].push_back(xx[2]); // Signal norm
+        Norm[name.second].push_back(xx[fParamIndices["A_signal"]]); // Signal norm
       }
 
       if (name.second == "Regeneration")
       {
-        Norm[name.second].push_back(xx[3]); // Left DC Wall
-        Norm[name.second].push_back(xx[4]); // Left beam pipe Wall
-        Norm[name.second].push_back(xx[5]); // Right beam pipe Wall
-        Norm[name.second].push_back(xx[6]); // Right DC Wall
+        Norm[name.second].push_back(xx[fParamIndices["A_regen_far_left"]]);   // Left DC Wall
+        Norm[name.second].push_back(xx[fParamIndices["A_regen_near_left"]]);  // Left beam pipe Wall
+        Norm[name.second].push_back(xx[fParamIndices["A_regen_near_right"]]); // Right beam pipe Wall
+        Norm[name.second].push_back(xx[fParamIndices["A_regen_far_right"]]);  // Right DC Wall
       }
 
       if (name.second == "Omega")
-        Norm[name.second].push_back(xx[7]); // Background norms
+        Norm[name.second].push_back(xx[fParamIndices["A_omega"]]); // Background norms
 
       if (name.second == "3pi0")
-        Norm[name.second].push_back(xx[8]); // Background norms
+        Norm[name.second].push_back(xx[fParamIndices["A_three"]]); // Background norms
 
       if (name.second == "Semileptonic")
-        Norm[name.second].push_back(xx[9]); // Background norms
+        Norm[name.second].push_back(xx[fParamIndices["A_semileptonic"]]); // Background norms
 
       if (name.second == "Other")
-        Norm[name.second].push_back(xx[10]); // Background norms
+        Norm[name.second].push_back(xx[fParamIndices["A_other"]]); // Background norms
+
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     for (const auto &name : KLOE::channName)
     {
-      if (ToLower(name.second) == "data")   
+      if (ToLower(name.second) == "data")
         goto skip_data;
 
       if (channOmit(name.second))
         continue;
 
-      for (Int_t j = 0; j < time_diff[name.second].size(); j++)
+      for (UInt_t j = 0; j < time_diff[name.second].size(); j++)
       {
         if (ToLower(name.second) == "signal")
-          _frac[name.second]->Fill(time_diff[name.second][j], interf_function(time_diff_gen[j], 0, xx)); //! Filling Signal
+          _frac[name.second]->Fill(time_diff[name.second][j], fit_function(time_diff_gen[j], 0, xx)); //! Filling Signal
         else
           _frac[name.second]->Fill(time_diff[name.second][j]); //! Filling background
       }
@@ -284,7 +322,7 @@ namespace KLOE
             time_diff[i][j] < exclusions[2] && time_diff[i][j] > exclusions[3])
         {
           if (i == 0)
-            _frac[i]->Fill(time_diff[i][j], interf_function(time_diff_gen[j], 0, xx));
+            _frac[i]->Fill(time_diff[i][j], fit_function(time_diff_gen[j], 0, xx));
           else
             _frac[i]->Fill(time_diff[i][j]);
         }
@@ -340,10 +378,10 @@ namespace KLOE
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     for (Int_t j = 0; j < time_diff_rand_mc["Signal"].size(); j++)
-      _frac["Signal"]->Fill(time_diff_rand_mc["Signal"][j], interf_function(time_diff_gen_rand_mc[j], 0, xx));
+      _frac["Signal"]->Fill(time_diff_rand_mc["Signal"][j], fit_function(time_diff_gen_rand_mc[j], 0, xx));
 
     for (Int_t j = 0; j < time_diff_rand_data["Signal"].size(); j++)
-      _frac["Data"]->Fill(time_diff_rand_data["Signal"][j], interf_function(time_diff_gen_rand_data[j]));
+      _frac["Data"]->Fill(time_diff_rand_data["Signal"][j], fit_function(time_diff_gen_rand_data[j], 0, xx));
 
     _frac["Signal"]->Scale(_frac["Signal"]->GetEntries() / _frac["Signal"]->Integral(0, _bin_number + 1));
     interference::bin_extraction("Signal", _frac["Signal"]);

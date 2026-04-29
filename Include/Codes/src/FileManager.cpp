@@ -163,35 +163,49 @@ namespace KLOE
     std::ifstream rootFiles(Paths::rootfilesName);
     json filePaths = json::parse(rootFiles);
 
-    Bool_t *all_phys;
-
     TString fullname = "",
             dirnamedata,
             filenamedata,
             extension = Paths::ext_root,
-            newestDateStampData = (std::string)Utils::properties["variables"]["rootFiles"]["newestFileDateStampData"],
-            newestDateStampMC = (std::string)Utils::properties["variables"]["rootFiles"]["newestFileDateStampMC"],
             path = (std::string)Utils::properties["variables"]["rootFiles"]["pathOldAna"],
+            base_path = (std::string)filePaths["analyzed"]["signal"]["basePath"],
+            datestamp = (std::string)filePaths["analyzed"]["signal"]["dateStamp"],
             mc_dir = "MONTE_CARLO",
             data_dir = "DATA";
 
-    Int_t fileNumData[2] = {Utils::properties["variables"]["rootFiles"]["Data"]["firstFile"],
-                            Utils::properties["variables"]["rootFiles"]["Data"]["lastFile"]};
+    base_path += datestamp + "/";
 
-    std::vector<Int_t> fileNumMC[3];
+    Int_t fileNumData[2] = {filePaths["analyzed"]["signal"]["Data"]["firstFile"],
+                            filePaths["analyzed"]["signal"]["Data"]["lastFile"]};
 
-    std::vector<TString>
-        dirnamemc,
-        filenamemc;
+    std::map<TString, std::array<Int_t, 2>> fileNumMC = {
+        {"ALL_PHYS", {filePaths["analyzed"]["signal"]["MC"]["all_phys"]["firstFile"], filePaths["analyzed"]["signal"]["MC"]["all_phys"]["lastFile"]}},
+        {"ALL_PHYS2", {filePaths["analyzed"]["signal"]["MC"]["all_phys2"]["firstFile"], filePaths["analyzed"]["signal"]["MC"]["all_phys2"]["lastFile"]}},
+        {"ALL_PHYS3", {filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["firstFile"], filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["lastFile"]}}
+    };
 
-    // Przygotuj nazwy plików MC - nowa analiza
-    for (Int_t i = 0; i < 3; i++)
+    std::map<TString, std::string> pathMap = {
+        {"DATA", filePaths["analyzed"]["signal"]["Data"]["path"]},
+        {"ALL_PHYS", filePaths["analyzed"]["signal"]["MC"]["all_phys"]["path"]},
+        {"ALL_PHYS2", filePaths["analyzed"]["signal"]["MC"]["all_phys2"]["path"]},
+        {"ALL_PHYS3", filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["path"]}
+    };
+
+    for (auto &entry : pathMap)
     {
-      dirnamemc.push_back(path + mc_dir);
-      // filenamemc.push_back((std::string)filePaths["MC"]["filenameBase"][i]);
-      // fileNumMC[i].push_back(Utils::properties["variables"]["rootFiles"]["MC"][i]["firstFile"]);
-      // fileNumMC[i].push_back(Utils::properties["variables"]["rootFiles"]["MC"][i]["lastFile"]);
+      entry.second = base_path + "Signal/" + entry.second;
     }
+
+    std::map<TString, std::string> baseName = {
+        {"DATA", filePaths["analyzed"]["signal"]["Data"]["baseName"]},
+        {"ALL_PHYS", filePaths["analyzed"]["signal"]["MC"]["all_phys"]["baseName"]},
+        {"ALL_PHYS2", filePaths["analyzed"]["signal"]["MC"]["all_phys2"]["baseName"]},
+        {"ALL_PHYS3", filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["baseName"]}
+    };
+
+    dirnamedata = base_path + "Signal/" + (std::string)filePaths["analyzed"]["signal"]["Data"]["path"];
+    filenamedata = (std::string)filePaths["analyzed"]["signal"]["Data"]["baseName"];
+
     //////////////////////////////////////////////
     // Przygotuj nazwy plików dla starej analizy
     TString dirnamemcOld = path + mc_dir;
@@ -200,23 +214,22 @@ namespace KLOE
                             Utils::properties["variables"]["rootFiles"]["lastFileOld"]};
     //////////////////////////////////////////////
 
-    dirnamedata = path + data_dir;
-    filenamedata = (std::string)filePaths["Data"]["filenameBaseOldAna"];
-
     switch (dataTypeOpt)
     {
     case Controls::DataType::MC_DATA:
     {
-      for (Int_t i = firstData; i <= lastData; i++)
+      for (Int_t i = fileNumData[0]; i <= fileNumData[1]; i++)
       {
-        fullname = dirnamedata + "/" + filenamedata + "_" + std::to_string(i) + extension;
+        fullname = dirnamedata + filenamedata + "_" + std::to_string(i) + extension;
 
         // Check if file exists
         boost::filesystem::path pathExist(fullname);
 
-        if (1) // boost::filesystem::exists(pathExist))
+        if (boost::filesystem::exists(pathExist))
         {
           infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
+
+          std::cout << "Checking data file: " << fullname << std::endl;
 
           chain_init.Add(fullname);
           _logger.getLog(infoCode, (std::string)filenamedata + "_" + std::to_string(i) + (std::string)extension);
@@ -225,13 +238,12 @@ namespace KLOE
 
       if (oldAnaFlag == false)
       {
-
-        for (Int_t k = 0; k < dirnamemc.size(); k++)
+        for (const auto &entry : pathMap)
         {
-          for (Int_t j = fileNumMC[k][0]; j <= fileNumMC[k][1]; j++)
+          for (Int_t j = fileNumMC[entry.first][0]; j <= fileNumMC[entry.first][1]; j++)
           {
 
-            fullname = dirnamemc[k] + "/" + filenamemc[k] + "_" + std::to_string(j) + extension;
+            fullname = entry.second + baseName[entry.first] + "_" + std::to_string(j) + extension;
 
             // Check if file exists
             boost::filesystem::path pathExist(fullname);
@@ -240,16 +252,16 @@ namespace KLOE
             {
               infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
+              std::cout << "Checking MC file: " << fullname << std::endl;
+
               chain_init.Add(fullname);
-              _logger.getLog(infoCode, (std::string)filenamemc[k] + "_" + std::to_string(j) + (std::string)extension);
+              _logger.getLog(infoCode, (std::string)baseName[entry.first] + "_" + std::to_string(j) + (std::string)extension);
             }
           }
         }
       }
       else
       {
-
-
         for (Int_t j = fileNumMCOld[0]; j <= fileNumMCOld[1]; j++)
         {
 
@@ -274,12 +286,12 @@ namespace KLOE
     }
     case Controls::DataType::MC_ONLY:
     {
-      for (Int_t k = 0; k < dirnamemc.size(); k++)
+      for (const auto &entry : pathMap)
       {
-        for (Int_t j = fileNumMC[k][0]; j <= fileNumMC[k][1]; j++)
+        for (Int_t j = fileNumMC[entry.first][0]; j <= fileNumMC[entry.first][1]; j++)
         {
 
-          fullname = dirnamemc[k] + "/" + filenamemc[k] + "_" + std::to_string(j) + extension;
+          fullname = entry.second + "/" + baseName[entry.first] + "_" + std::to_string(j) + extension;
 
           // Check if file exists
           boost::filesystem::path pathExist(fullname);
@@ -289,7 +301,7 @@ namespace KLOE
             infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
             chain_init.Add(fullname);
-            _logger.getLog(infoCode, (std::string)filenamemc[k] + "_" + std::to_string(j) + (std::string)extension);
+            _logger.getLog(infoCode, (std::string)baseName[entry.first] + "_" + std::to_string(j) + (std::string)extension);
           }
         }
       }
@@ -320,8 +332,6 @@ namespace KLOE
     {
       for (Int_t j = firstMC; j <= lastMC; j++)
       {
-        // fullname = path + "/" + dirnamemc + "/" + filenamemc + std::to_string(j) + extension;
-
         // Check if file exists
         boost::filesystem::path pathExist(fullname);
 
@@ -330,7 +340,6 @@ namespace KLOE
           infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
           chain_init.Add(fullname);
-          // logger.getLog(infoCode, (std::string)filenamemc + std::to_string(j) + (std::string)extension);
         }
       }
 
