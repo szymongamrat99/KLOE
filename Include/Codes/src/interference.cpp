@@ -31,8 +31,14 @@ namespace KLOE
 
     if (check == 0)
     {
-      RePart = par[fParamIndices["Re"]];
-      ImPart = par[fParamIndices["Im"]];
+      // Pobieramy indeksy
+      Int_t idxRe = fParamIndices["Re"];
+      Int_t idxIm = fParamIndices["Im"];
+
+      // Jeśli indeks jest poprawny (nie -1), bierzemy wartość z minimizera.
+      // W przeciwnym razie bierzemy 0.0 (lub inną wartość domyślną).
+      RePart = (idxRe != -1) ? par[idxRe] : 0.0;
+      ImPart = (idxIm != -1) ? par[idxIm] : 0.0;
     }
     else
     {
@@ -164,36 +170,6 @@ namespace KLOE
   //! Fitting with splitted regeneration into 4 parts
   Double_t interference::interf_chi2_split(const Double_t *xx)
   {
-    // Pomocnicza lambda do bezpiecznego pobierania parametrów
-    auto getPar = [&](const TString &name, Double_t defaultVal = 0.0)
-    {
-      auto it = fParamIndices.find(name);
-      if (it != fParamIndices.end() && it->second != -1)
-      {
-        return xx[it->second];
-      }
-      return defaultVal;
-    };
-
-    // Pobieramy parametry fizyczne
-    // RePart i ImPart są używane wewnątrz fit_function, która też musi używać fParamIndices!
-
-    std::map<TString, std::vector<Double_t>> Norm;
-
-    // Mapujemy kanały na parametry zgodnie z logiką split
-    Norm["Signal"].push_back(getPar("A_signal", 1.0));
-
-    // Specjalna obsługa splitu regeneracji
-    Norm["Regeneration"].push_back(getPar("A_regen_far_left", 1.0));
-    Norm["Regeneration"].push_back(getPar("A_regen_near_left", 1.0));
-    Norm["Regeneration"].push_back(getPar("A_regen_near_right", 1.0));
-    Norm["Regeneration"].push_back(getPar("A_regen_far_right", 1.0));
-
-    Norm["Omega"].push_back(getPar("A_omega", 1.0));
-    Norm["3pi0"].push_back(getPar("A_three", 1.0));
-    Norm["Semileptonic"].push_back(getPar("A_semileptonic", 0.0));
-    Norm["Other"].push_back(getPar("A_other", 0.0));
-
     /////////////////////////////////////////////////////////////////////////////////////////////
     for (const auto &name : KLOE::channName)
     {
@@ -258,40 +234,19 @@ namespace KLOE
 
     for (const auto &name : KLOE::channName)
     {
-      // Skip Data and MC sum channels in the summation
       if (channOmit(name.second))
         continue;
 
       for (Int_t j = 0; j < _bin_number; j++)
       {
-        if (name.second == "Regeneration")
-        {
-          if (j + 1 < _frac[name.second]->FindBin(left_x_split))
-          {
-            b["MC sum"][j] += Norm[name.second][0] * b[name.second][j];
-            e["MC sum"][j] += std::pow(Norm[name.second][0] * e[name.second][j], 2);
-          }
-          else if (j + 1 > _frac[name.second]->FindBin(left_x_split) && j + 1 < _frac[name.second]->FindBin(center_x_split))
-          {
-            b["MC sum"][j] += Norm[name.second][1] * b[name.second][j];
-            e["MC sum"][j] += std::pow(Norm[name.second][1] * e[name.second][j], 2);
-          }
-          else if (j + 1 > _frac[name.second]->FindBin(center_x_split) && j + 1 < _frac[name.second]->FindBin(right_x_split))
-          {
-            b["MC sum"][j] += Norm[name.second][2] * b[name.second][j];
-            e["MC sum"][j] += std::pow(Norm[name.second][2] * e[name.second][j], 2);
-          }
-          else if (j + 1 > _frac[name.second]->FindBin(right_x_split))
-          {
-            b["MC sum"][j] += Norm[name.second][3] * b[name.second][j];
-            e["MC sum"][j] += std::pow(Norm[name.second][3] * e[name.second][j], 2);
-          }
-        }
-        else
-        {
-          b["MC sum"][j] += Norm[name.second][0] * b[name.second][j];
-          e["MC sum"][j] += std::pow(Norm[name.second][0] * e[name.second][j], 2);
-        }
+        // Pobieramy dt środka binu, aby wiedzieć w którym przedziale splitu jesteśmy
+        Double_t dt_bin = _frac[name.second]->GetBinCenter(j + 1);
+
+        // Magia: get_weight sam wie, czy użyć parametru pojedynczego, czy splitu
+        Double_t weight = get_weight(name.second, dt_bin, xx);
+
+        b["MC sum"][j] += weight * b[name.second][j];
+        e["MC sum"][j] += std::pow(weight * e[name.second][j], 2);
       }
     }
 

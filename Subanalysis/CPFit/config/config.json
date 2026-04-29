@@ -81,7 +81,7 @@
       "fixed": false
     },
     "A_three": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -99,7 +99,7 @@
       "fixed": false
     },
     "A_semileptonic": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -108,7 +108,7 @@
       "fixed": false
     },
     "A_other": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -117,7 +117,7 @@
       "fixed": false
     },
     "A_bcg_group": {
-      "enabled": false,
+      "enabled": true,
       "groupName": "A_bcg",
       "initialValue": 1.0,
       "step": 0.01,
