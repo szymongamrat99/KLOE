@@ -28,9 +28,12 @@ namespace KLOE
 
     std::vector<Double_t> init_vars, step;
 
-    Double_t *corr_vals, *eff_vals, *resi_vals; 
-    
+    Double_t *corr_vals, *eff_vals, *resi_vals;
+
     std::map<TString, std::vector<Double_t>> tmp_norm;
+
+    // Mapa przechowująca indeksy parametrów z minimizera dla każdego kanału
+    std::map<TString, std::vector<Int_t>> channel_to_indices;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -84,20 +87,19 @@ namespace KLOE
       {
         for (const auto &name : KLOE::channName)
         {
-          _frac_data[name.second] = new TH1D("MC 'data' fracs " + name.second, 
-                                              "", 
-                                              bin_number, 
-                                              x_min, 
-                                              x_max);
+          _frac_data[name.second] = new TH1D("MC 'data' fracs " + name.second,
+                                             "",
+                                             bin_number,
+                                             x_min,
+                                             x_max);
 
           _frac_data[name.second]->SetLineColor(KLOE::channColor.at(name.second));
         }
       }
 
-     _data_sub = new TH1D("DATA subtraction histogram", "", _bin_number, _x_min, _x_max);
+      _data_sub = new TH1D("DATA subtraction histogram", "", _bin_number, _x_min, _x_max);
 
       _mc_sub = new TH1D("MC subtraction histogram", "", _bin_number, _x_min, _x_max);
-
 
       for (const auto &name : KLOE::channName)
       {
@@ -204,6 +206,9 @@ namespace KLOE
     Bool_t _corr_check;
 
     std::map<TString, Int_t> fParamIndices;
+
+    // Funkcja pomocnicza do pobierania wagi (dodaj w pliku .cpp klasy)
+    Double_t get_weight(TString channel, Double_t dt, const Double_t *xx);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
   };

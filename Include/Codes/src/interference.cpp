@@ -71,7 +71,7 @@ namespace KLOE
     Double_t tau_S_org = 0.0587;
     Double_t tau_L_org = 49.75;
 
-    Double_t gammaS = 1.0; // Wartość gamma_S do ustawienia zakresów
+    Double_t gammaS = 1.0;                   // Wartość gamma_S do ustawienia zakresów
     Double_t gammaL = tau_S_org / tau_L_org; // Wartość gamma_L do ustawienia zakresów
 
     Double_t dt = x * PhysicsConstants::tau_S_nonCPT / tau_S_org;
@@ -84,7 +84,7 @@ namespace KLOE
     }
     else
     {
-      RePart = 0.0; //PhysicsConstants::Re;
+      RePart = 0.0; // PhysicsConstants::Re;
     }
 
     Double_t value = 0.;
@@ -164,36 +164,35 @@ namespace KLOE
   //! Fitting with splitted regeneration into 4 parts
   Double_t interference::interf_chi2_split(const Double_t *xx)
   {
+    // Pomocnicza lambda do bezpiecznego pobierania parametrów
+    auto getPar = [&](const TString &name, Double_t defaultVal = 0.0)
+    {
+      auto it = fParamIndices.find(name);
+      if (it != fParamIndices.end() && it->second != -1)
+      {
+        return xx[it->second];
+      }
+      return defaultVal;
+    };
+
+    // Pobieramy parametry fizyczne
+    // RePart i ImPart są używane wewnątrz fit_function, która też musi używać fParamIndices!
+
     std::map<TString, std::vector<Double_t>> Norm;
 
-    for (const auto &name : KLOE::channName)
-    {
-      if (name.second == "Signal")
-      {
-        Norm[name.second].push_back(xx[fParamIndices["A_signal"]]); // Signal norm
-      }
+    // Mapujemy kanały na parametry zgodnie z logiką split
+    Norm["Signal"].push_back(getPar("A_signal", 1.0));
 
-      if (name.second == "Regeneration")
-      {
-        Norm[name.second].push_back(xx[fParamIndices["A_regen_far_left"]]);   // Left DC Wall
-        Norm[name.second].push_back(xx[fParamIndices["A_regen_near_left"]]);  // Left beam pipe Wall
-        Norm[name.second].push_back(xx[fParamIndices["A_regen_near_right"]]); // Right beam pipe Wall
-        Norm[name.second].push_back(xx[fParamIndices["A_regen_far_right"]]);  // Right DC Wall
-      }
+    // Specjalna obsługa splitu regeneracji
+    Norm["Regeneration"].push_back(getPar("A_regen_far_left", 1.0));
+    Norm["Regeneration"].push_back(getPar("A_regen_near_left", 1.0));
+    Norm["Regeneration"].push_back(getPar("A_regen_near_right", 1.0));
+    Norm["Regeneration"].push_back(getPar("A_regen_far_right", 1.0));
 
-      if (name.second == "Omega")
-        Norm[name.second].push_back(xx[fParamIndices["A_omega"]]); // Background norms
-
-      if (name.second == "3pi0")
-        Norm[name.second].push_back(xx[fParamIndices["A_three"]]); // Background norms
-
-      if (name.second == "Semileptonic")
-        Norm[name.second].push_back(xx[fParamIndices["A_semileptonic"]]); // Background norms
-
-      if (name.second == "Other")
-        Norm[name.second].push_back(xx[fParamIndices["A_other"]]); // Background norms
-
-    }
+    Norm["Omega"].push_back(getPar("A_omega", 1.0));
+    Norm["3pi0"].push_back(getPar("A_three", 1.0));
+    Norm["Semileptonic"].push_back(getPar("A_semileptonic", 0.0));
+    Norm["Other"].push_back(getPar("A_other", 0.0));
 
     /////////////////////////////////////////////////////////////////////////////////////////////
     for (const auto &name : KLOE::channName)
@@ -623,5 +622,36 @@ namespace KLOE
 
     time_diff_gen.clear();
     time_diff_gen.shrink_to_fit();
+  }
+
+  Double_t KLOE::interference::get_weight(TString channel, Double_t dt, const Double_t *xx)
+  {
+    auto it = channel_to_indices.find(channel);
+    if (it == channel_to_indices.end() || it->second.empty())
+      return 0.0;
+
+    const std::vector<Int_t> &indices = it->second;
+
+    // SCENARIUSZ A: Kanał ma tylko jeden parametr (Signal, Omega, lub grupa A_bcg)
+    if (indices.size() == 1)
+    {
+      Int_t idx = indices[0];
+      return (idx != -1) ? xx[idx] : 1.0;
+    }
+
+    // SCENARIUSZ B: Kanał ma wiele parametrów (Regeneracja ze splitem)
+    if (channel == "Regeneration" && indices.size() >= 4)
+    {
+      if (dt < left_x_split)
+        return (indices[0] != -1) ? xx[indices[0]] : 1.0;
+      else if (dt < center_x_split)
+        return (indices[1] != -1) ? xx[indices[1]] : 1.0;
+      else if (dt < right_x_split)
+        return (indices[2] != -1) ? xx[indices[2]] : 1.0;
+      else
+        return (indices[3] != -1) ? xx[indices[3]] : 1.0;
+    }
+
+    return 1.0;
   }
 }

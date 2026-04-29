@@ -97,7 +97,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   UInt_t
       nbins = Int_t((x_max - x_min) / res_deltaT);
 
-      std::cout << "INFO: Fit settings loaded successfully." << std::endl;
+  std::cout << "INFO: Fit settings loaded successfully." << std::endl;
 
   if (nbins % 2 == 0)
     nbins += 1; // Ensure an odd number of bins for symmetry around zero
@@ -119,7 +119,6 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   std::cout << "INFO: Fit settings loaded successfully." << std::endl;
 
-
   // ============================================================================================================
   // Fitting procedure
   // Get settings
@@ -136,40 +135,61 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   std::cout << "INFO: Fit settings loaded successfully." << std::endl;
 
-
   std::map<TString, Int_t> param_index_map;
   Int_t par_num = 0; // Licznik parametrów faktycznie przekazanych do minimizera
 
   for (auto it = cfg.parameters.begin(); it != cfg.parameters.end(); ++it)
   {
-    const TString& pName = it->first;
-    const Parameter& p   = it->second;
+    const TString &pName = it->first;
+    const Parameter &p = it->second;
 
-    if (!p.enabled) {
-        // Parametr całkowicie pominięty w minimizerze
-        event.SetParamIndex(pName, -1); 
-        param_index_map[pName] = -1;
-        std::cout << "INFO: Parameter " << pName << " is DISABLED (omitted from fit)." << std::endl;
-        continue; 
+    if (!p.enabled)
+    {
+      // Parametr całkowicie pominięty w minimizerze
+      event.SetParamIndex(pName, -1);
+      param_index_map[pName] = -1;
+      std::cout << "INFO: Parameter " << pName << " is DISABLED (omitted from fit)." << std::endl;
+      continue;
     }
 
     // Rejestrujemy indeks w minimizerze
     event.SetParamIndex(pName, par_num);
     param_index_map[pName] = par_num;
 
-    if (p.fixed) {
-        // Parametr jest w fitowaniu, ale ma stałą wartość (nie zmienia się)
-        minimum->SetFixedVariable(par_num, pName.Data(), p.initial_value);
+    if (p.fixed)
+    {
+      // Parametr jest w fitowaniu, ale ma stałą wartość (nie zmienia się)
+      minimum->SetFixedVariable(par_num, pName.Data(), p.initial_value);
     }
-    else {
-        auto lims = p.limits();
-        if (p.limit_lower > 0.0 || p.limit_upper > 0.0) {
-            minimum->SetLimitedVariable(par_num, pName.Data(), p.initial_value, p.step, lims[0], lims[1]);
-        } else {
-            minimum->SetVariable(par_num, pName.Data(), p.initial_value, p.step);
-        }
+    else
+    {
+      auto lims = p.limits();
+      if (p.limit_lower > 0.0 || p.limit_upper > 0.0)
+      {
+        minimum->SetLimitedVariable(par_num, pName.Data(), p.initial_value, p.step, lims[0], lims[1]);
+      }
+      else
+      {
+        minimum->SetVariable(par_num, pName.Data(), p.initial_value, p.step);
+      }
     }
     par_num++; // Zwiększamy tylko jeśli parametr został dodany do minimum
+  }
+
+  // Czyścimy i wypełniamy powiązania kanał -> parametry
+  event.channel_to_indices.clear();
+  for (auto const &ch : KLOE::channName)
+  {
+    TString chName = ch.second;
+    for (auto const &pEntry : cfg.parameters)
+    {
+      const auto &p = pEntry.second;
+      // Sprawdzamy czy ten parametr obsługuje dany kanał
+      if (std::find(p.channels.begin(), p.channels.end(), chName) != p.channels.end())
+      {
+        event.channel_to_indices[chName].push_back(param_index_map[pEntry.first]);
+      }
+    }
   }
 
   ROOT::Math::Functor minimized_function(&event, &KLOE::interference::interf_chi2, num_of_vars);
