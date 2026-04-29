@@ -21,6 +21,8 @@
 #include <TTreeReaderArray.h>
 #include <boost/progress.hpp>
 
+#include "../inc/fit_setter.h"
+
 #include "../inc/cpfit.hpp"
 
 int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
@@ -86,134 +88,88 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   // ===========================================================================
 
   ///////////////////////////////////////
-  std::ifstream configFile(Paths::cpfit_dir + "config/config.json");
-  if (!configFile.is_open())
-  {
-    std::cerr << "ERROR: Could not open config file: " << Paths::cpfit_dir + "config/config.json" << std::endl;
-    return 1;
-  }
-
-  json config;
-  try
-  {
-    config = json::parse(configFile);
-  }
-  catch (const json::parse_error &e)
-  {
-    std::cerr << "ERROR: Failed to parse config file: " << e.what() << std::endl;
-    return 1;
-  }
-  /////////////////////////////////////
-  const Double_t
-      x_min = config.at("deltaT").at("rangeX").at(0),
-      x_max = config.at("deltaT").at("rangeX").at(1),
-      x_min_display = config.at("deltaT").at("xRangeDisplay").at(0),
-      x_max_display = config.at("deltaT").at("xRangeDisplay").at(1),
-      x_fit_range_min = config.at("deltaT").at("xFitRange").at(0),
-      x_fit_range_split1 = config.at("deltaT").at("xFitRange").at(1),
-      x_fit_range_split2 = config.at("deltaT").at("xFitRange").at(2),
-      x_fit_range_max = config.at("deltaT").at("xFitRange").at(3);
+  FitSetter setter((std::string)Paths::cpfit_dir + "config/config.json");
+  FitConfig cfg = setter.getFitConfig();
   Double_t
-      res_deltaT = config.at("deltaT").at("resolution");
+      x_min = cfg.deltaTConfig.xRange[0],
+      x_max = cfg.deltaTConfig.xRange[1],
+      res_deltaT = cfg.deltaTConfig.resolution;
   UInt_t
       nbins = Int_t((x_max - x_min) / res_deltaT);
+
+      std::cout << "INFO: Fit settings loaded successfully." << std::endl;
 
   if (nbins % 2 == 0)
     nbins += 1; // Ensure an odd number of bins for symmetry around zero
 
-  Double_t split[3] = {
-      config.at("regenerationSplit").at(0),
-      config.at("regenerationSplit").at(1),
-      config.at("regenerationSplit").at(2)};
+  // Splits related to regeneration
+  Double_t left_split = cfg.parameters.at("A_regen_far_left").parameter_ranges[0][1];
+  Double_t center_split = cfg.parameters.at("A_regen_near_left").parameter_ranges[0][1];
+  Double_t right_split = cfg.parameters.at("A_regen_near_right").parameter_ranges[0][1];
 
-  // Get enabled variables for the fit
-  const auto &enabled_params = config.at("parameterSettings");
-  std::map<TString, TString> channel_to_param;
-  std::map<TString, Double_t> init_vars, step, limit_lower, limit_upper;
-  UInt_t num_of_vars = 11;
+  Double_t split[3] = {left_split, center_split, right_split};
 
-  for (const auto &param : enabled_params.items())
-  {
-    if (!param.value().at("enabled").get<bool>())
-    {
-      std::cout << "Parameter " << param.key() << " is disabled for the fit." << std::endl;
-      init_vars[param.key()] = param.value().at("initialValue").get<Double_t>();
+  std::cout << "INFO: Fit settings loaded successfully." << std::endl;
 
-      std::cout << "Parameter " << param.key() << ": initial value = " << init_vars[param.key()]
-                << ", step = " << 0.0
-                << ", limits = [none]" << std::endl;
-    }
-    else
-    {
-      if (param.key() == "Re" || param.key() == "Im")
-      {
-        init_vars[param.key()] = param.value().at("initialValue").get<Double_t>();
-        step[param.key()] = param.value().at("step").get<Double_t>();
-        limit_lower[param.key()] = param.value().at("limitLower").get<Double_t>();
-        limit_upper[param.key()] = param.value().at("limitUpper").get<Double_t>();
-
-        std::cout << "Parameter " << param.key() << ": initial value = " << init_vars[param.key()]
-                  << ", step = " << step[param.key()]
-                  << ", limits = [" << init_vars[param.key()] - limit_lower[param.key()] * init_vars[param.key()]
-                  << ", " << init_vars[param.key()] + limit_upper[param.key()] * init_vars[param.key()] << "]" << std::endl;
-      }
-      else if (param.key() == "A_bcg_group")
-      {
-          for (const auto &ch : enabled_params.items())
-      }
-    }
-  }
+  // Pobranie zakresów wyświetlania (używane później w rysowaniu)
+  const Double_t xMinRangeDisplay = cfg.deltaTConfig.xRangeDisplay[0];
+  const Double_t xMaxRangeDisplay = cfg.deltaTConfig.xRangeDisplay[1];
 
   KLOE::interference event(mode, check_corr, nbins, x_min, x_max, split);
+
+  std::cout << "INFO: Fit settings loaded successfully." << std::endl;
+
 
   // ============================================================================================================
   // Fitting procedure
   // Get settings
 
-  std::string minimizer_type = config.at("fitSettings").at("minimizerType").get<std::string>(),
-              algo_type = config.at("fitSettings").at("minimizerAlgorithm").get<std::string>();
-
+  UInt_t num_of_vars = cfg.getNumOfEnabledParameters(); // Default number of variables (can be adjusted based on mode)
   ROOT::Math::Minimizer *minimum =
-      ROOT::Math::Factory::CreateMinimizer(minimizer_type, algo_type);
-
-  Int_t max_calls = config.at("fitSettings").at("maxFunctionCalls").get<Int_t>();
-  Double_t tolerance = config.at("fitSettings").at("tolerance").get<Double_t>();
-  Int_t print_level = config.at("fitSettings").at("printLevel").get<Int_t>();
-  Int_t strategy = config.at("fitSettings").at("strategy").get<Int_t>();
+      ROOT::Math::Factory::CreateMinimizer(cfg.minimizer_type, cfg.minimizer_algorithm);
 
   // set tolerance , etc...
-  minimum->SetMaxFunctionCalls(max_calls); // for Minuit/Minuit2
-  minimum->SetTolerance(tolerance);
-  minimum->SetPrintLevel(print_level);
-  minimum->SetStrategy(strategy);
+  minimum->SetMaxFunctionCalls(cfg.max_function_calls); // for Minuit/Minuit2
+  minimum->SetTolerance(cfg.tolerance);
+  minimum->SetPrintLevel(cfg.print_level);
+  minimum->SetStrategy(cfg.strategy);
+
+  std::cout << "INFO: Fit settings loaded successfully." << std::endl;
+
 
   std::map<TString, Int_t> param_index_map;
+  Int_t par_num = 0; // Licznik parametrów faktycznie przekazanych do minimizera
 
-  Int_t par_num = 0;
-  for (const auto &param : init_vars)
+  for (auto it = cfg.parameters.begin(); it != cfg.parameters.end(); ++it)
   {
-    std::string param_name = (std::string)param.first;
+    const TString& pName = it->first;
+    const Parameter& p   = it->second;
 
-    if (limit_lower.find(param.first) != limit_lower.end() && limit_upper.find(param.first) != limit_upper.end())
-    {
-      Double_t lower_limit = init_vars[param.first] - limit_lower[param.first] * init_vars[param.first];
-      Double_t upper_limit = init_vars[param.first] + limit_upper[param.first] * init_vars[param.first];
-
-      minimum->SetLimitedVariable(par_num, param_name, init_vars[param.first], step[param.first], lower_limit, upper_limit);
-      std::cout << "Parameter " << param_name << " has limits set. Using initial value = " << init_vars[param.first]
-                << ", step = " << step[param.first]
-                << ", limits = [" << lower_limit << ", " << upper_limit << "]" << std::endl;
+    if (!p.enabled) {
+        // Parametr całkowicie pominięty w minimizerze
+        event.SetParamIndex(pName, -1); 
+        param_index_map[pName] = -1;
+        std::cout << "INFO: Parameter " << pName << " is DISABLED (omitted from fit)." << std::endl;
+        continue; 
     }
-    else
-    {
-      minimum->SetVariable(par_num, param_name, init_vars[param.first], step[param.first]);
-      std::cout << "Parameter " << param_name << " has no limits set. Using initial value = " << init_vars[param.first]
-                << " and step = " << step[param.first] << std::endl;
-    }
-    event.SetParamIndex(param.first, par_num);
-    param_index_map[param.first] = par_num;
 
-    ++par_num;
+    // Rejestrujemy indeks w minimizerze
+    event.SetParamIndex(pName, par_num);
+    param_index_map[pName] = par_num;
+
+    if (p.fixed) {
+        // Parametr jest w fitowaniu, ale ma stałą wartość (nie zmienia się)
+        minimum->SetFixedVariable(par_num, pName.Data(), p.initial_value);
+    }
+    else {
+        auto lims = p.limits();
+        if (p.limit_lower > 0.0 || p.limit_upper > 0.0) {
+            minimum->SetLimitedVariable(par_num, pName.Data(), p.initial_value, p.step, lims[0], lims[1]);
+        } else {
+            minimum->SetVariable(par_num, pName.Data(), p.initial_value, p.step);
+        }
+    }
+    par_num++; // Zwiększamy tylko jeśli parametr został dodany do minimum
   }
 
   ROOT::Math::Functor minimized_function(&event, &KLOE::interference::interf_chi2, num_of_vars);
@@ -481,8 +437,6 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   gStyle->SetOptStat(0);
 
   TGraphAsymmErrors *sig_eff = new TGraphAsymmErrors();
-
-  Double_t xMinRangeDisplay = x_min_display, xMaxRangeDisplay = x_max_display;
 
   sig_eff->Divide(sig_pass, sig_total, "cl=0.683 b(1,1) mode");
 
