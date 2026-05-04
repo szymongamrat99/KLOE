@@ -41,6 +41,7 @@ struct FitConfig
   Int_t print_level;
   Int_t strategy;
   DeltaTConfig deltaTConfig;
+  Bool_t regenerationExclusionFlag;
 
   Int_t getNumOfEnabledParameters() const
   {
@@ -110,6 +111,16 @@ public:
     catch (const json::out_of_range &e)
     {
       throw std::runtime_error("ERROR: Missing fit setting in config file: " + std::string(e.what()));
+    }
+
+    // Regeneration exclusion flag    try
+    try 
+    {
+      fitConfig.regenerationExclusionFlag = _config.at("regenerationExclusion").at("enabled").get<Bool_t>();
+    }
+    catch (const json::out_of_range &e)
+    {
+      throw std::runtime_error("ERROR: Missing regenerationExclusionFlag in config file: " + std::string(e.what()));
     }
 
     // 2. Extract DeltaTConfig (DOPISANE)

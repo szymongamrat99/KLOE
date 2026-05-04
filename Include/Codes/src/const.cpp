@@ -61,6 +61,7 @@ namespace Paths
   TString efficiency_dir = workdirPath + "/Subanalysis/EfficiencyAnalysis/";
   TString charged_dir = workdirPath + "/Subanalysis/KchRec/";
   TString plots_dir = workdirPath + "/Subanalysis/Plots/";
+  TString regen_analysis_dir = workdirPath + "/Subanalysis/RegenerationAnalysis/";
   TString root_files_dir = "root_files/";
   TString input_dir = "input/";
   TString logs_dir = "log/";

@@ -18,11 +18,8 @@
 
 using namespace std;
 
-int plots(Int_t firstFile, Int_t lastFile)
+int plots(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt, ErrorHandling::ErrorLogs &logger)
 {
-  TChain *chain = new TChain("INTERF/h1");
-  chain_init(chain, firstFile, lastFile);
-
   // Tree names and filenames to be analyzed
   std::map<TString, TString>
       treeNames,
@@ -235,7 +232,7 @@ int plots(Int_t firstFile, Int_t lastFile)
 
   for (Int_t i = 1; i < 7; i++)
   {
-    img_name = img_dir + "RegenerationAnalysis/deltaT" + i + ext_img;
+    img_name = Paths::img_dir + "RegenerationAnalysis/deltaT" + i + Paths::ext_img;
     deltaTcanva[i - 1]->cd();
 
     deltaT[0]->SetLineColor(kGreen);

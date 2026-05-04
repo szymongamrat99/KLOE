@@ -100,7 +100,7 @@ void MainMenuHandler::runMenuLoop(
                 OmegaRec_main(chain, eventAnalysis, dataTypeOpt);
                 break;
             case Controls::MainMenu::REGEN_REJ:
-                // Regen_main(chain);
+                Regen_main(chain, eventAnalysis, dataTypeOpt, logger);
                 break;
             case Controls::MainMenu::KNEREC_TRILAT:
                 Neutrec_main(chain, eventAnalysis, dataTypeOpt);

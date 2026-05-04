@@ -1,0 +1,16 @@
+{
+  "beamPipeBound": 8.0,
+  "driftChamberBound": 20.0,
+  "histogramRanges": {
+    "CylindricalBeamPipe": [0.0, 50.0],
+    "SphericalBeamPipe": [0.0, 50.0]
+  },
+  "fitRanges": {
+    "CylindricalBeamPipe": [3.8, 6.0],
+    "SphericalBeamPipe": [8.0, 13.0]
+  },
+  "resolutions": {
+    "CylindricalBeamPipe": 0.5,
+    "SphericalBeamPipe": 1.0
+  }
+}

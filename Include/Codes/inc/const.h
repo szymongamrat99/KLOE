@@ -51,6 +51,7 @@ namespace Paths
   extern TString efficiency_dir;
   extern TString charged_dir;
   extern TString plots_dir;
+  extern TString regen_analysis_dir;
   extern TString root_files_dir;
   extern TString input_dir;
   extern TString logs_dir;

@@ -1,10 +1,26 @@
 {
   "deltaT": {
     "rangeX": [-300.0, 300.0],
-    "xRangeDisplay": [-90.0, 90.0],
+    "xRangeDisplay": [-50.0, 50.0],
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
+  "regenerationExclusion": {
+    "enabled": false,
+    "beamPipeBoundary": 10.0,
+    "spherical": {
+      "meanCharged": 10.4941,
+      "sigmaCharged": 0.957544,
+      "meanNeutral": 10.3769,
+      "sigmaNeutral": 1.23898
+    },
+    "cylindrical": {
+      "meanCharged": 4.84397,
+      "sigmaCharged": 0.877508,
+      "meanNeutral": 4.63652,
+      "sigmaNeutral": 0.703466
+    }
+  },
   "fitSettings": {
     "maxFunctionCalls": 10000000,
     "tolerance": 1e-6,
@@ -32,8 +48,8 @@
       "fixed": false
     },
     "A_signal": {
-      "enabled": true,
-      "initialValue": 1.0,
+      "enabled": false,
+      "initialValue": 1.09,
       "limitLower": 0.2,
       "limitUpper": 0.2,
       "step": 0.01,
@@ -90,7 +106,7 @@
       "fixed": false
     },
     "A_omega": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -119,11 +135,11 @@
     "A_bcg_group": {
       "enabled": true,
       "groupName": "A_bcg",
-      "initialValue": 1.0,
+      "initialValue": 1.09,
       "step": 0.01,
-      "limitLower": 0.0,
+      "limitLower": 1.0,
       "limitUpper": 10.0,
-      "channels": ["3pi0", "Semileptonic", "Other"],
+      "channels": ["3pi0", "Semileptonic", "Other", "Omega", "Signal"],
       "fixed": false
     }
   }

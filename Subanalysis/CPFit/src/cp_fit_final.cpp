@@ -79,6 +79,9 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   TTreeReaderArray<Double_t> KchrecFit(reader, "KchrecFit");
   TTreeReaderArray<Double_t> ipFit(reader, "ipFit");
 
+  TTreeReaderArray<Double_t> Kchboost(reader, "Kchboost");
+  TTreeReaderArray<Double_t> ip(reader, "ip");
+
   TTreeReaderArray<Double_t> trk1Fit(reader, "trk1Fit");
   TTreeReaderArray<Double_t> trk2Fit(reader, "trk2Fit");
 
@@ -108,6 +111,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Double_t right_split = cfg.parameters.at("A_regen_near_right").parameter_ranges[0][1];
 
   Double_t split[3] = {left_split, center_split, right_split};
+
+  Bool_t regenerationExclusionFlag = cfg.regenerationExclusionFlag;
 
   std::cout << "INFO: Fit settings loaded successfully." << std::endl;
 
@@ -156,6 +161,11 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     event.SetParamIndex(pName, par_num);
     param_index_map[pName] = par_num;
 
+    std::cout << "INFO: Parameter " << pName << " is ENABLED with initial value " << p.initial_value
+              << ", step " << p.step
+              << (p.fixed ? ", FIXED." : (p.limit_lower > 0.0 || p.limit_upper > 0.0 ? ", LIMITED." : ", UNLIMITED."))
+              << std::endl;
+
     if (p.fixed)
     {
       // Parametr jest w fitowaniu, ale ma stałą wartość (nie zmienia się)
@@ -181,14 +191,29 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   for (auto const &ch : KLOE::channName)
   {
     TString chName = ch.second;
+    std::vector<std::pair<Double_t, Int_t>> range_based;
+
     for (auto const &pEntry : cfg.parameters)
     {
       const auto &p = pEntry.second;
-      // Sprawdzamy czy ten parametr obsługuje dany kanał
-      if (std::find(p.channels.begin(), p.channels.end(), chName) != p.channels.end())
-      {
-        event.channel_to_indices[chName].push_back(param_index_map[pEntry.first]);
-      }
+      if (!p.enabled)
+        continue; // ← FIX 1: pomiń wyłączone
+      if (std::find(p.channels.begin(), p.channels.end(), std::string(chName.Data())) == p.channels.end())
+        continue;
+
+      Int_t idx = param_index_map[pEntry.first];
+      if (!p.parameter_ranges.empty())
+        range_based.push_back({p.parameter_ranges[0][0], idx}); // ← zbieramy z rangą
+      else
+        event.channel_to_indices[chName].push_back(idx);
+    }
+
+    // FIX 2: sortowanie po dolnej granicy zakresu → gwarantuje kolejność far_left, near_left, near_right, far_right
+    if (!range_based.empty())
+    {
+      std::sort(range_based.begin(), range_based.end());
+      for (const auto &pr : range_based)
+        event.channel_to_indices[chName].push_back(pr.second);
     }
   }
 
@@ -239,7 +264,6 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         rho_pm = std::sqrt(distChargedIP[0] * distChargedIP[0] + distChargedIP[1] * distChargedIP[1]),
         rho_00 = std::sqrt(distNeutralIP[0] * distNeutralIP[0] + distNeutralIP[1] * distNeutralIP[1]),
         rho = std::sqrt(std::pow(rho_pm, 2) + std::pow(rho_00, 2));
-    ;
 
     Double_t radius00 = std::sqrt(std::pow(Knerec[6] - *Bx, 2) +
                                   std::pow(Knerec[7] - *By, 2)),
@@ -260,6 +284,48 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
     Bool_t global_cut = ((fiducialVolume && (abs(phiTrk1Angle) < 0.8 || abs(phiTrk2Angle) < 0.8)) || !fiducialVolume) && ((fiducialVolumeClose && rho > 1.5) || !fiducialVolumeClose) && ellipse_cut(*minv4gam - PhysicsConstants::mK0, KnerecSix[5] - PhysicsConstants::mK0);
 
+    // Regeneration cut
+    TVector3 ipVector, neutralVtxVector, chargedVtxVector;
+    
+    // Set up geometry vectors
+    ipVector.SetXYZ(ip[0], ip[1], ip[2]);
+    neutralVtxVector.SetXYZ(Knerec[6], Knerec[7], Knerec[8]);
+    chargedVtxVector.SetXYZ(Kchboost[6], Kchboost[7], Kchboost[8]);
+
+    // Calculate radius vectors
+    TVector3 ipToCharged = chargedVtxVector - ipVector;
+    TVector3 ipToNeutral = neutralVtxVector - ipVector;
+
+    // Cylindrical radius (rho) to charged and neutral vertices
+    double rhoCharged = ipToCharged.Perp();
+    double rhoNeutral = ipToNeutral.Perp();
+
+    // Spherical radius to charged and neutral vertices
+    double rCharged = ipToCharged.Mag();
+    double rNeutral = ipToNeutral.Mag();
+
+    Double_t ch_Spherical_Mean = 10.4941, ch_Spherical_Sigma = 0.957544;
+    Double_t ne_Spherical_Mean = 10.3769, ne_Spherical_Sigma = 1.23898;
+    Double_t ch_Cylindrical_Mean = 4.84397, ch_Cylindrical_Sigma = 0.877508;
+    Double_t ne_Cylindrical_Mean = 4.63652, ne_Cylindrical_Sigma = 0.703466;
+    
+    Double_t beamPipeBound = 5; // Przykładowa granica między obszarem cylindra a sferą (do dostosowania)
+
+    Bool_t regeneration_cut = true; // Domyślnie przepuszczamy wszystkie zdarzenia, jeśli flaga jest wyłączona
+
+    if (regenerationExclusionFlag)
+    {
+      Bool_t regeneration_cut_ch = false, regeneration_cut_ne = false;
+
+      if (rhoCharged > beamPipeBound)
+        regeneration_cut_ch = std::abs(rCharged - ch_Spherical_Mean) < 1.5 * ch_Spherical_Sigma;
+
+      if (rhoNeutral > beamPipeBound)
+        regeneration_cut_ne = std::abs(rNeutral - ne_Spherical_Mean) < 1.5 * ne_Spherical_Sigma;
+
+      regeneration_cut = !(regeneration_cut_ch || regeneration_cut_ne);
+    }
+
     baseKin.Dtmc = *KaonChTimeCMMC - *KaonNeTimeCMMC;
     baseKin.Dtboostlor = *KaonChTimeCMSignalFit - *KaonNeTimeCMSignalFit;
 
@@ -271,7 +337,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         no_cuts_sig[1].push_back(baseKin.Dtboostlor);
       }
 
-      if (global_cut)
+      if (global_cut && regeneration_cut)
       {
         if (*mctruth == 1)
         {
@@ -306,7 +372,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
       }
     }
 
-    if (*mcflag == 0 && global_cut)
+    if (*mcflag == 0 && global_cut && regeneration_cut)
     {
       event.time_diff["Data"].push_back(baseKin.Dtboostlor);
     }
@@ -318,47 +384,32 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   std::vector<Double_t> par(num_of_vars), parErr(num_of_vars);
 
-  par[param_index_map["Re"]] = minimum->X()[param_index_map["Re"]];
-  par[param_index_map["Im"]] = minimum->X()[param_index_map["Im"]];
-  par[param_index_map["A_signal"]] = minimum->X()[param_index_map["A_signal"]];
-  par[param_index_map["A_regen_far_left"]] = minimum->X()[param_index_map["A_regen_far_left"]];
-  par[param_index_map["A_regen_near_left"]] = minimum->X()[param_index_map["A_regen_near_left"]];
-  par[param_index_map["A_regen_near_right"]] = minimum->X()[param_index_map["A_regen_near_right"]];
-  par[param_index_map["A_regen_far_right"]] = minimum->X()[param_index_map["A_regen_far_right"]];
-  par[param_index_map["A_omega"]] = minimum->X()[param_index_map["A_omega"]];
-  par[param_index_map["A_three"]] = minimum->X()[param_index_map["A_three"]];
-  par[param_index_map["A_semileptonic"]] = minimum->X()[param_index_map["A_semileptonic"]];
-  par[param_index_map["A_other"]] = minimum->X()[param_index_map["A_other"]];
+  // Wypełnij par/parErr tylko dla aktywnych parametrów
+  for (const auto &pm : param_index_map)
+  {
+    if (pm.second < 0)
+      continue;
+    par[pm.second] = minimum->X()[pm.second];
+    parErr[pm.second] = minimum->Errors()[pm.second];
+  }
 
-  parErr[param_index_map["Re"]] = minimum->Errors()[param_index_map["Re"]];
-  parErr[param_index_map["Im"]] = minimum->Errors()[param_index_map["Im"]];
-  parErr[param_index_map["A_signal"]] = minimum->Errors()[param_index_map["A_signal"]];
-  parErr[param_index_map["A_regen_far_left"]] = minimum->Errors()[param_index_map["A_regen_far_left"]];
-  parErr[param_index_map["A_regen_near_left"]] = minimum->Errors()[param_index_map["A_regen_near_left"]];
-  parErr[param_index_map["A_regen_near_right"]] = minimum->Errors()[param_index_map["A_regen_near_right"]];
-  parErr[param_index_map["A_regen_far_right"]] = minimum->Errors()[param_index_map["A_regen_far_right"]];
-  parErr[param_index_map["A_omega"]] = minimum->Errors()[param_index_map["A_omega"]];
-  parErr[param_index_map["A_three"]] = minimum->Errors()[param_index_map["A_three"]];
-  parErr[param_index_map["A_semileptonic"]] = minimum->Errors()[param_index_map["A_semileptonic"]];
-  parErr[param_index_map["A_other"]] = minimum->Errors()[param_index_map["A_other"]];
-
-  std::cout << "---------------------------------" << std::endl;
-  std::cout << "Wyniki minimizacji:" << std::endl;
-  std::cout << "Re(epsilon): " << par[param_index_map["Re"]] << " +/- " << parErr[param_index_map["Re"]] << std::endl;
-  std::cout << "Im(epsilon): " << par[param_index_map["Im"]] << " +/- " << parErr[param_index_map["Im"]] << std::endl;
-  std::cout << "---------------------------------" << std::endl;
-  std::cout << std::endl;
-  std::cout << "Norms of fitted components:" << std::endl;
-  std::cout << "Signal: " << par[param_index_map["A_signal"]] << " +/- " << parErr[param_index_map["A_signal"]] << std::endl;
-  std::cout << "Regeneration (far left): " << par[param_index_map["A_regen_far_left"]] << " +/- " << parErr[param_index_map["A_regen_far_left"]] << std::endl;
-  std::cout << "Regeneration (close left): " << par[param_index_map["A_regen_near_left"]] << " +/- " << parErr[param_index_map["A_regen_near_left"]] << std::endl;
-  std::cout << "Regeneration (close right): " << par[param_index_map["A_regen_near_right"]] << " +/- " << parErr[param_index_map["A_regen_near_right"]] << std::endl;
-  std::cout << "Regeneration (far right): " << par[param_index_map["A_regen_far_right"]] << " +/- " << parErr[param_index_map["A_regen_far_right"]] << std::endl;
-  std::cout << "Omega: " << par[param_index_map["A_omega"]] << " +/- " << parErr[param_index_map["A_omega"]] << std::endl;
-  std::cout << "3pi0: " << par[param_index_map["A_three"]] << " +/- " << parErr[param_index_map["A_three"]] << std::endl;
-  std::cout << "Semileptonic: " << par[param_index_map["A_semileptonic"]] << " +/- " << parErr[param_index_map["A_semileptonic"]] << std::endl;
-  std::cout << "Other background: " << par[param_index_map["A_other"]] << " +/- " << parErr[param_index_map["A_other"]] << std::endl;
-  std::cout << "---------------------------------" << std::endl;
+  // std::cout << "---------------------------------" << std::endl;
+  // std::cout << "Wyniki minimizacji:" << std::endl;
+  // std::cout << "Re(epsilon): " << par[param_index_map["Re"]] << " +/- " << parErr[param_index_map["Re"]] << std::endl;
+  // std::cout << "Im(epsilon): " << par[param_index_map["Im"]] << " +/- " << parErr[param_index_map["Im"]] << std::endl;
+  // std::cout << "---------------------------------" << std::endl;
+  // std::cout << std::endl;
+  // std::cout << "Norms of fitted components:" << std::endl;
+  // std::cout << "Signal: " << par[param_index_map["A_signal"]] << " +/- " << parErr[param_index_map["A_signal"]] << std::endl;
+  // std::cout << "Regeneration (far left): " << par[param_index_map["A_regen_far_left"]] << " +/- " << parErr[param_index_map["A_regen_far_left"]] << std::endl;
+  // std::cout << "Regeneration (close left): " << par[param_index_map["A_regen_near_left"]] << " +/- " << parErr[param_index_map["A_regen_near_left"]] << std::endl;
+  // std::cout << "Regeneration (close right): " << par[param_index_map["A_regen_near_right"]] << " +/- " << parErr[param_index_map["A_regen_near_right"]] << std::endl;
+  // std::cout << "Regeneration (far right): " << par[param_index_map["A_regen_far_right"]] << " +/- " << parErr[param_index_map["A_regen_far_right"]] << std::endl;
+  // std::cout << "Omega: " << par[param_index_map["A_omega"]] << " +/- " << parErr[param_index_map["A_omega"]] << std::endl;
+  // std::cout << "3pi0: " << par[param_index_map["A_three"]] << " +/- " << parErr[param_index_map["A_three"]] << std::endl;
+  // std::cout << "Semileptonic: " << par[param_index_map["A_semileptonic"]] << " +/- " << parErr[param_index_map["A_semileptonic"]] << std::endl;
+  // std::cout << "Other background: " << par[param_index_map["A_other"]] << " +/- " << parErr[param_index_map["A_other"]] << std::endl;
+  // std::cout << "---------------------------------" << std::endl;
 
   Double_t sum_of_events = 0.;
   std::map<TString, Double_t> fractions;
@@ -430,10 +481,25 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     }
   }
 
-  event.getFracHistogram("Omega")->Scale(par[param_index_map["A_omega"]] * event.getFracHistogram("Omega")->GetEntries() / event.getFracHistogram("Omega")->Integral(0, nbins + 1));
-  event.getFracHistogram("3pi0")->Scale(par[param_index_map["A_three"]] * event.getFracHistogram("3pi0")->GetEntries() / event.getFracHistogram("3pi0")->Integral(0, nbins + 1));
-  event.getFracHistogram("Semileptonic")->Scale(par[param_index_map["A_semileptonic"]] * event.getFracHistogram("Semileptonic")->GetEntries() / event.getFracHistogram("Semileptonic")->Integral(0, nbins + 1));
-  event.getFracHistogram("Other")->Scale(par[param_index_map["A_other"]] * event.getFracHistogram("Other")->GetEntries() / event.getFracHistogram("Other")->Integral(0, nbins + 1));
+  auto get_channel_norm = [&](TString channel) -> Double_t
+  {
+    auto it = event.channel_to_indices.find(channel);
+    if (it == event.channel_to_indices.end() || it->second.empty())
+      return 0.0;
+    Int_t idx = it->second[0];
+    return (idx >= 0 && idx < (Int_t)par.size()) ? par[idx] : 0.0;
+  };
+
+  for (auto const &name : {"Omega", "3pi0", "Semileptonic", "Other"})
+  {
+    TString ch = name;
+    Double_t norm = get_channel_norm(ch);
+    Double_t integral = event.getFracHistogram(ch)->Integral(0, nbins + 1);
+    if (norm > 0.0 && integral > 0.0)
+      event.getFracHistogram(ch)->Scale(norm * event.getFracHistogram(ch)->GetEntries() / integral);
+    else
+      event.getFracHistogram(ch)->Scale(0.0); // wyłączony kanał → zerowy
+  }
 
   // Build MC sum from all channels
   for (auto const &name : KLOE::channName)
