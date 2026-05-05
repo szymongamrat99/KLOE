@@ -142,16 +142,6 @@ int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataT
     if (tree->IsZombie())
       throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
 
-    // file_omega = new TFile(filename_omega);
-
-    // if (file_omega->IsZombie())
-    //   throw(ErrorHandling::ErrorCodes::FILE_NOT_EXIST);
-
-    // tree_omega = (TTree *)file_omega->Get(treename_omega);
-
-    // if (tree_omega->IsZombie())
-    //   throw(ErrorHandling::ErrorCodes::TREE_NOT_EXIST);
-
     file_mctruth = new TFile(filename_mctruth);
 
     if (file_mctruth->IsZombie())

@@ -83,7 +83,7 @@ int CPFit_main(TChain &chain, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher, Contro
       logger.getLog(infoCode, "CP Final Fit");
 
       Obj.startTimer();
-      cp_fit_mc_data(chain, "split", false, dataTypeOpt, logger, Obj, cfgWatcher);
+      cp_fit_final(chain, "split", false, dataTypeOpt, logger, Obj, cfgWatcher);
       
       infoCode = ErrorHandling::InfoCodes::FUNC_EXEC_TIME;
       logger.getLog(infoCode, Obj.endTimer());

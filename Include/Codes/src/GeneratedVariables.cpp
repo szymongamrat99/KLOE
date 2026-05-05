@@ -8,7 +8,8 @@ void GeneratedVariables::classifyChannel(
     const Int_t *vtxmcOld,
     const Int_t *motherOld,
     UInt_t mcflag,
-    Int_t &mctruth_int)
+    Int_t &mctruth_int,
+    Int_t &semileptonic_flag)
 {
   UInt_t Ks = 0, Kl = 0, Ksregen = 0, piplusks = 0, pipluskl = 0, piminusks = 0, piminuskl = 0,
          muonplusks = 0, muonpluskl = 0, muonminusks = 0, muonminuskl = 0, electronks = 0, electronkl = 0,
@@ -147,6 +148,20 @@ void GeneratedVariables::classifyChannel(
                          (pi0kl == 2 && piplusks == 1 && muonminusks == 1 && pi0ks == 0) ||
                          (pi0kl == 2 && piminusks == 1 && muonplusks == 1 && pi0ks == 0)));
 
+    Bool_t semi_ele_pos_cond = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 &&
+                             Ksregen == 0 && Ks == 1 && Kl == 1 &&
+                             ((pi0ks == 2 && positronkl == 1 && piminuskl == 1 && pi0kl == 0) ||
+                              (pi0ks == 2 && pipluskl == 1 && electronkl == 1 && pi0kl == 0) ||
+                              (pi0kl == 2 && positronks == 1 && piminusks == 1 && pi0ks == 0) ||
+                              (pi0kl == 2 && piplusks == 1 && electronks == 1 && pi0ks == 0)));
+
+    Bool_t semi_muon_cond = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 &&
+                             Ksregen == 0 && Ks == 1 && Kl == 1 &&
+                             ((pi0ks == 2 && pipluskl == 1 && muonminuskl == 1 && pi0kl == 0) ||
+                              (pi0ks == 2 && piminuskl == 1 && muonpluskl == 1 && pi0kl == 0) ||
+                              (pi0kl == 2 && piplusks == 1 && muonminusks == 1 && pi0ks == 0) ||
+                              (pi0kl == 2 && piminusks == 1 && muonplusks == 1 && pi0ks == 0)));
+
     if (signal_cond)
       mctruth_int = 1; // Signal channel: KSKL -> pi+pi-pi0pi0
     else if (regen_cond)
@@ -161,6 +176,14 @@ void GeneratedVariables::classifyChannel(
       mctruth_int = 7; // pipi
     else
       mctruth_int = 6; // Other background
+
+    if (semi_ele_pos_cond)
+      semileptonic_flag = 23; // Semi-leptonic with electron-positron
+    else if (semi_muon_cond)
+      semileptonic_flag = 56; // Semi-leptonic with muon
+    else
+      semileptonic_flag = 0; // Not semi-leptonic
+
   }
   else if (mcflag == 0)
   {

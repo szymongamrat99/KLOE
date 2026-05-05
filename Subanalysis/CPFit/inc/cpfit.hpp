@@ -41,6 +41,8 @@
 
 int cp_fit_mc_data(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher);
 
+int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher);
+
 int cp_fit_func(KLOE::interference &event, std::vector<std::vector<Double_t>> &relativeErr, std::vector<std::vector<Double_t>> &real, std::vector<std::vector<Double_t>> &imaginary, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);
 
 int cut_search(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj);

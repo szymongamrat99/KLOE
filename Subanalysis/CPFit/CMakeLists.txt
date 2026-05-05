@@ -5,6 +5,7 @@ add_library(CPFit SHARED
             app/cpfit_main.cpp
             src/cp_fit_func.cpp
             src/cp_fit_mc_data.cpp
+            src/cp_fit_final.cpp
             src/cut_search.cpp) # Użyj SHARED, jeśli ma być dynamiczna
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.

@@ -51,6 +51,7 @@ namespace Paths
   extern TString efficiency_dir;
   extern TString charged_dir;
   extern TString plots_dir;
+  extern TString regen_analysis_dir;
   extern TString root_files_dir;
   extern TString input_dir;
   extern TString logs_dir;
@@ -105,12 +106,23 @@ namespace PhysicsConstants
   extern Double_t br_phi_kskl;
   extern Double_t br_phi_omegapi0;
 
+  // Phi old values (for corrections; source mdfign.inc)
+  extern Double_t br_phi_kskl_old;
+  extern Double_t br_phi_omegapi0_old;
+
   // K-short
   extern Double_t br_ks_pi0pi0;
   extern Double_t br_ks_pippim;
   extern Double_t br_ks_pippimgamma;
   extern Double_t br_ks_piele;
   extern Double_t br_ks_pimu;
+
+  // K-short old values (for corrections; source mdfign.inc)
+  extern Double_t br_ks_pi0pi0_old;
+  extern Double_t br_ks_pippim_old;
+  extern Double_t br_ks_pippimgamma_old;
+  extern Double_t br_ks_piele_old;
+  extern Double_t br_ks_pimu_old;
 
   // K-long
   extern Double_t br_kl_pi0pi0;
@@ -119,6 +131,20 @@ namespace PhysicsConstants
   extern Double_t br_kl_3pi0;
   extern Double_t br_kl_piele;
   extern Double_t br_kl_pimu;
+
+  // K-long old values (for corrections; source mdfign.inc)
+  extern Double_t br_kl_pi0pi0_old;
+  extern Double_t br_kl_pippim_old;
+  extern Double_t br_kl_pippimpi0_old;
+  extern Double_t br_kl_3pi0_old;
+  extern Double_t br_kl_piele_old;
+  extern Double_t br_kl_pimu_old;
+
+  // Omega decays
+  extern Double_t br_omega_pippimpi0;
+
+  // Omega decays old values (for corrections; source mdfign.inc)
+  extern Double_t br_omega_pippimpi0_old;
 
   // Kaons' properties and CPV
   extern Double_t tau_S_nonCPT;      // ns
@@ -325,7 +351,8 @@ namespace KLOE
         Cotv1 = 0.0,
         Curv2 = 0.0,
         Phiv2 = 0.0,
-        Cotv2 = 0.0;
+        Cotv2 = 0.0,
+        bestError = 999999.0;
 
     Int_t
         nevent = 0,
@@ -351,7 +378,8 @@ namespace KLOE
         mcflag = 0,
         cut = 0,
         muonAlertPlus = 0,
-        muonAlertMinus = 0;
+        muonAlertMinus = 0,
+        semileptonic_flag = 0;
 
     std::vector<Double_t>
         Kchrecnew,

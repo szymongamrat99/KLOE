@@ -13,6 +13,8 @@
 #include <TFile.h>
 #include <vector>
 #include <array>
+#include <BRCorrectionFactors.h>
+
 
 namespace KLOE
 {
@@ -28,9 +30,12 @@ namespace KLOE
 
     std::vector<Double_t> init_vars, step;
 
-    Double_t *corr_vals, *eff_vals, *resi_vals; 
-    
+    Double_t *corr_vals, *eff_vals, *resi_vals;
+
     std::map<TString, std::vector<Double_t>> tmp_norm;
+
+    // Mapa przechowująca indeksy parametrów z minimizera dla każdego kanału
+    std::map<TString, std::vector<Int_t>> channel_to_indices;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -84,20 +89,19 @@ namespace KLOE
       {
         for (const auto &name : KLOE::channName)
         {
-          _frac_data[name.second] = new TH1D("MC 'data' fracs " + name.second, 
-                                              "", 
-                                              bin_number, 
-                                              x_min, 
-                                              x_max);
+          _frac_data[name.second] = new TH1D("MC 'data' fracs " + name.second,
+                                             "",
+                                             bin_number,
+                                             x_min,
+                                             x_max);
 
           _frac_data[name.second]->SetLineColor(KLOE::channColor.at(name.second));
         }
       }
 
-     _data_sub = new TH1D("DATA subtraction histogram", "", _bin_number, _x_min, _x_max);
+      _data_sub = new TH1D("DATA subtraction histogram", "", _bin_number, _x_min, _x_max);
 
       _mc_sub = new TH1D("MC subtraction histogram", "", _bin_number, _x_min, _x_max);
-
 
       for (const auto &name : KLOE::channName)
       {
@@ -142,7 +146,10 @@ namespace KLOE
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    Double_t interf_function(const Float_t x, Int_t check = 1, const Double_t *par = 0);
+    Double_t interf_function(const Double_t x, Int_t check = 1, const Double_t *par = 0);
+    Double_t double_exponential(const Double_t x, Int_t check = 1, const Double_t *par = 0);
+
+    Double_t fit_function(const Double_t x, Int_t check = 1, const Double_t *par = 0);
 
     Double_t interf_chi2_split(const Double_t *xx);
     Double_t interf_chi2_excluded(const Double_t *xx);
@@ -177,6 +184,8 @@ namespace KLOE
         return false;
     };
 
+    void SetParamIndex(TString name, Int_t index) { fParamIndices[name] = index; }
+
   private:
     TString _mode; //! "split", "window", "excluded, "mc", "bcg", "all"
     TGraphErrors *corr_factor, *eff_factor;
@@ -197,6 +206,13 @@ namespace KLOE
     UInt_t num_of_vars;
 
     Bool_t _corr_check;
+
+    std::map<TString, Int_t> fParamIndices;
+
+    KLOE::BRCorrectionFactors BRCF;
+
+    // Funkcja pomocnicza do pobierania wagi (dodaj w pliku .cpp klasy)
+    Double_t get_weight(TString channel, Double_t dt, const Double_t *xx);
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////
   };
