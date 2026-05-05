@@ -1252,6 +1252,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           }
           else
           {
+
+            if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
+              break;
+
             baseKin.bestError = 999999.;
             KnerecSix.total = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
             photonFourMomSix = std::vector<KLOE::neutralParticle>(6, KLOE::neutralParticle());
@@ -1505,7 +1509,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                 }
                 }
 
-                if (mctruth == 1)
+                if (mctruth == mctruthSignal)
                 {
                   passed = true;
                   mctruth = 0;
