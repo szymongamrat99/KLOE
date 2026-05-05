@@ -652,7 +652,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           dataAccess.GetVtxMC().data(),
           dataAccess.GetMother().data(),
           mcflag, // Assuming mcflag is 1 for MC events
-          mctruth);
+          mctruth,
+          baseKin.semileptonic_flag);
 
       MctruthCounter(mctruth, mctruth_num);
       // -------------------------------------------------------------------
@@ -768,12 +769,29 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
     else
     {
+      Int_t nclMinCurrent = (hypoCode == KLOE::HypothesisCode::THREE_PI0) ? 6 : NCLMIN;
       errorCode = genVarClassifier.FindNeutralCluster(dataAccess.GetNClu(),
                                                       dataAccess.GetNTCl(),
                                                       dataAccess.GetAssCl().data(),
-                                                      NCLMIN,
+                                                      nclMinCurrent,
                                                       logger,
                                                       neuclulist);
+
+      // For THREE_PI0: additionally require all neutral clusters have energy >= 20 MeV
+      if (errorCode == ErrorHandling::ErrorCodes::NO_ERROR)
+      {
+        const auto &enecl = dataAccess.GetEneCl();
+        neuclulist.erase(std::remove_if(neuclulist.begin(), neuclulist.end(),
+                                        [&](Int_t idx) { return enecl[idx - 1] < 20.0; }),
+                         neuclulist.end());
+        if (static_cast<Int_t>(neuclulist.size()) < nclMinCurrent)
+        {
+          if (hypoCode != KLOE::HypothesisCode::THREE_PI0)
+            errorCode = ErrorHandling::ErrorCodes::LESS_THAN_FOUR_NEUTRAL_CLUSTERS;
+          else
+            errorCode = ErrorHandling::ErrorCodes::LESS_THAN_SIX_NEUTRAL_CLUSTERS;
+        }
+      }
     }
 
     if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
@@ -1252,9 +1270,24 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           }
           else
           {
-
+            // This branch should not be reached for THREE_PI0 because FindNeutralCluster
+            // already requires >= 6 clusters with E > 20 MeV. Guard it defensively.
             if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
-              break;
+            {
+              noError = false;
+              if (mctruth == mctruthSignal)
+              {
+                passed = true;
+                mctruth = -1;
+                goto skipEvent;
+              }
+              else
+              {
+                neuclulist.clear();
+                ++show_progress;
+                continue;
+              }
+            }
 
             baseKin.bestError = 999999.;
             KnerecSix.total = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
@@ -1639,7 +1672,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"goodClustersTriKinFitSize", baseKin.goodClustersTriKinFit.size()},
           {"cutApplied", baseKin.cut},
           {"muonAlertPlus", baseKin.muonAlertPlus},
-          {"muonAlertMinus", baseKin.muonAlertMinus}};
+          {"muonAlertMinus", baseKin.muonAlertMinus},
+          {"semileptonicFlag", baseKin.semileptonic_flag}};
 
       // Double_t zmienne
       std::map<std::string, Double_t> floatVars = {

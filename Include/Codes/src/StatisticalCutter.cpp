@@ -129,6 +129,12 @@ void StatisticalCutter::LoadCuts(const json& j) {
         case KLOE::HypothesisCode::SIMONA_ANALYSIS:
             cutListKey = "SIMONA_ANALYSIS";
             break;
+        case KLOE::HypothesisCode::THREE_PI0:
+            cutListKey = "THREE_PI0";
+            break;
+        case KLOE::HypothesisCode::SEMILEPTONIC:
+            cutListKey = "SEMILEPTONIC";
+            break;
         default:
             std::cout << "Warning: Using default cuts for unknown hypothesis code" << std::endl;
             return;
