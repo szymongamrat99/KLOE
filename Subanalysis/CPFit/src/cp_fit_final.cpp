@@ -21,6 +21,8 @@
 #include <TTreeReaderArray.h>
 #include <boost/progress.hpp>
 
+#include <BRCorrectionFactors.h>
+
 #include "../inc/fit_setter.h"
 
 #include "../inc/cpfit.hpp"
@@ -286,7 +288,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
     // Regeneration cut
     TVector3 ipVector, neutralVtxVector, chargedVtxVector;
-    
+
     // Set up geometry vectors
     ipVector.SetXYZ(ip[0], ip[1], ip[2]);
     neutralVtxVector.SetXYZ(Knerec[6], Knerec[7], Knerec[8]);
@@ -308,7 +310,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     Double_t ne_Spherical_Mean = 10.3769, ne_Spherical_Sigma = 1.23898;
     Double_t ch_Cylindrical_Mean = 4.84397, ch_Cylindrical_Sigma = 0.877508;
     Double_t ne_Cylindrical_Mean = 4.63652, ne_Cylindrical_Sigma = 0.703466;
-    
+
     Double_t beamPipeBound = 5; // Przykładowa granica między obszarem cylindra a sferą (do dostosowania)
 
     Bool_t regeneration_cut = true; // Domyślnie przepuszczamy wszystkie zdarzenia, jeśli flaga jest wyłączona
@@ -471,16 +473,9 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     event.getFracHistogram("Data")->Fill(event.time_diff["Data"][j]);
   }
 
-  event.getFracHistogram("Signal")->Scale(par[param_index_map["A_signal"]] * event.getFracHistogram("Signal")->GetEntries() / event.getFracHistogram("Signal")->Integral(0, nbins + 1));
+  KLOE::BRCorrectionFactors BRCF;
 
-  if (check_corr == true)
-  {
-    for (Int_t i = 0; i < nbins; i++)
-    {
-      event.getFracHistogram("Signal")->SetBinContent(i + 1, event.getFracHistogram("Signal")->GetBinContent(i + 1) * event.corr_vals[i]);
-    }
-  }
-
+  // Definicja lambdy - PRZED pierwszym Scale
   auto get_channel_norm = [&](TString channel) -> Double_t
   {
     auto it = event.channel_to_indices.find(channel);
@@ -490,13 +485,27 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     return (idx >= 0 && idx < (Int_t)par.size()) ? par[idx] : 0.0;
   };
 
+  // Signal - przez get_channel_norm zamiast hardkodu
+  Double_t sig_norm = get_channel_norm("Signal");
+  Double_t sig_integral = event.getFracHistogram("Signal")->Integral(0, nbins + 1);
+  if (sig_norm > 0.0 && sig_integral > 0.0)
+    event.getFracHistogram("Signal")->Scale(BRCF.BRcorrectionFactors["Signal"] * sig_norm * event.getFracHistogram("Signal")->GetEntries() / sig_integral);
+
+  if (check_corr == true)
+  {
+    for (Int_t i = 0; i < nbins; i++)
+    {
+      event.getFracHistogram("Signal")->SetBinContent(i + 1, event.getFracHistogram("Signal")->GetBinContent(i + 1) * event.corr_vals[i]);
+    }
+  }
+
   for (auto const &name : {"Omega", "3pi0", "Semileptonic", "Other"})
   {
     TString ch = name;
     Double_t norm = get_channel_norm(ch);
     Double_t integral = event.getFracHistogram(ch)->Integral(0, nbins + 1);
     if (norm > 0.0 && integral > 0.0)
-      event.getFracHistogram(ch)->Scale(norm * event.getFracHistogram(ch)->GetEntries() / integral);
+      event.getFracHistogram(ch)->Scale(BRCF.BRcorrectionFactors[ch] * norm * event.getFracHistogram(ch)->GetEntries() / integral);
     else
       event.getFracHistogram(ch)->Scale(0.0); // wyłączony kanał → zerowy
   }
@@ -509,6 +518,49 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
     event.getFracHistogram("MC sum")->Add(event.getFracHistogram(name.second));
   }
+
+  // ─── Purity & Efficiency calculations ────────────────────────────────────────
+
+  const Double_t range_lo = -20.0, range_hi = 20.0;
+  Int_t bin_lo = event.getFracHistogram("Signal")->FindBin(range_lo);
+  Int_t bin_hi = event.getFracHistogram("Signal")->FindBin(range_hi);
+
+  // Całkowita wydajność
+  Double_t pass_total = sig_pass->Integral(0, nbins + 1);
+  Double_t total_total = sig_total->Integral(0, nbins + 1);
+  Double_t total_eff = (total_total > 0.0) ? pass_total / total_total : 0.0;
+
+  // Całkowita czystość
+  Double_t sig_total_integral = event.getFracHistogram("Signal")->Integral(0, nbins + 1);
+  Double_t mc_sum_total_integral = event.getFracHistogram("MC sum")->Integral(0, nbins + 1);
+  Double_t total_purity = (mc_sum_total_integral > 0.0) ? sig_total_integral / mc_sum_total_integral : 0.0;
+
+  // Czystość w [-20, 20]
+  Double_t sig_range_integral = event.getFracHistogram("Signal")->Integral(bin_lo, bin_hi);
+  Double_t mc_sum_range_integral = event.getFracHistogram("MC sum")->Integral(bin_lo, bin_hi);
+  Double_t purity_range = (mc_sum_range_integral > 0.0) ? sig_range_integral / mc_sum_range_integral : 0.0;
+
+  // Wydajność w [-20, 20]
+  Int_t bin_lo_raw = sig_total->FindBin(range_lo);
+  Int_t bin_hi_raw = sig_total->FindBin(range_hi);
+  Double_t pass_range = sig_pass->Integral(bin_lo_raw, bin_hi_raw);
+  Double_t total_range = sig_total->Integral(bin_lo_raw, bin_hi_raw);
+  Double_t eff_range = (total_range > 0.0) ? pass_range / total_range : 0.0;
+
+  std::cout << "BR Correction factors: " << std::endl;
+  for (const auto &factor : BRCF.BRcorrectionFactors)
+  {
+    std::cout << "  " << factor.first << ": " << factor.second << std::endl;
+  }
+  std::cout << std::endl;
+
+  std::cout << "=== Purity & Efficiency ===" << std::endl;
+  std::cout << "Total efficiency:              " << total_eff * 100.0 << " %" << std::endl;
+  std::cout << "Efficiency in [-20, 20] tau_S: " << eff_range * 100.0 << " %" << std::endl;
+  std::cout << "===========================" << std::endl;
+  std::cout << "Total purity:                  " << total_purity * 100.0 << " %" << std::endl;
+  std::cout << "Purity in [-20, 20] tau_S:     " << purity_range * 100.0 << " %" << std::endl;
+  std::cout << "===========================" << std::endl;
 
   TCanvas *c1 = new TCanvas("c1", "", 790, 1200);
 
@@ -540,8 +592,6 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Double_t
       weightedMean = Obj.WeightedAverageAsymmetric(y, eyl, eyh),
       weightedMeanErr = Obj.WAvgAsymmError(eyl, eyh);
-
-  std::cout << "Weighted mean: " << weightedMean << " +/- " << weightedMeanErr << std::endl;
 
   TLine
       *lineAvg = new TLine(xMinRangeDisplay, weightedMean, xMaxRangeDisplay, weightedMean),

@@ -116,12 +116,23 @@ namespace PhysicsConstants
   Double_t br_phi_kskl = 0.339;
   Double_t br_phi_omegapi0 = 4.7E-5;
 
+  // Phi old values (for corrections; source mdfign.inc)
+  Double_t br_phi_kskl_old = 0.337;
+  Double_t br_phi_omegapi0_old = 4.1E-5;
+
   // K-short
   Double_t br_ks_pi0pi0 = 0.3069;
   Double_t br_ks_pippim = 0.6920;
   Double_t br_ks_pippimgamma = 1.79E-3;
   Double_t br_ks_piele = 7.04E-4;
   Double_t br_ks_pimu = 4.56E-4;
+
+  // K-short old values (for corrections; source mdfign.inc)
+  Double_t br_ks_pi0pi0_old = 0.30687;
+  Double_t br_ks_pippim_old = 0.69196;
+  Double_t br_ks_pippimgamma_old = 1.80E-3;
+  Double_t br_ks_piele_old = 7.046E-4;
+  Double_t br_ks_pimu_old = 4.692E-4;
 
   // K-long
   Double_t br_kl_pi0pi0 = 8.64E-4;
@@ -130,6 +141,20 @@ namespace PhysicsConstants
   Double_t br_kl_3pi0 = 0.1952;
   Double_t br_kl_piele = 0.4055;
   Double_t br_kl_pimu = 0.2704;
+
+  // K-long old values (for corrections; source mdfign.inc)
+  Double_t br_kl_pi0pi0_old = 8.83E-4;
+  Double_t br_kl_pippim_old = 1.963E-3;
+  Double_t br_kl_pippimpi0_old = 0.1263;
+  Double_t br_kl_3pi0_old = 0.1997;
+  Double_t br_kl_piele_old = 0.4007;
+  Double_t br_kl_pimu_old = 0.2698;
+
+  // Omega decays
+  Double_t br_omega_pippimpi0 = 0.892;
+
+  // Omega decays
+  Double_t br_omega_pippimpi0_old = 0.893;
 
   // Kaons' properties and CPV
   Double_t tau_S_nonCPT = 0.89564E-1;     // ns

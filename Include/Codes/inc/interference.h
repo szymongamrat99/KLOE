@@ -13,6 +13,8 @@
 #include <TFile.h>
 #include <vector>
 #include <array>
+#include <BRCorrectionFactors.h>
+
 
 namespace KLOE
 {
@@ -206,6 +208,8 @@ namespace KLOE
     Bool_t _corr_check;
 
     std::map<TString, Int_t> fParamIndices;
+
+    KLOE::BRCorrectionFactors BRCF;
 
     // Funkcja pomocnicza do pobierania wagi (dodaj w pliku .cpp klasy)
     Double_t get_weight(TString channel, Double_t dt, const Double_t *xx);

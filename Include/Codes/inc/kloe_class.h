@@ -642,7 +642,8 @@ namespace KLOE
           {"SIGNAL", HypothesisCode::SIGNAL},
           {"OMEGAPI", HypothesisCode::OMEGAPI},
           {"FOUR_PI", HypothesisCode::FOUR_PI},
-          {"THREE_PI0", HypothesisCode::THREE_PI0}};
+          {"THREE_PI0", HypothesisCode::THREE_PI0},
+          {"SEMILEPTONIC", HypothesisCode::SEMILEPTONIC}};
 
       auto it = enumMap.find(str);
       if (it != enumMap.end())
@@ -661,7 +662,8 @@ namespace KLOE
           {HypothesisCode::SIGNAL, "SIGNAL"},
           {HypothesisCode::OMEGAPI, "OMEGAPI"},
           {HypothesisCode::FOUR_PI, "FOUR_PI"},
-          {HypothesisCode::THREE_PI0, "THREE_PI0"}};
+          {HypothesisCode::THREE_PI0, "THREE_PI0"},
+          {HypothesisCode::SEMILEPTONIC, "SEMILEPTONIC"}};
 
       auto it = enumMap.find(code);
       if (it != enumMap.end())

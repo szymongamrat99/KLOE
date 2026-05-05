@@ -245,8 +245,8 @@ namespace KLOE
         // Magia: get_weight sam wie, czy użyć parametru pojedynczego, czy splitu
         Double_t weight = get_weight(name.second, dt_bin, xx);
 
-        b["MC sum"][j] += weight * b[name.second][j];
-        e["MC sum"][j] += std::pow(weight * e[name.second][j], 2);
+        b["MC sum"][j] += BRCF.BRcorrectionFactors[name.second] * weight * b[name.second][j];
+        e["MC sum"][j] += std::pow(BRCF.BRcorrectionFactors[name.second] * weight * e[name.second][j], 2);
       }
     }
 

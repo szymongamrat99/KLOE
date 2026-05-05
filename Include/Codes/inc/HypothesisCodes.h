@@ -9,6 +9,7 @@ namespace KLOE
     FOUR_PI = 3, // For Pi+Pi-Pi+Pi-
     SIMONA_ANALYSIS = 4, // For Simona's analysis
     THREE_PI0 = 5, // For 3Pi0
+    SEMILEPTONIC = 6, // For semileptonic decays
 
     INVALID_VALUE // For invalid values
   };

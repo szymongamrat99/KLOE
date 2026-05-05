@@ -107,7 +107,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   Int_t nPhotons = 0, nPions = 0;
 
   if (hypoCode == KLOE::HypothesisCode::SIGNAL ||
-      hypoCode == KLOE::HypothesisCode::OMEGAPI || hypoCode == KLOE::HypothesisCode::FOUR_PI)
+      hypoCode == KLOE::HypothesisCode::OMEGAPI || hypoCode == KLOE::HypothesisCode::FOUR_PI || hypoCode == KLOE::HypothesisCode::SEMILEPTONIC || hypoCode == KLOE::HypothesisCode::THREE_PI0)
   {
     nPhotons = 4;
     nPions = 2;
@@ -252,11 +252,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   KLOE::NeutralReconstruction neutRec(logger);
 
   if (hypoCode == KLOE::HypothesisCode::SIGNAL ||
-      hypoCode == KLOE::HypothesisCode::OMEGAPI)
+      hypoCode == KLOE::HypothesisCode::OMEGAPI || 
+      hypoCode == KLOE::HypothesisCode::SEMILEPTONIC ||
+      hypoCode == KLOE::HypothesisCode::THREE_PI0)
   {
     neutRec.SetNumberOfPhotons(4);
   }
-  // -------------------------------------------------------------
+  // -----------------------------------------------------
 
   Int_t mode = 1; // Model for pi+pi-
 
@@ -300,6 +302,31 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       return ((baseKin.pi01Fit[5] - pi0Mass1_mean) - (baseKin.pi02Fit[5] - pi0Mass2_mean)) / std::sqrt(2);
     };
     //
+
+    auto angleBetweenChargedPionsCM = [&]()
+    {
+      TVector3 KchrecGeometrical(baseKin.Kchboostnew[6] - baseKin.ip[0], 
+                                 baseKin.Kchboostnew[7] - baseKin.ip[1], 
+                                 baseKin.Kchboostnew[8] - baseKin.ip[2]);
+
+      Double_t KchrecMom = sqrt(std::pow(baseKin.Kchboostnew[3], 2) - std::pow(PhysicsConstants::mK0, 2));
+      Double_t Norm = KchrecGeometrical.Mag();
+      KchrecGeometrical = KchrecGeometrical * (KchrecMom / Norm);
+      
+      TVector3 boost(-KchrecGeometrical.X() / baseKin.Kchboostnew[3],
+                     -KchrecGeometrical.Y() / baseKin.Kchboostnew[3],
+                     -KchrecGeometrical.Z() / baseKin.Kchboostnew[3]);
+
+
+      TLorentzVector pi1Vec(baseKin.trknew[0][0], baseKin.trknew[0][1], baseKin.trknew[0][2], baseKin.trknew[0][3]);
+      TLorentzVector pi2Vec(baseKin.trknew[1][0], baseKin.trknew[1][1], baseKin.trknew[1][2], baseKin.trknew[1][3]);
+
+      // Boost to CM frame
+      pi1Vec.Boost(boost);
+      pi2Vec.Boost(boost);
+
+      return pi1Vec.Angle(pi2Vec.Vect()) / M_PI * 180.0; // Return angle in degrees
+    };
 
   // Cuts application
 
@@ -365,6 +392,24 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     cutter.RegisterCentralValueGetter("Pi0MassPlane_v", [&]()
                                   { return 0; });
     
+  }
+  else if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
+  {
+    cutter.RegisterVariableGetter("SixGammaError", [&]()
+                                  { return baseKin.bestError; });
+  }
+  else if (hypoCode == KLOE::HypothesisCode::SEMILEPTONIC)
+  {
+    cutter.RegisterVariableGetter("Qmiss", [&]()
+                                  { return baseKin.Qmiss; });
+    
+    cutter.RegisterCentralValueGetter("Qmiss", [&]()
+                                  { return 71.13; });
+
+    cutter.RegisterVariableGetter("PipPimAngleCM", [&]()
+                                  { return angleBetweenChargedPionsCM(); });
+    cutter.RegisterCentralValueGetter("PipPimAngleCM", [&]()
+                                  { return 145.8; });
   }
 
   if (!cutter.ValidateConfiguration())
@@ -446,7 +491,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   // Auxiliary reconstruction of Kneutral with 6 gammas (for studies)
   KLOE::kaonNeutral KnerecSix;
   std::vector<KLOE::neutralParticle> photonFourMomSix(6);
-  Double_t bestError;
   std::vector<Int_t> bestIndicesSix;
 
   while (dataAccess.Next())
@@ -786,12 +830,23 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     if (smearing)
     {
       // KMASS HYPOTHESIS WITH MOM SMEARING - FOR SIGNAL
-      hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+      if (hypoCode == KLOE::HypothesisCode::SIGNAL)
+        hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+      else if (hypoCode == KLOE::HypothesisCode::SEMILEPTONIC)
+        hypoMap[KLOE::HypothesisCode::SEMILEPTONIC] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+      else if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
+        hypoMap[KLOE::HypothesisCode::THREE_PI0] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
     }
     else
     {
       // NO MOMENTUM SMEARING - FOR SIGNAL
-      hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 0, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+
+      if (hypoCode == KLOE::HypothesisCode::SIGNAL)
+        hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 0, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+      else if (hypoCode == KLOE::HypothesisCode::SEMILEPTONIC)
+        hypoMap[KLOE::HypothesisCode::SEMILEPTONIC] = eventAnalysis->findKchRec(mcflag, 0, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+      else if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
+        hypoMap[KLOE::HypothesisCode::THREE_PI0] = eventAnalysis->findKchRec(mcflag, 0, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
     }
 
     pT1 = std::sqrt(std::pow(baseKin.trknew[0][0], 2) + std::pow(baseKin.trknew[0][1], 2)),
@@ -889,21 +944,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         mctruth = -1;
 
         goto skipEvent;
-      }
-      else
-      {
-        neuclulist.clear();
-        ++show_progress;
-        continue;
-      }
-    }
-
-    if (0)
-    {
-      if (mctruth == mctruthSignal)
-      {
-        mctruth = 0;
-        passed = true;
       }
       else
       {
@@ -1017,7 +1057,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           }
       }
     }
-    else if (hypoCode == KLOE::HypothesisCode::SIGNAL)
+    else if (hypoCode == KLOE::HypothesisCode::SIGNAL || hypoCode == KLOE::HypothesisCode::THREE_PI0 || hypoCode == KLOE::HypothesisCode::SEMILEPTONIC)
     {
       // -----------------------------------------------------------------------
       // Boost of the charged part of the decay
@@ -1127,21 +1167,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
         errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.Knerec, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
 
-        if (0)
-        {
-          if (mctruth == mctruthSignal)
-          {
-            mctruth = 0;
-            passed = true;
-          }
-          else
-          {
-            neuclulist.clear();
-            ++show_progress;
-            continue;
-          }
-        }
-
         if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
         {
           LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
@@ -1223,11 +1248,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {
             // 4 clusters chosen with the trilateration + 2 remaining clusters
             // To keep the statistical independence of the samples
-            neutRec.ReconstructSixGammaVertexWithFourTaken(cluster, neuclulist, baseKin.g4takenTriKinFit, bestIndicesSix, bestError, KnerecSix, photonFourMomSix);
+            neutRec.ReconstructSixGammaVertexWithFourTaken(cluster, neuclulist, baseKin.g4takenTriKinFit, bestIndicesSix, baseKin.bestError, KnerecSix, photonFourMomSix);
           }
           else
           {
-            bestError = 999999.;
+            baseKin.bestError = 999999.;
             KnerecSix.total = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
             photonFourMomSix = std::vector<KLOE::neutralParticle>(6, KLOE::neutralParticle());
           }
@@ -1672,7 +1697,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"Phiv2", baseKin.Phiv2},
           {"Cotv2", baseKin.Cotv2},
           {"Chi2OmegaKinFit", baseKin.Chi2OmegaKinFit},
-          {"bestErrorSixGamma", bestError}};
+          {"bestErrorSixGamma", baseKin.bestError}};
 
       // Tablice
       std::map<std::string, std::vector<Int_t>> intArrays = {

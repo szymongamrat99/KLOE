@@ -14,3 +14,7 @@ git commit -m "Changes for interference"
 ./execute_analysis.sh 
 git checkout -- .
 ./execute_analysis.sh 
+git add .
+git commit -m "Flexible normalization"
+git push
+./execute_analysis.sh 

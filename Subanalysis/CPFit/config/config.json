@@ -1,7 +1,7 @@
 {
   "deltaT": {
     "rangeX": [-300.0, 300.0],
-    "xRangeDisplay": [-50.0, 50.0],
+    "xRangeDisplay": [-90.0, 90.0],
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
@@ -48,7 +48,7 @@
       "fixed": false
     },
     "A_signal": {
-      "enabled": false,
+      "enabled": true,
       "initialValue": 1.09,
       "limitLower": 0.2,
       "limitUpper": 0.2,
@@ -97,7 +97,7 @@
       "fixed": false
     },
     "A_three": {
-      "enabled": false,
+      "enabled": true,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -106,7 +106,7 @@
       "fixed": false
     },
     "A_omega": {
-      "enabled": false,
+      "enabled": true,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -115,7 +115,7 @@
       "fixed": false
     },
     "A_semileptonic": {
-      "enabled": false,
+      "enabled": true,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -124,7 +124,7 @@
       "fixed": false
     },
     "A_other": {
-      "enabled": false,
+      "enabled": true,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -133,13 +133,13 @@
       "fixed": false
     },
     "A_bcg_group": {
-      "enabled": true,
+      "enabled": false,
       "groupName": "A_bcg",
       "initialValue": 1.09,
       "step": 0.01,
       "limitLower": 1.0,
       "limitUpper": 10.0,
-      "channels": ["3pi0", "Semileptonic", "Other", "Omega", "Signal"],
+      "channels": ["Semileptonic", "Other", "3pi0"],
       "fixed": false
     }
   }
