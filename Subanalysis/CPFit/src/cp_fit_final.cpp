@@ -249,6 +249,13 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     return std::sqrt(std::max(0.0, dist2)) > n_sigma_cut;
   };
 
+  Long64_t event_data = reader.GetEntries("mcflag == 0"),
+           event_mc = reader.GetEntries("mcflag == 1 && mctruth != -1 && mctruth != 0");
+
+  // Luminosity scaling factor
+  Double_t lumi_scaling_factor = event_data / static_cast<Double_t>(event_mc);
+  // ---
+
   while (reader.Next())
   {
     // Cut setting
@@ -437,6 +444,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     sig_total->Fill(no_cuts_sig[1][i]);
   }
 
+  KLOE::BRCorrectionFactors BRCF;
+
   for (auto const &name : KLOE::channName)
   {
     if (name.second == "Data" || name.second == "MC sum" || event.time_diff[name.second].size() == 0)
@@ -452,14 +461,16 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
       }
       else if (name.second == "Regeneration")
       {
+        Double_t scaling_factor = BRCF.BRcorrectionFactors["Regeneration"] * 1.09;
+
         if (event.time_diff["Regeneration"][j] < event.left_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_far_left"]]);
+          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], 1.09 * par[param_index_map["A_regen_far_left"]]);
         else if (event.time_diff["Regeneration"][j] > event.left_x_split && event.time_diff["Regeneration"][j] < event.center_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_near_left"]]);
+          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], 1.09 * par[param_index_map["A_regen_near_left"]]);
         else if (event.time_diff["Regeneration"][j] > event.center_x_split && event.time_diff["Regeneration"][j] < event.right_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_near_right"]]);
+          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], 1.09 * par[param_index_map["A_regen_near_right"]]);
         else if (event.time_diff["Regeneration"][j] > event.right_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_far_right"]]);
+          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], 1.09 * par[param_index_map["A_regen_far_right"]]);
       }
       else
       {
@@ -472,8 +483,6 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   {
     event.getFracHistogram("Data")->Fill(event.time_diff["Data"][j]);
   }
-
-  KLOE::BRCorrectionFactors BRCF;
 
   // Definicja lambdy - PRZED pierwszym Scale
   auto get_channel_norm = [&](TString channel) -> Double_t
@@ -489,7 +498,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Double_t sig_norm = get_channel_norm("Signal");
   Double_t sig_integral = event.getFracHistogram("Signal")->Integral(0, nbins + 1);
   if (sig_norm > 0.0 && sig_integral > 0.0)
-    event.getFracHistogram("Signal")->Scale(BRCF.BRcorrectionFactors["Signal"] * sig_norm * event.getFracHistogram("Signal")->GetEntries() / sig_integral);
+    event.getFracHistogram("Signal")->Scale(BRCF.BRcorrectionFactors["Signal"] * 1.09 * sig_norm * event.getFracHistogram("Signal")->GetEntries() / sig_integral);
 
   if (check_corr == true)
   {
@@ -505,7 +514,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     Double_t norm = get_channel_norm(ch);
     Double_t integral = event.getFracHistogram(ch)->Integral(0, nbins + 1);
     if (norm > 0.0 && integral > 0.0)
-      event.getFracHistogram(ch)->Scale(BRCF.BRcorrectionFactors[ch] * norm * event.getFracHistogram(ch)->GetEntries() / integral);
+      event.getFracHistogram(ch)->Scale(BRCF.BRcorrectionFactors[ch] * norm * 1.09 * event.getFracHistogram(ch)->GetEntries() / integral);
     else
       event.getFracHistogram(ch)->Scale(0.0); // wyłączony kanał → zerowy
   }
@@ -547,10 +556,24 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Double_t total_range = sig_total->Integral(bin_lo_raw, bin_hi_raw);
   Double_t eff_range = (total_range > 0.0) ? pass_range / total_range : 0.0;
 
+  std::cout << "Branching Ratios:" << std::endl;
+  for (const auto &br : BRCF.BranchingRatios)
+  {
+    std::cout << "  " << br.first << ": (" << br.second * 100 << " ± " << BRCF.BranchingRatios_err[br.first] * 100 << ") %" << std::endl;
+  }
+
+  std::cout << std::endl;
+  std::cout << "Old Branching Ratios:" << std::endl;
+  for (const auto &br : BRCF.BranchingRatios_old)
+  {
+    std::cout << "  " << br.first << ": " << br.second * 100 << " %" << std::endl;
+  }
+  std::cout << std::endl;
+
   std::cout << "BR Correction factors: " << std::endl;
   for (const auto &factor : BRCF.BRcorrectionFactors)
   {
-    std::cout << "  " << factor.first << ": " << factor.second << std::endl;
+    std::cout << "  " << factor.first << ": " << factor.second << " ± " << BRCF.BRcorrectionFactors_err[factor.first] << std::endl;
   }
   std::cout << std::endl;
 
