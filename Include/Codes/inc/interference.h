@@ -186,9 +186,30 @@ namespace KLOE
 
     void SetParamIndex(TString name, Int_t index) { fParamIndices[name] = index; }
 
+    // -------------------------------------------------------------------------
+    // External per-split scaling constants for the Regeneration histogram.
+    // Order: [0]=far_left, [1]=near_left, [2]=near_right, [3]=far_right.
+    // These are NOT fit parameters – they are fixed, externally determined
+    // factors (e.g. from a data/MC ratio in a control region) with their own
+    // statistical uncertainties that are propagated into the chi2 bin errors.
+    struct RegenSplitScaling
+    {
+      Double_t val = 1.0; ///< Scaling factor
+      Double_t err = 0.0; ///< Absolute uncertainty on val
+    };
+
+    void SetRegenScaling(const std::array<RegenSplitScaling, 4> &s) { _regenScaling = s; }
+    // -------------------------------------------------------------------------
+
   private:
     TString _mode; //! "split", "window", "excluded, "mc", "bcg", "all"
     TGraphErrors *corr_factor, *eff_factor;
+
+    std::array<RegenSplitScaling, 4> _regenScaling; // [far_left, near_left, near_right, far_right]
+
+    /// Returns the split-region index (0-3) for a given Delta-t value.
+    Int_t getSplitIndex(Double_t dt) const;
+
 
     Int_t _bin_number;
     Double_t _x_min, _x_max;

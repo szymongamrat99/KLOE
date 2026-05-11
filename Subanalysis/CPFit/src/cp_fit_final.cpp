@@ -124,10 +124,22 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   KLOE::interference event(mode, check_corr, nbins, x_min, x_max, split);
 
-  std::cout << "INFO: Fit settings loaded successfully." << std::endl;
-
-  // ============================================================================================================
-  // Fitting procedure
+  // -------------------------------------------------------------------------
+  // Zewnętrzne stałe skalujące histogram regeneracji (per split).
+  // Kolejność: [0]=far_left, [1]=near_left, [2]=near_right, [3]=far_right.
+  // Wartości i błędy wyznaczone z zewnętrznej analizy (np. dopasowania
+  // histogramu w regionie kontrolnym wolnym od sygnału).
+  // Ich błędy są automatycznie propagowane do błędów binów w chi2.
+  {
+    std::array<KLOE::interference::RegenSplitScaling, 4> regenScaling = {{
+        {0.524, 0.031}, // far_left:   val ± err  (UZUPEŁNIJ)
+        {4.30, 0.52}, // near_left:  val ± err  (UZUPEŁNIJ)
+        {4.78, 1.36}, // near_right: val ± err  (UZUPEŁNIJ)
+        {0.546, 0.046}, // far_right:  val ± err  (UZUPEŁNIJ)
+    }};
+    event.SetRegenScaling(regenScaling);
+  }
+  // -------------------------------------------------------------------------
   // Get settings
 
   UInt_t num_of_vars = cfg.getNumOfEnabledParameters(); // Default number of variables (can be adjusted based on mode)

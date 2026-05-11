@@ -58,43 +58,43 @@
     },
     "A_regen_far_left": {
       "enabled": true,
-      "initialValue": 0.524,
-      "limitLower": 0.177,
-      "limitUpper": 0.177,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 5.0,
       "step": 0.01,
       "channels": ["Regeneration"],
       "parameter_ranges": [[-300.0, -30.0]],
-      "fixed": true
+      "fixed": false
     },
     "A_regen_far_right": {
       "enabled": true,
-      "initialValue": 0.546,
-      "limitLower": 0.2526,
-      "limitUpper": 0.2526,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 5.0,
       "step": 0.01,
       "channels": ["Regeneration"],
       "parameter_ranges": [[30.0, 300.0]],
-      "fixed": true
+      "fixed": false
     },
     "A_regen_near_left": {
       "enabled": true,
-      "initialValue": 4.30,
-      "limitLower": 0.3627,
-      "limitUpper": 0.3627,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 5.0,
       "step": 0.01,
       "channels": ["Regeneration"],
       "parameter_ranges": [[-30.0, 0.0]],
-      "fixed": true
+      "fixed": false
     },
     "A_regen_near_right": {
       "enabled": true,
-      "initialValue": 4.78,
-      "limitLower": 0.8535,
-      "limitUpper": 0.8535,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 5.0,
       "step": 0.01,
       "channels": ["Regeneration"],
       "parameter_ranges": [[0.0, 30.0]],
-      "fixed": true
+      "fixed": false
     },
     "A_three": {
       "enabled": true,
