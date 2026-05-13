@@ -127,18 +127,15 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   // -------------------------------------------------------------------------
   // Zewnętrzne stałe skalujące histogram regeneracji (per split).
   // Kolejność: [0]=far_left, [1]=near_left, [2]=near_right, [3]=far_right.
-  // Wartości i błędy wyznaczone z zewnętrznej analizy (np. dopasowania
-  // histogramu w regionie kontrolnym wolnym od sygnału).
-  // Ich błędy są automatycznie propagowane do błędów binów w chi2.
-  {
-    std::array<KLOE::interference::RegenSplitScaling, 4> regenScaling = {{
-        {0.524, 0.031}, // far_left:   val ± err  (UZUPEŁNIJ)
-        {4.30, 0.52}, // near_left:  val ± err  (UZUPEŁNIJ)
-        {4.78, 1.36}, // near_right: val ± err  (UZUPEŁNIJ)
-        {0.546, 0.046}, // far_right:  val ± err  (UZUPEŁNIJ)
-    }};
-    event.SetRegenScaling(regenScaling);
-  }
+  // Dostępne w całej funkcji – używane zarówno w chi2 jak i histogramach
+  // prezentacyjnych (spójna propagacja błędów).
+  std::array<KLOE::interference::RegenSplitScaling, 4> regenScaling = {{
+      {0.524, 0.031}, // [0] far_left
+      {4.30,  0.52},  // [1] near_left
+      {4.78,  1.36},  // [2] near_right
+      {0.546, 0.046}, // [3] far_right
+  }};
+  event.SetRegenScaling(regenScaling);
   // -------------------------------------------------------------------------
   // Get settings
 
@@ -473,16 +470,19 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
       }
       else if (name.second == "Regeneration")
       {
-        Double_t scaling_factor = BRCF.BRcorrectionFactors["Regeneration"] * 1.09;
+        // Identyczne skalowanie jak w interf_chi2_split:
+        // k = BRCF * 1.09 * A_regen_split * s_val_split
+        const Double_t brcf_regen = BRCF.BRcorrectionFactors["Regeneration"];
+        Double_t dt_regen = event.time_diff["Regeneration"][j];
+        Int_t si;
+        TString pname;
+        if (dt_regen < event.left_x_split)        { si = 0; pname = "A_regen_far_left"; }
+        else if (dt_regen < event.center_x_split) { si = 1; pname = "A_regen_near_left"; }
+        else if (dt_regen < event.right_x_split)  { si = 2; pname = "A_regen_near_right"; }
+        else                                       { si = 3; pname = "A_regen_far_right"; }
 
-        if (event.time_diff["Regeneration"][j] < event.left_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], 1.09 * par[param_index_map["A_regen_far_left"]]);
-        else if (event.time_diff["Regeneration"][j] > event.left_x_split && event.time_diff["Regeneration"][j] < event.center_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], 1.09 * par[param_index_map["A_regen_near_left"]]);
-        else if (event.time_diff["Regeneration"][j] > event.center_x_split && event.time_diff["Regeneration"][j] < event.right_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], 1.09 * par[param_index_map["A_regen_near_right"]]);
-        else if (event.time_diff["Regeneration"][j] > event.right_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], 1.09 * par[param_index_map["A_regen_far_right"]]);
+        Double_t w = brcf_regen * 1.09 * par[param_index_map[pname]] * regenScaling[si].val;
+        event.getFracHistogram("Regeneration")->Fill(dt_regen, w);
       }
       else
       {
@@ -495,6 +495,54 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   {
     event.getFracHistogram("Data")->Fill(event.time_diff["Data"][j]);
   }
+
+  // ─── Propagacja błędu s_err do binów histogramu Regeneracji ──────────────────
+  // sigma_sys = sqrt((BRCF_err/BRCF)^2 + (s_err/s_val)^2) * content
+  // – identyczna formuła jak dk w interf_chi2_split.
+  {
+    auto getSplitIdx = [&](Double_t dt) -> Int_t
+    {
+      if (dt < event.left_x_split)   return 0;
+      if (dt < event.center_x_split) return 1;
+      if (dt < event.right_x_split)  return 2;
+      return 3;
+    };
+    TH1 *hRegen         = event.getFracHistogram("Regeneration");
+    const Double_t brcf     = BRCF.BRcorrectionFactors["Regeneration"];
+    const Double_t brcf_err = BRCF.BRcorrectionFactors_err["Regeneration"];
+    for (Int_t i = 1; i <= (Int_t)nbins; i++)
+    {
+      Double_t content = hRegen->GetBinContent(i);
+      if (content == 0.0) continue;
+      Double_t stat_err = hRegen->GetBinError(i);
+      const KLOE::interference::RegenSplitScaling &rs = regenScaling[getSplitIdx(hRegen->GetBinCenter(i))];
+      Double_t rel_sys = 0.0;
+      if (std::abs(brcf) > 1e-12 && std::abs(rs.val) > 1e-12)
+        rel_sys = std::sqrt(std::pow(brcf_err / brcf, 2) + std::pow(rs.err / rs.val, 2));
+      hRegen->SetBinError(i, std::sqrt(stat_err * stat_err + std::pow(rel_sys * content, 2)));
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ─── Propagacja błędu BRCF do binów histogramów prezentacyjnych ────────────
+  // Identycznie jak w interf_chi2_split: sigma_sys = (BRCF_err/BRCF) * content.
+  for (auto const &ch : {"Signal", "Omega", "3pi0", "Semileptonic", "Other"})
+  {
+    TString chName = ch;
+    TH1 *h = event.getFracHistogram(chName);
+    const Double_t brcf     = BRCF.BRcorrectionFactors[chName];
+    const Double_t brcf_err = BRCF.BRcorrectionFactors_err[chName];
+    if (std::abs(brcf) < 1e-12) continue;
+    const Double_t rel_sys = brcf_err / brcf;
+    for (Int_t i = 1; i <= (Int_t)nbins; i++)
+    {
+      Double_t content = h->GetBinContent(i);
+      if (content == 0.0) continue;
+      Double_t stat_err = h->GetBinError(i);
+      h->SetBinError(i, std::sqrt(stat_err * stat_err + std::pow(rel_sys * content, 2)));
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
 
   // Definicja lambdy - PRZED pierwszym Scale
   auto get_channel_norm = [&](TString channel) -> Double_t

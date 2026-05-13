@@ -64,7 +64,7 @@
       "step": 0.01,
       "channels": ["Regeneration"],
       "parameter_ranges": [[-300.0, -30.0]],
-      "fixed": false
+      "fixed": true
     },
     "A_regen_far_right": {
       "enabled": true,
@@ -74,7 +74,7 @@
       "step": 0.01,
       "channels": ["Regeneration"],
       "parameter_ranges": [[30.0, 300.0]],
-      "fixed": false
+      "fixed": true
     },
     "A_regen_near_left": {
       "enabled": true,
@@ -84,7 +84,7 @@
       "step": 0.01,
       "channels": ["Regeneration"],
       "parameter_ranges": [[-30.0, 0.0]],
-      "fixed": false
+      "fixed": true
     },
     "A_regen_near_right": {
       "enabled": true,

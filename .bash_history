@@ -93,3 +93,15 @@ git pull
 ssh tier1-cnaf 
 exit
 ./execute_analysis.sh 
+git add .
+git checkout -b feat/scaling-factors-regeneration
+git push
+git push --set-upstream origin feat/scaling-factors-regeneration
+git add .
+git commit -m "Preparation for scaling fctors"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Scaling factors added to fitting"
+git push
+./execute_analysis.sh 
