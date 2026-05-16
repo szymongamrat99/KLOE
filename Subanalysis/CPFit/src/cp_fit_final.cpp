@@ -20,6 +20,7 @@
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
 #include <boost/progress.hpp>
+#include <TF1.h>
 
 #include <BRCorrectionFactors.h>
 
@@ -29,6 +30,8 @@
 
 int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
 {
+  gErrorIgnoreLevel = kBreak;
+
   // =============================================================================
   KLOE::BaseKinematics
       baseKin;
@@ -124,10 +127,19 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   KLOE::interference event(mode, check_corr, nbins, x_min, x_max, split);
 
-  std::cout << "INFO: Fit settings loaded successfully." << std::endl;
-
-  // ============================================================================================================
-  // Fitting procedure
+  // -------------------------------------------------------------------------
+  // Zewnętrzne stałe skalujące histogram regeneracji (per split).
+  // Kolejność: [0]=far_left, [1]=near_left, [2]=near_right, [3]=far_right.
+  // Dostępne w całej funkcji – używane zarówno w chi2 jak i histogramach
+  // prezentacyjnych (spójna propagacja błędów).
+  std::array<KLOE::interference::RegenSplitScaling, 4> regenScaling = {{
+      {1.0, 0.0}, // [0] far_left
+      {1.0, 0.0},   // [1] near_left
+      {1.0, 0.0},   // [2] near_right
+      {1.0, 0.0}, // [3] far_right
+  }};
+  event.SetRegenScaling(regenScaling);
+  // -------------------------------------------------------------------------
   // Get settings
 
   UInt_t num_of_vars = cfg.getNumOfEnabledParameters(); // Default number of variables (can be adjusted based on mode)
@@ -249,6 +261,19 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     return std::sqrt(std::max(0.0, dist2)) > n_sigma_cut;
   };
 
+  Long64_t event_data = reader.GetEntries("mcflag == 0"),
+           event_mc = reader.GetEntries("mcflag == 1 && mctruth != -1 && mctruth != 0");
+
+  // Luminosity scaling factor
+  Double_t lumi_scaling_factor = event_data / static_cast<Double_t>(event_mc);
+  // ---
+
+  struct RegenKinVars
+  {
+    Double_t rhoCharged, rhoNeutral, rCharged, rNeutral;
+  };
+  std::vector<RegenKinVars> regen_kin_vars;
+
   while (reader.Next())
   {
     // Cut setting
@@ -350,6 +375,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         if (*mctruth == 2)
         {
           event.time_diff["Regeneration"].push_back(baseKin.Dtboostlor);
+          regen_kin_vars.push_back({rhoCharged, rhoNeutral, rCharged, rNeutral});
         }
 
         if (*mctruth == 3)
@@ -381,6 +407,81 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
     ++display;
   }
+
+  // ── Korekcja kształtu Regeneracji ────────────────────────────────────────────
+  if (cfg.regenShapeCorrection.enabled && !regen_kin_vars.empty())
+  {
+    TFile *fCorr = TFile::Open((Paths::cpfit_dir + cfg.regenShapeCorrection.correctionFile), "READ");
+    if (!fCorr || fCorr->IsZombie())
+    {
+      std::cerr << "ERROR: Cannot open correction file: "
+                << cfg.regenShapeCorrection.correctionFile << std::endl;
+    }
+    else
+    {
+      // Wczytaj wszystkie TF1 i ich zakresy
+      struct LoadedCorr
+      {
+        TF1 *func;
+        std::string variable;
+        Double_t rangeMin, rangeMax;
+      };
+      std::vector<LoadedCorr> loaded;
+      for (const auto &ce : cfg.regenShapeCorrection.corrections)
+      {
+        TF1 *f = (TF1 *)fCorr->Get(ce.functionName.c_str());
+        if (!f)
+        {
+          std::cerr << "WARNING: Function " << ce.functionName << " not found in correction file.\n";
+          continue;
+        }
+        loaded.push_back({(TF1 *)f->Clone(), ce.variable, ce.rangeMin, ce.rangeMax});
+      }
+      fCorr->Close();
+
+      // Helper: wyciągnij wartość zmiennej kinematycznej
+      auto getKinVar = [](const RegenKinVars &k, const std::string &var) -> Double_t
+      {
+        if (var == "R_Charged")
+          return k.rCharged;
+        if (var == "Rho_Charged")
+          return k.rhoCharged;
+        if (var == "R_Neutral")
+          return k.rNeutral;
+        if (var == "Rho_Neutral")
+          return k.rhoNeutral;
+        return 0.0;
+      };
+
+      event.regen_event_weights.reserve(regen_kin_vars.size());
+      for (const auto &kv : regen_kin_vars)
+      {
+        Double_t w = 1.0;
+        for (const auto &lc : loaded)
+        {
+          Double_t x = getKinVar(kv, lc.variable);
+          if (!(x >= lc.rangeMin && x <= lc.rangeMax))
+            continue; // zmienna poza zakresem poprawki – nie stosujemy
+
+          // Sprawdzenie niejednoznaczności: czy DRUGA zmienna tego samego układu
+          // (charged lub neutral) leży również w zakresie TEJ poprawki?
+          // Jeśli tak, obszar cylindryczny i sferyczny nachodzą na siebie
+          // i nie można jednoznacznie przypisać korekcji – pomijamy.
+          if (lc.variable == "R_Charged"   && kv.rhoCharged >= lc.rangeMin && kv.rhoCharged <= lc.rangeMax) continue;
+          if (lc.variable == "Rho_Charged" && kv.rCharged   >= lc.rangeMin && kv.rCharged   <= lc.rangeMax) continue;
+          if (lc.variable == "R_Neutral"   && kv.rhoNeutral >= lc.rangeMin && kv.rhoNeutral <= lc.rangeMax) continue;
+          if (lc.variable == "Rho_Neutral" && kv.rNeutral   >= lc.rangeMin && kv.rNeutral   <= lc.rangeMax) continue;
+
+          w *= lc.func->Eval(x);
+        }
+        event.regen_event_weights.push_back(w);
+      }
+
+      for (auto &lc : loaded)
+        delete lc.func;
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
 
   minimum->Minimize();
 
@@ -437,6 +538,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     sig_total->Fill(no_cuts_sig[1][i]);
   }
 
+  KLOE::BRCorrectionFactors BRCF;
+
   for (auto const &name : KLOE::channName)
   {
     if (name.second == "Data" || name.second == "MC sum" || event.time_diff[name.second].size() == 0)
@@ -452,14 +555,40 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
       }
       else if (name.second == "Regeneration")
       {
-        if (event.time_diff["Regeneration"][j] < event.left_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_far_left"]]);
-        else if (event.time_diff["Regeneration"][j] > event.left_x_split && event.time_diff["Regeneration"][j] < event.center_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_near_left"]]);
-        else if (event.time_diff["Regeneration"][j] > event.center_x_split && event.time_diff["Regeneration"][j] < event.right_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_near_right"]]);
-        else if (event.time_diff["Regeneration"][j] > event.right_x_split)
-          event.getFracHistogram("Regeneration")->Fill(event.time_diff["Regeneration"][j], par[param_index_map["A_regen_far_right"]]);
+        // Identyczne skalowanie jak w interf_chi2_split:
+        // k = BRCF * 1.09 * A_regen_split * s_val_split
+        const Double_t brcf_regen = BRCF.BRcorrectionFactors["Regeneration"];
+        Double_t dt_regen = event.time_diff["Regeneration"][j];
+        Int_t si;
+        TString pname;
+        if (dt_regen < event.left_x_split)
+        {
+          si = 0;
+          pname = "A_regen_far_left";
+        }
+        else if (dt_regen < event.center_x_split)
+        {
+          si = 1;
+          pname = "A_regen_near_left";
+        }
+        else if (dt_regen < event.right_x_split)
+        {
+          si = 2;
+          pname = "A_regen_near_right";
+        }
+        else
+        {
+          si = 3;
+          pname = "A_regen_far_right";
+        }
+
+        //Double_t w = brcf_regen * 1.09 * par[param_index_map[pname]] * regenScaling[si].val;
+
+        Double_t w = brcf_regen * 1.09 * par[param_index_map[pname]];
+        if (!event.regen_event_weights.empty())
+          w *= event.regen_event_weights[j];
+        
+        event.getFracHistogram("Regeneration")->Fill(dt_regen, w);
       }
       else
       {
@@ -473,7 +602,59 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     event.getFracHistogram("Data")->Fill(event.time_diff["Data"][j]);
   }
 
-  KLOE::BRCorrectionFactors BRCF;
+  // ─── Propagacja błędu s_err do binów histogramu Regeneracji ──────────────────
+  // sigma_sys = sqrt((BRCF_err/BRCF)^2 + (s_err/s_val)^2) * content
+  // – identyczna formuła jak dk w interf_chi2_split.
+  {
+    auto getSplitIdx = [&](Double_t dt) -> Int_t
+    {
+      if (dt < event.left_x_split)
+        return 0;
+      if (dt < event.center_x_split)
+        return 1;
+      if (dt < event.right_x_split)
+        return 2;
+      return 3;
+    };
+    TH1 *hRegen = event.getFracHistogram("Regeneration");
+    const Double_t brcf = BRCF.BRcorrectionFactors["Regeneration"];
+    const Double_t brcf_err = BRCF.BRcorrectionFactors_err["Regeneration"];
+    for (Int_t i = 1; i <= (Int_t)nbins; i++)
+    {
+      Double_t content = hRegen->GetBinContent(i);
+      if (content == 0.0)
+        continue;
+      Double_t stat_err = hRegen->GetBinError(i);
+      const KLOE::interference::RegenSplitScaling &rs = regenScaling[getSplitIdx(hRegen->GetBinCenter(i))];
+      Double_t rel_sys = 0.0;
+      if (std::abs(brcf) > 1e-12 && std::abs(rs.val) > 1e-12)
+        rel_sys = std::sqrt(std::pow(brcf_err / brcf, 2) + std::pow(rs.err / rs.val, 2));
+      hRegen->SetBinError(i, std::sqrt(stat_err * stat_err + std::pow(rel_sys * content, 2)));
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
+  // ─── Propagacja błędu BRCF do binów histogramów prezentacyjnych ────────────
+  // Identycznie jak w interf_chi2_split: sigma_sys = (BRCF_err/BRCF) * content.
+  for (auto const &ch : {"Signal", "Omega", "3pi0", "Semileptonic", "Other"})
+  {
+    TString chName = ch;
+    TH1 *h = event.getFracHistogram(chName);
+    const Double_t brcf = BRCF.BRcorrectionFactors[chName];
+    const Double_t brcf_err = BRCF.BRcorrectionFactors_err[chName];
+    if (std::abs(brcf) < 1e-12)
+      continue;
+    const Double_t rel_sys = brcf_err / brcf;
+    for (Int_t i = 1; i <= (Int_t)nbins; i++)
+    {
+      Double_t content = h->GetBinContent(i);
+      if (content == 0.0)
+        continue;
+      Double_t stat_err = h->GetBinError(i);
+      h->SetBinError(i, std::sqrt(stat_err * stat_err + std::pow(rel_sys * content, 2)));
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
 
   // Definicja lambdy - PRZED pierwszym Scale
   auto get_channel_norm = [&](TString channel) -> Double_t
@@ -489,7 +670,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Double_t sig_norm = get_channel_norm("Signal");
   Double_t sig_integral = event.getFracHistogram("Signal")->Integral(0, nbins + 1);
   if (sig_norm > 0.0 && sig_integral > 0.0)
-    event.getFracHistogram("Signal")->Scale(BRCF.BRcorrectionFactors["Signal"] * sig_norm * event.getFracHistogram("Signal")->GetEntries() / sig_integral);
+    event.getFracHistogram("Signal")->Scale(BRCF.BRcorrectionFactors["Signal"] * 1.09 * sig_norm * event.getFracHistogram("Signal")->GetEntries() / sig_integral);
 
   if (check_corr == true)
   {
@@ -505,7 +686,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     Double_t norm = get_channel_norm(ch);
     Double_t integral = event.getFracHistogram(ch)->Integral(0, nbins + 1);
     if (norm > 0.0 && integral > 0.0)
-      event.getFracHistogram(ch)->Scale(BRCF.BRcorrectionFactors[ch] * norm * event.getFracHistogram(ch)->GetEntries() / integral);
+      event.getFracHistogram(ch)->Scale(BRCF.BRcorrectionFactors[ch] * norm * 1.09 * event.getFracHistogram(ch)->GetEntries() / integral);
     else
       event.getFracHistogram(ch)->Scale(0.0); // wyłączony kanał → zerowy
   }
@@ -547,10 +728,24 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Double_t total_range = sig_total->Integral(bin_lo_raw, bin_hi_raw);
   Double_t eff_range = (total_range > 0.0) ? pass_range / total_range : 0.0;
 
+  std::cout << "Branching Ratios:" << std::endl;
+  for (const auto &br : BRCF.BranchingRatios)
+  {
+    std::cout << "  " << br.first << ": (" << br.second * 100 << " ± " << BRCF.BranchingRatios_err[br.first] * 100 << ") %" << std::endl;
+  }
+
+  std::cout << std::endl;
+  std::cout << "Old Branching Ratios:" << std::endl;
+  for (const auto &br : BRCF.BranchingRatios_old)
+  {
+    std::cout << "  " << br.first << ": " << br.second * 100 << " %" << std::endl;
+  }
+  std::cout << std::endl;
+
   std::cout << "BR Correction factors: " << std::endl;
   for (const auto &factor : BRCF.BRcorrectionFactors)
   {
-    std::cout << "  " << factor.first << ": " << factor.second << std::endl;
+    std::cout << "  " << factor.first << ": " << factor.second << " ± " << BRCF.BRcorrectionFactors_err[factor.first] << std::endl;
   }
   std::cout << std::endl;
 
@@ -749,11 +944,11 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Utils::properties["variables"]["CPFit"]["result"]["chi2"] = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "UW CHI2");
   Utils::properties["variables"]["CPFit"]["result"]["normChi2"] = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "UW CHI2/NDF");
 
-  delete residuals_hist;
-  delete c1;
-  delete c2;
+  // delete residuals_hist;
+  // delete c1;
+  // delete c2;
 
-  delete rp;
+  // delete rp;
 
   Utils::properties["lastScript"] = "Final CP Parameters normalization";
   Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();

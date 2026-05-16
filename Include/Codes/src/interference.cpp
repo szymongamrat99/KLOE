@@ -183,8 +183,10 @@ namespace KLOE
       {
         if (ToLower(name.second) == "signal")
           _frac[name.second]->Fill(time_diff[name.second][j], fit_function(time_diff_gen[j], 0, xx)); //! Filling Signal
+        else if (name.second == "Regeneration" && !regen_event_weights.empty())
+          _frac[name.second]->Fill(time_diff[name.second][j], regen_event_weights[j]);
         else
-          _frac[name.second]->Fill(time_diff[name.second][j]); //! Filling background
+        _frac[name.second]->Fill(time_diff[name.second][j]);
       }
 
       //! Using correction factor and efficiency
@@ -245,8 +247,29 @@ namespace KLOE
         // Magia: get_weight sam wie, czy użyć parametru pojedynczego, czy splitu
         Double_t weight = get_weight(name.second, dt_bin, xx);
 
-        b["MC sum"][j] += BRCF.BRcorrectionFactors[name.second] * weight * b[name.second][j];
-        e["MC sum"][j] += std::pow(BRCF.BRcorrectionFactors[name.second] * weight * e[name.second][j], 2);
+        Double_t brcf_val = BRCF.BRcorrectionFactors[name.second];
+        Double_t brcf_err = BRCF.BRcorrectionFactors_err[name.second];
+
+        // Zewnętrzna stała skalująca per-split dla regeneracji
+        Double_t s_val = 1.0, s_err = 0.0;
+        if (name.second == "Regeneration")
+        {
+          const RegenSplitScaling &rs = _regenScaling[getSplitIndex(dt_bin)];
+          s_val = rs.val;
+          s_err = rs.err;
+        }
+
+        // k = BRCF * 1.09 * weight * s_val
+        Double_t k = brcf_val * 1.09 * weight * s_val;
+
+        // Propagacja błędu: dk^2 = (brcf_err * 1.09 * weight * s_val)^2
+        //                         + (brcf_val * 1.09 * weight * s_err)^2
+        // (błąd wagi pochodzi z minimizera, nie propagujemy go tu ręcznie)
+        Double_t dk = 1.09 * weight * std::sqrt(std::pow(brcf_err * s_val, 2) +
+                                                 std::pow(brcf_val * s_err, 2));
+
+        b["MC sum"][j] += k * b[name.second][j];
+        e["MC sum"][j] += std::pow(dk * b[name.second][j], 2) + std::pow(k * e[name.second][j], 2);
       }
     }
 
@@ -577,6 +600,22 @@ namespace KLOE
 
     time_diff_gen.clear();
     time_diff_gen.shrink_to_fit();
+  }
+
+  /// Returns the regeneration split-region index for a given Delta-t:
+  ///   0 = far_left   (dt < left_x_split)
+  ///   1 = near_left  (left_x_split <= dt < center_x_split)
+  ///   2 = near_right (center_x_split <= dt < right_x_split)
+  ///   3 = far_right  (dt >= right_x_split)
+  Int_t interference::getSplitIndex(Double_t dt) const
+  {
+    if (dt < left_x_split)
+      return 0;
+    if (dt < center_x_split)
+      return 1;
+    if (dt < right_x_split)
+      return 2;
+    return 3;
   }
 
   Double_t KLOE::interference::get_weight(TString channel, Double_t dt, const Double_t *xx)

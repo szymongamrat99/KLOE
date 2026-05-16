@@ -21,6 +21,16 @@
       "sigmaNeutral": 0.703466
     }
   },
+  "regenerationShapeCorrection": {
+    "enabled": true,
+    "correctionFile": "config/regeneration_correction_functions.root",
+    "corrections": [
+        { "functionName": "R_Charged_WeightFunction",   "variable": "R_Charged",   "rangeMin": 8.086,  "rangeMax": 12.914 },
+        { "functionName": "Rho_Charged_WeightFunction", "variable": "Rho_Charged", "rangeMin": 21.895, "rangeMax": 29.105 },
+        { "functionName": "R_Neutral_WeightFunction",   "variable": "R_Neutral",   "rangeMin": 6.809,  "rangeMax": 13.774 },
+        { "functionName": "Rho_Neutral_WeightFunction", "variable": "Rho_Neutral", "rangeMin": 21.530, "rangeMax": 29.172 }
+    ]
+},
   "fitSettings": {
     "maxFunctionCalls": 10000000,
     "tolerance": 1e-6,
@@ -49,7 +59,7 @@
     },
     "A_signal": {
       "enabled": true,
-      "initialValue": 1.09,
+      "initialValue": 1.00,
       "limitLower": 0.2,
       "limitUpper": 0.2,
       "step": 0.01,
@@ -60,7 +70,7 @@
       "enabled": true,
       "initialValue": 1.0,
       "limitLower": 1.0,
-      "limitUpper": 2.5,
+      "limitUpper": 5.0,
       "step": 0.01,
       "channels": ["Regeneration"],
       "parameter_ranges": [[-300.0, -30.0]],
@@ -70,7 +80,7 @@
       "enabled": true,
       "initialValue": 1.0,
       "limitLower": 1.0,
-      "limitUpper": 2.5,
+      "limitUpper": 5.0,
       "step": 0.01,
       "channels": ["Regeneration"],
       "parameter_ranges": [[30.0, 300.0]],
@@ -135,7 +145,7 @@
     "A_bcg_group": {
       "enabled": false,
       "groupName": "A_bcg",
-      "initialValue": 1.09,
+      "initialValue": 1.00,
       "step": 0.01,
       "limitLower": 1.0,
       "limitUpper": 10.0,

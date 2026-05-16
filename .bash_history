@@ -81,3 +81,35 @@ ls
 cd 2026-05-05
 ls
 cat error.log 
+./execute_analysis.sh 
+git add .
+git commit -m "Final version"
+git push
+git checkout main
+git checkout -- .
+git checkout main 
+git pull
+./execute_analysis.sh 
+ssh tier1-cnaf 
+exit
+./execute_analysis.sh 
+git add .
+git checkout -b feat/scaling-factors-regeneration
+git push
+git push --set-upstream origin feat/scaling-factors-regeneration
+git add .
+git commit -m "Preparation for scaling fctors"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Scaling factors added to fitting"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Scaling factors propagated along with their errors"
+git push
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+./e
+./execute_analysis.sh 
