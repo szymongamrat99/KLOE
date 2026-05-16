@@ -20,6 +20,7 @@
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
 #include <boost/progress.hpp>
+#include <TF1.h>
 
 #include <BRCorrectionFactors.h>
 
@@ -29,6 +30,8 @@
 
 int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
 {
+  gErrorIgnoreLevel = kBreak;
+
   // =============================================================================
   KLOE::BaseKinematics
       baseKin;
@@ -130,10 +133,10 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   // Dostępne w całej funkcji – używane zarówno w chi2 jak i histogramach
   // prezentacyjnych (spójna propagacja błędów).
   std::array<KLOE::interference::RegenSplitScaling, 4> regenScaling = {{
-      {0.524, 0.031}, // [0] far_left
-      {4.30,  0.52},  // [1] near_left
-      {4.78,  1.36},  // [2] near_right
-      {0.546, 0.046}, // [3] far_right
+      {1.0, 0.0}, // [0] far_left
+      {1.0, 0.0},   // [1] near_left
+      {1.0, 0.0},   // [2] near_right
+      {1.0, 0.0}, // [3] far_right
   }};
   event.SetRegenScaling(regenScaling);
   // -------------------------------------------------------------------------
@@ -265,6 +268,12 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Double_t lumi_scaling_factor = event_data / static_cast<Double_t>(event_mc);
   // ---
 
+  struct RegenKinVars
+  {
+    Double_t rhoCharged, rhoNeutral, rCharged, rNeutral;
+  };
+  std::vector<RegenKinVars> regen_kin_vars;
+
   while (reader.Next())
   {
     // Cut setting
@@ -366,6 +375,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         if (*mctruth == 2)
         {
           event.time_diff["Regeneration"].push_back(baseKin.Dtboostlor);
+          regen_kin_vars.push_back({rhoCharged, rhoNeutral, rCharged, rNeutral});
         }
 
         if (*mctruth == 3)
@@ -397,6 +407,81 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
     ++display;
   }
+
+  // ── Korekcja kształtu Regeneracji ────────────────────────────────────────────
+  if (cfg.regenShapeCorrection.enabled && !regen_kin_vars.empty())
+  {
+    TFile *fCorr = TFile::Open((Paths::cpfit_dir + cfg.regenShapeCorrection.correctionFile), "READ");
+    if (!fCorr || fCorr->IsZombie())
+    {
+      std::cerr << "ERROR: Cannot open correction file: "
+                << cfg.regenShapeCorrection.correctionFile << std::endl;
+    }
+    else
+    {
+      // Wczytaj wszystkie TF1 i ich zakresy
+      struct LoadedCorr
+      {
+        TF1 *func;
+        std::string variable;
+        Double_t rangeMin, rangeMax;
+      };
+      std::vector<LoadedCorr> loaded;
+      for (const auto &ce : cfg.regenShapeCorrection.corrections)
+      {
+        TF1 *f = (TF1 *)fCorr->Get(ce.functionName.c_str());
+        if (!f)
+        {
+          std::cerr << "WARNING: Function " << ce.functionName << " not found in correction file.\n";
+          continue;
+        }
+        loaded.push_back({(TF1 *)f->Clone(), ce.variable, ce.rangeMin, ce.rangeMax});
+      }
+      fCorr->Close();
+
+      // Helper: wyciągnij wartość zmiennej kinematycznej
+      auto getKinVar = [](const RegenKinVars &k, const std::string &var) -> Double_t
+      {
+        if (var == "R_Charged")
+          return k.rCharged;
+        if (var == "Rho_Charged")
+          return k.rhoCharged;
+        if (var == "R_Neutral")
+          return k.rNeutral;
+        if (var == "Rho_Neutral")
+          return k.rhoNeutral;
+        return 0.0;
+      };
+
+      event.regen_event_weights.reserve(regen_kin_vars.size());
+      for (const auto &kv : regen_kin_vars)
+      {
+        Double_t w = 1.0;
+        for (const auto &lc : loaded)
+        {
+          Double_t x = getKinVar(kv, lc.variable);
+          if (!(x >= lc.rangeMin && x <= lc.rangeMax))
+            continue; // zmienna poza zakresem poprawki – nie stosujemy
+
+          // Sprawdzenie niejednoznaczności: czy DRUGA zmienna tego samego układu
+          // (charged lub neutral) leży również w zakresie TEJ poprawki?
+          // Jeśli tak, obszar cylindryczny i sferyczny nachodzą na siebie
+          // i nie można jednoznacznie przypisać korekcji – pomijamy.
+          if (lc.variable == "R_Charged"   && kv.rhoCharged >= lc.rangeMin && kv.rhoCharged <= lc.rangeMax) continue;
+          if (lc.variable == "Rho_Charged" && kv.rCharged   >= lc.rangeMin && kv.rCharged   <= lc.rangeMax) continue;
+          if (lc.variable == "R_Neutral"   && kv.rhoNeutral >= lc.rangeMin && kv.rhoNeutral <= lc.rangeMax) continue;
+          if (lc.variable == "Rho_Neutral" && kv.rNeutral   >= lc.rangeMin && kv.rNeutral   <= lc.rangeMax) continue;
+
+          w *= lc.func->Eval(x);
+        }
+        event.regen_event_weights.push_back(w);
+      }
+
+      for (auto &lc : loaded)
+        delete lc.func;
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
 
   minimum->Minimize();
 
@@ -476,12 +561,33 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         Double_t dt_regen = event.time_diff["Regeneration"][j];
         Int_t si;
         TString pname;
-        if (dt_regen < event.left_x_split)        { si = 0; pname = "A_regen_far_left"; }
-        else if (dt_regen < event.center_x_split) { si = 1; pname = "A_regen_near_left"; }
-        else if (dt_regen < event.right_x_split)  { si = 2; pname = "A_regen_near_right"; }
-        else                                       { si = 3; pname = "A_regen_far_right"; }
+        if (dt_regen < event.left_x_split)
+        {
+          si = 0;
+          pname = "A_regen_far_left";
+        }
+        else if (dt_regen < event.center_x_split)
+        {
+          si = 1;
+          pname = "A_regen_near_left";
+        }
+        else if (dt_regen < event.right_x_split)
+        {
+          si = 2;
+          pname = "A_regen_near_right";
+        }
+        else
+        {
+          si = 3;
+          pname = "A_regen_far_right";
+        }
 
-        Double_t w = brcf_regen * 1.09 * par[param_index_map[pname]] * regenScaling[si].val;
+        //Double_t w = brcf_regen * 1.09 * par[param_index_map[pname]] * regenScaling[si].val;
+
+        Double_t w = brcf_regen * 1.09 * par[param_index_map[pname]];
+        if (!event.regen_event_weights.empty())
+          w *= event.regen_event_weights[j];
+        
         event.getFracHistogram("Regeneration")->Fill(dt_regen, w);
       }
       else
@@ -502,18 +608,22 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   {
     auto getSplitIdx = [&](Double_t dt) -> Int_t
     {
-      if (dt < event.left_x_split)   return 0;
-      if (dt < event.center_x_split) return 1;
-      if (dt < event.right_x_split)  return 2;
+      if (dt < event.left_x_split)
+        return 0;
+      if (dt < event.center_x_split)
+        return 1;
+      if (dt < event.right_x_split)
+        return 2;
       return 3;
     };
-    TH1 *hRegen         = event.getFracHistogram("Regeneration");
-    const Double_t brcf     = BRCF.BRcorrectionFactors["Regeneration"];
+    TH1 *hRegen = event.getFracHistogram("Regeneration");
+    const Double_t brcf = BRCF.BRcorrectionFactors["Regeneration"];
     const Double_t brcf_err = BRCF.BRcorrectionFactors_err["Regeneration"];
     for (Int_t i = 1; i <= (Int_t)nbins; i++)
     {
       Double_t content = hRegen->GetBinContent(i);
-      if (content == 0.0) continue;
+      if (content == 0.0)
+        continue;
       Double_t stat_err = hRegen->GetBinError(i);
       const KLOE::interference::RegenSplitScaling &rs = regenScaling[getSplitIdx(hRegen->GetBinCenter(i))];
       Double_t rel_sys = 0.0;
@@ -530,14 +640,16 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   {
     TString chName = ch;
     TH1 *h = event.getFracHistogram(chName);
-    const Double_t brcf     = BRCF.BRcorrectionFactors[chName];
+    const Double_t brcf = BRCF.BRcorrectionFactors[chName];
     const Double_t brcf_err = BRCF.BRcorrectionFactors_err[chName];
-    if (std::abs(brcf) < 1e-12) continue;
+    if (std::abs(brcf) < 1e-12)
+      continue;
     const Double_t rel_sys = brcf_err / brcf;
     for (Int_t i = 1; i <= (Int_t)nbins; i++)
     {
       Double_t content = h->GetBinContent(i);
-      if (content == 0.0) continue;
+      if (content == 0.0)
+        continue;
       Double_t stat_err = h->GetBinError(i);
       h->SetBinError(i, std::sqrt(stat_err * stat_err + std::pow(rel_sys * content, 2)));
     }
@@ -832,11 +944,11 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Utils::properties["variables"]["CPFit"]["result"]["chi2"] = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "UW CHI2");
   Utils::properties["variables"]["CPFit"]["result"]["normChi2"] = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "UW CHI2/NDF");
 
-  delete residuals_hist;
-  delete c1;
-  delete c2;
+  // delete residuals_hist;
+  // delete c1;
+  // delete c2;
 
-  delete rp;
+  // delete rp;
 
   Utils::properties["lastScript"] = "Final CP Parameters normalization";
   Utils::properties["lastUpdate"] = Obj.getCurrentTimestamp();

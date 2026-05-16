@@ -183,8 +183,10 @@ namespace KLOE
       {
         if (ToLower(name.second) == "signal")
           _frac[name.second]->Fill(time_diff[name.second][j], fit_function(time_diff_gen[j], 0, xx)); //! Filling Signal
+        else if (name.second == "Regeneration" && !regen_event_weights.empty())
+          _frac[name.second]->Fill(time_diff[name.second][j], regen_event_weights[j]);
         else
-          _frac[name.second]->Fill(time_diff[name.second][j]); //! Filling background
+        _frac[name.second]->Fill(time_diff[name.second][j]);
       }
 
       //! Using correction factor and efficiency

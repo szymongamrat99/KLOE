@@ -105,3 +105,11 @@ git add .
 git commit -m "Scaling factors added to fitting"
 git push
 ./execute_analysis.sh 
+git add .
+git commit -m "Scaling factors propagated along with their errors"
+git push
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+./e
+./execute_analysis.sh 

@@ -30,6 +30,21 @@ struct DeltaTConfig
   Double_t resolution;
 };
 
+struct RegenCorrectionEntry
+{
+  std::string functionName; // nazwa TF1 w ROOT file
+  std::string variable;     // R_Charged | Rho_Charged | R_Neutral | Rho_Neutral
+  Double_t rangeMin;
+  Double_t rangeMax;
+};
+
+struct RegenShapeCorrectionConfig
+{
+  bool enabled = false;
+  std::string correctionFile; // ścieżka relatywna do Paths::cpfit_dir
+  std::vector<RegenCorrectionEntry> corrections;
+};
+
 struct FitConfig
 {
   std::map<std::string, Parameter> parameters;
@@ -42,6 +57,7 @@ struct FitConfig
   Int_t strategy;
   DeltaTConfig deltaTConfig;
   Bool_t regenerationExclusionFlag;
+  RegenShapeCorrectionConfig regenShapeCorrection;
 
   Int_t getNumOfEnabledParameters() const
   {
@@ -114,7 +130,7 @@ public:
     }
 
     // Regeneration exclusion flag    try
-    try 
+    try
     {
       fitConfig.regenerationExclusionFlag = _config.at("regenerationExclusion").at("enabled").get<Bool_t>();
     }
@@ -133,7 +149,7 @@ public:
     }
     catch (const json::out_of_range &e)
     {
-        throw std::runtime_error("ERROR: Missing deltaT setting: " + std::string(e.what()));
+      throw std::runtime_error("ERROR: Missing deltaT setting: " + std::string(e.what()));
     }
 
     // 3. Extract parameter settings
@@ -184,15 +200,16 @@ public:
       for (const auto &pName : paramsInChannel)
       {
         const Parameter &p = fitConfig.parameters.at(pName);
-        if (!p.enabled) continue;
+        if (!p.enabled)
+          continue;
 
         for (const auto &range : p.parameter_ranges)
         {
           // OPCJONALNIE: Sprawdzenie czy zakres parametru mieści się w globalnym xRange
           if (range[0] < fitConfig.deltaTConfig.xRange[0] || range[1] > fitConfig.deltaTConfig.xRange[1])
           {
-              std::cerr << "WARNING: Range (" << range[0] << "," << range[1] << ") for param [" 
-                        << pName << "] is outside global xRange.\n";
+            std::cerr << "WARNING: Range (" << range[0] << "," << range[1] << ") for param ["
+                      << pName << "] is outside global xRange.\n";
           }
           allRangesInChannel.push_back(std::make_pair(range, pName));
         }
@@ -213,6 +230,25 @@ public:
                << "overlaps with (" << r2[0] << ", " << r2[1] << ") from [" << allRangesInChannel[j].second << "].";
             throw std::runtime_error(ss.str());
           }
+        }
+      }
+    }
+
+    if (_config.contains("regenerationShapeCorrection"))
+    {
+      const auto &rsc = _config.at("regenerationShapeCorrection");
+      fitConfig.regenShapeCorrection.enabled = rsc.value("enabled", false);
+      fitConfig.regenShapeCorrection.correctionFile = rsc.value("correctionFile", "");
+      if (rsc.contains("corrections"))
+      {
+        for (const auto &c : rsc.at("corrections"))
+        {
+          RegenCorrectionEntry entry;
+          entry.functionName = c.at("functionName").get<std::string>();
+          entry.variable = c.at("variable").get<std::string>();
+          entry.rangeMin = c.at("rangeMin").get<Double_t>();
+          entry.rangeMax = c.at("rangeMax").get<Double_t>();
+          fitConfig.regenShapeCorrection.corrections.push_back(entry);
         }
       }
     }
