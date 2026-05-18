@@ -111,7 +111,8 @@ void VariableConfig::InitializeDefaultMappings()
 
   // Tablice Int_t
   AddVariable("eclstream", VariableInfo("EclStream", "EclStream", "Int_t", true, "necls"));
-  AddVariable("asscl", VariableInfo("AssCl", "AssCl", "Int_t", true, "nclu"));
+  AddVariable("asscl", VariableInfo("AssCl", "AssCl", "Int_t", true, "ntcl"));
+  AddVariable("asstr", VariableInfo("AssTr", "AssTr", "Int_t", true, "ntcl"));
   AddVariable("iv", VariableInfo("iV", "iV", "Int_t", true, "ntv"));
 
   // Tablice UInt_t (MC)
@@ -159,4 +160,7 @@ void VariableConfig::InitializeDefaultMappings()
   AddVariable("pxmc", VariableInfo("PxMC", "PxMC", "Float_t", true, "ntmc"));
   AddVariable("pymc", VariableInfo("PyMC", "PyMC", "Float_t", true, "ntmc"));
   AddVariable("pzmc", VariableInfo("PzMC", "PzMC", "Float_t", true, "ntmc"));
+
+  // Tablice Float_t - powiązane z asocjacją klaster-track
+  AddVariable("assleng", VariableInfo("AssLenG", "AssLenG", "Float_t", true, "ntcl"));
 }

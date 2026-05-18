@@ -105,6 +105,7 @@ namespace KLOE
 
     const std::vector<Int_t> &GetEclStream() const;
     const std::vector<Int_t> &GetAssCl() const;
+    const std::vector<Int_t> &GetAssTr() const;
     const std::vector<Int_t> &GetIv() const;
     const std::vector<Int_t> &GetVtxMC() const;
     const std::vector<Int_t> &GetPidMC() const;
@@ -141,6 +142,8 @@ namespace KLOE
     const std::vector<Float_t> &GetPxMC() const;
     const std::vector<Float_t> &GetPyMC() const;
     const std::vector<Float_t> &GetPzMC() const;
+    const std::vector<Float_t> &GetAssLenG() const;
+
 
     // ==================== UTILITY METHODS ====================
 

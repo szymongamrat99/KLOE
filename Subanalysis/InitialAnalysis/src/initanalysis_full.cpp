@@ -13,6 +13,7 @@
 #include <TLegend.h>
 #include <boost/progress.hpp>
 #include <chrono>
+#include <utility>
 
 #include <event_data.h>
 #include <GeneratedVariables.h>
@@ -252,7 +253,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   KLOE::NeutralReconstruction neutRec(logger);
 
   if (hypoCode == KLOE::HypothesisCode::SIGNAL ||
-      hypoCode == KLOE::HypothesisCode::OMEGAPI || 
+      hypoCode == KLOE::HypothesisCode::OMEGAPI ||
       hypoCode == KLOE::HypothesisCode::SEMILEPTONIC ||
       hypoCode == KLOE::HypothesisCode::THREE_PI0)
   {
@@ -287,46 +288,45 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   // Lambdas for cuts
   // SIGNAL hypothesis
   Double_t pi0Mass1_mean = 134.83240924168848,
-            pi0Mass1_sigma = 3.402793221980809,
-            pi0Mass2_mean = 134.87134080668446,
-            pi0Mass2_sigma = 3.22758797811996,
-            rho = -0.3399659203793453;
+           pi0Mass1_sigma = 3.402793221980809,
+           pi0Mass2_mean = 134.87134080668446,
+           pi0Mass2_sigma = 3.22758797811996,
+           rho = -0.3399659203793453;
 
-    auto u = [&]()
-    {
-      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) + (baseKin.pi02Fit[5] - pi0Mass2_mean)) / std::sqrt(2);
-    };
+  auto u = [&]()
+  {
+    return ((baseKin.pi01Fit[5] - pi0Mass1_mean) + (baseKin.pi02Fit[5] - pi0Mass2_mean)) / std::sqrt(2);
+  };
 
-    auto v = [&]()
-    {
-      return ((baseKin.pi01Fit[5] - pi0Mass1_mean) - (baseKin.pi02Fit[5] - pi0Mass2_mean)) / std::sqrt(2);
-    };
-    //
+  auto v = [&]()
+  {
+    return ((baseKin.pi01Fit[5] - pi0Mass1_mean) - (baseKin.pi02Fit[5] - pi0Mass2_mean)) / std::sqrt(2);
+  };
+  //
 
-    auto angleBetweenChargedPionsCM = [&]()
-    {
-      TVector3 KchrecGeometrical(baseKin.Kchboostnew[6] - baseKin.ip[0], 
-                                 baseKin.Kchboostnew[7] - baseKin.ip[1], 
-                                 baseKin.Kchboostnew[8] - baseKin.ip[2]);
+  auto angleBetweenChargedPionsCM = [&]()
+  {
+    TVector3 KchrecGeometrical(baseKin.Kchboostnew[6] - baseKin.ip[0],
+                               baseKin.Kchboostnew[7] - baseKin.ip[1],
+                               baseKin.Kchboostnew[8] - baseKin.ip[2]);
 
-      Double_t KchrecMom = sqrt(std::pow(baseKin.Kchboostnew[3], 2) - std::pow(PhysicsConstants::mK0, 2));
-      Double_t Norm = KchrecGeometrical.Mag();
-      KchrecGeometrical = KchrecGeometrical * (KchrecMom / Norm);
-      
-      TVector3 boost(-KchrecGeometrical.X() / baseKin.Kchboostnew[3],
-                     -KchrecGeometrical.Y() / baseKin.Kchboostnew[3],
-                     -KchrecGeometrical.Z() / baseKin.Kchboostnew[3]);
+    Double_t KchrecMom = sqrt(std::pow(baseKin.Kchboostnew[3], 2) - std::pow(PhysicsConstants::mK0, 2));
+    Double_t Norm = KchrecGeometrical.Mag();
+    KchrecGeometrical = KchrecGeometrical * (KchrecMom / Norm);
 
+    TVector3 boost(-KchrecGeometrical.X() / baseKin.Kchboostnew[3],
+                   -KchrecGeometrical.Y() / baseKin.Kchboostnew[3],
+                   -KchrecGeometrical.Z() / baseKin.Kchboostnew[3]);
 
-      TLorentzVector pi1Vec(baseKin.trknew[0][0], baseKin.trknew[0][1], baseKin.trknew[0][2], baseKin.trknew[0][3]);
-      TLorentzVector pi2Vec(baseKin.trknew[1][0], baseKin.trknew[1][1], baseKin.trknew[1][2], baseKin.trknew[1][3]);
+    TLorentzVector pi1Vec(baseKin.trknew[0][0], baseKin.trknew[0][1], baseKin.trknew[0][2], baseKin.trknew[0][3]);
+    TLorentzVector pi2Vec(baseKin.trknew[1][0], baseKin.trknew[1][1], baseKin.trknew[1][2], baseKin.trknew[1][3]);
 
-      // Boost to CM frame
-      pi1Vec.Boost(boost);
-      pi2Vec.Boost(boost);
+    // Boost to CM frame
+    pi1Vec.Boost(boost);
+    pi2Vec.Boost(boost);
 
-      return pi1Vec.Angle(pi2Vec.Vect()) / M_PI * 180.0; // Return angle in degrees
-    };
+    return pi1Vec.Angle(pi2Vec.Vect()) / M_PI * 180.0; // Return angle in degrees
+  };
 
   // Cuts application
 
@@ -384,14 +384,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                   { return u(); });
 
     cutter.RegisterCentralValueGetter("Pi0MassPlane_u", [&]()
-                                  { return 0; });
-    
+                                      { return 0; });
+
     cutter.RegisterVariableGetter("Pi0MassPlane_v", [&]()
                                   { return v(); });
 
     cutter.RegisterCentralValueGetter("Pi0MassPlane_v", [&]()
-                                  { return 0; });
-    
+                                      { return 0; });
   }
   else if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
   {
@@ -402,14 +401,14 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   {
     cutter.RegisterVariableGetter("Qmiss", [&]()
                                   { return baseKin.Qmiss; });
-    
+
     cutter.RegisterCentralValueGetter("Qmiss", [&]()
-                                  { return 71.13; });
+                                      { return 71.13; });
 
     cutter.RegisterVariableGetter("PipPimAngleCM", [&]()
                                   { return angleBetweenChargedPionsCM(); });
     cutter.RegisterCentralValueGetter("PipPimAngleCM", [&]()
-                                  { return 145.8; });
+                                      { return 145.8; });
   }
 
   if (!cutter.ValidateConfiguration())
@@ -556,8 +555,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
     // Construction of the charged rec class object
     Double_t bhabha_vtx[3] = {dataAccess.GetBx(),
-                             dataAccess.GetBy(),
-                             dataAccess.GetBz()};
+                              dataAccess.GetBy(),
+                              dataAccess.GetBz()};
 
     // ZMIANA: Stwórz zmienne lokalne dla referencji
     Int_t nv_local = dataAccess.GetNV();
@@ -583,7 +582,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     baseKin.vtxcov[2].assign(dataAccess.GetVtxCov3().begin(), dataAccess.GetVtxCov3().end());
     baseKin.vtxcov[3].assign(dataAccess.GetVtxCov4().begin(), dataAccess.GetVtxCov4().end());
     baseKin.vtxcov[4].assign(dataAccess.GetVtxCov5().begin(), dataAccess.GetVtxCov5().end());
-    baseKin.vtxcov[5].assign(dataAccess.GetVtxCov6().begin(), dataAccess.GetVtxCov6().end()) ;
+    baseKin.vtxcov[5].assign(dataAccess.GetVtxCov6().begin(), dataAccess.GetVtxCov6().end());
 
     baseKin.bhabha_vtx[0] = dataAccess.GetBx();
     baseKin.bhabha_vtx[1] = dataAccess.GetBy();
@@ -597,6 +596,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     baseKin.ntmc = dataAccess.GetNTMC();
     baseKin.nvtxmc = dataAccess.GetNVtxMC();
     baseKin.nclu = dataAccess.GetNClu();
+    baseKin.ntcl = dataAccess.GetNTCl();
 
     baseKin.pidmc.assign(dataAccess.GetPidMC().begin(), dataAccess.GetPidMC().end());
     baseKin.vtxmc.assign(dataAccess.GetVtxMC().begin(), dataAccess.GetVtxMC().end());
@@ -607,6 +607,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     baseKin.pxmc.assign(dataAccess.GetPxMC().begin(), dataAccess.GetPxMC().end());
     baseKin.pymc.assign(dataAccess.GetPyMC().begin(), dataAccess.GetPyMC().end());
     baseKin.pzmc.assign(dataAccess.GetPzMC().begin(), dataAccess.GetPzMC().end());
+
+    baseKin.Asstr.assign(dataAccess.GetAssTr().begin(), dataAccess.GetAssTr().end());
+    baseKin.Asscl.assign(dataAccess.GetAssCl().begin(), dataAccess.GetAssCl().end());
+    baseKin.Assleng.assign(dataAccess.GetAssLenG().begin(), dataAccess.GetAssLenG().end());
 
     // Transverse momenta of the two charged pions
     Double_t pT1 = 0, pT2 = 0;
@@ -638,6 +642,19 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           break;
         }
         countTmp++;
+      }
+    }
+
+    for (Int_t i = 0; i < baseKin.ntcl; i++)
+    {
+      Int_t clusterIdx = baseKin.Asscl[i];
+      Int_t trackIdx = baseKin.Asstr[i];
+
+      if (clusterIdx >= 1 && trackIdx >= 1)
+      {
+        baseKin.trackWithCluster.push_back(trackIdx);
+        baseKin.clusterWithTrack.push_back(clusterIdx);
+        baseKin.trackClusterPathLength.push_back(baseKin.Assleng[i]);
       }
     }
 
@@ -687,10 +704,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                baseKin.muonAlertMinus);
 
       std::vector<Double_t> kaonChMom = {baseKin.Kchmc[0], baseKin.Kchmc[1], baseKin.Kchmc[2], baseKin.Kchmc[3]},
-                           kaonChPos = {baseKin.Kchmc[6], baseKin.Kchmc[7], baseKin.Kchmc[8]},
-                           kaonNeMom = {baseKin.Knemc[0], baseKin.Knemc[1], baseKin.Knemc[2], baseKin.Knemc[3]},
-                           kaonNePos = {baseKin.Knemc[6], baseKin.Knemc[7], baseKin.Knemc[8]},
-                           ipPos = {baseKin.ipmc[0], baseKin.ipmc[1], baseKin.ipmc[2]};
+                            kaonChPos = {baseKin.Kchmc[6], baseKin.Kchmc[7], baseKin.Kchmc[8]},
+                            kaonNeMom = {baseKin.Knemc[0], baseKin.Knemc[1], baseKin.Knemc[2], baseKin.Knemc[3]},
+                            kaonNePos = {baseKin.Knemc[6], baseKin.Knemc[7], baseKin.Knemc[8]},
+                            ipPos = {baseKin.ipmc[0], baseKin.ipmc[1], baseKin.ipmc[2]};
 
       kaonTimesMC = Obj.CalculateKaonProperTimes(kaonChMom, kaonChPos, kaonNeMom, kaonNePos, ipPos);
 
@@ -780,11 +797,14 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       // For THREE_PI0: additionally require all neutral clusters have energy >= 20 MeV
       if (errorCode == ErrorHandling::ErrorCodes::NO_ERROR)
       {
+        std::vector<Int_t> neuclulistCopy = neuclulist; // Kopia listy indeksów klastrów
+
         const auto &enecl = dataAccess.GetEneCl();
-        neuclulist.erase(std::remove_if(neuclulist.begin(), neuclulist.end(),
-                                        [&](Int_t idx) { return enecl[idx - 1] < 20.0; }),
-                         neuclulist.end());
-        if (static_cast<Int_t>(neuclulist.size()) < nclMinCurrent)
+        neuclulistCopy.erase(std::remove_if(neuclulistCopy.begin(), neuclulistCopy.end(),
+                                        [&](Int_t idx)
+                                        { return enecl[idx - 1] < 20.0; }),
+                         neuclulistCopy.end());
+        if (static_cast<Int_t>(neuclulistCopy.size()) < nclMinCurrent)
         {
           if (hypoCode != KLOE::HypothesisCode::THREE_PI0)
             errorCode = ErrorHandling::ErrorCodes::LESS_THAN_FOUR_NEUTRAL_CLUSTERS;
@@ -845,26 +865,19 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     eventAnalysis = new KLOE::ChargedVtxRec<>(nv_local, ntv_local, iv_data.data(), bhabha_vtx, curv_data.data(), baseKin.pxtv.data(), baseKin.pytv.data(), baseKin.pztv.data(), xv_data.data(), yv_data.data(), zv_data.data(), mode_local, logger);
 
     // --------------------------------------------------------------------------------
-    if (smearing)
-    {
-      // KMASS HYPOTHESIS WITH MOM SMEARING - FOR SIGNAL
-      if (hypoCode == KLOE::HypothesisCode::SIGNAL)
-        hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
-      else if (hypoCode == KLOE::HypothesisCode::SEMILEPTONIC)
-        hypoMap[KLOE::HypothesisCode::SEMILEPTONIC] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
-      else if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
-        hypoMap[KLOE::HypothesisCode::THREE_PI0] = eventAnalysis->findKchRec(mcflag, 1, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
-    }
-    else
-    {
-      // NO MOMENTUM SMEARING - FOR SIGNAL
 
-      if (hypoCode == KLOE::HypothesisCode::SIGNAL)
-        hypoMap[KLOE::HypothesisCode::SIGNAL] = eventAnalysis->findKchRec(mcflag, 0, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
-      else if (hypoCode == KLOE::HypothesisCode::SEMILEPTONIC)
-        hypoMap[KLOE::HypothesisCode::SEMILEPTONIC] = eventAnalysis->findKchRec(mcflag, 0, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
-      else if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
-        hypoMap[KLOE::HypothesisCode::THREE_PI0] = eventAnalysis->findKchRec(mcflag, 0, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+    if (hypoCode != KLOE::HypothesisCode::FOUR_PI && hypoCode != KLOE::HypothesisCode::OMEGAPI)
+    {
+      // pi+pi- mode
+      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+
+      // pi+-e-+ mode
+      eventAnalysis->setMode(2); // Set mode to pi+-e-+
+      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.KchrecElectron, baseKin.trkElectron[0], baseKin.trkElectron[1], baseKin.vtakenElectron, logger);
+
+      // pi+-muon-+ mode
+      eventAnalysis->setMode(3); // Set mode to pi+-muon-+
+      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.KchrecMuon, baseKin.trkMuon[0], baseKin.trkMuon[1], baseKin.vtakenMuon, logger);
     }
 
     pT1 = std::sqrt(std::pow(baseKin.trknew[0][0], 2) + std::pow(baseKin.trknew[0][1], 2)),
@@ -1004,8 +1017,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL, baseKin.phi_mom, baseKin.KchboostKL);
 
         Double_t X_lineKS[3] = {baseKin.KchboostKS[6],
-                               baseKin.KchboostKS[7],
-                               baseKin.KchboostKS[8]}, // Vertex laying on the line
+                                baseKin.KchboostKS[7],
+                                baseKin.KchboostKS[8]}, // Vertex laying on the line
             X_lineKL[3] = {baseKin.KchboostKL[6],
                            baseKin.KchboostKL[7],
                            baseKin.KchboostKL[8]}, // Vertex laying on the line
@@ -1081,6 +1094,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       // Boost of the charged part of the decay
 
       BoostMethodObj.KaonMomFromBoost(baseKin.Kchrecnew, baseKin.phi_mom, baseKin.Kchboostnew);
+      BoostMethodObj.KaonMomFromBoost(baseKin.KchrecElectron, baseKin.phi_mom, baseKin.KchboostElectron);
+      BoostMethodObj.KaonMomFromBoost(baseKin.KchrecMuon, baseKin.phi_mom, baseKin.KchboostMuon);
 
       Double_t X_line[3] = {baseKin.Kchboostnew[6],
                             baseKin.Kchboostnew[7],
@@ -1473,11 +1488,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             trackParametersErr[1].push_back(std::pow(1.8, 2) / 2.0);
 
             std::vector<Double_t> omegaVtx = {baseKin.KchrecClosest[6],
-                                             baseKin.KchrecClosest[7],
-                                             baseKin.KchrecClosest[8]},
-                                 omegaVtxErr = {std::sqrt(baseKin.vtxcov[0][baseKin.vtakenClosest[0]]),
-                                                std::sqrt(baseKin.vtxcov[3][baseKin.vtakenClosest[0]]),
-                                                std::sqrt(baseKin.vtxcov[5][baseKin.vtakenClosest[0]])};
+                                              baseKin.KchrecClosest[7],
+                                              baseKin.KchrecClosest[8]},
+                                  omegaVtxErr = {std::sqrt(baseKin.vtxcov[0][baseKin.vtakenClosest[0]]),
+                                                 std::sqrt(baseKin.vtxcov[3][baseKin.vtakenClosest[0]]),
+                                                 std::sqrt(baseKin.vtxcov[5][baseKin.vtakenClosest[0]])};
 
             omegaKinFitObj.SetParameters(trackParameters, trackParametersErr, clusterChosen, bhabha_mom, bhabha_mom_err, chargedVtx, chargedVtxErr, omegaVtx, omegaVtxErr);
             errorCode = omegaKinFitObj.Reconstruct();
@@ -1597,11 +1612,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       baseKin.ntcl = dataAccess.GetNTCl();
       baseKin.T0step1 = dataAccess.GetT0Step1();
       baseKin.Asscl.assign(dataAccess.GetAssCl().begin(), dataAccess.GetAssCl().end());
+      baseKin.Asstr.assign(dataAccess.GetAssTr().begin(), dataAccess.GetAssTr().end());
       baseKin.Xcl.assign(dataAccess.GetXCl().begin(), dataAccess.GetXCl().end());
       baseKin.Ycl.assign(dataAccess.GetYCl().begin(), dataAccess.GetYCl().end());
       baseKin.Zcl.assign(dataAccess.GetZCl().begin(), dataAccess.GetZCl().end());
       baseKin.Tcl.assign(dataAccess.GetTCl().begin(), dataAccess.GetTCl().end());
       baseKin.Enecl.assign(dataAccess.GetEneCl().begin(), dataAccess.GetEneCl().end());
+      baseKin.Assleng.assign(dataAccess.GetAssLenG().begin(), dataAccess.GetAssLenG().end());
       // -------------------------------------------------------------------------------------
       // Charged decay data
       baseKin.nv = dataAccess.GetNV();
@@ -1748,7 +1765,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"vtakenClosest", baseKin.vtakenClosest},
           {"vtaken", baseKin.vtaken},
           {"g4takenTriKinFit", baseKin.g4takenTriKinFit},
-          {"goodClustersTriKinFit", baseKin.goodClustersTriKinFit}};
+          {"goodClustersTriKinFit", baseKin.goodClustersTriKinFit},
+          {"Asstr", baseKin.Asstr},
+          {"vtakenElectron", baseKin.vtakenElectron},
+          {"vtakenMuon", baseKin.vtakenMuon},
+          {"trackWithCluster", baseKin.trackWithCluster},
+          {"clusterWithTrack", baseKin.clusterWithTrack}};
 
       std::map<std::string, std::vector<Double_t>> floatArrays = {
           {"Xcl", baseKin.Xcl},
@@ -1857,7 +1879,17 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"photonSix3", photonFourMomSix[2].total},
           {"photonSix4", photonFourMomSix[3].total},
           {"photonSix5", photonFourMomSix[4].total},
-          {"photonSix6", photonFourMomSix[5].total}};
+          {"photonSix6", photonFourMomSix[5].total},
+          {"Assleng", baseKin.Assleng},
+          {"KchrecElectron", baseKin.KchrecElectron},
+          {"KchrecMuon", baseKin.KchrecMuon},
+          {"KchboostElectron", baseKin.KchboostElectron},
+          {"KchboostMuon", baseKin.KchboostMuon},
+          {"trk1Electron", baseKin.trkElectron[0]},
+          {"trk2Electron", baseKin.trkElectron[1]},
+          {"trk1Muon", baseKin.trkMuon[0]},
+          {"trk2Muon", baseKin.trkMuon[1]},
+          {"trackClusterPathLength", baseKin.trackClusterPathLength}};
 
       writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }

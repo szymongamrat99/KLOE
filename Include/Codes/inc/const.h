@@ -282,7 +282,13 @@ namespace KLOE
                        ipKS(3, 0),
                        ipKL(3, 0),
                        Kchrecnew(10, 0),
-                       Kchboostnew(10, 0)
+                       Kchboostnew(10, 0),
+                       KchrecElectron(10, 0),
+                       KchboostElectron(10, 0),
+                       KchrecMuon(10, 0),
+                       KchboostMuon(10, 0),
+                       vtakenElectron(3, 0),
+                       vtakenMuon(3, 0)
                         {}
 
     Double_t
@@ -479,7 +485,15 @@ namespace KLOE
         pxtv,
         pytv,
         pztv,
-        vtxcov[6];
+        vtxcov[6],
+        Assleng,
+        KchrecElectron,
+        KchboostElectron,
+        KchrecMuon,
+        KchboostMuon,
+        trkElectron[2],
+        trkMuon[2],
+        trackClusterPathLength;
 
     std::vector<Int_t>
         vtaken,
@@ -497,7 +511,12 @@ namespace KLOE
         cuts,
         g4takenTriKinFit,
         goodClustersTriKinFit,
-        ncll;
+        ncll,
+        Asstr,
+        vtakenElectron,
+        vtakenMuon,
+        trackWithCluster,
+        clusterWithTrack;
 
     void resize()
     {
@@ -598,6 +617,16 @@ namespace KLOE
       vtakenClosest.resize(3, 0);
       trk1MC.resize(4, 0.0);
       trk2MC.resize(4, 0.0);
+      trkElectron[0].resize(4, 0.0);
+      trkElectron[1].resize(4, 0.0);
+      trkMuon[0].resize(4, 0.0);
+      trkMuon[1].resize(4, 0.0);
+      KchrecElectron.resize(10, 0.0);
+      KchboostElectron.resize(10, 0.0);
+      KchrecMuon.resize(10, 0.0);
+      KchboostMuon.resize(10, 0.0);
+      vtakenElectron.resize(3, 0);
+      vtakenMuon.resize(3, 0);
     };
 
     /**
@@ -686,6 +715,21 @@ namespace KLOE
       trk2MC.clear();
       muonAlertMinus = 0;
       muonAlertPlus = 0;
+      Asstr.clear();
+      Assleng.clear();
+      KchrecElectron.clear();
+      KchboostElectron.clear();
+      KchrecMuon.clear();
+      KchboostMuon.clear();
+      vtakenElectron.clear();
+      vtakenMuon.clear();
+      trkElectron[0].clear();
+      trkElectron[1].clear();
+      trkMuon[0].clear();
+      trkMuon[1].clear();
+      trackWithCluster.clear();
+      clusterWithTrack.clear();
+      trackClusterPathLength.clear();
     }
   };
 }

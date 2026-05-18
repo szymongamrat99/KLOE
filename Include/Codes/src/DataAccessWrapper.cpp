@@ -815,6 +815,7 @@ Float_t DataAccessWrapper::GetBRootsErr() const { return GetScalarValue<Float_t>
 // Tablice Int_t
 const std::vector<Int_t> &DataAccessWrapper::GetEclStream() const { return GetArrayValue<Int_t>("eclstream"); }
 const std::vector<Int_t> &DataAccessWrapper::GetAssCl() const { return GetArrayValue<Int_t>("asscl"); }
+const std::vector<Int_t> &DataAccessWrapper::GetAssTr() const { return GetArrayValue<Int_t>("asstr"); }
 const std::vector<Int_t> &DataAccessWrapper::GetIv() const { return GetArrayValue<Int_t>("iv"); }
 
 // Tablice Int_t
@@ -854,3 +855,4 @@ const std::vector<Float_t> &DataAccessWrapper::GetZvMC() const { return GetArray
 const std::vector<Float_t> &DataAccessWrapper::GetPxMC() const { return GetArrayValue<Float_t>("pxmc"); }
 const std::vector<Float_t> &DataAccessWrapper::GetPyMC() const { return GetArrayValue<Float_t>("pymc"); }
 const std::vector<Float_t> &DataAccessWrapper::GetPzMC() const { return GetArrayValue<Float_t>("pzmc"); }
+const std::vector<Float_t> &DataAccessWrapper::GetAssLenG() const { return GetArrayValue<Float_t>("assleng"); }
