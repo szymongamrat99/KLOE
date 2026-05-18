@@ -113,3 +113,329 @@ git push
 ./execute_analysis.sh 
 ./e
 ./execute_analysis.sh 
+cd ../root_files/
+ls
+cd kitt/
+ls
+rm -fr ALL_PHYS*
+cd ..
+ls
+cd ..
+ls
+cd gamrat/
+ls
+cd DBV-26/all_phys
+ls
+cd 20260415/
+ls
+cd ../../
+ls
+cd ../
+cd root_files/
+ls
+cd kitt/
+ls
+cd 2026-04-15/
+ls
+cd ..
+cd ../../
+ls
+cd DBV-26/all_phys2/
+ls
+cd 20260415/
+ls -hl
+cd ..
+ks
+ls
+cd ../
+ls
+cd all_phys3/
+ls
+cd 20260414/
+ls
+cd ../../DK0/
+ls
+cd 20260315/
+ls -hl
+cd ../
+ls
+cd ..
+ls
+cd ..
+ls
+cd DBV-26/
+ls
+cd all_phys
+ls
+cd 20260315/
+ls
+cd ..
+ls
+cd ../root_files/kitt/
+ls
+cd 2026-04-15/
+ls
+cd ALL_PHYS3_SIGNAL_NoSmearing/
+ls -hl
+cd ..
+ls
+cd ..
+cd h
+cd ../
+cd ..
+ls
+./lumi_
+./lumi_batch.sh 
+./lumi_batch.sh /data/tape_dump/gamrat/PROD2ROOT/MC/MK0 all_phys 4 lumi_file/lumi_per_ev_nb.log 
+./lumi_batch.sh /data/tape_dump/gamrat/PROD2ROOT/MC/MK0 26 all_phys 4 lumi_file/lumi_per_ev_nb.log 
+ls /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys2/
+ls /data/tape_dump/gamrat/PROD2ROOT/MC/MK0/
+./lumi_batch.sh /data/tape_dump/gamrat/PROD2ROOT/MC/MK0 26 all_phys2 4 lumi_file/lumi_per_ev_nb.log 
+./lumi_batch.sh /data/tape_dump/gamrat/PROD2ROOT/MC/MK0 26 all_phys3 4 lumi_file/lumi_per_ev_nb.log 
+./lumi_batch.sh /data/ssd/gamrat/PROD2ROOT 26 DK0 4 lumi_file/lumi_per_ev_nb.log 
+./lumi_batch.sh /data/ssd/gamrat/PROD2ROOT/DK0 26 DK0 4 lumi_file/lumi_per_ev_nb.log 
+vi lumi_batch.sh 
+./lumi_batch.sh /data/ssd/gamrat/PROD2ROOT 26 DK0 4 lumi_file/lumi_per_ev_nb.log 
+vi lumi_batch.sh 
+cd DBV-26/all_phys/20260516/
+ls
+cd ../
+cd ../
+ls PROD2ROOT/MC/MK0/all_phys
+ls PROD2ROOT/MC/MK0/all_phys2
+ls PROD2ROOT/MC/MK0/all_phys3
+ls PROD2ROOT/DK0/
+cd DBV-26/DK0/
+ls
+cd 20260516/
+ls
+cd ..
+cd ../
+cd all_phys
+ls
+cd 20260516/
+ls
+cd ../
+cd ../DK0/
+ls
+cd 20260516/
+ls
+cat luminosity_report.log 
+cd ../../../PROD2ROOT/DK0/
+ls
+cd ../DBV-26/all_phys2/
+ls -hl
+cd 20260516/
+ls
+cd ../../
+cd all_phys3/
+ls
+cd 20260516/
+ls -hl
+ls
+./execute_analysis.sh 
+htop
+git checkout 
+git add .
+git commit -m "Scalingfactors almost done"
+git push
+git checkout 
+git checkout main 
+git pull
+./execute_analysis.sh 
+htop
+./run_parallel.sh 
+./run_parallel.sh all_phys 20260516 1 206 15
+htop
+./run_parallel.sh all_phys2 20260516 1 71 15
+htop
+./run_parallel.sh all_phys3 20260516 1 76 15
+htop
+ls
+pgrep parallel
+pgrep run
+pgrep nohup
+ps -e
+killall parallel
+killall nohup
+killall KLSPM00
+killall execute_analysis.sh
+ps -e
+killall bash
+ps -e
+killall KLSPM00
+killall execute_analysis.sh
+killall KLSPM00
+killall execute_analysis.sh
+killall KLSPM00
+killall execute_analysis.sh
+killall KLSPM00
+killall execute_analysis.sh
+killall KLSPM00
+killall execute_analysis.sh
+killall KLSPM00
+rm -fr parallel_logs_all_phys*
+rm -fr nohup_all_phys*
+htop
+./run_parallel.sh all_phys 20260516 1 206 15
+./run_parallel.sh all_phys2 20260516 1 71 15
+./run_parallel.sh all_phys3 20260516 1 76 15
+cd ../root_files/hal/
+ls
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+cd ..
+ls
+htop
+cd ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+htop
+du -h
+df -h
+exit
+df -h
+quota
+quota --human-readable 
+cd ../root_files/hal
+ls
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+htop
+cd ../
+cd ALL_PHYS3_SEMILEPTONIC_NoSmearing/
+ls -hl
+ll
+ls -hl
+htop
+cd ../../../
+cd KLOE/
+ls -hl
+cat nohup_all_phys_1_206.log 
+ls
+cd ../root_files/hal/
+ls
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+ls
+cat file_lumi_ALL_PHYS_SEMILEPTONIC_NoSmearing.log 
+root 
+root mk0_initial_analysis_all_phys_SEMILEPTONIC_NoSmearing_12.root
+htop
+cd ../root_files/hal/
+ls
+cd ALL_PHYS2_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+;s
+ls
+cd ..
+ls
+cd ALL_PHYS3_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+cd ../
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+ls
+ls -l
+ls
+ls | wc -l
+ls -hl
+cd ../
+cd ..
+cd ../KLOE/
+ls
+cd parallel_logs_all_phys_1_206/
+ls
+cd 1
+ls
+cd 1
+ls
+cat stdout 
+ls
+cd ..
+ls
+cd ..
+cd parallel_logs_all_phys2_1_71/
+ls
+cd 1
+ls
+cd ../
+ls
+cd ../log/
+ls
+cd 2026-05-16
+ls
+cd ..
+cd all_phys
+ls
+cd 1
+ls
+cat cut.analysis.log 
+cd ..
+ls
+cd 110
+ls
+cat error.log 
+cat general.log 
+ls
+cat analysis.config.log 
+exit
+cd ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+cd ../ALL_PHYS2_SEMILEPTONIC_NoSmearing/
+root
+git checkout -b feat/semileptonic-reconstruction-method
+cd ../PROD2ROOT/MC/
+ls
+cd MK0/
+ls
+cd all_phys
+ls
+root prod2root_mk0_all_phys_32508_v2.root 
+cd ../root_files/hal/
+ls
+cd ALL_PHYS2_SEMILEPTONIC_NoSmearing/
+ls -h
+ls -hl
+cp ../root_files/initial_analysis/lib/HistFactory.h Include/Codes/inc/.
+cp ../root_files/initial_analysis/lib/HistFactory.cpp Include/Codes/src/.
+./execute_analysis.sh 
+htop
+./execute_analysis.sh 
+pgrep KLSPM00
+killall KLSPM00
+pgrep KLSPM00
+killall KLSPM00
+rm -fr parallel_logs_all_phys*
+cd ../
+cd root_files/
+ls
+cd hal/
+ls
+rm -fr *
+cd ../../
+ls
+cd KLOE/
+ls
+rm nohup_all_phys*
+./run_parallel.sh 
+./run_parallel.sh all_phys 1 206 15
+./run_parallel.sh all_phys 20260516 1 206 15
+./run_parallel.sh all_phys2 20260516 1 71 15
+./run_parallel.sh all_phys3 20260516 1 76 15
+cd initial_analysis/src/
+ls
+root
+ls
+cd ../root_files/hal/ALL_PHYS
+cd ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+htop

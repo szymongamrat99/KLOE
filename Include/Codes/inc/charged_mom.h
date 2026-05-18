@@ -72,6 +72,8 @@ namespace KLOE
     Int_t IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, F *int_point) const;
     Int_t IPBoostCorr(F *X_line, F *vec_line, F *X_plane, F *vec_plane, std::vector<F> &int_point) const;
 
+    void setMode(Int_t mode) { _mode = mode; }
+
   };
 
 }
