@@ -439,3 +439,57 @@ cd ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
 ls
 ls -hl
 htop
+cd ../root_files/
+ls
+cd kitt/
+ls
+cd 2026-05-18/
+ls
+cd ALL_PHYS3_THREE_PI0_NoSmearing/
+ls
+cd ..
+rm -fr *
+cd ..
+htop
+cd kitt/
+ls
+cd ..
+ls
+cd hal/
+ls
+cd ALL_PHYS
+ls
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+htop
+ls -hl
+cat input_luminosity_ALL_PHYS_SEMILEPTONIC_NoSmearing.log 
+cat file_lumi_ALL_PHYS_SEMILEPTONIC_NoSmearing.log 
+git add .
+git commit -m "Reconstruction method adjusted"
+git push
+git push --set-upstream origin feat/semileptonic-reconstruction-method
+ls ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls -hl ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+cd ../root_files/hal/
+ls
+cd 2026-05-18/
+ls
+cd ALL_PHYS3_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+root
+./execute_analysis.sh 
+./execute_analysis.sh 
+cd ../root_files/hal/2026-05-19/
+ls
+cd ALL_PHYS3_SEMILEPTONIC_NoSmearing/
+root
+ls
+ls -hl
+root 
+htop
+cd ../../../
+cd hal/ALL_PHYS2_SEMILEPTONIC_NoSmearing/
+ls -hl

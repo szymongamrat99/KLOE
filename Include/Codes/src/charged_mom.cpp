@@ -12,6 +12,21 @@ namespace KLOE
   ChargedVtxRec<F, T>::ChargedVtxRec(ErrorHandling::ErrorLogs &logger) : _iv(nullptr), _nv(def), _ntv(def), _IP(nullptr), _CurV(nullptr), _PhiV(nullptr), _CotV(nullptr), _xv(nullptr), _yv(nullptr), _zv(nullptr), _mode(def), _logger(logger){};
 
   template <typename F, typename T>
+  Double_t ChargedVtxRec<F, T>::calculateTrackEnergy(std::vector<F> &trk, T mode)
+  {
+    Double_t massSquared = 0;
+
+    if (mode == 1)
+      massSquared = std::pow(PhysicsConstants::mPiCh, 2);
+    else if (mode == 2)
+      massSquared = std::pow(PhysicsConstants::mElec, 2);
+    else if (mode == 3)
+      massSquared = std::pow(PhysicsConstants::mMuon, 2);
+
+    return std::sqrt(std::pow(trk[0], 2) + std::pow(trk[1], 2) + std::pow(trk[2], 2) + massSquared);
+  }
+
+  template <typename F, typename T>
   void ChargedVtxRec<F, T>::charged_mom(F CurvOld, F PhivOld, F CotvOld, F *mom_vec, Int_t mode, ErrorHandling::ErrorLogs &logger)
   {
     if (CurvOld == 0)
@@ -25,12 +40,9 @@ namespace KLOE
     mom_vec[1] = sin(PhivOld) * 1000. / std::abs(CurvOld);
     mom_vec[2] = CotvOld * 1000. / std::abs(CurvOld);
 
-    if (mode == 1)
-      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
-    else if (mode == 2)
-      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mElec, 2));
-    else if (mode == 3)
-      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mMuon, 2));
+    std::vector<F> trk = {mom_vec[0], mom_vec[1], mom_vec[2]};
+
+    mom_vec[3] = calculateTrackEnergy(trk, mode);
   }
 
   template <typename F, typename T>
@@ -47,12 +59,8 @@ namespace KLOE
     mom_vec[1] = sin(_PhiV[i]) * 1000. / std::abs(_CurV[i]);
     mom_vec[2] = _CotV[i] * 1000. / std::abs(_CurV[i]);
 
-    if (_mode == 1)
-      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
-    else if (_mode == 2)
-      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mElec, 2));
-    else if (_mode == 3)
-      mom_vec[3] = std::sqrt(std::pow(mom_vec[0], 2) + std::pow(mom_vec[1], 2) + std::pow(mom_vec[2], 2) + std::pow(PhysicsConstants::mMuon, 2));
+    std::vector<F> trk = {mom_vec[0], mom_vec[1], mom_vec[2]};
+    mom_vec[3] = calculateTrackEnergy(trk, _mode);
   }
 
   template <typename F, typename T>
@@ -179,9 +187,10 @@ namespace KLOE
   }
 
   template <typename F, typename T>
-  ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKchRec(T mcflag, Bool_t smearingFlag, TMatrixT<Double_t> covMatrix, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger)
+  ErrorHandling::ErrorCodes ChargedVtxRec<F, T>::findKchRec(T mcflag, Bool_t smearingFlag, TMatrixT<Double_t> &covMatrix, std::vector<F> &KchRec, std::vector<F> &trk1, std::vector<F> &trk2, std::vector<Int_t> &vtaken, ErrorHandling::ErrorLogs &logger, T mode)
   {
-    F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {}, KchTmp[9] = {};
+    F mom_vec1Tmp[4] = {}, mom_vec2Tmp[4] = {};
+    std::vector<F> KchTmp(10, 0.);
     std::vector<Int_t> ivTmp(_iv, _iv + _ntv);
     std::unordered_map<Int_t, Int_t> mapTmp = pm00::CountRepeatingElements(ivTmp);
     vtaken.clear();
@@ -201,8 +210,6 @@ namespace KLOE
     TVectorT<Double_t>
         momVecMC(numberOfMomenta * 3),
         momVecSmeared(numberOfMomenta * 3);
-
-    KLOE::MomentumSmearing<Double_t> CovMatrixCalcObj(momVecMC, covMatrix);
     // -------------------------------------------------------------
 
     for (Int_t i = 0; i < _nv; i++)
@@ -216,82 +223,35 @@ namespace KLOE
             {
               if (std::signbit(_CurV[j1]) != std::signbit(_CurV[j2]))
               {
-
-                if (_PxTv != nullptr && _PyTv != nullptr && _PzTv != nullptr)
+                ErrorHandling::ErrorCodes err = setTrackMom(mom_vec1Tmp, mom_vec2Tmp, j1, j2);
+                if (err != ErrorHandling::ErrorCodes::NO_ERROR)
                 {
-                  mom_vec1Tmp[0] = _PxTv[j1];
-                  mom_vec1Tmp[1] = _PyTv[j1];
-                  mom_vec1Tmp[2] = _PzTv[j1];
-                  mom_vec2Tmp[0] = _PxTv[j2];
-                  mom_vec2Tmp[1] = _PyTv[j2];
-                  mom_vec2Tmp[2] = _PzTv[j2];
-                }
-                else if (_CurV != nullptr && _CotV != nullptr && _PhiV != nullptr)
-                {
-                  ChargedVtxRec::charged_mom(j1, mom_vec1Tmp, _logger);
-                  ChargedVtxRec::charged_mom(j2, mom_vec2Tmp, _logger);
-                }
-                else
-                {
-                  ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::NULL_POINTER;
                   return err;
                 }
 
                 Double_t KchrecSmeared[9], KchboostSmeared[9], energyPion[2];
 
-                if (mcflag == 1 && smearingFlag == 1)
-                {
-                  momVecMC[0] = mom_vec1Tmp[0];
-                  momVecMC[1] = mom_vec1Tmp[1];
-                  momVecMC[2] = mom_vec1Tmp[2];
-                  momVecMC[3] = mom_vec2Tmp[0];
-                  momVecMC[4] = mom_vec2Tmp[1];
-                  momVecMC[5] = mom_vec2Tmp[2];
+                ChargedVtxRec::makeMomentumSmearing(mcflag, smearingFlag, covMatrix, momVecMC, momVecSmeared, mom_vec1Tmp, mom_vec2Tmp);
 
-                  CovMatrixCalcObj.SetMCVector(momVecMC);
-                  CovMatrixCalcObj.SmearMomentum();
-                  CovMatrixCalcObj.GetSmearedMomentum(momVecSmeared);
-                }
-                else
-                {
-                  momVecSmeared[0] = mom_vec1Tmp[0];
-                  momVecSmeared[1] = mom_vec1Tmp[1];
-                  momVecSmeared[2] = mom_vec1Tmp[2];
-                  momVecSmeared[3] = mom_vec2Tmp[0];
-                  momVecSmeared[4] = mom_vec2Tmp[1];
-                  momVecSmeared[5] = mom_vec2Tmp[2];
-                }
+                std::vector<F> trk1Vec = {momVecSmeared[0], momVecSmeared[1], momVecSmeared[2], 0.};
+                std::vector<F> trk2Vec = {momVecSmeared[3], momVecSmeared[4], momVecSmeared[5], 0.};
 
-                energyPion[0] = std::sqrt(std::pow(momVecSmeared[0], 2) + std::pow(momVecSmeared[1], 2) + std::pow(momVecSmeared[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
-                energyPion[1] = std::sqrt(std::pow(momVecSmeared[3], 2) + std::pow(momVecSmeared[4], 2) + std::pow(momVecSmeared[5], 2) + std::pow(PhysicsConstants::mPiCh, 2));
+                ChargedVtxRec::bestTrackCombination(trk1Vec, trk2Vec, KchTmp, logger, mode);
 
-                for (Int_t k = 0; k < 3; k++)
-                  KchTmp[k] = momVecSmeared[k] + momVecSmeared[k + 3];
-
-                KchTmp[3] = energyPion[0] + energyPion[1];
-
-                KchTmp[4] = std::pow(KchTmp[0], 2) + std::pow(KchTmp[1], 2) + std::pow(KchTmp[2], 2);
-                KchTmp[5] = std::sqrt(std::pow(KchTmp[3], 2) - KchTmp[4]);
-                KchTmp[4] = std::sqrt(KchTmp[4]);
                 if (vtaken[0] <= -1 || std::abs(KchTmp[5] - PhysicsConstants::mK0) < std::abs(KchRec[5] - PhysicsConstants::mK0))
                 {
                   vtaken[0] = i;
                   vtaken[1] = j1;
                   vtaken[2] = j2;
+
                   for (Int_t k = 0; k < 6; k++)
                     KchRec[k] = KchTmp[k];
                   KchRec[6] = _xv[vtaken[0]];
                   KchRec[7] = _yv[vtaken[0]];
                   KchRec[8] = _zv[vtaken[0]];
 
-                  for (Int_t k = 0; k < 3; k++)
-                  {
-                    trk1[k] = momVecSmeared[k];
-                    trk2[k] = momVecSmeared[k + 3];
-                  }
-
-                  trk1[3] = std::sqrt(std::pow(trk1[0], 2) + std::pow(trk1[1], 2) + std::pow(trk1[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
-                  trk2[3] = std::sqrt(std::pow(trk2[0], 2) + std::pow(trk2[1], 2) + std::pow(trk2[2], 2) + std::pow(PhysicsConstants::mPiCh, 2));
+                  trk1 = trk1Vec;
+                  trk2 = trk2Vec;
 
                   found = true;
                 }
@@ -884,6 +844,56 @@ namespace KLOE
     {
       LOG_EVENT(_logger, err, logMessages[4], ErrorHandling::LogFiles::LogType::ERROR);
       return Int_t(err);
+    }
+  }
+
+  template <typename F, typename T>
+  void ChargedVtxRec<F, T>::calculateTrackTOF(std::vector<T> &vtaken, std::vector<T> &Asstrk, std::vector<T> &Asscl, std::vector<F> &Assleng, std::vector<F> &Enecl, std::vector<F> &Xcl, std::vector<F> &Ycl, std::vector<F> &Zcl, std::vector<F> &Tcl, std::vector<F> trk[2], std::vector<F> trkCluster[2], std::vector<F> trkDT[2]) const
+  {
+    for (int i = 1; i < 3; i++)
+    {
+      int trackNumber = vtaken[i];
+      int clusterTrackNumber = -1;
+      double trackLength = -1.;
+
+      if (trackNumber > -1)
+      {
+        auto it = std::find(Asstrk.begin(), Asstrk.end(), trackNumber);
+        if (it == Asstrk.end())
+          break;
+
+        int index = std::distance(Asstrk.begin(), it);
+
+        if (index >= Asscl.size() || index >= Assleng.size())
+          break;
+
+        clusterTrackNumber = Asscl[index];
+        trackLength = Assleng[index];
+
+        if (clusterTrackNumber <= 0)
+          break;
+
+        trkCluster[i - 1] = {Enecl[clusterTrackNumber - 1], 
+                              Xcl[clusterTrackNumber - 1], 
+                              Ycl[clusterTrackNumber - 1], 
+                              Zcl[clusterTrackNumber - 1], 
+                              Tcl[clusterTrackNumber - 1]};
+        
+        double trackMom = std::sqrt(std::pow(trk[i - 1][0], 2) + std::pow(trk[i - 1][1], 2) + std::pow(trk[i - 1][2], 2));
+        
+        // Calculation of DT for different hypotheses
+        double betaPi = trackMom / std::sqrt(std::pow(trackMom, 2) + std::pow(PhysicsConstants::mPiCh, 2));
+        double betaElectron = trackMom / std::sqrt(std::pow(trackMom, 2) + std::pow(PhysicsConstants::mElec, 2));
+        double betaMuon = trackMom / std::sqrt(std::pow(trackMom, 2) + std::pow(PhysicsConstants::mMuon, 2));
+
+        double tofPi = trackLength / (PhysicsConstants::cVel * betaPi);
+        double tofElectron = trackLength / (PhysicsConstants::cVel * betaElectron);
+        double tofMuon = trackLength / (PhysicsConstants::cVel * betaMuon);
+
+        trkDT[i - 1] = {trkCluster[i - 1][4] - tofPi, 
+                        trkCluster[i - 1][4] - tofElectron, 
+                        trkCluster[i - 1][4] - tofMuon};
+      }
     }
   }
 
