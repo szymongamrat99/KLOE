@@ -869,15 +869,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     if (hypoCode != KLOE::HypothesisCode::FOUR_PI && hypoCode != KLOE::HypothesisCode::OMEGAPI)
     {
       // pi+pi- mode
-      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger);
+      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger, 1);
 
       // pi+-e-+ mode
-      eventAnalysis->setMode(2); // Set mode to pi+-e-+
-      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.KchrecElectron, baseKin.trkElectron[0], baseKin.trkElectron[1], baseKin.vtakenElectron, logger);
+      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.KchrecElectron, baseKin.trkElectron[0], baseKin.trkElectron[1], baseKin.vtakenElectron, logger, 2);
 
       // pi+-muon-+ mode
-      eventAnalysis->setMode(3); // Set mode to pi+-muon-+
-      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.KchrecMuon, baseKin.trkMuon[0], baseKin.trkMuon[1], baseKin.vtakenMuon, logger);
+      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.KchrecMuon, baseKin.trkMuon[0], baseKin.trkMuon[1], baseKin.vtakenMuon, logger, 3);
     }
 
     pT1 = std::sqrt(std::pow(baseKin.trknew[0][0], 2) + std::pow(baseKin.trknew[0][1], 2)),
@@ -1090,6 +1088,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     }
     else if (hypoCode == KLOE::HypothesisCode::SIGNAL || hypoCode == KLOE::HypothesisCode::THREE_PI0 || hypoCode == KLOE::HypothesisCode::SEMILEPTONIC)
     {
+      // Calculate variables for tracks which hit calorimeter
+      // For initial double pion hypothesis
+      eventAnalysis->calculateTrackTOF(baseKin.vtaken, baseKin.Asstr, baseKin.Asscl, baseKin.Assleng, baseKin.Enecl, baseKin.Xcl, baseKin.Ycl, baseKin.Zcl, baseKin.Tcl, baseKin.trknew, baseKin.trknewCluster, baseKin.trknewDT);
+
+      // For initial electron-pion hypothesis
+      eventAnalysis->calculateTrackTOF(baseKin.vtaken, baseKin.Asstr, baseKin.Asscl, baseKin.Assleng, baseKin.Enecl, baseKin.Xcl, baseKin.Ycl, baseKin.Zcl, baseKin.Tcl, baseKin.trkElectron, baseKin.trkElectronCluster, baseKin.trkElectronDT);
+
+      // For initial muon-pion hypothesis
+      eventAnalysis->calculateTrackTOF(baseKin.vtaken, baseKin.Asstr, baseKin.Asscl, baseKin.Assleng, baseKin.Enecl, baseKin.Xcl, baseKin.Ycl, baseKin.Zcl, baseKin.Tcl, baseKin.trkMuon, baseKin.trkMuonCluster, baseKin.trkMuonDT);
+
       // -----------------------------------------------------------------------
       // Boost of the charged part of the decay
 
@@ -1768,9 +1776,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"goodClustersTriKinFit", baseKin.goodClustersTriKinFit},
           {"Asstr", baseKin.Asstr},
           {"vtakenElectron", baseKin.vtakenElectron},
-          {"vtakenMuon", baseKin.vtakenMuon},
-          {"trackWithCluster", baseKin.trackWithCluster},
-          {"clusterWithTrack", baseKin.clusterWithTrack}};
+          {"vtakenMuon", baseKin.vtakenMuon}};
 
       std::map<std::string, std::vector<Double_t>> floatArrays = {
           {"Xcl", baseKin.Xcl},
@@ -1889,7 +1895,18 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"trk2Electron", baseKin.trkElectron[1]},
           {"trk1Muon", baseKin.trkMuon[0]},
           {"trk2Muon", baseKin.trkMuon[1]},
-          {"trackClusterPathLength", baseKin.trackClusterPathLength}};
+          {"trk1Cluster", baseKin.trknewCluster[0]},
+          {"trk2Cluster", baseKin.trknewCluster[1]},
+          {"trk1ElectronCluster", baseKin.trkElectronCluster[0]},
+          {"trk2ElectronCluster", baseKin.trkElectronCluster[1]},
+          {"trk1MuonCluster", baseKin.trkMuonCluster[0]},
+          {"trk2MuonCluster", baseKin.trkMuonCluster[1]},
+          {"trk1DT", baseKin.trknewDT[0]},
+          {"trk2DT", baseKin.trknewDT[1]},
+          {"trk1ElectronDT", baseKin.trkElectronDT[0]},
+          {"trk2ElectronDT", baseKin.trkElectronDT[1]},
+          {"trk1MuonDT", baseKin.trkMuonDT[0]},
+          {"trk2MuonDT", baseKin.trkMuonDT[1]}};
 
       writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }

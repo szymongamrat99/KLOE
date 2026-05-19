@@ -493,7 +493,13 @@ namespace KLOE
         KchboostMuon,
         trkElectron[2],
         trkMuon[2],
-        trackClusterPathLength;
+        trackClusterPathLength,
+        trknewCluster[2],
+        trknewDT[2],
+        trkElectronCluster[2],
+        trkMuonCluster[2],
+        trkElectronDT[2],
+        trkMuonDT[2];
 
     std::vector<Int_t>
         vtaken,
@@ -627,6 +633,18 @@ namespace KLOE
       KchboostMuon.resize(10, 0.0);
       vtakenElectron.resize(3, 0);
       vtakenMuon.resize(3, 0);
+      trknewCluster[0].resize(5, -999.0);
+      trknewCluster[1].resize(5, -999.0);
+      trknewDT[0].resize(3, -999.0);
+      trknewDT[1].resize(3, -999.0);
+      trkElectronCluster[0].resize(5, -999.0);
+      trkElectronCluster[1].resize(5, -999.0);
+      trkElectronDT[0].resize(3, -999.0);
+      trkElectronDT[1].resize(3, -999.0);
+      trkMuonCluster[0].resize(5, -999.0);
+      trkMuonCluster[1].resize(5, -999.0);
+      trkMuonDT[0].resize(3, -999.0);
+      trkMuonDT[1].resize(3, -999.0);
     };
 
     /**
@@ -730,6 +748,18 @@ namespace KLOE
       trackWithCluster.clear();
       clusterWithTrack.clear();
       trackClusterPathLength.clear();
+      trknewCluster[0].clear();
+      trknewCluster[1].clear();
+      trknewDT[0].clear();
+      trknewDT[1].clear();
+      trkElectronCluster[0].clear();
+      trkElectronCluster[1].clear();
+      trkElectronDT[0].clear();
+      trkElectronDT[1].clear();
+      trkMuonCluster[0].clear();
+      trkMuonCluster[1].clear();
+      trkMuonDT[0].clear();
+      trkMuonDT[1].clear();
     }
   };
 }
