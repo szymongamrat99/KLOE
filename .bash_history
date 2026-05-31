@@ -493,3 +493,10 @@ htop
 cd ../../../
 cd hal/ALL_PHYS2_SEMILEPTONIC_NoSmearing/
 ls -hl
+git add .
+git commit -m "New semileptonic method done"
+git push
+ls ../root_files/kitt/
+ls
+ls ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+exit

@@ -270,7 +270,13 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   struct RegenKinVars
   {
-    Double_t rhoCharged, rhoNeutral, rCharged, rNeutral;
+    Double_t rhoCharged, rhoNeutral, rCharged, rNeutral, dtBoostLor;
+
+    Bool_t
+        rhoChargedRegion = false,
+        rhoNeutralRegion = false,
+        rChargedRegion = false,
+        rNeutralRegion = false;
   };
   std::vector<RegenKinVars> regen_kin_vars;
 
@@ -315,7 +321,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     TVector3 ipVector, neutralVtxVector, chargedVtxVector;
 
     // Set up geometry vectors
-    ipVector.SetXYZ(ip[0], ip[1], ip[2]);
+    ipVector.SetXYZ(0, 0, 0);//ip[0], ip[1], ip[2]);
     neutralVtxVector.SetXYZ(Knerec[6], Knerec[7], Knerec[8]);
     chargedVtxVector.SetXYZ(Kchboost[6], Kchboost[7], Kchboost[8]);
 
@@ -375,7 +381,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         if (*mctruth == 2)
         {
           event.time_diff["Regeneration"].push_back(baseKin.Dtboostlor);
-          regen_kin_vars.push_back({rhoCharged, rhoNeutral, rCharged, rNeutral});
+          regen_kin_vars.push_back({rhoCharged, rhoNeutral, rCharged, rNeutral, baseKin.Dtboostlor});
         }
 
         if (*mctruth == 3)
@@ -467,10 +473,20 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
           // (charged lub neutral) leży również w zakresie TEJ poprawki?
           // Jeśli tak, obszar cylindryczny i sferyczny nachodzą na siebie
           // i nie można jednoznacznie przypisać korekcji – pomijamy.
-          if (lc.variable == "R_Charged"   && kv.rhoCharged >= lc.rangeMin && kv.rhoCharged <= lc.rangeMax) continue;
-          if (lc.variable == "Rho_Charged" && kv.rCharged   >= lc.rangeMin && kv.rCharged   <= lc.rangeMax) continue;
-          if (lc.variable == "R_Neutral"   && kv.rhoNeutral >= lc.rangeMin && kv.rhoNeutral <= lc.rangeMax) continue;
-          if (lc.variable == "Rho_Neutral" && kv.rNeutral   >= lc.rangeMin && kv.rNeutral   <= lc.rangeMax) continue;
+          // if (lc.variable == "R_Charged"   && kv.rhoCharged >= lc.rangeMin && kv.rhoCharged <= lc.rangeMax) continue;
+          // if (lc.variable == "Rho_Charged" && kv.rCharged   >= lc.rangeMin && kv.rCharged   <= lc.rangeMax) continue;
+          // if (lc.variable == "R_Neutral"   && kv.rhoNeutral >= lc.rangeMin && kv.rhoNeutral <= lc.rangeMax) continue;
+          // if (lc.variable == "Rho_Neutral" && kv.rNeutral   >= lc.rangeMin && kv.rNeutral   <= lc.rangeMax) continue;
+
+          if (lc.variable == "R_Charged" && (kv.rhoCharged - 4.4) < 1.5 && kv.rCharged >= lc.rangeMin && kv.rCharged <= lc.rangeMax)
+            continue;
+          if (lc.variable == "Rho_Charged" && (kv.rCharged - 10.0) < 1.5 && kv.rhoCharged >= lc.rangeMin && kv.rhoCharged <= lc.rangeMax)
+            continue;
+
+          if (lc.variable == "R_Neutral" && (kv.rhoNeutral - 4.4) < 1.5 && kv.rNeutral >= lc.rangeMin && kv.rNeutral <= lc.rangeMax)
+            continue;
+          if (lc.variable == "Rho_Neutral" && (kv.rNeutral - 10.0) < 1.5 && kv.rhoNeutral >= lc.rangeMin && kv.rhoNeutral <= lc.rangeMax)
+            continue;
 
           w *= lc.func->Eval(x);
         }
@@ -901,7 +917,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   }
 
   residuals_hist->GetYaxis()->SetRangeUser(0, 1.2 * residuals_hist->GetMaximum());
-  residuals_hist->Fit("gaus");
+  // residuals_hist->Fit("gaus");
 
   c2->cd();
 

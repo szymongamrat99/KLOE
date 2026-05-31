@@ -25,9 +25,9 @@
     "enabled": true,
     "correctionFile": "config/regeneration_correction_functions.root",
     "corrections": [
-        { "functionName": "R_Charged_WeightFunction",   "variable": "R_Charged",   "rangeMin": 8.086,  "rangeMax": 12.914 },
+        { "functionName": "R_Charged_WeightFunction",   "variable": "R_Charged",   "rangeMin": 9.086,  "rangeMax": 10.914 },
         { "functionName": "Rho_Charged_WeightFunction", "variable": "Rho_Charged", "rangeMin": 21.895, "rangeMax": 29.105 },
-        { "functionName": "R_Neutral_WeightFunction",   "variable": "R_Neutral",   "rangeMin": 6.809,  "rangeMax": 13.774 },
+        { "functionName": "R_Neutral_WeightFunction",   "variable": "R_Neutral",   "rangeMin": 9.809,  "rangeMax": 10.774 },
         { "functionName": "Rho_Neutral_WeightFunction", "variable": "Rho_Neutral", "rangeMin": 21.530, "rangeMax": 29.172 }
     ]
 },
