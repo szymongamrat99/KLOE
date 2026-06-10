@@ -182,29 +182,29 @@ namespace KLOE
       for (UInt_t j = 0; j < time_diff[name.second].size(); j++)
       {
         if (ToLower(name.second) == "signal")
-          _frac[name.second]->Fill(time_diff[name.second][j], fit_function(time_diff_gen[j], 0, xx)); //! Filling Signal
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j], fit_function(time_diff_gen[j], 0, xx)); //! Filling Signal
         else if (name.second == "Regeneration" && !regen_event_weights.empty())
         {
-          _frac[name.second]->Fill(time_diff[name.second][j], regen_event_weights[j]);
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j], regen_event_weights[j]);
         }
         else
-        _frac[name.second]->Fill(time_diff[name.second][j]);
+        _frac_tmp[name.second]->Fill(time_diff[name.second][j]);
       }
 
       //! Using correction factor and efficiency
       if (ToLower(name.second) == "signal")
       {
-        _frac[name.second]->Scale(_frac[name.second]->GetEntries() / _frac[name.second]->Integral(0, _bin_number + 1));
+        _frac_tmp[name.second]->Scale(_frac_tmp[name.second]->GetEntries() / _frac_tmp[name.second]->Integral(0, _bin_number + 1));
 
         for (UInt_t j = 0; j < _bin_number; j++)
         {
-          _frac[name.second]->SetBinContent(j + 1, _frac[name.second]->GetBinContent(j + 1) * corr_vals[j]);
+          _frac_tmp[name.second]->SetBinContent(j + 1, _frac_tmp[name.second]->GetBinContent(j + 1) * corr_vals[j]);
         }
 
-        interference::bin_extraction(name.second, _frac[name.second]);
+        interference::bin_extraction(name.second, _frac_tmp[name.second]);
       }
       else
-        interference::bin_extraction(name.second, _frac[name.second]);
+        interference::bin_extraction(name.second, _frac_tmp[name.second]);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -214,16 +214,18 @@ namespace KLOE
         continue;
 
       for (Int_t j = 0; j < time_diff[name.second].size(); j++)
-        _frac[name.second]->Fill(time_diff[name.second][j]); //! Filling DATA
+        _frac_tmp[name.second]->Fill(time_diff[name.second][j]); //! Filling DATA
 
-      interference::bin_extraction(name.second, _frac[name.second]);
+      interference::bin_extraction(name.second, _frac_tmp[name.second]);
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     for (const auto &name : KLOE::channName)
-      _frac[name.second]->Reset("ICESM");
-
+    {
+      _frac[name.second] = _frac_tmp[name.second];
+      _frac_tmp[name.second]->Reset("ICESM");
+    }
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     Double_t value = 0;
@@ -244,7 +246,7 @@ namespace KLOE
       for (Int_t j = 0; j < _bin_number; j++)
       {
         // Pobieramy dt środka binu, aby wiedzieć w którym przedziale splitu jesteśmy
-        Double_t dt_bin = _frac[name.second]->GetBinCenter(j + 1);
+        Double_t dt_bin = _frac_tmp[name.second]->GetBinCenter(j + 1);
 
         // Magia: get_weight sam wie, czy użyć parametru pojedynczego, czy splitu
         Double_t weight = get_weight(name.second, dt_bin, xx);

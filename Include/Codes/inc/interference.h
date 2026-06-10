@@ -238,7 +238,7 @@ namespace KLOE
 
     std::map<TString, std::vector<Double_t>> b, e;
 
-    std::map<TString, TH1 *> _frac, _frac_data;
+    std::map<TString, TH1 *> _frac, _frac_data, _frac_tmp;
 
     TH1 *_data_sub, *_mc_sub;
 

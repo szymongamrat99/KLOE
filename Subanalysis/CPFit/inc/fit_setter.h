@@ -60,6 +60,7 @@ struct FitConfig
   Int_t strategy;
   DeltaTConfig deltaTConfig;
   Bool_t regenerationExclusionFlag;
+  std::array<Double_t, 3> regenerationSplit = {-30.0, 0.0, 30.0};
   RegenShapeCorrectionConfig regenShapeCorrection;
 
   Int_t getNumOfEnabledParameters() const
@@ -140,6 +141,12 @@ public:
     catch (const json::out_of_range &e)
     {
       throw std::runtime_error("ERROR: Missing regenerationExclusionFlag in config file: " + std::string(e.what()));
+    }
+
+    // Regeneration split boundaries (used in single A_regen mode)
+    if (_config.contains("regenerationSplit"))
+    {
+      fitConfig.regenerationSplit = _config.at("regenerationSplit").get<std::array<Double_t, 3>>();
     }
 
     // 2. Extract DeltaTConfig (DOPISANE)

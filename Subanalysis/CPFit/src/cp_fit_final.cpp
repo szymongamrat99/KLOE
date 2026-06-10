@@ -112,9 +112,24 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     nbins += 1; // Ensure an odd number of bins for symmetry around zero
 
   // Splits related to regeneration
-  Double_t left_split = cfg.parameters.at("A_regen_far_left").parameter_ranges[0][1];
-  Double_t center_split = cfg.parameters.at("A_regen_near_left").parameter_ranges[0][1];
-  Double_t right_split = cfg.parameters.at("A_regen_near_right").parameter_ranges[0][1];
+  // Single mode: jeden parametr A_regen bez parameter_ranges → granice z regenerationSplit
+  // Split mode:  4 parametry A_regen_far_left/near_left/near_right/far_right → granice z ich parameter_ranges
+  bool regenSplitMode = cfg.parameters.count("A_regen_far_left") &&
+                        cfg.parameters.at("A_regen_far_left").enabled;
+
+  Double_t left_split, center_split, right_split;
+  if (regenSplitMode)
+  {
+    left_split   = cfg.parameters.at("A_regen_far_left").parameter_ranges[0][1];
+    center_split = cfg.parameters.at("A_regen_near_left").parameter_ranges[0][1];
+    right_split  = cfg.parameters.at("A_regen_near_right").parameter_ranges[0][1];
+  }
+  else
+  {
+    left_split   = cfg.regenerationSplit[0];
+    center_split = cfg.regenerationSplit[1];
+    right_split  = cfg.regenerationSplit[2];
+  }
 
   Double_t split[3] = {left_split, center_split, right_split};
 
@@ -274,6 +289,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     Double_t rhoCharged, rhoNeutral, rCharged, rNeutral, dt;
   };
   std::vector<RegenKinVars> regen_kin_vars;
+
+  reader.SetEntry(0); // Ensure we start from the first entry
 
   while (reader.Next())
   {
@@ -497,13 +514,6 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     }
   }
 
-  std::cout << event.time_diff["Signal"].size() << " signal events after cuts." << std::endl;
-  std::cout << event.time_diff["Regeneration"].size() << " regeneration events after cuts." << std::endl;
-  std::cout << event.time_diff["Omega"].size() << " omega events after cuts." << std::endl;
-  std::cout << event.time_diff["3pi0"].size() << " 3pi0 events after cuts." << std::endl;
-  std::cout << event.time_diff["Semileptonic"].size() << " semileptonic events after cuts." << std::endl;
-  std::cout << event.time_diff["Other"].size() << " other background events after cuts." << std::endl;
-
   minimum->Minimize();
 
   std::vector<Double_t> par(num_of_vars), parErr(num_of_vars);
@@ -566,6 +576,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   for (auto const &name : KLOE::channName)
   {
+    event.getFracHistogram(name.second)->Reset("ICESM"); // Clear histogram before filling
+
     if (name.second == "Data" || name.second == "MC sum" || event.time_diff[name.second].size() == 0)
       continue;
 
@@ -583,28 +595,6 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         // k = BRCF * 1.09 * A_regen_split * s_val_split
         const Double_t brcf_regen = BRCF.BRcorrectionFactors["Regeneration"];
         Double_t dt_regen = event.time_diff["Regeneration"][j];
-        Int_t si;
-        TString pname;
-        if (dt_regen < event.left_x_split)
-        {
-          si = 0;
-          pname = "A_regen_far_left";
-        }
-        else if (dt_regen < event.center_x_split)
-        {
-          si = 1;
-          pname = "A_regen_near_left";
-        }
-        else if (dt_regen < event.right_x_split)
-        {
-          si = 2;
-          pname = "A_regen_near_right";
-        }
-        else
-        {
-          si = 3;
-          pname = "A_regen_far_right";
-        }
 
         Double_t w_shape = 1.0, w_shape_err = 0.0;
         if (!event.regen_event_weights.empty())
@@ -612,6 +602,21 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
           w_shape = event.regen_event_weights[j];
           w_shape_err = event.regen_weight_errors[j];
         }
+
+        TString pname;
+        Int_t si;
+        if (regenSplitMode)
+        {
+          if (dt_regen < event.left_x_split)       { si = 0; pname = "A_regen_far_left"; }
+          else if (dt_regen < event.center_x_split) { si = 1; pname = "A_regen_near_left"; }
+          else if (dt_regen < event.right_x_split)  { si = 2; pname = "A_regen_near_right"; }
+          else                                       { si = 3; pname = "A_regen_far_right"; }
+        }
+        else
+        {
+          si = 0; pname = "A_regen";
+        }
+
         Double_t w = brcf_regen * par[param_index_map[pname]] * w_shape;
         event.getFracHistogram("Regeneration")->Fill(dt_regen, w);
         // Accumulate relative shape-weight error squared per bin
@@ -740,6 +745,14 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   event.getFracHistogram("Other")->Scale(scaling_factor);
   event.getFracHistogram("Signal")->Scale(scaling_factor);
   event.getFracHistogram("MC sum")->Scale(scaling_factor);
+
+  std::cout << "Integral of Regeneration: " << event.getFracHistogram("Regeneration")->Integral(0, nbins + 1) << std::endl;
+  std::cout << "Integral of Omega: " << event.getFracHistogram("Omega")->Integral(0, nbins + 1) << std::endl;
+  std::cout << "Integral of 3pi0: " << event.getFracHistogram("3pi0")->Integral(0, nbins + 1) << std::endl;
+  std::cout << "Integral of Semileptonic: " << event.getFracHistogram("Semileptonic")->Integral(0, nbins + 1) << std::endl;
+  std::cout << "Integral of Other: " << event.getFracHistogram("Other")->Integral(0, nbins + 1) << std::endl;
+  std::cout << "Integral of Signal: " << event.getFracHistogram("Signal")->Integral(0, nbins + 1) << std::endl;
+  std::cout << "Integral of MC sum: " << event.getFracHistogram("MC sum")->Integral(0, nbins + 1) << std::endl;
 
   // ─── Purity & Efficiency calculations ────────────────────────────────────────
 
