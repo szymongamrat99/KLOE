@@ -21,6 +21,7 @@
 #include <TTreeReaderArray.h>
 #include <boost/progress.hpp>
 #include <TF1.h>
+#include <set>
 
 #include <BRCorrectionFactors.h>
 
@@ -84,7 +85,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   TTreeReaderArray<Double_t> KchrecFit(reader, "KchrecFit");
   TTreeReaderArray<Double_t> ipFit(reader, "ipFit");
 
-  TTreeReaderArray<Double_t> Kchboost(reader, "Kchboost");
+  TTreeReaderArray<Double_t> Kchrec(reader, "Kchrec");
   TTreeReaderArray<Double_t> ip(reader, "ip");
 
   TTreeReaderArray<Double_t> trk1Fit(reader, "trk1Fit");
@@ -134,8 +135,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   // prezentacyjnych (spójna propagacja błędów).
   std::array<KLOE::interference::RegenSplitScaling, 4> regenScaling = {{
       {1.0, 0.0}, // [0] far_left
-      {1.0, 0.0},   // [1] near_left
-      {1.0, 0.0},   // [2] near_right
+      {1.0, 0.0}, // [1] near_left
+      {1.0, 0.0}, // [2] near_right
       {1.0, 0.0}, // [3] far_right
   }};
   event.SetRegenScaling(regenScaling);
@@ -270,13 +271,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   struct RegenKinVars
   {
-    Double_t rhoCharged, rhoNeutral, rCharged, rNeutral, dtBoostLor;
-
-    Bool_t
-        rhoChargedRegion = false,
-        rhoNeutralRegion = false,
-        rChargedRegion = false,
-        rNeutralRegion = false;
+    Double_t rhoCharged, rhoNeutral, rCharged, rNeutral, dt;
   };
   std::vector<RegenKinVars> regen_kin_vars;
 
@@ -321,9 +316,9 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     TVector3 ipVector, neutralVtxVector, chargedVtxVector;
 
     // Set up geometry vectors
-    ipVector.SetXYZ(0, 0, 0);//ip[0], ip[1], ip[2]);
+    ipVector.SetXYZ(0,0,0);//ip[0], ip[1], ip[2]);
     neutralVtxVector.SetXYZ(Knerec[6], Knerec[7], Knerec[8]);
-    chargedVtxVector.SetXYZ(Kchboost[6], Kchboost[7], Kchboost[8]);
+    chargedVtxVector.SetXYZ(Kchrec[6], Kchrec[7], Kchrec[8]);
 
     // Calculate radius vectors
     TVector3 ipToCharged = chargedVtxVector - ipVector;
@@ -370,7 +365,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         no_cuts_sig[1].push_back(baseKin.Dtboostlor);
       }
 
-      if (global_cut && regeneration_cut)
+      if (global_cut)
       {
         if (*mctruth == 1)
         {
@@ -406,7 +401,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
       }
     }
 
-    if (*mcflag == 0 && global_cut && regeneration_cut)
+    if (*mcflag == 0 && global_cut)
     {
       event.time_diff["Data"].push_back(baseKin.Dtboostlor);
     }
@@ -414,90 +409,100 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     ++display;
   }
 
-  // ── Korekcja kształtu Regeneracji ────────────────────────────────────────────
-  if (cfg.regenShapeCorrection.enabled && !regen_kin_vars.empty())
+  if (cfg.regenShapeCorrection.enabled)
   {
     TFile *fCorr = TFile::Open((Paths::cpfit_dir + cfg.regenShapeCorrection.correctionFile), "READ");
-    if (!fCorr || fCorr->IsZombie())
+    if (fCorr && !fCorr->IsZombie())
     {
-      std::cerr << "ERROR: Cannot open correction file: "
-                << cfg.regenShapeCorrection.correctionFile << std::endl;
-    }
-    else
-    {
-      // Wczytaj wszystkie TF1 i ich zakresy
-      struct LoadedCorr
-      {
-        TF1 *func;
-        std::string variable;
-        Double_t rangeMin, rangeMax;
-      };
-      std::vector<LoadedCorr> loaded;
+      std::map<std::string, TH2 *> matrices;
       for (const auto &ce : cfg.regenShapeCorrection.corrections)
       {
-        TF1 *f = (TF1 *)fCorr->Get(ce.functionName.c_str());
-        if (!f)
+        TH2 *h = (TH2 *)fCorr->Get(ce.histName.c_str());
+        if (h)
         {
-          std::cerr << "WARNING: Function " << ce.functionName << " not found in correction file.\n";
-          continue;
+          h->SetDirectory(0);
+          matrices[ce.histName] = h;
         }
-        loaded.push_back({(TF1 *)f->Clone(), ce.variable, ce.rangeMin, ce.rangeMax});
+        else
+        {
+          std::cerr << "WARNING: TH2 " << ce.histName << " not found.\n";
+        }
       }
       fCorr->Close();
+      delete fCorr;
+      event.SetRegenCorrMatrices(cfg.regenShapeCorrection.corrections, matrices);
 
-      // Helper: wyciągnij wartość zmiennej kinematycznej
-      auto getKinVar = [](const RegenKinVars &k, const std::string &var) -> Double_t
-      {
-        if (var == "R_Charged")
-          return k.rCharged;
-        if (var == "Rho_Charged")
-          return k.rhoCharged;
-        if (var == "R_Neutral")
-          return k.rNeutral;
-        if (var == "Rho_Neutral")
-          return k.rhoNeutral;
+      // Wypełnienie wag per-zdarzenie z macierzy TH2
+      auto getKinVar = [](const RegenKinVars &k, const std::string &var) -> Double_t {
+        if (var == "R_Charged")   return k.rCharged;
+        if (var == "Rho_Charged") return k.rhoCharged;
+        if (var == "R_Neutral")   return k.rNeutral;
+        if (var == "Rho_Neutral") return k.rhoNeutral;
         return 0.0;
       };
 
       event.regen_event_weights.reserve(regen_kin_vars.size());
+      event.regen_weight_errors.reserve(regen_kin_vars.size());
+
       for (const auto &kv : regen_kin_vars)
       {
-        Double_t w = 1.0;
-        for (const auto &lc : loaded)
+        Double_t best_w = 1.0, best_err = std::numeric_limits<Double_t>::max();
+        bool applied = false;
+
+        for (const auto &ce : cfg.regenShapeCorrection.corrections)
         {
-          Double_t x = getKinVar(kv, lc.variable);
-          if (!(x >= lc.rangeMin && x <= lc.rangeMax))
-            continue; // zmienna poza zakresem poprawki – nie stosujemy
+          Double_t var = getKinVar(kv, ce.variable);
+          if (var < ce.rangeMin || var > ce.rangeMax) continue;
 
-          // Sprawdzenie niejednoznaczności: czy DRUGA zmienna tego samego układu
-          // (charged lub neutral) leży również w zakresie TEJ poprawki?
-          // Jeśli tak, obszar cylindryczny i sferyczny nachodzą na siebie
-          // i nie można jednoznacznie przypisać korekcji – pomijamy.
-          // if (lc.variable == "R_Charged"   && kv.rhoCharged >= lc.rangeMin && kv.rhoCharged <= lc.rangeMax) continue;
-          // if (lc.variable == "Rho_Charged" && kv.rCharged   >= lc.rangeMin && kv.rCharged   <= lc.rangeMax) continue;
-          // if (lc.variable == "R_Neutral"   && kv.rhoNeutral >= lc.rangeMin && kv.rhoNeutral <= lc.rangeMax) continue;
-          // if (lc.variable == "Rho_Neutral" && kv.rNeutral   >= lc.rangeMin && kv.rNeutral   <= lc.rangeMax) continue;
+          auto it = matrices.find(ce.histName);
+          if (it == matrices.end() || !it->second) continue;
 
-          if (lc.variable == "R_Charged" && (kv.rhoCharged - 4.4) < 1.5 && kv.rCharged >= lc.rangeMin && kv.rCharged <= lc.rangeMax)
-            continue;
-          if (lc.variable == "Rho_Charged" && (kv.rCharged - 10.0) < 1.5 && kv.rhoCharged >= lc.rangeMin && kv.rhoCharged <= lc.rangeMax)
-            continue;
+          Int_t bin2D = it->second->FindBin(kv.dt, var);
+          Double_t val = it->second->GetBinContent(bin2D);
+          Double_t err = it->second->GetBinError(bin2D);
+          if (val <= 0.0 || val > 15.0) continue;
 
-          if (lc.variable == "R_Neutral" && (kv.rhoNeutral - 4.4) < 1.5 && kv.rNeutral >= lc.rangeMin && kv.rNeutral <= lc.rangeMax)
-            continue;
-          if (lc.variable == "Rho_Neutral" && (kv.rNeutral - 10.0) < 1.5 && kv.rhoNeutral >= lc.rangeMin && kv.rhoNeutral <= lc.rangeMax)
-            continue;
-
-          w *= lc.func->Eval(x);
+          if (err < best_err)
+          {
+            best_err = err;
+            best_w   = val;
+            applied  = true;
+          }
         }
-        event.regen_event_weights.push_back(w);
+
+        std::cout << "Regen weight: " << best_w << " +/- " << best_err
+                  << (applied ? "" : " [not applied]") << std::endl;
+
+        event.regen_event_weights.push_back(applied ? best_w : 1.0);
+        event.regen_weight_errors.push_back(applied ? best_err : 0.0);
       }
 
-      for (auto &lc : loaded)
-        delete lc.func;
+      TCanvas *cMat = new TCanvas("cMat_check", "", 800, 600);
+      cMat->SetRightMargin(0.15);
+      std::set<std::string> drawn;
+      for (const auto &ce : cfg.regenShapeCorrection.corrections)
+      {
+        if (drawn.count(ce.histName)) continue;
+        drawn.insert(ce.histName);
+        auto it = matrices.find(ce.histName);
+        if (it == matrices.end() || !it->second) continue;
+        cMat->Clear();
+        it->second->SetTitle((ce.histName + ";#Delta t [#tau_{S}];kinematic var [cm]").c_str());
+        it->second->Draw("COLZ");
+        TString outName = Paths::cpfit_dir + Paths::img_dir + "corr_matrix_" + ce.histName + Paths::ext_img;
+        cMat->Print(outName);
+        std::cout << "INFO: Saved correction matrix image: " << outName << std::endl;
+      }
+      delete cMat;
     }
   }
-  // ─────────────────────────────────────────────────────────────────────────────
+
+  std::cout << event.time_diff["Signal"].size() << " signal events after cuts." << std::endl;
+  std::cout << event.time_diff["Regeneration"].size() << " regeneration events after cuts." << std::endl;
+  std::cout << event.time_diff["Omega"].size() << " omega events after cuts." << std::endl;
+  std::cout << event.time_diff["3pi0"].size() << " 3pi0 events after cuts." << std::endl;
+  std::cout << event.time_diff["Semileptonic"].size() << " semileptonic events after cuts." << std::endl;
+  std::cout << event.time_diff["Other"].size() << " other background events after cuts." << std::endl;
 
   minimum->Minimize();
 
@@ -556,6 +561,9 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   KLOE::BRCorrectionFactors BRCF;
 
+  // Per-bin sum of squared relative TH2 shape-weight errors for Regeneration
+  std::vector<Double_t> th2_rel_err2_per_bin(nbins + 2, 0.0);
+
   for (auto const &name : KLOE::channName)
   {
     if (name.second == "Data" || name.second == "MC sum" || event.time_diff[name.second].size() == 0)
@@ -598,13 +606,21 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
           pname = "A_regen_far_right";
         }
 
-        //Double_t w = brcf_regen * 1.09 * par[param_index_map[pname]] * regenScaling[si].val;
-
-        Double_t w = brcf_regen * 1.09 * par[param_index_map[pname]];
+        Double_t w_shape = 1.0, w_shape_err = 0.0;
         if (!event.regen_event_weights.empty())
-          w *= event.regen_event_weights[j];
-        
+        {
+          w_shape = event.regen_event_weights[j];
+          w_shape_err = event.regen_weight_errors[j];
+        }
+        Double_t w = brcf_regen * par[param_index_map[pname]] * w_shape;
         event.getFracHistogram("Regeneration")->Fill(dt_regen, w);
+        // Accumulate relative shape-weight error squared per bin
+        if (0)//w_shape > 1e-12)
+        {
+          Int_t ibin = event.getFracHistogram("Regeneration")->FindBin(dt_regen);
+          if (ibin >= 1 && ibin <= (Int_t)nbins)
+            th2_rel_err2_per_bin[ibin] += std::pow(w_shape_err / w_shape, 2.0);
+        }
       }
       else
       {
@@ -644,7 +660,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
       const KLOE::interference::RegenSplitScaling &rs = regenScaling[getSplitIdx(hRegen->GetBinCenter(i))];
       Double_t rel_sys = 0.0;
       if (std::abs(brcf) > 1e-12 && std::abs(rs.val) > 1e-12)
-        rel_sys = std::sqrt(std::pow(brcf_err / brcf, 2) + std::pow(rs.err / rs.val, 2));
+        rel_sys = std::sqrt(std::pow(brcf_err / brcf, 2) + std::pow(rs.err / rs.val, 2) + th2_rel_err2_per_bin[i]);
       hRegen->SetBinError(i, std::sqrt(stat_err * stat_err + std::pow(rel_sys * content, 2)));
     }
   }
@@ -686,7 +702,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Double_t sig_norm = get_channel_norm("Signal");
   Double_t sig_integral = event.getFracHistogram("Signal")->Integral(0, nbins + 1);
   if (sig_norm > 0.0 && sig_integral > 0.0)
-    event.getFracHistogram("Signal")->Scale(BRCF.BRcorrectionFactors["Signal"] * 1.09 * sig_norm * event.getFracHistogram("Signal")->GetEntries() / sig_integral);
+    event.getFracHistogram("Signal")->Scale(BRCF.BRcorrectionFactors["Signal"] * sig_norm * event.getFracHistogram("Signal")->GetEntries() / sig_integral);
 
   if (check_corr == true)
   {
@@ -702,7 +718,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     Double_t norm = get_channel_norm(ch);
     Double_t integral = event.getFracHistogram(ch)->Integral(0, nbins + 1);
     if (norm > 0.0 && integral > 0.0)
-      event.getFracHistogram(ch)->Scale(BRCF.BRcorrectionFactors[ch] * norm * 1.09 * event.getFracHistogram(ch)->GetEntries() / integral);
+      event.getFracHistogram(ch)->Scale(BRCF.BRcorrectionFactors[ch] * norm * event.getFracHistogram(ch)->GetEntries() / integral);
     else
       event.getFracHistogram(ch)->Scale(0.0); // wyłączony kanał → zerowy
   }
@@ -715,6 +731,15 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
     event.getFracHistogram("MC sum")->Add(event.getFracHistogram(name.second));
   }
+
+  double scaling_factor = 1.09;
+  event.getFracHistogram("Regeneration")->Scale(scaling_factor);
+  event.getFracHistogram("Omega")->Scale(scaling_factor);
+  event.getFracHistogram("3pi0")->Scale(scaling_factor);
+  event.getFracHistogram("Semileptonic")->Scale(scaling_factor);
+  event.getFracHistogram("Other")->Scale(scaling_factor);
+  event.getFracHistogram("Signal")->Scale(scaling_factor);
+  event.getFracHistogram("MC sum")->Scale(scaling_factor);
 
   // ─── Purity & Efficiency calculations ────────────────────────────────────────
 

@@ -500,3 +500,100 @@ ls ../root_files/kitt/
 ls
 ls ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
 exit
+cd Subanalysis/CPFit/config/
+ls
+ssh tier1-cnaf 
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+exit
+htop
+cd ../root_files/hal/
+ls
+cd ALL_PHYS2_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+cd ../../../
+cd KLOE/
+git add .
+git commit -m "New function"
+git push
+./execute_analysis.sh 
+cd Subanalysis/CPFit/img/
+ls
+ls -l
+cd ../../../
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+cd Subanalysis/CPFit/config/
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+git pull
+cd ..
+git clone https://github.com/szymongamrat99/python-kloe-analysis .
+git clone https://github.com/szymongamrat99/python-kloe-analysis
+cd python-kloe-analysis/
+ls
+cd scripts/
+ls
+cd results/
+ls
+cd ..
+root
+ls
+root
+root-config --incdir
+root
+ls ../../CNAF_Produced_Files/root_files/2026-04-17/Signal/
+root
+cd ..
+git add .
+git commit -m "Created weighting matrix for the regeneration"
+git push
+cd scripts/
+root
+git add .
+cd ..
+git commit -m "Added new"
+git push
+cd scripts/
+root
+root-config
+root-config --incdir
+root
+cd Subanalysis/CPFit/config/
+cp /data/ssd/gamrat/python-kloe-analysis/scripts/results/* .
+cd../../
+cd ..
+cd ../../\
+cd ../../
+./execute_analysis.sh 
+cd ../../
+cd gamrat/KLOE/
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+cd scripts/
+root

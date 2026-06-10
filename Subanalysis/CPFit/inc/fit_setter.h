@@ -30,19 +30,22 @@ struct DeltaTConfig
   Double_t resolution;
 };
 
-struct RegenCorrectionEntry
+#ifndef REGEN_KIN_RANGE_DEFINED
+#define REGEN_KIN_RANGE_DEFINED
+struct RegenKinRange
 {
-  std::string functionName; // nazwa TF1 w ROOT file
-  std::string variable;     // R_Charged | Rho_Charged | R_Neutral | Rho_Neutral
-  Double_t rangeMin;
-  Double_t rangeMax;
+  std::string variable;   // "R_Charged" | "Rho_Charged" | "R_Neutral" | "Rho_Neutral"
+  std::string histName;   // nazwa TH2 w pliku ROOT (klucz osi: deltaT x var)
+  Double_t rangeMin;      // dolna granica zmiennej kinematycznej
+  Double_t rangeMax;      // górna granica zmiennej kinematycznej
 };
+#endif
 
 struct RegenShapeCorrectionConfig
 {
   bool enabled = false;
-  std::string correctionFile; // ścieżka relatywna do Paths::cpfit_dir
-  std::vector<RegenCorrectionEntry> corrections;
+  std::string correctionFile;
+  std::vector<RegenKinRange> corrections;
 };
 
 struct FitConfig
@@ -243,8 +246,8 @@ public:
       {
         for (const auto &c : rsc.at("corrections"))
         {
-          RegenCorrectionEntry entry;
-          entry.functionName = c.at("functionName").get<std::string>();
+          RegenKinRange entry;
+          entry.histName = c.at("histName").get<std::string>();
           entry.variable = c.at("variable").get<std::string>();
           entry.rangeMin = c.at("rangeMin").get<Double_t>();
           entry.rangeMax = c.at("rangeMax").get<Double_t>();

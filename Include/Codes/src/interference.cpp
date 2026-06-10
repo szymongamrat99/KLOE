@@ -184,7 +184,9 @@ namespace KLOE
         if (ToLower(name.second) == "signal")
           _frac[name.second]->Fill(time_diff[name.second][j], fit_function(time_diff_gen[j], 0, xx)); //! Filling Signal
         else if (name.second == "Regeneration" && !regen_event_weights.empty())
+        {
           _frac[name.second]->Fill(time_diff[name.second][j], regen_event_weights[j]);
+        }
         else
         _frac[name.second]->Fill(time_diff[name.second][j]);
       }
@@ -260,16 +262,16 @@ namespace KLOE
         }
 
         // k = BRCF * 1.09 * weight * s_val
-        Double_t k = brcf_val * 1.09 * weight * s_val;
+        Double_t k = 1.09 * brcf_val * weight * s_val;
 
         // Propagacja błędu: dk^2 = (brcf_err * 1.09 * weight * s_val)^2
         //                         + (brcf_val * 1.09 * weight * s_err)^2
         // (błąd wagi pochodzi z minimizera, nie propagujemy go tu ręcznie)
-        Double_t dk = 1.09 * weight * std::sqrt(std::pow(brcf_err * s_val, 2) +
+        Double_t dk = weight * std::sqrt(std::pow(brcf_err * s_val, 2) +
                                                  std::pow(brcf_val * s_err, 2));
 
         b["MC sum"][j] += k * b[name.second][j];
-        e["MC sum"][j] += std::pow(dk * b[name.second][j], 2) + std::pow(k * e[name.second][j], 2);
+        e["MC sum"][j] += std::pow(k * e[name.second][j], 2);
       }
     }
 
