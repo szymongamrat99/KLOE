@@ -15,7 +15,6 @@
 #include <clear_variables.h>
 #include <kloe_class.h>
 
-int regenrejec(TChain &, KLOE::pm00 &, Controls::DataType &, ErrorHandling::ErrorLogs &);
-// int plots(TChain &, KLOE::pm00 &, Controls::DataType &, ErrorHandling::ErrorLogs &);
+int regeneration_correction_factors(TChain &, KLOE::pm00 &, Controls::DataType &, ErrorHandling::ErrorLogs &);
 
 #endif //! REGENREJEC_HPP

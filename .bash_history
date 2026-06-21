@@ -597,3 +597,54 @@ cd gamrat/KLOE/
 ./execute_analysis.sh 
 cd scripts/
 root
+cd scripts/
+ls
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+.q
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+git add .
+git commit -m "Single regeneration scaling"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Single regeneration scaling"
+git push
+./execute_analysis.sh 
+rot
+root
+./execute_analysis.sh 
+root
+./execute_analysis.sh 
+cd scripts/
+root
+cp /data/ssd/gamrat/python-kloe-analysis/scripts/results/* .
+root
+./execute_analysis.sh 
+1
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+cd build/
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+make -j8
+./execute_analysis.sh
+make -j8
+./execute_analysis.sh

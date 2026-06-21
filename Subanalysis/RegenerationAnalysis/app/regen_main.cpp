@@ -59,7 +59,7 @@ int Regen_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt, 
     case Controls::Regen::REGEN_REJEC_TEST:
     {
       auto start = std::chrono::system_clock::now();
-      regenrejec(chain, Obj, dataTypeOpt, logger);
+      // regenrejec(chain, Obj, dataTypeOpt, logger);
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
       break;
@@ -67,7 +67,7 @@ int Regen_main(TChain &chain, KLOE::pm00 &Obj, Controls::DataType &dataTypeOpt, 
     case Controls::Regen::PLOTS:
     {
       auto start = std::chrono::system_clock::now();
-      // plots(chain, Obj, dataTypeOpt, logger);
+      regeneration_correction_factors(chain, Obj, dataTypeOpt, logger);
       auto end = std::chrono::system_clock::now();
       std::chrono::duration<double> elapsed_seconds = end - start;
       break;

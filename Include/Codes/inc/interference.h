@@ -91,8 +91,14 @@ namespace KLOE
                                       bin_number,
                                       x_min,
                                       x_max);
+        _frac_tmp[name.second] = new TH1D("Fitted histo tmp " + name.second,
+                                      "",
+                                      bin_number,
+                                      x_min,
+                                      x_max);
 
         _frac[name.second]->SetLineColor(KLOE::channColor.at(name.second));
+        _frac_tmp[name.second]->SetLineColor(KLOE::channColor.at(name.second));
       }
 
       // Fractions of MC for 1/2 MC - 1/2 fake DATA fit

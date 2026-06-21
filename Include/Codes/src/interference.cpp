@@ -188,7 +188,7 @@ namespace KLOE
           _frac_tmp[name.second]->Fill(time_diff[name.second][j], regen_event_weights[j]);
         }
         else
-        _frac_tmp[name.second]->Fill(time_diff[name.second][j]);
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j]);
       }
 
       //! Using correction factor and efficiency
@@ -200,12 +200,11 @@ namespace KLOE
         {
           _frac_tmp[name.second]->SetBinContent(j + 1, _frac_tmp[name.second]->GetBinContent(j + 1) * corr_vals[j]);
         }
-
-        interference::bin_extraction(name.second, _frac_tmp[name.second]);
       }
-      else
-        interference::bin_extraction(name.second, _frac_tmp[name.second]);
 
+      _frac_tmp[name.second]->Scale(1.09); // Global scaling factor to match the number of events in data (to be optimized by the fit)
+
+      interference::bin_extraction(name.second, _frac_tmp[name.second]);
       /////////////////////////////////////////////////////////////////////////////////////////////
 
     skip_data:
@@ -219,13 +218,6 @@ namespace KLOE
       interference::bin_extraction(name.second, _frac_tmp[name.second]);
     }
 
-    /////////////////////////////////////////////////////////////////////////////////////////////
-
-    for (const auto &name : KLOE::channName)
-    {
-      _frac[name.second] = _frac_tmp[name.second];
-      _frac_tmp[name.second]->Reset("ICESM");
-    }
     /////////////////////////////////////////////////////////////////////////////////////////////
 
     Double_t value = 0;
@@ -249,7 +241,9 @@ namespace KLOE
         Double_t dt_bin = _frac_tmp[name.second]->GetBinCenter(j + 1);
 
         // Magia: get_weight sam wie, czy użyć parametru pojedynczego, czy splitu
-        Double_t weight = get_weight(name.second, dt_bin, xx);
+        Double_t weight = 1.0;
+        weight = get_weight(name.second, dt_bin, xx);
+
 
         Double_t brcf_val = BRCF.BRcorrectionFactors[name.second];
         Double_t brcf_err = BRCF.BRcorrectionFactors_err[name.second];
@@ -264,22 +258,49 @@ namespace KLOE
         }
 
         // k = BRCF * 1.09 * weight * s_val
-        Double_t k = 1.09 * brcf_val * weight * s_val;
+        Double_t k = brcf_val * weight * s_val;
 
         // Propagacja błędu: dk^2 = (brcf_err * 1.09 * weight * s_val)^2
         //                         + (brcf_val * 1.09 * weight * s_err)^2
         // (błąd wagi pochodzi z minimizera, nie propagujemy go tu ręcznie)
         Double_t dk = weight * std::sqrt(std::pow(brcf_err * s_val, 2) +
-                                                 std::pow(brcf_val * s_err, 2));
+                                         std::pow(brcf_val * s_err, 2));
 
-        b["MC sum"][j] += k * b[name.second][j];
-        e["MC sum"][j] += std::pow(k * e[name.second][j], 2);
+        Double_t b_val = k * b[name.second][j];
+        Double_t e_val = std::sqrt(std::pow(k * e[name.second][j], 2) + std::pow(dk * b[name.second][j], 2));
+
+        b["MC sum"][j] += b_val;
+        e["MC sum"][j] += std::pow(e_val, 2);
+
+        _frac_tmp[name.second]->SetBinContent(j + 1, b_val);
+        _frac_tmp[name.second]->SetBinError(j + 1, e_val);
       }
     }
 
     for (Int_t i = 0; i < _bin_number; i++)
     {
-      value += std::pow(b["Data"][i] - b["MC sum"][i], 2) / (std::pow(e["Data"][i], 2) + (e["MC sum"][i]));
+      value += std::pow(b["Data"][i] - b["MC sum"][i], 2) / (std::pow(e["Data"][i], 2) + e["MC sum"][i]);
+
+      _frac_tmp["Data"]->SetBinContent(i + 1, b["Data"][i]);
+      _frac_tmp["Data"]->SetBinError(i + 1, e["Data"][i]);
+
+      _frac_tmp["MC sum"]->SetBinContent(i + 1, b["MC sum"][i]);
+      _frac_tmp["MC sum"]->SetBinError(i + 1, std::sqrt(e["MC sum"][i]));
+    }
+
+    for (const auto &name : KLOE::channName)
+    {
+      _frac[name.second] = (TH1D *)_frac_tmp[name.second]->Clone("Fitted histo " + name.second);
+
+      // 1. Czyszczenie zawartości i błędów
+      _frac_tmp[name.second]->Reset("ICESM");
+
+      // 2. KLUCZOWE: Całkowite wyczyszczenie i odświeżenie struktury Sumw2
+      if (_frac_tmp[name.second]->GetSumw2N() > 0)
+      {
+        _frac_tmp[name.second]->GetSumw2()->Set(0); // Zerowanie alokacji tablicy wag
+        _frac_tmp[name.second]->Sumw2();            // Re-inicjalizacja czystej struktury
+      }
     }
 
     return value;
