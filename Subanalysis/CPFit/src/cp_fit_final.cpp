@@ -26,6 +26,7 @@
 #include <BRCorrectionFactors.h>
 
 #include "../inc/fit_setter.h"
+#include "../../RegenerationAnalysis/inc/regen_frac_fit.h"
 
 #include "../inc/cpfit.hpp"
 
@@ -53,6 +54,12 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
     delete eff_signal;
   }
+
+  // =============================================================================
+
+  // Preparation of the RegenerationFractionFit object to calculate regeneration weights
+  std::string weightsFilePath = (std::string)Paths::regen_analysis_dir + (std::string)Paths::result_dir + "regeneration_analysis_results.root";
+  RegenerationFractionFit regen_weights(weightsFilePath);
 
   // ===========================================================================
 
@@ -353,6 +360,13 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     double rCharged = ipToCharged.Mag();
     double rNeutral = ipToNeutral.Mag();
 
+    std::map<HistogramType, double> radiusMap = {
+        {HistogramType::RHO_CHARGED, rhoCharged},
+        {HistogramType::RHO_NEUTRAL, rhoNeutral},
+        {HistogramType::R_CHARGED, rCharged},
+        {HistogramType::R_NEUTRAL, rNeutral}
+    };
+
     Double_t ch_Spherical_Mean = 10.4941, ch_Spherical_Sigma = 0.957544;
     Double_t ne_Spherical_Mean = 10.3769, ne_Spherical_Sigma = 1.23898;
     Double_t ch_Cylindrical_Mean = 4.84397, ch_Cylindrical_Sigma = 0.877508;
@@ -400,15 +414,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         {
           event.time_diff["Regeneration"].push_back(baseKin.Dtboostlor);
 
-          RegenKinVars vars;
-
-          vars.rhoNeutral = rhoNeutral;
-          vars.rhoCharged = rhoCharged;
-          vars.rNeutral = rNeutral;
-          vars.rCharged = rCharged;
-          vars.dt = baseKin.Dtboostlor;
-
-          regen_kin_vars.push_back(vars);
+          if (cfg.regenShapeCorrection.enabled)
+            event.regen_event_weights.push_back(regen_weights.GetContinuousRegenerationWeight(baseKin.Dtboostlor, radiusMap));
         }
 
         if (*mctruth == 3)
@@ -439,94 +446,6 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     }
 
     ++display;
-  }
-
-
-
-  if (cfg.regenShapeCorrection.enabled)
-  {
-    TFile *fCorr = TFile::Open((Paths::cpfit_dir + cfg.regenShapeCorrection.correctionFile), "READ");
-    if (fCorr && !fCorr->IsZombie())
-    {
-      // Zakresy regionów zdefiniowane w kodzie (identycznie jak w correction_application.C)
-      // config steruje tylko włączeniem/wyłączeniem i ścieżką do pliku z macierzami
-      std::map<std::string, TH2 *> matrices;
-      TH2 *hSph = (TH2 *)fCorr->Get("h_ratio_R_dt");
-      TH2 *hCyl = (TH2 *)fCorr->Get("h_ratio_rho_dt");
-      if (hSph) { hSph->SetDirectory(0); matrices["spherical"]   = hSph; }
-      else std::cerr << "WARNING: TH2 h_ratio_R_dt (spherical) not found.\n";
-      if (hCyl) { hCyl->SetDirectory(0); matrices["cylindrical"] = hCyl; }
-      else std::cerr << "WARNING: TH2 h_ratio_rho_dt (cylindrical) not found.\n";
-      fCorr->Close();
-      delete fCorr;
-
-      event.regen_event_weights.reserve(regen_kin_vars.size());
-      event.regen_weight_errors.reserve(regen_kin_vars.size());
-
-      for (const auto &kv : regen_kin_vars)
-      {
-        bool CylBPCharged = (kv.rhoCharged > 3.60227 && kv.rhoCharged < 5.4366);
-        bool CylDCCharged = (kv.rhoCharged > 23.4879 && kv.rhoCharged < 26.8633);
-        bool SphBPCharged = (kv.rCharged   > 8.57729 && kv.rCharged   < 12.3962);
-        bool CylBPNeutral = (kv.rhoNeutral > 3.34375 && kv.rhoNeutral < 5.41215);
-        bool CylDCNeutral = (kv.rhoNeutral > 23.3831 && kv.rhoNeutral < 26.8272);
-        bool SphBPNeutral = (kv.rNeutral   > 8.91582 && kv.rNeutral   < 12.334);
-
-        int n_regions = (int)CylBPCharged + (int)CylDCCharged + (int)SphBPCharged
-                      + (int)CylBPNeutral + (int)CylDCNeutral + (int)SphBPNeutral;
-
-        Double_t best_w = 1.0, best_err = std::numeric_limits<Double_t>::max();
-        bool applied = false;
-
-        if (n_regions >= 1)
-        {
-          struct Candidate { TH2 *h; Double_t var; };
-          std::vector<Candidate> candidates;
-          if (CylBPCharged || CylDCCharged) candidates.push_back({matrices["cylindrical"], kv.rhoCharged});
-          if (SphBPCharged)                 candidates.push_back({matrices["spherical"],    kv.rCharged});
-          if (CylBPNeutral || CylDCNeutral) candidates.push_back({matrices["cylindrical"], kv.rhoNeutral});
-          if (SphBPNeutral)                 candidates.push_back({matrices["spherical"],    kv.rNeutral});
-
-          for (const auto &cand : candidates)
-          {
-            if (!cand.h) continue;
-            Int_t bin2D = cand.h->FindBin(kv.dt, cand.var);
-            Double_t val = cand.h->GetBinContent(bin2D);
-            Double_t err = cand.h->GetBinError(bin2D);
-            Double_t rel_err = (val > 0.0) ? err / val : std::numeric_limits<Double_t>::max();
-            if (val <= 0.0 || val > 15.0) continue;
-            if (rel_err > 2.5) continue; // Odrzucamy korekcje z nieakceptowalnym błędem względnym
-            if (rel_err < best_err) { best_err = rel_err; best_w = val; applied = true; }
-          }
-        }
-
-        event.regen_event_weights.push_back(applied ? best_w : 1.0);
-        event.regen_weight_errors.push_back(applied ? best_err * best_w : 0.0);
-
-        if (applied)
-        {
-          hEffWeightVsRelErr->Fill(applied ? best_w : 1.0, applied ? best_err : 0.0); // Profil wag korekcji względem ich błędów względnych
-          hEffErrorProfile->Fill(kv.dt, applied ? best_err : 0.0); // Profil błędów korekcji względem deltaT
-        }
-      }
-
-      TCanvas *cMat = new TCanvas("cMat_check", "", 800, 600);
-      cMat->SetRightMargin(0.15);
-      for (const auto &kv : matrices)
-      {
-        if (kv.first == "spherical")
-          kv.second->SetTitle(";#Deltat [#tau_{S}];R [cm]");
-        else if (kv.first == "cylindrical")
-          kv.second->SetTitle(";#Deltat [#tau_{S}];#rho [cm]");
-
-        cMat->Clear();
-        kv.second->Draw("COLZ");
-        TString outName = Paths::cpfit_dir + Paths::img_dir + "corr_matrix_" + kv.first + Paths::ext_img;
-        cMat->Print(outName);
-        std::cout << "INFO: Saved correction matrix image: " << outName << std::endl;
-      }
-      delete cMat;
-    }
   }
 
   minimum->Minimize();

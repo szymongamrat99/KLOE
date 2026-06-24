@@ -19,5 +19,9 @@ int regeneration_correction_factors(TChain &chain, KLOE::pm00 &Obj, Controls::Da
 
   delete reader;
 
+  std::string weightsFilePath = (std::string)Paths::regen_analysis_dir + (std::string)Paths::result_dir + "regeneration_analysis_results.root";
+  RegenerationFractionFit fit_test(weightsFilePath);
+
+  std::cout << "Test regeneration weight (DC, radius=50 cm): " << fit_test.GetContinuousRegenerationWeight(30.0, 40.0) << std::endl;
   return 0;
 }

@@ -648,3 +648,8 @@ make -j8
 ./execute_analysis.sh
 make -j8
 ./execute_analysis.sh
+git add .
+git commit -m "Last version"
+git push
+git checkout -b feat/1d-corrections-regeneration
+./execute_analysis.sh 

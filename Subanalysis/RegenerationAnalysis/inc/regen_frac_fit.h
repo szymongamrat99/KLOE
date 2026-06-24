@@ -6,6 +6,7 @@
 
 #include <TTreeReader.h>
 #include <TH1D.h>
+#include <TH2D.h>
 #include <TVector3.h>
 
 #include <TTreeReaderValue.h>
@@ -75,6 +76,7 @@ class RegenerationFractionFit
 {
 public:
   RegenerationFractionFit(TTreeReader *reader);
+  RegenerationFractionFit(std::string weightsFilePath);
   ~RegenerationFractionFit();
 
   void LoadConfig();
@@ -83,6 +85,7 @@ public:
   std::pair<double, double> GetRegenerationWeight(HistogramType histType, double radius) const;
   std::pair<double, double> GetRegenerationWeight(double radius) const;
   double GetContinuousRegenerationWeight(double dt, double radius);
+  double GetContinuousRegenerationWeight(double dt, std::map<HistogramType, double> radius);
 
 private:
   using json = nlohmann::json;
@@ -95,6 +98,8 @@ private:
   std::map<HistogramType, std::unordered_map<std::string, TH1D *>> fHistos;
   std::map<HistogramType, TH1D *> fRegenerationWeights;
   std::map<std::string, TH1D *> fTimeDiffHist;
+  std::map<std::string, TH2D *> fRhovsRChargedHist, fRhovsRNeutralHist;
+
   std::map<std::string, TTreeReaderValue<Double_t> *> fReaderFloat;
   std::map<std::string, TTreeReaderValue<Int_t> *> fReaderInteger;
 
@@ -113,7 +118,7 @@ private:
   void _ResetHistograms();
   void _SetupJson(json &inputConfig,json &outputConfig, std::string section) const;
 
-  double _Chi2FitRegenerationFraction(double *x, double *par);
+  std::pair<TF1*, HistogramType> _GetFitFuncByDt(double dt);
 
   void _FitContinuousWeightFunction(HistogramType histType);
 
@@ -143,6 +148,7 @@ private:
   bool _checkRegenerationLimits(double xLeft, double xRight) const;
   HistogramType _checkRegenerationLimitsTypes(double radius) const;
   HistogramType _checkRegenerationLimitsTypesDeltaT(double dt) const;
+  TFile *fFileWeights;
 
   void _calculateRegenerationWeights();
 

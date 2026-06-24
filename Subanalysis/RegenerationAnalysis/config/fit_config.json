@@ -41,40 +41,40 @@
     "DCWallCenter": [-0.083, -1.028, 0.0],
     "DCWallBounds": {
       "charged": {
-        "bottom": 22.00,
-        "top": 50.0
+        "bottom": 19.49,
+        "top": 36.86
       },
       "neutral": {
-        "bottom": 22.00,
-        "top": 50.0
+        "bottom": 19.38,
+        "top": 36.86
       }
     },
     "sphericalBeamPipeBound": {
       "charged": {
-        "bottom": 7.58,
-        "top": 18.0
+        "bottom": 5.58,
+        "top": 16.0
       },
       "neutral": {
-        "bottom": 7.92,
-        "top": 18.0
+        "bottom": 5.92,
+        "top": 16.0
       }
     },
     "cylindricalBeamPipeBound": {
       "charged": {
-        "bottom": 2.60,
-        "top": 6.44
+        "bottom": 3.60,
+        "top": 5.44
       },
       "neutral": {
-        "bottom": 2.34,
-        "top": 6.41
+        "bottom": 3.34,
+        "top": 5.41
       }
     }
   },
   "generalSettings": {
-    "isSignalWeighted": true,
+    "isSignalWeighted": false,
     "isRegenerationWeighted": true,
     "onlyKLong": false,
-    "lumiFactor": 1.09,
-    "weightErrorLimit": 10.0
+    "lumiFactor": 1.00,
+    "weightErrorLimit": 100.0
   }
 }
