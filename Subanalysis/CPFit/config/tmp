@@ -1,0 +1,41 @@
+"A_regen_far_left": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 5.0,
+      "step": 0.01,
+      "channels": ["Regeneration"],
+      "parameter_ranges": [[-300.0, -30.0]],
+      "fixed": true
+    },
+    "A_regen_far_right": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 5.0,
+      "step": 0.01,
+      "channels": ["Regeneration"],
+      "parameter_ranges": [[30.0, 300.0]],
+      "fixed": true
+    },
+    "A_regen_near_left": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 1.0,
+      "limitUpper": 5.0,
+      "step": 0.01,
+      "channels": ["Regeneration"],
+      "parameter_ranges": [[-30.0, 0.0]],
+      "fixed": true
+    },
+
+
+"A_regen": {
+      "enabled": true,
+      "initialValue": 1.0,
+      "limitLower": 0.9,
+      "limitUpper": 1.2,
+      "step": 0.01,
+      "channels": ["Regeneration"],
+      "fixed": true
+    },

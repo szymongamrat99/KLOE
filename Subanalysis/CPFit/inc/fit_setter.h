@@ -30,19 +30,22 @@ struct DeltaTConfig
   Double_t resolution;
 };
 
-struct RegenCorrectionEntry
+#ifndef REGEN_KIN_RANGE_DEFINED
+#define REGEN_KIN_RANGE_DEFINED
+struct RegenKinRange
 {
-  std::string functionName; // nazwa TF1 w ROOT file
-  std::string variable;     // R_Charged | Rho_Charged | R_Neutral | Rho_Neutral
-  Double_t rangeMin;
-  Double_t rangeMax;
+  std::string variable;   // "R_Charged" | "Rho_Charged" | "R_Neutral" | "Rho_Neutral"
+  std::string histName;   // nazwa TH2 w pliku ROOT (klucz osi: deltaT x var)
+  Double_t rangeMin;      // dolna granica zmiennej kinematycznej
+  Double_t rangeMax;      // górna granica zmiennej kinematycznej
 };
+#endif
 
 struct RegenShapeCorrectionConfig
 {
   bool enabled = false;
-  std::string correctionFile; // ścieżka relatywna do Paths::cpfit_dir
-  std::vector<RegenCorrectionEntry> corrections;
+  std::string correctionFile;
+  std::vector<RegenKinRange> corrections;
 };
 
 struct FitConfig
@@ -57,6 +60,7 @@ struct FitConfig
   Int_t strategy;
   DeltaTConfig deltaTConfig;
   Bool_t regenerationExclusionFlag;
+  std::array<Double_t, 3> regenerationSplit = {-30.0, 0.0, 30.0};
   RegenShapeCorrectionConfig regenShapeCorrection;
 
   Int_t getNumOfEnabledParameters() const
@@ -137,6 +141,12 @@ public:
     catch (const json::out_of_range &e)
     {
       throw std::runtime_error("ERROR: Missing regenerationExclusionFlag in config file: " + std::string(e.what()));
+    }
+
+    // Regeneration split boundaries (used in single A_regen mode)
+    if (_config.contains("regenerationSplit"))
+    {
+      fitConfig.regenerationSplit = _config.at("regenerationSplit").get<std::array<Double_t, 3>>();
     }
 
     // 2. Extract DeltaTConfig (DOPISANE)
@@ -243,8 +253,8 @@ public:
       {
         for (const auto &c : rsc.at("corrections"))
         {
-          RegenCorrectionEntry entry;
-          entry.functionName = c.at("functionName").get<std::string>();
+          RegenKinRange entry;
+          entry.histName = c.at("histName").get<std::string>();
           entry.variable = c.at("variable").get<std::string>();
           entry.rangeMin = c.at("rangeMin").get<Double_t>();
           entry.rangeMax = c.at("rangeMax").get<Double_t>();

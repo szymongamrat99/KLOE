@@ -493,3 +493,163 @@ htop
 cd ../../../
 cd hal/ALL_PHYS2_SEMILEPTONIC_NoSmearing/
 ls -hl
+git add .
+git commit -m "New semileptonic method done"
+git push
+ls ../root_files/kitt/
+ls
+ls ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+exit
+cd Subanalysis/CPFit/config/
+ls
+ssh tier1-cnaf 
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+exit
+htop
+cd ../root_files/hal/
+ls
+cd ALL_PHYS2_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+cd ../../../
+cd KLOE/
+git add .
+git commit -m "New function"
+git push
+./execute_analysis.sh 
+cd Subanalysis/CPFit/img/
+ls
+ls -l
+cd ../../../
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+cd Subanalysis/CPFit/config/
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_correction_functions.root .
+scp tier1-cnaf:/home/g/gamrat/init_analysis/scripts/regeneration_fit_results.txt .
+git pull
+cd ..
+git clone https://github.com/szymongamrat99/python-kloe-analysis .
+git clone https://github.com/szymongamrat99/python-kloe-analysis
+cd python-kloe-analysis/
+ls
+cd scripts/
+ls
+cd results/
+ls
+cd ..
+root
+ls
+root
+root-config --incdir
+root
+ls ../../CNAF_Produced_Files/root_files/2026-04-17/Signal/
+root
+cd ..
+git add .
+git commit -m "Created weighting matrix for the regeneration"
+git push
+cd scripts/
+root
+git add .
+cd ..
+git commit -m "Added new"
+git push
+cd scripts/
+root
+root-config
+root-config --incdir
+root
+cd Subanalysis/CPFit/config/
+cp /data/ssd/gamrat/python-kloe-analysis/scripts/results/* .
+cd../../
+cd ..
+cd ../../\
+cd ../../
+./execute_analysis.sh 
+cd ../../
+cd gamrat/KLOE/
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+cd scripts/
+root
+cd scripts/
+ls
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+.q
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+cp results/* ../../KLOE/Subanalysis/CPFit/config/.
+root
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+git add .
+git commit -m "Single regeneration scaling"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Single regeneration scaling"
+git push
+./execute_analysis.sh 
+rot
+root
+./execute_analysis.sh 
+root
+./execute_analysis.sh 
+cd scripts/
+root
+cp /data/ssd/gamrat/python-kloe-analysis/scripts/results/* .
+root
+./execute_analysis.sh 
+1
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+cd build/
+cmake -DCMAKE_BUILD_TYPE=Debug ..
+make -j8
+./execute_analysis.sh
+make -j8
+./execute_analysis.sh
+git add .
+git commit -m "Last version"
+git push
+git checkout -b feat/1d-corrections-regeneration
+./execute_analysis.sh 

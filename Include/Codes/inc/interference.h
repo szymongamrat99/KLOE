@@ -14,7 +14,18 @@
 #include <vector>
 #include <array>
 #include <BRCorrectionFactors.h>
+#include <TH2.h>
 
+#ifndef REGEN_KIN_RANGE_DEFINED
+#define REGEN_KIN_RANGE_DEFINED
+struct RegenKinRange
+{
+  std::string variable;
+  std::string histName;
+  Double_t rangeMin;
+  Double_t rangeMax;
+};
+#endif
 
 namespace KLOE
 {
@@ -22,7 +33,7 @@ namespace KLOE
   {
   public:
     std::map<TString, std::vector<Double_t>> time_diff;
-    std::vector<Double_t> time_diff_gen, regen_event_weights;
+    std::vector<Double_t> time_diff_gen, regen_event_weights, regen_weight_errors;
     std::map<TString, std::vector<Double_t>> time_diff_rand_mc, time_diff_rand_data;
     std::vector<Double_t> time_diff_gen_rand_mc, time_diff_gen_rand_data;
 
@@ -80,8 +91,14 @@ namespace KLOE
                                       bin_number,
                                       x_min,
                                       x_max);
+        _frac_tmp[name.second] = new TH1D("Fitted histo tmp " + name.second,
+                                      "",
+                                      bin_number,
+                                      x_min,
+                                      x_max);
 
         _frac[name.second]->SetLineColor(KLOE::channColor.at(name.second));
+        _frac_tmp[name.second]->SetLineColor(KLOE::channColor.at(name.second));
       }
 
       // Fractions of MC for 1/2 MC - 1/2 fake DATA fit
@@ -201,6 +218,16 @@ namespace KLOE
     void SetRegenScaling(const std::array<RegenSplitScaling, 4> &s) { _regenScaling = s; }
     // -------------------------------------------------------------------------
 
+    void SetRegenCorrMatrices(const std::vector<RegenKinRange> &ranges,
+                              const std::map<std::string, TH2 *> &matrices)
+    {
+      _regenKinRanges = ranges;
+      _regenCorrMatrices = matrices;
+    }
+
+    const std::map<std::string, TH2 *> &GetRegenCorrMatrices() const { return _regenCorrMatrices; }
+    const std::vector<RegenKinRange> &GetRegenKinRanges() const { return _regenKinRanges; }
+
   private:
     TString _mode; //! "split", "window", "excluded, "mc", "bcg", "all"
     TGraphErrors *corr_factor, *eff_factor;
@@ -210,7 +237,6 @@ namespace KLOE
     /// Returns the split-region index (0-3) for a given Delta-t value.
     Int_t getSplitIndex(Double_t dt) const;
 
-
     Int_t _bin_number;
     Double_t _x_min, _x_max;
 
@@ -218,7 +244,7 @@ namespace KLOE
 
     std::map<TString, std::vector<Double_t>> b, e;
 
-    std::map<TString, TH1 *> _frac, _frac_data;
+    std::map<TString, TH1 *> _frac, _frac_data, _frac_tmp;
 
     TH1 *_data_sub, *_mc_sub;
 
@@ -229,6 +255,11 @@ namespace KLOE
     Bool_t _corr_check;
 
     std::map<TString, Int_t> fParamIndices;
+
+    // Macierze korekcji 2D: histName → TH2* (wczytane z pliku, SetDirectory(0))
+    std::map<std::string, TH2 *> _regenCorrMatrices;
+    // Definicje zakresów kinematycznych dla każdej macierzy
+    std::vector<RegenKinRange> _regenKinRanges; // wymaga #include fit_setter.h lub własnej kopii struktury
 
     KLOE::BRCorrectionFactors BRCF;
 

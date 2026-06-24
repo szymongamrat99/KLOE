@@ -1,0 +1,80 @@
+{
+  "histogramConfiguration": {
+    "rhoNeutral": {
+      "resolution": 1.0,
+      "range": [0.0, 50.0],
+      "displayRange": [0.0, 50.0],
+      "title": "#rho_{neutral}",
+      "xAxisTitle": "#rho_{neutral}",
+      "yAxisTitle": "Entries",
+      "logarithmic": true
+    },
+    "rhoCharged": {
+      "resolution": 1.0,
+      "range": [0.0, 50.0],
+      "displayRange": [0.0, 50.0],
+      "title": "#rho_{charged}",
+      "xAxisTitle": "#rho_{charged}",
+      "yAxisTitle": "Entries",
+      "logarithmic": true
+    },
+    "RNeutral": {
+      "resolution": 1.0,
+      "range": [0.0, 50.0],
+      "displayRange": [0.0, 50.0],
+      "title": "R_{neutral}",
+      "xAxisTitle": "R_{neutral}",
+      "yAxisTitle": "Entries",
+      "logarithmic": true
+    },
+    "RCharged": {
+      "resolution": 1.0,
+      "range": [0.0, 50.0],
+      "displayRange": [0.0, 50.0],
+      "title": "R_{charged}",
+      "xAxisTitle": "R_{charged}",
+      "yAxisTitle": "Entries",
+      "logarithmic": true
+    }
+  },
+  "constantCorrections": {
+    "DCWallCenter": [-0.083, -1.028, 0.0],
+    "DCWallBounds": {
+      "charged": {
+        "bottom": 19.49,
+        "top": 36.86
+      },
+      "neutral": {
+        "bottom": 19.38,
+        "top": 36.86
+      }
+    },
+    "sphericalBeamPipeBound": {
+      "charged": {
+        "bottom": 5.58,
+        "top": 16.0
+      },
+      "neutral": {
+        "bottom": 5.92,
+        "top": 16.0
+      }
+    },
+    "cylindricalBeamPipeBound": {
+      "charged": {
+        "bottom": 3.60,
+        "top": 5.44
+      },
+      "neutral": {
+        "bottom": 3.34,
+        "top": 5.41
+      }
+    }
+  },
+  "generalSettings": {
+    "isSignalWeighted": false,
+    "isRegenerationWeighted": true,
+    "onlyKLong": false,
+    "lumiFactor": 1.00,
+    "weightErrorLimit": 100.0
+  }
+}

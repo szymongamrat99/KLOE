@@ -6,7 +6,7 @@
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
   "regenerationExclusion": {
-    "enabled": false,
+    "enabled": true,
     "beamPipeBoundary": 10.0,
     "spherical": {
       "meanCharged": 10.4941,
@@ -23,12 +23,14 @@
   },
   "regenerationShapeCorrection": {
     "enabled": true,
-    "correctionFile": "config/regeneration_correction_functions.root",
+    "correctionFile": "config/regeneration_cross_section_corr_factors.root",
     "corrections": [
-        { "functionName": "R_Charged_WeightFunction",   "variable": "R_Charged",   "rangeMin": 8.086,  "rangeMax": 12.914 },
-        { "functionName": "Rho_Charged_WeightFunction", "variable": "Rho_Charged", "rangeMin": 21.895, "rangeMax": 29.105 },
-        { "functionName": "R_Neutral_WeightFunction",   "variable": "R_Neutral",   "rangeMin": 6.809,  "rangeMax": 13.774 },
-        { "functionName": "Rho_Neutral_WeightFunction", "variable": "Rho_Neutral", "rangeMin": 21.530, "rangeMax": 29.172 }
+        { "histName": "h_ratio_R_charged_dt",   "variable": "R_Charged",   "rangeMin": 5.57729, "rangeMax": 15.3962  },
+        { "histName": "h_ratio_R_neutral_dt",   "variable": "R_Neutral",   "rangeMin": 5.91582, "rangeMax": 15.334   },
+        { "histName": "h_ratio_rho_charged_dt", "variable": "Rho_Charged", "rangeMin": 23.4879, "rangeMax": 26.8633  },
+        { "histName": "h_ratio_rho_charged_dt", "variable": "Rho_Charged", "rangeMin": 3.60227, "rangeMax": 5.4366   },
+        { "histName": "h_ratio_rho_neutral_dt", "variable": "Rho_Neutral", "rangeMin": 23.3831, "rangeMax": 26.8272  },
+        { "histName": "h_ratio_rho_neutral_dt", "variable": "Rho_Neutral", "rangeMin": 3.34375, "rangeMax": 5.41215  }
     ]
 },
   "fitSettings": {
@@ -66,44 +68,13 @@
       "channels": ["Signal"],
       "fixed": false
     },
-    "A_regen_far_left": {
+    "A_regen": {
       "enabled": true,
       "initialValue": 1.0,
       "limitLower": 1.0,
-      "limitUpper": 5.0,
+      "limitUpper": 2.5,
       "step": 0.01,
       "channels": ["Regeneration"],
-      "parameter_ranges": [[-300.0, -30.0]],
-      "fixed": false
-    },
-    "A_regen_far_right": {
-      "enabled": true,
-      "initialValue": 1.0,
-      "limitLower": 1.0,
-      "limitUpper": 5.0,
-      "step": 0.01,
-      "channels": ["Regeneration"],
-      "parameter_ranges": [[30.0, 300.0]],
-      "fixed": false
-    },
-    "A_regen_near_left": {
-      "enabled": true,
-      "initialValue": 1.0,
-      "limitLower": 1.0,
-      "limitUpper": 5.0,
-      "step": 0.01,
-      "channels": ["Regeneration"],
-      "parameter_ranges": [[-30.0, 0.0]],
-      "fixed": false
-    },
-    "A_regen_near_right": {
-      "enabled": true,
-      "initialValue": 1.0,
-      "limitLower": 1.0,
-      "limitUpper": 5.0,
-      "step": 0.01,
-      "channels": ["Regeneration"],
-      "parameter_ranges": [[0.0, 30.0]],
       "fixed": false
     },
     "A_three": {
