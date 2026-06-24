@@ -24,6 +24,7 @@
 #include <ConfigManager.h>
 #include <NeutralReconstruction.h>
 #include <FileManager.h>
+#include <event_context.h>
 
 #include <DataAccessWrapper.h>
 
@@ -246,7 +247,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   // Initialization of Charged part of decay reconstruction class
   // Constructor is below, in the loop
   // boost::optional<KLOE::ChargedVtxRec<>> eventAnalysis;
-  KLOE::ChargedVtxRec<> *eventAnalysis = nullptr;
+  // KLOE::ChargedVtxRec<> *eventAnalysis = nullptr;
   // -------------------------------------------------------------
 
   // Initialization of Neutral part of decay reconstruction class
@@ -492,6 +493,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::vector<KLOE::neutralParticle> photonFourMomSix(6);
   std::vector<Int_t> bestIndicesSix;
 
+  // Intelligent event context to manage the state of the analysis
+  EventContext eventContext(dataAccess, Obj, logger);
+
   while (dataAccess.Next())
   {
     // Here you would process each entry in the tree.
@@ -612,38 +616,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     baseKin.Asscl.assign(dataAccess.GetAssCl().begin(), dataAccess.GetAssCl().end());
     baseKin.Assleng.assign(dataAccess.GetAssLenG().begin(), dataAccess.GetAssLenG().end());
 
+    // Another constructor to be used for KLOE-2 (including helix parameters)
+    KLOE::ChargedVtxRec<> eventAnalysis(nv_local, ntv_local, iv_data.data(), bhabha_vtx, curv_data.data(), baseKin.pxtv.data(), baseKin.pytv.data(), baseKin.pztv.data(), xv_data.data(), yv_data.data(), zv_data.data(), mode_local, logger);
+
     // Transverse momenta of the two charged pions
     Double_t pT1 = 0, pT2 = 0;
-
-    ivTmp = std::vector<Int_t>(dataAccess.GetIv().begin(), dataAccess.GetIv().end());
-    mapTmp = Obj.CountRepeatingElements(ivTmp);
-
-    // Sprawdź czy jest przynajmniej jeden wierzchołek z dwoma dołączonymi śladami
-    bool hasOne = false;
-    for (const auto &pair : mapTmp)
-    {
-      if (pair.second == 2)
-      {
-        hasOne = true;
-        break;
-      }
-    }
-
-    // Sprawdź czy są przynajmniej dwa wierzchołki z dwoma dołączonymi śladami
-    bool hasTwo = false;
-    Int_t countTmp = 0;
-    for (const auto &pair : mapTmp)
-    {
-      if (pair.second == 2)
-      {
-        if (countTmp == 1)
-        {
-          hasTwo = true;
-          break;
-        }
-        countTmp++;
-      }
-    }
 
     for (Int_t i = 0; i < baseKin.ntcl; i++)
     {
@@ -782,37 +759,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
     // --------------------------------------------------------------------------------
 
-    if (hypoCode == KLOE::HypothesisCode::FOUR_PI) // If we look for pipipipi - clusters do not matter
-      errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
-    else
-    {
-      Int_t nclMinCurrent = (hypoCode == KLOE::HypothesisCode::THREE_PI0) ? 6 : NCLMIN;
-      errorCode = genVarClassifier.FindNeutralCluster(dataAccess.GetNClu(),
-                                                      dataAccess.GetNTCl(),
-                                                      dataAccess.GetAssCl().data(),
-                                                      nclMinCurrent,
-                                                      logger,
-                                                      neuclulist);
+    Int_t nclMinCurrent = (hypoCode == KLOE::HypothesisCode::THREE_PI0) ? 6 : NCLMIN;
+    double eneclMinCurrent = 20.0;
 
-      // For THREE_PI0: additionally require all neutral clusters have energy >= 20 MeV
-      if (errorCode == ErrorHandling::ErrorCodes::NO_ERROR)
-      {
-        std::vector<Int_t> neuclulistCopy = neuclulist; // Kopia listy indeksów klastrów
-
-        const auto &enecl = dataAccess.GetEneCl();
-        neuclulistCopy.erase(std::remove_if(neuclulistCopy.begin(), neuclulistCopy.end(),
-                                        [&](Int_t idx)
-                                        { return enecl[idx - 1] < 20.0; }),
-                         neuclulistCopy.end());
-        if (static_cast<Int_t>(neuclulistCopy.size()) < nclMinCurrent)
-        {
-          if (hypoCode != KLOE::HypothesisCode::THREE_PI0)
-            errorCode = ErrorHandling::ErrorCodes::LESS_THAN_FOUR_NEUTRAL_CLUSTERS;
-          else
-            errorCode = ErrorHandling::ErrorCodes::LESS_THAN_SIX_NEUTRAL_CLUSTERS;
-        }
-      }
-    }
+    errorCode = eventContext.FilterNeutralClusters(nclMinCurrent,
+                                                   eneclMinCurrent,
+                                                   neuclulist);
 
     if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
     {
@@ -835,7 +787,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
     }
 
-    if (!hasOne)
+    if (eventContext.GetNumberOfVerticesWithTwoTracks() < 1)
     {
       errorCode = ErrorHandling::ErrorCodes::NO_VTX_WITH_TWO_TRACKS;
       LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
@@ -856,26 +808,18 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
     }
 
-    if (eventAnalysis != nullptr)
-    {
-      delete eventAnalysis; // Usuń poprzedni obiekt jeśli istnieje
-    }
-
-    // Another constructor to be used for KLOE-2 (including helix parameters)
-    eventAnalysis = new KLOE::ChargedVtxRec<>(nv_local, ntv_local, iv_data.data(), bhabha_vtx, curv_data.data(), baseKin.pxtv.data(), baseKin.pytv.data(), baseKin.pztv.data(), xv_data.data(), yv_data.data(), zv_data.data(), mode_local, logger);
-
     // --------------------------------------------------------------------------------
 
     if (hypoCode != KLOE::HypothesisCode::FOUR_PI && hypoCode != KLOE::HypothesisCode::OMEGAPI)
     {
       // pi+pi- mode
-      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger, 1);
+      hypoMap[hypoCode] = eventAnalysis.findKchRec(mcflag, smearing, covMatrixTot, baseKin.Kchrecnew, baseKin.trknew[0], baseKin.trknew[1], baseKin.vtaken, logger, 1);
 
       // pi+-e-+ mode
-      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.KchrecElectron, baseKin.trkElectron[0], baseKin.trkElectron[1], baseKin.vtakenElectron, logger, 2);
+      hypoMap[hypoCode] = eventAnalysis.findKchRec(mcflag, smearing, covMatrixTot, baseKin.KchrecElectron, baseKin.trkElectron[0], baseKin.trkElectron[1], baseKin.vtakenElectron, logger, 2);
 
       // pi+-muon-+ mode
-      hypoMap[hypoCode] = eventAnalysis->findKchRec(mcflag, smearing, covMatrixTot, baseKin.KchrecMuon, baseKin.trkMuon[0], baseKin.trkMuon[1], baseKin.vtakenMuon, logger, 3);
+      hypoMap[hypoCode] = eventAnalysis.findKchRec(mcflag, smearing, covMatrixTot, baseKin.KchrecMuon, baseKin.trkMuon[0], baseKin.trkMuon[1], baseKin.vtakenMuon, logger, 3);
     }
 
     pT1 = std::sqrt(std::pow(baseKin.trknew[0][0], 2) + std::pow(baseKin.trknew[0][1], 2)),
@@ -932,21 +876,21 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     }
 
     // VTX CLOSEST TO BHABHA IP - FOR OMEGAPI
-    hypoMap[KLOE::HypothesisCode::OMEGAPI] = eventAnalysis->findKClosestRec(baseKin.KchrecClosest, baseKin.trkClosest[0], baseKin.trkClosest[1], baseKin.vtakenClosest, logger);
+    hypoMap[KLOE::HypothesisCode::OMEGAPI] = eventAnalysis.findKClosestRec(baseKin.KchrecClosest, baseKin.trkClosest[0], baseKin.trkClosest[1], baseKin.vtakenClosest, logger);
 
     ErrorHandling::ErrorCodes errTmp[2];
 
     // VTX OF KS - FOR PIPIPIPI
-    errTmp[0] = eventAnalysis->findKSLRec(16, -1, baseKin.KchrecKS, baseKin.trkKS[0], baseKin.trkKS[1], baseKin.vtakenKS, logger);
+    errTmp[0] = eventAnalysis.findKSLRec(16, -1, baseKin.KchrecKS, baseKin.trkKS[0], baseKin.trkKS[1], baseKin.vtakenKS, logger);
 
     // --------------------------------------------------------------------------------
-    if (hasTwo)
+    if (eventContext.GetNumberOfVerticesWithTwoTracks() >= 2)
     {
       // VTX OF KL - FOR PIPIPIPI
-      errTmp[1] = eventAnalysis->findKSLRec(10, baseKin.vtakenKS[0], baseKin.KchrecKL, baseKin.trkKL[0], baseKin.trkKL[1], baseKin.vtakenKL, logger);
+      errTmp[1] = eventAnalysis.findKSLRec(10, baseKin.vtakenKS[0], baseKin.KchrecKL, baseKin.trkKL[0], baseKin.trkKL[1], baseKin.vtakenKL, logger);
       // --------------------------------------------------------------------------------
     }
-    else if (!hasTwo && hypoCode == KLOE::HypothesisCode::FOUR_PI)
+    else if (eventContext.GetNumberOfVerticesWithTwoTracks() < 2 && hypoCode == KLOE::HypothesisCode::FOUR_PI)
       errTmp[1] = ErrorHandling::ErrorCodes::NO_TWO_VTX_WITH_TWO_TRACKS; // Special error if looking for 4pi but only one vertex found
     else
       errTmp[1] = ErrorHandling::ErrorCodes::NO_ERROR; // No error for other hypotheses
@@ -1011,8 +955,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
         KchrecKSMom = std::sqrt(std::pow(KchrecKS_PhiCM[0], 2) + std::pow(KchrecKS_PhiCM[1], 2) + std::pow(KchrecKS_PhiCM[2], 2));
         KchrecKLMom = std::sqrt(std::pow(KchrecKL_PhiCM[0], 2) + std::pow(KchrecKL_PhiCM[1], 2) + std::pow(KchrecKL_PhiCM[2], 2));
 
-        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS, baseKin.phi_mom, baseKin.KchboostKS);
-        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL, baseKin.phi_mom, baseKin.KchboostKL);
+        eventAnalysis.KaonMomFromBoost(baseKin.KchrecKS, baseKin.phi_mom, baseKin.KchboostKS);
+        eventAnalysis.KaonMomFromBoost(baseKin.KchrecKL, baseKin.phi_mom, baseKin.KchboostKL);
 
         Double_t X_lineKS[3] = {baseKin.KchboostKS[6],
                                 baseKin.KchboostKS[7],
@@ -1034,8 +978,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                              0.}; // Vector perpendicular to the plane from Bhabha momentum
 
         // Corrected IP event by event
-        eventAnalysis->IPBoostCorr(X_lineKS, pKL, xB, plane_perp, baseKin.ipKS);
-        eventAnalysis->IPBoostCorr(X_lineKL, pKL, xB, plane_perp, baseKin.ipKL);
+        eventAnalysis.IPBoostCorr(X_lineKS, pKL, xB, plane_perp, baseKin.ipKS);
+        eventAnalysis.IPBoostCorr(X_lineKL, pKL, xB, plane_perp, baseKin.ipKL);
         // Setting x and y coordinates of the IP to the Bhabha vertex
 
         baseKin.ipKS[0] = baseKin.bhabha_vtx[0];
@@ -1090,13 +1034,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     {
       // Calculate variables for tracks which hit calorimeter
       // For initial double pion hypothesis
-      eventAnalysis->calculateTrackTOF(baseKin.vtaken, baseKin.Asstr, baseKin.Asscl, baseKin.Assleng, baseKin.Enecl, baseKin.Xcl, baseKin.Ycl, baseKin.Zcl, baseKin.Tcl, baseKin.trknew, baseKin.trknewCluster, baseKin.trknewDT);
+      eventAnalysis.calculateTrackTOF(baseKin.vtaken, baseKin.Asstr, baseKin.Asscl, baseKin.Assleng, baseKin.Enecl, baseKin.Xcl, baseKin.Ycl, baseKin.Zcl, baseKin.Tcl, baseKin.trknew, baseKin.trknewCluster, baseKin.trknewDT);
 
       // For initial electron-pion hypothesis
-      eventAnalysis->calculateTrackTOF(baseKin.vtaken, baseKin.Asstr, baseKin.Asscl, baseKin.Assleng, baseKin.Enecl, baseKin.Xcl, baseKin.Ycl, baseKin.Zcl, baseKin.Tcl, baseKin.trkElectron, baseKin.trkElectronCluster, baseKin.trkElectronDT);
+      eventAnalysis.calculateTrackTOF(baseKin.vtaken, baseKin.Asstr, baseKin.Asscl, baseKin.Assleng, baseKin.Enecl, baseKin.Xcl, baseKin.Ycl, baseKin.Zcl, baseKin.Tcl, baseKin.trkElectron, baseKin.trkElectronCluster, baseKin.trkElectronDT);
 
       // For initial muon-pion hypothesis
-      eventAnalysis->calculateTrackTOF(baseKin.vtaken, baseKin.Asstr, baseKin.Asscl, baseKin.Assleng, baseKin.Enecl, baseKin.Xcl, baseKin.Ycl, baseKin.Zcl, baseKin.Tcl, baseKin.trkMuon, baseKin.trkMuonCluster, baseKin.trkMuonDT);
+      eventAnalysis.calculateTrackTOF(baseKin.vtaken, baseKin.Asstr, baseKin.Asscl, baseKin.Assleng, baseKin.Enecl, baseKin.Xcl, baseKin.Ycl, baseKin.Zcl, baseKin.Tcl, baseKin.trkMuon, baseKin.trkMuonCluster, baseKin.trkMuonDT);
 
       // -----------------------------------------------------------------------
       // Boost of the charged part of the decay
@@ -1118,7 +1062,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                            baseKin.phi_mom[1],
                            0.}; // Vector perpendicular to the plane from Bhabha momentum
 
-      eventAnalysis->IPBoostCorr(X_line, p, xB, plane_perp, baseKin.ipnew);
+      eventAnalysis.IPBoostCorr(X_line, p, xB, plane_perp, baseKin.ipnew);
 
       baseKin.ipnew[0] = baseKin.bhabha_vtx[0];
       baseKin.ipnew[1] = baseKin.bhabha_vtx[1];
