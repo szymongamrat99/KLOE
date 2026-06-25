@@ -25,6 +25,8 @@
 #include <NeutralReconstruction.h>
 #include <FileManager.h>
 #include <event_context.h>
+#include <three_pi0_hypothesis.h>
+#include <base_hypothesis.h>
 
 #include <DataAccessWrapper.h>
 
@@ -236,7 +238,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   Int_t mcflag = 0, mctruth = 0, NCLMIN = 4; // Assuming NCLMIN is 4, adjust as needed;
   std::vector<Int_t> neuclulist;
 
-  UInt_t mctruth_num[8] = {0, 0, 0, 0, 0, 0, 0, 0}; // Array to hold mctruth values
+  std::array<UInt_t, 8> mctruth_num = {0};
 
   // Progress bar
   boost::progress_display show_progress(dataAccess.GetEntries());
@@ -417,6 +419,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     std::cerr << "ERROR: StatisticalCutter configuration validation failed. Aborting analysis." << std::endl;
     return 1;
   }
+
+  // Initialization of analysis register
+  std::map<KLOE::HypothesisCode, std::unique_ptr<BaseHypothesis>> analysisRegister;
+  analysisRegister[KLOE::HypothesisCode::THREE_PI0] = std::make_unique<ThreePi0Hypothesis>();
+  // ---------------------------------------------------------------------------
 
   // Initialization of momentum smearing
   // -------------------------------------------------------------
@@ -635,136 +642,30 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
     }
 
-    if (MonteCarloInitAnalysis)
-    {
-      mcflag = 1;
-
-      genVarClassifier.classifyChannel(
-          dataAccess.GetNTMC(),
-          dataAccess.GetNVtxMC(),
-          dataAccess.GetPidMC().data(),
-          dataAccess.GetVtxMC().data(),
-          dataAccess.GetMother().data(),
-          mcflag, // Assuming mcflag is 1 for MC events
-          mctruth,
-          baseKin.semileptonic_flag);
-
-      MctruthCounter(mctruth, mctruth_num);
-      // -------------------------------------------------------------------
-
-      genVarClassifier.genVars(baseKin.ntmc,
-                               baseKin.nvtxmc,
-                               baseKin.nclu,
-                               baseKin.pidmc.data(),
-                               baseKin.vtxmc.data(),
-                               baseKin.mother.data(),
-                               baseKin.xvmc.data(),
-                               baseKin.yvmc.data(),
-                               baseKin.zvmc.data(),
-                               baseKin.pxmc.data(),
-                               baseKin.pymc.data(),
-                               baseKin.pzmc.data(),
-                               mcflag,
-                               mctruth,
-                               baseKin.ipmc,
-                               baseKin.Knemc,
-                               baseKin.Kchmc,
-                               trkMC,
-                               4,
-                               pgammaMC,
-                               baseKin.CurvMC,
-                               baseKin.PhivMC,
-                               baseKin.CotvMC,
-                               baseKin.goodClusIndex,
-                               clusterMC,
-                               baseKin.muonAlertPlus,
-                               baseKin.muonAlertMinus);
-
-      std::vector<Double_t> kaonChMom = {baseKin.Kchmc[0], baseKin.Kchmc[1], baseKin.Kchmc[2], baseKin.Kchmc[3]},
-                            kaonChPos = {baseKin.Kchmc[6], baseKin.Kchmc[7], baseKin.Kchmc[8]},
-                            kaonNeMom = {baseKin.Knemc[0], baseKin.Knemc[1], baseKin.Knemc[2], baseKin.Knemc[3]},
-                            kaonNePos = {baseKin.Knemc[6], baseKin.Knemc[7], baseKin.Knemc[8]},
-                            ipPos = {baseKin.ipmc[0], baseKin.ipmc[1], baseKin.ipmc[2]};
-
-      kaonTimesMC = Obj.CalculateKaonProperTimes(kaonChMom, kaonChPos, kaonNeMom, kaonNePos, ipPos);
-
-      KLOE::channEventCount[mctruth]++;
-
-      if (mctruth == 1)
-      {
-        baseKin.trk1MC[0] = trkMC[0][0];
-        baseKin.trk1MC[1] = trkMC[0][1];
-        baseKin.trk1MC[2] = trkMC[0][2];
-        baseKin.trk1MC[3] = trkMC[0][3];
-
-        baseKin.trk2MC[0] = trkMC[1][0];
-        baseKin.trk2MC[1] = trkMC[1][1];
-        baseKin.trk2MC[2] = trkMC[1][2];
-        baseKin.trk2MC[3] = trkMC[1][3];
-      }
-
-      if (mctruth == 7)
-      {
-        for (Int_t iter = 0; iter < 4; iter++)
-        {
-          if (trkMC[iter][4] == 10)
-          {
-            if (baseKin.trkKLmc[0].size() == 0)
-              baseKin.trkKLmc[0].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
-            else
-              baseKin.trkKLmc[1].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
-          }
-          else if (trkMC[iter][4] == 16)
-          {
-            if (baseKin.trkKSmc[0].size() == 0)
-              baseKin.trkKSmc[0].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
-            else
-              baseKin.trkKSmc[1].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
-          }
-        }
-      }
-    }
-    else
-    {
-      // Default values for data events
-      mcflag = 0;
-      mctruth = 0;
-      baseKin.ipmc = {0.0f, 0.0f, 0.0f};
-      baseKin.Kchmc = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-      baseKin.Knemc = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
-      baseKin.trkMC[0] = {0.0f, 0.0f, 0.0f, 0.0f};
-      baseKin.trkMC[1] = {0.0f, 0.0f, 0.0f, 0.0f};
-      // // baseKin.goodClusIndex = {0, 0, 0, 0};
-      baseKin.trkKSmc[0] = {0.0f, 0.0f, 0.0f, 0.0f};
-      baseKin.trkKSmc[1] = {0.0f, 0.0f, 0.0f, 0.0f};
-      baseKin.trkKLmc[0] = {0.0f, 0.0f, 0.0f, 0.0f};
-      baseKin.trkKLmc[1] = {0.0f, 0.0f, 0.0f, 0.0f};
-      baseKin.CurvMC = {0.0f, 0.0f};
-      baseKin.PhivMC = {0.0f, 0.0f};
-      baseKin.CotvMC = {0.0f, 0.0f};
-
-      kaonTimesMC = KLOE::KaonProperTimes();
-    }
-
-    Bool_t badMcTruth = (mctruth != mctruthSignal);
+    // --- Monte Carlo truth processing ---
+    eventContext.ProcessMonteCarloTruth(MonteCarloInitAnalysis, baseKin, mcflag, mctruth, mctruthSignal, kaonTimesMC, mctruth_num);
 
     // If only signal MC is to be analyzed, skip bad mctruth events
-    if (SignalOnly && badMcTruth)
+    if (SignalOnly && (mctruth != mctruthSignal))
     {
       noError = false;
       passed = false;
       ++show_progress;
       continue;
     }
-
     // --------------------------------------------------------------------------------
 
-    Int_t nclMinCurrent = (hypoCode == KLOE::HypothesisCode::THREE_PI0) ? 6 : NCLMIN;
-    double eneclMinCurrent = 20.0;
+    if (noError)
+    {
+      errorCode = analysisRegister.at(hypoCode)->Process(eventContext);
 
-    errorCode = eventContext.FilterNeutralClusters(nclMinCurrent,
-                                                   eneclMinCurrent,
-                                                   neuclulist);
+      if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+      {
+        noError = false;
+      }
+    }
+
+    neuclulist = eventContext.GetNeutralClusterList();          
 
     if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
     {
@@ -1889,37 +1790,4 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   config.saveProperties();
 
   return 0;
-}
-
-void MctruthCounter(Int_t mctruth, UInt_t mctruth_num[8])
-{
-  switch (mctruth)
-  {
-  case 0:
-    mctruth_num[0]++;
-    break;
-  case 1:
-    mctruth_num[1]++;
-    break;
-  case 2:
-    mctruth_num[2]++;
-    break;
-  case 3:
-    mctruth_num[3]++;
-    break;
-  case 4:
-    mctruth_num[4]++;
-    break;
-  case 5:
-    mctruth_num[5]++;
-    break;
-  case 6:
-    mctruth_num[6]++;
-    break;
-  case 7:
-    mctruth_num[7]++;
-    break;
-  default:
-    std::cerr << "Unknown mctruth value: " << mctruth << std::endl;
-  }
 }

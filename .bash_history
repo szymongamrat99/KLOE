@@ -653,3 +653,13 @@ git commit -m "Last version"
 git push
 git checkout -b feat/1d-corrections-regeneration
 ./execute_analysis.sh 
+git add .
+git commit -m "1D Method for regeneration correction is finished"
+git push
+git push --set-upstream origin feat/1d-corrections-regeneration
+git checkout main
+git pull
+git checkout -b feature/control-samples-semileptonic-3pi0
+git add .
+git commit -m "Added event context class"
+git push

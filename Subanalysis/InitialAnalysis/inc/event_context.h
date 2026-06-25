@@ -15,10 +15,18 @@ class EventContext
     void NewEvent();
 
     int GetNumberOfVerticesWithTwoTracks();
-    ErrorHandling::ErrorCodes FilterNeutralClusters(int minClusters, double minEnergy, std::vector<Int_t>& outList);
+    ErrorHandling::ErrorCodes FilterNeutralClusters(int minClusters, double minClusterEnergy);
 
     bool CheckChargedVerticesWithTracksAssignedToClusters();
     bool ReconstructChargedParticles();
+
+    void ProcessMonteCarloTruth(bool isMcEnabled, BaseKinematics& baseKin, 
+                                int& mcflag, int& mctruth, int mctruthSignal,
+                                KLOE::KaonProperTimes& kaonTimesMC,
+                                std::array<UInt_t, 8>& mctruth_num);
+
+    // --- Getters for derived variables ---
+    const std::vector<Int_t>& GetNeutralClusterList() const { return fNeuCluList; }
 
   private:
     DataAccessWrapper &fdataAccess;

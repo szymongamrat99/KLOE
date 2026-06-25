@@ -761,6 +761,43 @@ namespace KLOE
       trkMuonDT[0].clear();
       trkMuonDT[1].clear();
     }
+
+    void clearMC()
+    {
+      trkMC[0].clear();
+      trkMC[1].clear();
+      trkKSmc[0].clear();
+      trkKSmc[1].clear();
+      trkKLmc[0].clear();
+      trkKLmc[1].clear();
+      Kchmc.clear();
+      Knemc.clear();
+      ipmc.clear();
+      xvmc.clear();
+      yvmc.clear();
+      zvmc.clear();
+      pxmc.clear();
+      pymc.clear();
+      pzmc.clear();
+
+      kaonNeTimeLABMC = 0.0;
+      kaonNeTimeCMMC = 0.0;
+      kaonChTimeLABMC = 0.0;
+      kaonChTimeCMMC = 0.0;
+
+      CurvMC.clear();
+      PhivMC.clear();
+      CotvMC.clear();
+
+      pidmc.clear();
+      vtxmc.clear();
+      mother.clear();
+
+      goodClustersTriKinFit.clear();
+
+      ntmc = 0;
+      nvtxmc = 0;
+    }
   };
 }
 

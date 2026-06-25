@@ -3,7 +3,8 @@
 # Deklarujemy bibliotekę dla Analizy A
 add_library(InitialAnalysis SHARED 
             app/initialanalysis_main.cpp 
-            src/initanalysis_full.cpp )
+            src/initanalysis_full.cpp
+            src/event_context.cpp )
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
 # PUBLIC: oznacza, że katalog z nagłówkami (tu: bieżący katalog, '.') będzie
