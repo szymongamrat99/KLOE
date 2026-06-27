@@ -501,7 +501,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::vector<Int_t> bestIndicesSix;
 
   // Intelligent event context to manage the state of the analysis
-  EventContext eventContext(dataAccess, Obj, logger);
+  EventContext eventContext(dataAccess, Obj, logger, baseKin);
 
   while (dataAccess.Next())
   {
@@ -575,15 +575,15 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     Int_t mode_local = mode;
 
     // Skopiuj dane iv do lokalnej tablicy (jeśli potrzeba)
-    iv_data = dataAccess.GetIv();
+    baseKin.iv = dataAccess.GetIv();
 
     // Skopiuj dane do lokalnych tablic dla wskaźników
-    curv_data.assign(dataAccess.GetCurv().begin(), dataAccess.GetCurv().end());
-    phiv_data.assign(dataAccess.GetPhiv().begin(), dataAccess.GetPhiv().end());
-    cotv_data.assign(dataAccess.GetCotv().begin(), dataAccess.GetCotv().end());
-    xv_data.assign(dataAccess.GetXv().begin(), dataAccess.GetXv().end());
-    yv_data.assign(dataAccess.GetYv().begin(), dataAccess.GetYv().end());
-    zv_data.assign(dataAccess.GetZv().begin(), dataAccess.GetZv().end());
+    baseKin.Curv.assign(dataAccess.GetCurv().begin(), dataAccess.GetCurv().end());
+    baseKin.Phiv.assign(dataAccess.GetPhiv().begin(), dataAccess.GetPhiv().end());
+    baseKin.Cotv.assign(dataAccess.GetCotv().begin(), dataAccess.GetCotv().end());
+    baseKin.xv.assign(dataAccess.GetXv().begin(), dataAccess.GetXv().end());
+    baseKin.yv.assign(dataAccess.GetYv().begin(), dataAccess.GetYv().end());
+    baseKin.zv.assign(dataAccess.GetZv().begin(), dataAccess.GetZv().end());
 
     baseKin.pxtv.assign(dataAccess.GetPxtv().begin(), dataAccess.GetPxtv().end());
     baseKin.pytv.assign(dataAccess.GetPytv().begin(), dataAccess.GetPytv().end());
@@ -624,7 +624,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     baseKin.Assleng.assign(dataAccess.GetAssLenG().begin(), dataAccess.GetAssLenG().end());
 
     // Another constructor to be used for KLOE-2 (including helix parameters)
-    KLOE::ChargedVtxRec<> eventAnalysis(nv_local, ntv_local, iv_data.data(), bhabha_vtx, curv_data.data(), baseKin.pxtv.data(), baseKin.pytv.data(), baseKin.pztv.data(), xv_data.data(), yv_data.data(), zv_data.data(), mode_local, logger);
+    KLOE::ChargedVtxRec<> eventAnalysis(nv_local, ntv_local, baseKin.iv.data(), bhabha_vtx, curv_data.data(), baseKin.pxtv.data(), baseKin.pytv.data(), baseKin.pztv.data(), xv_data.data(), yv_data.data(), zv_data.data(), mode_local, logger);
 
     // Transverse momenta of the two charged pions
     Double_t pT1 = 0, pT2 = 0;
@@ -643,10 +643,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     }
 
     // --- Monte Carlo truth processing ---
-    eventContext.ProcessMonteCarloTruth(MonteCarloInitAnalysis, baseKin, mcflag, mctruth, mctruthSignal, kaonTimesMC, mctruth_num);
+    eventContext.ProcessMonteCarloTruth(MonteCarloInitAnalysis, mctruthSignal, kaonTimesMC, mctruth_num);
 
     // If only signal MC is to be analyzed, skip bad mctruth events
-    if (SignalOnly && (mctruth != mctruthSignal))
+    if (SignalOnly && (baseKin.mctruth != mctruthSignal))
     {
       noError = false;
       passed = false;
@@ -665,9 +665,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       }
     }
 
-    neuclulist = eventContext.GetNeutralClusterList();          
-
-    if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+    if (!noError)
     {
       LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
 
@@ -677,33 +675,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       {
         passed = true;
         mctruth = -1;
-
-        goto skipEvent;
       }
       else
       {
-        neuclulist.clear();
-        ++show_progress;
-        continue;
-      }
-    }
-
-    if (eventContext.GetNumberOfVerticesWithTwoTracks() < 1)
-    {
-      errorCode = ErrorHandling::ErrorCodes::NO_VTX_WITH_TWO_TRACKS;
-      LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
-      noError = false;
-
-      if (mctruth == mctruthSignal)
-      {
-        passed = true;
-        mctruth = -1;
-
-        goto skipEvent;
-      }
-      else
-      {
-        neuclulist.clear();
         ++show_progress;
         continue;
       }
@@ -1529,8 +1503,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"necls", baseKin.necls},               // Number of ECL words
           {"Eclfilfo", baseKin.eclfilfo},         // Which filfo was used
           {"Eclfilfoword", baseKin.eclfilfoword}, // Filfo word
-          {"mcflag", mcflag},                     // If event from MC of Data
-          {"mctruth", mctruth},                   // What event type
+          {"mcflag", baseKin.mcflag},                     // If event from MC of Data
+          {"mctruth", baseKin.mctruth},                   // What event type
           {"nclu", baseKin.nclu},
           {"ntcl", baseKin.ntcl},
           {"nv", baseKin.nv},

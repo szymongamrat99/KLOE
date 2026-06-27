@@ -14,15 +14,26 @@ ErrorHandling::ErrorCodes ThreePi0Hypothesis::Process(EventContext &ctx)
   if (noError)
   {
     errorCode = ctx.FilterNeutralClusters(minClusters, minClusterEnergy);
-    const auto &neutralClusters = ctx.GetNeutralClusterList();
-
     noError = CheckErrorCode(errorCode);
   }
   // -------------------------------------------------------
 
+  // --- Reconstruct kaon into charged pions with invariant mass condition ---
   if (noError)
   {
+    errorCode = ctx.ReconstructKaonIntoChargedPions();
+    noError = CheckErrorCode(errorCode);
   }
+  // -------------------------------------------------------------------------
+
+  // --- Reconstruct Kaon into neutral particles -----------------------------
+  if (noError)
+  {
+    errorCode = ctx.ReconstructKaonClosestToIP();
+    noError = CheckErrorCode(errorCode);
+  }
+
+
 
   return errorCode;
 }

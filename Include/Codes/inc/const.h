@@ -382,6 +382,7 @@ namespace KLOE
         errorCode = 0,
         doneTriKinFit = 0,
         mcflag = 0,
+        mctruth = 0,
         cut = 0,
         muonAlertPlus = 0,
         muonAlertMinus = 0,
@@ -522,7 +523,10 @@ namespace KLOE
         vtakenElectron,
         vtakenMuon,
         trackWithCluster,
-        clusterWithTrack;
+        clusterWithTrack,
+        neuclulist;
+
+    KLOE::KaonProperTimes kaonTimesMC;
 
     void resize()
     {
@@ -797,6 +801,11 @@ namespace KLOE
 
       ntmc = 0;
       nvtxmc = 0;
+
+      mctruth = 0;
+      mcflag = 0;
+
+      kaonTimesMC = KLOE::KaonProperTimes();
     }
   };
 }

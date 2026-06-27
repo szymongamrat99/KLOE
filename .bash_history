@@ -663,3 +663,9 @@ git checkout -b feature/control-samples-semileptonic-3pi0
 git add .
 git commit -m "Added event context class"
 git push
+./execute_analysis.sh 
+1
+./execute_analysis.sh 
+git add .
+git commit -m "CHanges to the analysis steps"
+git push

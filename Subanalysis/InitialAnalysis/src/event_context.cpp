@@ -2,10 +2,7 @@
 
 int EventContext::GetNumberOfVerticesWithTwoTracks()
 {
-  if (fIv.empty())
-    fIv.assign(fdataAccess.GetIv().begin(), fdataAccess.GetIv().end());
-
-  fVtxTracksAssignedNum = fobj.CountRepeatingElements(fIv);
+  fVtxTracksAssignedNum = fobj.CountRepeatingElements(fBaseKin.iv);
 
   int verticesWithTwoTracksCount = 0;
   for (const auto &pair : fVtxTracksAssignedNum)
@@ -29,7 +26,7 @@ ErrorHandling::ErrorCodes EventContext::FilterNeutralClusters(int minClusters, d
       fdataAccess.GetAssCl().data(),
       minClusters,
       flogger,
-      fNeuCluList);
+      fBaseKin.neuclulist);
 
   if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
     return errorCode;
@@ -38,12 +35,12 @@ ErrorHandling::ErrorCodes EventContext::FilterNeutralClusters(int minClusters, d
   if (minClusterEnergy > 0.0)
   {
     const auto &enecl = fdataAccess.GetEneCl();
-    fNeuCluList.erase(std::remove_if(fNeuCluList.begin(), fNeuCluList.end(),
+    fBaseKin.neuclulist.erase(std::remove_if(fBaseKin.neuclulist.begin(), fBaseKin.neuclulist.end(),
                                      [&](Int_t idx)
                                  { return enecl[idx - 1] < minClusterEnergy; }),
-                  fNeuCluList.end());
+                  fBaseKin.neuclulist.end());
 
-    if (static_cast<Int_t>(fNeuCluList.size()) < minClusters)
+    if (static_cast<Int_t>(fBaseKin.neuclulist.size()) < minClusters)
     {
       if (minClusters == 4)
       {
@@ -65,27 +62,22 @@ ErrorHandling::ErrorCodes EventContext::FilterNeutralClusters(int minClusters, d
 
 // ---
 
-void EventContext::ProcessMonteCarloTruth(bool isMcEnabled, BaseKinematics &baseKin,
-                                          int &mcflag, int &mctruth, int mctruthSignal,
-                                          KLOE::KaonProperTimes &kaonTimesMC,
+void EventContext::ProcessMonteCarloTruth(bool isMcEnabled,
+                                          int mctruthSignal,
                                           std::array<UInt_t, 8> &mctruth_num)
 {
   if (!isMcEnabled)
   {
     // -------------------------------------------------------------------
     // REAL DATA: Resetowanie struktur do wartości domyślnych
-    // ----------------------------------------------------------------===
-    mcflag = 0;
-    mctruth = 0;
-    baseKin.clearMC(); // Warto przenieść ten wielki reset do metody w BaseKinematics!
-    kaonTimesMC = KLOE::KaonProperTimes();
+    // -------------------------------------------------------------------
+    fBaseKin.clearMC(); // Warto przenieść ten wielki reset do metody w BaseKinematics!
     return;
   }
 
   // -------------------------------------------------------------------
   // MONTE CARLO: Pełna rekonstrukcja prawdy generatora
   // -------------------------------------------------------------------
-  mcflag = 1;
 
   // Definiujemy tymczasowe kontenery (zamiast trzymać je globalnie w makrze)
   std::vector<std::vector<Double_t>> trkMC;
@@ -96,13 +88,13 @@ void EventContext::ProcessMonteCarloTruth(bool isMcEnabled, BaseKinematics &base
   fgenVarClassifier.classifyChannel(
       fdataAccess.GetNTMC(), fdataAccess.GetNVtxMC(), fdataAccess.GetPidMC().data(),
       fdataAccess.GetVtxMC().data(), fdataAccess.GetMother().data(),
-      mcflag, mctruth, baseKin.semileptonic_flag);
+      fBaseKin.mcflag, fBaseKin.mctruth, fBaseKin.semileptonic_flag);
 
   try
   {
-    if (mctruth >= 0 && mctruth < 8)
+    if (fBaseKin.mctruth >= 0 && fBaseKin.mctruth < 8)
     {
-      mctruth_num[mctruth]++;
+      mctruth_num[fBaseKin.mctruth]++;
     }
     else
     {
@@ -111,36 +103,36 @@ void EventContext::ProcessMonteCarloTruth(bool isMcEnabled, BaseKinematics &base
   }
   catch (ErrorHandling::ErrorCodes &e)
   {
-    std::string message = "MC truth value out of range: " + std::to_string(mctruth);
+    std::string message = "MC truth value out of range: " + std::to_string(fBaseKin.mctruth);
     LOG_CRITICAL(flogger, e, message, ErrorHandling::LogFiles::LogType::ERROR);
   }
-  KLOE::channEventCount[mctruth]++;
+  KLOE::channEventCount[fBaseKin.mctruth]++;
 
   // 2. Generowanie zmiennych MC
   fgenVarClassifier.genVars(
-      baseKin.ntmc, baseKin.nvtxmc, baseKin.nclu, baseKin.pidmc.data(), baseKin.vtxmc.data(),
-      baseKin.mother.data(), baseKin.xvmc.data(), baseKin.yvmc.data(), baseKin.zvmc.data(),
-      baseKin.pxmc.data(), baseKin.pymc.data(), baseKin.pzmc.data(), mcflag, mctruth,
-      baseKin.ipmc, baseKin.Knemc, baseKin.Kchmc, trkMC, 4, pgammaMC,
-      baseKin.CurvMC, baseKin.PhivMC, baseKin.CotvMC, baseKin.goodClusIndex, clusterMC,
-      baseKin.muonAlertPlus, baseKin.muonAlertMinus);
+      fBaseKin.ntmc, fBaseKin.nvtxmc, fBaseKin.nclu, fBaseKin.pidmc.data(), fBaseKin.vtxmc.data(),
+      fBaseKin.mother.data(), fBaseKin.xvmc.data(), fBaseKin.yvmc.data(), fBaseKin.zvmc.data(),
+      fBaseKin.pxmc.data(), fBaseKin.pymc.data(), fBaseKin.pzmc.data(), fBaseKin.mcflag, fBaseKin.mctruth,
+      fBaseKin.ipmc, fBaseKin.Knemc, fBaseKin.Kchmc, trkMC, 4, pgammaMC,
+      fBaseKin.CurvMC, fBaseKin.PhivMC, fBaseKin.CotvMC, fBaseKin.goodClusIndex, clusterMC,
+      fBaseKin.muonAlertPlus, fBaseKin.muonAlertMinus);
 
   // 3. Obliczanie czasów życia kaonów
-  std::vector<Double_t> kaonChMom = {baseKin.Kchmc[0], baseKin.Kchmc[1], baseKin.Kchmc[2], baseKin.Kchmc[3]};
-  std::vector<Double_t> kaonChPos = {baseKin.Kchmc[6], baseKin.Kchmc[7], baseKin.Kchmc[8]};
-  std::vector<Double_t> kaonNeMom = {baseKin.Knemc[0], baseKin.Knemc[1], baseKin.Knemc[2], baseKin.Knemc[3]};
-  std::vector<Double_t> kaonNePos = {baseKin.Knemc[6], baseKin.Knemc[7], baseKin.Knemc[8]};
-  std::vector<Double_t> ipPos = {baseKin.ipmc[0], baseKin.ipmc[1], baseKin.ipmc[2]};
+  std::vector<Double_t> kaonChMom = {fBaseKin.Kchmc[0], fBaseKin.Kchmc[1], fBaseKin.Kchmc[2], fBaseKin.Kchmc[3]};
+  std::vector<Double_t> kaonChPos = {fBaseKin.Kchmc[6], fBaseKin.Kchmc[7], fBaseKin.Kchmc[8]};
+  std::vector<Double_t> kaonNeMom = {fBaseKin.Knemc[0], fBaseKin.Knemc[1], fBaseKin.Knemc[2], fBaseKin.Knemc[3]};
+  std::vector<Double_t> kaonNePos = {fBaseKin.Knemc[6], fBaseKin.Knemc[7], fBaseKin.Knemc[8]};
+  std::vector<Double_t> ipPos = {fBaseKin.ipmc[0], fBaseKin.ipmc[1], fBaseKin.ipmc[2]};
 
-  kaonTimesMC = fobj.CalculateKaonProperTimes(kaonChMom, kaonChPos, kaonNeMom, kaonNePos, ipPos);
+  fBaseKin.kaonTimesMC = fobj.CalculateKaonProperTimes(kaonChMom, kaonChPos, kaonNeMom, kaonNePos, ipPos);
 
-  // 4. Specyficzna logika per-kanał (Rozbicie na mctruth)
-  if (mctruth == 1 && trkMC.size() >= 2)
+  // 4. Specyficzna logika per-kanał (Rozbicie na fmctruth)
+  if (fBaseKin.mctruth == 1 && trkMC.size() >= 2)
   {
-    std::copy_n(trkMC[0].begin(), 4, baseKin.trk1MC.begin());
-    std::copy_n(trkMC[1].begin(), 4, baseKin.trk2MC.begin());
+    std::copy_n(trkMC[0].begin(), 4, fBaseKin.trk1MC.begin());
+    std::copy_n(trkMC[1].begin(), 4, fBaseKin.trk2MC.begin());
   }
-  else if (mctruth == 7)
+  else if (fBaseKin.mctruth == 7)
   {
     for (const auto &singleTrk : trkMC)
     {
@@ -150,14 +142,47 @@ void EventContext::ProcessMonteCarloTruth(bool isMcEnabled, BaseKinematics &base
 
       if (pdgType == 10) // KL
       {
-        auto targetIdx = (baseKin.trkKLmc[0].empty()) ? 0 : 1;
-        baseKin.trkKLmc[targetIdx].assign(singleTrk.begin(), singleTrk.end() - 1);
+        auto targetIdx = (fBaseKin.trkKLmc[0].empty()) ? 0 : 1;
+        fBaseKin.trkKLmc[targetIdx].assign(singleTrk.begin(), singleTrk.end() - 1);
       }
       else if (pdgType == 16) // KS
       {
-        auto targetIdx = (baseKin.trkKSmc[0].empty()) ? 0 : 1;
-        baseKin.trkKSmc[targetIdx].assign(singleTrk.begin(), singleTrk.end() - 1);
+        auto targetIdx = (fBaseKin.trkKSmc[0].empty()) ? 0 : 1;
+        fBaseKin.trkKSmc[targetIdx].assign(singleTrk.begin(), singleTrk.end() - 1);
       }
     }
   }
 }
+
+ErrorHandling::ErrorCodes EventContext::ReconstructKaonIntoChargedPions()
+{
+  TMatrixT<Double_t> covMatrixTot(6, 6);
+  covMatrixTot.Zero();
+
+  return fCurrentEventAnalysis->findKchRec(fBaseKin.mcflag, 0, covMatrixTot, fBaseKin.Kchrecnew, fBaseKin.trknew[0], fBaseKin.trknew[1], fBaseKin.vtaken, flogger, 1);
+}
+
+ErrorHandling::ErrorCodes EventContext::ReconstructKSIntoChargedParticles()
+{
+  TMatrixT<Double_t> covMatrixTot(6, 6);
+  covMatrixTot.Zero();
+
+  return fCurrentEventAnalysis->findKSLRec(16, -1, fBaseKin.KchrecKS, fBaseKin.trkKS[0], fBaseKin.trkKS[1], fBaseKin.vtakenKS, flogger);
+}
+
+ErrorHandling::ErrorCodes EventContext::ReconstructKLIntoChargedParticles()
+{
+  TMatrixT<Double_t> covMatrixTot(6, 6);
+  covMatrixTot.Zero();
+
+  return fCurrentEventAnalysis->findKSLRec(10, fBaseKin.vtakenKS[0], fBaseKin.KchrecKS, fBaseKin.trkKS[0], fBaseKin.trkKS[1], fBaseKin.vtakenKS, flogger);
+}
+
+ErrorHandling::ErrorCodes EventContext::ReconstructKaonClosestToIP()
+{
+  TMatrixT<Double_t> covMatrixTot(6, 6);
+  covMatrixTot.Zero();
+
+  return fCurrentEventAnalysis->findKClosestRec(fBaseKin.KchrecClosest, fBaseKin.trkClosest[0], fBaseKin.trkClosest[1], fBaseKin.vtakenClosest, flogger);
+}
+
