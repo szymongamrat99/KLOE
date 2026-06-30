@@ -517,6 +517,7 @@ namespace KLOE
         cuts,
         g4takenTriKinFit,
         goodClustersTriKinFit,
+        goodClustersSix,
         ncll,
         Asstr,
         vtakenElectron,
@@ -542,6 +543,7 @@ namespace KLOE
       Knereclor.resize(10, 0.0);
       g4takenTriKinFit.resize(4, 0);
       goodClustersTriKinFit.resize(4, 0);
+      goodClustersSix.resize(6, 0);
       pi01.resize(6, 0.0);
       pi02.resize(6, 0.0);
       pi01Fit.resize(6, 0.0);
@@ -663,6 +665,7 @@ namespace KLOE
       Knereclor.clear();
       g4takenTriKinFit.clear();
       goodClustersTriKinFit.clear();
+      goodClustersSix.clear();
       pi01.clear();
       pi02.clear();
       pi01Fit.clear();

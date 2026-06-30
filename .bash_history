@@ -653,3 +653,189 @@ git commit -m "Last version"
 git push
 git checkout -b feat/1d-corrections-regeneration
 ./execute_analysis.sh 
+cd ../root_files/
+ls
+cd hal/
+ls
+cd ..
+cd kitt/
+ls
+cd ALL_PHYS2_THREE_PI0_NoSmearing/
+ls -hl
+root 
+cd ../../
+ls
+cd ..
+ls
+cd DBV-26/
+ls
+cd DK0/
+ls
+cd 20260516/
+ls
+cd ..
+ls
+cd all_phys
+ls
+cd ..
+ls
+cd all_phys
+ls
+cd 20260516/
+ls
+cd ../../
+cd ../
+ls
+./lumi_
+
+./lumi_batch.sh PROD2ROOT/DK0 26 data 4 lumi_file/lumi_per_ev_nb.log 
+./lumi_batch.sh PROD2ROOT/DK0 26 DK0 4 lumi_file/lumi_per_ev_nb.log 
+./lumi_batch.sh PROD2ROOT 26 DK0 4 lumi_file/lumi_per_ev_nb.log 
+cat lumi_batch.sh 
+vi lumi_batch.sh 
+cp lumi_batch.sh lumi_batch_backup.sh 
+vi lumi_batch
+vi lumi_batch.sh 
+./lumi_batch.sh PROD2ROOT 26 DK0 4 lumi_file/lumi_per_ev_nb.log 
+cd DBV-26/
+ls
+mv DK0/ data/
+ls
+./lumi_batch.sh /data/ssd/gamrat/PROD2ROOT 26 DK0 4 lumi_file/lumi_per_ev_nb.log 
+cd ..
+./lumi_batch.sh /data/ssd/gamrat/PROD2ROOT 26 DK0 4 lumi_file/lumi_per_ev_nb.log 
+cd DBV-26/
+ls
+rm data/
+rm -r data/
+mv DK0/ data/
+cd ../root_files/hal/
+ls
+cd DATA_SEMILEPTONIC_NoSmearing/
+ls
+rm -fr *
+ls
+ls -hl
+cd ../../kitt/
+ls
+cd DATA_THREE_PI0_NoSmearing/
+ls
+ls -hl
+cd ..
+cd ../hal/
+ls
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+root mk0_initial_analysis_all_phys_SEMILEPTONIC_NoSmearing_Semileptonic_99.root
+git add .
+git commit -m "Middle point of the three pi0 hypothesis"
+git push
+git checkout master
+git checkout main 
+ls
+./execute_analysis.sh 
+ls
+cat run_parallel.sh 
+vi parameters.txt 
+cat para
+cat parameters.txt 
+./run_parallel.sh data 20260627 1 421 100
+cd parallel_logs_data_1_421/
+ls
+cd 1
+ls
+cd 1
+ls
+cat stderr 
+cd ..
+ls
+cd ..
+cd 1/1
+ls
+cat seq 
+cat stdout 
+cd ../../../
+./execute_analysis.sh /data/ssd/gamrat/DBV-26/data/20260627/job_v26_data_4_inv_pb_1.txt
+./execute_analysis.sh 10 /data/ssd/gamrat/DBV-26/data/20260627/job_v26_data_4_inv_pb_1.txt
+htop
+./run_parallel.sh data 20260627 1 421 60
+htop
+ls
+cd ../root_files/hal/
+ls
+cd DATA_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+htop
+root dk0_initial_analysis_SEMILEPTONIC_NoSmearing_13.root
+cd ../../kitt/DATA_THREE_PI0_NoSmearing/
+ls
+ls -hl
+htop
+cd ../root_files/
+ls
+cd hal/
+ls
+cd DATA_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+cd ../../kitt/
+ls
+cd DATA_THREE_PI0_NoSmearing/
+ls
+ls -hl
+exit
+cd ../root_files/kitt/
+ls
+cd DATA_THREE_PI0_NoSmearing/
+ls
+cd ..
+cd ALL_PHYS_THREE_PI0_NoSmearing/
+ls
+cd ../
+cd ..
+cd kitt/DATA_THREE_PI0_NoSmearing/
+ls
+cat file_lumi_DATA_THREE_PI0_NoSmearing.log 
+cd ..
+ls
+cd ../
+ls
+cd ../CNAF_Produced_Files/
+ls
+cd root_files/
+ls
+cd 2026-04-17/
+ls
+cd Signal/
+ls
+cd log/
+ls
+cat calculate
+cat calculate.sh 
+cat calculate_total.sh 
+./calculate_total.sh 
+cp calculate* ../../../../../KLOE/log/.
+cp calculate* /data/4/users/gamrat/KLOE/log/.
+cd ../../../../../root_files/kitt/
+ls
+cd ALL_PHYS_THREE_PI0_NoSmearing/
+ls
+cat file_lumi_ALL_PHYS_THREE_PI0_NoSmearing.log 
+vi calculate_lumi.sh
+chmod +x calculate_lumi.sh file_lumi_ALL_PHYS_THREE_PI0_NoSmearing.log 
+./calculate_lumi.sh file_lumi_ALL_PHYS_THREE_PI0_NoSmearing.log 
+cp calculate_lumi.sh ../.
+cd ..
+./calculate_lumi.sh ALL_PHYS_THREE_PI0_NoSmearing/file_lumi_ALL_PHYS_THREE_PI0_NoSmearing.log 
+./calculate_lumi.sh ALL_PHYS2_THREE_PI0_NoSmearing/file_lumi_ALL_PHYS2_THREE_PI0_NoSmearing.log 
+./calculate_lumi.sh ALL_PHYS3_THREE_PI0_NoSmearing/file_lumi_ALL_PHYS3_THREE_PI0_NoSmearing.log 
+./calculate_lumi.sh DATA_THREE_PI0_NoSmearing/file_lumi_DATA_THREE_PI0_NoSmearing.log 
+cd scripts/
+root
+root\
+root
+htop
+root
+cd scripts/
+root

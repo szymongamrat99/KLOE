@@ -1290,6 +1290,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             // 4 clusters chosen with the trilateration + 2 remaining clusters
             // To keep the statistical independence of the samples
             neutRec.ReconstructSixGammaVertexWithFourTaken(cluster, neuclulist, baseKin.g4takenTriKinFit, bestIndicesSix, baseKin.bestError, KnerecSix, photonFourMomSix);
+
+            genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g4takenTriKinFit, dataAccess.GetPNum1(), baseKin.ntmc, dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersSix);
           }
           else
           {
@@ -1695,6 +1697,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"bunchnum", baseKin.bunchnum},
           {"errorcode", baseKin.errorCode},
           {"goodClustersTriKinFitSize", baseKin.goodClustersTriKinFit.size()},
+          {"goodClustersSixSize", baseKin.goodClustersSix.size()},
           {"cutApplied", baseKin.cut},
           {"muonAlertPlus", baseKin.muonAlertPlus},
           {"muonAlertMinus", baseKin.muonAlertMinus},
