@@ -1208,6 +1208,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
         errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, bhabha_mom, baseKin.Kchboostnew, baseKin.ipnew, baseKin.Knerec, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
 
+        std::vector<Double_t> gamma_mom_final_triangle[4];
+        gamma_mom_final_triangle[0].resize(4);
+        gamma_mom_final_triangle[1].resize(4);
+        gamma_mom_final_triangle[2].resize(4);
+        gamma_mom_final_triangle[3].resize(4);
+
+        TriangleVtxRec(cluster, neuclulist, bhabha_mom, baseKin.ipnew, baseKin.Kchboostnew, baseKin.g4takenTriangle, gamma_mom_final_triangle, baseKin.KnerecTriangle, baseKin.minv4gamTriangle, baseKin.TrcSumTriangle, logger);
+
+        genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g4takenTriangle, dataAccess.GetPNum1(), baseKin.ntmc, dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersTriangle);
+
         if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
         {
           LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
@@ -1235,6 +1245,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           baseKin.gammaMomTriangle2.assign(gamma_mom_final[1].begin(), gamma_mom_final[1].end());
           baseKin.gammaMomTriangle3.assign(gamma_mom_final[2].begin(), gamma_mom_final[2].end());
           baseKin.gammaMomTriangle4.assign(gamma_mom_final[3].begin(), gamma_mom_final[3].end());
+
+          baseKin.gammaMomTriangleTotal1.assign(gamma_mom_final_triangle[0].begin(), gamma_mom_final_triangle[0].end());
+          baseKin.gammaMomTriangleTotal2.assign(gamma_mom_final_triangle[1].begin(), gamma_mom_final_triangle[1].end());
+          baseKin.gammaMomTriangleTotal3.assign(gamma_mom_final_triangle[2].begin(), gamma_mom_final_triangle[2].end());
+          baseKin.gammaMomTriangleTotal4.assign(gamma_mom_final_triangle[3].begin(), gamma_mom_final_triangle[3].end());
 
           TrcSum = baseKin.trcfinal[0] + baseKin.trcfinal[1] + baseKin.trcfinal[2] + baseKin.trcfinal[3];
 
@@ -1289,7 +1304,31 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {
             // 4 clusters chosen with the trilateration + 2 remaining clusters
             // To keep the statistical independence of the samples
-            neutRec.ReconstructSixGammaVertexWithFourTaken(cluster, neuclulist, baseKin.g4takenTriKinFit, bestIndicesSix, baseKin.bestError, KnerecSix, photonFourMomSix);
+            errorCode = neutRec.ReconstructSixGammaVertexWithFourTaken(cluster, neuclulist, baseKin.g4takenTriKinFit, bestIndicesSix, baseKin.bestError, KnerecSix, photonFourMomSix);
+
+            if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
+            {
+              if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
+              {
+                noError = false;
+                if (mctruth == mctruthSignal)
+                {
+                  passed = true;
+                  mctruth = -1;
+                  goto skipEvent;
+                }
+                else
+                {
+                  neuclulist.clear();
+                  ++show_progress;
+                  continue;
+                }
+              }
+            }
+            else
+            {
+              genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, bestIndicesSix, dataAccess.GetPNum1(), baseKin.ntmc, dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersSix);
+            }
           }
           else
           {
@@ -1695,6 +1734,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"bunchnum", baseKin.bunchnum},
           {"errorcode", baseKin.errorCode},
           {"goodClustersTriKinFitSize", baseKin.goodClustersTriKinFit.size()},
+          {"goodClustersSixSize", baseKin.goodClustersSix.size()},
+          {"goodClustersTriangleSize", baseKin.goodClustersTriangle.size()},
           {"cutApplied", baseKin.cut},
           {"muonAlertPlus", baseKin.muonAlertPlus},
           {"muonAlertMinus", baseKin.muonAlertMinus},
@@ -1753,6 +1794,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"CotvSmeared2", baseKin.CotvSmeared2},
           {"Chi2SignalKinFit", baseKin.Chi2SignalKinFit},
           {"TrcSum", TrcSum},
+          {"TrcSumTriangle", baseKin.TrcSumTriangle},
           {"Curv1", baseKin.Curv1},
           {"Phiv1", baseKin.Phiv1},
           {"Cotv1", baseKin.Cotv1},
@@ -1774,6 +1816,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"vtaken", baseKin.vtaken},
           {"g4takenTriKinFit", baseKin.g4takenTriKinFit},
           {"goodClustersTriKinFit", baseKin.goodClustersTriKinFit},
+          {"g4takenTriangle", baseKin.g4takenTriangle},
           {"Asstr", baseKin.Asstr},
           {"vtakenElectron", baseKin.vtakenElectron},
           {"vtakenMuon", baseKin.vtakenMuon}};
@@ -1829,11 +1872,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"gammaMomTriKinFit3", baseKin.gammaMomTriKinFit3},
           {"gammaMomTriKinFit4", baseKin.gammaMomTriKinFit4},
           {"Knerec", baseKin.Knerec},
+          {"KnerecTriangle", baseKin.KnerecTriangle},
           {"Knereclor", baseKin.Knereclor},
           {"gammaMomTriangle1", baseKin.gammaMomTriangle1},
           {"gammaMomTriangle2", baseKin.gammaMomTriangle2},
           {"gammaMomTriangle3", baseKin.gammaMomTriangle3},
           {"gammaMomTriangle4", baseKin.gammaMomTriangle4},
+          {"gammaMomTriangleTotal1", baseKin.gammaMomTriangleTotal1},
+          {"gammaMomTriangleTotal2", baseKin.gammaMomTriangleTotal2},
+          {"gammaMomTriangleTotal3", baseKin.gammaMomTriangleTotal3},
+          {"gammaMomTriangleTotal4", baseKin.gammaMomTriangleTotal4},
           {"trcfinal", baseKin.trcfinal},
           {"PhivMC", baseKin.PhivMC},
           {"CurvMC", baseKin.CurvMC},

@@ -22,4 +22,6 @@ ErrorHandling::ErrorCodes TrilaterationKinFit(Int_t N_free, Int_t N_const, Int_t
 
 ErrorHandling::ErrorCodes TriangleRec(std::vector<Int_t> g4taken_kinfit, std::vector<Double_t> cluster[5], std::vector<Int_t> Asscl, std::vector<Double_t> bhabha_mom, std::vector<Double_t> Kchboost, std::vector<Double_t> ip, std::vector<Double_t> &Knetriangle, std::vector<Double_t> gammatriangle[4], Double_t &minv4gam, std::vector<Double_t> &trcfinal, ErrorHandling::ErrorLogs &logger);
 
+ErrorHandling::ErrorCodes TriangleVtxRec(std::vector<Double_t> cluster[5], std::vector<Int_t> &neu_clu_list, std::vector<Double_t> &bhabha_mom, std::vector<Double_t> &ip, std::vector<Double_t> &Kchboost, std::vector<Int_t> &g4taken_triangle, std::vector<Double_t> photon_triangle[4], std::vector<Double_t> &Knetriangle, Double_t &minv4gamTriangle, Double_t &TrcFinalTriangle, ErrorHandling::ErrorLogs &logger);
+
 #endif //! TRILATERATION_H

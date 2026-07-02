@@ -430,7 +430,8 @@ namespace KLOE
       return ErrorHandling::ErrorCodes::LESS_THAN_SIX_NEUTRAL_CLUSTERS;
 
     // Vector of combinations of photonNum clusters
-    std::vector<std::array<Int_t, photonNum>> combinations;
+    std::vector<std::array<Int_t, photonNum>> combinations, 
+        indicescombo;
     for (Int_t i1 = 0; i1 < neuCluSize - 1; i1++)
       for (Int_t i2 = i1 + 1; i2 < neuCluSize; i2++)
       {
@@ -446,6 +447,8 @@ namespace KLOE
                                 neu_clu_list[g4taken[3]],
                                 neu_clu_list[i1],
                                 neu_clu_list[i2]});
+        
+        indicescombo.push_back({g4taken[0], g4taken[1], g4taken[2], g4taken[3], i1, i2});
       }
     ////////////////////////////////////////////////////////////////////////////
 
@@ -548,7 +551,8 @@ namespace KLOE
       {
         solutionFound = true;
         bestTotalError = totalErrorTmp;
-        bestIndices = {combo[0], combo[1], combo[2], combo[3], combo[4], combo[5]};
+        bestIndices = {indicescombo[&combo - &combinations[0]][0], indicescombo[&combo - &combinations[0]][1], indicescombo[&combo - &combinations[0]][2], indicescombo[&combo - &combinations[0]][3], indicescombo[&combo - &combinations[0]][4], indicescombo[&combo - &combinations[0]][5]};
+
         partialSolutions = partialSolutionsTmp;           // Update to the best partial solutions
         partialSolutionEnergy = partialSolutionEnergyTmp; // Update to the best partial solution energies
       }
