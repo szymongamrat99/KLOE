@@ -839,3 +839,37 @@ htop
 root
 cd scripts/
 root
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+q
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+nohup ./execute_analysis.sh < parameters.txt > nohup.log &
+cd ../root_files/hal/
+ls
+cd 2026-07-01/
+ls
+cd ALL_PHYS3_THREE_PI0_NoSmearing/
+ls -hl
+exit
+cd scripts/
+root
+git add .
+git checkout -b feature/three_pi0_additional_functions
+git add .
+git commit -m "Addition of good clusters check for six gammas"
+git push
+git push --set-upstream origin feature/three_pi0_additional_functions
+./execute_analysis.sh 
+cd ../root_files/hal/2026-07-01/
+ls
+cd ALL_PHYS3_THREE_PI0_NoSmearing/
+ls -hl
+root
+cd ../root_files/hal/2026-07-02/ALL_PHYS3_THREE_PI0_NoSmearing/
+ls
+root

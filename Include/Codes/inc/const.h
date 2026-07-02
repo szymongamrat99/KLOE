@@ -310,6 +310,7 @@ namespace KLOE
         T0step1 = 0.0,
         Chi2 = 0.0,
         minv4gam = 0.0,
+        minv4gamTriangle = 0.0,
         Qmiss = 0.0,
         Pgamrec[4][4] = {{0.0}},
         omega[9] = {0.0},
@@ -358,7 +359,8 @@ namespace KLOE
         Curv2 = 0.0,
         Phiv2 = 0.0,
         Cotv2 = 0.0,
-        bestError = 999999.0;
+        bestError = 999999.0,
+        TrcSumTriangle = 0.0;
 
     Int_t
         nevent = 0,
@@ -448,6 +450,10 @@ namespace KLOE
         gammaMomTriangle2,
         gammaMomTriangle3,
         gammaMomTriangle4,
+        gammaMomTriangleTotal1,
+        gammaMomTriangleTotal2,
+        gammaMomTriangleTotal3,
+        gammaMomTriangleTotal4,
         trcfinal,
         CurvMC,
         PhivMC,
@@ -499,7 +505,8 @@ namespace KLOE
         trkElectronCluster[2],
         trkMuonCluster[2],
         trkElectronDT[2],
-        trkMuonDT[2];
+        trkMuonDT[2],
+        KnerecTriangle;
 
     std::vector<Int_t>
         vtaken,
@@ -516,7 +523,9 @@ namespace KLOE
         errors,
         cuts,
         g4takenTriKinFit,
+        g4takenTriangle,
         goodClustersTriKinFit,
+        goodClustersTriangle,
         goodClustersSix,
         ncll,
         Asstr,
@@ -541,8 +550,10 @@ namespace KLOE
       KchrecKLTwoBody.resize(10, 0.0);
       Knerec.resize(10, 0.0);
       Knereclor.resize(10, 0.0);
+      KnerecTriangle.resize(10, 0.0);
       g4takenTriKinFit.resize(4, 0);
       goodClustersTriKinFit.resize(4, 0);
+      goodClustersTriangle.resize(4, 0);
       goodClustersSix.resize(6, 0);
       pi01.resize(6, 0.0);
       pi02.resize(6, 0.0);
@@ -689,6 +700,7 @@ namespace KLOE
       trkFit[1].clear();
       KchrecFit.clear();
       KchboostFit.clear();
+      KnerecTriangle.clear();
       ipFit.clear();
       ipOmegaFit.clear();
       photonFit[0].clear();
@@ -763,6 +775,15 @@ namespace KLOE
       trkMuonCluster[1].clear();
       trkMuonDT[0].clear();
       trkMuonDT[1].clear();
+
+      minv4gam = 0.0;
+      minv4gamTriangle = 0.0;
+      Qmiss = 0.0;
+      kaonChTimeCM = 0.0;
+      kaonChTimeLAB = 0.0;
+      kaonNeTimeLAB = 0.0;
+      kaonNeTimeCM = 0.0;
+      TrcSumTriangle = 999.0;
     }
   };
 }

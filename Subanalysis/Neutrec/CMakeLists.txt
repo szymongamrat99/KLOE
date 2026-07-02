@@ -6,7 +6,8 @@ add_library(NeutRec SHARED
             src/triangle_neu_rec.cpp
             src/trilateration_neu_rec_kin_fit_aux.cpp
             src/trilaterationKinFit.cpp
-            src/triangleRec.cpp)
+            src/triangleRec.cpp
+            src/triangleVtxRec.cpp)
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
 # PUBLIC: oznacza, że katalog z nagłówkami (tu: bieżący katalog, '.') będzie
