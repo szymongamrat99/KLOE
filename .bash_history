@@ -873,3 +873,6 @@ root
 cd ../root_files/hal/2026-07-02/ALL_PHYS3_THREE_PI0_NoSmearing/
 ls
 root
+./execute_analysis.sh 
+cd scripts/
+root
