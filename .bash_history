@@ -876,3 +876,33 @@ root
 ./execute_analysis.sh 
 cd scripts/
 root
+./execute_analysis.sh 
+git checkout main 
+git checkout -- .
+git checkout main
+git pull
+git checkout -b feature/semileptonic-analysis
+git add .
+git commit -m "Single vtx for semileptonic events"
+git push
+git add .
+git commit -m "Added special configs"
+git push
+./run_parallel.sh 
+./run_parallel.sh all_phys 20260516 1 206 15 analysis_config_MC_Semileptonic.json
+cd ../root_files/hal/ALL_PHYS
+cd ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+cd ..
+ls
+rm -fr *
+htop
+killall KLSPM00
+killall
+killall -u gamrat
+htop
+./execute_analysis.sh 
+killall
+ps -e gamrat
+kill
+pkill -u gamrat

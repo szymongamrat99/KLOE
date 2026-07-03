@@ -755,7 +755,6 @@ namespace Utils
       {
         Paths::propName = (std::string)paths.at("analysisProperties").at("properties");
         Paths::pdgConstFilePath = (std::string)paths.at("analysisProperties").at("PDGConst");
-        Paths::analysisConfigPath = (std::string)paths.at("analysisProperties").at("analysisConfig");
 
         Paths::ext_img = (std::string)paths.at("extensions").at("img");
         Paths::ext_root = (std::string)paths.at("extensions").at("root");
