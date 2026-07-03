@@ -85,6 +85,7 @@ namespace ErrorHandling
     TRIANGLE_REC = 309,                             /*!< Did not pass the triangle reconstruction*/
     SIGNAL_KIN_FIT = 310,                           /*!< Did not pass the signal kin fit*/
     OMEGA_KIN_FIT = 311,                            /*!< Did not pass the omega kin fit*/
+    NOT_SINGLE_VTX_EVENT = 312,                        /*!< Not a single vertex event for semileptonic hypothesis*/
 
     CUT_CHI2_SIGNAL = 400,  /*!< Did not pass chi2 cut for signal hypothesis*/
     CUT_COMB_MPI0 = 401,    /*!< Did not pass combined mpi0 cut*/
@@ -248,6 +249,8 @@ namespace ErrorHandling
         return "Less than four neutral clusters with good energy available for analysis.";
       case ErrorCodes::OMEGA_KIN_FIT:
         return "Did not pass the omega kin fit.";
+      case ErrorCodes::NOT_SINGLE_VTX_EVENT:
+        return "Not a single vertex event for semileptonic hypothesis.";
 
       // Cut-related logs
       case ErrorCodes::CUT_CHI2_SIGNAL:

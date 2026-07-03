@@ -620,12 +620,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
     // Sprawdź czy jest przynajmniej jeden wierzchołek z dwoma dołączonymi śladami
     bool hasOne = false;
+    int countVtx = 0;
     for (const auto &pair : mapTmp)
     {
       if (pair.second == 2)
       {
         hasOne = true;
-        break;
+        countVtx++;
       }
     }
 
@@ -961,6 +962,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       hypoMap[KLOE::HypothesisCode::FOUR_PI] = ErrorHandling::ErrorCodes::NO_ERROR;
 
     errorCode = hypoMap[hypoCode]; // error code based on the hypothesis
+
+    if (hypoCode == KLOE::HypothesisCode::SEMILEPTONIC && countVtx != 1)
+    {
+      errorCode = ErrorHandling::ErrorCodes::NOT_SINGLE_VTX_EVENT;
+    }
 
     if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
     {
