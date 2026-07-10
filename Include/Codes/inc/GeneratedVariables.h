@@ -34,7 +34,10 @@ public:
 			const Int_t *motherOld,
 			UInt_t mcflag,
 			Int_t &mctruth,
-      Int_t &semileptonic_flag);
+      Int_t &semileptonic_flag,
+      Int_t &other_flag,
+      Int_t &isr_flag
+    );
 
 	/**
 	 * @brief Find clusters not associated with any track.

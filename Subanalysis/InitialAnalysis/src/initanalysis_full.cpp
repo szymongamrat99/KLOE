@@ -671,7 +671,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           dataAccess.GetMother().data(),
           mcflag, // Assuming mcflag is 1 for MC events
           mctruth,
-          baseKin.semileptonic_flag);
+          baseKin.semileptonic_flag,
+          baseKin.other_flag,
+          baseKin.isr_flag);
 
       MctruthCounter(mctruth, mctruth_num);
       // -------------------------------------------------------------------
@@ -1745,7 +1747,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"cutApplied", baseKin.cut},
           {"muonAlertPlus", baseKin.muonAlertPlus},
           {"muonAlertMinus", baseKin.muonAlertMinus},
-          {"semileptonicFlag", baseKin.semileptonic_flag}};
+          {"semileptonicFlag", baseKin.semileptonic_flag},
+          {"otherFlag", baseKin.other_flag},
+          {"isrFlag", baseKin.isr_flag}};
 
       // Double_t zmienne
       std::map<std::string, Double_t> floatVars = {

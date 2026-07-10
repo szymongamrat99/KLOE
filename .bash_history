@@ -906,3 +906,186 @@ killall
 ps -e gamrat
 kill
 pkill -u gamrat
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+./run_parallel.sh all_phys 20260516 1 206 15 analysis_config_MC_Semileptonic.json
+./run_parallel.sh all_phys2 20260516 1 71 15 analysis_config_MC_Semileptonic.json
+./run_parallel.sh all_phys3 20260516 1 76 15 analysis_config_MC_Semileptonic.json
+./run_parallel.sh data 20260627 1 421 15 analysis_config_Data_Semileptonic.json
+killall KLSPM00
+./run_parallel.sh data 20260627 1 421 15 analysis_config_Data_Semileptonic.json
+killall KLSPM00
+killall parallel
+killall KLSPM00
+./run_parallel.sh all_phys 20260516 1 206 15 analysis_config_MC_Semileptonic.json
+./run_parallel.sh all_phys2 20260516 1 71 15 analysis_config_MC_Semileptonic.json
+./run_parallel.sh all_phys3 20260516 1 76 15 analysis_config_MC_Semileptonic.json
+./run_parallel.sh data 20260627 1 421 15 analysis_config_Data_Semileptonic.json
+killall KLSPM00
+git add .
+git commit -m "Elastic analysis config file"
+git push
+./run_parallel.sh all_phys 20260516 1 206 15 analysis_config_MC_Semileptonic.json
+./run_parallel.sh all_phys2 20260516 1 71 15 analysis_config_MC_Semileptonic.json
+killall KLSPM00
+./run_parallel.sh all_phys3 20260516 1 76 15 analysis_config_MC_Semileptonic.json
+./run_parallel.sh data 20260627 1 421 15 analysis_config_Data_Semileptonic.json
+htop
+./execute_analysis.sh 
+kill $(pgrep -u gamrat | grep -v -e $$ -e $PPID)
+pkill -u gamrat -t $(basename $(tty))
+htop
+pkill -u gamrat -t $(basename $(tty))
+htop
+cd /data/ssd/gamrat/root_files/hal/
+;s
+ls
+cd ../../DBV-26/all_phys2/20260516/
+ls
+cd ../../data/
+ls
+cd 20260627/
+ls -hl
+cd ../../../
+cd root_files/hal/
+ls
+pgrep -u gamrat parallel
+pkill -9 -P $(pgrep -u gamrat parallel)
+pkill -u gamrat parallel
+ls
+cd ALL_PHYS_THREE_PI0_NoSmearing/
+ls -hl
+cd ..
+rm -fr *
+ls
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+cd ..
+ls
+cd ALL_PHYS2_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+htop
+cd ../root_files/kitt/ALL_PHYS_THREE_PI0_NoSmearing/
+ls -hl
+cd ../root_files/kitt/ALL_PHYS2_THREE_PI0_NoSmearing/
+cd ../ALL_PHYS2_THREE_PI0_NoSmearing/
+ls
+ls -hl
+cd ../ALL_PHYS3_THREE_PI0_NoSmearing/
+ls -hl
+cd ../DATA_THREE_PI0_NoSmearing/
+ls -hl
+cd ../../hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls -hl
+cd ../
+ls
+cd ../
+ls
+cd hal/
+ls
+exit
+ls
+cd ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls 0hl
+ls -hl
+cd ..
+cd ../kitt/DATA_THREE_PI0_NoSmearing/
+ls -hl
+cd ../root_files/hal/ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+ls -hl
+wc -l
+l -hl wc -l
+l -hl | wc -l
+l -hl | wc
+l -hl | wl
+ls -hl | wc -l
+ls -hl
+root
+ls
+cat file_lumi_ALL_PHYS_SEMILEPTONIC_NoSmearing.log 
+root
+exit
+cd ../python-kloe-analysis/
+root
+cd scripts/
+root
+htop
+cd ../root_files/hal/DATA_SEMILEPTONIC_NoSmearing/
+ls -hl
+ls
+cd ../ALL_PHYS
+cd ../ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls -hl
+cd ../ALL_PHYS2_SEMILEPTONIC_NoSmearing/
+ls -hl
+cd ../
+ls
+mkdir ROOT-in-docker
+docker ps
+cd KLe
+cd KLOE/
+cd ../python-kloe-analysis/
+cd scripts/
+root
+htop
+cd ../root_files/
+ls
+cd hal/
+ls
+cd../ki
+cd ../kitt
+ls
+cd ALL_PHYS_THREE_PI0_NoSmearing/
+ls
+root
+ls
+root
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+cd so
+cd scripts/
+root
+.q
+root
+.q
+root
+git checkout -b feature/other-flags
+git add .
+git commit -m "Flag check for other channel"
+git push
+git push --set-upstream origin feature/other-flags
+root
+cd img/other_flags/
+ls
+cd ..
+root
+cd results/detailed_other_flags/
+ls
+root flags.root 
+cd ../../
+root
+cd results/detailed_other_flags/
+ls
+root flags.root 
+cd ../../
+htop
+cd ../root_files/
+ls
+cd hal
+ls
+cd 2026-07-10/
+ls -hl
+cd ALL_PHYS3_THREE_PI0_NoSmearing/
+ls
+root 

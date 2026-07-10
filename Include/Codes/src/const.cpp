@@ -194,6 +194,30 @@ namespace KLOE
       {7, "pi+pi-pi+pi-"},
       {8, "MC sum"}};
 
+  const std::map<Int_t, TString> otherChannName = {
+      {1, "K+K-pi+pi0pi-pi0"},
+      {2, "K+K-mu+mu-"},
+      {3, "K+K-pi+pi0mu-"},
+      {4, "K+K-mu+pi-pi0"},
+      {5, "KLKS3pi0"},
+      {6, "KLKSpi+pi-pi0"},
+      {7, "KSKLlambda"},
+      {8, "K+K-pi+pi0pi0pi-pi0pi0"},
+      {9, "K+K-pi+pi0pi-pi0pi0"},
+      {10, "K+K-pi+pi0pi0pi-pi0"},
+      {11, "KSKLpi0pi0pielectron"},
+      {12, "K+K-positronpi-pi0"},
+      {13, "K+K-mu+pi0pi-pi0pi0"},
+      {14, "Omega_pi0_pi+pi-pi0"},
+      {15, "KSKLsemileptonic_muon"},
+      {16, "K+K-mu+pi-pi0pi0"},
+      {17, "K+K-pi+pi0pi0_muminus"},
+      {18, "KSKL3pi0_semileptonic"},
+      {19, "KSKL3pi0_2pi0"},
+      {20, "K+K-pi0pi0piplus_pi0electronpositron"},
+      {21, "K+K-pi0piplus_pi0electronpositron"},
+      {22, "Other"}};
+
   const std::map<TString, TString> channTitle = {
       {"Data", "Data"},
       {"Signal", "K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{0}#pi^{0}"},
@@ -205,6 +229,30 @@ namespace KLOE
       {"pi+pi-pi+pi-", "K_{S}K_{L}#rightarrow#pi^{+}#pi^{-}#pi^{+}#pi^{-}"},
       {"MC sum", "MC sum"}};
 
+  const std::map<TString, TString> otherChannTitle = {
+      {"K+K-pi+pi0pi-pi0", "K^{+}K^{-}#rightarrow#pi^{+}#pi^{0}#pi^{-}#pi^{0}"},
+      {"K+K-mu+mu-", "K^{+}K^{-}#rightarrow#mu^{+}#mu^{-}"},
+      {"K+K-pi+pi0mu-", "K^{+}K^{-}#rightarrow#pi^{+}#pi^{0}#mu^{-}"},
+      {"K+K-mu+pi-pi0", "K^{+}K^{-}#rightarrow#mu^{+}#pi^{-}#pi^{0}"},
+      {"KLKS3pi0", "K_{L}(K_{S})#rightarrow3#pi^{0}"},
+      {"KLKSpi+pi-pi0", "K_{L}(K_{S})#rightarrow#pi^{+}#pi^{-}#pi^{0}"},
+      {"KSKLlambda", "K_{S}K_{L}#rightarrow#Lambda"},
+      {"K+K-pi+pi0pi0pi-pi0pi0", "K^{+}K^{-}#rightarrow#pi^{+}#pi^{0}#pi^{0}#pi^{-}#pi^{0}#pi^{0}"},
+      {"K+K-pi+pi0pi-pi0pi0", "K^{+}K^{-}#rightarrow#pi^{+}#pi^{0}#pi^{-}#pi^{0}#pi^{0}"},
+      {"K+K-pi+pi0pi0pi-pi0", "K^{+}K^{-}#rightarrow#pi^{+}#pi^{0}#pi^{0}#pi^{-}#pi^{0}"},
+      {"KSKLpi0pi0pielectron", "K_{S}K_{L}#rightarrow#pi^{0}#pi^{0}#pi^{#pm}e^{#mp}#nu"},
+      {"K+K-positronpi-pi0", "K^{+}K^{-}#rightarrowe^{+}#pi^{-}#pi^{0}"},
+      {"K+K-mu+pi0pi-pi0pi0", "K^{+}K^{-}#rightarrow#mu^{+}#pi^{0}#pi^{-}#pi^{0}#pi^{0}"},
+      {"Omega_pi0_pi+pi-pi0", "#omega#pi^{0}#rightarrow#pi^{+}#pi^{-}#pi^{0}#pi^{0}"},
+      {"KSKLsemileptonic_muon", "K_{S}K_{L}#rightarrow#pi^{#pm}#mu^{#mp}#nu#pi^{0}#pi^{0}"},
+      {"K+K-mu+pi-pi0pi0", "K^{+}K^{-}#rightarrow#mu^{+}#pi^{-}#pi^{0}#pi^{0}"},
+      {"K+K-pi+pi0pi0_muminus", "K^{+}K^{-}#rightarrow#pi^{+}#pi^{0}#pi^{0}#mu^{-}"},
+      {"K+K-pi0pi0piplus_pi0electronpositron", "K^{+}K^{-}#rightarrow#pi^{0}#pi^{0}#pi^{#pm}#pi^{0}l^{#mp}#nu"},
+      {"KSKL3pi0_semileptonic", "K_{S}K_{L}#rightarrow3#pi^{0}#pi^{#pm}l^{#mp}#nu"},
+      {"KSKL3pi0_2pi0", "K_{S}K_{L}#rightarrow3#pi^{0}2#pi^{0}"},
+      {"K+K-pi0piplus_pi0electronpositron", "K^{+}K^{-}#rightarrow#pi^{0}#pi^{#pm}#pi^{0}l^{#mp}#nu"},
+      {"Other", "Other"}};
+
   const std::map<TString, Color_t> channColor = {
       {"Data", kBlack},
       {"Signal", kRed},
@@ -215,6 +263,30 @@ namespace KLOE
       {"Other", kGreen - 1},
       {"pi+pi-pi+pi-", kYellow},
       {"MC sum", kOrange}};
+
+  const std::map<TString, Color_t> otherChannColor = {
+      {"K+K-pi+pi0pi-pi0", kRed},
+      {"K+K-mu+mu-", kGreen},
+      {"K+K-pi+pi0mu-", kBlue},
+      {"K+K-mu+pi-pi0", kViolet},
+      {"KLKS3pi0", kCyan},
+      {"KLKSpi+pi-pi0", kOrange},
+      {"KSKLlambda", kMagenta},
+      {"K+K-pi+pi0pi0pi-pi0pi0", kYellow},
+      {"K+K-pi+pi0pi-pi0pi0", kGreen - 1},
+      {"K+K-pi+pi0pi0pi-pi0", kBlue - 1},
+      {"KSKLpi0pi0pielectron", kViolet - 1},
+      {"K+K-positronpi-pi0", kCyan - 1},
+      {"K+K-mu+pi0pi-pi0pi0", kOrange - 1},
+      {"Omega_pi0_pi+pi-pi0", kMagenta - 1},
+      {"KSKLsemileptonic_muon", kYellow -1},
+      {"K+K-mu+pi-pi0pi0", kGreen - 2},
+      {"K+K-pi+pi0pi0_muminus", kRed - 2},
+      {"KSKL3pi0_semileptonic", kBlue - 2},
+      {"KSKL3pi0_2pi0", kViolet - 2},
+      {"K+K-pi0pi0piplus_pi0electronpositron", kCyan - 2},
+      {"K+K-pi0piplus_pi0electronpositron", kOrange - 2},
+      {"Other", kBlack}};
 
   std::map<Int_t, Int_t> channEventCount = {
       {0, 0},
