@@ -176,8 +176,11 @@ namespace KLOE
   static constexpr UInt_t channNum = 7; //!< Number of analyzed channels
 
   extern const std::map<Int_t, TString> channName;    //!< Map of channel names
+  extern const std::map<Int_t, TString> otherChannName;   //!< Map of other channel names
   extern const std::map<TString, TString> channTitle; //!< Map of channel titles
+  extern const std::map<TString, TString> otherChannTitle; //!< Map of short channel titles
   extern const std::map<TString, Color_t> channColor; //!< Map of channel colors
+  extern const std::map<TString, Color_t> otherChannColor; //!< Map of other channel colors
 
   extern std::map<Int_t, Int_t> channEventCount; //!< Map of event counts per channel
 
@@ -387,7 +390,9 @@ namespace KLOE
         cut = 0,
         muonAlertPlus = 0,
         muonAlertMinus = 0,
-        semileptonic_flag = 0;
+        semileptonic_flag = 0,
+        other_flag = 0,
+        isr_flag = 0;
 
     std::vector<Double_t>
         Kchrecnew,
@@ -784,6 +789,10 @@ namespace KLOE
       kaonNeTimeLAB = 0.0;
       kaonNeTimeCM = 0.0;
       TrcSumTriangle = 999.0;
+      other_flag = 0;
+      isr_flag = 0;
+      mctruth_int = 0;
+      mcflag = 0;
     }
   };
 }

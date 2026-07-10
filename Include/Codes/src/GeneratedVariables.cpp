@@ -9,12 +9,15 @@ void GeneratedVariables::classifyChannel(
     const Int_t *motherOld,
     UInt_t mcflag,
     Int_t &mctruth_int,
-    Int_t &semileptonic_flag)
+    Int_t &semileptonic_flag,
+    Int_t &other_flag,
+    Int_t &isr_flag)
 {
-  UInt_t Ks = 0, Kl = 0, Ksregen = 0, piplusks = 0, pipluskl = 0, piminusks = 0, piminuskl = 0,
-         muonplusks = 0, muonpluskl = 0, muonminusks = 0, muonminuskl = 0, electronks = 0, electronkl = 0,
-         positronks = 0, positronkl = 0, pi0ks = 0, pi0kl = 0, pi0phi = 0, piplusphi = 0, piminusphi = 0,
-         otherphi = 0, otherkl = 0, otherks = 0, gammaphi = 0;
+  UInt_t Ks = 0, Kl = 0, Ksregen = 0, piplusks = 0, pipluskl = 0, piminusks = 0, piminuskl = 0, muonplusks = 0, muonpluskl = 0, muonminusks = 0, muonminuskl = 0, electronks = 0, electronkl = 0, positronks = 0, positronkl = 0, pi0ks = 0, pi0kl = 0, pi0phi = 0, piplusphi = 0, piminusphi = 0, otherphi = 0, otherkl = 0, otherks = 0, gammaphi = 0, neutrinoks = 0, neutrinokl = 0, neutrinokplus = 0, neutrinokminus = 0, Kllambda = 0, Kslambda = 0, Ksgamma = 0, Klgamma = 0, Kplusgamma = 0, Kminusgamma = 0, pi0kplus = 0, pi0kminus = 0, pipluskplus = 0, pipluskminus = 0, piminuskplus = 0, piminuskminus = 0, muonpluskplus = 0, muonpluskminus = 0, muonminuskplus = 0, muonminuskminus = 0, electronkplus = 0, electronkminus = 0, positronkplus = 0, positronkminus = 0, otherkplus = 0, otherkminus = 0, Kplus = 0, Kminus = 0;
+
+  isr_flag = 0;
+  semileptonic_flag = 0;
+  other_flag = 0;
 
   if (mcflag == 1)
   {
@@ -29,6 +32,12 @@ void GeneratedVariables::classifyChannel(
           break;
         case 16:
           Ks++;
+          break;
+        case 11:
+          Kplus++;
+          break;
+        case 12:
+          Kminus++;
           break;
         case 7:
           pi0phi++;
@@ -75,6 +84,15 @@ void GeneratedVariables::classifyChannel(
         case 3:
           electronkl++;
           break;
+        case 4:
+          neutrinokl++;
+          break;
+        case 1:
+          Klgamma++;
+          break;
+        case 18:
+          Kllambda++;
+          break;
         default:
           otherkl++;
           break;
@@ -105,24 +123,109 @@ void GeneratedVariables::classifyChannel(
         case 3:
           electronks++;
           break;
+        case 4:
+          neutrinoks++;
+          break;
+        case 1:
+          Ksgamma++;
+          break;
+        case 18:
+          Kslambda++;
+          break;
         default:
           otherks++;
           break;
         }
       }
+      else if (motherOld[vtxmcOld[j] - 1] == 11)
+      {
+        switch (pidmcOld[j])
+        {
+        case 7:
+          pi0kplus++;
+          break;
+        case 8:
+          pipluskplus++;
+          break;
+        case 9:
+          piminuskplus++;
+          break;
+        case 5:
+          muonpluskplus++;
+          break;
+        case 6:
+          muonminuskplus++;
+          break;
+        case 2:
+          positronkplus++;
+          break;
+        case 3:
+          electronkplus++;
+          break;
+        case 1:
+          Kplusgamma++;
+          break;
+        case 4:
+          neutrinokplus++;
+          break;
+        default:
+        {
+          otherkplus++;
+          break;
+        }
+        }
+      }
+      else if (motherOld[vtxmcOld[j] - 1] == 12)
+      {
+        switch (pidmcOld[j])
+        {
+        case 7:
+          pi0kminus++;
+          break;
+        case 8:
+          pipluskminus++;
+          break;
+        case 9:
+          piminuskminus++;
+          break;
+        case 5:
+          muonpluskminus++;
+          break;
+        case 6:
+          muonminuskminus++;
+          break;
+        case 2:
+          positronkminus++;
+          break;
+        case 3:
+          electronkminus++;
+          break;
+        case 1:
+          Kminusgamma++;
+          break;
+        case 4:
+          neutrinokminus++;
+          break;
+        default:
+        {
+          otherkminus++;
+          break;
+        }
+        }
+      }
     }
 
-    Bool_t signal_cond = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 &&
+    Bool_t base_ksl = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 && Ksregen == 0 && Kl == 1 && Ks == 1);
+
+    Bool_t signal_cond = (base_ksl &&
                           positronkl + positronks == 0 && electronkl + electronks == 0 && muonminuskl + muonminusks == 0 &&
-                          muonpluskl + muonplusks == 0 && Ksregen == 0 &&
-                          Ks == 1 && Kl == 1 &&
+                          muonpluskl + muonplusks == 0 && neutrinokl + neutrinoks == 0 && neutrinokplus + neutrinokminus == 0 &&
                           ((pi0ks == 2 && pipluskl == 1 && piminuskl == 1 && pi0kl == 0 && piplusks == 0 && piminusks == 0) ||
                            (pi0kl == 2 && piplusks == 1 && piminusks == 1 && pi0ks == 0 && pipluskl == 0 && piminuskl == 0)));
 
-    Bool_t pipi_cond = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 &&
+    Bool_t pipi_cond = (base_ksl &&
                         positronkl + positronks == 0 && electronkl + electronks == 0 && muonminuskl + muonminusks == 0 &&
-                        muonpluskl + muonplusks == 0 && Ksregen == 0 &&
-                        Ks == 1 && Kl == 1 &&
+                        muonpluskl + muonplusks == 0 &&
                         ((piminusks == 1 && piplusks == 1 && pipluskl == 1 && piminuskl == 1 && pi0kl == 0 && pi0ks == 0)));
 
     Bool_t regen_cond = (Ksregen == 1 && Ks == 1 && Kl == 1);
@@ -132,35 +235,78 @@ void GeneratedVariables::classifyChannel(
                          muonpluskl + muonplusks == 0 && Ksregen == 0 &&
                          Ks == 0 && Kl == 0 && pi0ks == 0 && pi0kl == 0 && pipluskl + piplusks == 0 && piminuskl + piminusks == 0);
 
-    Bool_t three_cond = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 &&
+    Bool_t three_cond = (base_ksl &&
                          positronkl + positronks == 0 && electronkl + electronks == 0 && muonminuskl + muonminusks == 0 &&
-                         muonpluskl + muonplusks == 0 && Ksregen == 0 &&
-                         Ks == 1 && Kl == 1 && (pi0kl == 3 && piplusks == 1 && piminusks == 1 && pi0ks == 0 && pipluskl == 0 && piminuskl == 0));
+                         muonpluskl + muonplusks == 0 && (pi0kl == 3 && piplusks == 1 && piminusks == 1 && pi0ks == 0 && pipluskl == 0 && piminuskl == 0 && Klgamma == 0 && Ksgamma == 0));
 
-    Bool_t semi_cond = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 &&
-                        Ksregen == 0 && Ks == 1 && Kl == 1 &&
-                        ((pi0ks == 2 && positronkl == 1 && piminuskl == 1 && pi0kl == 0) ||
-                         (pi0ks == 2 && pipluskl == 1 && electronkl == 1 && pi0kl == 0) ||
-                         (pi0ks == 2 && pipluskl == 1 && muonminuskl == 1 && pi0kl == 0) ||
-                         (pi0ks == 2 && piminuskl == 1 && muonpluskl == 1 && pi0kl == 0) ||
-                         (pi0kl == 2 && positronks == 1 && piminusks == 1 && pi0ks == 0) ||
-                         (pi0kl == 2 && piplusks == 1 && electronks == 1 && pi0ks == 0) ||
-                         (pi0kl == 2 && piplusks == 1 && muonminusks == 1 && pi0ks == 0) ||
-                         (pi0kl == 2 && piminusks == 1 && muonplusks == 1 && pi0ks == 0)));
+    Bool_t semi_cond = (base_ksl &&
+                        ((pi0ks == 2 && positronkl == 1 && piminuskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
+                         (pi0ks == 2 && pipluskl == 1 && electronkl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
+                         (pi0ks == 2 && pipluskl == 1 && muonminuskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
+                         (pi0ks == 2 && piminuskl == 1 && muonpluskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
+                         (pi0kl == 2 && positronks == 1 && piminusks == 1 && pi0ks == 0 && neutrinoks >= 0) ||
+                         (pi0kl == 2 && piplusks == 1 && electronks == 1 && pi0ks == 0 && neutrinoks >= 0) ||
+                         (pi0kl == 2 && piplusks == 1 && muonminusks == 1 && pi0ks == 0 && neutrinoks >= 0) ||
+                         (pi0kl == 2 && piminusks == 1 && muonplusks == 1 && pi0ks == 0 && neutrinoks >= 0)));
 
-    Bool_t semi_ele_pos_cond = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 &&
-                             Ksregen == 0 && Ks == 1 && Kl == 1 &&
-                             ((pi0ks == 2 && positronkl == 1 && piminuskl == 1 && pi0kl == 0) ||
-                              (pi0ks == 2 && pipluskl == 1 && electronkl == 1 && pi0kl == 0) ||
-                              (pi0kl == 2 && positronks == 1 && piminusks == 1 && pi0ks == 0) ||
-                              (pi0kl == 2 && piplusks == 1 && electronks == 1 && pi0ks == 0)));
+    Bool_t semi_ele_pos_cond = (base_ksl &&
+                                ((pi0ks == 2 && positronkl == 1 && piminuskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
+                                 (pi0ks == 2 && pipluskl == 1 && electronkl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
+                                 (pi0kl == 2 && positronks == 1 && piminusks == 1 && pi0ks == 0 && neutrinoks >= 0) ||
+                                 (pi0kl == 2 && piplusks == 1 && electronks == 1 && pi0ks == 0 && neutrinoks >= 0)));
 
-    Bool_t semi_muon_cond = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 &&
-                             Ksregen == 0 && Ks == 1 && Kl == 1 &&
-                             ((pi0ks == 2 && pipluskl == 1 && muonminuskl == 1 && pi0kl == 0) ||
-                              (pi0ks == 2 && piminuskl == 1 && muonpluskl == 1 && pi0kl == 0) ||
-                              (pi0kl == 2 && piplusks == 1 && muonminusks == 1 && pi0ks == 0) ||
-                              (pi0kl == 2 && piminusks == 1 && muonplusks == 1 && pi0ks == 0)));
+    Bool_t semi_muon_cond = (base_ksl &&
+                             ((pi0ks == 2 && pipluskl == 1 && muonminuskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
+                              (pi0ks == 2 && piminuskl == 1 && muonpluskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
+                              (pi0kl == 2 && piplusks == 1 && muonminusks == 1 && pi0ks == 0 && neutrinoks >= 0) ||
+                              (pi0kl == 2 && piminusks == 1 && muonplusks == 1 && pi0ks == 0 && neutrinoks >= 0)));
+
+    // Conditions for other_flag and isr_flag
+
+    Bool_t base_kplusminus = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 && otherkplus == 0 && otherkminus == 0 && Ksregen == 0 && Kplus == 1 && Kminus == 1);
+
+    Bool_t kplusminus_pipluspi0_piminuspi0 = base_kplusminus && (pi0kplus == 1 && pipluskplus == 1 && pi0kminus == 1 && piminuskminus == 1);
+
+    Bool_t kplusminus_muplus_muminus = base_kplusminus && (muonpluskplus == 1 && muonminuskminus == 1);
+
+    Bool_t kplusminus_pipluspi0_muminus = base_kplusminus && (pi0kplus == 1 && pipluskplus == 1 && muonminuskminus == 1);
+
+    Bool_t kplusminus_pipluspi0pi0_muminus = base_kplusminus && (pi0kplus == 2 && pipluskplus == 1 && muonminuskminus == 1);
+
+    Bool_t kplusminus_pipluspi0pi0_piminuspi0pi0 = base_kplusminus && (pi0kplus == 2 && pipluskplus == 1 && pi0kminus == 2 && piminuskminus == 1);
+
+    Bool_t kplusminus_mupluspi0_piminuspi0pi0 = base_kplusminus && (muonpluskplus == 1 && pi0kplus == 1 && pi0kminus == 2 && piminuskminus == 1);
+
+    Bool_t kplusminus_pipluspi0_piminuspi0pi0 = base_kplusminus && (pi0kplus == 1 && pipluskplus == 1 && pi0kminus == 2 && piminuskminus == 1);
+
+    Bool_t kplusminus_pipluspi0pi0_piminuspi0 = base_kplusminus && (pi0kplus == 2 && pipluskplus == 1 && pi0kminus == 1 && piminuskminus == 1);
+
+    Bool_t kplusminus_muplus_piminuspi0 = base_kplusminus && (muonpluskplus == 1 && pi0kminus == 1 && piminuskminus == 1);
+
+    Bool_t kplusminus_muplus_piminuspi0pi0 = base_kplusminus && (muonpluskplus == 1 && pi0kminus == 2 && piminuskminus == 1);
+
+    Bool_t kplusminus_positron_piminuspi0 = base_kplusminus && (positronkplus == 1 && pi0kminus == 1 && piminuskminus == 1);
+
+    Bool_t kplusminus_pi0pi0piplus_pi0electronpositron = base_kplusminus && ((pipluskplus == 1 && pi0kplus == 2 && pi0kminus == 1 && electronkminus == 1) || (piminuskminus == 1 && pi0kminus == 2 && pi0kplus == 1 && positronkplus == 1) || (pipluskplus == 1 && pi0kplus == 2 && pi0kminus == 1 && muonminuskminus == 1) || (piminuskminus == 1 && pi0kminus == 2 && pi0kplus == 1 && muonpluskplus == 1));
+
+    Bool_t kplusminus_pi0piplus_pi0electronpositron = base_kplusminus && ((pipluskplus == 1 && pi0kplus == 1 && pi0kminus == 1 && electronkminus == 1) || (piminuskminus == 1 && pi0kminus == 1 && pi0kplus == 1 && positronkplus == 1) || (pipluskplus == 1 && pi0kplus == 1 && pi0kminus == 1 && muonminuskminus == 1) || (piminuskminus == 1 && pi0kminus == 1 && pi0kplus == 1 && muonpluskplus == 1));
+
+    Bool_t ksl_3pi0_pipluspiminusgamma = base_ksl && ((pi0kl == 3 && piplusks == 1 && piminusks == 1 && Ksgamma == 1) || (pi0ks == 3 && pipluskl == 1 && piminuskl == 1 && Klgamma == 1));
+
+    Bool_t ksl_3pi0_semileptonic = base_ksl && ((pi0kl == 3 && positronks == 1 && piminusks == 1) || (pi0kl == 3 && electronks == 1 && piplusks == 1) || (pi0ks == 3 && positronkl == 1 && piminuskl == 1) || (pi0ks == 3 && electronkl == 1 && pipluskl == 1) || (pi0kl == 3 && muonplusks == 1 && piminusks == 1) || (pi0kl == 3 && muonminusks == 1 && piplusks == 1) || (pi0ks == 3 && muonpluskl == 1 && piminuskl == 1) || (pi0ks == 3 && muonminuskl == 1 && pipluskl == 1));
+
+    Bool_t ksl_3pi0_2pi0 = base_ksl && ((pi0kl == 3 && pi0ks == 2) || (pi0ks == 3 && pi0kl == 2));
+
+    Bool_t ksl_pipluspiminuspi0 = base_ksl && ((pipluskl == 1 && piminuskl == 1 && pi0kl == 1) || (piplusks == 1 && piminusks == 1 && pi0ks == 1));
+
+    Bool_t ksl_lambda = base_ksl && (Kllambda == 1 || Kslambda == 1);
+
+    Bool_t omegapi0_pipluspiminuspi0 = (pi0phi == 1 && piplusphi == 1 && piminusphi == 1 && otherphi == 0);
+
+    if (gammaphi > 0)
+    {
+      isr_flag = 1;
+    }
 
     if (signal_cond)
       mctruth_int = 1; // Signal channel: KSKL -> pi+pi-pi0pi0
@@ -184,6 +330,46 @@ void GeneratedVariables::classifyChannel(
     else
       semileptonic_flag = 0; // Not semi-leptonic
 
+    if (kplusminus_pipluspi0_piminuspi0)
+      other_flag = 1;
+    else if (kplusminus_muplus_muminus)
+      other_flag = 2;
+    else if (kplusminus_pipluspi0_muminus)
+      other_flag = 3;
+    else if (kplusminus_muplus_piminuspi0)
+      other_flag = 4;
+    else if (ksl_3pi0_pipluspiminusgamma)
+      other_flag = 5;
+    else if (ksl_pipluspiminuspi0)
+      other_flag = 6;
+    else if (ksl_lambda)
+      other_flag = 7;
+    else if (kplusminus_pipluspi0pi0_piminuspi0pi0)
+      other_flag = 8;
+    else if (kplusminus_pipluspi0_piminuspi0pi0)
+      other_flag = 9;
+    else if (kplusminus_pipluspi0pi0_piminuspi0)
+      other_flag = 10;
+    else if (kplusminus_positron_piminuspi0)
+      other_flag = 11;
+    else if (kplusminus_mupluspi0_piminuspi0pi0)
+      other_flag = 12;
+    else if (omegapi0_pipluspiminuspi0)
+      other_flag = 13;
+    else if (kplusminus_muplus_piminuspi0pi0)
+      other_flag = 14;
+    else if (kplusminus_pipluspi0pi0_muminus)
+      other_flag = 15;
+    else if (ksl_3pi0_semileptonic)
+      other_flag = 16;
+    else if (ksl_3pi0_2pi0)
+      other_flag = 17;
+    else if (kplusminus_pi0pi0piplus_pi0electronpositron)
+      other_flag = 18;
+    else if (kplusminus_pi0piplus_pi0electronpositron)
+      other_flag = 19;
+    else
+      other_flag = 20; // Not recognized
   }
   else if (mcflag == 0)
   {
@@ -343,12 +529,12 @@ void GeneratedVariables::ClusterVariableFinder(Int_t ntmc, const Int_t *mother, 
       Double_t
           beta_c = PhysicsConstants::cVel * Knemc[4] / Knemc[3],
           length = std::sqrt(std::pow(Knemc[6] - ipmc[0], 2) +
-                        std::pow(Knemc[7] - ipmc[1], 2) +
-                        std::pow(Knemc[8] - ipmc[2], 2)),
+                             std::pow(Knemc[7] - ipmc[1], 2) +
+                             std::pow(Knemc[8] - ipmc[2], 2)),
           time_K = length / beta_c,
           length_clus = std::sqrt(std::pow(cluster[0] - Knemc[6], 2) +
-                             std::pow(cluster[1] - Knemc[7], 2) +
-                             std::pow(cluster[2] - Knemc[8], 2));
+                                  std::pow(cluster[1] - Knemc[7], 2) +
+                                  std::pow(cluster[2] - Knemc[8], 2));
 
       Double_t auxTim = time_K + (length_clus / PhysicsConstants::cVel);
       std::vector<Double_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, cluster[0], cluster[1], cluster[2], auxTim};
@@ -374,17 +560,17 @@ void GeneratedVariables::GeneratedClusterFinder(Int_t nclu, Int_t ind_gam[4], co
           {
 
             clus_diff.push_back(std::sqrt(std::pow(cluster_rec[0][ind_gam[0]] - pgammaMC[mc_ind[0]][4], 2) +
-                                     std::pow(cluster_rec[1][ind_gam[0]] - pgammaMC[mc_ind[0]][5], 2) +
-                                     std::pow(cluster_rec[2][ind_gam[0]] - pgammaMC[mc_ind[0]][6], 2)) +
+                                          std::pow(cluster_rec[1][ind_gam[0]] - pgammaMC[mc_ind[0]][5], 2) +
+                                          std::pow(cluster_rec[2][ind_gam[0]] - pgammaMC[mc_ind[0]][6], 2)) +
                                 std::sqrt(std::pow(cluster_rec[0][ind_gam[1]] - pgammaMC[mc_ind[1]][4], 2) +
-                                     std::pow(cluster_rec[1][ind_gam[1]] - pgammaMC[mc_ind[1]][5], 2) +
-                                     std::pow(cluster_rec[2][ind_gam[1]] - pgammaMC[mc_ind[1]][6], 2)) +
+                                          std::pow(cluster_rec[1][ind_gam[1]] - pgammaMC[mc_ind[1]][5], 2) +
+                                          std::pow(cluster_rec[2][ind_gam[1]] - pgammaMC[mc_ind[1]][6], 2)) +
                                 std::sqrt(std::pow(cluster_rec[0][ind_gam[2]] - pgammaMC[mc_ind[2]][4], 2) +
-                                     std::pow(cluster_rec[1][ind_gam[2]] - pgammaMC[mc_ind[2]][5], 2) +
-                                     std::pow(cluster_rec[2][ind_gam[2]] - pgammaMC[mc_ind[2]][6], 2)) +
+                                          std::pow(cluster_rec[1][ind_gam[2]] - pgammaMC[mc_ind[2]][5], 2) +
+                                          std::pow(cluster_rec[2][ind_gam[2]] - pgammaMC[mc_ind[2]][6], 2)) +
                                 std::sqrt(std::pow(cluster_rec[0][ind_gam[3]] - pgammaMC[mc_ind[3]][4], 2) +
-                                     std::pow(cluster_rec[1][ind_gam[3]] - pgammaMC[mc_ind[3]][5], 2) +
-                                     std::pow(cluster_rec[2][ind_gam[3]] - pgammaMC[mc_ind[3]][6], 2)));
+                                          std::pow(cluster_rec[1][ind_gam[3]] - pgammaMC[mc_ind[3]][5], 2) +
+                                          std::pow(cluster_rec[2][ind_gam[3]] - pgammaMC[mc_ind[3]][6], 2)));
 
             clus_time.push_back(pgammaMC[mc_ind[0]][7] > 0. && pgammaMC[mc_ind[1]][7] > 0. && pgammaMC[mc_ind[2]][7] > 0. && pgammaMC[mc_ind[3]][7] > 0.);
 
@@ -466,9 +652,9 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
     if ((mother[vtxmc[j] - 1] == 10) && (pidmc[j] == 8 || pidmc[j] == 9))
     {
       Double_t auxEne = std::sqrt(std::pow(pxmc[j], 2) +
-                            std::pow(pymc[j], 2) +
-                            std::pow(pzmc[j], 2) +
-                            std::pow(PhysicsConstants::mPiCh, 2));
+                                  std::pow(pymc[j], 2) +
+                                  std::pow(pzmc[j], 2) +
+                                  std::pow(PhysicsConstants::mPiCh, 2));
       std::vector<Double_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 10};
 
       trkMC.push_back(auxiliaryVec);
@@ -499,9 +685,9 @@ void GeneratedVariables::twoTracksFinder(Int_t ntmc, const Int_t *mother, const 
     if ((mother[vtxmc[j] - 1] == 16) && (pidmc[j] == 8 || pidmc[j] == 9))
     {
       Double_t auxEne = std::sqrt(std::pow(pxmc[j], 2) +
-                            std::pow(pymc[j], 2) +
-                            std::pow(pzmc[j], 2) +
-                            std::pow(PhysicsConstants::mPiCh, 2));
+                                  std::pow(pymc[j], 2) +
+                                  std::pow(pzmc[j], 2) +
+                                  std::pow(PhysicsConstants::mPiCh, 2));
       std::vector<Double_t> auxiliaryVec = {pxmc[j], pymc[j], pzmc[j], auxEne, 16};
 
       trkMC.push_back(auxiliaryVec);
