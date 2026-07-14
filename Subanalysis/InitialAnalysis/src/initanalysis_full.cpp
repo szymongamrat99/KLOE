@@ -1335,7 +1335,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
             }
             else
             {
-              genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, bestIndicesSix, dataAccess.GetPNum1(), baseKin.ntmc, dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersSix);
+              genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g6takenSix, dataAccess.GetPNum1(), baseKin.ntmc, dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersSix);
             }
           }
           else

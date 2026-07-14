@@ -1165,3 +1165,40 @@ cd ../../root_files/kitt/ALL_PHYS_THREE_PI0_NoSmearing/
 root
 cd scripts/
 root
+cd scripts/
+root
+cd scripts/
+root
+./execute_analysis.sh 
+cd build/
+git checkout -b feature/three_pi0_additional_functions 
+git checkout feature/three_pi0_additional_functions 
+git add .
+git commit -m "Bug fixed"
+cd ..
+git add .
+git commit -m "Bug fixed"
+git checkout feature/three_pi0_additional_functions 
+git push
+git merge master
+git merge main
+git push
+./execute_analysis.sh 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+nohup ./execute_analysis.sh < par.txt > nohup.log &
+cd ../root_files/hal/
+ls
+cd 2026-07-14/
+ls
+cd ALL_PHYS3_THREE_PI0_NoSmearing/
+ls
+root 
+root
+cd ../root_files/hal/2026-07-14/
+ls
+cd ALL_PHYS3_THREE_PI0_NoSmearing/
+root
+exit
