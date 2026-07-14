@@ -1,6 +1,8 @@
 #include <GeneratedVariables.h>
 #include <const.h>
 
+#include <algorithm>
+
 void GeneratedVariables::classifyChannel(
     Int_t ntmc,
     Int_t nvtxmc,
@@ -594,7 +596,6 @@ void GeneratedVariables::GeneratedClusterFinder(Int_t nclu, Int_t ind_gam[4], co
 void GeneratedVariables::MCvsReconstructedClustersComparator(const std::vector<Int_t> neuclulist, const std::vector<Int_t> gtaken, const std::vector<Int_t> Pnum1, const Int_t ntmc, const std::vector<Int_t> mother, const std::vector<Int_t> vtxmc, const std::vector<Int_t> pidmc, const std::vector<Int_t> kine, const std::vector<Int_t> kinmom, std::vector<Int_t> &goodCluster)
 {
   goodCluster.clear();
-  goodCluster.resize(0);
 
   for (Int_t i = 0; i < ntmc; ++i)
   {
@@ -609,7 +610,12 @@ void GeneratedVariables::MCvsReconstructedClustersComparator(const std::vector<I
           {
             if (pidmc[k] == 7 && kine[k] == kinPi0 && (mother[vtxmc[k] - 1] == 10 || mother[vtxmc[k] - 1] == 16))
             {
-              goodCluster.push_back(neuclulist[gtaken[j]]);
+              const Int_t clusterIndex = neuclulist[gtaken[j]];
+
+              if (std::find(goodCluster.begin(), goodCluster.end(), clusterIndex) == goodCluster.end())
+              {
+                goodCluster.push_back(clusterIndex);
+              }
 
               break;
             }

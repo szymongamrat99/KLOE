@@ -547,11 +547,15 @@ namespace KLOE
       }
       //////////////////////////////////////////////////////
       // Choice of the solution
+      if (partialSolutionsTmp.empty())
+        continue;
+
       if (totalErrorTmp < bestTotalError)
       {
         solutionFound = true;
         bestTotalError = totalErrorTmp;
-        bestIndices = {indicescombo[&combo - &combinations[0]][0], indicescombo[&combo - &combinations[0]][1], indicescombo[&combo - &combinations[0]][2], indicescombo[&combo - &combinations[0]][3], indicescombo[&combo - &combinations[0]][4], indicescombo[&combo - &combinations[0]][5]};
+        const auto &idxcombo = indicescombo[&combo - &combinations[0]];
+        bestIndices = {idxcombo[0], idxcombo[1], idxcombo[2], idxcombo[3], idxcombo[4], idxcombo[5]};
 
         partialSolutions = partialSolutionsTmp;           // Update to the best partial solutions
         partialSolutionEnergy = partialSolutionEnergyTmp; // Update to the best partial solution energies
@@ -569,7 +573,7 @@ namespace KLOE
 
     for (Int_t i = 0; i < photonNum; i++)
     {
-      Int_t ind = bestIndices[i] - 1;
+      Int_t ind = neu_clu_list[bestIndices[i]] - 1;
 
       neutral_mom(cluster[0][ind],
                   cluster[1][ind],
