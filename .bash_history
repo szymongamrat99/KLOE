@@ -1089,3 +1089,79 @@ ls -hl
 cd ALL_PHYS3_THREE_PI0_NoSmearing/
 ls
 root 
+cd build/
+rm -fr *
+cd ..
+./execute_analysis.sh 
+cd ../
+cd root_files/
+ls -hl
+cd hal/
+ls
+rm -fr *
+cd ../kitt/
+rm -fr *
+ls
+cd ..
+htop
+cd ../h
+cd hal/
+ls
+killall KLSPM00
+htop
+killall KLSPM00
+ls
+rm -fr *
+cd ../
+ls
+cd kitt/
+ls -hl
+cd ../../
+ls
+cd KLOE/
+git add .
+git commit -m "Other flag + isr"
+git push
+git checkout main 
+git pull
+./execute_analysis.sh 
+cd log/
+ls
+rm -fr all_phys*
+rm -fr data*
+ls
+cd ../
+rm -fr nohup*
+rm -fr parallel_logs_*
+./run_parallel.sh all_phys 20260516 1 206 15 "analysis_config_MC_Semileptonic.json"
+./run_parallel.sh all_phys2 20260516 1 71 15 "analysis_config_MC_Semileptonic.json"
+./run_parallel.sh all_phys3 20260516 1 76 25 "analysis_config_MC
+./run_parallel.sh all_phys3 20260516 1 76 15 "analysis_config_MC_Semileptonic.json"
+./run_parallel.sh data 20260627 1 421 15 "analysis_config_Data_Semileptonic.json"
+ls
+cd ../root_files/hal/
+ls
+cd ALL_PHYS
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls -hl
+cd scripts/
+root
+cd scripts/
+root
+cd scripts/
+root
+cd ../../root_files/kitt/DATA_THREE_PI0_NoSmearing/
+;s
+ls
+root
+cd 
+cd /data/ssd/gamrat/python-kloe-analysis/s
+cd /data/ssd/gamrat/python-kloe-analysis/scripts/
+root
+htop
+cd scripts/
+root
+cd ../../root_files/kitt/ALL_PHYS_THREE_PI0_NoSmearing/
+root
+cd scripts/
+root

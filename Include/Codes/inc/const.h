@@ -529,6 +529,7 @@ namespace KLOE
         cuts,
         g4takenTriKinFit,
         g4takenTriangle,
+        g6takenSix,
         goodClustersTriKinFit,
         goodClustersTriangle,
         goodClustersSix,
@@ -557,6 +558,8 @@ namespace KLOE
       Knereclor.resize(10, 0.0);
       KnerecTriangle.resize(10, 0.0);
       g4takenTriKinFit.resize(4, 0);
+      g6takenSix.resize(6, 0);
+      g4takenTriangle.resize(4, 0);
       goodClustersTriKinFit.resize(4, 0);
       goodClustersTriangle.resize(4, 0);
       goodClustersSix.resize(6, 0);
@@ -680,7 +683,10 @@ namespace KLOE
       Knerec.clear();
       Knereclor.clear();
       g4takenTriKinFit.clear();
+      g6takenSix.clear();
+      g4takenTriangle.clear();
       goodClustersTriKinFit.clear();
+      goodClustersTriangle.clear();
       goodClustersSix.clear();
       pi01.clear();
       pi02.clear();

@@ -1312,7 +1312,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {
             // 4 clusters chosen with the trilateration + 2 remaining clusters
             // To keep the statistical independence of the samples
-            errorCode = neutRec.ReconstructSixGammaVertexWithFourTaken(cluster, neuclulist, baseKin.g4takenTriKinFit, bestIndicesSix, baseKin.bestError, KnerecSix, photonFourMomSix);
+            errorCode = neutRec.ReconstructSixGammaVertexWithFourTaken(cluster, neuclulist, baseKin.g4takenTriKinFit, baseKin.g6takenSix, baseKin.bestError, KnerecSix, photonFourMomSix);
 
             if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
             {
@@ -1827,9 +1827,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"g4takenTriKinFit", baseKin.g4takenTriKinFit},
           {"goodClustersTriKinFit", baseKin.goodClustersTriKinFit},
           {"g4takenTriangle", baseKin.g4takenTriangle},
+          {"g6takenSix", baseKin.g6takenSix},
+          {"goodClustersSix", baseKin.goodClustersSix},
+          {"goodClustersTriangle", baseKin.goodClustersTriangle},
           {"Asstr", baseKin.Asstr},
           {"vtakenElectron", baseKin.vtakenElectron},
-          {"vtakenMuon", baseKin.vtakenMuon}};
+          {"vtakenMuon", baseKin.vtakenMuon},
+          {"neutralClustersList", neuclulist}};
 
       std::map<std::string, std::vector<Double_t>> floatArrays = {
           {"Xcl", baseKin.Xcl},
