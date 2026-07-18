@@ -1,0 +1,29 @@
+exit
+exit
+.q
+.q
+exit
+.q
+.q
+TChain *chain = new TChain("INTERF/h1")
+chain->Add("*.root")
+chain->GetEntries("mctruth == 1 || mctruth == 2 || mctruth == 0")
+chain->GetEntries("mctruth == 1 || mctruth == 2")
+chain->Print()
+chain->Draw("cldist", "mctruth == 1")
+chain->Draw("chdist", "mctruth == 1")
+chain->Draw("Rn", "mctruth == 1")
+chain->Draw("Rnmc", "mctruth == 1")
+chain->Draw("Rc", "mctruth == 1")
+chain->GetEntries("(mctruth == 1 || mctruth == 2 || mctruth == 0) && (Rc < 50 || Rn < 50)")
+chain->GetEntries("(mctruth == 1 || mctruth == 2) && (Rc < 50 || Rn < 50)")
+chain->GetEntries("(mctruth == 1 || mctruth == 2)")
+chain->GetEntries("(mctruth == 0) && (Rc < 50 || Rn < 50)")
+chain->GetEntries("(mctruth == 0) && (Rcmc < 50 || Rnmc < 50)")
+chain->GetEntries("(mctruth == 0) && (Rcmc < 50 && Rnmc < 50)")
+chain->GetEntries("(mctruth == 1 || mctruth == 2 || mctruth == 0) && (Rc < 50 && Rn < 50)")
+chain->GetEntries("(mctruth == 1 || mctruth == 2 || mctruth == 0) && (Rc < 50 && Rn < 50)")
+chain->GetEntries("(mctruth == 1 || mctruth == 2) && (Rc < 50 && Rn < 50)")
+chain->GetEntries("(mctruth == 1 || mctruth == 2)")
+chain->GetEntries("(mctruth == 1)")
+chain->GetEntries("(mctruth == 3)")
