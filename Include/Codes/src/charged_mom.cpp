@@ -848,54 +848,74 @@ namespace KLOE
   }
 
   template <typename F, typename T>
-  void ChargedVtxRec<F, T>::calculateTrackTOF(std::vector<T> &vtaken, std::vector<T> &Asstrk, std::vector<T> &Asscl, std::vector<F> &Assleng, std::vector<F> &Enecl, std::vector<F> &Xcl, std::vector<F> &Ycl, std::vector<F> &Zcl, std::vector<F> &Tcl, std::vector<F> trk[2], std::vector<F> trkCluster[2], std::vector<F> trkDT[2]) const
+void ChargedVtxRec<F, T>::calculateTrackTOF(
+    std::vector<T> &vtaken, std::vector<T> &Asstrk, std::vector<T> &Asscl, 
+    std::vector<F> &Assleng, std::vector<F> &Enecl, std::vector<F> &Xcl, 
+    std::vector<F> &Ycl, std::vector<F> &Zcl, std::vector<F> &Tcl, 
+    std::vector<F> trk[2], std::vector<F> trkCluster[2], std::vector<F> trkDT[2]) const
+{
+  // ZABEZPIECZENIE: Sprawdź czy vtaken ma wystarczająco dużo elementów dla pętli (indeksy 1 i 2)
+  if (vtaken.size() < 3) return; 
+
+  for (int i = 1; i < 3; i++)
   {
-    for (int i = 1; i < 3; i++)
+    int trackNumber = vtaken[i];
+    int clusterTrackNumber = -1;
+    double trackLength = -1.;
+
+    if (trackNumber > -1)
     {
-      int trackNumber = vtaken[i];
-      int clusterTrackNumber = -1;
-      double trackLength = -1.;
+      auto it = std::find(Asstrk.begin(), Asstrk.end(), trackNumber);
+      if (it == Asstrk.end())
+        continue; // Zmieniono na continue, żeby błąd w jednym tracku nie przerywał drugiego
 
-      if (trackNumber > -1)
+      int index = std::distance(Asstrk.begin(), it);
+
+      // ZABEZPIECZENIE: Sprawdzenie relacji z Asscl i Assleng
+      if (index >= (int)Asscl.size() || index >= (int)Assleng.size())
+        continue;
+
+      clusterTrackNumber = Asscl[index];
+      trackLength = Assleng[index];
+
+      // ZABEZPIECZENIE: clusterTrackNumber-1 musi mieścić się w granicach wektorów detektora
+      if (clusterTrackNumber <= 0)
+        continue;
+      
+      int clIdx = clusterTrackNumber - 1;
+      if (clIdx >= (int)Enecl.size() || clIdx >= (int)Xcl.size() || 
+          clIdx >= (int)Ycl.size()   || clIdx >= (int)Zcl.size() || 
+          clIdx >= (int)Tcl.size())
       {
-        auto it = std::find(Asstrk.begin(), Asstrk.end(), trackNumber);
-        if (it == Asstrk.end())
-          break;
-
-        int index = std::distance(Asstrk.begin(), it);
-
-        if (index >= Asscl.size() || index >= Assleng.size())
-          break;
-
-        clusterTrackNumber = Asscl[index];
-        trackLength = Assleng[index];
-
-        if (clusterTrackNumber <= 0)
-          break;
-
-        trkCluster[i - 1] = {Enecl[clusterTrackNumber - 1], 
-                              Xcl[clusterTrackNumber - 1], 
-                              Ycl[clusterTrackNumber - 1], 
-                              Zcl[clusterTrackNumber - 1], 
-                              Tcl[clusterTrackNumber - 1]};
-        
-        double trackMom = std::sqrt(std::pow(trk[i - 1][0], 2) + std::pow(trk[i - 1][1], 2) + std::pow(trk[i - 1][2], 2));
-        
-        // Calculation of DT for different hypotheses
-        double betaPi = trackMom / std::sqrt(std::pow(trackMom, 2) + std::pow(PhysicsConstants::mPiCh, 2));
-        double betaElectron = trackMom / std::sqrt(std::pow(trackMom, 2) + std::pow(PhysicsConstants::mElec, 2));
-        double betaMuon = trackMom / std::sqrt(std::pow(trackMom, 2) + std::pow(PhysicsConstants::mMuon, 2));
-
-        double tofPi = trackLength / (PhysicsConstants::cVel * betaPi);
-        double tofElectron = trackLength / (PhysicsConstants::cVel * betaElectron);
-        double tofMuon = trackLength / (PhysicsConstants::cVel * betaMuon);
-
-        trkDT[i - 1] = {trkCluster[i - 1][4] - tofPi, 
-                        trkCluster[i - 1][4] - tofElectron, 
-                        trkCluster[i - 1][4] - tofMuon};
+        continue; // Indeks klastra poza rozmiarem drzewa ROOT
       }
+
+      // ZABEZPIECZENIE: Upewnij się, że trk[i-1] ma współrzędne p_x, p_y, p_z
+      if (trk[i - 1].size() < 3)
+        continue;
+
+      trkCluster[i - 1] = {Enecl[clIdx], Xcl[clIdx], Ycl[clIdx], Zcl[clIdx], Tcl[clIdx]};
+      
+      double trackMom = std::sqrt(std::pow(trk[i - 1][0], 2) + std::pow(trk[i - 1][1], 2) + std::pow(trk[i - 1][2], 2));
+      
+      // Unikamy dzielenia przez zero, gdy pęd pędu wynosi 0
+      if (trackMom <= 0.0) continue;
+
+      // Calculation of DT for different hypotheses
+      double betaPi       = trackMom / std::sqrt(std::pow(trackMom, 2) + std::pow(PhysicsConstants::mPiCh, 2));
+      double betaElectron = trackMom / std::sqrt(std::pow(trackMom, 2) + std::pow(PhysicsConstants::mElec, 2));
+      double betaMuon     = trackMom / std::sqrt(std::pow(trackMom, 2) + std::pow(PhysicsConstants::mMuon, 2));
+
+      double tofPi       = trackLength / (PhysicsConstants::cVel * betaPi);
+      double tofElectron = trackLength / (PhysicsConstants::cVel * betaElectron);
+      double tofMuon     = trackLength / (PhysicsConstants::cVel * betaMuon);
+
+      trkDT[i - 1] = {trkCluster[i - 1][4] - tofPi, 
+                      trkCluster[i - 1][4] - tofElectron, 
+                      trkCluster[i - 1][4] - tofMuon};
     }
   }
+}
 
   // Explicit definition of template class
   template class ChargedVtxRec<Double_t, Int_t>;
