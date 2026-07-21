@@ -187,8 +187,12 @@ namespace KLOE
         {
           _frac_tmp[name.second]->Fill(time_diff[name.second][j], regen_event_weights[j]);
         }
+        else if (name.second == "3pi0" && !three_pi0_weights.empty())
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j], three_pi0_weights[j]);
+        else if (name.second == "Semileptonic" && !semileptonic_weights.empty())
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j], semileptonic_weights[j]);
         else
-          _frac_tmp[name.second]->Fill(time_diff[name.second][j]);
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j]); //! Filling MC
       }
 
       //! Using correction factor and efficiency

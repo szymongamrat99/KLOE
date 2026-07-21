@@ -1202,3 +1202,20 @@ ls
 cd ALL_PHYS3_THREE_PI0_NoSmearing/
 root
 exit
+./run_parallel.sh 
+./execute_analysis.sh 
+git checkout feature/three_pi0_additional_functions 
+git add .
+git commit -m "Modified charged"
+git push
+git checkout feature/three_pi0_additional_functions 
+ls
+git checkout feature/control-samples-semileptonic-3pi0 
+git checkout feature/three_pi0_additional_functions 
+./execute_analysis.sh 
+./e
+./execute_analysis.sh 
+cd scripts/results/
+ls
+cd control_sample_corr_factors/
+pwd

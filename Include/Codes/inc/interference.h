@@ -34,6 +34,7 @@ namespace KLOE
   public:
     std::map<TString, std::vector<Double_t>> time_diff;
     std::vector<Double_t> time_diff_gen, regen_event_weights, regen_weight_errors;
+    std::vector<Double_t> three_pi0_weights, semileptonic_weights;
     std::map<TString, std::vector<Double_t>> time_diff_rand_mc, time_diff_rand_data;
     std::vector<Double_t> time_diff_gen_rand_mc, time_diff_gen_rand_data;
 

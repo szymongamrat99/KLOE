@@ -16,6 +16,7 @@
 #include <TFitResult.h>
 
 #include <interference.h>
+#include <BRCorrectionFactors.h>
 
 using json = nlohmann::json;
 
@@ -23,6 +24,15 @@ RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(
 {
   LoadConfig();
   KLOE::setGlobalStyle();
+
+  TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors_backup.root", "READ");
+
+  TCanvas *c = (TCanvas*)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
+  threePi0WeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
+
+  TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors_backup.root", "READ");
+
+  semileptonicWeightsHist = (TH1*)fFileWeightsSemileptonic->Get("semileptonic/histogramsComparison/correction_factors")->Clone();
 
   for (const auto &histType : _histTypesIterative)
   {
@@ -291,6 +301,8 @@ void RegenerationFractionFit::_FillHistograms()
     auto &tch_fit = **fReaderFloat.at("KaonChTimeCMSignalFit");
     auto &tne_fit = **fReaderFloat.at("KaonNeTimeCMSignalFit");
 
+    auto &minv4gam = **fReaderFloat.at("minv4gam");
+
     double signalWeight = 1.0,
            regenerationWeight = 1.0,
            regenerationWeightError = 0.0;
@@ -313,7 +325,7 @@ void RegenerationFractionFit::_FillHistograms()
     {
       double radius = _calculateRadius(histType);
 
-      int integralWeights = fRegenerationWeights[histType]->Integral();
+      double integralWeights = fRegenerationWeights[histType]->Integral();
 
       if (fConfig.isRegenerationWeighted && integralWeights > 0)
       {
@@ -328,7 +340,15 @@ void RegenerationFractionFit::_FillHistograms()
       {
         fHistos[histType][channelName_str]->Fill(radius, regenerationWeight);
       }
-      else// if (channelName_str != "Semileptonic" && channelName_str != "3pi0")
+      else if (channelName_str == "3pi0")
+      {
+        fHistos[histType][channelName_str]->Fill(radius, 1.0);//threePi0WeightsHist->Interpolate(minv4gam));
+      }
+      else if (channelName_str == "Semileptonic")
+      {
+        fHistos[histType][channelName_str]->Fill(radius, 1.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      }
+      else
       {
         fHistos[histType][channelName_str]->Fill(radius);
       }
@@ -381,6 +401,8 @@ void RegenerationFractionFit::_FillHistograms()
 
 void RegenerationFractionFit::_RenormalizeMCToLumi()
 {
+  KLOE::BRCorrectionFactors factors;
+
   for (const auto &histType : _histTypesIterative)
   {
     for (const auto &channel : KLOE::channName)
@@ -390,7 +412,7 @@ void RegenerationFractionFit::_RenormalizeMCToLumi()
       if (channelName_str == "Data" || channelName_str == "MC sum")
         continue;
 
-      fHistos[histType][channelName_str]->Scale(fConfig.lumiFactor);
+      fHistos[histType][channelName_str]->Scale(fConfig.lumiFactor * factors.BRcorrectionFactors.at(channelName_str));
     }
   }
 
@@ -401,9 +423,9 @@ void RegenerationFractionFit::_RenormalizeMCToLumi()
     if (channelName_str == "Data" || channelName_str == "MC sum")
       continue;
 
-    fTimeDiffHist[channelName_str]->Scale(fConfig.lumiFactor);
-    fRhovsRChargedHist[channelName_str]->Scale(fConfig.lumiFactor);
-    fRhovsRNeutralHist[channelName_str]->Scale(fConfig.lumiFactor);
+    fTimeDiffHist[channelName_str]->Scale(fConfig.lumiFactor * factors.BRcorrectionFactors.at(channelName_str));
+    fRhovsRChargedHist[channelName_str]->Scale(fConfig.lumiFactor * factors.BRcorrectionFactors.at(channelName_str));
+    fRhovsRNeutralHist[channelName_str]->Scale(fConfig.lumiFactor * factors.BRcorrectionFactors.at(channelName_str));
   }
 }
 

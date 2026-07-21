@@ -150,6 +150,8 @@ private:
   HistogramType _checkRegenerationLimitsTypesDeltaT(double dt) const;
   TFile *fFileWeights;
 
+  TH1 *threePi0WeightsHist, *semileptonicWeightsHist;
+
   void _calculateRegenerationWeights();
 
   double _calculateRadius(HistogramType type) const;

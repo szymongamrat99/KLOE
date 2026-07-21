@@ -56,6 +56,16 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   }
 
   // =============================================================================
+  // Preparation of the Three pi0 hist object to calculate regeneration weights
+    TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
+
+    TCanvas *c = (TCanvas*)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
+    TH1 *threePi0WeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
+
+    TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors_backup.root", "READ");
+
+    TH1 *semileptonicWeightsHist = (TH1*)fFileWeightsSemileptonic->Get("semileptonic/histogramsComparison/correction_factors")->Clone();
+
 
   // Preparation of the RegenerationFractionFit object to calculate regeneration weights
   std::string weightsFilePath = (std::string)Paths::regen_analysis_dir + (std::string)Paths::result_dir + "regeneration_analysis_results.root";
@@ -426,11 +436,15 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         if (*mctruth == 4)
         {
           event.time_diff["3pi0"].push_back(baseKin.Dtboostlor);
+          event.three_pi0_weights.push_back(1.0);
+          // event.three_pi0_weights.push_back(threePi0WeightsHist->Interpolate(*minv4gam));
         }
 
         if (*mctruth == 5)
         {
           event.time_diff["Semileptonic"].push_back(baseKin.Dtboostlor);
+          event.semileptonic_weights.push_back(1.0);
+          // event.semileptonic_weights.push_back(semileptonicWeightsHist->Interpolate(*minv4gam));
         }
 
         if (*mctruth == 6)
