@@ -14,6 +14,7 @@
 #include <TString.h>
 #include <TPrincipal.h>
 #include <ErrorLogs.h>
+#include <TChain.h>
 
 #include <PdgManager.h>
 
@@ -1011,6 +1012,39 @@ namespace Utils
       std::string logMessage = Form("Failed to access JSON field: %s. Error: %s", fieldPath.c_str(), e.what());
       logger.getErrLog(errorCode, logMessage);
     }
+  }
+
+  int CountFiles(TChain *chain, bool isMC)
+  {
+    if (!chain)
+    {
+      std::cerr << "[-] BŁĄD: Przekazano pusty wskaźnik TChain do CountFiles!" << std::endl;
+      return 0;
+    }
+
+    TObjArray *fileList = chain->GetListOfFiles();
+
+    int patternCount = 0;
+    for (int i = 0; i < fileList->GetEntries(); ++i) {
+        TChainElement *element = (TChainElement*)fileList->At(i);
+        TString fileName = element->GetTitle();
+        
+        // Sprawdzamy, czy nazwa zawiera "mk0" LUB "dk0"
+        if (isMC) 
+        {
+          if (fileName.Contains("mk0")) 
+            patternCount++;
+
+        }
+        else 
+        {
+          if (fileName.Contains("dk0")) 
+            patternCount++;
+        }
+    }
+
+    std::cout << "[+] Liczba plików w TChain: " << patternCount << std::endl;
+    return patternCount;
   }
 
 }

@@ -62,7 +62,7 @@
     "A_signal": {
       "enabled": true,
       "initialValue": 1.00,
-      "limitLower": 0.2,
+      "limitLower": 1.0,
       "limitUpper": 0.2,
       "step": 0.01,
       "channels": ["Signal"],
@@ -78,7 +78,7 @@
       "fixed": true
     },
     "A_three": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -87,7 +87,7 @@
       "fixed": true
     },
     "A_omega": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -96,16 +96,16 @@
       "fixed": false
     },
     "A_semileptonic": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
       "step": 0.01,
       "channels": ["Semileptonic"],
-      "fixed": false
+      "fixed": true
     },
     "A_other": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -114,13 +114,13 @@
       "fixed": false
     },
     "A_bcg_group": {
-      "enabled": false,
+      "enabled": true,
       "groupName": "A_bcg",
       "initialValue": 1.00,
       "step": 0.01,
       "limitLower": 1.0,
       "limitUpper": 10.0,
-      "channels": ["Semileptonic", "Other", "3pi0"],
+      "channels": ["Semileptonic", "Other", "3pi0", "Omega"],
       "fixed": false
     }
   }

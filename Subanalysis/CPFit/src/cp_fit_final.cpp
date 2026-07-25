@@ -22,6 +22,8 @@
 #include <boost/progress.hpp>
 #include <TF1.h>
 #include <set>
+#include <TFitResultPtr.h>
+#include <TFitResult.h>
 
 #include <BRCorrectionFactors.h>
 
@@ -33,6 +35,18 @@
 int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
 {
   gErrorIgnoreLevel = kBreak;
+
+  int mcFiles = 0, dataFiles = 0;
+  double lumiFactor = 1.0;
+
+  mcFiles = Utils::CountFiles(&chain, true);
+  dataFiles = Utils::CountFiles(&chain, false);
+
+  lumiFactor = (dataFiles > 0) ? static_cast<double>(dataFiles) / static_cast<double>(mcFiles) : 1.0;
+
+  std::cout << "INFO: Number of MC files: " << mcFiles << std::endl;
+  std::cout << "INFO: Number of Data files: " << dataFiles << std::endl;
+  std::cout << "INFO: Luminosity factor: " << lumiFactor << std::endl;
 
   // =============================================================================
   KLOE::BaseKinematics
@@ -57,15 +71,26 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   // =============================================================================
   // Preparation of the Three pi0 hist object to calculate regeneration weights
-    TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
+  TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
 
-    TCanvas *c = (TCanvas*)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
-    TH1 *threePi0WeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
+  TCanvas *c = (TCanvas *)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
+  TH1 *threePi0WeightsHist = (TH1 *)c->FindObject("correction_factors")->Clone();
 
-    TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors_backup.root", "READ");
+  // Calculation of average weighting factor for three pi0 events
+  TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
+  double avgThreePi0Weight = threePi0WeightResult->Parameter(0);
+  std::cout << "INFO: Average weighting factor for three pi0 events: " << avgThreePi0Weight << std::endl;
 
-    TH1 *semileptonicWeightsHist = (TH1*)fFileWeightsSemileptonic->Get("semileptonic/histogramsComparison/correction_factors")->Clone();
+  // Preparation of the Semileptonic hist object to calculate regeneration weights
+  TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
 
+  TCanvas *ctest = (TCanvas *)fFileWeightsSemileptonic->Get("semileptonic/correction_factors/cCorr");
+  TH1 *semileptonicWeightsHist = (TH1 *)ctest->FindObject("correction_factors")->Clone();
+
+  // Calculation of average weighting factor for semileptonic events
+  TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
+  double avgSemileptonicWeight = semileptonicWeightResult->Parameter(0);
+  std::cout << "INFO: Average weighting factor for semileptonic events: " << avgSemileptonicWeight << std::endl;
 
   // Preparation of the RegenerationFractionFit object to calculate regeneration weights
   std::string weightsFilePath = (std::string)Paths::regen_analysis_dir + (std::string)Paths::result_dir + "regeneration_analysis_results.root";
@@ -137,15 +162,15 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Double_t left_split, center_split, right_split;
   if (regenSplitMode)
   {
-    left_split   = cfg.parameters.at("A_regen_far_left").parameter_ranges[0][1];
+    left_split = cfg.parameters.at("A_regen_far_left").parameter_ranges[0][1];
     center_split = cfg.parameters.at("A_regen_near_left").parameter_ranges[0][1];
-    right_split  = cfg.parameters.at("A_regen_near_right").parameter_ranges[0][1];
+    right_split = cfg.parameters.at("A_regen_near_right").parameter_ranges[0][1];
   }
   else
   {
-    left_split   = cfg.regenerationSplit[0];
+    left_split = cfg.regenerationSplit[0];
     center_split = cfg.regenerationSplit[1];
-    right_split  = cfg.regenerationSplit[2];
+    right_split = cfg.regenerationSplit[2];
   }
 
   Double_t split[3] = {left_split, center_split, right_split};
@@ -158,7 +183,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   const Double_t xMinRangeDisplay = cfg.deltaTConfig.xRangeDisplay[0];
   const Double_t xMaxRangeDisplay = cfg.deltaTConfig.xRangeDisplay[1];
 
-  // Profile of relative errors 
+  // Profile of relative errors
   TH2 *hEffErrorProfile = new TH2D("hEffErrorProfile", "Regen corr factor relative errors vs. deltaT;#Deltat [#tau_{S}];Relative error on weight [-]", nbins, x_min, x_max, 50, 0, 3);
   TH2 *hEffWeightVsRelErr = new TH2D("hEffWeightVsRelErr", "Regen corr factor weights vs. relative errors;Weight [-];Relative error on weight [-]", 50, 0, 7.0, 50, 0, 3);
 
@@ -354,7 +379,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     TVector3 ipVector, neutralVtxVector, chargedVtxVector;
 
     // Set up geometry vectors
-    ipVector.SetXYZ(0,0,0);//ip[0], ip[1], ip[2]);
+    ipVector.SetXYZ(0, 0, 0); // ip[0], ip[1], ip[2]);
     neutralVtxVector.SetXYZ(Knerec[6], Knerec[7], Knerec[8]);
     chargedVtxVector.SetXYZ(Kchrec[6], Kchrec[7], Kchrec[8]);
 
@@ -374,8 +399,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         {HistogramType::RHO_CHARGED, rhoCharged},
         {HistogramType::RHO_NEUTRAL, rhoNeutral},
         {HistogramType::R_CHARGED, rCharged},
-        {HistogramType::R_NEUTRAL, rNeutral}
-    };
+        {HistogramType::R_NEUTRAL, rNeutral}};
 
     Double_t ch_Spherical_Mean = 10.4941, ch_Spherical_Sigma = 0.957544;
     Double_t ne_Spherical_Mean = 10.3769, ne_Spherical_Sigma = 1.23898;
@@ -436,15 +460,15 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         if (*mctruth == 4)
         {
           event.time_diff["3pi0"].push_back(baseKin.Dtboostlor);
-          event.three_pi0_weights.push_back(1.0);
+          event.three_pi0_weights.push_back(avgThreePi0Weight);
           // event.three_pi0_weights.push_back(threePi0WeightsHist->Interpolate(*minv4gam));
         }
 
         if (*mctruth == 5)
         {
           event.time_diff["Semileptonic"].push_back(baseKin.Dtboostlor);
-          event.semileptonic_weights.push_back(1.0);
-          // event.semileptonic_weights.push_back(semileptonicWeightsHist->Interpolate(*minv4gam));
+          event.semileptonic_weights.push_back(avgSemileptonicWeight);
+          // event.semileptonic_weights.push_back(semileptonicWeightsHist->Interpolate(Kchrec[5]));
         }
 
         if (*mctruth == 6)
@@ -498,7 +522,6 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   {
     sig_total->Fill(no_cuts_sig[1][i]);
   }
-
 
   std::cout << "Integral of Regeneration: " << event.getFracHistogram("Regeneration")->Integral(0, nbins + 1) << std::endl;
   std::cout << "Integral of Omega: " << event.getFracHistogram("Omega")->Integral(0, nbins + 1) << std::endl;
@@ -638,6 +661,24 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   event.getFracHistogram("Data")->SetMarkerStyle(20);
   event.getFracHistogram("Data")->SetMarkerSize(0.8);
   event.getFracHistogram("Data")->SetLineColor(kBlack);
+
+  // Calculate chi2 between Data and MC sum
+  Double_t chi2 = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "WW CHI2/NDF");
+  std::cout << "Chi2/NDF between Data and MC sum: " << chi2 << " (NDF = " << event.getFracHistogram("Data")->GetNbinsX() - 1 << ")" << std::endl;
+
+  // Get correlations between parameters
+  for (const auto &p1 : param_index_map)
+  {
+    if (p1.second < 0)
+      continue; // Skip disabled parameters
+    for (const auto &p2 : param_index_map)
+    {
+      if (p2.second < 0)
+        continue; // Skip disabled parameters
+      Double_t corr = minimum->Correlation(p1.second, p2.second);
+      std::cout << "Correlation between " << p1.first << " and " << p2.first << ": " << corr << std::endl;
+    }
+  }
 
   TRatioPlot *rp = new TRatioPlot(event.getFracHistogram("MC sum"), event.getFracHistogram("Data"), "diffsig");
 

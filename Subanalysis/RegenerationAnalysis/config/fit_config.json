@@ -71,10 +71,10 @@
     }
   },
   "generalSettings": {
-    "isSignalWeighted": false,
+    "isSignalWeighted": true,
     "isRegenerationWeighted": true,
     "onlyKLong": false,
-    "lumiFactor": 1.00,
+    "lumiFactor": 1.13,
     "weightErrorLimit": 100.0
   }
 }

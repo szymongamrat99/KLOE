@@ -25,14 +25,25 @@ RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(
   LoadConfig();
   KLOE::setGlobalStyle();
 
-  TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors_backup.root", "READ");
+  TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
 
   TCanvas *c = (TCanvas*)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
   threePi0WeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
 
-  TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors_backup.root", "READ");
+  TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
 
-  semileptonicWeightsHist = (TH1*)fFileWeightsSemileptonic->Get("semileptonic/histogramsComparison/correction_factors")->Clone();
+  c = (TCanvas*)fFileWeightsSemileptonic->Get("semileptonic/correction_factors/cCorr");
+  semileptonicWeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
+
+  TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
+  avgThreePi0Weight = threePi0WeightResult->Parameter(0);
+
+  std::cout << "Average Three Pi0 Weight: " << avgThreePi0Weight << std::endl;
+
+  TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
+  avgSemileptonicWeight = semileptonicWeightResult->Parameter(0);
+
+  std::cout << "Average Semileptonic Weight: " << avgSemileptonicWeight << std::endl;
 
   for (const auto &histType : _histTypesIterative)
   {
@@ -302,6 +313,7 @@ void RegenerationFractionFit::_FillHistograms()
     auto &tne_fit = **fReaderFloat.at("KaonNeTimeCMSignalFit");
 
     auto &minv4gam = **fReaderFloat.at("minv4gam");
+    auto &Kchrec = *fReaderFloatArray.at("Kchrec");
 
     double signalWeight = 1.0,
            regenerationWeight = 1.0,
@@ -342,11 +354,11 @@ void RegenerationFractionFit::_FillHistograms()
       }
       else if (channelName_str == "3pi0")
       {
-        fHistos[histType][channelName_str]->Fill(radius, 1.0);//threePi0WeightsHist->Interpolate(minv4gam));
+        fHistos[histType][channelName_str]->Fill(radius, avgThreePi0Weight);
       }
       else if (channelName_str == "Semileptonic")
       {
-        fHistos[histType][channelName_str]->Fill(radius, 1.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+        fHistos[histType][channelName_str]->Fill(radius, avgSemileptonicWeight);
       }
       else
       {
@@ -388,7 +400,19 @@ void RegenerationFractionFit::_FillHistograms()
       fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, regenerationWeight);
       fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, regenerationWeight);
     }
-    else// if (channelName_str != "Semileptonic" && channelName_str != "3pi0")
+    else if (channelName_str == "3pi0")
+    {
+      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit, avgThreePi0Weight);
+      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, avgThreePi0Weight);
+      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, avgThreePi0Weight);
+    }
+    else if (channelName_str == "Semileptonic")
+    {
+      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit, avgSemileptonicWeight);
+      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, avgSemileptonicWeight);
+      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, avgSemileptonicWeight);
+    }
+    else
     {
       fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit);
       fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged);
@@ -683,16 +707,14 @@ void RegenerationFractionFit::_RenormalizeSignalHistogram()
 
 void RegenerationFractionFit::_calculateRegenerationWeights()
 {
+  KLOE::BRCorrectionFactors factors;
+
   // 1. Napełniamy surowe histogramy (bez wag i bez lumi)
   _FillHistograms();
-
-  // 2. Budujemy surową sumę MC (addRegeneration = false), aby mieć tło w mcSumHist
-  _FillMCSumHistogram(false);
 
   for (const auto &histType : _histTypesIterative)
   {
     TH1 *dataHist = fHistos[histType]["Data"];
-    TH1 *mcSumHist = fHistos[histType]["MC sum"];
 
     int bins = dataHist->GetNbinsX();
 
@@ -704,29 +726,45 @@ void RegenerationFractionFit::_calculateRegenerationWeights()
       if (!_checkRegenerationLimits(xLeft, xRight))
         continue;
 
-      // Pobieramy zawartość surowego tła MC i skalujemy je "w locie" do poziomu Data
-      double rawMcSumContent = mcSumHist->GetBinContent(i);
-      double rawMcSumError = mcSumHist->GetBinError(i);
+      // Obliczamy przeskalowaną sumę tła MC "w locie" z uwzględnieniem BR dla każdego kanału
+      double mcSumContentScaled = 0.0;
+      double mcSumErrorScaled2 = 0.0;
 
-      double mcSumContentScaled = rawMcSumContent * fConfig.lumiFactor;
-      double mcSumErrorScaled = rawMcSumError * fConfig.lumiFactor;
+      for (const auto &channel : KLOE::channName)
+      {
+        std::string ch = (std::string)channel.second;
+        if (ch == "Data" || ch == "MC sum" || ch == "Regeneration")
+          continue;
+
+        double scaleFactor = fConfig.lumiFactor * factors.BRcorrectionFactors.at(ch);
+        mcSumContentScaled += fHistos[histType][ch]->GetBinContent(i) * scaleFactor;
+        double chErr = fHistos[histType][ch]->GetBinError(i) * scaleFactor;
+        mcSumErrorScaled2 += chErr * chErr;
+      }
+      double mcSumErrorScaled = std::sqrt(mcSumErrorScaled2);
 
       double dataContent = dataHist->GetBinContent(i);
       double dataError = dataHist->GetBinError(i);
 
       // Nadmiar zdarzeń w Data, który musi pokryć Regeneracja (w skali Data)
-      double regenerationEventsData = (dataContent > mcSumContentScaled) ? dataContent - mcSumContentScaled : 0.0;
+      double regenerationEventsData = (dataContent > mcSumContentScaled) ? dataContent - mcSumContentScaled : dataContent - mcSumContentScaled;
       double regenerationEventsDataError = std::sqrt(dataError * dataError + mcSumErrorScaled * mcSumErrorScaled);
 
-      // Pobieramy surową regenerację z MC i skalujemy ją "w locie"
+      // Pobieramy surową regenerację z MC i skalujemy ją "w locie" z BR
+      double scaleFactor_regen = fConfig.lumiFactor * factors.BRcorrectionFactors.at("Regeneration");
       double rawRegenerationMC = fHistos[histType]["Regeneration"]->GetBinContent(i);
       double rawRegenerationMCError = fHistos[histType]["Regeneration"]->GetBinError(i);
 
-      double regenerationEventsMCScaled = rawRegenerationMC * fConfig.lumiFactor;
-      double regenerationEventsMCErrorScaled = rawRegenerationMCError * fConfig.lumiFactor;
+      double regenerationEventsMCScaled = rawRegenerationMC * scaleFactor_regen;
+      double regenerationEventsMCErrorScaled = rawRegenerationMCError * scaleFactor_regen;
 
       // Obliczamy wagę: stosunek zliczeń w tej samej skali (skala Data / skala Data)
       double weight = (regenerationEventsMCScaled > 0) ? regenerationEventsData / regenerationEventsMCScaled : 1.0;
+
+      std::cout << "Type: " << _HistTypeToString(histType) << ", Bin: " << i
+                << ", Data: " << regenerationEventsData << " ± " << regenerationEventsDataError
+                << ", MC: " << regenerationEventsMCScaled << " ± " << regenerationEventsMCErrorScaled
+                << ", Weight: " << weight << std::endl;
 
       // Propagacja błędu dla dzielenia (regenerationEventsData / regenerationEventsMCScaled)
       double weightError = 0.0;
@@ -1117,34 +1155,34 @@ void RegenerationFractionFit::_FitContinuousWeightFunction(HistogramType histTyp
     return;
   }
 
-  TFitResultPtr fitResultDC = fRegenerationWeights[histType]->Fit(fcontWeightDC[histType], "QRES");
-  TFitResultPtr fitResultSphBP = fRegenerationWeights[histType]->Fit(fcontWeightSphBP[histType], "QRES+");
-  TFitResultPtr fitResultCylBP = fRegenerationWeights[histType]->Fit(fcontWeightCylBP[histType], "QRES+");
+  TFitResultPtr fitResultDC = fRegenerationWeights[histType]->Fit(fcontWeightDC[histType], "RES");
+  TFitResultPtr fitResultSphBP = fRegenerationWeights[histType]->Fit(fcontWeightSphBP[histType], "RES+");
+  TFitResultPtr fitResultCylBP = fRegenerationWeights[histType]->Fit(fcontWeightCylBP[histType], "RES+");
 
-  if (1)//fitResultDC)// && fitResultDC->Status() == 0)
+  if (fitResultDC)// && fitResultDC->Status() == 0)
   {
     std::cout << "Fit successful for DC Wall bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    std::cout << "Fit parameters for DC Wall: " << fitResultDC->GetParams()[0] << " +- " << fitResultDC->Errors()[0] << ", " << fitResultDC->GetParams()[1] << " +- " << fitResultDC->Errors()[1] << std::endl;
+    std::cout << "Fit parameters for DC Wall: b = (" << fitResultDC->GetParams()[0] << " +- " << fitResultDC->Errors()[0] << "), a = (" << fitResultDC->GetParams()[1] << " +- " << fitResultDC->Errors()[1] << ")" << std::endl << std::endl;
   }
   else
   {
     std::cerr << "Fit failed for DC Wall bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
   }
 
-  if (1)
+  if (fitResultSphBP)// && fitResultSphBP->Status() == 0)
   {
     std::cout << "Fit successful for Spherical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    std::cout << "Fit parameters for Spherical BP: " << fitResultSphBP->GetParams()[0] << " +- " << fitResultSphBP->Errors()[0] << ", " << fitResultSphBP->GetParams()[1] << " +- " << fitResultSphBP->Errors()[1] << std::endl;
+    std::cout << "Fit parameters for Spherical BP: b = (" << fitResultSphBP->GetParams()[0] << " +- " << fitResultSphBP->Errors()[0] << "), a = (" << fitResultSphBP->GetParams()[1] << " +- " << fitResultSphBP->Errors()[1] << ")" << std::endl;
   }
   else
   {
     std::cerr << "Fit failed for Spherical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
   }
 
-  if (1)
+  if (fitResultCylBP)// && fitResultCylBP->Status() == 0)
   {
     std::cout << "Fit successful for Cylindrical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    std::cout << "Fit parameters for Cylindrical BP: " << fitResultCylBP->GetParams()[0] << " +- " << fitResultCylBP->Errors()[0] << ", " << fitResultCylBP->GetParams()[1] << " +- " << fitResultCylBP->Errors()[1] << std::endl;
+    std::cout << "Fit parameters for Cylindrical BP: b = (" << fitResultCylBP->GetParams()[0] << " +- " << fitResultCylBP->Errors()[0] << "), a = (" << fitResultCylBP->GetParams()[1] << " +- " << fitResultCylBP->Errors()[1] << ")" << std::endl;
   }
   else
   {

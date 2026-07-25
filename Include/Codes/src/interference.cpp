@@ -206,7 +206,7 @@ namespace KLOE
         }
       }
 
-      _frac_tmp[name.second]->Scale(1.09); // Global scaling factor to match the number of events in data (to be optimized by the fit)
+      _frac_tmp[name.second]->Scale(1.13);
 
       interference::bin_extraction(name.second, _frac_tmp[name.second]);
       /////////////////////////////////////////////////////////////////////////////////////////////

@@ -7,6 +7,8 @@
 #include <TH1.h>
 #include <TH2.h>
 #include <ErrorLogs.h>
+#include <TChain.h>
+#include <TChainElement.h>
 
 #include <TMath.h>
 
@@ -816,4 +818,5 @@ namespace Utils
   void JsonFieldLookupDouble(nlohmann::json &jsonObj, const std::string fieldPath, double &value, ErrorHandling::ErrorLogs &logger);
   void JsonFieldLookupInt(nlohmann::json &jsonObj, const std::string fieldPath, int &value, ErrorHandling::ErrorLogs &logger);
   void JsonFieldLookupLong(nlohmann::json &jsonObj, const std::string fieldPath, long &value, ErrorHandling::ErrorLogs &logger);
+  int CountFiles(TChain *chain, bool isMC);
 }

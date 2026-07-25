@@ -1219,3 +1219,143 @@ cd scripts/results/
 ls
 cd control_sample_corr_factors/
 pwd
+cd scripts/
+./analyses_corr_fact.sh 
+./analyses_corr_fact.sh kitt THREE_PI0 20 0.0
+pkill -9 root.exe 
+./analyses_corr_fact.sh kitt THREE_PI0 20 0.0
+./analyses_corr_fact.sh kitt THREE_PI0 450 0.0
+./analyses_corr_fact.sh hal SEMILEPTONIC 450
+ps -e root
+pgrep root
+ps -e "root.exe"
+ps -e | grep root.exe
+kill 15244
+./analyses_corr_fact.sh hal SEMILEPTONIC 450
+./execute_analysis.sh 
+git add .
+git commit -m "Corrections"
+git push
+htop
+cd ../root_files/
+ls
+cd hal/
+ls
+ls -hl
+cd DATA_SEMILEPTONIC_NoSmearing/
+ls -hl
+cd ../
+cd ALL_PHYS
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+root
+cd ../
+ls
+cd ../
+ls
+cd CNAF_Produced_Files/
+ls
+cd root_files/
+ls
+rsync -avz tier1-cnaf:/home/g/gamrat/root_files/2026-07-26 .
+ssh tier1-cnaf 
+rsync -avz tier1-cnaf:/home/g/gamrat/root_files/2026-07-19 .
+cd scripts/
+ls
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1 0.0
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1
+pkill -9 root.exe
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 5
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 2
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 3
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 4
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 5
+pkill -9 root.exe
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 2
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 3
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 4
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 5
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 2
+kill -9 root.exe
+pkill -9 root.exe
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 2
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 3
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 4
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 4 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 2
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 3
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+./analyses_corr_fact.sh kitt THREE_PI0 450 1 0.0
+./analyses_corr_fact.sh kitt THREE_PI0 450 2 0.0
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+cd ../root_files/kitt/ALL_PHYS_SIGNAL_NoSmearing/
+ls -hl
+cd ../../../KLOE/
+./execute_analysis.sh 
+cd scripts/
+ls
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 2
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 3
+./analyses_corr_fact.sh kitt THREE_PI0 450 2 0.0
+./analyses_corr_fact.sh kitt THREE_PI0 450 1 0.0
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+cd ../CNAF_Produced_Files/
+ls
+cd root_files/
+ls
+cd 2026-07-19/
+ls
+cd signal/
+ls
+cd ALL_PHYS
+cd ALL_PHYS_SIGNAL_NoSmearing/
+ls
+scp tier1-cnaf:/home/g/gamrat/root_files/2026-07-19/signal/ALL_PHYS_SIGNAL_NoSmearing/mk0_initial_analysis_all_phys_SIGNAL_NoSmearing_173.root .
+cd
+ext
+exit
+cd ../
+cd CNAF_Produced_Files/
+ls
+cd root_files/
+ls
+cd 2026-0
+cd 2026-04-17/
+ls
+cd Signal/
+ls
+mv ALL_PHYS_SIGNAL_NoSmearing/ ALL_PHYS_SIGNAL_NoSmearing_backup
+mv ALL_PHYS2_SIGNAL_NoSmearing/ ALL_PHYS2_SIGNAL_NoSmearing_backup
+mv ALL_PHYS3_SIGNAL_NoSmearing/ ALL_PHYS3_SIGNAL_NoSmearing_backup
+ls
+cp -r ../../2026-07-19/signal/ALL_PHYS_SIGNAL_NoSmearing .
+cp -r ../../2026-07-19/signal/ALL_PHYS2_SIGNAL_NoSmearing .
+cp -r ../../2026-07-19/signal/ALL_PHYS3_SIGNAL_NoSmearing .
+ls -hl
+cd ..
+cd ../../
+cd KLOE/
+ls
+./execute_analysis.sh 
+cd log/
+ls
+./calculate_total.sh 
+./calculate_total.sh all_phys2
+./calculate_total.sh all_phys3
+./calculate_total.sh all_phys
+./calculate_total.sh
+./calculate.sh all_phys
+./calculate.sh all_phys2
+./calculate.sh all_phys3
+./calculate.sh all_phys3 .
+./calculate.sh all_phys .
+./calculate.sh all_phys2 .
+./calculate.sh all_phys3 .
+./execute_analysis.sh 
