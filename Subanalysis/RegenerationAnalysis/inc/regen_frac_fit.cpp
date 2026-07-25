@@ -1159,30 +1159,43 @@ void RegenerationFractionFit::_FitContinuousWeightFunction(HistogramType histTyp
   TFitResultPtr fitResultSphBP = fRegenerationWeights[histType]->Fit(fcontWeightSphBP[histType], "RES+");
   TFitResultPtr fitResultCylBP = fRegenerationWeights[histType]->Fit(fcontWeightCylBP[histType], "RES+");
 
-  if (fitResultDC)// && fitResultDC->Status() == 0)
+  TFitResult *resDC    = fitResultDC.Get();
+  TFitResult *resSphBP = fitResultSphBP.Get();
+  TFitResult *resCylBP = fitResultCylBP.Get();
+
+  if (resDC != nullptr && resDC->NPar() > 0)
   {
+    const double *p = resDC->GetParams();
+    const auto &e = resDC->Errors();
     std::cout << "Fit successful for DC Wall bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    std::cout << "Fit parameters for DC Wall: b = (" << fitResultDC->GetParams()[0] << " +- " << fitResultDC->Errors()[0] << "), a = (" << fitResultDC->GetParams()[1] << " +- " << fitResultDC->Errors()[1] << ")" << std::endl << std::endl;
+    if (p && !e.empty())
+      std::cout << "Fit parameters for DC Wall: b = (" << p[0] << " +- " << e[0] << "), a = (" << p[1] << " +- " << e[1] << ")" << std::endl << std::endl;
   }
   else
   {
     std::cerr << "Fit failed for DC Wall bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
   }
 
-  if (fitResultSphBP)// && fitResultSphBP->Status() == 0)
+  if (resSphBP != nullptr && resSphBP->NPar() > 0)
   {
+    const double *p = resSphBP->GetParams();
+    const auto &e = resSphBP->Errors();
     std::cout << "Fit successful for Spherical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    std::cout << "Fit parameters for Spherical BP: b = (" << fitResultSphBP->GetParams()[0] << " +- " << fitResultSphBP->Errors()[0] << "), a = (" << fitResultSphBP->GetParams()[1] << " +- " << fitResultSphBP->Errors()[1] << ")" << std::endl;
+    if (p && !e.empty())
+      std::cout << "Fit parameters for Spherical BP: b = (" << p[0] << " +- " << e[0] << "), a = (" << p[1] << " +- " << e[1] << ")" << std::endl;
   }
   else
   {
     std::cerr << "Fit failed for Spherical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
   }
 
-  if (fitResultCylBP)// && fitResultCylBP->Status() == 0)
+  if (resCylBP != nullptr && resCylBP->NPar() > 0)
   {
+    const double *p = resCylBP->GetParams();
+    const auto &e = resCylBP->Errors();
     std::cout << "Fit successful for Cylindrical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    std::cout << "Fit parameters for Cylindrical BP: b = (" << fitResultCylBP->GetParams()[0] << " +- " << fitResultCylBP->Errors()[0] << "), a = (" << fitResultCylBP->GetParams()[1] << " +- " << fitResultCylBP->Errors()[1] << ")" << std::endl;
+    if (p && !e.empty())
+      std::cout << "Fit parameters for Cylindrical BP: b = (" << p[0] << " +- " << e[0] << "), a = (" << p[1] << " +- " << e[1] << ")" << std::endl;
   }
   else
   {

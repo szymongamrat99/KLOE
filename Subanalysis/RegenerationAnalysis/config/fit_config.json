@@ -71,7 +71,7 @@
     }
   },
   "generalSettings": {
-    "isSignalWeighted": true,
+    "isSignalWeighted": false,
     "isRegenerationWeighted": true,
     "onlyKLong": false,
     "lumiFactor": 1.13,
