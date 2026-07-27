@@ -90,7 +90,7 @@ namespace KLOE
     }
     else
     {
-      RePart = 0.0; // PhysicsConstants::Re;
+      RePart = 0.0;
     }
 
     Double_t value = 0.;
@@ -206,7 +206,7 @@ namespace KLOE
         }
       }
 
-      _frac_tmp[name.second]->Scale(1.13);
+      _frac_tmp[name.second]->Scale(1.00);
 
       interference::bin_extraction(name.second, _frac_tmp[name.second]);
       /////////////////////////////////////////////////////////////////////////////////////////////

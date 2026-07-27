@@ -124,7 +124,7 @@ private:
 
   // ---
 
-  const std::vector<std::string> floatVars = {"Chi2SignalKinFit", "minv4gam", "Qmiss", "Bx", "By", "Bz", "KaonChTimeCMMC", "KaonNeTimeCMMC", "KaonChTimeCMSignalFit", "KaonNeTimeCMSignalFit", "bestErrorSixGamma"};
+  const std::vector<std::string> floatVars = {"Chi2SignalKinFit", "minv4gam", "Qmiss", "Bx", "By", "Bz", "KaonChTimeCMMC", "KaonNeTimeCMMC", "KaonChTimeCMSignalFit", "KaonNeTimeCMSignalFit", "KaonChTimeCMBoostTriFit", "KaonNeTimeCMBoostTriFit", "bestErrorSixGamma"};
   const std::vector<std::string> integerVars = {"mcflag", "mctruth"};
   const std::vector<std::string> floatArrayVars = {"Knerec", "KnerecSix", "KchrecClosest", "KnerecFit", "KchrecFit", "ipFit", "Kchrec", "ip", "trk1Fit", "trk2Fit", "pi01Fit", "pi02Fit", "Kchrec"};
 
@@ -150,7 +150,7 @@ private:
   HistogramType _checkRegenerationLimitsTypesDeltaT(double dt) const;
   TFile *fFileWeights;
 
-  TH1 *threePi0WeightsHist, *semileptonicWeightsHist;
+  TH1 *threePi0WeightsHist, *semileptonicWeightsHist, *signalWeightsHist;
   double avgThreePi0Weight, avgSemileptonicWeight;
 
   void _calculateRegenerationWeights();

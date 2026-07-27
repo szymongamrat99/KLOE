@@ -45,6 +45,11 @@ RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(
 
   std::cout << "Average Semileptonic Weight: " << avgSemileptonicWeight << std::endl;
 
+  TFile *fFileWeightsSignal = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/combined_signal_correction_factors.root", "READ");
+
+  c = (TCanvas*)fFileWeightsSignal->Get("CorrFactors");
+  signalWeightsHist = (TH1*)c->FindObject("CombinedCorrFactor")->Clone();
+
   for (const auto &histType : _histTypesIterative)
   {
     for (const auto &channel : KLOE::channName)
@@ -312,8 +317,12 @@ void RegenerationFractionFit::_FillHistograms()
     auto &tch_fit = **fReaderFloat.at("KaonChTimeCMSignalFit");
     auto &tne_fit = **fReaderFloat.at("KaonNeTimeCMSignalFit");
 
+    auto &tch_tri = **fReaderFloat.at("KaonChTimeCMBoostTriFit");
+    auto &tne_tri = **fReaderFloat.at("KaonNeTimeCMBoostTriFit");
+
     auto &minv4gam = **fReaderFloat.at("minv4gam");
     auto &Kchrec = *fReaderFloatArray.at("Kchrec");
+    
 
     double signalWeight = 1.0,
            regenerationWeight = 1.0,
@@ -707,81 +716,33 @@ void RegenerationFractionFit::_RenormalizeSignalHistogram()
 
 void RegenerationFractionFit::_calculateRegenerationWeights()
 {
-  KLOE::BRCorrectionFactors factors;
-
   // 1. Napełniamy surowe histogramy (bez wag i bez lumi)
   _FillHistograms();
-
+  _RenormalizeMCToLumi();
+  _FillMCSumHistogram(false); // Include Regeneration in the MC sum
+  
   for (const auto &histType : _histTypesIterative)
   {
-    TH1 *dataHist = fHistos[histType]["Data"];
+    TH1 *dataRegenerationHist = (TH1*)(fHistos[histType]["Data"]->Clone("DataRegeneration"));
+    dataRegenerationHist->Add(fHistos[histType]["MC sum"], -1);
 
-    int bins = dataHist->GetNbinsX();
-
-    for (int i = 1; i <= bins; ++i)
+    fRegenerationWeights[histType]->Reset("ICESM");
+    fRegenerationWeights[histType]->Divide(dataRegenerationHist, fHistos[histType]["Regeneration"], 1.0, 1.0);
+      
+    for (int i = 1; i <= fRegenerationWeights[histType]->GetNbinsX(); ++i)
     {
-      double xLeft = dataHist->GetBinLowEdge(i),
-             xRight = dataHist->GetBinLowEdge(i + 1);
-
-      if (!_checkRegenerationLimits(xLeft, xRight))
-        continue;
-
-      // Obliczamy przeskalowaną sumę tła MC "w locie" z uwzględnieniem BR dla każdego kanału
-      double mcSumContentScaled = 0.0;
-      double mcSumErrorScaled2 = 0.0;
-
-      for (const auto &channel : KLOE::channName)
-      {
-        std::string ch = (std::string)channel.second;
-        if (ch == "Data" || ch == "MC sum" || ch == "Regeneration")
-          continue;
-
-        double scaleFactor = fConfig.lumiFactor * factors.BRcorrectionFactors.at(ch);
-        mcSumContentScaled += fHistos[histType][ch]->GetBinContent(i) * scaleFactor;
-        double chErr = fHistos[histType][ch]->GetBinError(i) * scaleFactor;
-        mcSumErrorScaled2 += chErr * chErr;
-      }
-      double mcSumErrorScaled = std::sqrt(mcSumErrorScaled2);
-
-      double dataContent = dataHist->GetBinContent(i);
-      double dataError = dataHist->GetBinError(i);
-
-      // Nadmiar zdarzeń w Data, który musi pokryć Regeneracja (w skali Data)
-      double regenerationEventsData = (dataContent > mcSumContentScaled) ? dataContent - mcSumContentScaled : dataContent - mcSumContentScaled;
-      double regenerationEventsDataError = std::sqrt(dataError * dataError + mcSumErrorScaled * mcSumErrorScaled);
-
-      // Pobieramy surową regenerację z MC i skalujemy ją "w locie" z BR
-      double scaleFactor_regen = fConfig.lumiFactor * factors.BRcorrectionFactors.at("Regeneration");
-      double rawRegenerationMC = fHistos[histType]["Regeneration"]->GetBinContent(i);
-      double rawRegenerationMCError = fHistos[histType]["Regeneration"]->GetBinError(i);
-
-      double regenerationEventsMCScaled = rawRegenerationMC * scaleFactor_regen;
-      double regenerationEventsMCErrorScaled = rawRegenerationMCError * scaleFactor_regen;
-
-      // Obliczamy wagę: stosunek zliczeń w tej samej skali (skala Data / skala Data)
-      double weight = (regenerationEventsMCScaled > 0) ? regenerationEventsData / regenerationEventsMCScaled : 1.0;
-
-      std::cout << "Type: " << _HistTypeToString(histType) << ", Bin: " << i
-                << ", Data: " << regenerationEventsData << " ± " << regenerationEventsDataError
-                << ", MC: " << regenerationEventsMCScaled << " ± " << regenerationEventsMCErrorScaled
-                << ", Weight: " << weight << std::endl;
-
-      // Propagacja błędu dla dzielenia (regenerationEventsData / regenerationEventsMCScaled)
-      double weightError = 0.0;
-      if (regenerationEventsMCScaled > 0 && regenerationEventsData > 0)
-      {
-        weightError = std::sqrt(std::pow(regenerationEventsDataError / regenerationEventsMCScaled, 2) +
-                                std::pow(regenerationEventsData * regenerationEventsMCErrorScaled / (regenerationEventsMCScaled * regenerationEventsMCScaled), 2));
-      }
-
+      double weight = fRegenerationWeights[histType]->GetBinContent(i);
+      double weightError = fRegenerationWeights[histType]->GetBinError(i);
       double relativeError = (weight != 0) ? weightError / weight : 0.0;
 
-      if (relativeError > fConfig.weightErrorLimit)
-        continue;
-
-      fRegenerationWeights[histType]->SetBinContent(i, weight);
-      fRegenerationWeights[histType]->SetBinError(i, weightError);
+      if (weight <= 0.0 || relativeError > fConfig.weightErrorLimit)
+      {
+        fRegenerationWeights[histType]->SetBinContent(i, 0.0);
+        fRegenerationWeights[histType]->SetBinError(i, 0.0);
+      }
     }
+
+    dataRegenerationHist->Delete();
   }
 }
 
@@ -907,9 +868,7 @@ void RegenerationFractionFit::SaveHistograms()
     _FillHistograms();
   }
 
-  // 3. Dopiero teraz, gdy wagi są na swoim miejscu, aplikujemy lumiFactor na stałe do histogramów
   _RenormalizeMCToLumi();
-
   // 4. Budujemy finalny sumaryczny histogram "MC sum" (zawierający już wagi i lumi) do pliku ROOT
   _FillMCSumHistogram(true);
 

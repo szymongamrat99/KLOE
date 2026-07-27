@@ -1359,3 +1359,78 @@ ls
 ./calculate.sh all_phys2 .
 ./calculate.sh all_phys3 .
 ./execute_analysis.sh 
+cd ..
+cd CNAF_Produced_Files/root_files/2026-07-19/
+ls
+ls ../../../root_files/kitt/
+cd ../../../
+cd root_files/
+mkdir cnaf
+cd cnaf/
+ls
+cd ..
+ls
+cd hal/
+ls
+cd ../
+cd cnaf/
+ls
+cp -fr ../../CNAF_Produced_Files/root_files/2026-07-19/4pi/* .
+cd ..
+ls
+cd cnaf
+ls
+cd DATA_FOUR_PI_NoSmearing/
+ls -hl
+exit
+cd scripts/
+root
+./analyses_corr_fact.sh 
+./analyses_corr_fact.sh hal SEMILEPTONIC 1 4
+./analyses_corr_fact.sh hal SEMILEPTONIC 10 4
+./analyses_corr_fact.sh hal SEMILEPTONIC 420 4 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 10 4 true
+./analyses_corr_fact.sh kitt THREE_PI0 10 4 0.0 true
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+./analyses_corr_fact.sh cnaf DOUBLE_PI 450 3 0.0 true
+./analyses_corr_fact.sh cnaf FOUR_PI 450 3 0.0 true
+./analyses_corr_fact.sh cnaf FOUR_PI 450 1 0.0 true
+pkill -9 root.exe
+./analyses_corr_fact.sh cnaf FOUR_PI 450 1 0.0 true
+./analyses_corr_fact.sh cnaf FOUR_PI 450 2 0.0 true
+./analyses_corr_fact.sh cnaf FOUR_PI 450 3 0.0 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+git add .
+git commit -m "Inclusion of additional things for Regeneration weight calculation"
+./execute_analysis.sh 
+git add .
+git commit -m "Inclusion of additional things for Regeneration weight calculation"
+git push
+git checkout -b feature/regeneration-weight-with-fit
+./execute_analysis.sh 
+git checkout feature/three_pi0_additional_functions 
+git checkout -- .
+./execute_analysis.sh 
+cd ../CNAF_Produced_Files/
+ls
+cd root_files/2026-04-17/
+ls
+cd Signal/
+ls
+cd ALL_PHYS2_SIGNAL_NoSmearing
+ls
+cd ../
+cd ALL_PHYS3_SIGNAL_NoSmearing
+ls
+cd ..
+ls
+cd DATA_SIGNAL_NoSmearing/
+ls
+cd ..
+ls
+cd ..
+cd ../../../
+cd KLOE/
+./execute_analysis.sh 
