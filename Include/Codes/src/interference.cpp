@@ -90,7 +90,7 @@ namespace KLOE
     }
     else
     {
-      RePart = 0.0; // PhysicsConstants::Re;
+      RePart = 0.0;
     }
 
     Double_t value = 0.;
@@ -171,6 +171,8 @@ namespace KLOE
   Double_t interference::interf_chi2_split(const Double_t *xx)
   {
     /////////////////////////////////////////////////////////////////////////////////////////////
+    signal_event_weights_sum = 0.0;
+
     for (const auto &name : KLOE::channName)
     {
       if (ToLower(name.second) == "data")
@@ -182,19 +184,28 @@ namespace KLOE
       for (UInt_t j = 0; j < time_diff[name.second].size(); j++)
       {
         if (ToLower(name.second) == "signal")
-          _frac_tmp[name.second]->Fill(time_diff[name.second][j], fit_function(time_diff_gen[j], 0, xx)); //! Filling Signal
+        {
+          double weight = fit_function(time_diff_gen[j], 0, xx) * signal_event_weights[j];
+          signal_event_weights_sum += signal_event_weights[j];
+
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j], weight); //! Filling Signal
+        }
         else if (name.second == "Regeneration" && !regen_event_weights.empty())
         {
           _frac_tmp[name.second]->Fill(time_diff[name.second][j], regen_event_weights[j]);
         }
+        else if (name.second == "3pi0" && !three_pi0_weights.empty())
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j], three_pi0_weights[j]);
+        else if (name.second == "Semileptonic" && !semileptonic_weights.empty())
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j], semileptonic_weights[j]);
         else
-          _frac_tmp[name.second]->Fill(time_diff[name.second][j]);
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j]); //! Filling MC
       }
 
       //! Using correction factor and efficiency
       if (ToLower(name.second) == "signal")
       {
-        _frac_tmp[name.second]->Scale(_frac_tmp[name.second]->GetEntries() / _frac_tmp[name.second]->Integral(0, _bin_number + 1));
+        _frac_tmp[name.second]->Scale(signal_event_weights_sum / _frac_tmp[name.second]->Integral(0, _bin_number + 1));
 
         for (UInt_t j = 0; j < _bin_number; j++)
         {
@@ -202,7 +213,7 @@ namespace KLOE
         }
       }
 
-      _frac_tmp[name.second]->Scale(1.09); // Global scaling factor to match the number of events in data (to be optimized by the fit)
+      _frac_tmp[name.second]->Scale(1.07906);
 
       interference::bin_extraction(name.second, _frac_tmp[name.second]);
       /////////////////////////////////////////////////////////////////////////////////////////////

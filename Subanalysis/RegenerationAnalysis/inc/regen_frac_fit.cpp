@@ -16,6 +16,7 @@
 #include <TFitResult.h>
 
 #include <interference.h>
+#include <BRCorrectionFactors.h>
 
 using json = nlohmann::json;
 
@@ -23,6 +24,31 @@ RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(
 {
   LoadConfig();
   KLOE::setGlobalStyle();
+
+  TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
+
+  TCanvas *c = (TCanvas*)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
+  threePi0WeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
+
+  TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
+
+  c = (TCanvas*)fFileWeightsSemileptonic->Get("semileptonic/correction_factors/cCorr");
+  semileptonicWeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
+
+  TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
+  avgThreePi0Weight = threePi0WeightResult->Parameter(0);
+
+  std::cout << "Average Three Pi0 Weight: " << avgThreePi0Weight << std::endl;
+
+  TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
+  avgSemileptonicWeight = semileptonicWeightResult->Parameter(0);
+
+  std::cout << "Average Semileptonic Weight: " << avgSemileptonicWeight << std::endl;
+
+  TFile *fFileWeightsSignal = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/combined_signal_correction_factors.root", "READ");
+
+  c = (TCanvas*)fFileWeightsSignal->Get("CorrFactors");
+  signalWeightsHist = (TH1*)c->FindObject("CombinedCorrFactor")->Clone();
 
   for (const auto &histType : _histTypesIterative)
   {
@@ -57,7 +83,7 @@ RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(
     std::string histUniqueName = "TimeDiff_" + channelName_str;
     std::string histTotalTitle = "Time Difference (t_ch - t_ne) for " + channelName_str + ";t_ch - t_ne (ns);Entries";
 
-    TH1D *h = new TH1D(histUniqueName.c_str(), histTotalTitle.c_str(), 150, -100, 100);
+    TH1D *h = new TH1D(histUniqueName.c_str(), histTotalTitle.c_str(), 150, -300, 300);
     fTimeDiffHist[channelName_str] = h;
 
     std::string histUniqueNameRhovsRCharged = "RhovsRCharged_" + channelName_str;
@@ -291,7 +317,19 @@ void RegenerationFractionFit::_FillHistograms()
     auto &tch_fit = **fReaderFloat.at("KaonChTimeCMSignalFit");
     auto &tne_fit = **fReaderFloat.at("KaonNeTimeCMSignalFit");
 
-    double signalWeight = 1.0,
+    auto &tch_tri = **fReaderFloat.at("KaonChTimeCMBoostTriFit");
+    auto &tne_tri = **fReaderFloat.at("KaonNeTimeCMBoostTriFit");
+
+    auto &minv4gam = **fReaderFloat.at("minv4gam");
+    auto &Kchrec = *fReaderFloatArray.at("Kchrec");
+    
+    double dttri = tch_tri - tne_tri;
+
+    double interpWeight = (double)signalWeightsHist->Interpolate(dttri);
+    // if (std::isnan(interpWeight) || std::isinf(interpWeight) || interpWeight <= 0.0)
+      interpWeight = 1.0;
+
+    double signalWeight = interpWeight,
            regenerationWeight = 1.0,
            regenerationWeightError = 0.0;
 
@@ -303,17 +341,20 @@ void RegenerationFractionFit::_FillHistograms()
 
     std::string channelName_str = (std::string)KLOE::channName.at(mctruth);
 
+    if (channelName_str == "Signal")
+      _sumSignalInterpWeights += interpWeight;
+
     if (fConfig.isSignalWeighted)
     {
       double dtmc = tch_mc - tne_mc;
-      signalWeight = fInterf.fit_function(dtmc, 1);
+      signalWeight *= fInterf.fit_function(dtmc, 1);
     }
 
     for (const auto &histType : _histTypesIterative)
     {
       double radius = _calculateRadius(histType);
 
-      int integralWeights = fRegenerationWeights[histType]->Integral();
+      double integralWeights = fRegenerationWeights[histType]->Integral();
 
       if (fConfig.isRegenerationWeighted && integralWeights > 0)
       {
@@ -328,7 +369,15 @@ void RegenerationFractionFit::_FillHistograms()
       {
         fHistos[histType][channelName_str]->Fill(radius, regenerationWeight);
       }
-      else// if (channelName_str != "Semileptonic" && channelName_str != "3pi0")
+      else if (channelName_str == "3pi0")
+      {
+        fHistos[histType][channelName_str]->Fill(radius, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      }
+      else if (channelName_str == "Semileptonic")
+      {
+        fHistos[histType][channelName_str]->Fill(radius, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      }
+      else
       {
         fHistos[histType][channelName_str]->Fill(radius);
       }
@@ -368,7 +417,19 @@ void RegenerationFractionFit::_FillHistograms()
       fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, regenerationWeight);
       fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, regenerationWeight);
     }
-    else// if (channelName_str != "Semileptonic" && channelName_str != "3pi0")
+    else if (channelName_str == "3pi0")
+    {
+      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+    }
+    else if (channelName_str == "Semileptonic")
+    {
+      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit,  0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+    }
+    else
     {
       fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit);
       fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged);
@@ -376,11 +437,16 @@ void RegenerationFractionFit::_FillHistograms()
     }
   }
 
-  _RenormalizeSignalHistogram();
+  if (fConfig.isSignalWeighted)
+  {
+    _RenormalizeSignalHistogram();
+  }
 }
 
 void RegenerationFractionFit::_RenormalizeMCToLumi()
 {
+  KLOE::BRCorrectionFactors factors;
+
   for (const auto &histType : _histTypesIterative)
   {
     for (const auto &channel : KLOE::channName)
@@ -390,7 +456,7 @@ void RegenerationFractionFit::_RenormalizeMCToLumi()
       if (channelName_str == "Data" || channelName_str == "MC sum")
         continue;
 
-      fHistos[histType][channelName_str]->Scale(fConfig.lumiFactor);
+      fHistos[histType][channelName_str]->Scale(fConfig.lumiFactor * factors.BRcorrectionFactors.at(channelName_str));
     }
   }
 
@@ -401,9 +467,9 @@ void RegenerationFractionFit::_RenormalizeMCToLumi()
     if (channelName_str == "Data" || channelName_str == "MC sum")
       continue;
 
-    fTimeDiffHist[channelName_str]->Scale(fConfig.lumiFactor);
-    fRhovsRChargedHist[channelName_str]->Scale(fConfig.lumiFactor);
-    fRhovsRNeutralHist[channelName_str]->Scale(fConfig.lumiFactor);
+    fTimeDiffHist[channelName_str]->Scale(fConfig.lumiFactor * factors.BRcorrectionFactors.at(channelName_str));
+    fRhovsRChargedHist[channelName_str]->Scale(fConfig.lumiFactor * factors.BRcorrectionFactors.at(channelName_str));
+    fRhovsRNeutralHist[channelName_str]->Scale(fConfig.lumiFactor * factors.BRcorrectionFactors.at(channelName_str));
   }
 }
 
@@ -429,6 +495,7 @@ void RegenerationFractionFit::_ResetHistograms()
   }
 
   _channInTimeDiff.clear(); // Clear the list of channels included in time difference sum
+  _sumSignalInterpWeights = 0.0;
 }
 
 void RegenerationFractionFit::_FillMCSumHistogram(bool addRegeneration)
@@ -642,7 +709,9 @@ void RegenerationFractionFit::_RenormalizeSignalHistogram()
 
     if (signalIntegral > 0)
     {
-      double scaleFactor = signalEntries / signalIntegral;
+      double scaleFactor = (_sumSignalInterpWeights > 0)
+                           ? _sumSignalInterpWeights / signalIntegral
+                           : signalEntries / signalIntegral;
       fHistos[histType]["Signal"]->Scale(scaleFactor);
     }
   }
@@ -654,7 +723,9 @@ void RegenerationFractionFit::_RenormalizeSignalHistogram()
 
   if (signalTimeDiffIntegral > 0)
   {
-    double scaleFactor = signalTimeDiffEntries / signalTimeDiffIntegral;
+    double scaleFactor = (_sumSignalInterpWeights > 0)
+                         ? _sumSignalInterpWeights / signalTimeDiffIntegral
+                         : signalTimeDiffEntries / signalTimeDiffIntegral;
     fTimeDiffHist["Signal"]->Scale(scaleFactor);
   }
 }
@@ -663,65 +734,35 @@ void RegenerationFractionFit::_calculateRegenerationWeights()
 {
   // 1. Napełniamy surowe histogramy (bez wag i bez lumi)
   _FillHistograms();
-
-  // 2. Budujemy surową sumę MC (addRegeneration = false), aby mieć tło w mcSumHist
-  _FillMCSumHistogram(false);
-
+  _RenormalizeMCToLumi();
+  _FillMCSumHistogram(false); // Include Regeneration in the MC sum
+  
   for (const auto &histType : _histTypesIterative)
   {
-    TH1 *dataHist = fHistos[histType]["Data"];
-    TH1 *mcSumHist = fHistos[histType]["MC sum"];
+    TH1 *dataRegenerationHist = (TH1*)(fHistos[histType]["Data"]->Clone("DataRegeneration"));
+    dataRegenerationHist->Add(fHistos[histType]["MC sum"], -1);
 
-    int bins = dataHist->GetNbinsX();
-
-    for (int i = 1; i <= bins; ++i)
+    fRegenerationWeights[histType]->Reset("ICESM");
+    fRegenerationWeights[histType]->Divide(dataRegenerationHist, fHistos[histType]["Regeneration"], 1.0, 1.0);
+      
+    for (int i = 1; i <= fRegenerationWeights[histType]->GetNbinsX(); ++i)
     {
-      double xLeft = dataHist->GetBinLowEdge(i),
-             xRight = dataHist->GetBinLowEdge(i + 1);
-
-      if (!_checkRegenerationLimits(xLeft, xRight))
-        continue;
-
-      // Pobieramy zawartość surowego tła MC i skalujemy je "w locie" do poziomu Data
-      double rawMcSumContent = mcSumHist->GetBinContent(i);
-      double rawMcSumError = mcSumHist->GetBinError(i);
-
-      double mcSumContentScaled = rawMcSumContent * fConfig.lumiFactor;
-      double mcSumErrorScaled = rawMcSumError * fConfig.lumiFactor;
-
-      double dataContent = dataHist->GetBinContent(i);
-      double dataError = dataHist->GetBinError(i);
-
-      // Nadmiar zdarzeń w Data, który musi pokryć Regeneracja (w skali Data)
-      double regenerationEventsData = (dataContent > mcSumContentScaled) ? dataContent - mcSumContentScaled : 0.0;
-      double regenerationEventsDataError = std::sqrt(dataError * dataError + mcSumErrorScaled * mcSumErrorScaled);
-
-      // Pobieramy surową regenerację z MC i skalujemy ją "w locie"
-      double rawRegenerationMC = fHistos[histType]["Regeneration"]->GetBinContent(i);
-      double rawRegenerationMCError = fHistos[histType]["Regeneration"]->GetBinError(i);
-
-      double regenerationEventsMCScaled = rawRegenerationMC * fConfig.lumiFactor;
-      double regenerationEventsMCErrorScaled = rawRegenerationMCError * fConfig.lumiFactor;
-
-      // Obliczamy wagę: stosunek zliczeń w tej samej skali (skala Data / skala Data)
-      double weight = (regenerationEventsMCScaled > 0) ? regenerationEventsData / regenerationEventsMCScaled : 1.0;
-
-      // Propagacja błędu dla dzielenia (regenerationEventsData / regenerationEventsMCScaled)
-      double weightError = 0.0;
-      if (regenerationEventsMCScaled > 0 && regenerationEventsData > 0)
-      {
-        weightError = std::sqrt(std::pow(regenerationEventsDataError / regenerationEventsMCScaled, 2) +
-                                std::pow(regenerationEventsData * regenerationEventsMCErrorScaled / (regenerationEventsMCScaled * regenerationEventsMCScaled), 2));
-      }
-
+      double weight = fRegenerationWeights[histType]->GetBinContent(i);
+      double weightError = fRegenerationWeights[histType]->GetBinError(i);
       double relativeError = (weight != 0) ? weightError / weight : 0.0;
 
-      if (relativeError > fConfig.weightErrorLimit)
-        continue;
+      std::cout << "Histogram Type: " << _HistTypeToString(histType) << ", Bin: " << i
+                << ", Weight: " << weight << ", Error: " << weightError
+                << ", Relative Error: " << relativeError << std::endl;
 
-      fRegenerationWeights[histType]->SetBinContent(i, weight);
-      fRegenerationWeights[histType]->SetBinError(i, weightError);
+      if (weight <= 0.0 || relativeError > fConfig.weightErrorLimit)
+      {
+        fRegenerationWeights[histType]->SetBinContent(i, 0.0);
+        fRegenerationWeights[histType]->SetBinError(i, 0.0);
+      }
     }
+
+    dataRegenerationHist->Delete();
   }
 }
 
@@ -847,11 +888,34 @@ void RegenerationFractionFit::SaveHistograms()
     _FillHistograms();
   }
 
-  // 3. Dopiero teraz, gdy wagi są na swoim miejscu, aplikujemy lumiFactor na stałe do histogramów
   _RenormalizeMCToLumi();
-
   // 4. Budujemy finalny sumaryczny histogram "MC sum" (zawierający już wagi i lumi) do pliku ROOT
   _FillMCSumHistogram(true);
+
+  // 4b. Chi2 Data vs MC sum dla wszystkich rysowanych histogramów
+  std::cout << "\n--- Chi2 (Data vs MC sum) after regeneration weighting ---" << std::endl;
+  for (const auto &histType : _histTypesIterative)
+  {
+    TH1 *hData = fHistos.at(histType).at("Data");
+    TH1 *hMC   = fHistos.at(histType).at("MC sum");
+    if (hData->GetEntries() > 0 && hMC->GetEntries() > 0)
+    {
+      Double_t chi2 = 0.0;
+      Int_t ndf = 0;
+      Int_t igood = 0;
+      hData->Chi2TestX(hMC, chi2, ndf, igood, "WW");
+      double chi2ndf = (ndf > 0) ? chi2 / ndf : 0.0;
+      std::cout << "  " << _HistTypeToString(histType)
+                << ":  chi2 = " << chi2
+                << ",  ndf = " << ndf
+                << ",  chi2/ndf = " << chi2ndf << std::endl;
+    }
+    else
+    {
+      std::cout << "  " << _HistTypeToString(histType) << ":  skipped (empty histogram)" << std::endl;
+    }
+  }
+  std::cout << "----------------------------------------------------------\n" << std::endl;
 
   // 5. Zapis struktur do pliku ROOT
   std::string outputFilePath = (std::string)Paths::regen_analysis_dir + "results/regeneration_analysis_results.root";
@@ -1095,34 +1159,47 @@ void RegenerationFractionFit::_FitContinuousWeightFunction(HistogramType histTyp
     return;
   }
 
-  TFitResultPtr fitResultDC = fRegenerationWeights[histType]->Fit(fcontWeightDC[histType], "QRES");
-  TFitResultPtr fitResultSphBP = fRegenerationWeights[histType]->Fit(fcontWeightSphBP[histType], "QRES+");
-  TFitResultPtr fitResultCylBP = fRegenerationWeights[histType]->Fit(fcontWeightCylBP[histType], "QRES+");
+  TFitResultPtr fitResultDC = fRegenerationWeights[histType]->Fit(fcontWeightDC[histType], "RES");
+  TFitResultPtr fitResultSphBP = fRegenerationWeights[histType]->Fit(fcontWeightSphBP[histType], "RES+");
+  TFitResultPtr fitResultCylBP = fRegenerationWeights[histType]->Fit(fcontWeightCylBP[histType], "RES+");
 
-  if (1)//fitResultDC)// && fitResultDC->Status() == 0)
+  TFitResult *resDC    = fitResultDC.Get();
+  TFitResult *resSphBP = fitResultSphBP.Get();
+  TFitResult *resCylBP = fitResultCylBP.Get();
+
+  if (resDC != nullptr && resDC->NPar() > 0)
   {
+    const double *p = resDC->GetParams();
+    const auto &e = resDC->Errors();
     std::cout << "Fit successful for DC Wall bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    std::cout << "Fit parameters for DC Wall: " << fitResultDC->GetParams()[0] << " +- " << fitResultDC->Errors()[0] << ", " << fitResultDC->GetParams()[1] << " +- " << fitResultDC->Errors()[1] << std::endl;
+    if (p && !e.empty())
+      std::cout << "Fit parameters for DC Wall: b = (" << p[0] << " +- " << e[0] << "), a = (" << p[1] << " +- " << e[1] << ")" << std::endl << std::endl;
   }
   else
   {
     std::cerr << "Fit failed for DC Wall bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
   }
 
-  if (1)
+  if (resSphBP != nullptr && resSphBP->NPar() > 0)
   {
+    const double *p = resSphBP->GetParams();
+    const auto &e = resSphBP->Errors();
     std::cout << "Fit successful for Spherical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    std::cout << "Fit parameters for Spherical BP: " << fitResultSphBP->GetParams()[0] << " +- " << fitResultSphBP->Errors()[0] << ", " << fitResultSphBP->GetParams()[1] << " +- " << fitResultSphBP->Errors()[1] << std::endl;
+    if (p && !e.empty())
+      std::cout << "Fit parameters for Spherical BP: b = (" << p[0] << " +- " << e[0] << "), a = (" << p[1] << " +- " << e[1] << ")" << std::endl;
   }
   else
   {
     std::cerr << "Fit failed for Spherical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
   }
 
-  if (1)
+  if (resCylBP != nullptr && resCylBP->NPar() > 0)
   {
+    const double *p = resCylBP->GetParams();
+    const auto &e = resCylBP->Errors();
     std::cout << "Fit successful for Cylindrical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    std::cout << "Fit parameters for Cylindrical BP: " << fitResultCylBP->GetParams()[0] << " +- " << fitResultCylBP->Errors()[0] << ", " << fitResultCylBP->GetParams()[1] << " +- " << fitResultCylBP->Errors()[1] << std::endl;
+    if (p && !e.empty())
+      std::cout << "Fit parameters for Cylindrical BP: b = (" << p[0] << " +- " << e[0] << "), a = (" << p[1] << " +- " << e[1] << ")" << std::endl;
   }
   else
   {

@@ -1,0 +1,16 @@
+{
+        "order": 0,
+        "cutDescription": "Missing energy Qmiss.",
+        "cutId": "Qmiss",
+        "cutType": "T",
+        "cutValue": 25,
+        "cutCondition": "<="
+      },
+      {
+        "order": 1,
+        "cutDescription": "Angle between pi+ and pi- in the center of mass frame of Kaon.",
+        "cutId": "PipPimAngleCM",
+        "cutType": "T",
+        "cutValue": 10,
+        "cutCondition": "<="
+      }

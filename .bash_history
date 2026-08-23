@@ -1,10 +1,4 @@
 git add .
-git commit -m "New approach"
-git push
-git checkout -b feat/mixed-channel-constants
-git push --set-upstream origin feat/mixed-channel-constants 
-./execute_analysis.sh 
-git add .
 git commit -m "Dynamic variables for fitting in the cp_fit_final"
 git add .
 git commit -m "change"
@@ -1201,4 +1195,806 @@ cd ../root_files/hal/2026-07-14/
 ls
 cd ALL_PHYS3_THREE_PI0_NoSmearing/
 root
+exit
+./run_parallel.sh 
+./execute_analysis.sh 
+git checkout feature/three_pi0_additional_functions 
+git add .
+git commit -m "Modified charged"
+git push
+git checkout feature/three_pi0_additional_functions 
+ls
+git checkout feature/control-samples-semileptonic-3pi0 
+git checkout feature/three_pi0_additional_functions 
+./execute_analysis.sh 
+./e
+./execute_analysis.sh 
+cd scripts/results/
+ls
+cd control_sample_corr_factors/
+pwd
+cd scripts/
+./analyses_corr_fact.sh 
+./analyses_corr_fact.sh kitt THREE_PI0 20 0.0
+pkill -9 root.exe 
+./analyses_corr_fact.sh kitt THREE_PI0 20 0.0
+./analyses_corr_fact.sh kitt THREE_PI0 450 0.0
+./analyses_corr_fact.sh hal SEMILEPTONIC 450
+ps -e root
+pgrep root
+ps -e "root.exe"
+ps -e | grep root.exe
+kill 15244
+./analyses_corr_fact.sh hal SEMILEPTONIC 450
+./execute_analysis.sh 
+git add .
+git commit -m "Corrections"
+git push
+htop
+cd ../root_files/
+ls
+cd hal/
+ls
+ls -hl
+cd DATA_SEMILEPTONIC_NoSmearing/
+ls -hl
+cd ../
+cd ALL_PHYS
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+root
+cd ../
+ls
+cd ../
+ls
+cd CNAF_Produced_Files/
+ls
+cd root_files/
+ls
+rsync -avz tier1-cnaf:/home/g/gamrat/root_files/2026-07-26 .
+ssh tier1-cnaf 
+rsync -avz tier1-cnaf:/home/g/gamrat/root_files/2026-07-19 .
+cd scripts/
+ls
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1 0.0
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1
+pkill -9 root.exe
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 5
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 2
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 3
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 4
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 5
+pkill -9 root.exe
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 2
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 3
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 4
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 5
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 2
+kill -9 root.exe
+pkill -9 root.exe
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 2
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 3
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 4
+./analyses_corr_fact.sh hal SEMILEPTONIC 20 4 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 2
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 3
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+./analyses_corr_fact.sh kitt THREE_PI0 450 1 0.0
+./analyses_corr_fact.sh kitt THREE_PI0 450 2 0.0
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+cd ../root_files/kitt/ALL_PHYS_SIGNAL_NoSmearing/
+ls -hl
+cd ../../../KLOE/
+./execute_analysis.sh 
+cd scripts/
+ls
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 1
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 2
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 3
+./analyses_corr_fact.sh kitt THREE_PI0 450 2 0.0
+./analyses_corr_fact.sh kitt THREE_PI0 450 1 0.0
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+cd ../CNAF_Produced_Files/
+ls
+cd root_files/
+ls
+cd 2026-07-19/
+ls
+cd signal/
+ls
+cd ALL_PHYS
+cd ALL_PHYS_SIGNAL_NoSmearing/
+ls
+scp tier1-cnaf:/home/g/gamrat/root_files/2026-07-19/signal/ALL_PHYS_SIGNAL_NoSmearing/mk0_initial_analysis_all_phys_SIGNAL_NoSmearing_173.root .
+cd
+ext
+exit
+cd ../
+cd CNAF_Produced_Files/
+ls
+cd root_files/
+ls
+cd 2026-0
+cd 2026-04-17/
+ls
+cd Signal/
+ls
+mv ALL_PHYS_SIGNAL_NoSmearing/ ALL_PHYS_SIGNAL_NoSmearing_backup
+mv ALL_PHYS2_SIGNAL_NoSmearing/ ALL_PHYS2_SIGNAL_NoSmearing_backup
+mv ALL_PHYS3_SIGNAL_NoSmearing/ ALL_PHYS3_SIGNAL_NoSmearing_backup
+ls
+cp -r ../../2026-07-19/signal/ALL_PHYS_SIGNAL_NoSmearing .
+cp -r ../../2026-07-19/signal/ALL_PHYS2_SIGNAL_NoSmearing .
+cp -r ../../2026-07-19/signal/ALL_PHYS3_SIGNAL_NoSmearing .
+ls -hl
+cd ..
+cd ../../
+cd KLOE/
+ls
+./execute_analysis.sh 
+cd log/
+ls
+./calculate_total.sh 
+./calculate_total.sh all_phys2
+./calculate_total.sh all_phys3
+./calculate_total.sh all_phys
+./calculate_total.sh
+./calculate.sh all_phys
+./calculate.sh all_phys2
+./calculate.sh all_phys3
+./calculate.sh all_phys3 .
+./calculate.sh all_phys .
+./calculate.sh all_phys2 .
+./calculate.sh all_phys3 .
+./execute_analysis.sh 
+cd ..
+cd CNAF_Produced_Files/root_files/2026-07-19/
+ls
+ls ../../../root_files/kitt/
+cd ../../../
+cd root_files/
+mkdir cnaf
+cd cnaf/
+ls
+cd ..
+ls
+cd hal/
+ls
+cd ../
+cd cnaf/
+ls
+cp -fr ../../CNAF_Produced_Files/root_files/2026-07-19/4pi/* .
+cd ..
+ls
+cd cnaf
+ls
+cd DATA_FOUR_PI_NoSmearing/
+ls -hl
+exit
+cd scripts/
+root
+./analyses_corr_fact.sh 
+./analyses_corr_fact.sh hal SEMILEPTONIC 1 4
+./analyses_corr_fact.sh hal SEMILEPTONIC 10 4
+./analyses_corr_fact.sh hal SEMILEPTONIC 420 4 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 10 4 true
+./analyses_corr_fact.sh kitt THREE_PI0 10 4 0.0 true
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+./analyses_corr_fact.sh cnaf DOUBLE_PI 450 3 0.0 true
+./analyses_corr_fact.sh cnaf FOUR_PI 450 3 0.0 true
+./analyses_corr_fact.sh cnaf FOUR_PI 450 1 0.0 true
+pkill -9 root.exe
+./analyses_corr_fact.sh cnaf FOUR_PI 450 1 0.0 true
+./analyses_corr_fact.sh cnaf FOUR_PI 450 2 0.0 true
+./analyses_corr_fact.sh cnaf FOUR_PI 450 3 0.0 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+git add .
+git commit -m "Inclusion of additional things for Regeneration weight calculation"
+./execute_analysis.sh 
+git add .
+git commit -m "Inclusion of additional things for Regeneration weight calculation"
+git push
+git checkout -b feature/regeneration-weight-with-fit
+./execute_analysis.sh 
+git checkout feature/three_pi0_additional_functions 
+git checkout -- .
+./execute_analysis.sh 
+cd ../CNAF_Produced_Files/
+ls
+cd root_files/2026-04-17/
+ls
+cd Signal/
+ls
+cd ALL_PHYS2_SIGNAL_NoSmearing
+ls
+cd ../
+cd ALL_PHYS3_SIGNAL_NoSmearing
+ls
+cd ..
+ls
+cd DATA_SIGNAL_NoSmearing/
+ls
+cd ..
+ls
+cd ..
+cd ../../../
+cd KLOE/
+./execute_analysis.sh 
+cd scripts/
+root
+git add .
+git commit -m "Preparation of signal weights"
+git push
+./execute_analysis.sh 
+git add .
+git commit -m "Determination of corr factors for signal - approach 1"
+git push
+cd scripts/
+./analyses_corr_fact.sh cnaf FOUR_PI 450 3 0.0 true
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+root
+cd ../CNAF_Produced_Files/
+ls
+cd root_files/
+ls
+cd 2026-04-17/
+ls
+cd SI
+cd Signal/
+ls
+cd log/
+ls
+./calculate.sh 
+cd lo
+cd ..
+ls
+cd DATA_SIGNAL_NoSmearing/
+ls
+cd ../
+ls
+cd DATA_SIGNAL_NoSmearing/
+cat file_lumi_DATA_SIGNAL_NoSmearing.log 
+cd ..
+vi lumi.sh
+chmod +x lumi.sh 
+./lumi.sh DATA_SIGNAL_NoSmearing/file_lumi_DATA_SIGNAL_NoSmearing.log 
+./lumi.sh ALL_PHYS_SIGNAL_NoSmearing/file_lumi_ALL_PHYS_SIGNAL_NoSmearing.log 
+./lumi.sh ALL_PHYS2_SIGNAL_NoSmearing/file_lumi_ALL_PHYS2_SIGNAL_NoSmearing.log 
+./lumi.sh ALL_PHYS3_SIGNAL_NoSmearing/file_lumi_ALL_PHYS3_SIGNAL_NoSmearing.log 
+exit
+cd ..
+cd CNAF_Produced_Files/root_files/2026-07-19/
+ls
+rsync -avz tier1-cnaf:/home/g/gamrat/root_files/2026-07-19/log .
+ls
+cd log/
+ls
+cd all_phys
+ls
+cd 1
+ls
+cat cut.analysis.log 
+cd ..
+cp ../../../KLOE/log/calculate* .
+ls
+./calculate.sh log/all_phys
+mv calculate* log/.
+cd log/
+ls
+./calculate.sh all_phys
+vi calculate
+vi calculate.sh 
+./calculate.sh all_phys .
+cat calculate.sh 
+cd all_phys/1
+ls
+cat cut.analysis.log 
+cd ../../
+ls
+vi calculate.sh 
+touch calculate_new.sh
+vi calculate_new.sh 
+chmod +x calculate_new.sh 
+./calculate_new.sh 
+./calculate_new.sh all_phys .
+./calculate_new.sh all_phys2 .
+./calculate_new.sh all_phys3 .
+ls
+cd ..
+ls
+cd signal/
+ls
+cd ..
+cd 4pi/
+ls
+cd ..
+cd ../2026-04-17/
+ls
+cd si
+cd Signal/
+ls
+./lumi.sh ALL_PHYS_SIGNAL_NoSmearing/file_lumi_ALL_PHYS_SIGNAL_NoSmearing.log 
+./lumi.sh ALL_PHYS2_SIGNAL_NoSmearing/file_lumi_ALL_PHYS2_SIGNAL_NoSmearing.log 
+./lumi.sh ALL_PHYS3_SIGNAL_NoSmearing/file_lumi_ALL_PHYS3_SIGNAL_NoSmearing.log 
+./lumi.sh DATA_SIGNAL_NoSmearing/file_lumi_DATA_SIGNAL_NoSmearing.log 
+htop
+cd ../../2026-07-19/
+ls
+cd log/
+ls
+./calculate_new.sh all_phys .
+./calculate_new.sh all_phys2 .
+./calculate_new.sh all_phys3 .
+ls
+cd all_phys
+ls
+cd 1
+ls
+cat error.log 
+cd scripts/
+root
+./analyses_corr_fact.sh cnaf FOUR_PI 450 3 0.0 true
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+root
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+root
+./execute_analysis.sh 
+./e
+./execute_analysis.sh 
+git add .
+git commit -m "New version of the corr factor check"
+git push
+root
+ls
+cd scripts/
+ls
+./analyses_corr_fact.sh 
+./analyses_corr_fact.sh hal SEMILEPTONIC 450 4 true
+./analyses_corr_fact.sh kitt THREE_PI0 450 3 0.0 true
+./execute_analysis.sh 
+cd ../root_files/
+ls
+cd hal/
+ls
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing/
+ls
+root mk0_initial_analysis_all_phys_SEMILEPTONIC_NoSmearing_99.root
+cd ..
+ls
+mv ALL_PHYS_SEMILEPTONIC_NoSmearing ALL_PHYS_SEMILEPTONIC_NoSmearing_backup
+ls
+cd ..
+ls
+cd hal/
+ls
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing
+ls -hl
+ls
+ls -hl
+root
+cd log/
+ls
+mv all_phys all_phys_bkp
+mv all_phys2 all_phys2_bkp
+mv all_phys3 all_phys3_bkp
+mv data data_bkp
+cd ..
+./run_parallel.sh all_phys 20260516 1 5 5 "analysis_config_MC_Semileptonic.json"
+htop
+ls
+htop
+./run_parallel.sh all_phys 20260516 6 20 15 "analysis_config_MC_Semileptonic.json"
+cd ../root_files/
+ls
+cd hal/
+ls
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing
+ls
+ls -hl
+root
+ssh kloerec
+exit
+ls
+./execute_analysis.sh 5 job_v26_all_phys3_1_inv_pb_1.txt 
+./execute_analysis.sh 5 ../../job_v26_all_phys3_1_inv_pb_1.txt 
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt 
+root
+ls
+scp tier1-cnaf:/home/g/gamrat/geanfi_test/sample.root .
+ls
+root sample.root 
+ls
+./execute_analysis.sh 
+cd ../root_files/hal/
+ls
+cd ALL_PHYS3_SIGNAL_NoSmearing/
+ls
+ls -hl
+root mk0_initial_analysis_all_phys3_SIGNAL_NoSmearing_1.root 
+exit
+cd ../root_files/
+ls
+cd ../DBV-26/all_phys
+ls
+cd 20260516/
+ls
+cd ../../
+cd ../
+ls
+cd PROD2ROOT/
+ls
+cd MC/MK0/all_phys3/
+ls
+root prod2root_mk0_all_phys3_41228_v2.root
+cd ../../../../
+ls
+cd root_files/
+ls
+cd hal/
+ls
+cd ALL_PHYS_SEMILEPTONIC_NoSmearing
+ls
+root mk0_initial_analysis_all_phys_SEMILEPTONIC_NoSmearing_9.root 
+cd ../../../PROD2ROOT/
+ls
+cd MC/MK0/all_phys3/
+root prod2root_mk0_all_phys3_41129_v2.root
+scp tier1-cnaf:~/geanfi_test/sample.root .
+ls
+./execute_analysis.sh 
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt
+ls
+root
+cd ../
+ls
+cd KLOE/
+cd ../root_files/hal/ALL_PHYS3_SIGNAL_NoSmearing/
+ls
+cat file_lumi_ALL_PHYS3_SIGNAL_NoSmearing.log 
+ls
+cat input_luminosity_ALL_PHYS3_SIGNAL_NoSmearing.log 
+root mk0_initial_analysis_all_phys3_SIGNAL_NoSmearing_1.root 
+exit
+scp tier1-cnaf:~/geanfi_test/sample.root .
+./execute_analysis.sh 5 ../job_v26_all_phys3_1_inv_pb_1.txt
+root sample.root 
+exit
+cd scripts/semileptonic_cuts_optimal/
+root
+cd scripts/semileptonic_cuts_optimal/
+ls
+root
+ls
+cd ../root_files/hal/
+ls
+htop
+./execute_analysis.sh 
+cd scripts/semileptonic_cuts_optimal/
+root
+cd ../
+cd results/
+ls -hl
+cd control_sample_corr_factors/
+ls -hl
+docker
+docker ps
+exit
+docker ps
+exit
+ls
+cd ..
+ls
+cd ksoft-container/
+ls
+docker compose up -d --build
+cat docker-compose.yaml 
+exit
+ssh-add -l
+cd ../ksoft-container/
+ls
+docker compose up -d --build
+vi docker-compose.yaml 
+vi Dockerfile 
+docker compose up -d --build
+docker ps
+docker exec -it 83ca398ed6a6 bash
+cd ../
+cd ksoft-container/
+ls
+vi docker-compose.yaml 
+vi Dockerfile 
+vi docker-compose.yaml 
+cd ..
+mkdir geanfi-workspace
+cd ksoft-container/
+vi docker-compose.yaml 
+docker exec -it 83ca398ed6a6 bash
+docker compose up -d --build
+ls
+cd ..
+cd geanfi-workspace/
+ls
+docker exec -it 83ca398ed6a6 bash
+docker ps
+docker exec -it 1a02f3c2501f bash
+ls
+rm geanfi-workspace/*
+ls
+rm *
+ls
+rm -fr geanfi-workspace/
+ls
+docker exec -it 1a02f3c2501f bash
+exit
+cd ..
+scp fibm15:/kbackup/db2.tar .
+scp fibm15:/kbackup/DB2/db2.tar .
+ls
+exit
+htop
+wget https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/linuxx64_odbc_cli.tar.gz 
+ls
+rm linuxx64_odbc_cli.tar.gz 
+cd ..
+rm linuxx64_odbc_cli.tar.gz 
+wget https://public.dhe.ibm.com/ibmdl/export/pub/software/data/db2/drivers/odbc_cli/linuxx64_odbc_cli.tar.gz 
+ls
+tar -zxvf linuxx64_odbc_cli.tar.gz
+ls
+docker ps
+docker exec -it 29511853c50a bash
+docker exec -ti ksoft_container bash
+docker exec -i db2server su - db2inst1 -c "db2 connect to kloemaps user dbread using HASLO > /dev/null && db2 \"select layer, prob_k1, prob_k2 from cndrng.mc_kch_noise where (Start_of_validity<=26759) and (26759<End_of_validity) order by layer\""
+docker exec -i db2server su - dbread -c "db2 connect to kloemaps user dbread using HASLO > /dev/null && db2 \"select layer, prob_k1, prob_k2 from cndrng.mc_kch_noise where (Start_of_validity<=26759) and (26759<End_of_validity) order by layer\""
+docker exec -i db2server su - db2inst2 -c "db2 connect to kloemaps user dbread using HASLO > /dev/null && db2 \"select layer, prob_k1, prob_k2 from cndrng.mc_kch_noise where (Start_of_validity<=26759) and (26759<End_of_validity) order by layer\""
+ls
+cp clidriver/ ksoft-container/.
+cp -r clidriver ksoft-container/.
+cd ksoft-container/
+ls
+rm last.kumac paw.metafile 
+ls
+cd ../
+ls
+cd db2-container/
+ls
+cd database/
+ls
+cd DB2/
+ls
+cat LOAD.out 
+llq
+ls
+cd..
+cd ..
+ls
+docker login
+cd db2-container/
+ls
+cat docker-compose.yaml 
+docker login
+ls
+rm -fr docker-compose.yaml 
+cd db2_data/
+ls
+cd ..
+docker login 
+docker pull icr.io/db2_community/db2
+ls
+dbdir=`pwd`
+#fill .env_list according to IBM docs (DB2INSTANCE=db2inst2,leave  DBNAME= empty, set your DB2INST2_PASSWORD=[password])
+echo -e "LICENSE=accept\nDB2INSTANCE=db2inst2\nDB2INST1_PASSWORD=megapass\nDBNAME=\n\
+BLU=false\nENABLE_ORACLE_COMPATIBILITY=false\nUPDATEAVAIL=NO\nTO_CREATE_SAMPLEDB=false\n\
+REPODB=false\nIS_OSXFS=false\nPERSISTENT_HOME=true\nHADR_ENABLED=false\n\
+ls
+echo -e "LICENSE=accept\nDB2INSTANCE=db2inst2\nDB2INST1_PASSWORD=megapass\nDBNAME=\n\
+BLU=false\nENABLE_ORACLE_COMPATIBILITY=false\nUPDATEAVAIL=NO\nTO_CREATE_SAMPLEDB=false\n\
+REPODB=false\nIS_OSXFS=false\nPERSISTENT_HOME=true\nHADR_ENABLED=false\n\
+vi fill_env.sh
+bash fill_env.sh 
+ls -a
+cat .env_list 
+ls
+rm fill_env.sh 
+rm -fr db2_data/
+ls
+mkdir database
+docker run -h db2server --name db2server --restart=always --detach --privileged=true -p 50000:50000 --env-file .env_list -v ${dbdir}/database:/database icr.io/db2_community/db2
+docker ps
+cd database/
+ls
+cd ../../
+mkdir DB2
+mv db2.tar DB2/.
+cd DB2
+ls
+tar -xvf nazwa_pliku.tar
+tar -xvf db2.tar
+ls
+mv db2.tar ../.
+cd ..
+cp -a DB2 ${dbdir}/database/
+cd ${dbdir}/database/DB2
+ls
+rm *.msg
+ls
+kloeddl=kloemaps_ddl_fix.sql
+cp kloemaps_ddl.sql $kloeddl
+sed -i 's|/DB2data/db2inst2/db2inst2/NODE0000/SQL00001/SQLT000DMS.0|SQLT000DMS.0|g' $kloeddl
+sed -i 's|/DB2data/db2inst2/db2inst2/NODE0000/SQL00001/SYSTOOLSPACE|SYSTOOLSPACE|g' $kloeddl
+sed -i 's|/DB2data/db2inst2/db2inst2/NODE0000/SQL00001/SYSTOOLSTMPSPACE|SYSTOOLSTMPSPACE|g' $kloeddl
+sed -i 's|/DB2data/db2inst2/db2inst2|/database/data/db2inst2|g' $kloeddl
+sed -i -e "s|SQLSTATE 'KLTRGM1'|SQLSTATE 'KLTM1'|g"  -e "s|SQLSTATE 'KLTRGM3'|SQLSTATE 'KLTM3'|g" $kloeddl
+sed -i "s|^create trigger DESCRIPT.FSP_FARM_ins|--#SET TERMINATOR @\ncreate trigger DESCRIPT.FSP_FARM_ins|g" $kloeddl
+sed -i "s|^create trigger DESCRIPT.FSP_MC_ins|--#SET TERMINATOR @\ncreate trigger DESCRIPT.FSP_MC_ins|g" $kloeddl
+sed -i "s|^create trigger DESCRIPT.FSP_OFFLINE_ins|--#SET TERMINATOR @\ncreate trigger DESCRIPT.FSP_OFFLINE_ins|g" $kloeddl
+sed -i "s|^END;|END@\n--#SET TERMINATOR ;|g" $kloeddl
+sed -i "s|LOW2KEY='charged rad DST'|LOW2KEY='Bhabha Monte Carlo DST'|g" $kloeddl
+sed -i "s|LOW2KEY=X'636F736D69635F6D75'|LOW2KEY='Kl_all'|g" $kloeddl
+sed -i "s|LOW2KEY=X'652B652D'|LOW2KEY='K+'|g" $kloeddl
+sed -i "s|LOW2KEY=X'636F736D69635F6D756F6E73'|LOW2KEY='K+'|g" $kloeddl
+sed -i 's|RUNSTATS ON TABLE "SYSTOOLS"."HMON_ATM_INFO"|--RUNSTATS ON TABLE "SYSTOOLS"."HMON_ATM_INFO"|g' $kloeddl
+sed -i 's|RUNSTATS ON TABLE "SYSTOOLS"."HMON_COLLECTION"|--RUNSTATS ON TABLE "SYSTOOLS"."HMON_COLLECTION"|g' $kloeddl
+sed -i '/ALTER TABLE "DB2INST2"."PROVABINNL"/,+3 s/^/--/' $kloeddl
+sed -i '/ALTER TABLE "HEPDB   "."PROVABINNL"/,+3 s/^/--/' $kloeddl
+sed -i '/CREATE UNIQUE INDEX "DB2INST2"."INDID"/,+3 s/;/;\nALTER TABLE "DB2INST2"."PROVABINNL" ADD PRIMARY KEY ("ID");/' $kloeddl
+sed -i '/CREATE UNIQUE INDEX "DB2INST2"."INDBIN"/,+3 s/;/;\nALTER TABLE "HEPDB   "."PROVABINNL" ADD PRIMARY KEY ("ID");/' $kloeddl
+sed -i '/PUBBLIC/s/^/--/' $kloeddl
+(cat $kloeddl | sed -n '/This CLP file was created/,/Statements for foreign keys/p'; echo -e "COMMIT WORK;\nCONNECT RESET;\nTERMINATE;") > ${kloeddl}_tables
+(echo "CONNECT TO KLOEMAPS;"; cat $kloeddl | sed -n '/Statements for foreign keys/,/TERMINATE/p' ) > ${kloeddl}_foreigns
+cp -a db2move.lst db2move.lst_bckp
+sed -i '/"SYSTOOLS"."HMON/d' db2move.lst
+ls -hl
+declare -A tbl=(["HEPDB.BANKS"]="REF" ["HEPDB.BANKS1"]="REF" ["HEPDB.BANKSA"]="REF" ["LOGGER.FILE_CNAF"]="FID" ["LOGGER.DATAREC_LOG"]="ID"  ["LOGGER.MC_LOG"]="ID"  ["LOGGER.RAW_LOG"]="ID")
+(echo "connect to kloemaps;"; for t in ${!tbl[@]}; do ( echo "ALTER TABLE ${t} ALTER COLUMN ${tbl[$t]} SET GENERATED BY DEFAULT;"; ) done; echo -e "CONNECT RESET;\nTERMINATE;") > generatedcols.sql
+(echo "connect to kloemaps;"; for t in ${!tbl[@]}; do ( echo "ALTER TABLE ${t} ALTER COLUMN ${tbl[$t]} SET GENERATED ALWAYS;"; ) done; echo -e "CONNECT RESET;\nTERMINATE;") > generatedcols_revert.sql
+echo -e 'connect to kloemaps;\nRUNSTATS ON TABLE "DESCRIPT"."MCSTREAM_DESCRIPT";\nRUNSTATS ON TABLE "DESCRIPT"."MCSTREAM_GROUP";\nRUNSTATS ON TABLE "DESCRIPT"."STREAM_OFFLINE";\nCONNECT RESET;\nTERMINATE;' > updatestat.sql
+docker exec -ti db2server bash -c "su - db2inst2"
+ls -l
+cd ..
+ls -l
+cd DB2/
+ls
+docker exec -ti db2server bash
+ls
+cd ..
+chmod -R 666 DB2/
+cd DB2
+ls
+ls -l
+docker exec -ti db2server bash
+docker exec -ti db2server bash -c "su - db2inst2"
+guid
+id -u
+id -g
+cd DB2
+ls -l
+chown 777 DB2
+chmod 777 DB2
+ls
+cd DB2/
+ls
+ls -l
+docker exec -ti db2server bash -c "su - db2inst2"
+docker exec -ti db2server bash -c "useradd -r -s /sbin/nologin --no-create-home dbread; passwd dbread" 
+docker exec -ti db2server bash -c "su - db2inst2"
+cd ksoft-container/
+docker compose up -d --build
+docker ps
+docker exec -it a5dc57b8f0ad bash
+tar -zxf v12.1.5_linuxx64_client.tar.gz 
+cd client/
+./db2setup -f sysreq
+cd ..
+rm -fr client/
+docker compose up -d --build
+docker logs
+docker ps
+docker logs 29511853c50a
+docker compose up -d --build
+tar -zxf v12.1.5_linuxx64_client.tar.gz 
+cd client/
+./db2_install --help
+cd ..
+rm -fr client/
+docker compose up -d --build
+tar -zxf v12.1.5_linuxx64_client.tar.gz 
+./db2_install -b /root/sqllib -p CLIENT -f sysreq
+cd client/
+./db2_install -b ~/sqllib -p CLIENT -f sysreq
+./db2setup -f sysreq
+./db2setup
+cd ..
+rm -fr client/
+docker compose up -d --build
+du -h
+df -h
+docker compose up -d --build
+tar -zxf v12.1.5_linuxx64_client.tar.gz 
+docker compose up -d --build
+docker system prune -a --volumes
+docker compose up -d --build
+docker system prune -a --volumes
+docker compose up -d --build
+docker build --progress=plain -t ksoft-cernlib:latest .
+docker compose up --build --progress=plain
+BUILDKIT_PROGRESS=plain docker compose up --build
+docker compose up -d --build
+du -h
+df -h
+docker compose up -d --build
+docker images
+docker builder prune -f
+docker compose up -d --build
+
+docker images
+cd scripts/
+ls
+root
+./analyses_corr_fact.sh 
+nohup ./analyses_corr_fact.sh hal semileptonic 500 4 true > logs.semi.4 &
+nohup ./analyses_corr_fact.sh hal SEMILEPTONIC 500 4 true > logs.semi.4 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 500 4 true > logs.three.3 &
+cd ../../
+cd root_files/hal/
+ls
+mv ALL_PHYS_SEMILEPTONIC_NoSmearing ALL_PHYS_SEMILEPTONIC_NoSmearing_backup2
+mv ALL_PHYS_SEMILEPTONIC_NoSmearing_backup ALL_PHYS_SEMILEPTONIC_NoSmearing
+ls
+cd ../../python-kloe-analysis/scripts/
+nohup ./analyses_corr_fact.sh hal SEMILEPTONIC 500 4 true > logs.semi.4 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 500 3 true > logs.three.3 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 1 3 true > logs.three.3 &
+cd scripts/
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 1 3 true > logs.three.3 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 1 3 0.0 true > logs.three.3 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 500 3 0.0 true > logs.three.3 &
+nohup ./analyses_corr_fact.sh hal SEMILEPTONIC 500 5 true > logs.semi.4 &
+pkill -9 root.exe
+nohup ./analyses_corr_fact.sh hal SEMILEPTONIC 500 5 > logs.semi.4 &
+nohup ./analyses_corr_fact.sh hal SEMILEPTONIC 500 6 true > logs.semi.4 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 500 4 0.0 > logs.three.3 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 500 5 0.0 > logs.three.3 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 500 6 0.0 true > logs.three.3 &
+nohup ./analyses_corr_fact.sh hal SEMILEPTONIC 500 5 true > logs.semi.4 &
+pkill -9 root.exe
+nohup ./analyses_corr_fact.sh hal SEMILEPTONIC 500 5 > logs.semi.4 &
+nohup ./analyses_corr_fact.sh hal SEMILEPTONIC 500 6 true > logs.semi.4 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 500 4 0.0 > logs.three.3 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 500 5 0.0 > logs.three.3 &
+nohup ./analyses_corr_fact.sh kitt THREE_PI0 500 6 0.0 true > logs.three.3 &
+./execute_analysis.sh 
+.q
+./execute_analysis.sh 
+cd scripts/results/
+ls
+cd control_sample_corr_factors/
+ls
+root control_sample_corr_factors_backup.root 
+pip install uproot
+python venv .venv
+python -m pyenv .venv
+python -m venv .venv
+cd ..
+python3 plotter.py 
+python plotter.py 
+./execute_analysis.sh
+ls
+cd ../root_files/hal/
+ls
+cd 2026-07-20/
+ls
+cd ..
+ls
 exit
