@@ -2,15 +2,21 @@
 nproc=$1
 file_list=$2
 
-set -a
-source /data/4/users/gamrat/.env
-set +a
+HOST=$(hostname)
 
-../copy_libs.sh
+if [ "$HOST" == "kitt" ]; 
+then
+  set -a
+  source /data/4/users/gamrat/.env
+  set +a
+fi
+
+if [ "$HOST" == "ui-tier1.cr.cnaf.infn.it" ]; then
+  ../copy_libs.sh
+fi
 
 cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
-# cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j$nproc
 
 echo "Using ANALYSIS_CONFIG_FILE: $ANALYSIS_CONFIG_FILE"
