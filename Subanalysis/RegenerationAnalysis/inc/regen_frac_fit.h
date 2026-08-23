@@ -152,6 +152,7 @@ private:
 
   TH1 *threePi0WeightsHist, *semileptonicWeightsHist, *signalWeightsHist;
   double avgThreePi0Weight, avgSemileptonicWeight;
+  double _sumSignalInterpWeights = 0.0;
 
   void _calculateRegenerationWeights();
 

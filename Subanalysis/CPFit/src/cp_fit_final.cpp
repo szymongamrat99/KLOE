@@ -42,7 +42,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   mcFiles = Utils::CountFiles(&chain, true);
   dataFiles = Utils::CountFiles(&chain, false);
 
-  lumiFactor = (dataFiles > 0) ? static_cast<double>(dataFiles) / static_cast<double>(mcFiles) : 1.0;
+  lumiFactor = 1.07906;//(dataFiles > 0) ? static_cast<double>(dataFiles) / static_cast<double>(mcFiles) : 1.0;
 
   std::cout << "INFO: Number of MC files: " << mcFiles << std::endl;
   std::cout << "INFO: Number of Data files: " << dataFiles << std::endl;
@@ -78,7 +78,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   // Calculation of average weighting factor for three pi0 events
   TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
-  double avgThreePi0Weight = threePi0WeightResult->Parameter(0);
+  double avgThreePi0Weight = 0.9375;//threePi0WeightResult->Parameter(0);
   std::cout << "INFO: Average weighting factor for three pi0 events: " << avgThreePi0Weight << std::endl;
 
   // Preparation of the Semileptonic hist object to calculate regeneration weights
@@ -89,8 +89,15 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   // Calculation of average weighting factor for semileptonic events
   TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
-  double avgSemileptonicWeight = semileptonicWeightResult->Parameter(0);
+  double avgSemileptonicWeight = 0.9272;//semileptonicWeightResult->Parameter(0);
   std::cout << "INFO: Average weighting factor for semileptonic events: " << avgSemileptonicWeight << std::endl;
+
+  // Preparation of signal weights
+  TFile *fFileWeightsSignal = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/combined_signal_correction_factors.root", "READ");
+
+  TCanvas *cSignal = (TCanvas*)fFileWeightsSignal->Get("CorrFactors");
+  TH1* signalWeightsHist = (TH1*)cSignal->FindObject("CombinedCorrFactor")->Clone();
+  
 
   // Preparation of the RegenerationFractionFit object to calculate regeneration weights
   std::string weightsFilePath = (std::string)Paths::regen_analysis_dir + (std::string)Paths::result_dir + "regeneration_analysis_results.root";
@@ -116,6 +123,9 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   TTreeReaderValue<Double_t> KaonNeTimeCMMC(reader, "KaonNeTimeCMMC");
   TTreeReaderValue<Double_t> KaonChTimeCMSignalFit(reader, "KaonChTimeCMSignalFit");
   TTreeReaderValue<Double_t> KaonNeTimeCMSignalFit(reader, "KaonNeTimeCMSignalFit");
+  TTreeReaderValue<Double_t> KaonChTimeCMBoostTriFit(reader, "KaonChTimeCMBoostTriFit");
+  TTreeReaderValue<Double_t> KaonNeTimeCMBoostTriFit(reader, "KaonNeTimeCMBoostTriFit");
+
 
   TTreeReaderValue<Double_t> bestErrorSixGamma(reader, "bestErrorSixGamma");
 
@@ -426,6 +436,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     baseKin.Dtmc = *KaonChTimeCMMC - *KaonNeTimeCMMC;
     baseKin.Dtboostlor = *KaonChTimeCMSignalFit - *KaonNeTimeCMSignalFit;
 
+    double Dttri = *KaonChTimeCMBoostTriFit - *KaonNeTimeCMBoostTriFit;
+
     if (*mcflag == 1)
     {
       if (*mctruth == 1 || *mctruth == 0)
@@ -440,6 +452,12 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         {
           event.time_diff_gen.push_back(baseKin.Dtmc);
           event.time_diff["Signal"].push_back(baseKin.Dtboostlor);
+          double weight = signalWeightsHist->Interpolate(Dttri);
+
+          // if (weight <= 0 || std::isnan(weight) || std::isinf(weight))
+            weight = 1;
+
+          event.signal_event_weights.push_back(weight);
 
           sig_pass->Fill(baseKin.Dtboostlor);
         }
@@ -460,15 +478,13 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         if (*mctruth == 4)
         {
           event.time_diff["3pi0"].push_back(baseKin.Dtboostlor);
-          event.three_pi0_weights.push_back(avgThreePi0Weight);
-          // event.three_pi0_weights.push_back(threePi0WeightsHist->Interpolate(*minv4gam));
+          event.three_pi0_weights.push_back(1.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
         }
 
         if (*mctruth == 5)
         {
           event.time_diff["Semileptonic"].push_back(baseKin.Dtboostlor);
-          event.semileptonic_weights.push_back(avgSemileptonicWeight);
-          // event.semileptonic_weights.push_back(semileptonicWeightsHist->Interpolate(Kchrec[5]));
+          event.semileptonic_weights.push_back(1.0);//semileptonicWeightsHist->Interpolate(*minv4gam));
         }
 
         if (*mctruth == 6)
@@ -497,6 +513,15 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
       continue;
     par[pm.second] = minimum->X()[pm.second];
     parErr[pm.second] = minimum->Errors()[pm.second];
+  }
+
+  std::cout << "INFO: Parameters" << std::endl;
+  std::cout << "------------------------" << std::endl;
+  for (const auto &pm : param_index_map)
+  {
+    if (pm.second < 0)
+      continue;
+    std::cout << pm.first << ": " << par[pm.second] << " ± " << parErr[pm.second] << std::endl;
   }
 
   Double_t sum_of_events = 0.;
@@ -752,7 +777,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   }
 
   residuals_hist->GetYaxis()->SetRangeUser(0, 1.2 * residuals_hist->GetMaximum());
-  // residuals_hist->Fit("gaus");
+  residuals_hist->Fit("gaus");
 
   c2->cd();
 

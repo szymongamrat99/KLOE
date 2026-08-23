@@ -171,6 +171,8 @@ namespace KLOE
   Double_t interference::interf_chi2_split(const Double_t *xx)
   {
     /////////////////////////////////////////////////////////////////////////////////////////////
+    signal_event_weights_sum = 0.0;
+
     for (const auto &name : KLOE::channName)
     {
       if (ToLower(name.second) == "data")
@@ -182,7 +184,12 @@ namespace KLOE
       for (UInt_t j = 0; j < time_diff[name.second].size(); j++)
       {
         if (ToLower(name.second) == "signal")
-          _frac_tmp[name.second]->Fill(time_diff[name.second][j], fit_function(time_diff_gen[j], 0, xx)); //! Filling Signal
+        {
+          double weight = fit_function(time_diff_gen[j], 0, xx) * signal_event_weights[j];
+          signal_event_weights_sum += signal_event_weights[j];
+
+          _frac_tmp[name.second]->Fill(time_diff[name.second][j], weight); //! Filling Signal
+        }
         else if (name.second == "Regeneration" && !regen_event_weights.empty())
         {
           _frac_tmp[name.second]->Fill(time_diff[name.second][j], regen_event_weights[j]);
@@ -198,7 +205,7 @@ namespace KLOE
       //! Using correction factor and efficiency
       if (ToLower(name.second) == "signal")
       {
-        _frac_tmp[name.second]->Scale(_frac_tmp[name.second]->GetEntries() / _frac_tmp[name.second]->Integral(0, _bin_number + 1));
+        _frac_tmp[name.second]->Scale(signal_event_weights_sum / _frac_tmp[name.second]->Integral(0, _bin_number + 1));
 
         for (UInt_t j = 0; j < _bin_number; j++)
         {
@@ -206,7 +213,7 @@ namespace KLOE
         }
       }
 
-      _frac_tmp[name.second]->Scale(1.00);
+      _frac_tmp[name.second]->Scale(1.07906);
 
       interference::bin_extraction(name.second, _frac_tmp[name.second]);
       /////////////////////////////////////////////////////////////////////////////////////////////

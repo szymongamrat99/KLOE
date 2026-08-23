@@ -74,7 +74,7 @@
     "isSignalWeighted": false,
     "isRegenerationWeighted": true,
     "onlyKLong": false,
-    "lumiFactor": 1.1382,
+    "lumiFactor": 1.079,
     "weightErrorLimit": 100.0
   }
 }
