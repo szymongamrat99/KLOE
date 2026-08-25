@@ -249,8 +249,10 @@ namespace Controls
     ALL_PHYS = 1,
     ALL_PHYS2 = 2,
     ALL_PHYS3 = 3,
+    KSKL_PM00 = 4,
+    OMEGAPI_PM00 = 5,
 
-    OPT_TOT = 4
+    OPT_TOT = 6
   };
 
   template <typename T>

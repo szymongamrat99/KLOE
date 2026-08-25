@@ -18,6 +18,7 @@
 #include <event_data.h>
 #include <ConfigManager.h>
 #include <StatisticalCutter.h>
+#include <SelectionCodes.h>
 
 #include "../inc/kchrec.hpp"
 
@@ -150,7 +151,7 @@ int kchrec_Kmass(TChain &chain, Controls::DataType &dataType, ErrorHandling::Err
   Double_t KchrecKLMom = 0.0;
 
   std::string cutFileName = "/data/ssd/gamrat/KLOE/Subanalysis/Properties/cut-limits-final.json";
-  StatisticalCutter cutter(cutFileName, 7, KLOE::HypothesisCode::FOUR_PI, logger);
+  StatisticalCutter cutter(cutFileName, 7, KLOE::SelectionCode::FINAL_SIGNAL, logger);
 
   Double_t pKTwoBody = Obj.TwoBodyDecayMass(PhysicsConstants::mPhi, PhysicsConstants::mK0, PhysicsConstants::mK0);
 

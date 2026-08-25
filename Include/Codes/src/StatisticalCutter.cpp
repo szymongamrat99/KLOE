@@ -1,10 +1,11 @@
 #include "StatisticalCutter.h"
 #include <iostream>
 #include <unordered_set>
+#include <SelectionCodes.h>
 
 using json = nlohmann::json;
 
-StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::HypothesisCode hypoCode, ErrorHandling::ErrorLogs& logger)
+StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::SelectionCode hypoCode, ErrorHandling::ErrorLogs& logger)
     : signalMctruth_(signalMctruth), hypoCode_(hypoCode), normalizationMode_(NormalizationMode::TOTAL_EVENTS), _logger(logger)
 {
     LoadCuts(jsonPath);
@@ -22,7 +23,7 @@ StatisticalCutter::StatisticalCutter(const std::string& jsonPath, int signalMctr
     independentBackgroundInFV_.resize(cuts_.size(), 0);
 }
 
-StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode, ErrorHandling::ErrorLogs& logger)
+StatisticalCutter::StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::SelectionCode hypoCode, ErrorHandling::ErrorLogs& logger)
     : hypoCode_(hypoCode), normalizationMode_(NormalizationMode::TOTAL_EVENTS), _logger(logger)
 {
     LoadCutsFromFiles(propertiesPath, cutsPath);
@@ -117,23 +118,38 @@ void StatisticalCutter::LoadCuts(const json& j) {
     
     std::string cutListKey;
     switch(hypoCode_) {
-        case KLOE::HypothesisCode::SIGNAL:
-            cutListKey = "SIGNAL";
+        case KLOE::SelectionCode::FINAL_SIGNAL:
+            cutListKey = "FINAL_SIGNAL";
             break;
-        case KLOE::HypothesisCode::FOUR_PI:
-            cutListKey = "FOUR_PI";
+        case KLOE::SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG:
+            cutListKey = "DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG";
             break;
-        case KLOE::HypothesisCode::OMEGAPI:
-            cutListKey = "OMEGA";
+        case KLOE::SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG:
+            cutListKey = "DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
             break;
-        case KLOE::HypothesisCode::SIMONA_ANALYSIS:
-            cutListKey = "SIMONA_ANALYSIS";
+        case KLOE::SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_TAG:
+            cutListKey = "DOUBLE_PINE_CONTROL_SAMPLE_TAG";
             break;
-        case KLOE::HypothesisCode::THREE_PI0:
-            cutListKey = "THREE_PI0";
+        case KLOE::SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG:
+            cutListKey = "DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
             break;
-        case KLOE::HypothesisCode::SEMILEPTONIC:
-            cutListKey = "SEMILEPTONIC";
+        case KLOE::SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG:
+            cutListKey = "DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG";
+            break;
+        case KLOE::SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG:
+            cutListKey = "DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
+            break;
+        case KLOE::SelectionCode::CUSTOM_SELECTION:
+            cutListKey = "CUSTOM_SELECTION";
+            break;
+        case KLOE::SelectionCode::NONE:
+            cutListKey = "NONE";
+            break;
+        case KLOE::SelectionCode::THREE_PI0_CONTROL_SAMPLE_TAG:
+            cutListKey = "THREE_PI0_CONTROL_SAMPLE_TAG";
+            break;
+        case KLOE::SelectionCode::SEMILEPTONIC_CONTROL_SAMPLE_TAG:
+            cutListKey = "SEMILEPTONIC_CONTROL_SAMPLE_TAG";
             break;
         default:
             std::cout << "Warning: Using default cuts for unknown hypothesis code" << std::endl;
@@ -142,7 +158,12 @@ void StatisticalCutter::LoadCuts(const json& j) {
 
     const json* listRoot = &j;
     if (j.contains("listOfCuts")) {
-        if (!j["listOfCuts"].contains(cutListKey)) {
+        if (cutListKey == "NONE")
+        {
+            std::cout << "Warning: No cuts will be applied" << std::endl;
+            return;
+        }
+        else if (!j["listOfCuts"].contains(cutListKey)) {
             std::cout << "Warning: No cuts found for hypothesis " << cutListKey << std::endl;
             return;
         }

@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     // Wyznacz fileTypeOpt z nazwy pliku
     // Format: job_v{version}_{type}_{luminosity}_inv_pb_{number}.txt
 
-    const std::regex re(R"(job_.*_(all_phys|all_phys2|all_phys3|data)_.*_(\d+)\.txt)");
+    const std::regex re(R"(job_.*_(all_phys|all_phys2|all_phys3|data|kskl_pm00|omegapi_pm00)_.*_(\d+)\.txt)");
     std::smatch match;
 
     if (std::regex_match(filename, match, re) && match.size() > 2)
@@ -173,6 +173,16 @@ int main(int argc, char *argv[])
         fileTypeOpt = Controls::FileType::ALL_PHYS;
         std::cout << "Analysis type: ALL_PHYS" << std::endl;
       }
+      else if (analysisType == "kskl_pm00")
+      {
+        fileTypeOpt = Controls::FileType::KSKL_PM00;
+        std::cout << "Analysis type: KSKL_PM00" << std::endl;
+      }
+      else if (analysisType == "omegapi_pm00")
+      {
+        fileTypeOpt = Controls::FileType::OMEGAPI_PM00;
+        std::cout << "Analysis type: OMEGAPI_PM00" << std::endl;
+      }
       else
       {
         std::cerr << "ERROR: Cannot determine analysis type from filename." << std::endl;
@@ -216,7 +226,6 @@ int main(int argc, char *argv[])
         callParams.dataTypeOpt,
         logger,
         infoCode);
-    // cfgWatcher);
   }
   else
   {
@@ -262,6 +271,28 @@ int main(int argc, char *argv[])
       break;
     }
     case Controls::FileType::ALL_PHYS3:
+    {
+      for (const auto &path : DataPathList)
+      {
+        runs = initObj.getRunStats(path, runRegexPattern);
+        initObj.chainInit(chain, path, runRegexPattern,
+                          runs.minRun, runs.minRun);
+      }
+
+      break;
+    }
+    case Controls::FileType::KSKL_PM00:
+    {
+      for (const auto &path : DataPathList)
+      {
+        runs = initObj.getRunStats(path, runRegexPattern);
+        initObj.chainInit(chain, path, runRegexPattern,
+                          runs.minRun, runs.minRun);
+      }
+
+      break;
+    }
+    case Controls::FileType::OMEGAPI_PM00:
     {
       for (const auto &path : DataPathList)
       {

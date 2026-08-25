@@ -22,6 +22,7 @@
 #include <neutral_mom.h>
 #include <MainMenu.h>
 #include <const.h>
+#include <SelectionCodes.h>
 
 /**
  * @brief KLOE namespace
@@ -675,6 +676,24 @@ namespace KLOE
 
       return "INVALID_VALUE";
     };
+
+    static std::string SelectionCodeToString(SelectionCode code) {
+    switch (code) {
+        case SelectionCode::NONE: return "NONE";
+        case SelectionCode::FINAL_SIGNAL: return "FINAL_SIGNAL";
+        case SelectionCode::THREE_PI0_CONTROL_SAMPLE_TAG: return "THREE_PI0_CONTROL_SAMPLE_TAG";
+        case SelectionCode::SEMILEPTONIC_CONTROL_SAMPLE_TAG: return "SEMILEPTONIC_CONTROL_SAMPLE_TAG";
+        case SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_TAG: return "DOUBLE_PINE_CONTROL_SAMPLE_TAG";
+        case SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG: return "DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
+        case SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG: return "DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG";
+        case SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG: return "DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
+        case SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG: return "DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG";
+        case SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG: return "DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
+        case SelectionCode::CUSTOM_SELECTION: return "CUSTOM_SELECTION";
+        case SelectionCode::INVALID: return "INVALID";
+        default: return "UNKNOWN";
+    }
+}
 
     // -------------------------------------------------------------------------------
     static TrilaterationCode StringToTrilaterationCode(const std::string &str)
