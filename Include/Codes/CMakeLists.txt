@@ -11,6 +11,7 @@ add_library(LibRec SHARED
             src/ConstraintsTrilateration.cpp
             src/ConstraintsSignal.cpp
             src/ConstraintsTest.cpp
+            src/ConstraintsPM.cpp
             src/CustomGraph.cpp
             src/cylinder_intersection.cpp
             src/DoubleRatio.cpp

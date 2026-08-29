@@ -358,6 +358,8 @@ namespace KLOE
         CotvSmeared2 = 0.0,
         Chi2SignalKinFit = 0.0,
         Chi2OmegaKinFit = 0.0,
+        Chi2PMKinFit = 0.0,
+        Chi200KinFit = 0.0,
         Curv1 = 0.0,
         Phiv1 = 0.0,
         Cotv1 = 0.0,
@@ -517,7 +519,17 @@ namespace KLOE
         trkMuonCluster[2],
         trkElectronDT[2],
         trkMuonDT[2],
-        KnerecTriangle;
+        KnerecTriangle,
+        KchrecFitPM,
+        KnerecFit00,
+        trkPMFit[2],
+        photonFit00[4],
+        pi01Fit00,
+        pi02Fit00,
+        ipFitPM,
+        ipFit00,
+        phiMomFitPM,
+        phiMomFit00;
 
     std::vector<Int_t>
         vtaken,

@@ -21,6 +21,8 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
     _objTrilateration = std::make_unique<ConstraintsTrilateration>(logger);
   else if (_mode == "Test")
     _baseObj = std::make_unique<ConstraintsTest>(logger);
+  else if (_mode == "PM")
+    _objPM = std::make_unique<ConstraintsPM>(logger);
 
   _D_real.ResizeTo(M, N_free);
   _D_T_real.ResizeTo(N_free, M);
@@ -46,6 +48,8 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
     _objTrilateration = std::make_unique<ConstraintsTrilateration>(logger);
   else if (_mode == "Test")
     _baseObj = std::make_unique<ConstraintsTest>(logger);
+  else if (_mode == "PM")
+    _objPM = std::make_unique<ConstraintsPM>(logger);
 
   _D_real.ResizeTo(M, N_free);
   _D_T_real.ResizeTo(N_free, M);
@@ -265,6 +269,10 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
   {
     _objOmega->IntermediateReconstruction(_X.GetMatrixArray());
   }
+  else if (_mode == "PM")
+  {
+    _objPM->IntermediateReconstruction(_X.GetMatrixArray());
+  }
   else
   {
     _baseObj->SetParameters(_X.GetMatrixArray());
@@ -323,6 +331,8 @@ Int_t KinFitter::ConstraintSet(std::vector<std::string> ConstSet)
       _constraints.push_back(TF1(ConstSet[i].c_str(), _objTrilateration.get(), constraintMapTrilateration[ConstSet[i]], 0, 1, _N_free + _N_const));
     else if (_mode == "Omega")
       _constraints.push_back(TF1(ConstSet[i].c_str(), _objOmega.get(), constraintMapOmega[ConstSet[i]], 0, 1, _N_free + _N_const));
+    else if (_mode == "PM")
+      _constraints.push_back(TF1(ConstSet[i].c_str(), _objPM.get(), constraintMapPM[ConstSet[i]], 0, 1, _N_free + _N_const));
     else
       _constraints.push_back(TF1(ConstSet[i].c_str(), _baseObj.get(), constraintMap[ConstSet[i]], 0, 1, _N_free + _N_const));
   }

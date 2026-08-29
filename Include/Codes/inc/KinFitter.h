@@ -21,6 +21,7 @@
 #include <ConstraintsTrilateration.h>
 #include <ConstraintsSignal.h>
 #include <ConstraintsTest.h>
+#include <ConstraintsPM.h>
 
 namespace KLOE
 {
@@ -73,6 +74,7 @@ namespace KLOE
     std::unique_ptr<ConstraintsSignal> _objSignal;
     std::unique_ptr<ConstraintsTrilateration> _objTrilateration;
     std::unique_ptr<ConstraintsOmega> _objOmega;
+    std::unique_ptr<ConstraintsPM> _objPM;
 
     std::map<std::string, Double_t (KinFit::*)(Double_t *, Double_t *)>
         constraintMap = {
@@ -125,6 +127,11 @@ namespace KLOE
             {"photon3pathlab", &ConstraintsOmega::Photon3PathConsvLAB},
             {"photon4pathlab", &ConstraintsOmega::Photon4PathConsvLAB},
             {"minvconsvomega", &ConstraintsOmega::MinvConsvOmega}};
+
+    std::map<std::string, Double_t (ConstraintsPM::*)(Double_t *, Double_t *)>
+        constraintMapPM = {
+            {"energyconsvcm", &ConstraintsPM::EnergyConsvCMChKaon},
+            {"minvconsvchargedkaon", &ConstraintsPM::MinvConsvChKaon}};
 
   protected:
     Int_t
