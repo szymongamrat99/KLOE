@@ -96,6 +96,8 @@ namespace ErrorHandling
 
     NOT_RECOGNIZED = 666, /*!< Unexpected exception*/
 
+    IMPROPER_MCTRUTH = 667, /*!< Improper MC truth information*/
+
     NO_ERROR = 0, /*!< No error occurred*/
 
     NUM_CODES = 38 /*!< Number of codes for loops*/
@@ -269,6 +271,9 @@ namespace ErrorHandling
       // Not recognized logs
       case ErrorCodes::NOT_RECOGNIZED:
         return "Error not recognized.";
+
+      case ErrorCodes::IMPROPER_MCTRUTH:
+        return "Improper MC truth information.";
 
       default:
         return "Improper error code.";

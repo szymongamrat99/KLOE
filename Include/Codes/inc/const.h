@@ -394,7 +394,11 @@ namespace KLOE
         muonAlertMinus = 0,
         semileptonic_flag = 0,
         other_flag = 0,
-        isr_flag = 0;
+        isr_flag = 0,
+        has_pm = 0,
+        has_00 = 0,
+        has_000 = 0,
+        has_semileptonic = 0;
 
     std::vector<Double_t>
         Kchrecnew,

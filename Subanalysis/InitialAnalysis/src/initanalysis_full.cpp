@@ -683,16 +683,24 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       mcflag = 1;
 
       genVarClassifier.classifyChannel(
+          logger,
           dataAccess.GetNTMC(),
           dataAccess.GetNVtxMC(),
           dataAccess.GetPidMC().data(),
           dataAccess.GetVtxMC().data(),
           dataAccess.GetMother().data(),
+          dataAccess.GetKine().data(),
+          dataAccess.GetKinMom().data(),
           mcflag, // Assuming mcflag is 1 for MC events
           mctruth,
           baseKin.semileptonic_flag,
           baseKin.other_flag,
-          baseKin.isr_flag);
+          baseKin.isr_flag,
+          baseKin.has_pm,
+          baseKin.has_00,
+          baseKin.has_000,
+          baseKin.has_semileptonic
+      );
 
       MctruthCounter(mctruth, mctruth_num);
       // -------------------------------------------------------------------
@@ -1767,7 +1775,11 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"muonAlertMinus", baseKin.muonAlertMinus},
           {"semileptonicFlag", baseKin.semileptonic_flag},
           {"otherFlag", baseKin.other_flag},
-          {"isrFlag", baseKin.isr_flag}};
+          {"isrFlag", baseKin.isr_flag},
+          {"hasPM", baseKin.has_pm},
+          {"has00", baseKin.has_00},
+          {"has000", baseKin.has_000},
+          {"hasSemileptonic", baseKin.has_semileptonic}};
 
       // Double_t zmienne
       std::map<std::string, Double_t> floatVars = {
