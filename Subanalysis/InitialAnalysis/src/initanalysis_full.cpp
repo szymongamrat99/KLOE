@@ -24,6 +24,7 @@
 #include <ConfigManager.h>
 #include <NeutralReconstruction.h>
 #include <FileManager.h>
+#include <SelectionCodes.h>
 
 #include <DataAccessWrapper.h>
 
@@ -45,8 +46,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   KLOE::AnalysisConfig &analysisConfig = KLOE::AnalysisConfig::getInstance();
   analysisConfig.Print();
+  
   // --------------- DataAccessWrapper initialization ----------------
-
   KLOE::DataAccessWrapper dataAccess(chain, logger);
 
   // Inicjalizacja wrapper'a
@@ -72,6 +73,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   Bool_t trilaterationKinFit = analysisConfig.GetActiveHypothesisConfig().modules.trilaterationKinFit;
   Bool_t signalKinFit = analysisConfig.GetActiveHypothesisConfig().modules.signalKinFit;
   Bool_t omegaKinFit = analysisConfig.GetActiveHypothesisConfig().modules.omegaKinFit;
+
+  KLOE::SelectionCode selectionCode = analysisConfig.GetActiveHypothesisConfig().cuts.cutSet;
 
   // Set flag for covariance matrix type
   std::string covMatrixType = config.getProperty<std::string>("flags.covMatrixType");
@@ -117,7 +120,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::ifstream file(Paths::cutlimitsName);
   json j = json::parse(file);
 
-  StatisticalCutter cutter(Paths::cutlimitsName, mctruthSignal, hypoCode, logger);
+  StatisticalCutter cutter(Paths::cutlimitsName, mctruthSignal, selectionCode, logger);
 
   std::ifstream rootFiles(Paths::rootfilesName);
   json filePaths = json::parse(rootFiles);
@@ -132,26 +135,20 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                                ""};
 
   std::string smearingName = "NoSmearing";
+  std::string selectionCodeStr = Obj.SelectionCodeToString(selectionCode);
+
 
   if (analysisConfig.GetActiveHypothesisConfig().modules.momentumSmearing)
   {
     smearingName = covMatrixType;
   }
 
-  if (SignalOnly)
+  // Append hypothesis, smearing, and channel information to base filenames
+  for (Int_t i = 0; i < baseFilenames.size(); i++)
   {
-    for (Int_t i = 0; i < baseFilenames.size(); i++)
-    {
-      baseFilenamesTot[i] = baseFilenames[i] + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal));
-    }
+    baseFilenamesTot[i] = baseFilenames[i] + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + "_" + selectionCodeStr;
   }
-  else
-  {
-    for (Int_t i = 0; i < baseFilenames.size(); i++)
-    {
-      baseFilenamesTot[i] = baseFilenames[i] + "_" + hypoCodeStr + "_" + smearingName;
-    }
-  }
+
 
   // Helper function to convert FileType to string
   auto fileTypeToString = [](Controls::FileType fileType) -> std::string
@@ -175,7 +172,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   std::string
       dirname = Paths::customRootResultsPath,
-      //(std::string)Paths::initialanalysis_dir + (std::string)Paths::root_files_dir,
       resultDirName = "",
       log_file_writer_lumi = "";
 
@@ -188,32 +184,18 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     resultDirName = dirname + "/" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName;
   }
 
-  if (SignalOnly)
-  {
-    log_file_writer_lumi = "file_lumi_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + ".log";
-  }
-  else
-  {
-    log_file_writer_lumi = "file_lumi_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + ".log";
-  }
+  log_file_writer_lumi = "file_lumi_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + "_" + selectionCodeStr + ".log";
 
   SplitFileWriter writer(baseFilenamesTot[int(fileTypeOpt)], 1.5 * 1024 * 1024 * 1024 * 0.01, false, resultDirName, log_file_writer_lumi, fileTypeOpt, singleFile, jobNumber);
 
   KLOE::FileManager fileManager(logger);
   std::string inputLumiLog = "";
 
-  if (SignalOnly)
-  {
-    inputLumiLog = resultDirName + "/input_luminosity_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + ".log";
-  }
-  else
-  {
-    inputLumiLog = resultDirName + "/input_luminosity_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + ".log";
-  }
+  inputLumiLog = resultDirName + "/input_luminosity_" + fileTypeStr + "_" + hypoCodeStr + "_" + smearingName + "_" + KLOE::channName.at(int(mctruthSignal)) + "_" + selectionCodeStr + ".log";
 
   fileManager.LogChainLuminosity(chain, logger, inputLumiLog);
 
-  // Oblicz całkowitą luminozność
+  // Calculate total luminosity
   double totalInputLuminosity = 0.0;
   TObjArray *fileElements = (TObjArray *)chain.GetListOfFiles();
   TIter next(fileElements);
@@ -262,11 +244,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   // -----------------------------------------------------
 
   Int_t mode = 1; // Model for pi+pi-
-
-  // GeneralEventPropertiesMC *eventProps;
-
-  // if (MonteCarloInitAnalysis)
-  //   eventProps = new GeneralEventPropertiesMC(reader);
 
   Double_t
       KchrecKSMom = 0,
@@ -329,8 +306,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   };
 
   // Cuts application
-
-  if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
+  if (selectionCode == KLOE::SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG)
   {
     ///////////////////////////////////////////////////////////////////
     cutter.RegisterVariableGetter("InvMassKch", [&]()
@@ -338,19 +314,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     cutter.RegisterCentralValueGetter("InvMassKch", [&]()
                                       { return PhysicsConstants::mK0; });
     ///////////////////////////////////////////////////////////////////
-    cutter.RegisterVariableGetter("InvMassKne", [&]()
-                                  { return baseKin.KchrecKL[5]; });
-    cutter.RegisterCentralValueGetter("InvMassKne", [&]()
-                                      { return PhysicsConstants::mK0; });
-    ///////////////////////////////////////////////////////////////////
     cutter.RegisterVariableGetter("TwoBodyMomKS", [&]()
                                   { return KchrecKSMom; });
     cutter.RegisterCentralValueGetter("TwoBodyMomKS", [&]()
-                                      { return pKTwoBody; });
-    ///////////////////////////////////////////////////////////////////
-    cutter.RegisterVariableGetter("TwoBodyMomKL", [&]()
-                                  { return KchrecKLMom; });
-    cutter.RegisterCentralValueGetter("TwoBodyMomKL", [&]()
                                       { return pKTwoBody; });
     ///////////////////////////////////////////////////////////////////
     cutter.RegisterVariableGetter("MissTotKS", [&]()
@@ -360,16 +326,34 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                   { return (std::pow(EmissKS, 2) - std::pow(PmissKS, 2)); });
     cutter.RegisterVariableGetter("MissLowerKS", [&]()
                                   { return (std::pow(EmissKS, 2) - std::pow(PmissKS, 2)); });
-    ///////////////////////////////////////////////////////////////////
-    cutter.RegisterVariableGetter("MissTotKL", [&]()
-                                  { return std::sqrt(std::pow(PmissKL, 2) + std::pow(EmissKL, 2)); });
-    ///////////////////////////////////////////////////////////////////
-    cutter.RegisterVariableGetter("MissHigherKL", [&]()
-                                  { return (std::pow(EmissKL, 2) - std::pow(PmissKL, 2)); });
-    cutter.RegisterVariableGetter("MissLowerKL", [&]()
-                                  { return (std::pow(EmissKL, 2) - std::pow(PmissKL, 2)); });
   }
-  else if (hypoCode == KLOE::HypothesisCode::SIGNAL)
+  else if (selectionCode == KLOE::SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG)
+  {
+    ///////////////////////////////////////////////////////////////////
+    cutter.RegisterVariableGetter("InvMassKch", [&]()
+                                  { return baseKin.KchrecKS[5]; });
+    cutter.RegisterCentralValueGetter("InvMassKch", [&]()
+                                      { return PhysicsConstants::mK0; });
+    ///////////////////////////////////////////////////////////////////
+    cutter.RegisterVariableGetter("InvMassKch2", [&]()
+                                  { return baseKin.KchrecKL[5]; });
+    cutter.RegisterCentralValueGetter("InvMassKch2", [&]()
+                                      { return 497.605; });
+    ///////////////////////////////////////////////////////////////////
+    cutter.RegisterVariableGetter("TwoBodyMomKS", [&]()
+                                  { return KchrecKSMom; });
+    cutter.RegisterCentralValueGetter("TwoBodyMomKS", [&]()
+                                      { return pKTwoBody; });
+    ///////////////////////////////////////////////////////////////////
+    cutter.RegisterVariableGetter("MissTotKS", [&]()
+                                  { return std::sqrt(std::pow(PmissKS, 2) + std::pow(EmissKS, 2)); });
+    ///////////////////////////////////////////////////////////////////
+    cutter.RegisterVariableGetter("MissHigherKS", [&]()
+                                  { return (std::pow(EmissKS, 2) - std::pow(PmissKS, 2)); });
+    cutter.RegisterVariableGetter("MissLowerKS", [&]()
+                                  { return (std::pow(EmissKS, 2) - std::pow(PmissKS, 2)); });
+  }
+  else if (selectionCode == KLOE::SelectionCode::FINAL_SIGNAL)
   {
     ///////////////////////////////////////////////////////////////////
     cutter.RegisterVariableGetter("InvMassKch", [&]()
@@ -392,16 +376,27 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     cutter.RegisterCentralValueGetter("Pi0MassPlane_v", [&]()
                                       { return 0; });
   }
-  else if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
+  else if (selectionCode == KLOE::SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG)
   {
     cutter.RegisterVariableGetter("SixGammaError", [&]()
                                   { return baseKin.bestError; });
   }
-  else if (hypoCode == KLOE::HypothesisCode::SEMILEPTONIC)
+  else if (selectionCode == KLOE::SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG)
+  {
+    cutter.RegisterVariableGetter("SixGammaError", [&]()
+                                  { return baseKin.bestError; });
+
+    /////////////////////////////////////////////////////////////
+
+    cutter.RegisterVariableGetter("InvMassKch", [&]()
+                                  { return baseKin.Kchrecnew[5]; });
+    cutter.RegisterCentralValueGetter("InvMassKch", [&]()
+                                      { return 497.605; });
+  }
+  else if (selectionCode == KLOE::SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_TAG)
   {
     cutter.RegisterVariableGetter("Qmiss", [&]()
                                   { return baseKin.Qmiss; });
-
     cutter.RegisterCentralValueGetter("Qmiss", [&]()
                                       { return 71.13; });
 
@@ -409,6 +404,32 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                   { return angleBetweenChargedPionsCM(); });
     cutter.RegisterCentralValueGetter("PipPimAngleCM", [&]()
                                       { return 145.8; });
+  }
+  else if (selectionCode == KLOE::SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG)
+  {
+    cutter.RegisterVariableGetter("Qmiss", [&]()
+                                  { return baseKin.Qmiss; });
+    cutter.RegisterCentralValueGetter("Qmiss", [&]()
+                                      { return 71.13; });
+
+    cutter.RegisterVariableGetter("PipPimAngleCM", [&]()
+                                  { return angleBetweenChargedPionsCM(); });
+    cutter.RegisterCentralValueGetter("PipPimAngleCM", [&]()
+                                      { return 145.8; });
+
+    //////////////////////////////////////////////////////////////////////////
+
+    cutter.RegisterVariableGetter("Pi0MassPlane_u", [&]()
+                                  { return u(); });
+
+    cutter.RegisterCentralValueGetter("Pi0MassPlane_u", [&]()
+                                      { return 0; });
+
+    cutter.RegisterVariableGetter("Pi0MassPlane_v", [&]()
+                                  { return v(); });
+
+    cutter.RegisterCentralValueGetter("Pi0MassPlane_v", [&]()
+                                      { return 0; });
   }
 
   if (!cutter.ValidateConfiguration())
@@ -558,15 +579,13 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                               dataAccess.GetBy(),
                               dataAccess.GetBz()};
 
-    // ZMIANA: Stwórz zmienne lokalne dla referencji
+    // Local variables for reference
     Int_t nv_local = dataAccess.GetNV();
     Int_t ntv_local = dataAccess.GetNTV();
     Int_t mode_local = mode;
 
-    // Skopiuj dane iv do lokalnej tablicy (jeśli potrzeba)
+    // Copy data to local arrays for indices
     iv_data = dataAccess.GetIv();
-
-    // Skopiuj dane do lokalnych tablic dla wskaźników
     curv_data.assign(dataAccess.GetCurv().begin(), dataAccess.GetCurv().end());
     phiv_data.assign(dataAccess.GetPhiv().begin(), dataAccess.GetPhiv().end());
     cotv_data.assign(dataAccess.GetCotv().begin(), dataAccess.GetCotv().end());
@@ -782,7 +801,6 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       ++show_progress;
       continue;
     }
-
     // --------------------------------------------------------------------------------
 
     if (hypoCode == KLOE::HypothesisCode::FOUR_PI) // If we look for pipipipi - clusters do not matter

@@ -35,6 +35,43 @@ std::string HypothesisCodeToString(HypothesisCode code) {
     }
 }
 
+SelectionCode JsonToSelectionCode(const std::string& str) {
+    // Możesz użyć Twojej funkcji pm00::StringToHypothesisCode
+    // lub zrobić prostą mapę:
+    if (str == "NONE") return SelectionCode::NONE;
+    if (str == "FINAL_SIGNAL")   return SelectionCode::FINAL_SIGNAL;
+    if (str == "THREE_PI0_CONTROL_SAMPLE_TAG") return SelectionCode::THREE_PI0_CONTROL_SAMPLE_TAG;
+    if (str == "SEMILEPTONIC_CONTROL_SAMPLE_TAG") return SelectionCode::SEMILEPTONIC_CONTROL_SAMPLE_TAG;
+    if (str == "DOUBLE_PINE_CONTROL_SAMPLE_TAG") return SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_TAG;
+    if (str == "DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG") return SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG;
+    if (str == "DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG") return SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG;
+    if (str == "DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG") return SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG;
+    if (str == "DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG") return SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG;
+    if (str == "DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG") return SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG;
+    if (str == "CUSTOM_SELECTION") return SelectionCode::CUSTOM_SELECTION;
+    
+    std::cerr << "Unknown selection code." << std::endl;
+    return SelectionCode::INVALID;
+}
+
+std::string SelectionCodeToString(SelectionCode code) {
+    switch (code) {
+        case SelectionCode::NONE: return "NONE";
+        case SelectionCode::FINAL_SIGNAL: return "FINAL_SIGNAL";
+        case SelectionCode::THREE_PI0_CONTROL_SAMPLE_TAG: return "THREE_PI0_CONTROL_SAMPLE_TAG";
+        case SelectionCode::SEMILEPTONIC_CONTROL_SAMPLE_TAG: return "SEMILEPTONIC_CONTROL_SAMPLE_TAG";
+        case SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_TAG: return "DOUBLE_PINE_CONTROL_SAMPLE_TAG";
+        case SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG: return "DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
+        case SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG: return "DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG";
+        case SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG: return "DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
+        case SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG: return "DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG";
+        case SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG: return "DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
+        case SelectionCode::CUSTOM_SELECTION: return "CUSTOM_SELECTION";
+        case SelectionCode::INVALID: return "INVALID";
+        default: return "UNKNOWN";
+    }
+}
+
 // ===== KONSTRUKTOR I DESTRUKTOR =====
 void AnalysisConfig::SetupLogger(ErrorHandling::ErrorLogs* logger) {
     _logger = logger;
@@ -110,12 +147,7 @@ bool AnalysisConfig::LoadFromFile(const std::string& filename) {
                 // Cuts
                 if (item.value().contains("cuts")) {
                     auto& cuts = item.value()["cuts"];
-                    config.cuts.minMassWindow = cuts.value("minMassWindow", 480.0);
-                    config.cuts.maxMassWindow = cuts.value("maxMassWindow", 540.0);
-                    config.cuts.maxChi2 = cuts.value("maxChi2", 50.0);
-                    config.cuts.applyPreselection = cuts.value("applyPreselection", true);
-                    config.cuts.applyKinematicFit = cuts.value("applyKinematicFit", true);
-                    config.cuts.applyStatisticalCuts = cuts.value("applyStatisticalCuts", true);
+                    config.cuts.cutSet = JsonToSelectionCode(cuts.value("cutSet", "NONE"));
                 }
                 
                 hypothesisConfigs[hyp] = config;
@@ -244,9 +276,7 @@ void AnalysisConfig::PrintToScreen() const {
     std::cout << "   Kaon Proper Times:       " << (hypConfig.modules.kaonProperTimes ? "true" : "false") << std::endl;
     
     std::cout << "Cuts:" << std::endl;
-    std::cout << "   Mass window: [" << hypConfig.cuts.minMassWindow 
-              << ", " << hypConfig.cuts.maxMassWindow << "] MeV" << std::endl;
-    std::cout << "   Max χ²: " << hypConfig.cuts.maxChi2 << std::endl;
+    std::cout << "   Cut Set: " << SelectionCodeToString(hypConfig.cuts.cutSet) << std::endl;
     
     std::cout << "Output:" << std::endl;
     std::cout << "   Save Pulls:          " << (output.savePulls ? "true" : "false") << std::endl;
@@ -291,8 +321,7 @@ void AnalysisConfig::Print() const {
     currentConfiguration += "   Kaon Proper Times:       " + std::string(hypConfig.modules.kaonProperTimes ? "true" : "false") + "\n";
 
     currentConfiguration += "Cuts:\n";
-    currentConfiguration += "   Mass window: [" + std::to_string(hypConfig.cuts.minMassWindow) + ", " + std::to_string(hypConfig.cuts.maxMassWindow) + "] MeV\n";
-    currentConfiguration += "   Max χ²: " + std::to_string(hypConfig.cuts.maxChi2) + "\n";
+    std::cout << "   Cut Set: " << SelectionCodeToString(hypConfig.cuts.cutSet) << std::endl;
 
     currentConfiguration += "Output:\n";
     currentConfiguration += "   Save Pulls:          " + std::string(output.savePulls ? "true" : "false") + "\n";

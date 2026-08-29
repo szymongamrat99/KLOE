@@ -2,6 +2,7 @@
 #define ANALYSIS_CONFIG_H
 
 #include <HypothesisCodes.h>
+#include <SelectionCodes.h>
 #include <string>
 #include <vector>
 #include <map>
@@ -79,14 +80,9 @@ public:
         bool photonPairing = true;
         bool kaonProperTimes = true;
     };
-    
+
     struct HypothesisCuts {
-        double minMassWindow = 480.0;
-        double maxMassWindow = 540.0;
-        double maxChi2 = 50.0;
-        bool applyPreselection = true;
-        bool applyKinematicFit = true;
-        bool applyStatisticalCuts = true;
+      SelectionCode cutSet = SelectionCode::NONE;
     };
     
     struct HypothesisConfig {

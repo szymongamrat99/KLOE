@@ -232,7 +232,8 @@ namespace KLOE
           std::cout << "Checking data file: " << fullname << std::endl;
 
           chain_init.Add(fullname);
-          _logger.getLog(infoCode, (std::string)filenamedata + "_" + std::to_string(i) + (std::string)extension);
+          std::string logFileName = std::string(filenamedata.Data()) + "_" + std::to_string(i) + extension.Data();
+          _logger.getLog(infoCode, logFileName);
         }
       }
 
@@ -255,7 +256,8 @@ namespace KLOE
               std::cout << "Checking MC file: " << fullname << std::endl;
 
               chain_init.Add(fullname);
-              _logger.getLog(infoCode, (std::string)baseName[entry.first] + "_" + std::to_string(j) + (std::string)extension);
+              std::string logFileName = baseName[entry.first] + "_" + std::to_string(j) + extension.Data();
+              _logger.getLog(infoCode, logFileName);
             }
           }
         }
@@ -275,7 +277,8 @@ namespace KLOE
             infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
             chain_init.Add(fullname);
-            _logger.getLog(infoCode, (std::string)filenamemcOld + "_" + std::to_string(j) + (std::string)extension);
+            std::string logFileName = std::string(filenamemcOld.Data()) + "_" + std::to_string(j) + extension.Data();
+            _logger.getLog(infoCode, logFileName);
 
             std::cout << "Added MC file: " << fullname << std::endl;
           }
@@ -301,7 +304,8 @@ namespace KLOE
             infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
             chain_init.Add(fullname);
-            _logger.getLog(infoCode, (std::string)baseName[entry.first] + "_" + std::to_string(j) + (std::string)extension);
+            std::string logFileName = baseName[entry.first] + "_" + std::to_string(j) + extension.Data();
+            _logger.getLog(infoCode, logFileName);
           }
         }
       }
@@ -322,7 +326,8 @@ namespace KLOE
           infoCode = ErrorHandling::InfoCodes::FILE_ADDED;
 
           chain_init.Add(fullname);
-          _logger.getLog(infoCode, (std::string)filenamedata + "_" + std::to_string(i) + (std::string)extension);
+          std::string logFileName = std::string(filenamedata.Data()) + "_" + std::to_string(i) + extension.Data();
+          _logger.getLog(infoCode, logFileName);
         }
       }
 

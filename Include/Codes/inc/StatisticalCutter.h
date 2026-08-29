@@ -9,7 +9,7 @@
 #include <fstream>
 #include <algorithm>
 #include <memory>
-#include <HypothesisCodes.h>
+#include <SelectionCodes.h>
 #include <ErrorLogs.h>
 
 #include <TFormula.h>
@@ -55,8 +55,8 @@ enum class NormalizationMode {
 
 class StatisticalCutter {
 public:
-    StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::HypothesisCode hypoCode, ErrorHandling::ErrorLogs& logger);
-    StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::HypothesisCode hypoCode, ErrorHandling::ErrorLogs& logger);
+    StatisticalCutter(const std::string& jsonPath, int signalMctruth, KLOE::SelectionCode hypoCode, ErrorHandling::ErrorLogs& logger);
+    StatisticalCutter(const std::string& propertiesPath, const std::string& cutsPath, KLOE::SelectionCode hypoCode, ErrorHandling::ErrorLogs& logger);
 
     void SetTree(TTree* tree);
     
@@ -186,7 +186,7 @@ private:
     bool ProcessCutsLoop(const std::vector<size_t>& cutsToProcess, 
                          std::vector<size_t>& survived_array, int mctruth);
 
-    KLOE::HypothesisCode hypoCode_;
+    KLOE::SelectionCode hypoCode_;
     NormalizationMode normalizationMode_ = NormalizationMode::TOTAL_EVENTS;
 
     std::vector<Cut> cuts_;

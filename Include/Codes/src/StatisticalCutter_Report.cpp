@@ -31,17 +31,38 @@ void StatisticalCutter::GenerateReport(const std::string& reportConfigPath, cons
     // Mapowanie nazwy hipotezy
     std::string hypothesisName;
     switch(hypoCode_) {
-        case KLOE::HypothesisCode::SIGNAL:
-            hypothesisName = "SIGNAL";
+        case KLOE::SelectionCode::FINAL_SIGNAL:
+            hypothesisName = "FINAL_SIGNAL";
             break;
-        case KLOE::HypothesisCode::FOUR_PI:
-            hypothesisName = "FOUR_PI";
+        case KLOE::SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG:
+            hypothesisName = "DOUBLE_PICH_KS_CONTROL_SAMPLE_TAG";
             break;
-        case KLOE::HypothesisCode::OMEGAPI:
-            hypothesisName = "OMEGA_PI";
+        case KLOE::SelectionCode::DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG:
+            hypothesisName = "DOUBLE_PICH_KS_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
             break;
-        case KLOE::HypothesisCode::SIMONA_ANALYSIS:
-            hypothesisName = "SIMONA_ANALYSIS";
+        case KLOE::SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_TAG:
+            hypothesisName = "DOUBLE_PINE_CONTROL_SAMPLE_TAG";
+            break;
+        case KLOE::SelectionCode::DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG:
+            hypothesisName = "DOUBLE_PINE_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
+            break;
+        case KLOE::SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG:
+            hypothesisName = "DOUBLE_PICH_KL_CONTROL_SAMPLE_TAG";
+            break;
+        case KLOE::SelectionCode::DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG:
+            hypothesisName = "DOUBLE_PICH_KL_CONTROL_SAMPLE_SIGNAL_FINAL_AFTER_TAG";
+            break;
+        case KLOE::SelectionCode::CUSTOM_SELECTION:
+            hypothesisName = "CUSTOM_SELECTION";
+            break;
+        case KLOE::SelectionCode::NONE:
+            hypothesisName = "NONE";
+            break;
+        case KLOE::SelectionCode::THREE_PI0_CONTROL_SAMPLE_TAG:
+            hypothesisName = "THREE_PI0_CONTROL_SAMPLE_TAG";
+            break;
+        case KLOE::SelectionCode::SEMILEPTONIC_CONTROL_SAMPLE_TAG:
+            hypothesisName = "SEMILEPTONIC_CONTROL_SAMPLE_TAG";
             break;
         default:
             hypothesisName = "UNKNOWN";
