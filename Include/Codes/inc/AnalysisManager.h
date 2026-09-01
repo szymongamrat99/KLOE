@@ -76,6 +76,8 @@ public:
         bool trilaterationKinFit = true;
         bool signalKinFit = true;
         bool omegaKinFit = false;
+        bool pmKinFit = false;
+        bool neuKinFit = false;
         bool triangleReconstruction = true;
         bool photonPairing = true;
         bool kaonProperTimes = true;

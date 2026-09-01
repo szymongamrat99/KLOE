@@ -293,8 +293,16 @@ namespace KLOE
                        KchrecMuon(10, 0),
                        KchboostMuon(10, 0),
                        vtakenElectron(3, 0),
-                       vtakenMuon(3, 0)
-                        {}
+                       vtakenMuon(3, 0),
+                       KchrecPMFit(10, 0),
+                       KchboostPMFit(10, 0),
+                       ipPMFit(3, 0),
+                       ipNeuFit(3, 0),
+                       phiPMMomFit(4, 0),
+                       phiNeuMomFit(4, 0),
+                       pi01NeuFit(6, 0.0),
+                       pi02NeuFit(6, 0.0)
+                       {}
 
     Double_t
         Kchboost[9] = {0.0},
@@ -359,7 +367,7 @@ namespace KLOE
         Chi2SignalKinFit = 0.0,
         Chi2OmegaKinFit = 0.0,
         Chi2PMKinFit = 0.0,
-        Chi200KinFit = 0.0,
+        Chi2NeuKinFit = 0.0,
         Curv1 = 0.0,
         Phiv1 = 0.0,
         Cotv1 = 0.0,
@@ -490,6 +498,11 @@ namespace KLOE
         ParamOmegaFit,
         ErrorsOmegaFit,
         pullsOmegaFit,
+        ParamPM,
+        ErrorsPM,
+        ParamPMFit,
+        ErrorsPMFit,
+        pullsPMFit,
         pi01,
         pi02,
         pi01Fit,
@@ -520,16 +533,17 @@ namespace KLOE
         trkElectronDT[2],
         trkMuonDT[2],
         KnerecTriangle,
-        KchrecFitPM,
-        KnerecFit00,
+        KchrecPMFit,
+        KchboostPMFit,
+        KnerecNeuFit,
         trkPMFit[2],
         photonFit00[4],
-        pi01Fit00,
-        pi02Fit00,
-        ipFitPM,
-        ipFit00,
-        phiMomFitPM,
-        phiMomFit00;
+        pi01NeuFit,
+        pi02NeuFit,
+        ipPMFit,
+        ipNeuFit,
+        phiPMMomFit,
+        phiNeuMomFit;
 
     std::vector<Int_t>
         vtaken,
@@ -684,6 +698,17 @@ namespace KLOE
       trkMuonCluster[1].resize(5, -999.0);
       trkMuonDT[0].resize(3, -999.0);
       trkMuonDT[1].resize(3, -999.0);
+      trkPMFit[0].resize(4, 0.0);
+      trkPMFit[1].resize(4, 0.0);
+      KchrecPMFit.resize(10, 0.0);
+      KchboostPMFit.resize(10, 0.0);
+      KnerecNeuFit.resize(10, 0.0);
+      ipPMFit.resize(3, 0.0);
+      ipNeuFit.resize(3, 0.0);
+      phiPMMomFit.resize(4, 0.0);
+      phiNeuMomFit.resize(4, 0.0);
+      pi01NeuFit.resize(6, 0.0);
+      pi02NeuFit.resize(6, 0.0);
     };
 
     /**
@@ -804,6 +829,17 @@ namespace KLOE
       trkMuonCluster[1].clear();
       trkMuonDT[0].clear();
       trkMuonDT[1].clear();
+      trkPMFit[0].clear();
+      trkPMFit[1].clear();
+      KchrecPMFit.clear();
+      KchboostPMFit.clear();
+      ipPMFit.clear();
+      phiPMMomFit.clear();
+      phiNeuMomFit.clear();
+      pi01NeuFit.clear();
+      pi02NeuFit.clear();
+      ipNeuFit.clear();
+      KnerecNeuFit.clear();
 
       minv4gam = 0.0;
       minv4gamTriangle = 0.0;

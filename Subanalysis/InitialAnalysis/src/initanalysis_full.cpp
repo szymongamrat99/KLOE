@@ -31,6 +31,7 @@
 #include <trilaterationKinFit.h>
 #include <signalKinFit.h>
 #include <omegaKinFit.h>
+#include <pmKinFit.h>
 
 #include <AnalysisManager.h>
 
@@ -73,6 +74,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   Bool_t trilaterationKinFit = analysisConfig.GetActiveHypothesisConfig().modules.trilaterationKinFit;
   Bool_t signalKinFit = analysisConfig.GetActiveHypothesisConfig().modules.signalKinFit;
   Bool_t omegaKinFit = analysisConfig.GetActiveHypothesisConfig().modules.omegaKinFit;
+  Bool_t pmKinFit = analysisConfig.GetActiveHypothesisConfig().modules.pmKinFit;
+  Bool_t neuKinFit = analysisConfig.GetActiveHypothesisConfig().modules.neuKinFit;
 
   KLOE::SelectionCode selectionCode = analysisConfig.GetActiveHypothesisConfig().cuts.cutSet;
 
@@ -455,7 +458,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   std::map<std::string, Double_t>
       chiSqrStep;
 
-  std::vector<std::string> kinFitMethods = {"Trilateration", "Signal", "Omega"};
+  std::vector<std::string> kinFitMethods = {"Trilateration", "Signal", "Omega", "PM", "NEU"};
 
   for (const auto &method : kinFitMethods)
   {
@@ -474,6 +477,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   KLOE::TrilaterationReconstructionKinFit trilatKinFitObj(N_free["Trilateration"], N_const["Trilateration"], M["Trilateration"], loopcount["Trilateration"], chiSqrStep["Trilateration"], jmin, jmax, logger);
   KLOE::SignalKinFit signalKinFitObj(N_free["Signal"], N_const["Signal"], M["Signal"], loopcount["Signal"], chiSqrStep["Signal"], logger);
   KLOE::OmegaKinFit omegaKinFitObj(N_free["Omega"], N_const["Omega"], M["Omega"], loopcount["Omega"], chiSqrStep["Omega"], logger);
+  KLOE::PMKinFit pmKinFitObj(N_free["PM"], N_const["PM"], M["PM"], loopcount["PM"], chiSqrStep["PM"], logger);
 
   // Skopiuj dane iv do lokalnej tablicy (jeśli potrzeba)
   std::vector<Int_t> iv_data;
@@ -1591,6 +1595,55 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                       baseKin.pullsOmegaFit);
           }
 
+          if (pmKinFit)
+          {
+            trackParameters[0].clear();
+            trackParameters[1].clear();
+            trackParametersErr[0].clear();
+            trackParametersErr[1].clear();
+
+            trackParameters[0].resize(0);
+            trackParameters[1].resize(0);
+            trackParametersErr[0].resize(0);
+            trackParametersErr[1].resize(0);
+
+            trackParameters[0].push_back(baseKin.trknew[0][0]);
+            trackParameters[0].push_back(baseKin.trknew[0][1]);
+            trackParameters[0].push_back(baseKin.trknew[0][2]);
+            trackParameters[1].push_back(baseKin.trknew[1][0]);
+            trackParameters[1].push_back(baseKin.trknew[1][1]);
+            trackParameters[1].push_back(baseKin.trknew[1][2]);
+
+            trackParametersErr[0].push_back(std::pow(1.5, 2) / 2.0);
+            trackParametersErr[0].push_back(std::pow(1.5, 2) / 2.0);
+            trackParametersErr[0].push_back(std::pow(1.8, 2) / 2.0);
+            trackParametersErr[1].push_back(std::pow(1.5, 2) / 2.0);
+            trackParametersErr[1].push_back(std::pow(1.5, 2) / 2.0);
+            trackParametersErr[1].push_back(std::pow(1.8, 2) / 2.0);
+
+            chargedVtx = {baseKin.Kchrecnew[6],
+                          baseKin.Kchrecnew[7],
+                          baseKin.Kchrecnew[8]};
+            
+            chargedVtxErr = {std::sqrt(baseKin.vtxcov[0][baseKin.vtaken[0]]),
+                             std::sqrt(baseKin.vtxcov[3][baseKin.vtaken[0]]),
+                             std::sqrt(baseKin.vtxcov[5][baseKin.vtaken[0]])};
+
+            pmKinFitObj.SetParameters(trackParameters, trackParametersErr, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, bhabha_vtx, bhabhaVtxErr);
+            errorCode = pmKinFitObj.Reconstruct();
+            pmKinFitObj.GetResults(baseKin.ParamPM,
+                                   baseKin.ErrorsPM,
+                                   baseKin.ParamPMFit,
+                                   baseKin.ErrorsPMFit,
+                                   baseKin.trkPMFit,
+                                   baseKin.KchrecPMFit,
+                                   baseKin.KchboostPMFit,
+                                   baseKin.ipPMFit,
+                                   baseKin.phiPMMomFit,
+                                   baseKin.Chi2PMKinFit,
+                                   baseKin.pullsPMFit);
+          }
+
           if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
           {
             LOG_PHYSICS_ERROR(logger, errorCode, mctruth, ErrorHandling::LogFiles::LogType::ERROR);
@@ -1842,7 +1895,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"Phiv2", baseKin.Phiv2},
           {"Cotv2", baseKin.Cotv2},
           {"Chi2OmegaKinFit", baseKin.Chi2OmegaKinFit},
-          {"bestErrorSixGamma", baseKin.bestError}};
+          {"bestErrorSixGamma", baseKin.bestError},
+          {"Chi2PMKinFit", baseKin.Chi2PMKinFit}};
 
       // Tablice
       std::map<std::string, std::vector<Int_t>> intArrays = {
@@ -1998,7 +2052,18 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"trk1ElectronDT", baseKin.trkElectronDT[0]},
           {"trk2ElectronDT", baseKin.trkElectronDT[1]},
           {"trk1MuonDT", baseKin.trkMuonDT[0]},
-          {"trk2MuonDT", baseKin.trkMuonDT[1]}};
+          {"trk2MuonDT", baseKin.trkMuonDT[1]},
+          {"ParamPM", baseKin.ParamPM},
+          {"ErrorsPM", baseKin.ErrorsPM},
+          {"ParamPMFit", baseKin.ParamPMFit},
+          {"ErrorsPMFit", baseKin.ErrorsPMFit},
+          {"pullsPMKinFit", baseKin.pullsPMFit},
+          {"trk1PMFit", baseKin.trkPMFit[0]},
+          {"trk2PMFit", baseKin.trkPMFit[1]},
+          {"KchrecPMFit", baseKin.KchrecPMFit},
+          {"KchboostPMFit", baseKin.KchboostPMFit},
+          {"phiMomPMFit", baseKin.phiPMMomFit},
+          {"ipPMFit", baseKin.ipPMFit}};
 
       writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }

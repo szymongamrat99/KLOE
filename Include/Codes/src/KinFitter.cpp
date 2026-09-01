@@ -415,6 +415,28 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
   PhiMomFit = _objOmega->fphi.total;
 }
 
+void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> trkFit[2], std::vector<Double_t> &KchrecFit, std::vector<Double_t> &KchboostFit, std::vector<Double_t> &ipFit, std::vector<Double_t> &PhiMomFit)
+{
+  X = _X;
+  V = _V;
+  X_init = _X_init;
+  V_init = _V_init;
+
+  for (Int_t i = 0; i < 2; i++)
+  {
+    if (trkFit[i].size() != 4)
+      trkFit[i].resize(4);
+    trkFit[i] = _objPM->fpionCh[i].fourMom;
+  }
+
+  KchrecFit = _objPM->fKchrec.total;
+  KchboostFit = _objPM->fKchboost.total;
+
+  ipFit = _objPM->fip;
+
+  PhiMomFit = _objPM->fphi.total;
+}
+
 void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init)
 {
   for (Int_t i = 0; i < _X.GetNrows(); i++)

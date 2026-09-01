@@ -183,6 +183,8 @@ namespace KLOE
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> trkFit[2], std::vector<Double_t> &OmegaFit, std::vector<Double_t> &ipFit, std::vector<Double_t> photonFit[4], std::vector<Double_t> Pi0OmegaFit[2], std::vector<Double_t> &PhiMomFit);
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init);
 
+    void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> trkFit[2], std::vector<Double_t> &KchrecFit, std::vector<Double_t> &KchboostFit, std::vector<Double_t> &ipFit, std::vector<Double_t> &PhiMomFit);
+
     Double_t EnergyCalc(Double_t *p, Double_t mass);
 
     Double_t DerivativeCalc(Int_t i, Int_t j);

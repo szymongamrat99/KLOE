@@ -149,26 +149,38 @@ void ConstraintsPM::IntermediateReconstruction(Double_t *p)
     fip.resize(3);
   }
 
+  int offset = 0;
+
+  fKchrec.fourPos[0] = p[0];
+  fKchrec.fourPos[1] = p[1];
+  fKchrec.fourPos[2] = p[2];
+
+  offset += 3;
+
   for (Int_t i = 0; i < 2; i++)
   {
-    fpionCh.at(i).fourMom[0] = p[i * 3];
-    fpionCh.at(i).fourMom[1] = p[i * 3 + 1];
-    fpionCh.at(i).fourMom[2] = p[i * 3 + 2];
+    fpionCh.at(i).fourMom[0] = p[offset + i * 3];
+    fpionCh.at(i).fourMom[1] = p[offset + i * 3 + 1];
+    fpionCh.at(i).fourMom[2] = p[offset + i * 3 + 2];
     fpionCh.at(i).fourMom[3] = std::sqrt(std::pow(fpionCh.at(i).fourMom[0], 2) +
                                          std::pow(fpionCh.at(i).fourMom[1], 2) +
                                          std::pow(fpionCh.at(i).fourMom[2], 2) +
                                          std::pow(PhysicsConstants::mPiCh, 2));
   }
 
-  for (Int_t i = 0; i < 4; i++)
-  {
-    fphi.fourMom[i] = p[6 + i];
+  offset += 6;
 
-    if (i < 3)
-    {
-      fphi.vtxPos[i] = p[10 + i];
-    };
-  }
+  for (Int_t i = 0; i < 4; i++)
+    fphi.fourMom[i] = p[offset + i];
+
+  offset += 4;
+
+  for (Int_t i = 0; i < 3; i++)
+    fphi.vtxPos[i] = p[offset + i];
+
+  offset += 3;
+
+  // === Setting ended === 
 
   // Setting four momentum for kaon charged
   for (Int_t i = 0; i < 4; i++)
