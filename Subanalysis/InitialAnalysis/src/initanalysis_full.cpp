@@ -32,6 +32,7 @@
 #include <signalKinFit.h>
 #include <omegaKinFit.h>
 #include <pmKinFit.h>
+#include <neutralKinFit.h>
 
 #include <AnalysisManager.h>
 
@@ -478,6 +479,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
   KLOE::SignalKinFit signalKinFitObj(N_free["Signal"], N_const["Signal"], M["Signal"], loopcount["Signal"], chiSqrStep["Signal"], logger);
   KLOE::OmegaKinFit omegaKinFitObj(N_free["Omega"], N_const["Omega"], M["Omega"], loopcount["Omega"], chiSqrStep["Omega"], logger);
   KLOE::PMKinFit pmKinFitObj(N_free["PM"], N_const["PM"], M["PM"], loopcount["PM"], chiSqrStep["PM"], logger);
+  KLOE::NeutralKinFit neutralKinFitObj(N_free["NEU"], N_const["NEU"], M["NEU"], loopcount["NEU"], chiSqrStep["NEU"], logger);
 
   // Skopiuj dane iv do lokalnej tablicy (jeśli potrzeba)
   std::vector<Int_t> iv_data;
@@ -1642,6 +1644,12 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                    baseKin.phiPMMomFit,
                                    baseKin.Chi2PMKinFit,
                                    baseKin.pullsPMFit);
+
+              if(neuKinFit)
+              {
+                errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, baseKin.phiPMMomFit, baseKin.KchboostPMFit, baseKin.ipPMFit, baseKin.Knerec, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
+              }
+            
           }
 
           if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
