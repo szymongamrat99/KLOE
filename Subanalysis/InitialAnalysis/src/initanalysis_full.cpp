@@ -1645,10 +1645,19 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                    baseKin.Chi2PMKinFit,
                                    baseKin.pullsPMFit);
 
-              if(neuKinFit)
-              {
-                errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, baseKin.phiPMMomFit, baseKin.KchboostPMFit, baseKin.ipPMFit, baseKin.Knerec, gamma_mom_final, baseKin.minv4gam, baseKin.trcfinal, logger);
-              }
+            std::vector<double> gammaMomPMFit[4];
+
+            errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, baseKin.phiPMMomFit, baseKin.KchboostPMFit, baseKin.ipPMFit, baseKin.KnerecPMFit, gammaMomPMFit, baseKin.minv4gamPMFit, baseKin.trcfinalPMFit, logger);
+
+            baseKin.gammaMomPMFit1.assign(gammaMomPMFit[0].begin(), gammaMomPMFit[0].end());
+            baseKin.gammaMomPMFit2.assign(gammaMomPMFit[1].begin(), gammaMomPMFit[1].end());
+            baseKin.gammaMomPMFit3.assign(gammaMomPMFit[2].begin(), gammaMomPMFit[2].end());
+            baseKin.gammaMomPMFit4.assign(gammaMomPMFit[3].begin(), gammaMomPMFit[3].end());
+                                   
+            if(neuKinFit)
+            {
+
+            }
             
           }
 

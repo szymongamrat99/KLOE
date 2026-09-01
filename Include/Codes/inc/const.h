@@ -262,6 +262,7 @@ namespace KLOE
                        gammaMomTriangle4(8, 0.0),
                        g4takenTriKinFit(4, 0),
                        trcfinal(4, 0.0),
+                       trcfinalPMFit(4, 0.0),
                        CurvSmeared1(0.0),
                        PhivSmeared1(0.0),
                        CotvSmeared1(0.0),
@@ -301,7 +302,8 @@ namespace KLOE
                        phiPMMomFit(4, 0),
                        phiNeuMomFit(4, 0),
                        pi01NeuFit(6, 0.0),
-                       pi02NeuFit(6, 0.0)
+                       pi02NeuFit(6, 0.0),
+                       KnerecPMFit(10, 0)
                        {}
 
     Double_t
@@ -324,6 +326,7 @@ namespace KLOE
         Chi2 = 0.0,
         minv4gam = 0.0,
         minv4gamTriangle = 0.0,
+        minv4gamPMFit = 0.0,
         Qmiss = 0.0,
         Pgamrec[4][4] = {{0.0}},
         omega[9] = {0.0},
@@ -475,7 +478,16 @@ namespace KLOE
         gammaMomTriangleTotal2,
         gammaMomTriangleTotal3,
         gammaMomTriangleTotal4,
+        gammaMomPMFit1,
+        gammaMomPMFit2,
+        gammaMomPMFit3,
+        gammaMomPMFit4,
+        gammaMomNeutralFit1,
+        gammaMomNeutralFit2,
+        gammaMomNeutralFit3,
+        gammaMomNeutralFit4,
         trcfinal,
+        trcfinalPMFit,
         CurvMC,
         PhivMC,
         CotvMC,
@@ -534,6 +546,7 @@ namespace KLOE
         trkMuonDT[2],
         KnerecTriangle,
         KchrecPMFit,
+        KnerecPMFit,
         KchboostPMFit,
         KnerecNeuFit,
         trkPMFit[2],
@@ -613,7 +626,16 @@ namespace KLOE
       gammaMomTriangle2.resize(8, 0.0);
       gammaMomTriangle3.resize(8, 0.0);
       gammaMomTriangle4.resize(8, 0.0);
+      gammaMomPMFit1.resize(8, 0.0);
+      gammaMomPMFit2.resize(8, 0.0);
+      gammaMomPMFit3.resize(8, 0.0);
+      gammaMomPMFit4.resize(8, 0.0);
+      gammaMomNeutralFit1.resize(8, 0.0);
+      gammaMomNeutralFit2.resize(8, 0.0);
+      gammaMomNeutralFit3.resize(8, 0.0);
+      gammaMomNeutralFit4.resize(8, 0.0);
       trcfinal.resize(4, 0.0);
+      trcfinalPMFit.resize(4, 0.0);
       pullsTriKinFit.resize(0, 0.0);
       trkFit[0].resize(4, 0.0);
       trkFit[1].resize(4, 0.0);
@@ -709,6 +731,8 @@ namespace KLOE
       phiNeuMomFit.resize(4, 0.0);
       pi01NeuFit.resize(6, 0.0);
       pi02NeuFit.resize(6, 0.0);
+      KnerecPMFit.resize(10, 0.0);
+      
     };
 
     /**
@@ -748,7 +772,16 @@ namespace KLOE
       gammaMomTriangle2.clear();
       gammaMomTriangle3.clear();
       gammaMomTriangle4.clear();
+      gammaMomPMFit1.clear();
+      gammaMomPMFit2.clear();
+      gammaMomPMFit3.clear();
+      gammaMomPMFit4.clear();
+      gammaMomNeutralFit1.clear();
+      gammaMomNeutralFit2.clear();
+      gammaMomNeutralFit3.clear();
+      gammaMomNeutralFit4.clear();
       trcfinal.clear();
+      trcfinalPMFit.clear();
       pullsTriKinFit.clear();
       trkFit[0].clear();
       trkFit[1].clear();
@@ -840,9 +873,11 @@ namespace KLOE
       pi02NeuFit.clear();
       ipNeuFit.clear();
       KnerecNeuFit.clear();
+      KnerecPMFit.clear();
 
       minv4gam = 0.0;
       minv4gamTriangle = 0.0;
+      minv4gamPMFit = 0.0;
       Qmiss = 0.0;
       kaonChTimeCM = 0.0;
       kaonChTimeLAB = 0.0;

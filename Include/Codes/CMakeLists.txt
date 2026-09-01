@@ -12,6 +12,7 @@ add_library(LibRec SHARED
             src/ConstraintsSignal.cpp
             src/ConstraintsTest.cpp
             src/ConstraintsPM.cpp
+            src/ConstraintsNeutral.cpp
             src/CustomGraph.cpp
             src/cylinder_intersection.cpp
             src/DoubleRatio.cpp
@@ -46,6 +47,7 @@ add_library(LibRec SHARED
             src/signalKinFit.cpp
             src/omegaKinFit.cpp
             src/pmKinFit.cpp
+            src/neutralKinFit.cpp
             src/NeutralReconstruction.cpp
             src/VariableConfig.cpp
             src/DataAccessWrapper.cpp
