@@ -303,7 +303,9 @@ namespace KLOE
                        phiNeuMomFit(4, 0),
                        pi01NeuFit(6, 0.0),
                        pi02NeuFit(6, 0.0),
-                       KnerecPMFit(10, 0)
+                       KnerecPMFit(10, 0),
+                       pi01PMFit(6, 0.0),
+                       pi02PMFit(6, 0.0)
                        {}
 
     Double_t
@@ -498,6 +500,7 @@ namespace KLOE
         ipFit,
         photonFit[4],
         photonOmegaFit[4],
+        photonNeutralFit[4],
         KnerecFit,
         KnereclorFit,
         ParamSignal,
@@ -515,6 +518,11 @@ namespace KLOE
         ParamPMFit,
         ErrorsPMFit,
         pullsPMFit,
+        ParamNeutral,
+        ErrorsNeutral,
+        ParamNeutralFit,
+        ErrorsNeutralFit,
+        pullsNeutralFit,
         pi01,
         pi02,
         pi01Fit,
@@ -553,6 +561,8 @@ namespace KLOE
         photonFit00[4],
         pi01NeuFit,
         pi02NeuFit,
+        pi01PMFit,
+        pi02PMFit,
         ipPMFit,
         ipNeuFit,
         phiPMMomFit,
@@ -732,6 +742,8 @@ namespace KLOE
       pi01NeuFit.resize(6, 0.0);
       pi02NeuFit.resize(6, 0.0);
       KnerecPMFit.resize(10, 0.0);
+      pi01PMFit.resize(6, 0.0);
+      pi02PMFit.resize(6, 0.0);
       
     };
 
@@ -874,6 +886,18 @@ namespace KLOE
       ipNeuFit.clear();
       KnerecNeuFit.clear();
       KnerecPMFit.clear();
+      pi01PMFit.clear();
+      pi02PMFit.clear();
+      pullsNeutralFit.clear();
+      ParamNeutral.clear();
+      ErrorsNeutral.clear();
+      ParamNeutralFit.clear();
+      ErrorsNeutralFit.clear();
+
+      photonNeutralFit[0].clear();
+      photonNeutralFit[1].clear();
+      photonNeutralFit[2].clear();
+      photonNeutralFit[3].clear();
 
       minv4gam = 0.0;
       minv4gamTriangle = 0.0;
