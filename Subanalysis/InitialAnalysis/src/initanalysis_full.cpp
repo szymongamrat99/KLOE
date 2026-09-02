@@ -818,7 +818,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
       errorCode = ErrorHandling::ErrorCodes::NO_ERROR;
     else
     {
-      Int_t nclMinCurrent = (hypoCode == KLOE::HypothesisCode::THREE_PI0) ? 6 : NCLMIN;
+      Int_t nclMinCurrent = (hypoCode == KLOE::HypothesisCode::THREE_PI0) ? NCLMIN : NCLMIN;
       errorCode = genVarClassifier.FindNeutralCluster(dataAccess.GetNClu(),
                                                       dataAccess.GetNTCl(),
                                                       dataAccess.GetAssCl().data(),
@@ -841,7 +841,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           if (hypoCode != KLOE::HypothesisCode::THREE_PI0)
             errorCode = ErrorHandling::ErrorCodes::LESS_THAN_FOUR_NEUTRAL_CLUSTERS;
           else
-            errorCode = ErrorHandling::ErrorCodes::LESS_THAN_SIX_NEUTRAL_CLUSTERS;
+            errorCode = ErrorHandling::ErrorCodes::LESS_THAN_FOUR_NEUTRAL_CLUSTERS;
         }
       }
     }
@@ -1643,6 +1643,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                    baseKin.pullsPMFit);
 
             std::vector<double> gammaMomPMFit[4];
+            gammaMomPMFit[0].resize(8);
+            gammaMomPMFit[1].resize(8);
+            gammaMomPMFit[2].resize(8);
+            gammaMomPMFit[3].resize(8);
 
             errorCode = TriangleRec(baseKin.g4takenTriKinFit, cluster, neuclulist, baseKin.phiPMMomFit, baseKin.KchboostPMFit, baseKin.ipPMFit, baseKin.KnerecPMFit, gammaMomPMFit, baseKin.minv4gamPMFit, baseKin.trcfinalPMFit, logger);
 
@@ -1714,10 +1718,10 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                                           baseKin.ErrorsNeutral,
                                           baseKin.ParamNeutralFit,
                                           baseKin.ErrorsNeutralFit,
-                                          baseKin.ipFit,
+                                          baseKin.ipNeuFit,
                                           baseKin.photonNeutralFit,
-                                          baseKin.KnerecFit,
-                                          baseKin.KnereclorFit,
+                                          baseKin.KnerecNeuFit,
+                                          baseKin.KnereclorNeutralFit,
                                           baseKin.phiNeuMomFit,
                                           baseKin.Chi2NeuKinFit,
                                           baseKin.pullsNeutralFit);

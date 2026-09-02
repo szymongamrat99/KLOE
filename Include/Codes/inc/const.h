@@ -255,6 +255,7 @@ namespace KLOE
                        ipTriangle(3, 0.0),
                        Knerec(10, 0.0),
                        Knereclor(10, 0.0),
+                       KnereclorNeutralFit(10, 0.0),
                        neuVtxTriangle(4, 0.0),
                        gammaMomTriangle1(8, 0.0),
                        gammaMomTriangle2(8, 0.0),
@@ -566,7 +567,8 @@ namespace KLOE
         ipPMFit,
         ipNeuFit,
         phiPMMomFit,
-        phiNeuMomFit;
+        phiNeuMomFit,
+        KnereclorNeutralFit;
 
     std::vector<Int_t>
         vtaken,
@@ -744,6 +746,7 @@ namespace KLOE
       KnerecPMFit.resize(10, 0.0);
       pi01PMFit.resize(6, 0.0);
       pi02PMFit.resize(6, 0.0);
+      KnereclorNeutralFit.resize(10, 0.0);
       
     };
 
@@ -893,6 +896,7 @@ namespace KLOE
       ErrorsNeutral.clear();
       ParamNeutralFit.clear();
       ErrorsNeutralFit.clear();
+      KnereclorNeutralFit.clear();
 
       photonNeutralFit[0].clear();
       photonNeutralFit[1].clear();

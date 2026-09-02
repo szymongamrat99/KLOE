@@ -96,6 +96,8 @@ namespace KLOE
 					_Errors[_offset + i] = _bhabhaVtxErr[i];
 				}
 
+        _offset += 3;
+
 				if (_offset != _N_free + _N_const)
 					throw ErrorHandling::ErrorCodes::NEU_KIN_FIT;
 			}
