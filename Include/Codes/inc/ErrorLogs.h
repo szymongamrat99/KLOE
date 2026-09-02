@@ -86,6 +86,8 @@ namespace ErrorHandling
     SIGNAL_KIN_FIT = 310,                           /*!< Did not pass the signal kin fit*/
     OMEGA_KIN_FIT = 311,                            /*!< Did not pass the omega kin fit*/
     NOT_SINGLE_VTX_EVENT = 312,                        /*!< Not a single vertex event for semileptonic hypothesis*/
+    PM_KIN_FIT = 313,                           /*!< Did not pass the PM kin fit*/
+    NEU_KIN_FIT = 314,                           /*!< Did not pass the NEU kin fit*/
 
     CUT_CHI2_SIGNAL = 400,  /*!< Did not pass chi2 cut for signal hypothesis*/
     CUT_COMB_MPI0 = 401,    /*!< Did not pass combined mpi0 cut*/
@@ -95,6 +97,8 @@ namespace ErrorHandling
     CUT_QMISS = 405,        /*!< Did not pass Qmiss cut*/
 
     NOT_RECOGNIZED = 666, /*!< Unexpected exception*/
+
+    IMPROPER_MCTRUTH = 667, /*!< Improper MC truth information*/
 
     NO_ERROR = 0, /*!< No error occurred*/
 
@@ -251,6 +255,10 @@ namespace ErrorHandling
         return "Did not pass the omega kin fit.";
       case ErrorCodes::NOT_SINGLE_VTX_EVENT:
         return "Not a single vertex event for semileptonic hypothesis.";
+      case ErrorCodes::PM_KIN_FIT:
+        return "Did not pass the Charged Tracks (PM) kin fit.";
+      case ErrorCodes::NEU_KIN_FIT:
+        return "Did not pass the Neutral (NEU) kin fit.";
 
       // Cut-related logs
       case ErrorCodes::CUT_CHI2_SIGNAL:
@@ -269,6 +277,9 @@ namespace ErrorHandling
       // Not recognized logs
       case ErrorCodes::NOT_RECOGNIZED:
         return "Error not recognized.";
+
+      case ErrorCodes::IMPROPER_MCTRUTH:
+        return "Improper MC truth information.";
 
       default:
         return "Improper error code.";

@@ -26,3 +26,5 @@ Subanalysis/Properties/schemas/
 *.txt
 .vscode/
 parallel_logs*/
+.root_hist
+.bash_history

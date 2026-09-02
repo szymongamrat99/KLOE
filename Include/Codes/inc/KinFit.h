@@ -25,7 +25,7 @@ namespace KLOE
     virtual Double_t PyConsvLAB(Double_t *, Double_t *) = 0;
     virtual Double_t PzConsvLAB(Double_t *, Double_t *) = 0;
 
-    // Energy conservation in CM (trilateration only)
+    // Energy conservation in CM
     virtual Double_t EnergyConsvCM(Double_t *, Double_t *) = 0;
 
     // Conservation of invariant mass

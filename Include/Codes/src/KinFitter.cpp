@@ -21,6 +21,10 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
     _objTrilateration = std::make_unique<ConstraintsTrilateration>(logger);
   else if (_mode == "Test")
     _baseObj = std::make_unique<ConstraintsTest>(logger);
+  else if (_mode == "PM")
+    _objPM = std::make_unique<ConstraintsPM>(logger);
+  else if (_mode == "Neutral")
+    _objNeutral = std::make_unique<ConstraintsNeutral>(logger);
 
   _D_real.ResizeTo(M, N_free);
   _D_T_real.ResizeTo(N_free, M);
@@ -46,6 +50,10 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
     _objTrilateration = std::make_unique<ConstraintsTrilateration>(logger);
   else if (_mode == "Test")
     _baseObj = std::make_unique<ConstraintsTest>(logger);
+  else if (_mode == "PM")
+    _objPM = std::make_unique<ConstraintsPM>(logger);
+  else if (_mode == "Neutral")
+    _objNeutral = std::make_unique<ConstraintsNeutral>(logger);
 
   _D_real.ResizeTo(M, N_free);
   _D_T_real.ResizeTo(N_free, M);
@@ -265,6 +273,14 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
   {
     _objOmega->IntermediateReconstruction(_X.GetMatrixArray());
   }
+  else if (_mode == "PM")
+  {
+    _objPM->IntermediateReconstruction(_X.GetMatrixArray());
+  }
+  else if (_mode == "Neutral")
+  {
+    _objNeutral->IntermediateReconstruction(_X.GetMatrixArray());
+  }
   else
   {
     _baseObj->SetParameters(_X.GetMatrixArray());
@@ -323,6 +339,10 @@ Int_t KinFitter::ConstraintSet(std::vector<std::string> ConstSet)
       _constraints.push_back(TF1(ConstSet[i].c_str(), _objTrilateration.get(), constraintMapTrilateration[ConstSet[i]], 0, 1, _N_free + _N_const));
     else if (_mode == "Omega")
       _constraints.push_back(TF1(ConstSet[i].c_str(), _objOmega.get(), constraintMapOmega[ConstSet[i]], 0, 1, _N_free + _N_const));
+    else if (_mode == "PM")
+      _constraints.push_back(TF1(ConstSet[i].c_str(), _objPM.get(), constraintMapPM[ConstSet[i]], 0, 1, _N_free + _N_const));
+    else if (_mode == "Neutral")
+      _constraints.push_back(TF1(ConstSet[i].c_str(), _objNeutral.get(), constraintMapNeutral[ConstSet[i]], 0, 1, _N_free + _N_const));
     else
       _constraints.push_back(TF1(ConstSet[i].c_str(), _baseObj.get(), constraintMap[ConstSet[i]], 0, 1, _N_free + _N_const));
   }
@@ -403,6 +423,46 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
   }
 
   PhiMomFit = _objOmega->fphi.total;
+}
+
+void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> trkFit[2], std::vector<Double_t> &KchrecFit, std::vector<Double_t> &KchboostFit, std::vector<Double_t> &ipFit, std::vector<Double_t> &PhiMomFit)
+{
+  X = _X;
+  V = _V;
+  X_init = _X_init;
+  V_init = _V_init;
+
+  for (Int_t i = 0; i < 2; i++)
+  {
+    if (trkFit[i].size() != 4)
+      trkFit[i].resize(4);
+    trkFit[i] = _objPM->fpionCh[i].fourMom;
+  }
+
+  KchrecFit = _objPM->fKchrec.total;
+  KchboostFit = _objPM->fKchboost.total;
+
+  ipFit = _objPM->fip;
+
+  PhiMomFit = _objPM->fphi.total;
+}
+
+void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> &ipFit, std::vector<Double_t> photonFit[4], std::vector<Double_t> &KnerecFit, std::vector<Double_t> &KnereclorFit, std::vector<Double_t> &phiMomFit)
+{
+  X = _X;
+  V = _V;
+  X_init = _X_init;
+  V_init = _V_init;
+
+  ipFit = _objNeutral->fip;
+
+  for (Int_t i = 0; i < 4; i++)
+    photonFit[i] = _objNeutral->fphoton[i].total;
+
+  KnerecFit = _objNeutral->fKnerec.total;
+  KnereclorFit = _objNeutral->fKnereclor.total;
+
+  phiMomFit = _objNeutral->fphi.total;
 }
 
 void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init)

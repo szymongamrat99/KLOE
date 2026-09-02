@@ -139,6 +139,8 @@ bool AnalysisConfig::LoadFromFile(const std::string& filename) {
                     config.modules.trilaterationKinFit = mod.value("trilaterationKinFit", true);
                     config.modules.signalKinFit = mod.value("signalKinFit", true);
                     config.modules.omegaKinFit = mod.value("omegaKinFit", false);
+                    config.modules.pmKinFit = mod.value("chargedKinFit", false);
+                    config.modules.neuKinFit = mod.value("neutralKinFit", false);
                     config.modules.triangleReconstruction = mod.value("triangleReconstruction", true);
                     config.modules.photonPairing = mod.value("photonPairing", true);
                     config.modules.kaonProperTimes = mod.value("kaonProperTimes", true);
@@ -218,6 +220,8 @@ bool AnalysisConfig::ShouldRunModule(const std::string& moduleName) const {
     if (moduleName == "trilaterationKinFit")     return hypConfig.modules.trilaterationKinFit;
     if (moduleName == "signalKinFit")           return hypConfig.modules.signalKinFit;
     if (moduleName == "omegaKinFit")            return hypConfig.modules.omegaKinFit;
+    if (moduleName == "chargedKinFit")          return hypConfig.modules.pmKinFit;
+    if (moduleName == "neutralKinFit")          return hypConfig.modules.neuKinFit;
     if (moduleName == "triangleReconstruction")  return hypConfig.modules.triangleReconstruction;
     if (moduleName == "photonPairing")          return hypConfig.modules.photonPairing;
     if (moduleName == "kaonProperTimes")        return hypConfig.modules.kaonProperTimes;
@@ -271,6 +275,8 @@ void AnalysisConfig::PrintToScreen() const {
     std::cout << "   Trilateration KinFit:    " << (hypConfig.modules.trilaterationKinFit ? "true" : "false") << std::endl;
     std::cout << "   Signal KinFit:           " << (hypConfig.modules.signalKinFit ? "true" : "false") << std::endl;
     std::cout << "   Omega KinFit:            " << (hypConfig.modules.omegaKinFit ? "true" : "false") << std::endl;
+    std::cout << "   Charged KinFit:               " << (hypConfig.modules.pmKinFit ? "true" : "false") << std::endl;
+    std::cout << "   Neutral KinFit:              " << (hypConfig.modules.neuKinFit ? "true" : "false") << std::endl;
     std::cout << "   Triangle Reconstruction: " << (hypConfig.modules.triangleReconstruction ? "true" : "false") << std::endl;
     std::cout << "   Photon Pairing:          " << (hypConfig.modules.photonPairing ? "true" : "false") << std::endl;
     std::cout << "   Kaon Proper Times:       " << (hypConfig.modules.kaonProperTimes ? "true" : "false") << std::endl;
@@ -316,6 +322,8 @@ void AnalysisConfig::Print() const {
     currentConfiguration += "   Trilateration KinFit:    " + std::string(hypConfig.modules.trilaterationKinFit ? "true" : "false") + "\n";
     currentConfiguration += "   Signal KinFit:           " + std::string(hypConfig.modules.signalKinFit ? "true" : "false") + "\n";
     currentConfiguration += "   Omega KinFit:            " + std::string(hypConfig.modules.omegaKinFit ? "true" : "false") + "\n";
+    currentConfiguration += "   Charged KinFit:               " + std::string(hypConfig.modules.pmKinFit ? "true" : "false") + "\n";
+    currentConfiguration += "   Neutral KinFit:         " + std::string(hypConfig.modules.neuKinFit ? "true" : "false") + "\n";
     currentConfiguration += "   Triangle Reconstruction: " + std::string(hypConfig.modules.triangleReconstruction ? "true" : "false") + "\n";
     currentConfiguration += "   Photon Pairing:          " + std::string(hypConfig.modules.photonPairing ? "true" : "false") + "\n";
     currentConfiguration += "   Kaon Proper Times:       " + std::string(hypConfig.modules.kaonProperTimes ? "true" : "false") + "\n";

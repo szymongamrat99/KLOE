@@ -2,29 +2,88 @@
 #include <const.h>
 
 #include <algorithm>
+#include <ChannelProperties.h>
+
+bool GeneratedVariables::IsPrimaryFromPhi(Int_t kineId) const
+{
+  auto it = nodes.find(kineId);
+  while (it != nodes.end())
+  {
+    if (it->second.motherID == 50)
+      return true; // dotarliśmy do phi
+    if (it->second.motherID == 10 && it->second.particleID == 16)
+      return false; // regeneracja Kl->Ks
+    it = nodes.find(it->second.parentKine);
+  }
+  return false;
+}
+
+bool GeneratedVariables::IsFromKs(Int_t kineId) const
+{
+  auto it = nodes.find(kineId);
+  while (it != nodes.end())
+  {
+    if (it->second.particleID == 16)
+      return true; // ten węzeł to Ks
+    it = nodes.find(it->second.parentKine);
+  }
+  return false;
+}
+
+bool GeneratedVariables::IsFromKl(Int_t kineId) const
+{
+  auto it = nodes.find(kineId);
+  while (it != nodes.end())
+  {
+    if (it->second.particleID == 10)
+      return true; // ten węzeł to Kl
+    it = nodes.find(it->second.parentKine);
+  }
+  return false;
+}
 
 void GeneratedVariables::classifyChannel(
+    ErrorHandling::ErrorLogs &logger,
     Int_t ntmc,
     Int_t nvtxmc,
     const Int_t *pidmcOld,
     const Int_t *vtxmcOld,
     const Int_t *motherOld,
+    const Int_t *kine,
+    const Int_t *kinmom,
     UInt_t mcflag,
     Int_t &mctruth_int,
     Int_t &semileptonic_flag,
     Int_t &other_flag,
-    Int_t &isr_flag)
+    Int_t &isr_flag,
+    Int_t &has_pm,
+    Int_t &has_00,
+    Int_t &has_000,
+    Int_t &has_semileptonic)
 {
   UInt_t Ks = 0, Kl = 0, Ksregen = 0, piplusks = 0, pipluskl = 0, piminusks = 0, piminuskl = 0, muonplusks = 0, muonpluskl = 0, muonminusks = 0, muonminuskl = 0, electronks = 0, electronkl = 0, positronks = 0, positronkl = 0, pi0ks = 0, pi0kl = 0, pi0phi = 0, piplusphi = 0, piminusphi = 0, otherphi = 0, otherkl = 0, otherks = 0, gammaphi = 0, neutrinoks = 0, neutrinokl = 0, neutrinokplus = 0, neutrinokminus = 0, Kllambda = 0, Kslambda = 0, Ksgamma = 0, Klgamma = 0, Kplusgamma = 0, Kminusgamma = 0, pi0kplus = 0, pi0kminus = 0, pipluskplus = 0, pipluskminus = 0, piminuskplus = 0, piminuskminus = 0, muonpluskplus = 0, muonpluskminus = 0, muonminuskplus = 0, muonminuskminus = 0, electronkplus = 0, electronkminus = 0, positronkplus = 0, positronkminus = 0, otherkplus = 0, otherkminus = 0, Kplus = 0, Kminus = 0;
 
   isr_flag = 0;
   semileptonic_flag = 0;
   other_flag = 0;
+  has_pm = 0;
+  has_00 = 0;
+  has_000 = 0;
+  has_semileptonic = 0;
+
+  nodes.clear();
 
   if (mcflag == 1)
   {
     for (Int_t j = 0; j < ntmc; ++j)
     {
+      MCNode node;
+      node.particleID = pidmcOld[j];
+      node.motherID = motherOld[vtxmcOld[j] - 1];
+      node.vertexID = vtxmcOld[j];
+      node.parentKine = kinmom[vtxmcOld[j] - 1];
+      nodes[kine[j]] = node;
+
       if (motherOld[vtxmcOld[j] - 1] == 50)
       {
         switch (pidmcOld[j])
@@ -219,29 +278,33 @@ void GeneratedVariables::classifyChannel(
 
     Bool_t base_ksl = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 && Ksregen == 0 && Kl == 1 && Ks == 1);
 
-    Bool_t signal_cond = (base_ksl &&
+    Bool_t signal_cond = (base_ksl && Ksgamma == 0 && Klgamma == 0 &&
                           positronkl + positronks == 0 && electronkl + electronks == 0 && muonminuskl + muonminusks == 0 &&
                           muonpluskl + muonplusks == 0 && neutrinokl + neutrinoks == 0 && neutrinokplus + neutrinokminus == 0 &&
                           ((pi0ks == 2 && pipluskl == 1 && piminuskl == 1 && pi0kl == 0 && piplusks == 0 && piminusks == 0) ||
                            (pi0kl == 2 && piplusks == 1 && piminusks == 1 && pi0ks == 0 && pipluskl == 0 && piminuskl == 0)));
 
-    Bool_t pipi_cond = (base_ksl &&
+    Bool_t pipi_cond = (base_ksl && Ksgamma == 0 && Klgamma == 0 &&
                         positronkl + positronks == 0 && electronkl + electronks == 0 && muonminuskl + muonminusks == 0 &&
                         muonpluskl + muonplusks == 0 &&
                         ((piminusks == 1 && piplusks == 1 && pipluskl == 1 && piminuskl == 1 && pi0kl == 0 && pi0ks == 0)));
 
-    Bool_t regen_cond = (Ksregen == 1 && Ks == 1 && Kl == 1);
+    Bool_t regen_cond = (pi0phi == 0 && piplusphi == 0 && piminusphi == 0 && otherphi == 0 && otherks == 0 && otherkl == 0 && 
+                         Ksregen == 1 && Ks == 1 && Kl == 1 && Ksgamma == 0 && Klgamma == 0 && 
+                         positronkl + positronks == 0 && electronkl + electronks == 0 && muonminuskl + muonminusks == 0 &&
+                         muonpluskl + muonplusks == 0 && neutrinokl + neutrinoks == 0 && neutrinokplus + neutrinokminus == 0 &&
+                        (pi0ks == 2 && piplusks == 1 && piminusks == 1 && pi0kl == 0 && pipluskl == 0 && piminuskl == 0));
 
     Bool_t omega_cond = (pi0phi == 2 && piplusphi == 1 && piminusphi == 1 && otherphi == 0 && otherks == 0 && otherkl == 0 &&
                          positronkl + positronks == 0 && electronkl + electronks == 0 && muonminuskl + muonminusks == 0 &&
                          muonpluskl + muonplusks == 0 && Ksregen == 0 &&
                          Ks == 0 && Kl == 0 && pi0ks == 0 && pi0kl == 0 && pipluskl + piplusks == 0 && piminuskl + piminusks == 0);
 
-    Bool_t three_cond = (base_ksl &&
+    Bool_t three_cond = (base_ksl && Ksgamma == 0 && Klgamma == 0 &&
                          positronkl + positronks == 0 && electronkl + electronks == 0 && muonminuskl + muonminusks == 0 &&
                          muonpluskl + muonplusks == 0 && (pi0kl == 3 && piplusks == 1 && piminusks == 1 && pi0ks == 0 && pipluskl == 0 && piminuskl == 0 && Klgamma == 0 && Ksgamma == 0));
 
-    Bool_t semi_cond = (base_ksl &&
+    Bool_t semi_cond = (base_ksl && Ksgamma == 0 && Klgamma == 0 &&
                         ((pi0ks == 2 && positronkl == 1 && piminuskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
                          (pi0ks == 2 && pipluskl == 1 && electronkl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
                          (pi0ks == 2 && pipluskl == 1 && muonminuskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
@@ -251,13 +314,13 @@ void GeneratedVariables::classifyChannel(
                          (pi0kl == 2 && piplusks == 1 && muonminusks == 1 && pi0ks == 0 && neutrinoks >= 0) ||
                          (pi0kl == 2 && piminusks == 1 && muonplusks == 1 && pi0ks == 0 && neutrinoks >= 0)));
 
-    Bool_t semi_ele_pos_cond = (base_ksl &&
+    Bool_t semi_ele_pos_cond = (base_ksl && Ksgamma == 0 && Klgamma == 0 &&
                                 ((pi0ks == 2 && positronkl == 1 && piminuskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
                                  (pi0ks == 2 && pipluskl == 1 && electronkl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
                                  (pi0kl == 2 && positronks == 1 && piminusks == 1 && pi0ks == 0 && neutrinoks >= 0) ||
                                  (pi0kl == 2 && piplusks == 1 && electronks == 1 && pi0ks == 0 && neutrinoks >= 0)));
 
-    Bool_t semi_muon_cond = (base_ksl &&
+    Bool_t semi_muon_cond = (base_ksl && Ksgamma == 0 && Klgamma == 0 &&
                              ((pi0ks == 2 && pipluskl == 1 && muonminuskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
                               (pi0ks == 2 && piminuskl == 1 && muonpluskl == 1 && pi0kl == 0 && neutrinokl >= 0) ||
                               (pi0kl == 2 && piplusks == 1 && muonminusks == 1 && pi0ks == 0 && neutrinoks >= 0) ||
@@ -372,10 +435,152 @@ void GeneratedVariables::classifyChannel(
       other_flag = 19;
     else
       other_flag = 20; // Not recognized
+
+    // ---------------------------------------------------
+    // Looking for primary KSKL decays
+    // ---------------------------------------------------
+
+    int piplusks_primary = 0, piminusks_primary = 0,
+        pipluskl_primary = 0, piminuskl_primary = 0,
+        pi0ks_primary = 0, pi0kl_primary = 0,
+        muonplusks_primary = 0, muonminusks_primary = 0,
+        positronks_primary = 0, electronks_primary = 0,
+        neutrinoks_primary = 0,
+        muonpluskl_primary = 0, muonminuskl_primary = 0,
+        positronkl_primary = 0, electronkl_primary = 0,
+        neutrinokl_primary = 0,
+        otherks_primary = 0,
+        otherkl_primary = 0;
+
+    for (int j = 0; j < ntmc; j++)
+    {
+      if (!IsPrimaryFromPhi(kine[j]))
+        continue;
+
+      if (motherOld[vtxmcOld[j] - 1] == 16)
+      {
+        switch (pidmcOld[j])
+        {
+        case 7:
+          pi0ks_primary++;
+          break;
+        case 8:
+          piplusks_primary++;
+          break;
+        case 9:
+          piminusks_primary++;
+          break;
+        case 5:
+          muonplusks_primary++;
+          break;
+        case 6:
+          muonminusks_primary++;
+          break;
+        case 2:
+          positronks_primary++;
+          break;
+        case 3:
+          electronks_primary++;
+          break;
+        case 4:
+          neutrinoks_primary++;
+          break;
+        default:
+          otherks_primary++;
+          break;
+        }
+      }
+      else if (motherOld[vtxmcOld[j] - 1] == 10)
+      {
+        switch (pidmcOld[j])
+        {
+        case 7:
+          pi0kl_primary++;
+          break;
+        case 8:
+          pipluskl_primary++;
+          break;
+        case 9:
+          piminuskl_primary++;
+          break;
+        case 5:
+          muonpluskl_primary++;
+          break;
+        case 6:
+          muonminuskl_primary++;
+          break;
+        case 2:
+          positronkl_primary++;
+          break;
+        case 3:
+          electronkl_primary++;
+          break;
+        case 4:
+          neutrinokl_primary++;
+          break;
+        default:
+          otherkl_primary++;
+          break;
+        }
+      }
+    }
+
+    bool primary_ks_pm_decay = (piplusks_primary == 1 && piminusks_primary == 1 && otherks_primary == 0 && pi0ks_primary == 0 && muonplusks_primary == 0 && muonminusks_primary == 0 && positronks_primary == 0 && electronks_primary == 0 && neutrinoks_primary == 0);
+
+    bool primary_kl_pm_decay = (pipluskl_primary == 1 && piminuskl_primary == 1 && otherkl_primary == 0 && pi0kl_primary == 0 && muonpluskl_primary == 0 && muonminuskl_primary == 0 && positronkl_primary == 0 && electronkl_primary == 0 && neutrinokl_primary == 0);
+
+    bool primary_ks_00_decay = (pi0ks_primary == 2 && otherks_primary == 0 && piplusks_primary == 0 && piminusks_primary == 0 && muonplusks_primary == 0 && muonminusks_primary == 0 && positronks_primary == 0 && electronks_primary == 0 && neutrinoks_primary == 0);
+
+    bool primary_kl_00_decay = (pi0kl_primary == 2 && otherkl_primary == 0 && pipluskl_primary == 0 && piminuskl_primary == 0 && muonpluskl_primary == 0 && muonminuskl_primary == 0 && positronkl_primary == 0 && electronkl_primary == 0 && neutrinokl_primary == 0);
+
+    bool primary_ks_000_decay = (pi0ks_primary == 3 && otherks_primary == 0 && piplusks_primary == 0 && piminusks_primary == 0 && muonplusks_primary == 0 && muonminusks_primary == 0 && positronks_primary == 0 && electronks_primary == 0 && neutrinoks_primary == 0);
+
+    bool primary_kl_000_decay = (pi0kl_primary == 3 && otherkl_primary == 0 && pipluskl_primary == 0 && piminuskl_primary == 0 && muonpluskl_primary == 0 && muonminuskl_primary == 0 && positronkl_primary == 0 && electronkl_primary == 0 && neutrinokl_primary == 0);
+
+    bool primary_ks_semileptonic_decay = (((piplusks_primary == 1 && (muonminusks_primary == 1 || electronks_primary == 1)) || (piminusks_primary == 1 && (muonplusks_primary == 1 || positronks_primary == 1))) && neutrinoks_primary >= 0 && pi0ks_primary == 0 && otherks_primary == 0);
+
+    bool primary_kl_semileptonic_decay = (((pipluskl_primary == 1 && (muonminuskl_primary == 1 || electronkl_primary == 1)) || (piminuskl_primary == 1 && (muonpluskl_primary == 1 || positronkl_primary == 1))) && neutrinokl_primary >= 0 && pi0kl_primary == 0 && otherkl_primary == 0);
+
+    UInt_t channelFlags = KLOE::ChannelFlags::kNone;
+    if (primary_ks_pm_decay || primary_kl_pm_decay)
+      channelFlags |= KLOE::ChannelFlags::kHasPM;
+    if (primary_ks_00_decay || primary_kl_00_decay)
+      channelFlags |= KLOE::ChannelFlags::kHas00;
+    if (primary_ks_000_decay || primary_kl_000_decay)
+      channelFlags |= KLOE::ChannelFlags::kHas000;
+    if (primary_ks_semileptonic_decay || primary_kl_semileptonic_decay)
+      channelFlags |= KLOE::ChannelFlags::kHasSemiLeptonic;
+
+    has_pm = (channelFlags & KLOE::ChannelFlags::kHasPM) != 0;
+    has_00 = (channelFlags & KLOE::ChannelFlags::kHas00) != 0;
+    has_000 = (channelFlags & KLOE::ChannelFlags::kHas000) != 0;
+    has_semileptonic = (channelFlags & KLOE::ChannelFlags::kHasSemiLeptonic) != 0;
+
+    // -------------------------------------------------------------------------
+    bool has_pm00_primary = (channelFlags & (KLOE::ChannelFlags::kHasPM | KLOE::ChannelFlags::kHas00)) == (KLOE::ChannelFlags::kHasPM | KLOE::ChannelFlags::kHas00);
+    bool has_pm000_primary = (channelFlags & (KLOE::ChannelFlags::kHasPM | KLOE::ChannelFlags::kHas000)) == (KLOE::ChannelFlags::kHasPM | KLOE::ChannelFlags::kHas000);
+    bool has_semileptonic00_primary = (channelFlags & (KLOE::ChannelFlags::kHasSemiLeptonic | KLOE::ChannelFlags::kHas00)) == (KLOE::ChannelFlags::kHasSemiLeptonic | KLOE::ChannelFlags::kHas00);
+
+    // -------------------------------------------------------------------------
+
+    ErrorHandling::ErrorCodes err = ErrorHandling::ErrorCodes::IMPROPER_MCTRUTH;
+    if (signal_cond && !has_pm00_primary)
+      LOG_CRITICAL(logger, err, "signal_cond bez oczekiwanej topologii pm+00", ErrorHandling::LogFiles::LogType::ERROR);
+
+    if (three_cond && !has_pm000_primary)
+      LOG_CRITICAL(logger, err, "three_cond bez has_000", ErrorHandling::LogFiles::LogType::ERROR);
+
+    if (semi_cond && !has_semileptonic00_primary)
+      LOG_CRITICAL(logger, err, "semi_cond bez oczekiwanej topologii semileptonic00", ErrorHandling::LogFiles::LogType::ERROR);
   }
   else if (mcflag == 0)
   {
     mctruth_int = 0; // Data event
+
+    has_pm = false;
+    has_00 = false;
+    has_000 = false;
+    has_semileptonic = false;
   }
 }
 
