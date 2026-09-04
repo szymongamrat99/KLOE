@@ -153,15 +153,19 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
   {
     try
     {
-      // Enforce positive energies
-      if (_X(4) < 0)
-        _X(4) = MIN_CLU_ENE;
-      if (_X(9) < 0)
-        _X(9) = MIN_CLU_ENE;
-      if (_X(14) < 0)
-        _X(14) = MIN_CLU_ENE;
-      if (_X(19) < 0)
-        _X(19) = MIN_CLU_ENE;
+      // Enforce positive energies - only valid for modes with a leading
+      // 4x5 (x,y,z,t,E) cluster block; PM has no clusters and only 16 params.
+      if (_mode == "SignalGlobal" || _mode == "Omega" || _mode == "Trilateration" || _mode == "Neutral")
+      {
+        if (_X(4) < 0)
+          _X(4) = MIN_CLU_ENE;
+        if (_X(9) < 0)
+          _X(9) = MIN_CLU_ENE;
+        if (_X(14) < 0)
+          _X(14) = MIN_CLU_ENE;
+        if (_X(19) < 0)
+          _X(19) = MIN_CLU_ENE;
+      }
 
       for (Int_t l = 0; l < _M; l++)
       {

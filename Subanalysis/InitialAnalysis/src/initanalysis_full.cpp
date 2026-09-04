@@ -1833,6 +1833,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
       baseKin.necls = dataAccess.GetNECls();
       baseKin.eclfilfo = dataAccess.GetEclFilfo();
+      baseKin.eclfilfoword = dataAccess.GetEclFilfoWord();
 
       baseKin.eclstream.assign(dataAccess.GetEclStream().begin(), dataAccess.GetEclStream().end());
       // -------------------------------------------------------------------------------------

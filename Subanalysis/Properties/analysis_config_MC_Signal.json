@@ -25,17 +25,14 @@
         "trilaterationKinFit": true,
         "signalKinFit": true,
         "omegaKinFit": true,
+        "chargedKinFit": true,
+        "neutralKinFit": true,
         "triangleReconstruction": false,
         "photonPairing": true,
         "kaonProperTimes": true
       },
       "cuts": {
-        "minMassWindow": 480.0,
-        "maxMassWindow": 540.0,
-        "maxChi2": 50.0,
-        "applyPreselection": true,
-        "applyKinematicFit": true,
-        "applyStatisticalCuts": true
+        "cutSet": "FINAL_SIGNAL"
       }
     },
     
@@ -47,17 +44,14 @@
         "trilaterationKinFit": false,
         "signalKinFit": false,
         "omegaKinFit": true,
+        "chargedKinFit": true,
+        "neutralKinFit": true,
         "triangleReconstruction": false,
         "photonPairing": true,
         "kaonProperTimes": false
       },
       "cuts": {
-        "minMassWindow": 750.0,
-        "maxMassWindow": 810.0,
-        "maxChi2": 30.0,
-        "applyPreselection": true,
-        "applyKinematicFit": true,
-        "applyStatisticalCuts": true
+        "cutSet": "NONE"
       }
     },
     
@@ -72,67 +66,52 @@
         "trilaterationKinFit": true,
         "signalKinFit": true,
         "omegaKinFit": true,
+        "chargedKinFit": true,
+        "neutralKinFit": true,
         "triangleReconstruction": false,
         "photonPairing": true,
         "kaonProperTimes": true
       },
       "cuts": {
-        "minMassWindow": 1000.0,
-        "maxMassWindow": 1040.0,
-        "maxChi2": 40.0,
-        "applyPreselection": true,
-        "applyKinematicFit": true,
-        "applyStatisticalCuts": true
+        "cutSet": "NONE"
       }
     },
     
     "THREE_PI0": {
-      "enabled": true,
-      "description": "phi -> K0K0 -> pi0pi0pi0pi+pi-",
-      "signal": 4,
+      "enabled": false,
+      "description": "phi -> pi0pi0pi0",
       "modules": {
-        "classifyMCVariables": true,
-        "signalOnly": false,
         "momentumSmearing": false,
-        "trilaterationKinFit": true,
-        "signalKinFit": true,
-        "omegaKinFit": true,
+        "trilaterationKinFit": false,
+        "signalKinFit": false,
+        "omegaKinFit": false,
+        "chargedKinFit": true,
+        "neutralKinFit": true,
         "triangleReconstruction": false,
         "photonPairing": true,
-        "kaonProperTimes": true
+        "kaonProperTimes": false
       },
       "cuts": {
-        "minMassWindow": 480.0,
-        "maxMassWindow": 540.0,
-        "maxChi2": 50.0,
-        "applyPreselection": true,
-        "applyKinematicFit": true,
-        "applyStatisticalCuts": true
+        "cutSet": "NONE"
       }
     },
 
     "SEMILEPTONIC": {
-      "enabled": true,
-      "description": "phi -> K0K0 -> pi+pi-l+nu",
-      "signal": 5,
+      "enabled": false,
+      "description": "KSKL->Semileptonic-pi0pi0",
       "modules": {
-        "classifyMCVariables": true,
-        "signalOnly": false,
         "momentumSmearing": false,
-        "trilaterationKinFit": true,
-        "signalKinFit": true,
-        "omegaKinFit": true,
+        "trilaterationKinFit": false,
+        "signalKinFit": false,
+        "omegaKinFit": false,
+        "chargedKinFit": true,
+        "neutralKinFit": true,
         "triangleReconstruction": false,
-        "photonPairing": false,
-        "kaonProperTimes": true
+        "photonPairing": true,
+        "kaonProperTimes": false
       },
       "cuts": {
-        "minMassWindow": 480.0,
-        "maxMassWindow": 540.0,
-        "maxChi2": 50.0,
-        "applyPreselection": true,
-        "applyKinematicFit": true,
-        "applyStatisticalCuts": true
+        "cutSet": "NONE"
       }
     }
   },
