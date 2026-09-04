@@ -90,19 +90,35 @@
     ],
     "SIGNAL": [
       {
-        "order": 0,
+        "order": 1,
         "cutDescription": "K->pi+pi- decay invariant mass.",
         "cutId": "InvMassKch",
         "cutType": "T",
-        "cutValue": 2.673,
+        "cutValue": 2.637,
         "cutCondition": "<="
       },
       {
-        "order": 1,
-        "cutDescription": "K->pi0pi0 decay invariant mass.",
-        "cutId": "InvMassKne",
+        "order": 0,
+        "cutDescription": "Chi2 of signal kin fit",
+        "cutId": "Chi2SignalKinFit",
+        "cutType": "O",
+        "cutValue": 30,
+        "cutCondition": "<="
+      },
+      {
+        "order": 2,
+        "cutDescription": "Plane of Pi0 Mass after kin fit U",
+        "cutId": "Pi0MassPlane_u",
         "cutType": "T",
-        "cutValue": 117.678,
+        "cutValue": 8.085754304,
+        "cutCondition": "<="
+      },
+      {
+        "order": 3,
+        "cutDescription": "Plane of Pi0 Mass after kin fit V",
+        "cutId": "Pi0MassPlane_v",
+        "cutType": "T",
+        "cutValue": 11.514665004,
         "cutCondition": "<="
       }
     ],
@@ -261,6 +277,10 @@
         "isBackgroundRejection": true,
         "channel": "3"
       }
+    ],
+
+    "NONE": [
+      
     ]
   }
 }
