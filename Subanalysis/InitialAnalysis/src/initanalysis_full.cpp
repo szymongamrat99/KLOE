@@ -994,7 +994,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
     errorCode = hypoMap[hypoCode]; // error code based on the hypothesis
 
-    if (hypoCode == KLOE::HypothesisCode::SEMILEPTONIC && countVtx != 1)
+    if (0)//hypoCode == KLOE::HypothesisCode::SEMILEPTONIC && countVtx != 1)
     {
       errorCode = ErrorHandling::ErrorCodes::NOT_SINGLE_VTX_EVENT;
     }
@@ -1371,7 +1371,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {
             // This branch should not be reached for THREE_PI0 because FindNeutralCluster
             // already requires >= 6 clusters with E > 20 MeV. Guard it defensively.
-            if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
+            if (false)//hypoCode == KLOE::HypothesisCode::THREE_PI0)
             {
               noError = false;
               if (mctruth == mctruthSignal)
