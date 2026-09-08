@@ -183,6 +183,8 @@ namespace KLOE
   extern const std::map<TString, TString> otherChannTitle; //!< Map of short channel titles
   extern const std::map<TString, Color_t> channColor; //!< Map of channel colors
   extern const std::map<TString, Color_t> otherChannColor; //!< Map of other channel colors
+  extern const std::map<TString, TString> controlSampleTitle; //!< Map of control sample titles
+  extern const std::map<TString, TString> controlSampleColor; //!< Map of control sample colors
 
   extern std::map<Int_t, Int_t> channEventCount; //!< Map of event counts per channel
 

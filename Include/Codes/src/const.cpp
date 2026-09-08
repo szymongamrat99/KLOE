@@ -250,6 +250,13 @@ namespace KLOE
       {"K+K-pi0piplus_pi0electronpositron", "K^{+}K^{-}#rightarrow#pi^{0}#pi^{#pm}#pi^{0}l^{#mp}#nu"},
       {"Other", "Other"}};
 
+  const std::map<TString, TString> controlSampleTitle = {
+    {"hasPM", "K#rightarrow#pi^{+}#pi^{-}"},
+    {"has00", "K#rightarrow#pi^{0}#pi^{0}"},
+    {"has000", "K#rightarrow3#pi^{0}"},
+    {"hasSemileptonic", "K#rightarrow#pi^{#pm}l^{#mp}#nu"}
+  };
+
   const std::map<TString, Color_t> channColor = {
       {"Data", kBlack},
       {"Signal", kRed},
@@ -282,6 +289,13 @@ namespace KLOE
       {"K+K-pi0pi0piplus_pi0electronpositron", kCyan - 2},
       {"K+K-pi0piplus_pi0electronpositron", kOrange - 2},
       {"Other", kBlack}};
+
+  const std::map<TString, TString> controlSampleColor = {
+    {"hasPM", "kRed"},
+    {"has00", "kBlue"},
+    {"has000", "kGreen"},
+    {"hasSemileptonic", "kMagenta"}
+  };
 
   std::map<Int_t, Int_t> channEventCount = {
       {0, 0},
