@@ -1,16 +1,15 @@
 cmake_minimum_required(VERSION 3.13)
+cmake_policy(SET CMP0167 OLD)
 project(KLSPM00 CXX Fortran)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_EXTENSIONS ON)
 
-# ✅ DODAJ BUILD TYPES I OPTYMALIZACJE
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
-# Optymalizacje kompilaitora
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -Wall -Wextra -Wpedantic -fsanitize=address -fsanitize=undefined")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG -march=x86-64")
@@ -44,7 +43,7 @@ add_subdirectory(Include/Codes)
 add_subdirectory(Include/MainMenuHandler)
 # add_subdirectory(Subanalysis/Pipi)
 # add_subdirectory(Subanalysis/Plots)
-# add_subdirectory(Subanalysis/RegenerationAnalysis)
+add_subdirectory(Subanalysis/RegenerationAnalysis)
 # add_subdirectory(Subanalysis/Semileptonic)
 # if(BUILD_TESTING)
 #   add_subdirectory(tests)
@@ -81,6 +80,7 @@ target_link_libraries(KLSPM00 PUBLIC
   OmegaRec
   MainMenuHandler
   InitialAnalysis
+  RegenAnalysis
   ${Boost_LIBRARIES}
   ${CURL_LIBRARIES}
   ${ROOT_LIBRARIES}
