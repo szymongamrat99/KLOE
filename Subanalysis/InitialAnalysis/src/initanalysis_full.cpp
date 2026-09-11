@@ -1345,7 +1345,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
             if (errorCode != ErrorHandling::ErrorCodes::NO_ERROR)
             {
-              if (hypoCode == KLOE::HypothesisCode::THREE_PI0)
+              if (false)//hypoCode == KLOE::HypothesisCode::THREE_PI0)
               {
                 noError = false;
                 if (mctruth == mctruthSignal)
@@ -1361,11 +1361,16 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
                   continue;
                 }
               }
+
+              baseKin.bestError = 999999.;
+              KnerecSix.total = {0., 0., 0., 0., 0., 0., 0., 0., 0.};
+              photonFourMomSix = std::vector<KLOE::neutralParticle>(6, KLOE::neutralParticle());
             }
             else
             {
               genVarClassifier.MCvsReconstructedClustersComparator(neuclulist, baseKin.g6takenSix, dataAccess.GetPNum1(), baseKin.ntmc, dataAccess.GetMother(), dataAccess.GetVtxMC(), dataAccess.GetPidMC(), dataAccess.GetKine(), dataAccess.GetKinMom(), baseKin.goodClustersSix);
             }
+            
           }
           else
           {
