@@ -42,7 +42,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   mcFiles = Utils::CountFiles(&chain, true);
   dataFiles = Utils::CountFiles(&chain, false);
 
-  lumiFactor = 1.07906;//(dataFiles > 0) ? static_cast<double>(dataFiles) / static_cast<double>(mcFiles) : 1.0;
+  lumiFactor = 1.082;//(dataFiles > 0) ? static_cast<double>(dataFiles) / static_cast<double>(mcFiles) : 1.0;
 
   std::cout << "INFO: Number of MC files: " << mcFiles << std::endl;
   std::cout << "INFO: Number of Data files: " << dataFiles << std::endl;

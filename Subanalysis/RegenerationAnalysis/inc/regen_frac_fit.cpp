@@ -36,12 +36,12 @@ RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(
   semileptonicWeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
 
   TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
-  avgThreePi0Weight = threePi0WeightResult->Parameter(0);
+  avgThreePi0Weight = 1.0;//threePi0WeightResult->Parameter(0);
 
   std::cout << "Average Three Pi0 Weight: " << avgThreePi0Weight << std::endl;
 
   TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
-  avgSemileptonicWeight = semileptonicWeightResult->Parameter(0);
+  avgSemileptonicWeight = 1.0;//semileptonicWeightResult->Parameter(0);
 
   std::cout << "Average Semileptonic Weight: " << avgSemileptonicWeight << std::endl;
 
@@ -371,11 +371,11 @@ void RegenerationFractionFit::_FillHistograms()
       }
       else if (channelName_str == "3pi0")
       {
-        fHistos[histType][channelName_str]->Fill(radius, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+        fHistos[histType][channelName_str]->Fill(radius, 1.0);// threePi0WeightsHist->Interpolate(Kchrec[5]));
       }
       else if (channelName_str == "Semileptonic")
       {
-        fHistos[histType][channelName_str]->Fill(radius, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+        fHistos[histType][channelName_str]->Fill(radius, 1.0);//semileptonicWeightsHist->Interpolate(minv4gam));
       }
       else
       {
@@ -419,15 +419,15 @@ void RegenerationFractionFit::_FillHistograms()
     }
     else if (channelName_str == "3pi0")
     {
-      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
-      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
-      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit, 1.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 1.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 1.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
     }
     else if (channelName_str == "Semileptonic")
     {
-      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit,  0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
-      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
-      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit,  1.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 1.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 1.0);//semileptonicWeightsHist->Interpolate(minv4gam));
     }
     else
     {
@@ -1128,6 +1128,24 @@ double RegenerationFractionFit::_calculateRadius(HistogramType type) const
   }
 }
 
+int RegenerationFractionFit::_CountNonEmptyBinsInRange(TH1D *hist, double xmin, double xmax) const
+{
+  if (hist == nullptr)
+    return 0;
+
+  int firstBin = hist->GetXaxis()->FindBin(xmin);
+  int lastBin = hist->GetXaxis()->FindBin(xmax);
+
+  int count = 0;
+  for (int bin = firstBin; bin <= lastBin; ++bin)
+  {
+    if (hist->GetBinContent(bin) != 0.0)
+      ++count;
+  }
+
+  return count;
+}
+
 void RegenerationFractionFit::_FitContinuousWeightFunction(HistogramType histType)
 {
   if (fcontWeightDC.find(histType) != fcontWeightDC.end() && fcontWeightDC[histType] != nullptr)
@@ -1137,21 +1155,26 @@ void RegenerationFractionFit::_FitContinuousWeightFunction(HistogramType histTyp
     delete fcontWeightCylBP[histType];
   }
 
-  // Assuming fInterf.fit_function is a callable object that takes x and type as parameters
+  fcontWeightDC[histType] = nullptr;
+  fcontWeightSphBP[histType] = nullptr;
+  fcontWeightCylBP[histType] = nullptr;
+
   std::string funcNameDC = "FuncDC_" + _HistTypeToString(histType),
               funcNameSphBP = "FuncSphBP_" + _HistTypeToString(histType),
               funcNameCylBP = "FuncCylBP_" + _HistTypeToString(histType);
+
+  double dcLow, dcHigh, sphLow, sphHigh, cylLow, cylHigh;
   if (histType == HistogramType::RHO_CHARGED || histType == HistogramType::R_CHARGED)
   {
-    fcontWeightDC[histType] = new TF1(funcNameDC.c_str(), "pol1", fConfig.DCWallBottomBoundCharged, fConfig.DCWallTopBoundCharged);
-    fcontWeightSphBP[histType] = new TF1(funcNameSphBP.c_str(), "pol1", fConfig.sphericalBPBottomBoundCharged, fConfig.sphericalBPTopBoundCharged);
-    fcontWeightCylBP[histType] = new TF1(funcNameCylBP.c_str(), "pol1", fConfig.cylindricalBPBottomBoundCharged, fConfig.cylindricalBPTopBoundCharged);
+    dcLow = fConfig.DCWallBottomBoundCharged;         dcHigh = fConfig.DCWallTopBoundCharged;
+    sphLow = fConfig.sphericalBPBottomBoundCharged;   sphHigh = fConfig.sphericalBPTopBoundCharged;
+    cylLow = fConfig.cylindricalBPBottomBoundCharged; cylHigh = fConfig.cylindricalBPTopBoundCharged;
   }
   else if (histType == HistogramType::RHO_NEUTRAL || histType == HistogramType::R_NEUTRAL)
   {
-    fcontWeightDC[histType] = new TF1(funcNameDC.c_str(), "pol1", fConfig.DCWallBottomBoundNeutral, fConfig.DCWallTopBoundNeutral);
-    fcontWeightSphBP[histType] = new TF1(funcNameSphBP.c_str(), "pol1", fConfig.sphericalBPBottomBoundNeutral, fConfig.sphericalBPTopBoundNeutral);
-    fcontWeightCylBP[histType] = new TF1(funcNameCylBP.c_str(), "pol1", fConfig.cylindricalBPBottomBoundNeutral, fConfig.cylindricalBPTopBoundNeutral);
+    dcLow = fConfig.DCWallBottomBoundNeutral;         dcHigh = fConfig.DCWallTopBoundNeutral;
+    sphLow = fConfig.sphericalBPBottomBoundNeutral;   sphHigh = fConfig.sphericalBPTopBoundNeutral;
+    cylLow = fConfig.cylindricalBPBottomBoundNeutral; cylHigh = fConfig.cylindricalBPTopBoundNeutral;
   }
   else
   {
@@ -1159,51 +1182,54 @@ void RegenerationFractionFit::_FitContinuousWeightFunction(HistogramType histTyp
     return;
   }
 
-  TFitResultPtr fitResultDC = fRegenerationWeights[histType]->Fit(fcontWeightDC[histType], "RES");
-  TFitResultPtr fitResultSphBP = fRegenerationWeights[histType]->Fit(fcontWeightSphBP[histType], "RES+");
-  TFitResultPtr fitResultCylBP = fRegenerationWeights[histType]->Fit(fcontWeightCylBP[histType], "RES+");
+  TH1D *hist = fRegenerationWeights[histType];
 
-  TFitResult *resDC    = fitResultDC.Get();
-  TFitResult *resSphBP = fitResultSphBP.Get();
-  TFitResult *resCylBP = fitResultCylBP.Get();
+  struct FitRange { const char *label; std::string name; double low, high; TF1 **target; };
+  std::array<FitRange, 3> ranges = {{
+      {"DC Wall", funcNameDC, dcLow, dcHigh, &fcontWeightDC[histType]},
+      {"Spherical BP", funcNameSphBP, sphLow, sphHigh, &fcontWeightSphBP[histType]},
+      {"Cylindrical BP", funcNameCylBP, cylLow, cylHigh, &fcontWeightCylBP[histType]},
+  }};
 
-  if (resDC != nullptr && resDC->NPar() > 0)
+  bool anyFitDrawnYet = false;
+  for (const auto &range : ranges)
   {
-    const double *p = resDC->GetParams();
-    const auto &e = resDC->Errors();
-    std::cout << "Fit successful for DC Wall bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    if (p && !e.empty())
-      std::cout << "Fit parameters for DC Wall: b = (" << p[0] << " +- " << e[0] << "), a = (" << p[1] << " +- " << e[1] << ")" << std::endl << std::endl;
-  }
-  else
-  {
-    std::cerr << "Fit failed for DC Wall bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-  }
+    int nPoints = _CountNonEmptyBinsInRange(hist, range.low, range.high);
 
-  if (resSphBP != nullptr && resSphBP->NPar() > 0)
-  {
-    const double *p = resSphBP->GetParams();
-    const auto &e = resSphBP->Errors();
-    std::cout << "Fit successful for Spherical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    if (p && !e.empty())
-      std::cout << "Fit parameters for Spherical BP: b = (" << p[0] << " +- " << e[0] << "), a = (" << p[1] << " +- " << e[1] << ")" << std::endl;
-  }
-  else
-  {
-    std::cerr << "Fit failed for Spherical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-  }
+    // With <2 non-empty points pol1 (2 parameters) is undetermined; with 0 points no fit is possible at all.
+    if (nPoints == 0)
+    {
+      std::cerr << "Fit impossible for " << range.label << " bounds, histogram type: "
+                << _HistTypeToString(histType) << " (no non-empty points in fit range)" << std::endl;
+      continue;
+    }
 
-  if (resCylBP != nullptr && resCylBP->NPar() > 0)
-  {
-    const double *p = resCylBP->GetParams();
-    const auto &e = resCylBP->Errors();
-    std::cout << "Fit successful for Cylindrical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
-    if (p && !e.empty())
-      std::cout << "Fit parameters for Cylindrical BP: b = (" << p[0] << " +- " << e[0] << "), a = (" << p[1] << " +- " << e[1] << ")" << std::endl;
-  }
-  else
-  {
-    std::cerr << "Fit failed for Cylindrical BP bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
+    const char *formula = (nPoints == 1) ? "pol0" : "pol1";
+    *range.target = new TF1(range.name.c_str(), formula, range.low, range.high);
+
+    std::string fitOption = anyFitDrawnYet ? "RES+" : "RES";
+    anyFitDrawnYet = true;
+
+    TFitResultPtr fitResult = hist->Fit(*range.target, fitOption.c_str());
+    TFitResult *res = fitResult.Get();
+
+    if (res != nullptr && res->NPar() > 0)
+    {
+      const double *p = res->GetParams();
+      const auto &e = res->Errors();
+      std::cout << "Fit successful for " << range.label << " bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
+      if (p && !e.empty())
+      {
+        std::cout << "Fit parameters for " << range.label << ": b = (" << p[0] << " +- " << e[0] << ")";
+        if (nPoints >= 2)
+          std::cout << ", a = (" << p[1] << " +- " << e[1] << ")";
+        std::cout << std::endl << std::endl;
+      }
+    }
+    else
+    {
+      std::cerr << "Fit failed for " << range.label << " bounds, histogram type: " << _HistTypeToString(histType) << std::endl;
+    }
   }
 }
 

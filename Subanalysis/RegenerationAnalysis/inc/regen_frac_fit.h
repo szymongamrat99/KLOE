@@ -121,6 +121,7 @@ private:
   std::pair<TF1*, HistogramType> _GetFitFuncByDt(double dt);
 
   void _FitContinuousWeightFunction(HistogramType histType);
+  int _CountNonEmptyBinsInRange(TH1D *hist, double xmin, double xmax) const;
 
   // ---
 

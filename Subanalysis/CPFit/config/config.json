@@ -62,7 +62,7 @@
     "A_signal": {
       "enabled": true,
       "initialValue": 1.00,
-      "limitLower": 3.0,
+      "limitLower": 1.0,
       "limitUpper": 3.0,
       "step": 0.01,
       "channels": ["Signal"],
@@ -71,26 +71,26 @@
     "A_regen": {
       "enabled": true,
       "initialValue": 1.0,
-      "limitLower": 3.0,
-      "limitUpper": 2.5,
+      "limitLower": 1.0,
+      "limitUpper": 3.0,
       "step": 0.01,
       "channels": ["Regeneration"],
-      "fixed": true
+      "fixed": false
     },
     "A_three": {
       "enabled": true,
-      "initialValue": 1.0,
+      "initialValue": 1.00,
       "limitLower": 1.0,
-      "limitUpper": 2.5,
-      "step": 0.01,
+      "limitUpper": 3.0,
+      "step": 100.0,
       "channels": ["3pi0"],
-      "fixed": true
+      "fixed": false
     },
     "A_omega": {
       "enabled": true,
       "initialValue": 1.0,
       "limitLower": 1.0,
-      "limitUpper": 2.5,
+      "limitUpper": 3.0,
       "step": 0.01,
       "channels": ["Omega"],
       "fixed": false
@@ -99,16 +99,16 @@
       "enabled": true,
       "initialValue": 1.0,
       "limitLower": 1.0,
-      "limitUpper": 2.5,
-      "step": 0.01,
+      "limitUpper": 3.0,
+      "step": 100.0,
       "channels": ["Semileptonic"],
-      "fixed": true
+      "fixed": false
     },
     "A_other": {
       "enabled": true,
       "initialValue": 1.0,
-      "limitLower": 1.0,
-      "limitUpper": 2.5,
+      "limitLower": 0.1,
+      "limitUpper": 0.2,
       "step": 0.01,
       "channels": ["Other"],
       "fixed": false
@@ -118,8 +118,8 @@
       "groupName": "A_bcg",
       "initialValue": 1.00,
       "step": 0.01,
-      "limitLower": 1.0,
-      "limitUpper": 10.0,
+      "limitLower": 0.0,
+      "limitUpper": 3.0,
       "channels": ["Semileptonic", "3pi0", "Other"],
       "fixed": false
     }
