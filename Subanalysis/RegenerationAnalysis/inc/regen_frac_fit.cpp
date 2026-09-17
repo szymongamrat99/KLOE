@@ -371,11 +371,11 @@ void RegenerationFractionFit::_FillHistograms()
       }
       else if (channelName_str == "3pi0")
       {
-        fHistos[histType][channelName_str]->Fill(radius, 1.0);// threePi0WeightsHist->Interpolate(Kchrec[5]));
+        fHistos[histType][channelName_str]->Fill(radius, 0.882);// threePi0WeightsHist->Interpolate(Kchrec[5]));
       }
       else if (channelName_str == "Semileptonic")
       {
-        fHistos[histType][channelName_str]->Fill(radius, 1.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+        fHistos[histType][channelName_str]->Fill(radius, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
       }
       else
       {
@@ -419,15 +419,15 @@ void RegenerationFractionFit::_FillHistograms()
     }
     else if (channelName_str == "3pi0")
     {
-      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit, 1.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
-      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 1.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
-      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 1.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit, 0.882);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 0.882);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 0.882);//threePi0WeightsHist->Interpolate(Kchrec[5]));
     }
     else if (channelName_str == "Semileptonic")
     {
-      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit,  1.0);//semileptonicWeightsHist->Interpolate(minv4gam));
-      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 1.0);//semileptonicWeightsHist->Interpolate(minv4gam));
-      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 1.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit,  0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
     }
     else
     {

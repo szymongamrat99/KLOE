@@ -79,10 +79,10 @@
     },
     "A_three": {
       "enabled": true,
-      "initialValue": 1.00,
+      "initialValue": 0.882,
       "limitLower": 1.0,
       "limitUpper": 3.0,
-      "step": 100.0,
+      "step": 0.01,
       "channels": ["3pi0"],
       "fixed": false
     },
@@ -111,7 +111,7 @@
       "limitUpper": 0.2,
       "step": 0.01,
       "channels": ["Other"],
-      "fixed": false
+      "fixed": true
     },
     "A_bcg_group": {
       "enabled": false,

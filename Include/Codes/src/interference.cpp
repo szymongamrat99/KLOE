@@ -213,7 +213,7 @@ namespace KLOE
         }
       }
 
-      _frac_tmp[name.second]->Scale(1.07906);
+      _frac_tmp[name.second]->Scale(1.082);
 
       interference::bin_extraction(name.second, _frac_tmp[name.second]);
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -314,6 +314,10 @@ namespace KLOE
       }
     }
 
+    value += (std::pow(get_weight("3pi0", 0.0, xx) - 0.882, 2) / std::pow(0.011, 2)) + 
+              (std::pow(get_weight("Regeneration", 0.0, xx) - 1.0, 2) / std::pow(0.05, 2)) + 
+              (std::pow(get_weight("Signal", 0.0, xx) - 1.0, 2) / std::pow(0.05, 2));
+              // (std::pow(get_weight("Semileptonic", 0.0, xx) - 1.0, 2) / std::pow(0.011, 2));
     return value;
   };
 
@@ -374,6 +378,8 @@ namespace KLOE
 
     for (Int_t i = 0; i < _bin_number; i++)
       value += std::pow(b[6][i] - bin_sum[i], 2) / (std::pow(e[6][i], 2) + err_sum[i] / 2.);
+
+      
 
     return value;
   };

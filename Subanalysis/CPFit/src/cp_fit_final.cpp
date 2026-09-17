@@ -5,6 +5,7 @@
 #include <TTree.h>
 #include <TFile.h>
 #include <TChain.h>
+#include <TRandom3.h>
 #include <Math/Minimizer.h>
 #include <Math/Factory.h>
 #include <Math/Functor.h>
@@ -502,7 +503,69 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     ++display;
   }
 
+  
+  // ===========================================================================
+  // KROK 1: Zgrubne dopasowanie algorytmem SIMPLEX
+  // ===========================================================================
+  std::cout << "INFO: Krok 1 - Przeszukiwanie przestrzeni algorytmem SIMPLEX..." << std::endl;
+
+  // Tworzymy minimizer Simplex (np. "Minuit2", "Simplex")
+  std::unique_ptr<ROOT::Math::Minimizer> simplex_min(
+      ROOT::Math::Factory::CreateMinimizer("Minuit2", "Simplex")
+  );
+
+  // Przepisujemy funkcję celu (FCN) oraz parametry do minimizera Simplex
+  simplex_min->SetFunction(minimized_function); // 'fcn' to Twój ROOT::Math::Functor / IMultiGenFunction
+  simplex_min->SetMaxFunctionCalls(10000);
+  simplex_min->SetTolerance(0.01);
+
+  for (const auto &pm : param_index_map) {
+      int idx = pm.second;
+      if (idx < 0) continue;
+      const Parameter &p_cfg = cfg.parameters.at(std::string(pm.first.Data()));
+
+      if (p_cfg.fixed) {
+          simplex_min->SetFixedVariable(idx, pm.first.Data(), p_cfg.initial_value);
+      } else if (p_cfg.limit_lower > 0.0 || p_cfg.limit_upper > 0.0) {
+          auto lims = p_cfg.limits();
+          simplex_min->SetLimitedVariable(idx, pm.first.Data(), p_cfg.initial_value, p_cfg.step, lims[0], lims[1]);
+      } else {
+          simplex_min->SetVariable(idx, pm.first.Data(), p_cfg.initial_value, p_cfg.step);
+      }
+  }
+
+  // Uruchomienie Simplex
+  simplex_min->Minimize();
+
+  // ===========================================================================
+  // KROK 2: Dokładne dopasowanie i błędy algorytmem MIGRAD
+  // ===========================================================================
+  std::cout << "INFO: Krok 2 - Przekazanie wyników do MIGRAD i precyzyjne dopasowanie..." << std::endl;
+
+  // Przepisujemy znalezione przez Simplex wartości jako nowe punkty startowe dla głównego 'minimum' (Migrad)
+  for (const auto &pm : param_index_map) {
+      int idx = pm.second;
+      if (idx < 0) continue;
+      const Parameter &p_cfg = cfg.parameters.at(std::string(pm.first.Data()));
+
+      double start_val = simplex_min->X()[idx]; // Wynik ze Simplexa
+
+      if (p_cfg.fixed) {
+          minimum->SetFixedVariable(idx, pm.first.Data(), start_val);
+      } else if (p_cfg.limit_lower > 0.0 || p_cfg.limit_upper > 0.0) {
+          auto lims = p_cfg.limits();
+          minimum->SetLimitedVariable(idx, pm.first.Data(), start_val, p_cfg.step, lims[0], lims[1]);
+      } else {
+          minimum->SetVariable(idx, pm.first.Data(), start_val, p_cfg.step);
+      }
+  }
+
+  // Główny fit MIGRAD
   minimum->Minimize();
+
+  Double_t err_low, err_up;
+  minimum->GetMinosError(param_index_map["Re"], err_low, err_up);
+  minimum->GetMinosError(param_index_map["Im"], err_low, err_up);
 
   std::vector<Double_t> par(num_of_vars), parErr(num_of_vars);
 
