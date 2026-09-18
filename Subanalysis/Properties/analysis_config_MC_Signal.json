@@ -32,7 +32,7 @@
         "kaonProperTimes": true
       },
       "cuts": {
-        "cutSet": "FINAL_SIGNAL"
+        "cutSet": "NONE"
       }
     },
     
