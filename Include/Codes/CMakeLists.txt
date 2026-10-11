@@ -1,5 +1,7 @@
 # CMakeLists.txt w katalogu MyProject/Analyses/AnalysisA/
 
+find_package(CURL REQUIRED)
+
 # 1. Definicja nagłówków ze ścieżkami względnymi do katalogu źródłowego
 set(LibRec_HEADERS
     ${CMAKE_CURRENT_SOURCE_DIR}/inc/const.h
@@ -88,6 +90,6 @@ target_include_directories(LibRec PUBLIC
 target_link_libraries(LibRec PRIVATE
     ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES}
-    ${CURL_LIBRARIES}
+    CURL::libcurl
     $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>
 )
