@@ -1,6 +1,22 @@
 # CMakeLists.txt w katalogu MyProject/Analyses/AnalysisA/
 
-# Deklarujemy bibliotekę dla Analizy A
+# 1. Definicja nagłówków ze ścieżkami względnymi do katalogu źródłowego
+set(LibRec_HEADERS
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/const.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/ErrorLogs.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/ConfigManager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/AnalysisManager.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/kloe_class.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/inc/reconstructor.h
+)
+
+# 2. Wygenerowanie słownika ROOT z pełnymi ścieżkami
+root_generate_dictionary(LibRecDict 
+    ${LibRec_HEADERS}
+    LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/inc/LinkDef.h
+)
+
+# Deklarujemy bibliotekę dla Analizy A (dodając wygenerowany słownik LibRecDict.cxx)
 add_library(LibRec SHARED 
             src/charged_mom.cpp
             src/chi2_dist.cpp
@@ -42,7 +58,6 @@ add_library(LibRec SHARED
             src/DoublGaussFitter.cpp
             src/double_gaus.cpp
             src/KaonMassReconstructor.cpp
-            src/ConfigManager.cpp
             src/trilaterationKinFit.cpp
             src/signalKinFit.cpp
             src/omegaKinFit.cpp
@@ -55,12 +70,10 @@ add_library(LibRec SHARED
             src/AnalysisManager.cpp
             src/PdgApiClient.cpp
             src/PdgManager.cpp
+            LibRecDict.cxx # <--- TUTAJ DODANO SŁOWNIK ROOT
             )
 
 # Poinformuj, gdzie są nagłówki dla tej biblioteki.
-# PUBLIC: oznacza, że katalog z nagłówkami (tu: bieżący katalog, '.') będzie
-# również widoczny dla celów, które linkują do AnalysisALib.
-
 target_include_directories(LibRec PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/../FortranAnalysis/inc
@@ -68,27 +81,13 @@ target_include_directories(LibRec PUBLIC
     ${Boost_INCLUDE_DIRS}
     ${CURL_INCLUDE_DIRS}
     ${ROOT_INCLUDE_DIRS}
-    ${ROOT_INCLUDE_DIRS}/nlohmann
-    # Jeśli AnalysisA.cpp używa nagłówków z src/ lub Subanalysis/,
-    # trzeba je tu również dodać (np. parent_directory/src)
-    # Przykład: target_include_directories(AnalysisALib PRIVATE ${CMAKE_SOURCE_DIR}/src)
+    ${ROOT_INCLUDE_DIRS}/n0hmann
 )
 
-# Jeśli AnalysisALib samo potrzebuje bibliotek ROOT, musisz je tu linkować.
-# Zmienna ${ROOT_LIBRARIES} jest dziedziczona z głównego CMakeLists.txt.
+# Linkowanie bibliotek
 target_link_libraries(LibRec PRIVATE
     ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES}
     ${CURL_LIBRARIES}
-    # ✅ DODAJ OpenMP do LibRec (gdzie jest KinFitter)
     $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>
 )
-
-# # ✅ DODAJ definicję _OPENMP jeśli OpenMP jest dostępny
-# if(OpenMP_CXX_FOUND)
-#     target_compile_definitions(LibRec PRIVATE _OPENMP)
-# endif()
-
-# Możesz tu także zdefiniować lokalny program wykonawczy, np. do testów.
-# add_executable(run_analysis_A AnalysisA.cpp)
-# target_link_libraries(run_analysis_A PRIVATE AnalysisALib ${ROOT_LIBRARIES})
