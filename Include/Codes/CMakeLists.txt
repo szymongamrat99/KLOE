@@ -79,6 +79,7 @@ target_include_directories(LibRec PUBLIC
 target_link_libraries(LibRec PRIVATE
     ${ROOT_LIBRARIES}
     ${Boost_LIBRARIES}
+    ${CURL_LIBRARIES}
     # ✅ DODAJ OpenMP do LibRec (gdzie jest KinFitter)
     $<$<BOOL:${OpenMP_CXX_FOUND}>:OpenMP::OpenMP_CXX>
 )
