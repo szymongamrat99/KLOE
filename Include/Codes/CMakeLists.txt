@@ -80,8 +80,8 @@ target_include_directories(LibRec PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/..
     ${Boost_INCLUDE_DIRS}
     ${CURL_INCLUDE_DIRS}
-    ${ROOT_INCLUDE_DIRS}
-    ${ROOT_INCLUDE_DIRS}/n0hmann
+    ${ROOT_INCLUDE_DIRS}/nlohmann   # <--- Zapewnia dostęp do pliku json.hpp bezpośrednio
+    ${ROOT_INCLUDE_DIRS}          # <--- Zapewnia dostęp do nlohmann/json.hpp
 )
 
 # Linkowanie bibliotek
