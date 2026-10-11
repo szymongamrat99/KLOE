@@ -24,6 +24,7 @@ Subanalysis/Properties/histogram_conf/
 Subanalysis/Properties/pdg_api/
 Subanalysis/Properties/schemas/
 *.txt
+!CMakeLists.txt
 .vscode/
 parallel_logs*/
 .root_hist
