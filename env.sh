@@ -1,0 +1,9 @@
+export WORKDIR=/internal/big_one/gamrat/KLOE
+export KLOE_PROPERTIES_PATH=$WORKDIR/Subanalysis/Properties
+export KLOE_PDGAPI_PATH=$WORKDIR/Subanalysis/Properties/pdg_api
+export KLOE_LOGS_PATH=$WORKDIR/log
+export OMP_NUM_THREADS=1
+export KLOE_PROPERTIES_PATH=$WORKDIR/Subanalysis/Properties
+export CMAKE_PREFIX_PATH=/home/gamrat/root_dirs/install_root
+export ROOT_RESULTS_PATH=/internal/big_one/gamrat/root_files/kitt
+export ANALYSIS_CONFIG_FILE=analysis_config.json

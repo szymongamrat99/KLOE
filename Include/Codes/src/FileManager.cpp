@@ -101,7 +101,6 @@ namespace KLOE
     message += "Total integrated luminosity: " + std::to_string(totalLuminosity) + " nb^-1 (" + std::to_string(totalEvents) + " events)";
 
     logger.prettyPrint(message, "", "", ErrorHandling::LogFiles::LogType::GENERAL);
-
   }
 
   RunStats FileManager::getRunStats(const std::string &directory, const std::string &regex_pattern)
@@ -167,7 +166,6 @@ namespace KLOE
             dirnamedata,
             filenamedata,
             extension = Paths::ext_root,
-            path = (std::string)Utils::properties["variables"]["rootFiles"]["pathOldAna"],
             base_path = (std::string)filePaths["analyzed"]["signal"]["basePath"],
             datestamp = (std::string)filePaths["analyzed"]["signal"]["dateStamp"],
             mc_dir = "MONTE_CARLO",
@@ -181,15 +179,13 @@ namespace KLOE
     std::map<TString, std::array<Int_t, 2>> fileNumMC = {
         {"ALL_PHYS", {filePaths["analyzed"]["signal"]["MC"]["all_phys"]["firstFile"], filePaths["analyzed"]["signal"]["MC"]["all_phys"]["lastFile"]}},
         {"ALL_PHYS2", {filePaths["analyzed"]["signal"]["MC"]["all_phys2"]["firstFile"], filePaths["analyzed"]["signal"]["MC"]["all_phys2"]["lastFile"]}},
-        {"ALL_PHYS3", {filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["firstFile"], filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["lastFile"]}}
-    };
+        {"ALL_PHYS3", {filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["firstFile"], filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["lastFile"]}}};
 
     std::map<TString, std::string> pathMap = {
         {"DATA", filePaths["analyzed"]["signal"]["Data"]["path"]},
         {"ALL_PHYS", filePaths["analyzed"]["signal"]["MC"]["all_phys"]["path"]},
         {"ALL_PHYS2", filePaths["analyzed"]["signal"]["MC"]["all_phys2"]["path"]},
-        {"ALL_PHYS3", filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["path"]}
-    };
+        {"ALL_PHYS3", filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["path"]}};
 
     for (auto &entry : pathMap)
     {
@@ -200,19 +196,10 @@ namespace KLOE
         {"DATA", filePaths["analyzed"]["signal"]["Data"]["baseName"]},
         {"ALL_PHYS", filePaths["analyzed"]["signal"]["MC"]["all_phys"]["baseName"]},
         {"ALL_PHYS2", filePaths["analyzed"]["signal"]["MC"]["all_phys2"]["baseName"]},
-        {"ALL_PHYS3", filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["baseName"]}
-    };
+        {"ALL_PHYS3", filePaths["analyzed"]["signal"]["MC"]["all_phys3"]["baseName"]}};
 
     dirnamedata = base_path + "Signal/" + (std::string)filePaths["analyzed"]["signal"]["Data"]["path"];
     filenamedata = (std::string)filePaths["analyzed"]["signal"]["Data"]["baseName"];
-
-    //////////////////////////////////////////////
-    // Przygotuj nazwy plików dla starej analizy
-    TString dirnamemcOld = path + mc_dir;
-    TString filenamemcOld = (std::string)filePaths["MC"]["filenameBaseOldAna"];
-    Int_t fileNumMCOld[2] = {Utils::properties["variables"]["rootFiles"]["firstFileOld"],
-                            Utils::properties["variables"]["rootFiles"]["lastFileOld"]};
-    //////////////////////////////////////////////
 
     switch (dataTypeOpt)
     {
@@ -264,6 +251,15 @@ namespace KLOE
       }
       else
       {
+        //////////////////////////////////////////////
+        // Przygotuj nazwy plików dla starej analizy
+        TString path = (std::string)Utils::properties["variables"]["rootFiles"]["pathOldAna"];
+        TString dirnamemcOld = path + mc_dir;
+        TString filenamemcOld = (std::string)filePaths["MC"]["filenameBaseOldAna"];
+        Int_t fileNumMCOld[2] = {Utils::properties["variables"]["rootFiles"]["firstFileOld"],
+                                 Utils::properties["variables"]["rootFiles"]["lastFileOld"]};
+        //////////////////////////////////////////////
+
         for (Int_t j = fileNumMCOld[0]; j <= fileNumMCOld[1]; j++)
         {
 

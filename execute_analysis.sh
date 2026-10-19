@@ -7,7 +7,7 @@ HOST=$(hostname)
 if [ "$HOST" == "kitt" ]; 
 then
   set -a
-  source /data/4/users/gamrat/.env
+  source env.sh
   set +a
 fi
 
