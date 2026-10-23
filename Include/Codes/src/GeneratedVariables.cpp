@@ -59,7 +59,9 @@ void GeneratedVariables::classifyChannel(
     Int_t &has_pm,
     Int_t &has_00,
     Int_t &has_000,
-    Int_t &has_semileptonic)
+    Int_t &has_semileptonic,
+    Int_t &has_ks_pm,
+    Int_t &has_kl_pm)
 {
   UInt_t Ks = 0, Kl = 0, Ksregen = 0, piplusks = 0, pipluskl = 0, piminusks = 0, piminuskl = 0, muonplusks = 0, muonpluskl = 0, muonminusks = 0, muonminuskl = 0, electronks = 0, electronkl = 0, positronks = 0, positronkl = 0, pi0ks = 0, pi0kl = 0, pi0phi = 0, piplusphi = 0, piminusphi = 0, otherphi = 0, otherkl = 0, otherks = 0, gammaphi = 0, neutrinoks = 0, neutrinokl = 0, neutrinokplus = 0, neutrinokminus = 0, Kllambda = 0, Kslambda = 0, Ksgamma = 0, Klgamma = 0, Kplusgamma = 0, Kminusgamma = 0, pi0kplus = 0, pi0kminus = 0, pipluskplus = 0, pipluskminus = 0, piminuskplus = 0, piminuskminus = 0, muonpluskplus = 0, muonpluskminus = 0, muonminuskplus = 0, muonminuskminus = 0, electronkplus = 0, electronkminus = 0, positronkplus = 0, positronkminus = 0, otherkplus = 0, otherkminus = 0, Kplus = 0, Kminus = 0;
 
@@ -70,6 +72,8 @@ void GeneratedVariables::classifyChannel(
   has_00 = 0;
   has_000 = 0;
   has_semileptonic = 0;
+  has_ks_pm = 0;
+  has_kl_pm = 0;
 
   nodes.clear();
 
@@ -550,11 +554,17 @@ void GeneratedVariables::classifyChannel(
       channelFlags |= KLOE::ChannelFlags::kHas000;
     if (primary_ks_semileptonic_decay || primary_kl_semileptonic_decay)
       channelFlags |= KLOE::ChannelFlags::kHasSemiLeptonic;
+    if (primary_ks_pm_decay)
+      channelFlags |= KLOE::ChannelFlags::kSHasPM;
+    if (primary_kl_pm_decay)
+      channelFlags |= KLOE::ChannelFlags::kLHasPM;
 
     has_pm = (channelFlags & KLOE::ChannelFlags::kHasPM) != 0;
     has_00 = (channelFlags & KLOE::ChannelFlags::kHas00) != 0;
     has_000 = (channelFlags & KLOE::ChannelFlags::kHas000) != 0;
     has_semileptonic = (channelFlags & KLOE::ChannelFlags::kHasSemiLeptonic) != 0;
+    has_ks_pm = (channelFlags & KLOE::ChannelFlags::kSHasPM) != 0;
+    has_kl_pm = (channelFlags & KLOE::ChannelFlags::kLHasPM) != 0;
 
     // -------------------------------------------------------------------------
     bool has_pm00_primary = (channelFlags & (KLOE::ChannelFlags::kHasPM | KLOE::ChannelFlags::kHas00)) == (KLOE::ChannelFlags::kHasPM | KLOE::ChannelFlags::kHas00);
@@ -581,6 +591,8 @@ void GeneratedVariables::classifyChannel(
     has_00 = false;
     has_000 = false;
     has_semileptonic = false;
+    has_ks_pm = false;
+    has_kl_pm = false;
   }
 }
 

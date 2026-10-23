@@ -20,7 +20,7 @@
       "signal": 1,
       "modules": {
         "classifyMCVariables": true,
-        "signalOnly": true,
+        "signalOnly": false,
         "momentumSmearing": false,
         "trilaterationKinFit": true,
         "signalKinFit": true,
@@ -103,6 +103,8 @@
       "enabled": false,
       "description": "KSKL->Semileptonic-pi0pi0",
       "modules": {
+        "classifyMCVariables": true,
+        "signalOnly": false,
         "momentumSmearing": false,
         "trilaterationKinFit": false,
         "signalKinFit": false,

@@ -703,7 +703,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           baseKin.has_pm,
           baseKin.has_00,
           baseKin.has_000,
-          baseKin.has_semileptonic);
+          baseKin.has_semileptonic,
+          baseKin.has_ks_pm,
+          baseKin.has_kl_pm);
 
       MctruthCounter(mctruth, mctruth_num);
       // -------------------------------------------------------------------
@@ -1949,7 +1951,9 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"hasPM", baseKin.has_pm},
           {"has00", baseKin.has_00},
           {"has000", baseKin.has_000},
-          {"hasSemileptonic", baseKin.has_semileptonic}};
+          {"hasSemileptonic", baseKin.has_semileptonic},
+          {"hasKsPM", baseKin.has_ks_pm},
+          {"hasKlPM", baseKin.has_kl_pm}};
 
       // Double_t zmienne
       std::map<std::string, Double_t> floatVars = {

@@ -56,7 +56,9 @@ public:
       Int_t &has_pm,
       Int_t &has_00,
       Int_t &has_000,
-      Int_t &has_semileptonic);
+      Int_t &has_semileptonic,
+      Int_t &has_ks_pm,
+      Int_t &has_kl_pm);
 
   /**
    * @brief Find clusters not associated with any track.
