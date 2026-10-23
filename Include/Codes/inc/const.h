@@ -308,7 +308,9 @@ namespace KLOE
                        pi02NeuFit(6, 0.0),
                        KnerecPMFit(10, 0),
                        pi01PMFit(6, 0.0),
-                       pi02PMFit(6, 0.0)
+                       pi02PMFit(6, 0.0),
+                       has_ks_pm(0),
+                       has_kl_pm(0)
                        {}
 
     Double_t
@@ -416,7 +418,9 @@ namespace KLOE
         has_pm = 0,
         has_00 = 0,
         has_000 = 0,
-        has_semileptonic = 0;
+        has_semileptonic = 0,
+        has_ks_pm = 0,
+        has_kl_pm = 0;
 
     std::vector<Double_t>
         Kchrecnew,
@@ -918,6 +922,8 @@ namespace KLOE
       isr_flag = 0;
       mctruth_int = 0;
       mcflag = 0;
+      has_ks_pm = 0;
+      has_kl_pm = 0;
     }
   };
 }

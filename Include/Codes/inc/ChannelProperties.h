@@ -8,6 +8,8 @@ namespace KLOE
     kHas00            = 1u << 1,  // pi0 pi0
     kHas000           = 1u << 2,  // 3 pi0
     kHasSemiLeptonic  = 1u << 3,  // semileptonic from Kaon
-    kHasISR           = 1u << 4   // ISR photon in the event
+    kHasISR           = 1u << 4,   // ISR photon in the event
+    kSHasPM           = 1u << 5,   // some specific flag for PM
+    kLHasPM           = 1u << 6   // some specific flag for L PM
   };
 }
