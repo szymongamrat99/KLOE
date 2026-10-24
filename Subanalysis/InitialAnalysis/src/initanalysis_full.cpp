@@ -504,13 +504,21 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
   KLOE::KaonProperTimes
       kaonTimesMC,
+      kaonTimesKSKLMC,
       kaonTimesRecTriKinFit,
       kaonTimesBoostTriKinFit,
       kaonTimesTriangleRecRec,
       kaonTimesTriangleBoostRec,
       kaonTimesTriangleRecLor,
       kaonTimesTriangleBoostLor,
-      kaonTimesSignalKinFit;
+      kaonTimesSignalKinFit,
+      kaonTimesFourPiRecRec,
+      kaonTimesFourPiBoostRec,
+      kaonTimesFourPiRecBoost,
+      kaonTimesFourPiBoostBoost,
+      kaonTimesFourPiFitBoost,
+      kaonTimesFourPiBoostFit,
+      kaonTimesFourPiFitFit;
 
   // Auxiliary reconstruction of Kneutral with 6 gammas (for studies)
   KLOE::kaonNeutral KnerecSix;
@@ -763,21 +771,19 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
 
       if (mctruth == 7)
       {
-        for (Int_t iter = 0; iter < 4; iter++)
+        Int_t ksTrackIndex = 0;
+        Int_t klTrackIndex = 0;
+        for (const auto &mcTrack : trkMC)
         {
-          if (trkMC[iter][4] == 10)
+          if (mcTrack[4] == 10 && klTrackIndex < 2)
           {
-            if (baseKin.trkKLmc[0].size() == 0)
-              baseKin.trkKLmc[0].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
-            else
-              baseKin.trkKLmc[1].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
+            baseKin.trkKLmc[klTrackIndex].assign(mcTrack.begin(), mcTrack.begin() + 4);
+            ++klTrackIndex;
           }
-          else if (trkMC[iter][4] == 16)
+          else if (mcTrack[4] == 16 && ksTrackIndex < 2)
           {
-            if (baseKin.trkKSmc[0].size() == 0)
-              baseKin.trkKSmc[0].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
-            else
-              baseKin.trkKSmc[1].assign(trkMC[iter].begin(), trkMC[iter].end() - 1);
+            baseKin.trkKSmc[ksTrackIndex].assign(mcTrack.begin(), mcTrack.begin() + 4);
+            ++ksTrackIndex;
           }
         }
       }
@@ -974,7 +980,7 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     errTmp[0] = eventAnalysis->findKSLRec(16, -1, baseKin.KchrecKS, baseKin.trkKS[0], baseKin.trkKS[1], baseKin.vtakenKS, logger);
 
     // --------------------------------------------------------------------------------
-    if (hasTwo)
+    if (hasTwo && (hypoCode != KLOE::HypothesisCode::FOUR_PI || errTmp[0] == ErrorHandling::ErrorCodes::NO_ERROR))
     {
       // VTX OF KL - FOR PIPIPIPI
       errTmp[1] = eventAnalysis->findKSLRec(10, baseKin.vtakenKS[0], baseKin.KchrecKL, baseKin.trkKL[0], baseKin.trkKL[1], baseKin.vtakenKL, logger);
@@ -1024,106 +1030,252 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
     // Calculation of variables specific to 4pi hypothesis
     if (hypoCode == KLOE::HypothesisCode::FOUR_PI)
     {
-      if (cutter.PassCut(0) && cutter.PassCut(1))
-      {
-        Double_t
-            boostPhi[3] = {
-                -dataAccess.GetBpx() / dataAccess.GetBRoots(),
-                -dataAccess.GetBpy() / dataAccess.GetBRoots(),
-                -dataAccess.GetBpz() / dataAccess.GetBRoots()},
-            trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {};
+      Double_t
+          boostPhi[3] = {
+              -dataAccess.GetBpx() / dataAccess.GetBRoots(),
+              -dataAccess.GetBpy() / dataAccess.GetBRoots(),
+              -dataAccess.GetBpz() / dataAccess.GetBRoots()},
+          trkKS_PhiCM[2][4] = {}, KchrecKS_PhiCM[4] = {}, trkKL_PhiCM[2][4], KchrecKL_PhiCM[4] = {};
 
-        pKTwoBody = Obj.TwoBodyDecayMass(PhysicsConstants::mPhi, PhysicsConstants::mK0, PhysicsConstants::mK0);
+      pKTwoBody = Obj.TwoBodyDecayMass(PhysicsConstants::mPhi, PhysicsConstants::mK0, PhysicsConstants::mK0);
 
-        Obj.lorentz_transf(boostPhi, baseKin.trkKS[0].data(), trkKS_PhiCM[0]);
-        Obj.lorentz_transf(boostPhi, baseKin.trkKS[1].data(), trkKS_PhiCM[1]);
-        Obj.lorentz_transf(boostPhi, baseKin.trkKL[0].data(), trkKL_PhiCM[0]);
-        Obj.lorentz_transf(boostPhi, baseKin.trkKL[1].data(), trkKL_PhiCM[1]);
+      Obj.lorentz_transf(boostPhi, baseKin.trkKS[0].data(), trkKS_PhiCM[0]);
+      Obj.lorentz_transf(boostPhi, baseKin.trkKS[1].data(), trkKS_PhiCM[1]);
+      Obj.lorentz_transf(boostPhi, baseKin.trkKL[0].data(), trkKL_PhiCM[0]);
+      Obj.lorentz_transf(boostPhi, baseKin.trkKL[1].data(), trkKL_PhiCM[1]);
 
-        for (Int_t part = 0; part < 2; part++)
-          for (Int_t comp = 0; comp < 4; comp++)
-          {
-            KchrecKS_PhiCM[comp] += trkKS_PhiCM[part][comp];
-            KchrecKL_PhiCM[comp] += trkKL_PhiCM[part][comp];
-          }
-
-        KchrecKSMom = std::sqrt(std::pow(KchrecKS_PhiCM[0], 2) + std::pow(KchrecKS_PhiCM[1], 2) + std::pow(KchrecKS_PhiCM[2], 2));
-        KchrecKLMom = std::sqrt(std::pow(KchrecKL_PhiCM[0], 2) + std::pow(KchrecKL_PhiCM[1], 2) + std::pow(KchrecKL_PhiCM[2], 2));
-
-        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS, baseKin.phi_mom, baseKin.KchboostKS);
-        eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL, baseKin.phi_mom, baseKin.KchboostKL);
-
-        Double_t X_lineKS[3] = {baseKin.KchboostKS[6],
-                                baseKin.KchboostKS[7],
-                                baseKin.KchboostKS[8]}, // Vertex laying on the line
-            X_lineKL[3] = {baseKin.KchboostKL[6],
-                           baseKin.KchboostKL[7],
-                           baseKin.KchboostKL[8]}, // Vertex laying on the line
-            pKS[3] = {baseKin.KchboostKS[0],
-                      baseKin.KchboostKS[1],
-                      baseKin.KchboostKS[2]}, // Direction of the line
-            pKL[3] = {baseKin.KchboostKL[0],
-                      baseKin.KchboostKL[1],
-                      baseKin.KchboostKL[2]}, // Direction of the line
-            xB[3] = {baseKin.bhabha_vtx[0],
-                     baseKin.bhabha_vtx[1],
-                     baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
-            plane_perp[3] = {baseKin.phi_mom[0],
-                             baseKin.phi_mom[1],
-                             0.}; // Vector perpendicular to the plane from Bhabha momentum
-
-        // Corrected IP event by event
-        eventAnalysis->IPBoostCorr(X_lineKS, pKL, xB, plane_perp, baseKin.ipKS);
-        eventAnalysis->IPBoostCorr(X_lineKL, pKL, xB, plane_perp, baseKin.ipKL);
-        // Setting x and y coordinates of the IP to the Bhabha vertex
-
-        baseKin.ipKS[0] = baseKin.bhabha_vtx[0];
-        baseKin.ipKS[1] = baseKin.bhabha_vtx[1];
-        // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
-        if (std::abs(baseKin.ipKS[2] - baseKin.bhabha_vtx[2]) > 2.8)
-          baseKin.ipKS[2] = baseKin.bhabha_vtx[2];
-
-        baseKin.ipKL[0] = baseKin.bhabha_vtx[0];
-        baseKin.ipKL[1] = baseKin.bhabha_vtx[1];
-        // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
-        if (std::abs(baseKin.ipKL[2] - baseKin.bhabha_vtx[2]) > 2.8)
-          baseKin.ipKL[2] = baseKin.bhabha_vtx[2];
-
-        Double_t
-            MissMomKS[3] = {},
-            MissMomKL[3] = {};
-
-        for (Int_t comp = 0; comp < 3; comp++)
+      for (Int_t part = 0; part < 2; part++)
+        for (Int_t comp = 0; comp < 4; comp++)
         {
-          MissMomKS[comp] = baseKin.phi_mom[comp] - baseKin.KchboostKS[comp] - baseKin.KchrecKL[comp];
-          MissMomKL[comp] = baseKin.phi_mom[comp] - baseKin.KchboostKL[comp] - baseKin.KchrecKS[comp];
+          KchrecKS_PhiCM[comp] += trkKS_PhiCM[part][comp];
+          KchrecKL_PhiCM[comp] += trkKL_PhiCM[part][comp];
         }
 
-        PmissKS = std::sqrt(std::pow(MissMomKS[0], 2) + std::pow(MissMomKS[1], 2) + std::pow(MissMomKS[2], 2));
-        PmissKL = std::sqrt(std::pow(MissMomKL[0], 2) + std::pow(MissMomKL[1], 2) + std::pow(MissMomKL[2], 2));
+      KchrecKSMom = std::sqrt(std::pow(KchrecKS_PhiCM[0], 2) + std::pow(KchrecKS_PhiCM[1], 2) + std::pow(KchrecKS_PhiCM[2], 2));
+      KchrecKLMom = std::sqrt(std::pow(KchrecKL_PhiCM[0], 2) + std::pow(KchrecKL_PhiCM[1], 2) + std::pow(KchrecKL_PhiCM[2], 2));
 
-        EmissKS = baseKin.KchboostKS[3] - baseKin.KchrecKS[3];
-        EmissKL = baseKin.KchboostKL[3] - baseKin.KchrecKL[3];
+      eventAnalysis->KaonMomFromBoost(baseKin.KchrecKS, baseKin.phi_mom, baseKin.KchboostKS);
+      eventAnalysis->KaonMomFromBoost(baseKin.KchrecKL, baseKin.phi_mom, baseKin.KchboostKL);
 
-        cutter.UpdateStats(mctruth);
+      Double_t X_lineKS[3] = {baseKin.KchboostKS[6],
+                              baseKin.KchboostKS[7],
+                              baseKin.KchboostKS[8]}, // Vertex laying on the line
+          X_lineKL[3] = {baseKin.KchboostKL[6],
+                         baseKin.KchboostKL[7],
+                         baseKin.KchboostKL[8]}, // Vertex laying on the line
+          pKS[3] = {baseKin.KchboostKS[0],
+                    baseKin.KchboostKS[1],
+                    baseKin.KchboostKS[2]}, // Direction of the line
+          pKL[3] = {baseKin.KchboostKL[0],
+                    baseKin.KchboostKL[1],
+                    baseKin.KchboostKL[2]}, // Direction of the line
+          xB[3] = {baseKin.bhabha_vtx[0],
+                   baseKin.bhabha_vtx[1],
+                   baseKin.bhabha_vtx[2]}, // Bhabha vertex - laying on the plane
+          plane_perp[3] = {baseKin.phi_mom[0],
+                           baseKin.phi_mom[1],
+                           0.}; // Vector perpendicular to the plane from Bhabha momentum
 
-        baseKin.cuts.clear();
-        baseKin.cuts.resize(cutter.GetCuts().size());
+      // Corrected IP event by event
+      eventAnalysis->IPBoostCorr(X_lineKS, pKL, xB, plane_perp, baseKin.ipKS);
+      eventAnalysis->IPBoostCorr(X_lineKL, pKL, xB, plane_perp, baseKin.ipKL);
+      // Setting x and y coordinates of the IP to the Bhabha vertex
 
-        for (Int_t iter = 0; iter < cutter.GetCuts().size(); iter++)
-          if (cutter.PassCut(iter))
-            baseKin.cuts[iter] = 1;
-          else if (!cutter.PassCut(iter))
-          {
-            baseKin.cuts[iter] = 0;
+      baseKin.ipKS[0] = baseKin.bhabha_vtx[0];
+      baseKin.ipKS[1] = baseKin.bhabha_vtx[1];
+      // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
+      if (std::abs(baseKin.ipKS[2] - baseKin.bhabha_vtx[2]) > 2.8)
+        baseKin.ipKS[2] = baseKin.bhabha_vtx[2];
 
-            if (mctruth == mctruthSignal)
-            {
-              passed = true;
-              mctruth = 0;
-            }
-          }
+      baseKin.ipKL[0] = baseKin.bhabha_vtx[0];
+      baseKin.ipKL[1] = baseKin.bhabha_vtx[1];
+      // z coordinate of the IP is set to the Bhabha vertex z coordinate if it differs by more than 2 cm
+      if (std::abs(baseKin.ipKL[2] - baseKin.bhabha_vtx[2]) > 2.8)
+        baseKin.ipKL[2] = baseKin.bhabha_vtx[2];
+
+      Double_t
+          MissMomKS[3] = {},
+          MissMomKL[3] = {};
+
+      for (Int_t comp = 0; comp < 3; comp++)
+      {
+        MissMomKS[comp] = baseKin.phi_mom[comp] - baseKin.KchboostKS[comp] - baseKin.KchrecKL[comp];
+        MissMomKL[comp] = baseKin.phi_mom[comp] - baseKin.KchboostKL[comp] - baseKin.KchrecKS[comp];
       }
+
+      PmissKS = std::sqrt(std::pow(MissMomKS[0], 2) + std::pow(MissMomKS[1], 2) + std::pow(MissMomKS[2], 2));
+      PmissKL = std::sqrt(std::pow(MissMomKL[0], 2) + std::pow(MissMomKL[1], 2) + std::pow(MissMomKL[2], 2));
+
+      EmissKS = baseKin.KchboostKS[3] - baseKin.KchrecKS[3];
+      EmissKL = baseKin.KchboostKL[3] - baseKin.KchrecKL[3];
+
+      if (pmKinFit)
+      {
+
+        // Perform kin fit for KS
+        std::vector<Double_t>
+          bhabha_mom_err = {dataAccess.GetBpxErr(),
+                            dataAccess.GetBpyErr(),
+                            dataAccess.GetBpzErr(),
+                            dataAccess.GetBRootsErr()},
+          bhabha_mom = {dataAccess.GetBpx(),
+                        dataAccess.GetBpy(),
+                        dataAccess.GetBpz(),
+                        dataAccess.GetBRoots()},
+          bhabha_vtx = {dataAccess.GetBx(),
+                        dataAccess.GetBy(),
+                        dataAccess.GetBz()},
+          bhabhaVtxErr = {std::sqrt(std::pow(dataAccess.GetBxErr(), 2) + std::pow(dataAccess.GetBlumx(), 2)),
+                          dataAccess.GetByErr(),
+                          std::sqrt(std::pow(dataAccess.GetBzErr(), 2) + std::pow(dataAccess.GetBlumz(), 2))};
+
+        std::vector<Double_t> trackParameters[2];
+        std::vector<Double_t> trackParametersErr[2];
+        std::vector<Double_t> chargedVtx;
+        std::vector<Double_t> chargedVtxErr;
+
+        trackParameters[0].clear();
+        trackParameters[1].clear();
+        trackParametersErr[0].clear();
+        trackParametersErr[1].clear();
+
+        trackParameters[0].reserve(3);
+        trackParameters[1].reserve(3);
+        trackParametersErr[0].reserve(3);
+        trackParametersErr[1].reserve(3);
+
+        trackParameters[0].push_back(baseKin.trkKS[0][0]);
+        trackParameters[0].push_back(baseKin.trkKS[0][1]);
+        trackParameters[0].push_back(baseKin.trkKS[0][2]);
+        trackParameters[1].push_back(baseKin.trkKS[1][0]);
+        trackParameters[1].push_back(baseKin.trkKS[1][1]);
+        trackParameters[1].push_back(baseKin.trkKS[1][2]);
+
+        trackParametersErr[0].push_back(std::pow(1.5, 2) / 2.0);
+        trackParametersErr[0].push_back(std::pow(1.5, 2) / 2.0);
+        trackParametersErr[0].push_back(std::pow(1.8, 2) / 2.0);
+        trackParametersErr[1].push_back(std::pow(1.5, 2) / 2.0);
+        trackParametersErr[1].push_back(std::pow(1.5, 2) / 2.0);
+        trackParametersErr[1].push_back(std::pow(1.8, 2) / 2.0);
+
+        chargedVtx = {baseKin.KchrecKS[6],
+                      baseKin.KchrecKS[7],
+                      baseKin.KchrecKS[8]};
+
+        chargedVtxErr = {std::sqrt(baseKin.vtxcov[0][baseKin.vtakenKS[0]]),
+                         std::sqrt(baseKin.vtxcov[3][baseKin.vtakenKS[0]]),
+                         std::sqrt(baseKin.vtxcov[5][baseKin.vtakenKS[0]])};
+
+        pmKinFitObj.SetParameters(trackParameters, trackParametersErr, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, bhabha_vtx, bhabhaVtxErr);
+        errorCode = pmKinFitObj.Reconstruct();
+        pmKinFitObj.GetResults(baseKin.ParamPMKS,
+                   baseKin.ErrorsPMKS,
+                   baseKin.ParamPMFitKS,
+                   baseKin.ErrorsPMFitKS,
+                   baseKin.trkPMFitKS,
+                   baseKin.KchrecPMFitKS,
+                   baseKin.KchboostPMFitKS,
+                   baseKin.ipPMFitKS,
+                   baseKin.phiPMMomFitKS,
+                   baseKin.Chi2PMKinFitKS,
+                   baseKin.pullsPMFitKS);
+
+        //////////////////////////////////////////////////
+        // Perform KL
+        //////////////////////////////////////////////////
+
+        trackParameters[0].clear();
+        trackParameters[1].clear();
+        trackParametersErr[0].clear();
+        trackParametersErr[1].clear();
+
+        trackParameters[0].reserve(3);
+        trackParameters[1].reserve(3);
+        trackParametersErr[0].reserve(3);
+        trackParametersErr[1].reserve(3);
+
+        trackParameters[0].push_back(baseKin.trkKL[0][0]);
+        trackParameters[0].push_back(baseKin.trkKL[0][1]);
+        trackParameters[0].push_back(baseKin.trkKL[0][2]);
+        trackParameters[1].push_back(baseKin.trkKL[1][0]);
+        trackParameters[1].push_back(baseKin.trkKL[1][1]);
+        trackParameters[1].push_back(baseKin.trkKL[1][2]);
+
+        trackParametersErr[0].push_back(std::pow(1.5, 2) / 2.0);
+        trackParametersErr[0].push_back(std::pow(1.5, 2) / 2.0);
+        trackParametersErr[0].push_back(std::pow(1.8, 2) / 2.0);
+        trackParametersErr[1].push_back(std::pow(1.5, 2) / 2.0);
+        trackParametersErr[1].push_back(std::pow(1.5, 2) / 2.0);
+        trackParametersErr[1].push_back(std::pow(1.8, 2) / 2.0);
+
+        chargedVtx = {baseKin.KchrecKL[6],
+                      baseKin.KchrecKL[7],
+                      baseKin.KchrecKL[8]};
+
+        chargedVtxErr = {std::sqrt(baseKin.vtxcov[0][baseKin.vtakenKL[0]]),
+                         std::sqrt(baseKin.vtxcov[3][baseKin.vtakenKL[0]]),
+                         std::sqrt(baseKin.vtxcov[5][baseKin.vtakenKL[0]])};
+
+        pmKinFitObj.SetParameters(trackParameters, trackParametersErr, chargedVtx, chargedVtxErr, bhabha_mom, bhabha_mom_err, bhabha_vtx, bhabhaVtxErr);
+        errorCode = pmKinFitObj.Reconstruct();
+        pmKinFitObj.GetResults(baseKin.ParamPMKL,
+                   baseKin.ErrorsPMKL,
+                   baseKin.ParamPMFitKL,
+                   baseKin.ErrorsPMFitKL,
+                   baseKin.trkPMFitKL,
+                   baseKin.KchrecPMFitKL,
+                   baseKin.KchboostPMFitKL,
+                   baseKin.ipPMFitKL,
+                   baseKin.phiPMMomFitKL,
+                   baseKin.Chi2PMKinFitKL,
+                   baseKin.pullsPMFitKL);
+      }
+      ///////////////////////////////////////////////////////////////////
+
+      std::vector<Double_t>
+              kaonKSMomRec = {baseKin.KchrecKS[0], baseKin.KchrecKS[1], baseKin.KchrecKS[2], baseKin.KchrecKS[3]},
+              kaonKSMomBoost = {baseKin.KchboostKS[0], baseKin.KchboostKS[1], baseKin.KchboostKS[2], baseKin.KchboostKS[3]},
+              kaonKSPos = {baseKin.KchboostKS[6], baseKin.KchboostKS[7], baseKin.KchboostKS[8]},
+              kaonKLMomRec = {baseKin.KchrecKL[0], baseKin.KchrecKL[1], baseKin.KchrecKL[2], baseKin.KchrecKL[3]},
+              kaonKLMomBoost = {baseKin.KchboostKL[0], baseKin.KchboostKL[1], baseKin.KchboostKL[2], baseKin.KchboostKL[3]},
+              kaonKLPos = {baseKin.KchboostKL[6], baseKin.KchboostKL[7], baseKin.KchboostKL[8]};
+
+      kaonTimesFourPiRecRec = Obj.CalculateKaonProperTimes(kaonKLMomRec, kaonKLPos, kaonKSMomRec, kaonKSPos, baseKin.ipKL);
+      kaonTimesFourPiBoostRec = Obj.CalculateKaonProperTimes(kaonKLMomBoost, kaonKLPos, kaonKSMomRec, kaonKSPos, baseKin.ipKL);
+      kaonTimesFourPiRecBoost = Obj.CalculateKaonProperTimes(kaonKLMomRec, kaonKLPos, kaonKSMomBoost, kaonKSPos, baseKin.ipKL);
+      kaonTimesFourPiBoostBoost = Obj.CalculateKaonProperTimes(kaonKLMomBoost, kaonKLPos, kaonKSMomBoost, kaonKSPos, baseKin.ipKL);
+
+      if (pmKinFit)
+      {
+        std::vector<Double_t>
+              kaonKSMomFit = {baseKin.KchboostPMFitKS[0], baseKin.KchboostPMFitKS[1], baseKin.KchboostPMFitKS[2], baseKin.KchboostPMFitKS[3]},
+              kaonKSPosFit = {baseKin.KchboostPMFitKS[6], baseKin.KchboostPMFitKS[7], baseKin.KchboostPMFitKS[8]},
+              kaonKLMomFit = {baseKin.KchboostPMFitKL[0], baseKin.KchboostPMFitKL[1], baseKin.KchboostPMFitKL[2], baseKin.KchboostPMFitKL[3]},
+              kaonKLPosFit = {baseKin.KchboostPMFitKL[6], baseKin.KchboostPMFitKL[7], baseKin.KchboostPMFitKL[8]};
+
+        kaonTimesFourPiFitBoost = Obj.CalculateKaonProperTimes(kaonKLMomFit, kaonKLPosFit, kaonKSMomBoost, kaonKSPos, baseKin.ipPMFitKL);
+        kaonTimesFourPiBoostFit = Obj.CalculateKaonProperTimes(kaonKLMomBoost, kaonKLPos, kaonKSMomFit, kaonKSPosFit, baseKin.ipKL);
+        kaonTimesFourPiFitFit = Obj.CalculateKaonProperTimes(kaonKLMomFit, kaonKLPosFit, kaonKSMomFit, kaonKSPosFit, baseKin.ipPMFitKL);
+      }
+
+      cutter.UpdateStats(mctruth);
+
+      baseKin.cuts.clear();
+      baseKin.cuts.resize(cutter.GetCuts().size());
+
+      for (Int_t iter = 0; iter < cutter.GetCuts().size(); iter++)
+        if (cutter.PassCut(iter))
+          baseKin.cuts[iter] = 1;
+        else if (!cutter.PassCut(iter))
+        {
+          baseKin.cuts[iter] = 0;
+
+          if (mctruth == mctruthSignal)
+          {
+            passed = true;
+            mctruth = -1;
+          }
+        }
     }
     else if (hypoCode == KLOE::HypothesisCode::SIGNAL || hypoCode == KLOE::HypothesisCode::THREE_PI0 || hypoCode == KLOE::HypothesisCode::SEMILEPTONIC)
     {
@@ -1991,12 +2143,44 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"KaonNeTimeCMRecTriFit", kaonTimesRecTriKinFit.kaon2TimeCM},
           {"KaonNeTimeLABMC", kaonTimesMC.kaon2TimeLAB},
           {"KaonNeTimeCMMC", kaonTimesMC.kaon2TimeCM},
+          {"KaonKSTimeLABMC", kaonTimesKSKLMC.kaon2TimeLAB},
+          {"KaonKSTimeCMMC", kaonTimesKSKLMC.kaon2TimeCM},
+          {"KaonKLTimeLABMC", kaonTimesKSKLMC.kaon1TimeLAB},
+          {"KaonKLTimeCMMC", kaonTimesKSKLMC.kaon1TimeCM},
           {"KaonChTimeLABMC", kaonTimesMC.kaon1TimeLAB},
           {"KaonChTimeCMMC", kaonTimesMC.kaon1TimeCM},
           {"KaonNeTimeLABSignalFit", kaonTimesSignalKinFit.kaon2TimeLAB},
           {"KaonNeTimeCMSignalFit", kaonTimesSignalKinFit.kaon2TimeCM},
           {"KaonChTimeLABSignalFit", kaonTimesSignalKinFit.kaon1TimeLAB},
           {"KaonChTimeCMSignalFit", kaonTimesSignalKinFit.kaon1TimeCM},
+          {"KaonKSTimeLABRecRec", kaonTimesFourPiRecRec.kaon2TimeLAB},
+          {"KaonKSTimeCMRecRec", kaonTimesFourPiRecRec.kaon2TimeCM},
+          {"KaonKLTimeLABRecRec", kaonTimesFourPiRecRec.kaon1TimeLAB},
+          {"KaonKLTimeCMRecRec", kaonTimesFourPiRecRec.kaon1TimeCM},
+          {"KaonKSTimeLABBoostRec", kaonTimesFourPiBoostRec.kaon2TimeLAB},
+          {"KaonKSTimeCMBoostRec", kaonTimesFourPiBoostRec.kaon2TimeCM},
+          {"KaonKLTimeLABBoostRec", kaonTimesFourPiBoostRec.kaon1TimeLAB},
+          {"KaonKLTimeCMBoostRec", kaonTimesFourPiBoostRec.kaon1TimeCM},
+          {"KaonKSTimeLABRecBoost", kaonTimesFourPiRecBoost.kaon2TimeLAB},
+          {"KaonKSTimeCMRecBoost", kaonTimesFourPiRecBoost.kaon2TimeCM},
+          {"KaonKLTimeLABRecBoost", kaonTimesFourPiRecBoost.kaon1TimeLAB},
+          {"KaonKLTimeCMRecBoost", kaonTimesFourPiRecBoost.kaon1TimeCM},
+          {"KaonKSTimeLABBoostBoost", kaonTimesFourPiBoostBoost.kaon2TimeLAB},
+          {"KaonKSTimeCMBoostBoost", kaonTimesFourPiBoostBoost.kaon2TimeCM},
+          {"KaonKLTimeLABBoostBoost", kaonTimesFourPiBoostBoost.kaon1TimeLAB},
+          {"KaonKLTimeCMBoostBoost", kaonTimesFourPiBoostBoost.kaon1TimeCM},
+          {"KaonKSTimeLABFitBoost", kaonTimesFourPiFitBoost.kaon2TimeLAB},
+          {"KaonKSTimeCMFitBoost", kaonTimesFourPiFitBoost.kaon2TimeCM},
+          {"KaonKLTimeLABFitBoost", kaonTimesFourPiFitBoost.kaon1TimeLAB},
+          {"KaonKLTimeCMFitBoost", kaonTimesFourPiFitBoost.kaon1TimeCM},
+          {"KaonKSTimeLABBoostFit", kaonTimesFourPiBoostFit.kaon2TimeLAB},
+          {"KaonKSTimeCMBoostFit", kaonTimesFourPiBoostFit.kaon2TimeCM},
+          {"KaonKLTimeLABBoostFit", kaonTimesFourPiBoostFit.kaon1TimeLAB},
+          {"KaonKLTimeCMBoostFit", kaonTimesFourPiBoostFit.kaon1TimeCM},
+          {"KaonKSTimeLABFitFit", kaonTimesFourPiFitFit.kaon2TimeLAB},
+          {"KaonKSTimeCMFitFit", kaonTimesFourPiFitFit.kaon2TimeCM},
+          {"KaonKLTimeLABFitFit", kaonTimesFourPiFitFit.kaon1TimeLAB},
+          {"KaonKLTimeCMFitFit", kaonTimesFourPiFitFit.kaon1TimeCM},
           {"Qmiss", baseKin.Qmiss},
           {"minv4gam", baseKin.minv4gam},
           {"Chi2TriKinFit", baseKin.Chi2TriKinFit},
@@ -2018,6 +2202,8 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"Chi2OmegaKinFit", baseKin.Chi2OmegaKinFit},
           {"bestErrorSixGamma", baseKin.bestError},
           {"Chi2PMKinFit", baseKin.Chi2PMKinFit},
+          {"Chi2PMKSKinFit", baseKin.Chi2PMKinFitKS},
+          {"Chi2PMKLKinFit", baseKin.Chi2PMKinFitKL},
           {"Chi2NeutralKinFit", baseKin.Chi2NeuKinFit}};
 
       // Tablice
@@ -2201,7 +2387,29 @@ int InitialAnalysis_full(TChain &chain, Controls::FileType &fileTypeOpt, ErrorHa
           {"phiMomNeutralFit", baseKin.phiNeuMomFit},
           {"ipNeutralFit", baseKin.ipNeuFit},
           {"pi0NeutralFit1", baseKin.pi01NeuFit},
-          {"pi0NeutralFit2", baseKin.pi02NeuFit}};
+          {"pi0NeutralFit2", baseKin.pi02NeuFit},
+          {"ParamPMKS", baseKin.ParamPMKS},
+          {"ErrorsPMKS", baseKin.ErrorsPMKS},
+          {"ParamPMKSFit", baseKin.ParamPMFitKS},
+          {"ErrorsPMKSFit", baseKin.ErrorsPMFitKS},
+          {"pullsPMKSKinFit", baseKin.pullsPMFitKS},
+          {"trk1PMKSKinFit", baseKin.trkPMFitKS[0]},
+          {"trk2PMKSKinFit", baseKin.trkPMFitKS[1]},
+          {"KchrecPMKSKinFit", baseKin.KchrecPMFitKS},
+          {"KchboostPMKSKinFit", baseKin.KchboostPMFitKS},
+          {"phiMomPMKSKinFit", baseKin.phiPMMomFitKS},
+          {"ipPMKSKinFit", baseKin.ipPMFitKS},
+          {"ParamPMKL", baseKin.ParamPMKL},
+          {"ErrorsPMKL", baseKin.ErrorsPMKL},
+          {"ParamPMKLFit", baseKin.ParamPMFitKL},
+          {"ErrorsPMKLFit", baseKin.ErrorsPMFitKL},
+          {"pullsPMKLKinFit", baseKin.pullsPMFitKL},
+          {"trk1PMKLFit", baseKin.trkPMFitKL[0]},
+          {"trk2PMKLFit", baseKin.trkPMFitKL[1]},
+          {"KchrecPMKLFit", baseKin.KchrecPMFitKL},
+          {"KchboostPMKLFit", baseKin.KchboostPMFitKL},
+          {"phiMomPMKLFit", baseKin.phiPMMomFitKL},
+          {"ipPMKLFit", baseKin.ipPMFitKL}};
 
       writer.Fill(intVars, floatVars, intArrays, floatArrays);
     }
