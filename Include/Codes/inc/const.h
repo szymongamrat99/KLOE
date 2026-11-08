@@ -367,6 +367,10 @@ namespace KLOE
         kaonNeTimeCMMC = 0.0,
         kaonChTimeLABMC = 0.0,
         kaonChTimeCMMC = 0.0,
+        kaonKSTimeCMMC = 0.0,
+        kaonKSTimeLABMC = 0.0,
+        kaonKLTimeCMMC = 0.0,
+        kaonKLTimeLABMC = 0.0,
         Chi2TriKinFit = 0.0,
         CurvSmeared1 = 0.0,
         PhivSmeared1 = 0.0,
@@ -377,6 +381,8 @@ namespace KLOE
         Chi2SignalKinFit = 0.0,
         Chi2OmegaKinFit = 0.0,
         Chi2PMKinFit = 0.0,
+        Chi2PMKinFitKS = 0.0,
+        Chi2PMKinFitKL = 0.0,
         Chi2NeuKinFit = 0.0,
         Curv1 = 0.0,
         Phiv1 = 0.0,
@@ -525,6 +531,16 @@ namespace KLOE
         ParamPMFit,
         ErrorsPMFit,
         pullsPMFit,
+        ParamPMKL,
+        ErrorsPMKL,
+        ParamPMFitKL,
+        ErrorsPMFitKL,
+        pullsPMFitKL,
+        ParamPMKS,
+        ErrorsPMKS,
+        ParamPMFitKS,
+        ErrorsPMFitKS,
+        pullsPMFitKS,
         ParamNeutral,
         ErrorsNeutral,
         ParamNeutralFit,
@@ -561,18 +577,28 @@ namespace KLOE
         trkMuonDT[2],
         KnerecTriangle,
         KchrecPMFit,
+        KchrecPMFitKS,
+        KchboostPMFitKS,
+        KchrecPMFitKL,
+        KchboostPMFitKL,
         KnerecPMFit,
         KchboostPMFit,
         KnerecNeuFit,
         trkPMFit[2],
+        trkPMFitKL[2],
+        trkPMFitKS[2],
         photonFit00[4],
         pi01NeuFit,
         pi02NeuFit,
         pi01PMFit,
         pi02PMFit,
         ipPMFit,
+        ipPMFitKL,
+        ipPMFitKS,
         ipNeuFit,
         phiPMMomFit,
+        phiPMMomFitKL,
+        phiPMMomFitKS,
         phiNeuMomFit,
         KnereclorNeutralFit;
 
@@ -740,12 +766,24 @@ namespace KLOE
       trkMuonDT[1].resize(3, -999.0);
       trkPMFit[0].resize(4, 0.0);
       trkPMFit[1].resize(4, 0.0);
+      trkPMFitKL[0].resize(4, 0.0);
+      trkPMFitKL[1].resize(4, 0.0);
+      trkPMFitKS[0].resize(4, 0.0);
+      trkPMFitKS[1].resize(4, 0.0);
       KchrecPMFit.resize(10, 0.0);
+      KchrecPMFitKL.resize(10, 0.0);
+      KchboostPMFitKL.resize(10, 0.0);
+      KchrecPMFitKS.resize(10, 0.0);
+      KchboostPMFitKS.resize(10, 0.0);
       KchboostPMFit.resize(10, 0.0);
       KnerecNeuFit.resize(10, 0.0);
       ipPMFit.resize(3, 0.0);
+      ipPMFitKL.resize(3, 0.0);
+      ipPMFitKS.resize(3, 0.0);
       ipNeuFit.resize(3, 0.0);
       phiPMMomFit.resize(4, 0.0);
+      phiPMMomFitKL.resize(4, 0.0);
+      phiPMMomFitKS.resize(4, 0.0);
       phiNeuMomFit.resize(4, 0.0);
       pi01NeuFit.resize(6, 0.0);
       pi02NeuFit.resize(6, 0.0);
@@ -844,6 +882,10 @@ namespace KLOE
       trkKS[1].clear();
       trkKL[0].clear();
       trkKL[1].clear();
+      trkKSmc[0].clear();
+      trkKSmc[1].clear();
+      trkKLmc[0].clear();
+      trkKLmc[1].clear();
       trkClosest[0].clear();
       trkClosest[1].clear();
       trkKLTwoBody[0].clear();
@@ -903,6 +945,8 @@ namespace KLOE
       ParamNeutralFit.clear();
       ErrorsNeutralFit.clear();
       KnereclorNeutralFit.clear();
+      pullsPMFitKL.clear();
+      pullsPMFitKS.clear();
 
       photonNeutralFit[0].clear();
       photonNeutralFit[1].clear();
