@@ -23,6 +23,7 @@
 #include <ConstraintsTest.h>
 #include <ConstraintsPM.h>
 #include <ConstraintsNeutral.h>
+#include <Constraints3pi0.h>
 
 namespace KLOE
 {
@@ -73,6 +74,7 @@ namespace KLOE
 
     std::unique_ptr<KinFit> _baseObj;
     std::unique_ptr<ConstraintsSignal> _objSignal;
+    std::unique_ptr<Constraints3PI0> _obj3PI0;
     std::unique_ptr<ConstraintsTrilateration> _objTrilateration;
     std::unique_ptr<ConstraintsOmega> _objOmega;
     std::unique_ptr<ConstraintsPM> _objPM;
@@ -109,6 +111,21 @@ namespace KLOE
             {"photon4pathlab", &ConstraintsSignal::Photon4PathConsvLAB},
             {"minvconsvneutralkaon", &ConstraintsSignal::MinvConsvNeuKaon},
             {"minvconsvchargedkaon", &ConstraintsSignal::MinvConsvChKaon}};
+
+    std::map<std::string, Double_t (Constraints3PI0::*)(Double_t *, Double_t *)>
+        constraintMap3PI0 = {
+            {"energyconsvlab", &Constraints3PI0::EnergyConsvLAB},
+            {"pxconsvlab", &Constraints3PI0::PxConsvLAB},
+            {"pyconsvlab", &Constraints3PI0::PyConsvLAB},
+            {"pzconsvlab", &Constraints3PI0::PzConsvLAB},
+            {"photon1pathlab", &Constraints3PI0::Photon1PathConsvLAB},
+            {"photon2pathlab", &Constraints3PI0::Photon2PathConsvLAB},
+            {"photon3pathlab", &Constraints3PI0::Photon3PathConsvLAB},
+            {"photon4pathlab", &Constraints3PI0::Photon4PathConsvLAB},
+            {"photon5pathlab", &Constraints3PI0::Photon5PathConsvLAB},
+            {"photon6pathlab", &Constraints3PI0::Photon6PathConsvLAB},
+            {"minvconsvneutralkaon", &Constraints3PI0::MinvConsvNeuKaon},
+            {"minvconsvchargedkaon", &Constraints3PI0::MinvConsvChKaon}};
 
     std::map<std::string, Double_t (ConstraintsTrilateration::*)(Double_t *, Double_t *)>
         constraintMapTrilateration = {
@@ -191,6 +208,7 @@ namespace KLOE
 
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> &ipFit, std::vector<Double_t> photonFit[4], std::vector<Double_t> &KnerecFit, std::vector<Double_t> &phiFit);
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> trkFit[2], std::vector<Double_t> &KchrecFit, std::vector<Double_t> &KchboostFit, std::vector<Double_t> &ipFit, std::vector<Double_t> photonFit[4], std::vector<Double_t> &KnerecFit, std::vector<Double_t> &KnereclorFit);
+    void GetResultsThreePi0(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> trkFit[2], std::vector<Double_t> &KchrecFit, std::vector<Double_t> &KchboostFit, std::vector<Double_t> &ipFit, std::vector<Double_t> photonFit[6], std::vector<Double_t> &KnerecFit, std::vector<Double_t> &KnereclorFit);
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> trkFit[2], std::vector<Double_t> &OmegaFit, std::vector<Double_t> &ipFit, std::vector<Double_t> photonFit[4], std::vector<Double_t> Pi0OmegaFit[2], std::vector<Double_t> &PhiMomFit);
     void GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init);
 

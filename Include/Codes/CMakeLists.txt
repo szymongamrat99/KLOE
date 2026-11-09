@@ -10,6 +10,7 @@ add_library(LibRec SHARED
             src/ConstraintsOmega.cpp
             src/ConstraintsTrilateration.cpp
             src/ConstraintsSignal.cpp
+            src/Constraints3pi0.cpp
             src/ConstraintsTest.cpp
             src/ConstraintsPM.cpp
             src/ConstraintsNeutral.cpp

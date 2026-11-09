@@ -17,6 +17,8 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
     _objOmega = std::make_unique<ConstraintsOmega>(logger);
   else if (_mode == "SignalGlobal")
     _objSignal = std::make_unique<ConstraintsSignal>(logger);
+  else if (_mode == "ThreePi0Global")
+    _obj3PI0 = std::make_unique<Constraints3PI0>(logger);
   else if (_mode == "Trilateration")
     _objTrilateration = std::make_unique<ConstraintsTrilateration>(logger);
   else if (_mode == "Test")
@@ -46,6 +48,8 @@ KinFitter::KinFitter(std::string mode, Int_t N_free, Int_t N_const, Int_t M, Int
     _objOmega = std::make_unique<ConstraintsOmega>(logger);
   else if (_mode == "SignalGlobal")
     _objSignal = std::make_unique<ConstraintsSignal>(logger);
+  else if (_mode == "ThreePi0Global")
+    _obj3PI0 = std::make_unique<Constraints3PI0>(logger);
   else if (_mode == "Trilateration")
     _objTrilateration = std::make_unique<ConstraintsTrilateration>(logger);
   else if (_mode == "Test")
@@ -167,6 +171,23 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
           _X(19) = MIN_CLU_ENE;
       }
 
+      // Enforce positive energies for ThreePi0Global mode
+      if (_mode == "ThreePi0Global")
+      {
+        if (_X(4) < 0)
+          _X(4) = MIN_CLU_ENE;
+        if (_X(9) < 0)
+          _X(9) = MIN_CLU_ENE;
+        if (_X(14) < 0)
+          _X(14) = MIN_CLU_ENE;
+        if (_X(19) < 0)
+          _X(19) = MIN_CLU_ENE;
+        if (_X(24) < 0)
+          _X(24) = MIN_CLU_ENE;
+        if (_X(29) < 0)
+          _X(29) = MIN_CLU_ENE;
+      }
+
       for (Int_t l = 0; l < _M; l++)
       {
         _constraints[l].SetParameters(_X.GetMatrixArray());
@@ -269,6 +290,10 @@ Double_t KinFitter::FitFunction(Double_t bunchCorr)
   {
     _objSignal->IntermediateReconstruction(_X.GetMatrixArray());
   }
+  else if (_mode == "ThreePi0Global")
+  {
+    _obj3PI0->IntermediateReconstruction(_X.GetMatrixArray());
+  }
   else if (_mode == "Trilateration")
   {
     _objTrilateration->IntermediateReconstruction(_X.GetMatrixArray());
@@ -339,6 +364,8 @@ Int_t KinFitter::ConstraintSet(std::vector<std::string> ConstSet)
 
     if (_mode == "SignalGlobal")
       _constraints.push_back(TF1(ConstSet[i].c_str(), _objSignal.get(), constraintMapSignal[ConstSet[i]], 0, 1, _N_free + _N_const));
+    else if (_mode == "ThreePi0Global")
+      _constraints.push_back(TF1(ConstSet[i].c_str(), _obj3PI0.get(), constraintMap3PI0[ConstSet[i]], 0, 1, _N_free + _N_const));
     else if (_mode == "Trilateration")
       _constraints.push_back(TF1(ConstSet[i].c_str(), _objTrilateration.get(), constraintMapTrilateration[ConstSet[i]], 0, 1, _N_free + _N_const));
     else if (_mode == "Omega")
@@ -392,6 +419,30 @@ void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD 
 
   KnerecFit = _objSignal->fKnerec.total;
   KnereclorFit = _objSignal->fKnereclor.total;
+}
+
+void KinFitter::GetResultsThreePi0(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> trkFit[2], std::vector<Double_t> &KchrecFit, std::vector<Double_t> &KchboostFit, std::vector<Double_t> &ipFit, std::vector<Double_t> photonFit[6], std::vector<Double_t> &KnerecFit, std::vector<Double_t> &KnereclorFit)
+{
+  X = _X;
+  V = _V;
+  X_init = _X_init;
+  V_init = _V_init;
+
+  for (Int_t i = 0; i < 2; i++)
+  {
+    trkFit[i] = _obj3PI0->fpionCh[i].fourMom;
+  }
+
+  KchrecFit = _obj3PI0->fKchrec.total;
+  KchboostFit = _obj3PI0->fKchboost.total;
+
+  ipFit = _obj3PI0->fip;
+
+  for (Int_t i = 0; i < 6; i++)
+    photonFit[i] = _obj3PI0->fphoton[i].total;
+
+  KnerecFit = _obj3PI0->fKnerec.total;
+  KnereclorFit = _obj3PI0->fKnereclor.total;
 }
 
 void KinFitter::GetResults(TVectorD &X, TMatrixD &V, TVectorD &X_init, TMatrixD &V_init, std::vector<Double_t> trkFit[2], std::vector<Double_t> &OmegaFit, std::vector<Double_t> &ipFit, std::vector<Double_t> photonFit[4], std::vector<Double_t> Pi0OmegaFit[2], std::vector<Double_t> &PhiMomFit)
