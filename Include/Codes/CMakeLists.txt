@@ -49,6 +49,7 @@ add_library(LibRec SHARED
             src/omegaKinFit.cpp
             src/pmKinFit.cpp
             src/neutralKinFit.cpp
+            src/threePi0KinFit.cpp
             src/NeutralReconstruction.cpp
             src/VariableConfig.cpp
             src/DataAccessWrapper.cpp
