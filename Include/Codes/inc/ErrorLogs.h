@@ -88,6 +88,7 @@ namespace ErrorHandling
     NOT_SINGLE_VTX_EVENT = 312,                        /*!< Not a single vertex event for semileptonic hypothesis*/
     PM_KIN_FIT = 313,                           /*!< Did not pass the PM kin fit*/
     NEU_KIN_FIT = 314,                           /*!< Did not pass the NEU kin fit*/
+    THREE_PI0_KIN_FIT = 315, /*!< Did not pass the three pi0 kin fit*/
 
     CUT_CHI2_SIGNAL = 400,  /*!< Did not pass chi2 cut for signal hypothesis*/
     CUT_COMB_MPI0 = 401,    /*!< Did not pass combined mpi0 cut*/
