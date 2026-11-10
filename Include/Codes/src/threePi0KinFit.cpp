@@ -144,7 +144,7 @@ namespace KLOE
 
 			_CHISQRMIN = KinFitter::FitFunction();
 
-			KinFitter::GetResults(_X_min, _V_min, _X_init_min, _V_init, _trkFit.data(), _KchrecFit, _KchboostFit, _ipFit, _photonFit.data(), _KnerecFit, _KnereclorFit);
+			KinFitter::GetResultsThreePi0(_X_min, _V_min, _X_init_min, _V_init, _trkFit.data(), _KchrecFit, _KchboostFit, _ipFit, _photonFit.data(), _KnerecFit, _KnereclorFit);
 
 			_isConverged = 1;
 		}
