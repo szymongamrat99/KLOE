@@ -5,6 +5,7 @@
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
+  "luminosityFactor": 1.07906,
   "diagnostics": {
     "profile": {
       "enabled": false,
@@ -167,7 +168,7 @@
       "step": 0.01,
       "limitLower": 1.0,
       "limitUpper": 10.0,
-      "channels": ["Semileptonic", "3pi0", "Other", "Regeneration"],
+      "channels": ["Semileptonic", "3pi0", "Other", "Regeneration", "Omega"],
       "fixed": true
     }
   }

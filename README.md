@@ -226,6 +226,8 @@ gdb --args ./bin/KLSPM00
 
 `copy_libs.sh` copies the built binary and all `*.so` libraries to the shared experiment software area (`/opt/exp_software/kloe/users/.../KLSPM00/`). It runs automatically at the end of `execute_analysis.sh` when executed on host `ui-tier1.cr.cnaf.infn.it`.
 
+Czynnik świetlności MC → Data ustawia `luminosityFactor` na górze `config.json` (domyślnie 1.07906 przy braku klucza); trafia do JSON wyniku.
+
 ### Diagnostyka fitu CP
 
 Plik wynikowy JSON zawiera sekcję `diagnostics`:

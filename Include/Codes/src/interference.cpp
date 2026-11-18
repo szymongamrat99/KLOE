@@ -216,7 +216,7 @@ namespace KLOE
         }
       }
 
-      _frac_tmp[name.second]->Scale(1.07906);
+      _frac_tmp[name.second]->Scale(luminosity_factor);
 
       interference::bin_extraction(name.second, _frac_tmp[name.second]);
       /////////////////////////////////////////////////////////////////////////////////////////////

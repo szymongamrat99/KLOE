@@ -101,6 +101,18 @@ class CPFitStandaloneTest(unittest.TestCase):
         self.assertLess(replaced, 560)
         self.assertAlmostEqual(weights["sum"], (560 - replaced) * 0.96 + replaced)
 
+    def test_luminosity_factor(self):
+        base = copy.deepcopy(self.config)
+        base["parameterSettings"]["A_signal"]["fixed"] = True
+        base["parameterSettings"]["Re"]["fixed"] = False
+        baseline = self.run_fit(base)
+        config = copy.deepcopy(base)
+        config["luminosityFactor"] = 2.0 * baseline["luminosityFactor"]
+        result = self.run_fit(config)
+        self.assertAlmostEqual(result["luminosityFactor"], 2.0 * baseline["luminosityFactor"])
+        ratio = result["channels"]["Signal"]["fittedIntegral"] / baseline["channels"]["Signal"]["fittedIntegral"]
+        self.assertAlmostEqual(ratio, 2.0)
+
     def test_diagnostics_profile(self):
         config = copy.deepcopy(self.config)
         config["diagnostics"] = {"profile": {"enabled": True, "points": 5, "nSigma": 2.0}}

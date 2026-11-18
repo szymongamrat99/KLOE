@@ -48,16 +48,12 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   gErrorIgnoreLevel = kBreak;
 
   int mcFiles = 0, dataFiles = 0;
-  double lumiFactor = 1.0;
 
   mcFiles = Utils::CountFiles(&chain, true);
   dataFiles = Utils::CountFiles(&chain, false);
 
-  lumiFactor = 1.07906;//(dataFiles > 0) ? static_cast<double>(dataFiles) / static_cast<double>(mcFiles) : 1.0;
-
   std::cout << "INFO: Number of MC files: " << mcFiles << std::endl;
   std::cout << "INFO: Number of Data files: " << dataFiles << std::endl;
-  std::cout << "INFO: Luminosity factor: " << lumiFactor << std::endl;
 
   // =============================================================================
   KLOE::BaseKinematics
@@ -71,6 +67,11 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
 
   FitSetter setter(config_path);
   FitConfig cfg = setter.getFitConfig();
+
+  const double lumiFactor = setter.getRawConfig().value("luminosityFactor", 1.07906);
+  if (!std::isfinite(lumiFactor) || lumiFactor <= 0.0)
+    throw std::runtime_error("Invalid luminosityFactor in CP fit configuration");
+  std::cout << "INFO: Luminosity factor: " << lumiFactor << std::endl;
 
   Double_t *eff_vals;
 
@@ -208,6 +209,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   TH2 *hEffWeightVsRelErr = new TH2D("hEffWeightVsRelErr", "Regen corr factor weights vs. relative errors;Weight [-];Relative error on weight [-]", 50, 0, 7.0, 50, 0, 3);
 
   KLOE::interference event(mode, check_corr, nbins, x_min, x_max, split);
+  event.luminosity_factor = lumiFactor;
 
   // -------------------------------------------------------------------------
   // Zewnętrzne stałe skalujące histogram regeneracji (per split).
@@ -591,7 +593,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
     const KLOE::BRCorrectionFactors branchingRatios;
     for (const auto &entry : branchingRatios.BRcorrectionFactors)
       result["branchingRatioCorrections"][entry.first.Data()] = entry.second;
-    result["luminosityFactor"] = 1.07906;
+    result["luminosityFactor"] = lumiFactor;
     result["fit"]["success"] = fitSucceeded;
     result["fit"]["status"] = minimum->Status();
     result["fit"]["chi2"] = chi2;
