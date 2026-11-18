@@ -113,6 +113,20 @@ class CPFitStandaloneTest(unittest.TestCase):
         ratio = result["channels"]["Signal"]["fittedIntegral"] / baseline["channels"]["Signal"]["fittedIntegral"]
         self.assertAlmostEqual(ratio, 2.0)
 
+    def test_signal_normalization_in_range_only(self):
+        config = copy.deepcopy(self.config)
+        config["eventWeights"]["apply"]["signal"] = True
+        config["parameterSettings"]["A_signal"]["fixed"] = True
+        config["parameterSettings"]["Re"]["fixed"] = False
+        config["deltaT"]["rangeX"] = [-1.0, 1.0]
+        config["deltaT"]["xRangeDisplay"] = [-1.0, 1.0]
+        full = self.run_fit(config)
+        config["signalNormalizationInRangeOnly"] = True
+        in_range = self.run_fit(config)
+        self.assertTrue(in_range["signalNormalizationInRangeOnly"])
+        self.assertLess(in_range["channels"]["Signal"]["fittedIntegral"],
+                        full["channels"]["Signal"]["fittedIntegral"])
+
     def test_diagnostics_profile(self):
         config = copy.deepcopy(self.config)
         config["diagnostics"] = {"profile": {"enabled": True, "points": 5, "nSigma": 2.0}}

@@ -186,7 +186,9 @@ namespace KLOE
         if (ToLower(name.second) == "signal")
         {
           double weight = fit_function(time_diff_gen[j], 0, xx) * signal_event_weights[j];
-          signal_event_weights_sum += signal_event_weights[j];
+          const Double_t dt_reco = time_diff[name.second][j];
+          if (!signal_norm_in_range_only || (dt_reco >= _x_min && dt_reco < _x_max))
+            signal_event_weights_sum += signal_event_weights[j];
 
           _frac_tmp[name.second]->Fill(time_diff[name.second][j], weight); //! Filling Signal
         }
@@ -205,7 +207,9 @@ namespace KLOE
       //! Using correction factor and efficiency
       if (ToLower(name.second) == "signal")
       {
-        const Double_t integral = _frac_tmp[name.second]->Integral(0, _bin_number + 1);
+        const Double_t integral = signal_norm_in_range_only
+                                      ? _frac_tmp[name.second]->Integral(1, _bin_number)
+                                      : _frac_tmp[name.second]->Integral(0, _bin_number + 1);
         if (!std::isfinite(integral) || integral <= 0.0)
           throw std::runtime_error("Invalid signal integral in CP fit");
         _frac_tmp[name.second]->Scale(signal_event_weights_sum / integral);

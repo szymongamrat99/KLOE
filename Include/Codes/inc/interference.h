@@ -41,6 +41,7 @@ namespace KLOE
     Double_t *exclusions, left_x_split, center_x_split, right_x_split;
     Double_t signal_event_weights_sum;
     Double_t luminosity_factor = 1.07906;
+    Bool_t signal_norm_in_range_only = false;
 
     std::vector<Double_t> init_vars, step;
 

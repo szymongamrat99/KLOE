@@ -210,6 +210,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
 
   KLOE::interference event(mode, check_corr, nbins, x_min, x_max, split);
   event.luminosity_factor = lumiFactor;
+  event.signal_norm_in_range_only = setter.getRawConfig().value("signalNormalizationInRangeOnly", false);
 
   // -------------------------------------------------------------------------
   // Zewnętrzne stałe skalujące histogram regeneracji (per split).
@@ -594,6 +595,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
     for (const auto &entry : branchingRatios.BRcorrectionFactors)
       result["branchingRatioCorrections"][entry.first.Data()] = entry.second;
     result["luminosityFactor"] = lumiFactor;
+    result["signalNormalizationInRangeOnly"] = event.signal_norm_in_range_only;
     result["fit"]["success"] = fitSucceeded;
     result["fit"]["status"] = minimum->Status();
     result["fit"]["chi2"] = chi2;

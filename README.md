@@ -228,6 +228,8 @@ gdb --args ./bin/KLSPM00
 
 Czynnik świetlności MC → Data ustawia `luminosityFactor` na górze `config.json` (domyślnie 1.07906 przy braku klucza); trafia do JSON wyniku.
 
+`signalNormalizationInRangeOnly` (domyślnie `false`): `true` normalizuje Signal do sumy wag tylko zdarzeń z Δt w zakresie fitu (`deltaT.rangeX`), zamiast wszystkich wybranych zdarzeń.
+
 ### Diagnostyka fitu CP
 
 Plik wynikowy JSON zawiera sekcję `diagnostics`:
