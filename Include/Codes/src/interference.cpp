@@ -263,8 +263,9 @@ namespace KLOE
         weight = get_weight(name.second, dt_bin, xx);
 
 
-        Double_t brcf_val = BRCF.BRcorrectionFactors[name.second];
-        Double_t brcf_err = BRCF.BRcorrectionFactors_err[name.second];
+        const Bool_t apply_br = ApplyBrCorrection(name.second);
+        Double_t brcf_val = apply_br ? BRCF.BRcorrectionFactors[name.second] : 1.0;
+        Double_t brcf_err = apply_br ? BRCF.BRcorrectionFactors_err[name.second] : 0.0;
 
         // Zewnętrzna stała skalująca per-split dla regeneracji
         Double_t s_val = 1.0, s_err = 0.0;

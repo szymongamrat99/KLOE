@@ -1,12 +1,20 @@
 {
   "deltaT": {
-    "rangeX": [-300.0, 300.0],
-    "xRangeDisplay": [-300.0, 300.0],
+    "rangeX": [-200.0, 200.0],
+    "xRangeDisplay": [-200.0, 200.0],
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
-  "luminosityFactor": 1.00,
-  "signalNormalizationInRangeOnly": false,
+  "luminosityFactor": 1.1349,
+  "signalNormalizationInRangeOnly": true,
+  "branchingRatioCorrection": {
+    "Signal": true,
+    "Regeneration": true,
+    "Omega": true,
+    "3pi0": true,
+    "Semileptonic": true,
+    "Other": true
+  },
   "diagnostics": {
     "profile": {
       "enabled": false,
@@ -167,8 +175,8 @@
       "groupName": "A_bcg",
       "initialValue": 1.00,
       "step": 0.01,
-      "limitLower": 5.0,
-      "limitUpper": 10.0,
+      "limitLower": 1.0,
+      "limitUpper": 1.0,
       "channels": ["Semileptonic", "3pi0", "Other"],
       "fixed": false
     }

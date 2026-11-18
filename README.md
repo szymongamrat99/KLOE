@@ -230,6 +230,8 @@ Czynnik świetlności MC → Data ustawia `luminosityFactor` na górze `config.j
 
 `signalNormalizationInRangeOnly` (domyślnie `false`): `true` normalizuje Signal do sumy wag tylko zdarzeń z Δt w zakresie fitu (`deltaT.rangeX`), zamiast wszystkich wybranych zdarzeń.
 
+`branchingRatioCorrection`: obiekt `{kanał: true/false}` (kanały: Signal, Regeneration, Omega, 3pi0, Semileptonic, Other; brak klucza = włączone); `false` daje czynnik 1 i zerowy błąd BR dla tego kanału. Pojedyncze `true`/`false` działa dla wszystkich kanałów. JSON zawiera `branchingRatioCorrectionApplied` per kanał.
+
 ### Diagnostyka fitu CP
 
 Plik wynikowy JSON zawiera sekcję `diagnostics`:

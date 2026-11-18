@@ -210,6 +210,26 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
 
   KLOE::interference event(mode, check_corr, nbins, x_min, x_max, split);
   event.luminosity_factor = lumiFactor;
+  {
+    const json brConfig = setter.getRawConfig().value("branchingRatioCorrection", json(true));
+    const KLOE::BRCorrectionFactors knownChannels;
+    for (const auto &entry : knownChannels.BRcorrectionFactors)
+    {
+      const std::string channelName = entry.first.Data();
+      bool apply = true;
+      if (brConfig.is_boolean())
+        apply = brConfig.get<bool>();
+      else if (brConfig.is_object() && brConfig.contains(channelName))
+        apply = brConfig.at(channelName).get<bool>();
+      else if (!brConfig.is_object())
+        throw std::runtime_error("branchingRatioCorrection must be a boolean or an object of booleans per channel");
+      event.apply_br_correction[entry.first] = apply;
+    }
+    if (brConfig.is_object())
+      for (auto it = brConfig.begin(); it != brConfig.end(); ++it)
+        if (!knownChannels.BRcorrectionFactors.count(it.key().c_str()))
+          throw std::runtime_error("Unknown channel in branchingRatioCorrection: " + it.key());
+  }
   event.signal_norm_in_range_only = setter.getRawConfig().value("signalNormalizationInRangeOnly", false);
 
   // -------------------------------------------------------------------------
@@ -593,7 +613,10 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
         {"phi_00_nonCPT", PhysicsConstants::phi_00_nonCPT}};
     const KLOE::BRCorrectionFactors branchingRatios;
     for (const auto &entry : branchingRatios.BRcorrectionFactors)
-      result["branchingRatioCorrections"][entry.first.Data()] = entry.second;
+    {
+      result["branchingRatioCorrectionApplied"][entry.first.Data()] = event.ApplyBrCorrection(entry.first);
+      result["branchingRatioCorrections"][entry.first.Data()] = event.ApplyBrCorrection(entry.first) ? entry.second : 1.0;
+    }
     result["luminosityFactor"] = lumiFactor;
     result["signalNormalizationInRangeOnly"] = event.signal_norm_in_range_only;
     result["fit"]["success"] = fitSucceeded;

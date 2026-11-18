@@ -25,6 +25,7 @@ class CPFitStandaloneTest(unittest.TestCase):
         cls.config["deltaT"].update(rangeX=[-3.0, 3.0], xRangeDisplay=[-3.0, 3.0], resolution=1.0)
         cls.config["eventWeights"]["apply"] = dict.fromkeys(cls.config["eventWeights"]["apply"], False)
         cls.config["eventWeights"]["signalMaxRelativeError"] = 0.0
+        cls.config["signalNormalizationInRangeOnly"] = False
         cls.config["eventWeights"]["signalCorrectionFile"] = str(cls.path / "signal.root")
         cls.config["eventWeights"]["signalCorrectionHistogram"] = "weights"
         cls.config["regenerationShapeCorrection"]["weightFunctionsFile"] = str(cls.path / "regen.root")
@@ -126,6 +127,24 @@ class CPFitStandaloneTest(unittest.TestCase):
         self.assertTrue(in_range["signalNormalizationInRangeOnly"])
         self.assertLess(in_range["channels"]["Signal"]["fittedIntegral"],
                         full["channels"]["Signal"]["fittedIntegral"])
+
+    def test_branching_ratio_correction_switch(self):
+        base = copy.deepcopy(self.config)
+        base["parameterSettings"]["A_signal"]["fixed"] = True
+        base["parameterSettings"]["Re"]["fixed"] = False
+        on = self.run_fit(base)
+        self.assertTrue(all(on["branchingRatioCorrectionApplied"].values()))
+        base["branchingRatioCorrection"] = {"Signal": False}
+        partial = self.run_fit(base)
+        self.assertFalse(partial["branchingRatioCorrectionApplied"]["Signal"])
+        self.assertTrue(partial["branchingRatioCorrectionApplied"]["3pi0"])
+        self.assertEqual(partial["branchingRatioCorrections"]["Signal"], 1.0)
+        self.assertEqual(partial["branchingRatioCorrections"]["3pi0"], on["branchingRatioCorrections"]["3pi0"])
+        base["branchingRatioCorrection"] = False
+        off = self.run_fit(base)
+        self.assertEqual(set(off["branchingRatioCorrections"].values()), {1.0})
+        base["branchingRatioCorrection"] = {"Bogus": False}
+        self.assertIn("Unknown channel", self.run_fit(base, expected=1))
 
     def test_diagnostics_profile(self):
         config = copy.deepcopy(self.config)

@@ -42,6 +42,12 @@ namespace KLOE
     Double_t signal_event_weights_sum;
     Double_t luminosity_factor = 1.07906;
     Bool_t signal_norm_in_range_only = false;
+    std::map<TString, Bool_t> apply_br_correction; // per channel; missing channel = applied
+    Bool_t ApplyBrCorrection(const TString &channel) const
+    {
+      const auto it = apply_br_correction.find(channel);
+      return it == apply_br_correction.end() || it->second;
+    }
 
     std::vector<Double_t> init_vars, step;
 
