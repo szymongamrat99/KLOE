@@ -7,6 +7,7 @@
 
 #include <TH1D.h>
 #include <TVector3.h>
+#include <TDirectory.h>
 #include <TFile.h>
 #include <TCanvas.h>
 #include <TLegend.h>
@@ -107,6 +108,7 @@ RegenerationFractionFit::RegenerationFractionFit(std::string weightsFilePath) : 
   LoadConfig();
   KLOE::setGlobalStyle();
 
+  TDirectory::TContext directoryContext;
   fFileWeights = TFile::Open(weightsFilePath.c_str(), "READ");
 
   for (const auto &histType : _histTypesIterative)

@@ -1,7 +1,10 @@
 #include <iostream>
 #include <fstream>
+#include <memory>
+#include <stdexcept>
 
 #include <TROOT.h>
+#include <TDirectory.h>
 #include <TTree.h>
 #include <TFile.h>
 #include <TChain.h>
@@ -58,6 +61,9 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   // =============================================================================
   const TString cpfit_res_dir = Paths::cpfit_dir + Paths::result_dir;
 
+  FitSetter setter((std::string)Paths::cpfit_dir + "config/config.json");
+  FitConfig cfg = setter.getFitConfig();
+
   Double_t *eff_vals;
 
   if (check_corr == true)
@@ -69,41 +75,46 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     delete eff_signal;
   }
 
-  // =============================================================================
-  // Preparation of the Three pi0 hist object to calculate regeneration weights
-  // TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
-
-  // TCanvas *c = (TCanvas *)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
-  // TH1 *threePi0WeightsHist = (TH1 *)c->FindObject("correction_factors")->Clone();
-
-  // Calculation of average weighting factor for three pi0 events
-  // TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
-  double avgThreePi0Weight = 0.9375;//threePi0WeightResult->Parameter(0);
+  const double avgThreePi0Weight = cfg.eventWeights.threePi0;
   std::cout << "INFO: Average weighting factor for three pi0 events: " << avgThreePi0Weight << std::endl;
 
-  // Preparation of the Semileptonic hist object to calculate regeneration weights
-  // TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
-
-  // TCanvas *ctest = (TCanvas *)fFileWeightsSemileptonic->Get("semileptonic/correction_factors/cCorr");
-  // TH1 *semileptonicWeightsHist = (TH1 *)ctest->FindObject("correction_factors")->Clone();
-
-  // // Calculation of average weighting factor for semileptonic events
-  // TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
-  double avgSemileptonicWeight = 0.9272;//semileptonicWeightResult->Parameter(0);
+  const double avgSemileptonicWeight = cfg.eventWeights.semileptonic;
   std::cout << "INFO: Average weighting factor for semileptonic events: " << avgSemileptonicWeight << std::endl;
 
-  // Preparation of signal weights
-  TFile *fFileWeightsSignal = TFile::Open("/data/ssd/gamrat/KLOE/Subanalysis/CPFit/config/efficiency_purity_plots/eff_pur_corr_factor.root", "READ");
-  TDirectoryFile *cSignal = (TDirectoryFile*)fFileWeightsSignal->Get("corr_factor");
+  std::unique_ptr<TFile> signalWeightsFile;
+  std::unique_ptr<TH1> signalWeightsHist;
+  if (cfg.eventWeights.applySignal)
+  {
+    TDirectory::TContext directoryContext;
+    const std::string signalWeightsPath =
+        (std::string)Paths::cpfit_dir + cfg.eventWeights.signalCorrectionFile;
+    signalWeightsFile.reset(TFile::Open(signalWeightsPath.c_str(), "READ"));
+    if (!signalWeightsFile || signalWeightsFile->IsZombie())
+      throw std::runtime_error("Could not open signal correction file: " + signalWeightsPath);
 
-  TH1* signalWeightsHist = (TH1*)cSignal->Get("corr_factor_Delta_t_tri_fit")->Clone();
+    TH1 *signalWeightsSource =
+        dynamic_cast<TH1 *>(signalWeightsFile->Get(cfg.eventWeights.signalCorrectionHistogram.c_str()));
+    if (!signalWeightsSource)
+      throw std::runtime_error("Could not find signal correction histogram: " +
+                               cfg.eventWeights.signalCorrectionHistogram);
 
-  std::cout << "INFO: Signal weights histogram prepared." << std::endl;
-  
+    signalWeightsHist.reset(dynamic_cast<TH1 *>(signalWeightsSource->Clone("cpfit_signal_weights")));
+    if (!signalWeightsHist)
+      throw std::runtime_error("Could not clone signal correction histogram.");
+    signalWeightsHist->SetDirectory(nullptr);
+
+    signalWeightsFile->Close();
+  }
 
   // Preparation of the RegenerationFractionFit object to calculate regeneration weights
-  std::string weightsFilePath = (std::string)Paths::regen_analysis_dir + (std::string)Paths::result_dir + "regeneration_analysis_results.root";
-  RegenerationFractionFit regen_weights(weightsFilePath);
+  std::unique_ptr<RegenerationFractionFit> regen_weights;
+  if (cfg.eventWeights.applyRegeneration)
+  {
+    std::string weightsFilePath = (std::string)Paths::regen_analysis_dir +
+                                  (std::string)Paths::result_dir +
+                                  cfg.regenShapeCorrection.weightFunctionsFile;
+    regen_weights = std::make_unique<RegenerationFractionFit>(weightsFilePath);
+  }
 
   // ===========================================================================
 
@@ -151,8 +162,6 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   // ===========================================================================
 
   ///////////////////////////////////////
-  FitSetter setter((std::string)Paths::cpfit_dir + "config/config.json");
-  FitConfig cfg = setter.getFitConfig();
   Double_t
       x_min = cfg.deltaTConfig.xRange[0],
       x_max = cfg.deltaTConfig.xRange[1],
@@ -187,7 +196,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   Double_t split[3] = {left_split, center_split, right_split};
 
-  Bool_t regenerationExclusionFlag = cfg.regenerationExclusionFlag;
+  const RegenerationExclusionConfig &regenerationExclusion = cfg.regenerationExclusion;
 
   std::cout << "INFO: Fit settings loaded successfully." << std::endl;
 
@@ -413,27 +422,24 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         {HistogramType::R_CHARGED, rCharged},
         {HistogramType::R_NEUTRAL, rNeutral}};
 
-    Double_t ch_Spherical_Mean = 10.4941, ch_Spherical_Sigma = 0.957544;
-    Double_t ne_Spherical_Mean = 10.3769, ne_Spherical_Sigma = 1.23898;
-    Double_t ch_Cylindrical_Mean = 4.84397, ch_Cylindrical_Sigma = 0.877508;
-    Double_t ne_Cylindrical_Mean = 4.63652, ne_Cylindrical_Sigma = 0.703466;
-
-    Double_t beamPipeBound = 5; // Przykładowa granica między obszarem cylindra a sferą (do dostosowania)
-
     Bool_t regeneration_cut = true; // Domyślnie przepuszczamy wszystkie zdarzenia, jeśli flaga jest wyłączona
 
-    if (regenerationExclusionFlag)
+    if (regenerationExclusion.enabled)
     {
       Bool_t regeneration_cut_ch = false, regeneration_cut_ne = false;
 
-      if (rhoCharged > beamPipeBound)
-        regeneration_cut_ch = std::abs(rCharged - ch_Spherical_Mean) < 1.5 * ch_Spherical_Sigma;
+      if (rhoCharged > regenerationExclusion.beamPipeBoundary)
+        regeneration_cut_ch = std::abs(rCharged - regenerationExclusion.meanCharged) <
+                              regenerationExclusion.sigmaMultiplier * regenerationExclusion.sigmaCharged;
 
-      if (rhoNeutral > beamPipeBound)
-        regeneration_cut_ne = std::abs(rNeutral - ne_Spherical_Mean) < 1.5 * ne_Spherical_Sigma;
+      if (rhoNeutral > regenerationExclusion.beamPipeBoundary)
+        regeneration_cut_ne = std::abs(rNeutral - regenerationExclusion.meanNeutral) <
+                              regenerationExclusion.sigmaMultiplier * regenerationExclusion.sigmaNeutral;
 
       regeneration_cut = !(regeneration_cut_ch || regeneration_cut_ne);
     }
+
+    const Bool_t event_passes_cuts = global_cut && regeneration_cut;
 
     baseKin.Dtmc = *KaonChTimeCMMC - *KaonNeTimeCMMC;
     baseKin.Dtboostlor = *KaonChTimeCMSignalFit - *KaonNeTimeCMSignalFit;
@@ -448,16 +454,20 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         no_cuts_sig[1].push_back(baseKin.Dtboostlor);
       }
 
-      if (global_cut)
+      if (event_passes_cuts)
       {
         if (*mctruth == 1)
         {
           event.time_diff_gen.push_back(baseKin.Dtmc);
           event.time_diff["Signal"].push_back(baseKin.Dtboostlor);
-          double weight = signalWeightsHist->Interpolate(Dttri);
-
-          if (weight <= 0 || std::isnan(weight) || std::isinf(weight) || rhoCharged > 20.0)
-            weight = 1;
+          double weight = 1.0;
+          if (cfg.eventWeights.applySignal)
+          {
+            weight = signalWeightsHist->Interpolate(Dttri);
+            if (weight <= 0 || std::isnan(weight) || std::isinf(weight) ||
+                rhoCharged > cfg.eventWeights.signalMaxChargedRadius)
+              weight = 1.0;
+          }
 
           event.signal_event_weights.push_back(weight);
 
@@ -467,9 +477,10 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         if (*mctruth == 2)
         {
           event.time_diff["Regeneration"].push_back(baseKin.Dtboostlor);
-
-          if (cfg.regenShapeCorrection.enabled)
-            event.regen_event_weights.push_back(regen_weights.GetContinuousRegenerationWeight(baseKin.Dtboostlor, radiusMap));
+          const double weight = cfg.eventWeights.applyRegeneration
+                                    ? regen_weights->GetContinuousRegenerationWeight(baseKin.Dtboostlor, radiusMap)
+                                    : 1.0;
+          event.regen_event_weights.push_back(weight);
         }
 
         if (*mctruth == 3)
@@ -480,13 +491,13 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         if (*mctruth == 4)
         {
           event.time_diff["3pi0"].push_back(baseKin.Dtboostlor);
-          event.three_pi0_weights.push_back(avgThreePi0Weight);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+          event.three_pi0_weights.push_back(cfg.eventWeights.applyThreePi0 ? avgThreePi0Weight : 1.0);
         }
 
         if (*mctruth == 5)
         {
           event.time_diff["Semileptonic"].push_back(baseKin.Dtboostlor);
-          event.semileptonic_weights.push_back(avgSemileptonicWeight);//semileptonicWeightsHist->Interpolate(*minv4gam));
+          event.semileptonic_weights.push_back(cfg.eventWeights.applySemileptonic ? avgSemileptonicWeight : 1.0);
         }
 
         if (*mctruth == 6)
@@ -496,13 +507,27 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
       }
     }
 
-    if (*mcflag == 0 && global_cut)
+    if (*mcflag == 0 && event_passes_cuts)
     {
       event.time_diff["Data"].push_back(baseKin.Dtboostlor);
     }
 
     ++display;
   }
+
+  const auto validateWeightCount = [&event](const TString &channel, const std::vector<Double_t> &weights)
+  {
+    const size_t eventCount = event.time_diff[channel].size();
+    if (eventCount != weights.size())
+    {
+      throw std::runtime_error("Weight count for channel " + std::string(channel.Data()) +
+                               " does not match its selected event count.");
+    }
+  };
+  validateWeightCount("Signal", event.signal_event_weights);
+  validateWeightCount("3pi0", event.three_pi0_weights);
+  validateWeightCount("Semileptonic", event.semileptonic_weights);
+  validateWeightCount("Regeneration", event.regen_event_weights);
 
   minimum->Minimize();
 
@@ -804,29 +829,48 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   hEffErrorProfile->Draw("COLZ");
   c4->Print(Paths::cpfit_dir + Paths::img_dir + "eff_error_profile" + Paths::ext_img);
 
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Re"] = par[0];
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Im"] = par[1];
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Signal"] = par[2];
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarLeft"] = par[3];
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseLeft"] = par[4];
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseRight"] = par[5];
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarRight"] = par[6];
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Omegapi0"] = par[7];
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Threepi0"] = par[8];
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Semileptonic"] = par[9];
-  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Other"] = par[10];
+  const auto parameterValue = [&](const std::string &name)
+  {
+    const auto index = param_index_map.find(TString(name.c_str()));
+    if (index != param_index_map.end() && index->second >= 0)
+      return par.at(index->second);
 
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["PhysicsConstants::Re"] = parErr[0];
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["Im"] = parErr[1];
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Signal"] = parErr[2];
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarLeft"] = parErr[3];
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseLeft"] = parErr[4];
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseRight"] = parErr[5];
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarRight"] = parErr[6];
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Omegapi0"] = parErr[7];
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Threepi0"] = parErr[8];
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Semileptonic"] = parErr[9];
-  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Other"] = parErr[10];
+    const auto configured = cfg.parameters.find(name);
+    return configured != cfg.parameters.end() ? configured->second.initial_value : 0.0;
+  };
+  const auto parameterError = [&](const std::string &name)
+  {
+    const auto index = param_index_map.find(TString(name.c_str()));
+    return index != param_index_map.end() && index->second >= 0 ? parErr.at(index->second) : 0.0;
+  };
+  const auto regenParameterName = [&](const std::string &splitName)
+  {
+    return regenSplitMode ? splitName : std::string("A_regen");
+  };
+
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Re"] = parameterValue("Re");
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Im"] = parameterValue("Im");
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Signal"] = parameterValue("A_signal");
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarLeft"] = parameterValue(regenParameterName("A_regen_far_left"));
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseLeft"] = parameterValue(regenParameterName("A_regen_near_left"));
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["CloseRight"] = parameterValue(regenParameterName("A_regen_near_right"));
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Regeneration"]["FarRight"] = parameterValue(regenParameterName("A_regen_far_right"));
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Omegapi0"] = parameterValue("A_omega");
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Threepi0"] = parameterValue("A_three");
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Semileptonic"] = parameterValue("A_semileptonic");
+  Utils::properties["variables"]["CPFit"]["result"]["value"]["Norm"]["Other"] = parameterValue("A_other");
+
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["PhysicsConstants::Re"] = parameterError("Re");
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Im"] = parameterError("Im");
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Signal"] = parameterError("A_signal");
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarLeft"] = parameterError(regenParameterName("A_regen_far_left"));
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseLeft"] = parameterError(regenParameterName("A_regen_near_left"));
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["CloseRight"] = parameterError(regenParameterName("A_regen_near_right"));
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Regeneration"]["FarRight"] = parameterError(regenParameterName("A_regen_far_right"));
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Omegapi0"] = parameterError("A_omega");
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Threepi0"] = parameterError("A_three");
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Semileptonic"] = parameterError("A_semileptonic");
+  Utils::properties["variables"]["CPFit"]["result"]["error"]["Norm"]["Other"] = parameterError("A_other");
 
   Utils::properties["variables"]["CPFit"]["result"]["chi2"] = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "UW CHI2");
   Utils::properties["variables"]["CPFit"]["result"]["normChi2"] = event.getFracHistogram("Data")->Chi2Test(event.getFracHistogram("MC sum"), "UW CHI2/NDF");

@@ -43,9 +43,33 @@ struct RegenKinRange
 
 struct RegenShapeCorrectionConfig
 {
-  bool enabled = false;
   std::string correctionFile;
+  std::string weightFunctionsFile;
   std::vector<RegenKinRange> corrections;
+};
+
+struct EventWeightConfig
+{
+  bool applySignal = true;
+  bool applySemileptonic = true;
+  bool applyThreePi0 = true;
+  bool applyRegeneration = true;
+  std::string signalCorrectionFile;
+  std::string signalCorrectionHistogram;
+  Double_t threePi0 = 0.9375;
+  Double_t semileptonic = 0.9272;
+  Double_t signalMaxChargedRadius = 20.0;
+};
+
+struct RegenerationExclusionConfig
+{
+  bool enabled = false;
+  Double_t beamPipeBoundary = 5.0;
+  Double_t meanCharged = 10.4941;
+  Double_t sigmaCharged = 0.957544;
+  Double_t meanNeutral = 10.3769;
+  Double_t sigmaNeutral = 1.23898;
+  Double_t sigmaMultiplier = 1.5;
 };
 
 struct FitConfig
@@ -59,7 +83,8 @@ struct FitConfig
   Int_t print_level;
   Int_t strategy;
   DeltaTConfig deltaTConfig;
-  Bool_t regenerationExclusionFlag;
+  RegenerationExclusionConfig regenerationExclusion;
+  EventWeightConfig eventWeights;
   std::array<Double_t, 3> regenerationSplit = {-30.0, 0.0, 30.0};
   RegenShapeCorrectionConfig regenShapeCorrection;
 
@@ -133,14 +158,39 @@ public:
       throw std::runtime_error("ERROR: Missing fit setting in config file: " + std::string(e.what()));
     }
 
-    // Regeneration exclusion flag    try
     try
     {
-      fitConfig.regenerationExclusionFlag = _config.at("regenerationExclusion").at("enabled").get<Bool_t>();
+      const auto &exclusion = _config.at("regenerationExclusion");
+      fitConfig.regenerationExclusion.enabled = exclusion.at("enabled").get<bool>();
+      fitConfig.regenerationExclusion.beamPipeBoundary = exclusion.at("beamPipeBoundary").get<Double_t>();
+      fitConfig.regenerationExclusion.meanCharged = exclusion.at("spherical").at("meanCharged").get<Double_t>();
+      fitConfig.regenerationExclusion.sigmaCharged = exclusion.at("spherical").at("sigmaCharged").get<Double_t>();
+      fitConfig.regenerationExclusion.meanNeutral = exclusion.at("spherical").at("meanNeutral").get<Double_t>();
+      fitConfig.regenerationExclusion.sigmaNeutral = exclusion.at("spherical").at("sigmaNeutral").get<Double_t>();
+      fitConfig.regenerationExclusion.sigmaMultiplier = exclusion.at("sigmaMultiplier").get<Double_t>();
     }
     catch (const json::out_of_range &e)
     {
-      throw std::runtime_error("ERROR: Missing regenerationExclusionFlag in config file: " + std::string(e.what()));
+      throw std::runtime_error("ERROR: Missing regeneration exclusion setting in config file: " + std::string(e.what()));
+    }
+
+    try
+    {
+      const auto &weights = _config.at("eventWeights");
+      const auto &applyWeights = weights.at("apply");
+      fitConfig.eventWeights.applySignal = applyWeights.at("signal").get<bool>();
+      fitConfig.eventWeights.applySemileptonic = applyWeights.at("semileptonic").get<bool>();
+      fitConfig.eventWeights.applyThreePi0 = applyWeights.at("threePi0").get<bool>();
+      fitConfig.eventWeights.applyRegeneration = applyWeights.at("regeneration").get<bool>();
+      fitConfig.eventWeights.signalCorrectionFile = weights.at("signalCorrectionFile").get<std::string>();
+      fitConfig.eventWeights.signalCorrectionHistogram = weights.at("signalCorrectionHistogram").get<std::string>();
+      fitConfig.eventWeights.threePi0 = weights.at("threePi0").get<Double_t>();
+      fitConfig.eventWeights.semileptonic = weights.at("semileptonic").get<Double_t>();
+      fitConfig.eventWeights.signalMaxChargedRadius = weights.at("signalMaxChargedRadius").get<Double_t>();
+    }
+    catch (const json::out_of_range &e)
+    {
+      throw std::runtime_error("ERROR: Missing event weight setting in config file: " + std::string(e.what()));
     }
 
     // Regeneration split boundaries (used in single A_regen mode)
@@ -247,8 +297,8 @@ public:
     if (_config.contains("regenerationShapeCorrection"))
     {
       const auto &rsc = _config.at("regenerationShapeCorrection");
-      fitConfig.regenShapeCorrection.enabled = rsc.value("enabled", false);
       fitConfig.regenShapeCorrection.correctionFile = rsc.value("correctionFile", "");
+      fitConfig.regenShapeCorrection.weightFunctionsFile = rsc.value("weightFunctionsFile", "regeneration_analysis_results.root");
       if (rsc.contains("corrections"))
       {
         for (const auto &c : rsc.at("corrections"))

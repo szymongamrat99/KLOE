@@ -6,8 +6,9 @@
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
   "regenerationExclusion": {
-    "enabled": true,
+    "enabled": false,
     "beamPipeBoundary": 10.0,
+    "sigmaMultiplier": 1.5,
     "spherical": {
       "meanCharged": 10.4941,
       "sigmaCharged": 0.957544,
@@ -21,9 +22,22 @@
       "sigmaNeutral": 0.703466
     }
   },
+  "eventWeights": {
+    "apply": {
+      "signal": true,
+      "semileptonic": true,
+      "threePi0": true,
+      "regeneration": true
+    },
+    "signalCorrectionFile": "config/efficiency_purity_plots/eff_pur_corr_factor.root",
+    "signalCorrectionHistogram": "corr_factor/corr_factor_Delta_t_tri_fit",
+    "threePi0": 0.9375,
+    "semileptonic": 0.9272,
+    "signalMaxChargedRadius": 20.0
+  },
   "regenerationShapeCorrection": {
-    "enabled": true,
     "correctionFile": "config/regeneration_cross_section_corr_factors.root",
+    "weightFunctionsFile": "regeneration_analysis_results.root",
     "corrections": [
         { "histName": "h_ratio_R_charged_dt",   "variable": "R_Charged",   "rangeMin": 5.57729, "rangeMax": 15.3962  },
         { "histName": "h_ratio_R_neutral_dt",   "variable": "R_Neutral",   "rangeMin": 5.91582, "rangeMax": 15.334   },
