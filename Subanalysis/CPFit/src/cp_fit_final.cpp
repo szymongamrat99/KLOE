@@ -1,4 +1,6 @@
+#include <ctime>
 #include <iostream>
+#include <limits>
 #include <fstream>
 #include <memory>
 #include <stdexcept>
@@ -25,6 +27,9 @@
 #include <boost/progress.hpp>
 #include <boost/filesystem.hpp>
 #include <TF1.h>
+#include <TMatrixDSym.h>
+#include <TMatrixDSymEigen.h>
+#include <TVectorD.h>
 #include <set>
 #include <TFitResultPtr.h>
 #include <TFitResult.h>
@@ -37,7 +42,8 @@
 #include "../inc/cpfit.hpp"
 
 static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm00 &Obj,
-                          const std::string &config_path, const std::string &output_path)
+                          const std::string &config_path, const std::string &output_path,
+                          bool standaloneRun = false)
 {
   gErrorIgnoreLevel = kBreak;
 
@@ -327,7 +333,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
 
   boost::progress_display display(nentries);
   Long64_t entriesRead = 0;
-  size_t signalInvalidWeightCount = 0, signalOutsideRadiusCount = 0;
+  size_t signalInvalidWeightCount = 0, signalOutsideRadiusCount = 0, signalLargeErrorCount = 0;
 
   struct RegenKinVars
   {
@@ -460,6 +466,19 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
               ++signalOutsideRadiusCount;
               weight = 1.0;
             }
+            else if (cfg.eventWeights.signalMaxRelativeError > 0.0)
+            {
+              const int weightBin = signalWeightsHist->FindFixBin(Dttri);
+              const double binContent = signalWeightsHist->GetBinContent(weightBin);
+              const double relativeError = binContent > 0.0
+                                               ? signalWeightsHist->GetBinError(weightBin) / binContent
+                                               : std::numeric_limits<double>::infinity();
+              if (relativeError > cfg.eventWeights.signalMaxRelativeError)
+              {
+                ++signalLargeErrorCount;
+                weight = 1.0;
+              }
+            }
           }
 
           event.signal_event_weights.push_back(weight);
@@ -533,7 +552,8 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   if (event.signal_event_weights.empty() || event.time_diff["Data"].empty())
     throw std::runtime_error("CP fit requires selected Signal MC and Data events");
   std::cout << "INFO: Signal weights replaced by 1: invalid=" << signalInvalidWeightCount
-            << ", outside charged-radius limit=" << signalOutsideRadiusCount << std::endl;
+            << ", outside charged-radius limit=" << signalOutsideRadiusCount
+            << ", relative error above limit=" << signalLargeErrorCount << std::endl;
 
   const bool fitSucceeded = minimum->Minimize();
   if (!fitSucceeded || minimum->Status() != 0)
@@ -603,6 +623,113 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
       result["channels"][name]["fittedIntegral"] =
           event.getFracHistogram(channel.second)->Integral(0, nbins + 1);
     }
+    try
+    {
+      std::vector<std::pair<std::string, int>> freeParams;
+      for (const auto &pm : param_index_map)
+      {
+        if (pm.second < 0)
+          continue;
+        const std::string name = pm.first.Data();
+        const auto &p = cfg.parameters.at(name);
+        auto &entry = result["diagnostics"]["parameters"][name];
+        entry["atLowerBound"] = false;
+        entry["atUpperBound"] = false;
+        if (p.fixed)
+          continue;
+        freeParams.emplace_back(name, pm.second);
+        if (p.limit_lower > 0.0 || p.limit_upper > 0.0)
+        {
+          const auto lims = p.limits();
+          const double tol = 1e-3 * (lims[1] - lims[0]);
+          entry["atLowerBound"] = par.at(pm.second) - lims[0] < tol;
+          entry["atUpperBound"] = lims[1] - par.at(pm.second) < tol;
+        }
+      }
+
+      const size_t nFree = freeParams.size();
+      if (nFree > 1)
+      {
+        TMatrixDSym corr(nFree);
+        for (size_t a = 0; a < nFree; ++a)
+          for (size_t b = 0; b < nFree; ++b)
+            corr(a, b) = minimum->Correlation(freeParams[a].second, freeParams[b].second);
+        TMatrixDSymEigen eigen(corr);
+        const TVectorD &values = eigen.GetEigenValues();
+        const TMatrixD &vectors = eigen.GetEigenVectors();
+        double minEigen = values(0), maxEigen = values(0);
+        size_t weakest = 0;
+        for (size_t a = 0; a < nFree; ++a)
+        {
+          if (values(a) < minEigen)
+          {
+            minEigen = values(a);
+            weakest = a;
+          }
+          maxEigen = std::max(maxEigen, values(a));
+        }
+        auto &deg = result["diagnostics"]["degeneracy"];
+        deg["minEigenvalue"] = minEigen;
+        deg["maxEigenvalue"] = maxEigen;
+        deg["conditionNumber"] = minEigen > 1e-12 ? json(maxEigen / minEigen) : json(nullptr);
+        for (size_t a = 0; a < nFree; ++a)
+          deg["weakestDirection"][freeParams[a].first] = vectors(a, weakest);
+        for (size_t a = 0; a < nFree; ++a)
+          for (size_t b = a + 1; b < nFree; ++b)
+            if (std::abs(corr(a, b)) > 0.9)
+              deg["strongCorrelations"].push_back(
+                  {{"a", freeParams[a].first}, {"b", freeParams[b].first}, {"correlation", corr(a, b)}});
+      }
+
+      const json &diagCfg = setter.getRawConfig().value("diagnostics", json::object());
+      const json profCfg = diagCfg.value("profile", json::object());
+      if (profCfg.value("enabled", false))
+      {
+        const int points = std::max(3, profCfg.value("points", 11));
+        const double nSigma = profCfg.value("nSigma", 3.0);
+        for (const auto &fp : freeParams)
+        {
+          const auto &p = cfg.parameters.at(fp.first);
+          const int idx = fp.second;
+          const double best = par.at(idx);
+          const double halfWidth = nSigma * (parErr.at(idx) > 0.0 ? parErr.at(idx) : p.step);
+          double lo = best - halfWidth, hi = best + halfWidth;
+          if (p.limit_lower > 0.0 || p.limit_upper > 0.0)
+          {
+            const auto lims = p.limits();
+            lo = std::max(lo, lims[0]);
+            hi = std::min(hi, lims[1]);
+          }
+          json scan = json::array();
+          for (int k = 0; k < points; ++k)
+          {
+            const double v = lo + (hi - lo) * k / (points - 1);
+            if (nFree == 1)
+            {
+              std::vector<Double_t> shifted(par);
+              shifted.at(idx) = v;
+              scan.push_back({{"value", v}, {"deltaChi2", event.interf_chi2(shifted.data()) - chi2}, {"converged", true}});
+              continue;
+            }
+            for (const auto &q : param_index_map)
+              if (q.second >= 0 && !cfg.parameters.at(q.first.Data()).fixed)
+                minimum->SetVariableValue(q.second, par.at(q.second));
+            minimum->SetVariableValue(idx, v);
+            minimum->FixVariable(idx);
+            const bool ok = minimum->Minimize();
+            scan.push_back({{"value", v}, {"deltaChi2", minimum->MinValue() - chi2}, {"converged", ok}});
+            minimum->ReleaseVariable(idx);
+          }
+          result["diagnostics"]["profile"][fp.first] = scan;
+        }
+        event.interf_chi2(par.data());
+      }
+    }
+    catch (const std::exception &e)
+    {
+      result["diagnostics"]["error"] = e.what();
+    }
+
     double sumWeights = 0.0, sumWeightsSquared = 0.0;
     for (const double weight : event.signal_event_weights)
     {
@@ -614,6 +741,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
     result["signalWeights"]["sumSquares"] = sumWeightsSquared;
     result["signalWeights"]["invalidReplaced"] = signalInvalidWeightCount;
     result["signalWeights"]["outsideRadiusReplaced"] = signalOutsideRadiusCount;
+    result["signalWeights"]["largeRelativeErrorReplaced"] = signalLargeErrorCount;
     result["signalWeights"]["mean"] = event.signal_event_weights.empty()
                                             ? json(nullptr)
                                             : json(sumWeights / event.signal_event_weights.size());
@@ -624,7 +752,8 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
     output.close();
     if (!output)
       throw std::runtime_error("Could not close CP fit results: " + output_path);
-    return 0;
+    if (standaloneRun)
+      return 0;
   }
 
   std::cout << "INFO: Parameters" << std::endl;
@@ -979,8 +1108,15 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
 int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type,
                  ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
 {
+  const boost::filesystem::path resultsDir = boost::filesystem::path(Paths::customRootResultsPath) / "cpfit_results";
+  boost::filesystem::create_directories(resultsDir);
+  char stamp[32];
+  const std::time_t now = std::time(nullptr);
+  std::strftime(stamp, sizeof(stamp), "%Y%m%d_%H%M%S", std::localtime(&now));
+  const std::string outputPath = (resultsDir / (std::string("cpfit_result_") + stamp + ".json")).string();
+  std::cout << "INFO: CP fit result and diagnostics will be written to " << outputPath << std::endl;
   return cp_fit_execute(chain, mode, check_corr, Obj,
-                        (std::string)Paths::cpfit_dir + "config/config.json", "");
+                        (std::string)Paths::cpfit_dir + "config/config.json", outputPath);
 }
 
 int cp_fit_run(TChain &chain, const char *config_path, const char *output_path)
@@ -1003,5 +1139,5 @@ int cp_fit_run(TChain &chain, const char *config_path, const char *output_path)
   if (!std::isfinite(PhysicsConstants::mK0) || PhysicsConstants::mK0 < 100.0)
     throw std::runtime_error("Failed to initialize the neutral-kaon mass from the local PDG cache");
   KLOE::pm00 object;
-  return cp_fit_execute(chain, "split", false, object, config_path, output_path);
+  return cp_fit_execute(chain, "split", false, object, config_path, output_path, true);
 }

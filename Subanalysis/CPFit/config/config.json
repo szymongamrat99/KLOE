@@ -5,6 +5,13 @@
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
+  "diagnostics": {
+    "profile": {
+      "enabled": false,
+      "points": 11,
+      "nSigma": 3.0
+    }
+  },
   "cuts": {
     "ellipse": {
       "enabled": true,
@@ -58,7 +65,8 @@
     "signalCorrectionHistogram": "corr_factor/corr_factor_Delta_t_tri_fit",
     "threePi0": 0.9375,
     "semileptonic": 0.9272,
-    "signalMaxChargedRadius": 20.0
+    "signalMaxChargedRadius": 20.0,
+    "signalMaxRelativeError": 0.1
   },
   "regenerationShapeCorrection": {
     "correctionFile": "config/regeneration_cross_section_corr_factors.root",
@@ -108,7 +116,7 @@
       "fixed": false
     },
     "A_regen": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 3.0,
       "limitUpper": 2.5,
@@ -117,7 +125,7 @@
       "fixed": false
     },
     "A_three": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -126,7 +134,7 @@
       "fixed": false
     },
     "A_omega": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -135,7 +143,7 @@
       "fixed": false
     },
     "A_semileptonic": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -144,7 +152,7 @@
       "fixed": false
     },
     "A_other": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -153,14 +161,14 @@
       "fixed": false
     },
     "A_bcg_group": {
-      "enabled": false,
+      "enabled": true,
       "groupName": "A_bcg",
       "initialValue": 1.00,
       "step": 0.01,
       "limitLower": 1.0,
       "limitUpper": 10.0,
-      "channels": ["Semileptonic", "3pi0", "Other"],
-      "fixed": false
+      "channels": ["Semileptonic", "3pi0", "Other", "Regeneration"],
+      "fixed": true
     }
   }
 }

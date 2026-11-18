@@ -81,6 +81,7 @@ struct EventWeightConfig
   Double_t threePi0 = 0.9375;
   Double_t semileptonic = 0.9272;
   Double_t signalMaxChargedRadius = 20.0;
+  Double_t signalMaxRelativeError = 0.0; // 0 disables the cut
 };
 
 struct RegenerationExclusionConfig
@@ -212,6 +213,7 @@ public:
       fitConfig.eventWeights.threePi0 = weights.at("threePi0").get<Double_t>();
       fitConfig.eventWeights.semileptonic = weights.at("semileptonic").get<Double_t>();
       fitConfig.eventWeights.signalMaxChargedRadius = weights.at("signalMaxChargedRadius").get<Double_t>();
+      fitConfig.eventWeights.signalMaxRelativeError = weights.value("signalMaxRelativeError", 0.0);
     }
     catch (const json::out_of_range &e)
     {
@@ -260,7 +262,9 @@ public:
     if (!std::isfinite(fitConfig.eventWeights.threePi0) || fitConfig.eventWeights.threePi0 < 0 ||
         !std::isfinite(fitConfig.eventWeights.semileptonic) || fitConfig.eventWeights.semileptonic < 0 ||
         !std::isfinite(fitConfig.eventWeights.signalMaxChargedRadius) ||
-        fitConfig.eventWeights.signalMaxChargedRadius < 0)
+        fitConfig.eventWeights.signalMaxChargedRadius < 0 ||
+        !std::isfinite(fitConfig.eventWeights.signalMaxRelativeError) ||
+        fitConfig.eventWeights.signalMaxRelativeError < 0)
       throw std::runtime_error("ERROR: Invalid event weight settings");
     if (!std::isfinite(fitConfig.regenerationExclusion.beamPipeBoundary) ||
         fitConfig.regenerationExclusion.beamPipeBoundary < 0 ||

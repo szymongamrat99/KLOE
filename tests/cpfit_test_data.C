@@ -55,7 +55,10 @@ void cpfit_test_data(const char *directory)
     TFile file((base + "/signal.root").c_str(), "RECREATE");
     TH1D weights("weights", "weights", 10, -5, 5);
     for (int i = 1; i <= 10; ++i)
+    {
       weights.SetBinContent(i, 0.96);
+      weights.SetBinError(i, i > 5 ? 0.5 : 0.01);
+    }
     weights.Write();
   }
   {

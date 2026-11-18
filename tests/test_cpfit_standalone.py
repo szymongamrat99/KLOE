@@ -24,6 +24,7 @@ class CPFitStandaloneTest(unittest.TestCase):
         cls.config = json.loads((ROOT / "Subanalysis/CPFit/config/config.json").read_text())
         cls.config["deltaT"].update(rangeX=[-3.0, 3.0], xRangeDisplay=[-3.0, 3.0], resolution=1.0)
         cls.config["eventWeights"]["apply"] = dict.fromkeys(cls.config["eventWeights"]["apply"], False)
+        cls.config["eventWeights"]["signalMaxRelativeError"] = 0.0
         cls.config["eventWeights"]["signalCorrectionFile"] = str(cls.path / "signal.root")
         cls.config["eventWeights"]["signalCorrectionHistogram"] = "weights"
         cls.config["regenerationShapeCorrection"]["weightFunctionsFile"] = str(cls.path / "regen.root")
@@ -89,6 +90,32 @@ class CPFitStandaloneTest(unittest.TestCase):
         result = self.run_fit(config)
         self.assertEqual(result["channels"]["Regeneration"]["selected"], 0)
         self.assertEqual(result["channels"]["Data"]["selected"], 840)
+
+    def test_signal_weight_relative_error_cut(self):
+        config = copy.deepcopy(self.config)
+        config["eventWeights"]["apply"]["signal"] = True
+        config["eventWeights"]["signalMaxRelativeError"] = 0.1
+        weights = self.run_fit(config)["signalWeights"]
+        replaced = weights["largeRelativeErrorReplaced"]
+        self.assertGreater(replaced, 0)
+        self.assertLess(replaced, 560)
+        self.assertAlmostEqual(weights["sum"], (560 - replaced) * 0.96 + replaced)
+
+    def test_diagnostics_profile(self):
+        config = copy.deepcopy(self.config)
+        config["diagnostics"] = {"profile": {"enabled": True, "points": 5, "nSigma": 2.0}}
+        config["parameterSettings"]["A_bcg_group"].update(enabled=True, fixed=False)
+        for name in ("A_three", "A_semileptonic", "A_other"):
+            config["parameterSettings"][name]["enabled"] = False
+        config["parameterSettings"]["A_signal"]["fixed"] = False
+        diagnostics = self.run_fit(config)["diagnostics"]
+        self.assertNotIn("error", diagnostics)
+        self.assertIn("conditionNumber", diagnostics["degeneracy"])
+        profile = diagnostics["profile"]
+        self.assertTrue(profile)
+        for scan in profile.values():
+            self.assertEqual(len(scan), 5)
+            self.assertGreater(max(point["deltaChi2"] for point in scan), -1e-3)
 
     def test_missing_regeneration_file(self):
         config = copy.deepcopy(self.config)

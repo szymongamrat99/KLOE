@@ -225,3 +225,12 @@ gdb --args ./bin/KLSPM00
 ## Deployment
 
 `copy_libs.sh` copies the built binary and all `*.so` libraries to the shared experiment software area (`/opt/exp_software/kloe/users/.../KLSPM00/`). It runs automatically at the end of `execute_analysis.sh` when executed on host `ui-tier1.cr.cnaf.infn.it`.
+
+### Diagnostyka fitu CP
+
+Plik wynikowy JSON zawiera sekcję `diagnostics`:
+- `parameters.<nazwa>.atLowerBound/atUpperBound` – parametr na granicy limitu;
+- `degeneracy` – wartości własne macierzy korelacji, `conditionNumber`, `weakestDirection` (składowe najsłabiej wyznaczonej kombinacji parametrów) i pary o `|corr| > 0.9`;
+- `profile.<parametr>` – profil chi2 (`deltaChi2` w funkcji wartości, pozostałe parametry reminimalizowane); włączany w konfiguracji: `"diagnostics": {"profile": {"enabled": true, "points": 11, "nSigma": 3.0}}`.
+
+Waga Signal jest zastępowana jedynką także wtedy, gdy względny błąd binu histogramu wag (`GetBinError/GetBinContent`) przekracza `eventWeights.signalMaxRelativeError` (domyślnie w `config.json` 0.1; 0 wyłącza). Liczba takich zdarzeń: `signalWeights.largeRelativeErrorReplaced`.
