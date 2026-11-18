@@ -23,6 +23,7 @@
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
 #include <boost/progress.hpp>
+#include <boost/filesystem.hpp>
 #include <TF1.h>
 #include <set>
 #include <TFitResultPtr.h>
@@ -35,7 +36,8 @@
 
 #include "../inc/cpfit.hpp"
 
-int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type, ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
+static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm00 &Obj,
+                          const std::string &config_path, const std::string &output_path)
 {
   gErrorIgnoreLevel = kBreak;
 
@@ -61,7 +63,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   // =============================================================================
   const TString cpfit_res_dir = Paths::cpfit_dir + Paths::result_dir;
 
-  FitSetter setter((std::string)Paths::cpfit_dir + "config/config.json");
+  FitSetter setter(config_path);
   FitConfig cfg = setter.getFitConfig();
 
   Double_t *eff_vals;
@@ -86,8 +88,9 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   if (cfg.eventWeights.applySignal)
   {
     TDirectory::TContext directoryContext;
-    const std::string signalWeightsPath =
-        (std::string)Paths::cpfit_dir + cfg.eventWeights.signalCorrectionFile;
+    const boost::filesystem::path configuredPath(cfg.eventWeights.signalCorrectionFile);
+    const std::string signalWeightsPath = (configuredPath.is_absolute()
+        ? configuredPath : boost::filesystem::path((std::string)Paths::cpfit_dir) / configuredPath).string();
     signalWeightsFile.reset(TFile::Open(signalWeightsPath.c_str(), "READ"));
     if (!signalWeightsFile || signalWeightsFile->IsZombie())
       throw std::runtime_error("Could not open signal correction file: " + signalWeightsPath);
@@ -110,9 +113,10 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   std::unique_ptr<RegenerationFractionFit> regen_weights;
   if (cfg.eventWeights.applyRegeneration)
   {
-    std::string weightsFilePath = (std::string)Paths::regen_analysis_dir +
-                                  (std::string)Paths::result_dir +
-                                  cfg.regenShapeCorrection.weightFunctionsFile;
+    const boost::filesystem::path configuredPath(cfg.regenShapeCorrection.weightFunctionsFile);
+    std::string weightsFilePath = (configuredPath.is_absolute()
+        ? configuredPath : boost::filesystem::path((std::string)Paths::regen_analysis_dir +
+                                                    (std::string)Paths::result_dir) / configuredPath).string();
     regen_weights = std::make_unique<RegenerationFractionFit>(weightsFilePath);
   }
 
@@ -123,10 +127,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   TTreeReaderValue<Int_t> mcflag(reader, "mcflag");
   TTreeReaderValue<Int_t> mctruth(reader, "mctruth");
 
-  TTreeReaderValue<Double_t> Chi2SignalKinFit(reader, "Chi2SignalKinFit");
   TTreeReaderValue<Double_t> minv4gam(reader, "minv4gam");
-
-  TTreeReaderValue<Double_t> Qmiss(reader, "Qmiss");
 
   TTreeReaderValue<Double_t> Bx(reader, "Bx");
   TTreeReaderValue<Double_t> By(reader, "By");
@@ -140,24 +141,16 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   TTreeReaderValue<Double_t> KaonNeTimeCMBoostTriFit(reader, "KaonNeTimeCMBoostTriFit");
 
 
-  TTreeReaderValue<Double_t> bestErrorSixGamma(reader, "bestErrorSixGamma");
-
   TTreeReaderArray<Double_t> Knerec(reader, "Knerec");
   TTreeReaderArray<Double_t> KnerecSix(reader, "KnerecSix");
   TTreeReaderArray<Double_t> KchrecClosest(reader, "KchrecClosest");
 
   TTreeReaderArray<Double_t> KnerecFit(reader, "KnerecFit");
   TTreeReaderArray<Double_t> KchrecFit(reader, "KchrecFit");
-  TTreeReaderArray<Double_t> ipFit(reader, "ipFit");
-
   TTreeReaderArray<Double_t> Kchrec(reader, "Kchrec");
-  TTreeReaderArray<Double_t> ip(reader, "ip");
 
   TTreeReaderArray<Double_t> trk1Fit(reader, "trk1Fit");
   TTreeReaderArray<Double_t> trk2Fit(reader, "trk2Fit");
-
-  TTreeReaderArray<Double_t> pi01Fit(reader, "pi01Fit");
-  TTreeReaderArray<Double_t> pi02Fit(reader, "pi02Fit");
 
   // ===========================================================================
 
@@ -228,6 +221,9 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   UInt_t num_of_vars = cfg.getNumOfEnabledParameters(); // Default number of variables (can be adjusted based on mode)
   ROOT::Math::Minimizer *minimum =
       ROOT::Math::Factory::CreateMinimizer(cfg.minimizer_type, cfg.minimizer_algorithm);
+  if (!minimum)
+    throw std::runtime_error("Cannot create requested minimizer: " + cfg.minimizer_type +
+                             "/" + cfg.minimizer_algorithm);
 
   // set tolerance , etc...
   minimum->SetMaxFunctionCalls(cfg.max_function_calls); // for Minuit/Minuit2
@@ -266,18 +262,22 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     if (p.fixed)
     {
       // Parametr jest w fitowaniu, ale ma stałą wartość (nie zmienia się)
-      minimum->SetFixedVariable(par_num, pName.Data(), p.initial_value);
+      if (!minimum->SetFixedVariable(par_num, pName.Data(), p.initial_value))
+        throw std::runtime_error("Cannot configure fixed fit parameter: " + std::string(pName.Data()));
     }
     else
     {
       auto lims = p.limits();
       if (p.limit_lower > 0.0 || p.limit_upper > 0.0)
       {
-        minimum->SetLimitedVariable(par_num, pName.Data(), p.initial_value, p.step, lims[0], lims[1]);
+        if (lims[0] >= lims[1] ||
+            !minimum->SetLimitedVariable(par_num, pName.Data(), p.initial_value, p.step, lims[0], lims[1]))
+          throw std::runtime_error("Cannot configure limits for fit parameter: " + std::string(pName.Data()));
       }
       else
       {
-        minimum->SetVariable(par_num, pName.Data(), p.initial_value, p.step);
+        if (!minimum->SetVariable(par_num, pName.Data(), p.initial_value, p.step))
+          throw std::runtime_error("Cannot configure fit parameter: " + std::string(pName.Data()));
       }
     }
     par_num++; // Zwiększamy tylko jeśli parametr został dodany do minimum
@@ -326,30 +326,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   Long64_t nentries = reader.GetEntries(true);
 
   boost::progress_display display(nentries);
-
-  double u0 = -92.9524, v0 = 7.1644, su = 33.7633, sv = 42.0163, rho = 0.556;
-  double n_sigma_cut = 2.5;
-
-  // Definicja lambdy
-  auto ellipse_cut = [=](double u, double v)
-  {
-    double du = u - u0;
-    double dv = v - v0;
-    double inv_rho2 = 1.0 / (1.0 - rho * rho);
-
-    double dist2 = inv_rho2 * ((du * du) / (su * su) +
-                               (dv * dv) / (sv * sv) -
-                               2.0 * rho * (du * dv) / (su * sv));
-
-    return std::sqrt(std::max(0.0, dist2)) > n_sigma_cut;
-  };
-
-  Long64_t event_data = reader.GetEntries("mcflag == 0"),
-           event_mc = reader.GetEntries("mcflag == 1 && mctruth != -1 && mctruth != 0");
-
-  // Luminosity scaling factor
-  Double_t lumi_scaling_factor = event_data / static_cast<Double_t>(event_mc);
-  // ---
+  Long64_t entriesRead = 0;
+  size_t signalInvalidWeightCount = 0, signalOutsideRadiusCount = 0;
 
   struct RegenKinVars
   {
@@ -357,10 +335,12 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   };
   std::vector<RegenKinVars> regen_kin_vars;
 
-  reader.SetEntry(0); // Ensure we start from the first entry
-
   while (reader.Next())
   {
+    if (Knerec.GetSize() < 9 || KnerecSix.GetSize() < 6 || KchrecClosest.GetSize() < 9 ||
+        KnerecFit.GetSize() < 9 || KchrecFit.GetSize() < 9 || Kchrec.GetSize() < 9 ||
+        trk1Fit.GetSize() < 3 || trk2Fit.GetSize() < 3)
+      throw std::runtime_error("Input event contains a kinematic array shorter than required");
     // Cut setting
     std::array<Double_t, 3> distNeutralCharged = {KchrecFit[6] - KnerecFit[6],
                                                   KchrecFit[7] - KnerecFit[7],
@@ -384,8 +364,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
              zdist00 = std::abs(Knerec[8] - KchrecClosest[8]),
              zdistpm = std::abs(KchrecClosest[8] - *Bz);
 
-    Double_t fiducialVolume = std::sqrt(std::pow(distNeutralCharged[0], 2) + std::pow(distNeutralCharged[1], 2)) < 2.05 && std::abs(distNeutralCharged[2]) < 2.45,
-             fiducialVolumeClose = radius00 < 1.5 && radiuspm < 2.0 && zdist00 < 1.5 && zdistpm < 1.5;
+    Bool_t fiducialVolume = std::sqrt(std::pow(distNeutralCharged[0], 2) + std::pow(distNeutralCharged[1], 2)) < cfg.cuts.vertexDistanceXY && std::abs(distNeutralCharged[2]) < cfg.cuts.vertexDistanceZ,
+           fiducialVolumeClose = radius00 < cfg.cuts.neutralRadius && radiuspm < cfg.cuts.chargedRadius && zdist00 < cfg.cuts.neutralZ && zdistpm < cfg.cuts.chargedZ;
 
     TVector3 KchrecVec = {KchrecFit[0], KchrecFit[1], KchrecFit[2]};
     TVector3 trk1VecFit = {trk1Fit[0], trk1Fit[1], trk1Fit[2]};
@@ -394,7 +374,13 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     Double_t phiTrk1Angle = cos(trk1VecFit.Angle(KchrecVec)),
              phiTrk2Angle = cos(trk2VecFit.Angle(KchrecVec));
 
-    Bool_t global_cut = ((fiducialVolume && (abs(phiTrk1Angle) < 0.8 || abs(phiTrk2Angle) < 0.8)) || !fiducialVolume) && ((fiducialVolumeClose && rho > 1.5) || !fiducialVolumeClose) && ellipse_cut(*minv4gam - PhysicsConstants::mK0, KnerecSix[5] - PhysicsConstants::mK0);
+    Bool_t global_cut =
+        (!cfg.cuts.trackAngleEnabled || !fiducialVolume ||
+         std::abs(phiTrk1Angle) < cfg.cuts.maxTrackCosine ||
+         std::abs(phiTrk2Angle) < cfg.cuts.maxTrackCosine) &&
+        (!cfg.cuts.closeVertexEnabled || !fiducialVolumeClose || rho > cfg.cuts.minCombinedRadius) &&
+        (!cfg.cuts.ellipseEnabled ||
+         cfg.cuts.outsideEllipse(*minv4gam - PhysicsConstants::mK0, KnerecSix[5] - PhysicsConstants::mK0));
 
     // Regeneration cut
     TVector3 ipVector, neutralVtxVector, chargedVtxVector;
@@ -464,9 +450,16 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
           if (cfg.eventWeights.applySignal)
           {
             weight = signalWeightsHist->Interpolate(Dttri);
-            if (weight <= 0 || std::isnan(weight) || std::isinf(weight) ||
-                rhoCharged > cfg.eventWeights.signalMaxChargedRadius)
+            if (weight <= 0 || !std::isfinite(weight))
+            {
+              ++signalInvalidWeightCount;
               weight = 1.0;
+            }
+            else if (rhoCharged > cfg.eventWeights.signalMaxChargedRadius)
+            {
+              ++signalOutsideRadiusCount;
+              weight = 1.0;
+            }
           }
 
           event.signal_event_weights.push_back(weight);
@@ -480,6 +473,8 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
           const double weight = cfg.eventWeights.applyRegeneration
                                     ? regen_weights->GetContinuousRegenerationWeight(baseKin.Dtboostlor, radiusMap)
                                     : 1.0;
+          if (!std::isfinite(weight) || weight < 0.0)
+            throw std::runtime_error("Invalid regeneration weight");
           event.regen_event_weights.push_back(weight);
         }
 
@@ -513,7 +508,14 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
     }
 
     ++display;
+    ++entriesRead;
   }
+
+  if (entriesRead != nentries ||
+      (reader.GetEntryStatus() != TTreeReader::kEntryBeyondEnd &&
+       reader.GetEntryStatus() != TTreeReader::kEntryNotFound))
+    throw std::runtime_error("Could not read the complete input chain (TTreeReader status " +
+                             std::to_string(reader.GetEntryStatus()) + ")");
 
   const auto validateWeightCount = [&event](const TString &channel, const std::vector<Double_t> &weights)
   {
@@ -528,8 +530,14 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   validateWeightCount("3pi0", event.three_pi0_weights);
   validateWeightCount("Semileptonic", event.semileptonic_weights);
   validateWeightCount("Regeneration", event.regen_event_weights);
+  if (event.signal_event_weights.empty() || event.time_diff["Data"].empty())
+    throw std::runtime_error("CP fit requires selected Signal MC and Data events");
+  std::cout << "INFO: Signal weights replaced by 1: invalid=" << signalInvalidWeightCount
+            << ", outside charged-radius limit=" << signalOutsideRadiusCount << std::endl;
 
-  minimum->Minimize();
+  const bool fitSucceeded = minimum->Minimize();
+  if (!fitSucceeded || minimum->Status() != 0)
+    throw std::runtime_error("CP fit failed: minimizer status " + std::to_string(minimum->Status()));
 
   std::vector<Double_t> par(num_of_vars), parErr(num_of_vars);
 
@@ -540,6 +548,83 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
       continue;
     par[pm.second] = minimum->X()[pm.second];
     parErr[pm.second] = minimum->Errors()[pm.second];
+  }
+
+  if (!output_path.empty())
+  {
+    const double chi2 = event.interf_chi2(par.data());
+    if (!std::isfinite(chi2))
+      throw std::runtime_error("CP fit returned a non-finite chi-square");
+
+    json result;
+    result["configuration"] = setter.getRawConfig();
+    result["physicsConstants"] = {
+        {"source", "PDG 2025 local cache"},
+        {"cacheDirectory", Paths::pdgCachePath},
+        {"mK0", PhysicsConstants::mK0},
+        {"tau_S_nonCPT", PhysicsConstants::tau_S_nonCPT},
+        {"tau_L", PhysicsConstants::tau_L},
+        {"delta_mass_nonCPT", PhysicsConstants::delta_mass_nonCPT},
+        {"mod_epsilon", PhysicsConstants::mod_epsilon},
+        {"phi_pm_nonCPT", PhysicsConstants::phi_pm_nonCPT},
+        {"phi_00_nonCPT", PhysicsConstants::phi_00_nonCPT}};
+    const KLOE::BRCorrectionFactors branchingRatios;
+    for (const auto &entry : branchingRatios.BRcorrectionFactors)
+      result["branchingRatioCorrections"][entry.first.Data()] = entry.second;
+    result["luminosityFactor"] = 1.07906;
+    result["fit"]["success"] = fitSucceeded;
+    result["fit"]["status"] = minimum->Status();
+    result["fit"]["chi2"] = chi2;
+    result["fit"]["parameters"] = json::object();
+    for (const auto &pm : param_index_map)
+    {
+      if (pm.second < 0)
+        continue;
+      const std::string name = pm.first.Data();
+      result["fit"]["parameters"][name] = {
+          {"value", par.at(pm.second)},
+          {"error", parErr.at(pm.second)},
+          {"fixed", cfg.parameters.at(name).fixed}};
+      for (const auto &other : param_index_map)
+        if (other.second >= 0)
+          result["fit"]["correlation"][name][other.first.Data()] =
+              minimum->Correlation(pm.second, other.second);
+    }
+
+    for (const auto &channel : KLOE::channName)
+    {
+      const std::string name = channel.second.Data();
+      size_t selected = event.time_diff[channel.second].size();
+      if (name == "MC sum")
+        for (const auto &mcChannel : KLOE::channName)
+          if (mcChannel.first > 0 && mcChannel.second != "MC sum")
+            selected += event.time_diff[mcChannel.second].size();
+      result["channels"][name]["selected"] = selected;
+      result["channels"][name]["fittedIntegral"] =
+          event.getFracHistogram(channel.second)->Integral(0, nbins + 1);
+    }
+    double sumWeights = 0.0, sumWeightsSquared = 0.0;
+    for (const double weight : event.signal_event_weights)
+    {
+      sumWeights += weight;
+      sumWeightsSquared += weight * weight;
+    }
+    result["signalWeights"]["count"] = event.signal_event_weights.size();
+    result["signalWeights"]["sum"] = sumWeights;
+    result["signalWeights"]["sumSquares"] = sumWeightsSquared;
+    result["signalWeights"]["invalidReplaced"] = signalInvalidWeightCount;
+    result["signalWeights"]["outsideRadiusReplaced"] = signalOutsideRadiusCount;
+    result["signalWeights"]["mean"] = event.signal_event_weights.empty()
+                                            ? json(nullptr)
+                                            : json(sumWeights / event.signal_event_weights.size());
+
+    std::ofstream output(output_path);
+    if (!output || !(output << result.dump(2) << '\n'))
+      throw std::runtime_error("Could not write CP fit results: " + output_path);
+    output.close();
+    if (!output)
+      throw std::runtime_error("Could not close CP fit results: " + output_path);
+    return 0;
   }
 
   std::cout << "INFO: Parameters" << std::endl;
@@ -889,4 +974,34 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
   outfile.close();
 
   return 0;
+}
+
+int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataType &data_type,
+                 ErrorHandling::ErrorLogs &logger, KLOE::pm00 &Obj, ConfigWatcher &cfgWatcher)
+{
+  return cp_fit_execute(chain, mode, check_corr, Obj,
+                        (std::string)Paths::cpfit_dir + "config/config.json", "");
+}
+
+int cp_fit_run(TChain &chain, const char *config_path, const char *output_path)
+{
+  if (!config_path || !*config_path || !output_path || !*output_path)
+    throw std::invalid_argument("CP fit requires a configuration and output path");
+  if (boost::filesystem::exists(output_path))
+    throw std::runtime_error("Output file already exists: " + std::string(output_path));
+  for (const char *id : {"S011", "S012", "S013"})
+  {
+    const std::string path = Paths::pdgCachePath + "/pdg_cache_" + id + "_2025.json";
+    if (!boost::filesystem::is_regular_file(path))
+      throw std::runtime_error("Missing local PDG cache file: " + path);
+  }
+  if (!boost::filesystem::is_regular_file(Paths::pathsExtensionsPath))
+    throw std::runtime_error("Missing path configuration: " + Paths::pathsExtensionsPath);
+  const boost::filesystem::path logs = boost::filesystem::path(output_path).parent_path() / "cpfit_logs";
+  ErrorHandling::ErrorLogs logger(logs.string() + "/");
+  Utils::InitializeVariables(logger);
+  if (!std::isfinite(PhysicsConstants::mK0) || PhysicsConstants::mK0 < 100.0)
+    throw std::runtime_error("Failed to initialize the neutral-kaon mass from the local PDG cache");
+  KLOE::pm00 object;
+  return cp_fit_execute(chain, "split", false, object, config_path, output_path);
 }

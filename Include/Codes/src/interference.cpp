@@ -205,7 +205,10 @@ namespace KLOE
       //! Using correction factor and efficiency
       if (ToLower(name.second) == "signal")
       {
-        _frac_tmp[name.second]->Scale(signal_event_weights_sum / _frac_tmp[name.second]->Integral(0, _bin_number + 1));
+        const Double_t integral = _frac_tmp[name.second]->Integral(0, _bin_number + 1);
+        if (!std::isfinite(integral) || integral <= 0.0)
+          throw std::runtime_error("Invalid signal integral in CP fit");
+        _frac_tmp[name.second]->Scale(signal_event_weights_sum / integral);
 
         for (UInt_t j = 0; j < _bin_number; j++)
         {
@@ -290,7 +293,12 @@ namespace KLOE
 
     for (Int_t i = 0; i < _bin_number; i++)
     {
-      value += std::pow(b["Data"][i] - b["MC sum"][i], 2) / (std::pow(e["Data"][i], 2) + e["MC sum"][i]);
+      const Double_t variance = std::pow(e["Data"][i], 2) + e["MC sum"][i];
+      const Double_t residual = b["Data"][i] - b["MC sum"][i];
+      if (variance > 0.0)
+        value += residual * residual / variance;
+      else if (variance != 0.0 || residual != 0.0)
+        throw std::runtime_error("Invalid variance in CP fit bin " + std::to_string(i + 1));
 
       _frac_tmp["Data"]->SetBinContent(i + 1, b["Data"][i]);
       _frac_tmp["Data"]->SetBinError(i + 1, e["Data"][i]);

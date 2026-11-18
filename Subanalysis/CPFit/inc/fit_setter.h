@@ -1,6 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
+#include <cmath>
 
 #include "TMath.h"
 #include "nlohmann/json.hpp"
@@ -18,7 +20,8 @@ struct Parameter
   bool fixed = false; // Indicates if the parameter is fixed (not to be fitted)
   std::array<Double_t, 2> limits() const
   {
-    return {initial_value - limit_lower * initial_value, initial_value + limit_upper * initial_value};
+    const Double_t scale = std::abs(initial_value);
+    return {initial_value - limit_lower * scale, initial_value + limit_upper * scale};
   };
   std::vector<std::array<Double_t, 2>> parameter_ranges;
 };
@@ -28,6 +31,25 @@ struct DeltaTConfig
   std::array<Double_t, 2> xRange;
   std::array<Double_t, 2> xRangeDisplay;
   Double_t resolution;
+};
+
+struct CutConfig
+{
+  bool ellipseEnabled;
+  Double_t ellipseU0, ellipseV0, ellipseSigmaU, ellipseSigmaV, ellipseRho, ellipseNSigma;
+  bool trackAngleEnabled;
+  Double_t vertexDistanceXY, vertexDistanceZ, maxTrackCosine;
+  bool closeVertexEnabled;
+  Double_t neutralRadius, chargedRadius, neutralZ, chargedZ, minCombinedRadius;
+
+  bool outsideEllipse(Double_t u, Double_t v) const
+  {
+    const Double_t du = (u - ellipseU0) / ellipseSigmaU;
+    const Double_t dv = (v - ellipseV0) / ellipseSigmaV;
+    const Double_t distance2 = (du * du + dv * dv - 2.0 * ellipseRho * du * dv) /
+                               (1.0 - ellipseRho * ellipseRho);
+    return std::sqrt(std::max(0.0, distance2)) > ellipseNSigma;
+  }
 };
 
 #ifndef REGEN_KIN_RANGE_DEFINED
@@ -83,6 +105,7 @@ struct FitConfig
   Int_t print_level;
   Int_t strategy;
   DeltaTConfig deltaTConfig;
+  CutConfig cuts;
   RegenerationExclusionConfig regenerationExclusion;
   EventWeightConfig eventWeights;
   std::array<Double_t, 3> regenerationSplit = {-30.0, 0.0, 30.0};
@@ -111,6 +134,8 @@ private:
   };
 
 public:
+  const json &getRawConfig() const { return _config; }
+
   FitSetter(std::string config_path)
   {
     try
@@ -193,6 +218,62 @@ public:
       throw std::runtime_error("ERROR: Missing event weight setting in config file: " + std::string(e.what()));
     }
 
+    const auto &cuts = _config.at("cuts");
+    const auto &ellipse = cuts.at("ellipse");
+    fitConfig.cuts.ellipseEnabled = ellipse.at("enabled").get<bool>();
+    fitConfig.cuts.ellipseU0 = ellipse.at("u0").get<Double_t>();
+    fitConfig.cuts.ellipseV0 = ellipse.at("v0").get<Double_t>();
+    fitConfig.cuts.ellipseSigmaU = ellipse.at("sigmaU").get<Double_t>();
+    fitConfig.cuts.ellipseSigmaV = ellipse.at("sigmaV").get<Double_t>();
+    fitConfig.cuts.ellipseRho = ellipse.at("rho").get<Double_t>();
+    fitConfig.cuts.ellipseNSigma = ellipse.at("nSigma").get<Double_t>();
+
+    const auto &track = cuts.at("trackAngle");
+    fitConfig.cuts.trackAngleEnabled = track.at("enabled").get<bool>();
+    fitConfig.cuts.vertexDistanceXY = track.at("vertexDistanceXY").get<Double_t>();
+    fitConfig.cuts.vertexDistanceZ = track.at("vertexDistanceZ").get<Double_t>();
+    fitConfig.cuts.maxTrackCosine = track.at("maxCosine").get<Double_t>();
+
+    const auto &close = cuts.at("closeVertex");
+    fitConfig.cuts.closeVertexEnabled = close.at("enabled").get<bool>();
+    fitConfig.cuts.neutralRadius = close.at("neutralRadius").get<Double_t>();
+    fitConfig.cuts.chargedRadius = close.at("chargedRadius").get<Double_t>();
+    fitConfig.cuts.neutralZ = close.at("neutralZ").get<Double_t>();
+    fitConfig.cuts.chargedZ = close.at("chargedZ").get<Double_t>();
+    fitConfig.cuts.minCombinedRadius = close.at("minCombinedRadius").get<Double_t>();
+    if (!std::isfinite(fitConfig.cuts.ellipseSigmaU) || fitConfig.cuts.ellipseSigmaU <= 0 ||
+        !std::isfinite(fitConfig.cuts.ellipseSigmaV) || fitConfig.cuts.ellipseSigmaV <= 0 ||
+        !std::isfinite(fitConfig.cuts.ellipseU0) || !std::isfinite(fitConfig.cuts.ellipseV0) ||
+        !std::isfinite(fitConfig.cuts.ellipseRho) || std::abs(fitConfig.cuts.ellipseRho) >= 1 ||
+        !std::isfinite(fitConfig.cuts.ellipseNSigma) || fitConfig.cuts.ellipseNSigma < 0)
+      throw std::runtime_error("ERROR: Invalid ellipse cut parameters");
+    if (!std::isfinite(fitConfig.cuts.vertexDistanceXY) || fitConfig.cuts.vertexDistanceXY < 0 ||
+        !std::isfinite(fitConfig.cuts.vertexDistanceZ) || fitConfig.cuts.vertexDistanceZ < 0 ||
+        !std::isfinite(fitConfig.cuts.maxTrackCosine) || fitConfig.cuts.maxTrackCosine < 0 ||
+        fitConfig.cuts.maxTrackCosine > 1 ||
+        !std::isfinite(fitConfig.cuts.neutralRadius) || fitConfig.cuts.neutralRadius < 0 ||
+        !std::isfinite(fitConfig.cuts.chargedRadius) || fitConfig.cuts.chargedRadius < 0 ||
+        !std::isfinite(fitConfig.cuts.neutralZ) || fitConfig.cuts.neutralZ < 0 ||
+        !std::isfinite(fitConfig.cuts.chargedZ) || fitConfig.cuts.chargedZ < 0 ||
+        !std::isfinite(fitConfig.cuts.minCombinedRadius) || fitConfig.cuts.minCombinedRadius < 0)
+      throw std::runtime_error("ERROR: Invalid track angle or close vertex cut parameters");
+    if (!std::isfinite(fitConfig.eventWeights.threePi0) || fitConfig.eventWeights.threePi0 < 0 ||
+        !std::isfinite(fitConfig.eventWeights.semileptonic) || fitConfig.eventWeights.semileptonic < 0 ||
+        !std::isfinite(fitConfig.eventWeights.signalMaxChargedRadius) ||
+        fitConfig.eventWeights.signalMaxChargedRadius < 0)
+      throw std::runtime_error("ERROR: Invalid event weight settings");
+    if (!std::isfinite(fitConfig.regenerationExclusion.beamPipeBoundary) ||
+        fitConfig.regenerationExclusion.beamPipeBoundary < 0 ||
+        !std::isfinite(fitConfig.regenerationExclusion.meanCharged) ||
+        !std::isfinite(fitConfig.regenerationExclusion.meanNeutral) ||
+        !std::isfinite(fitConfig.regenerationExclusion.sigmaCharged) ||
+        fitConfig.regenerationExclusion.sigmaCharged <= 0 ||
+        !std::isfinite(fitConfig.regenerationExclusion.sigmaNeutral) ||
+        fitConfig.regenerationExclusion.sigmaNeutral <= 0 ||
+        !std::isfinite(fitConfig.regenerationExclusion.sigmaMultiplier) ||
+        fitConfig.regenerationExclusion.sigmaMultiplier < 0)
+      throw std::runtime_error("ERROR: Invalid regeneration exclusion settings");
+
     // Regeneration split boundaries (used in single A_regen mode)
     if (_config.contains("regenerationSplit"))
     {
@@ -211,6 +292,11 @@ public:
     {
       throw std::runtime_error("ERROR: Missing deltaT setting: " + std::string(e.what()));
     }
+    if (!std::isfinite(fitConfig.deltaTConfig.resolution) || fitConfig.deltaTConfig.resolution <= 0 ||
+        !std::isfinite(fitConfig.deltaTConfig.xRange[0]) || !std::isfinite(fitConfig.deltaTConfig.xRange[1]) ||
+        fitConfig.deltaTConfig.xRange[1] <= fitConfig.deltaTConfig.xRange[0] ||
+        fitConfig.deltaTConfig.resolution > fitConfig.deltaTConfig.xRange[1] - fitConfig.deltaTConfig.xRange[0])
+      throw std::runtime_error("ERROR: Invalid deltaT range or resolution");
 
     // 3. Extract parameter settings
     const auto &enabled_params = _config.at("parameterSettings");

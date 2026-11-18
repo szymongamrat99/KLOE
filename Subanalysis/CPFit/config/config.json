@@ -5,6 +5,31 @@
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
+  "cuts": {
+    "ellipse": {
+      "enabled": true,
+      "u0": -92.9524,
+      "v0": 7.1644,
+      "sigmaU": 33.7633,
+      "sigmaV": 42.0163,
+      "rho": 0.556,
+      "nSigma": 2.5
+    },
+    "trackAngle": {
+      "enabled": true,
+      "vertexDistanceXY": 2.05,
+      "vertexDistanceZ": 2.45,
+      "maxCosine": 0.8
+    },
+    "closeVertex": {
+      "enabled": true,
+      "neutralRadius": 1.5,
+      "chargedRadius": 2.0,
+      "neutralZ": 1.5,
+      "chargedZ": 1.5,
+      "minCombinedRadius": 1.5
+    }
+  },
   "regenerationExclusion": {
     "enabled": false,
     "beamPipeBoundary": 10.0,

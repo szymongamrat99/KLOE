@@ -110,18 +110,34 @@ RegenerationFractionFit::RegenerationFractionFit(std::string weightsFilePath) : 
 
   TDirectory::TContext directoryContext;
   fFileWeights = TFile::Open(weightsFilePath.c_str(), "READ");
+  if (!fFileWeights || fFileWeights->IsZombie())
+  {
+    delete fFileWeights;
+    fFileWeights = nullptr;
+    throw std::runtime_error("Could not open regeneration weight file: " + weightsFilePath);
+  }
 
   for (const auto &histType : _histTypesIterative)
   {
     std::string funcDCName = "FuncDC_" + _HistTypeToString(histType);
-    fcontWeightDC[histType] = (TF1*)fFileWeights->Get(funcDCName.c_str());
+    fcontWeightDC[histType] = dynamic_cast<TF1*>(fFileWeights->Get(funcDCName.c_str()));
 
     std::string funcCylBPName = "FuncCylBP_" + _HistTypeToString(histType);
-    fcontWeightCylBP[histType] = (TF1*)fFileWeights->Get(funcCylBPName.c_str());
+    fcontWeightCylBP[histType] = dynamic_cast<TF1*>(fFileWeights->Get(funcCylBPName.c_str()));
 
     std::string funcSphBPName = "FuncSphBP_" + _HistTypeToString(histType);
-    fcontWeightSphBP[histType] = (TF1*)fFileWeights->Get(funcSphBPName.c_str());
+    fcontWeightSphBP[histType] = dynamic_cast<TF1*>(fFileWeights->Get(funcSphBPName.c_str()));
 
+    if (!fcontWeightDC[histType] || !fcontWeightCylBP[histType] || !fcontWeightSphBP[histType])
+    {
+      delete fFileWeights;
+      fFileWeights = nullptr;
+      throw std::runtime_error("Missing regeneration weight function for " + _HistTypeToString(histType) +
+                               " in " + weightsFilePath);
+    }
+  }
+  for (const auto &histType : _histTypesIterative)
+  {
     fRegenerationWeights[histType] = new TH1D(("RegenerationWeights" + _HistTypeToString(histType)).c_str(), ("Regeneration Weights for " + _HistTypeToString(histType)).c_str(), 100, fConfig.histRanges[histType].first, fConfig.histRanges[histType].second);
   }
 }
