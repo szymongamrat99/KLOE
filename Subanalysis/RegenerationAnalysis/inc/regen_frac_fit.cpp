@@ -25,30 +25,33 @@ RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(
   LoadConfig();
   KLOE::setGlobalStyle();
 
-  TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
+  // TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
 
-  TCanvas *c = (TCanvas*)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
-  threePi0WeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
+  // TCanvas *c = (TCanvas*)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
+  // threePi0WeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
 
-  TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
+  // TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
 
-  c = (TCanvas*)fFileWeightsSemileptonic->Get("semileptonic/correction_factors/cCorr");
-  semileptonicWeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
+  // c = (TCanvas*)fFileWeightsSemileptonic->Get("semileptonic/correction_factors/cCorr");
+  // semileptonicWeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
 
-  TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
-  avgThreePi0Weight = threePi0WeightResult->Parameter(0);
+  // TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
+  avgThreePi0Weight = 0.9375;//threePi0WeightResult->Parameter(0);
 
   std::cout << "Average Three Pi0 Weight: " << avgThreePi0Weight << std::endl;
 
-  TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
-  avgSemileptonicWeight = semileptonicWeightResult->Parameter(0);
+  // TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
+  avgSemileptonicWeight = 0.9272; //semileptonicWeightResult->Parameter(0);
 
   std::cout << "Average Semileptonic Weight: " << avgSemileptonicWeight << std::endl;
 
-  TFile *fFileWeightsSignal = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/combined_signal_correction_factors.root", "READ");
+  // Preparation of signal weights
+  TFile *fFileWeightsSignal = TFile::Open("/data/ssd/gamrat/KLOE/Subanalysis/CPFit/config/efficiency_purity_plots/eff_pur_corr_factor.root", "READ");
+  TDirectoryFile *cSignal = (TDirectoryFile*)fFileWeightsSignal->Get("corr_factor");
 
-  c = (TCanvas*)fFileWeightsSignal->Get("CorrFactors");
-  signalWeightsHist = (TH1*)c->FindObject("CombinedCorrFactor")->Clone();
+  signalWeightsHist = (TH1*)cSignal->Get("corr_factor_Delta_t_tri_fit")->Clone();
+
+  std::cout << "Signal Weights Histogram: " << signalWeightsHist->GetName() << std::endl;
 
   for (const auto &histType : _histTypesIterative)
   {
@@ -326,7 +329,7 @@ void RegenerationFractionFit::_FillHistograms()
     double dttri = tch_tri - tne_tri;
 
     double interpWeight = (double)signalWeightsHist->Interpolate(dttri);
-    // if (std::isnan(interpWeight) || std::isinf(interpWeight) || interpWeight <= 0.0)
+    if (std::isnan(interpWeight) || std::isinf(interpWeight) || interpWeight <= 0.0 || dttri > 12.0)
       interpWeight = 1.0;
 
     double signalWeight = interpWeight,
@@ -371,11 +374,11 @@ void RegenerationFractionFit::_FillHistograms()
       }
       else if (channelName_str == "3pi0")
       {
-        fHistos[histType][channelName_str]->Fill(radius, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+        fHistos[histType][channelName_str]->Fill(radius, avgThreePi0Weight);//threePi0WeightsHist->Interpolate(Kchrec[5]));
       }
       else if (channelName_str == "Semileptonic")
       {
-        fHistos[histType][channelName_str]->Fill(radius, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+        fHistos[histType][channelName_str]->Fill(radius, avgSemileptonicWeight);//semileptonicWeightsHist->Interpolate(minv4gam));
       }
       else
       {
@@ -419,15 +422,15 @@ void RegenerationFractionFit::_FillHistograms()
     }
     else if (channelName_str == "3pi0")
     {
-      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
-      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
-      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 0.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit, avgThreePi0Weight);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, avgThreePi0Weight);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, avgThreePi0Weight);//threePi0WeightsHist->Interpolate(Kchrec[5]));
     }
     else if (channelName_str == "Semileptonic")
     {
-      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit,  0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
-      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
-      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, 0.0);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fTimeDiffHist[channelName_str]->Fill(tch_fit - tne_fit,  avgSemileptonicWeight);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged, avgSemileptonicWeight);//semileptonicWeightsHist->Interpolate(minv4gam));
+      fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral, avgSemileptonicWeight);//semileptonicWeightsHist->Interpolate(minv4gam));
     }
     else
     {

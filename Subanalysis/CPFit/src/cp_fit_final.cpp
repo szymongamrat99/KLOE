@@ -71,32 +71,34 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
 
   // =============================================================================
   // Preparation of the Three pi0 hist object to calculate regeneration weights
-  TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
+  // TFile *fFileWeightsThreePi0 = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
 
-  TCanvas *c = (TCanvas *)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
-  TH1 *threePi0WeightsHist = (TH1 *)c->FindObject("correction_factors")->Clone();
+  // TCanvas *c = (TCanvas *)fFileWeightsThreePi0->Get("three_pi0/correction_factors/cCorr");
+  // TH1 *threePi0WeightsHist = (TH1 *)c->FindObject("correction_factors")->Clone();
 
   // Calculation of average weighting factor for three pi0 events
-  TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
+  // TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
   double avgThreePi0Weight = 0.9375;//threePi0WeightResult->Parameter(0);
   std::cout << "INFO: Average weighting factor for three pi0 events: " << avgThreePi0Weight << std::endl;
 
   // Preparation of the Semileptonic hist object to calculate regeneration weights
-  TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
+  // TFile *fFileWeightsSemileptonic = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/control_sample_corr_factors.root", "READ");
 
-  TCanvas *ctest = (TCanvas *)fFileWeightsSemileptonic->Get("semileptonic/correction_factors/cCorr");
-  TH1 *semileptonicWeightsHist = (TH1 *)ctest->FindObject("correction_factors")->Clone();
+  // TCanvas *ctest = (TCanvas *)fFileWeightsSemileptonic->Get("semileptonic/correction_factors/cCorr");
+  // TH1 *semileptonicWeightsHist = (TH1 *)ctest->FindObject("correction_factors")->Clone();
 
-  // Calculation of average weighting factor for semileptonic events
-  TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
+  // // Calculation of average weighting factor for semileptonic events
+  // TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
   double avgSemileptonicWeight = 0.9272;//semileptonicWeightResult->Parameter(0);
   std::cout << "INFO: Average weighting factor for semileptonic events: " << avgSemileptonicWeight << std::endl;
 
   // Preparation of signal weights
-  TFile *fFileWeightsSignal = TFile::Open("/data/ssd/gamrat/python-kloe-analysis/scripts/results/control_sample_corr_factors/combined_signal_correction_factors.root", "READ");
+  TFile *fFileWeightsSignal = TFile::Open("/data/ssd/gamrat/KLOE/Subanalysis/CPFit/config/efficiency_purity_plots/eff_pur_corr_factor.root", "READ");
+  TDirectoryFile *cSignal = (TDirectoryFile*)fFileWeightsSignal->Get("corr_factor");
 
-  TCanvas *cSignal = (TCanvas*)fFileWeightsSignal->Get("CorrFactors");
-  TH1* signalWeightsHist = (TH1*)cSignal->FindObject("CombinedCorrFactor")->Clone();
+  TH1* signalWeightsHist = (TH1*)cSignal->Get("corr_factor_Delta_t_tri_fit")->Clone();
+
+  std::cout << "INFO: Signal weights histogram prepared." << std::endl;
   
 
   // Preparation of the RegenerationFractionFit object to calculate regeneration weights
@@ -454,7 +456,7 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
           event.time_diff["Signal"].push_back(baseKin.Dtboostlor);
           double weight = signalWeightsHist->Interpolate(Dttri);
 
-          // if (weight <= 0 || std::isnan(weight) || std::isinf(weight))
+          if (weight <= 0 || std::isnan(weight) || std::isinf(weight) || rhoCharged > 20.0)
             weight = 1;
 
           event.signal_event_weights.push_back(weight);
@@ -478,13 +480,13 @@ int cp_fit_final(TChain &chain, TString mode, bool check_corr, Controls::DataTyp
         if (*mctruth == 4)
         {
           event.time_diff["3pi0"].push_back(baseKin.Dtboostlor);
-          event.three_pi0_weights.push_back(1.0);//threePi0WeightsHist->Interpolate(Kchrec[5]));
+          event.three_pi0_weights.push_back(avgThreePi0Weight);//threePi0WeightsHist->Interpolate(Kchrec[5]));
         }
 
         if (*mctruth == 5)
         {
           event.time_diff["Semileptonic"].push_back(baseKin.Dtboostlor);
-          event.semileptonic_weights.push_back(1.0);//semileptonicWeightsHist->Interpolate(*minv4gam));
+          event.semileptonic_weights.push_back(avgSemileptonicWeight);//semileptonicWeightsHist->Interpolate(*minv4gam));
         }
 
         if (*mctruth == 6)
