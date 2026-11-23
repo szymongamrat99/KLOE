@@ -121,9 +121,21 @@ without recompiling:
 - `eventWeights.apply.signal`, `.semileptonic`, `.threePi0`, and
   `.regeneration` independently enable event corrections. A disabled correction
   uses weight 1; the corresponding Signal or Regeneration file is not opened.
-  `signalCorrectionFile` is relative to `Subanalysis/CPFit/`, and
-  `regenerationShapeCorrection.weightFunctionsFile` to
-  `Subanalysis/RegenerationAnalysis/results/`; both also accept absolute paths.
+  Signal corrections are configured independently for `ks_pm`, `kl_pm`,
+  `ks_00`, and `kl_00` under `eventWeights.signalComponents`. Each enabled
+  component contributes `ratioSpline(R_ch) * correctionHistogram(Delta_t_tri)`
+  to the Signal event weight; the enabled contributions are summed, matching
+  the composition in `RegenerationFractionFit`. The `ks_pm` and `kl_pm`
+  components are enabled by default; `ks_00` and `kl_00` are disabled until
+  their correction files and ratio splines are available. Correction and ratio
+  file paths are relative to `Subanalysis/CPFit/` and also accept absolute
+  paths. `signalMaxRelativeError` is checked independently for each enabled
+  correction histogram; only a high-error component's histogram factor is set
+  to 1, so that component still contributes its ratio spline and other
+  components remain unchanged. `signalWeights.largeRelativeErrorReplacedByComponent`
+  reports the number of substituted components. `regenerationShapeCorrection.weightFunctionsFile`
+  is relative to `Subanalysis/RegenerationAnalysis/results/` and also accepts
+  absolute paths.
 - `regenerationExclusion.enabled` controls the regeneration veto for both data
   and MC; it is disabled by default. The current veto uses the spherical means
   and sigmas together with `beamPipeBoundary` and `sigmaMultiplier`. The
@@ -134,6 +146,18 @@ without recompiling:
 - `regenerationShapeCorrection.correctionFile` and `corrections` do not control
   the current CP-fit regeneration weights; the fitted functions from
   `weightFunctionsFile` are used instead.
+
+For the RegenerationAnalysis fit, [fit_config.json](Subanalysis/RegenerationAnalysis/config/fit_config.json)
+has independent `generalSettings.signalWeightComponents` switches for `ks_pm`,
+`kl_pm`, `ks_00`, and `kl_00`. Enabled components contribute the sum of
+`ratioSpline(R_ch) * correctionHistogram(Delta_t_tri)`; the two `00` components
+are off until their inputs are available. `signalWeightRelativeErrorLimit`
+uses a relative fraction (for example, `0.1` for 10%; `0` disables the error
+cut). The error limit is checked independently for each enabled component;
+only that component's correction histogram factor is set to 1, preserving its
+ratio spline contribution and the other components. A non-finite/non-positive
+composed weight is still replaced with 1. `isSignalWeighted` separately
+controls multiplication by the interference weight.
 
 The JSON result contains the complete configuration, initialized physics
 constants, branching-ratio corrections, luminosity factor, fit status, chi-square,
@@ -239,4 +263,4 @@ Plik wynikowy JSON zawiera sekcję `diagnostics`:
 - `degeneracy` – wartości własne macierzy korelacji, `conditionNumber`, `weakestDirection` (składowe najsłabiej wyznaczonej kombinacji parametrów) i pary o `|corr| > 0.9`;
 - `profile.<parametr>` – profil chi2 (`deltaChi2` w funkcji wartości, pozostałe parametry reminimalizowane); włączany w konfiguracji: `"diagnostics": {"profile": {"enabled": true, "points": 11, "nSigma": 3.0}}`.
 
-Waga Signal jest zastępowana jedynką także wtedy, gdy względny błąd binu histogramu wag (`GetBinError/GetBinContent`) przekracza `eventWeights.signalMaxRelativeError` (domyślnie w `config.json` 0.1; 0 wyłącza). Liczba takich zdarzeń: `signalWeights.largeRelativeErrorReplaced`.
+Gdy względny błąd binu histogramu składnika Signal (`GetBinError/GetBinContent`) przekracza `eventWeights.signalMaxRelativeError` (domyślnie w `config.json` 0.1; 0 wyłącza), tylko czynnik tego histogramu jest zastępowany przez 1; jego składnik nadal wynosi `ratio × 1`, a inne komponenty pozostają bez zmian. JSON podaje liczbę zdarzeń z taką zamianą w `signalWeights.largeRelativeErrorReplaced` oraz liczniki per komponent w `signalWeights.largeRelativeErrorReplacedByComponent`.

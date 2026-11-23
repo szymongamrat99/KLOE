@@ -24,6 +24,7 @@
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
+#include <TSpline.h>
 #include <boost/progress.hpp>
 #include <boost/filesystem.hpp>
 #include <TF1.h>
@@ -90,30 +91,58 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   const double avgSemileptonicWeight = cfg.eventWeights.semileptonic;
   std::cout << "INFO: Average weighting factor for semileptonic events: " << avgSemileptonicWeight << std::endl;
 
-  std::unique_ptr<TFile> signalWeightsFile;
-  std::unique_ptr<TH1> signalWeightsHist;
+  struct SignalWeightObjects
+  {
+    std::unique_ptr<TH1> correction;
+    std::unique_ptr<TSpline3> ratio;
+  };
+  std::map<std::string, SignalWeightObjects> signalWeightObjects;
   if (cfg.eventWeights.applySignal)
   {
-    TDirectory::TContext directoryContext;
-    const boost::filesystem::path configuredPath(cfg.eventWeights.signalCorrectionFile);
-    const std::string signalWeightsPath = (configuredPath.is_absolute()
-        ? configuredPath : boost::filesystem::path((std::string)Paths::cpfit_dir) / configuredPath).string();
-    signalWeightsFile.reset(TFile::Open(signalWeightsPath.c_str(), "READ"));
-    if (!signalWeightsFile || signalWeightsFile->IsZombie())
-      throw std::runtime_error("Could not open signal correction file: " + signalWeightsPath);
+    const auto resolveCPFitPath = [](const std::string &configuredPath)
+    {
+      const boost::filesystem::path path(configuredPath);
+      return (path.is_absolute() ? path : boost::filesystem::path((std::string)Paths::cpfit_dir) / path).string();
+    };
+    for (const auto &component : cfg.eventWeights.signalComponents)
+    {
+      if (!component.second.enabled)
+        continue;
 
-    TH1 *signalWeightsSource =
-        dynamic_cast<TH1 *>(signalWeightsFile->Get(cfg.eventWeights.signalCorrectionHistogram.c_str()));
-    if (!signalWeightsSource)
-      throw std::runtime_error("Could not find signal correction histogram: " +
-                               cfg.eventWeights.signalCorrectionHistogram);
+      SignalWeightObjects objects;
+      const std::string correctionPath = resolveCPFitPath(component.second.correctionFile);
+      {
+        TDirectory::TContext directoryContext;
+        std::unique_ptr<TFile> correctionFile(TFile::Open(correctionPath.c_str(), "READ"));
+        if (!correctionFile || correctionFile->IsZombie())
+          throw std::runtime_error("Could not open signal correction file for " + component.first + ": " +
+                                   correctionPath);
+        TH1 *source = dynamic_cast<TH1 *>(correctionFile->Get(component.second.correctionHistogram.c_str()));
+        if (!source)
+          throw std::runtime_error("Could not find signal correction histogram for " + component.first + ": " +
+                                   component.second.correctionHistogram);
+        objects.correction.reset(dynamic_cast<TH1 *>(source->Clone(("cpfit_" + component.first + "_correction").c_str())));
+        if (!objects.correction)
+          throw std::runtime_error("Could not clone signal correction histogram for " + component.first);
+        objects.correction->SetDirectory(nullptr);
+      }
 
-    signalWeightsHist.reset(dynamic_cast<TH1 *>(signalWeightsSource->Clone("cpfit_signal_weights")));
-    if (!signalWeightsHist)
-      throw std::runtime_error("Could not clone signal correction histogram.");
-    signalWeightsHist->SetDirectory(nullptr);
-
-    signalWeightsFile->Close();
+      const std::string ratioPath = resolveCPFitPath(component.second.ratioFile);
+      {
+        TDirectory::TContext directoryContext;
+        std::unique_ptr<TFile> ratioFile(TFile::Open(ratioPath.c_str(), "READ"));
+        if (!ratioFile || ratioFile->IsZombie())
+          throw std::runtime_error("Could not open signal ratio file for " + component.first + ": " + ratioPath);
+        TSpline3 *source = dynamic_cast<TSpline3 *>(ratioFile->Get(component.second.ratioSpline.c_str()));
+        if (!source)
+          throw std::runtime_error("Could not find signal ratio spline for " + component.first + ": " +
+                                   component.second.ratioSpline);
+        objects.ratio.reset(dynamic_cast<TSpline3 *>(source->Clone(("cpfit_" + component.first + "_ratio").c_str())));
+        if (!objects.ratio)
+          throw std::runtime_error("Could not clone signal ratio spline for " + component.first);
+      }
+      signalWeightObjects.emplace(component.first, std::move(objects));
+    }
   }
 
   // Preparation of the RegenerationFractionFit object to calculate regeneration weights
@@ -155,6 +184,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   TTreeReaderArray<Double_t> KnerecFit(reader, "KnerecFit");
   TTreeReaderArray<Double_t> KchrecFit(reader, "KchrecFit");
   TTreeReaderArray<Double_t> Kchrec(reader, "Kchrec");
+  TTreeReaderArray<Double_t> ip(reader, "ip");
 
   TTreeReaderArray<Double_t> trk1Fit(reader, "trk1Fit");
   TTreeReaderArray<Double_t> trk2Fit(reader, "trk2Fit");
@@ -357,6 +387,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   boost::progress_display display(nentries);
   Long64_t entriesRead = 0;
   size_t signalInvalidWeightCount = 0, signalOutsideRadiusCount = 0, signalLargeErrorCount = 0;
+  std::map<std::string, size_t> signalLargeErrorCountByComponent;
 
   struct RegenKinVars
   {
@@ -368,7 +399,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   {
     if (Knerec.GetSize() < 9 || KnerecSix.GetSize() < 6 || KchrecClosest.GetSize() < 9 ||
         KnerecFit.GetSize() < 9 || KchrecFit.GetSize() < 9 || Kchrec.GetSize() < 9 ||
-        trk1Fit.GetSize() < 3 || trk2Fit.GetSize() < 3)
+        ip.GetSize() < 3 || trk1Fit.GetSize() < 3 || trk2Fit.GetSize() < 3)
       throw std::runtime_error("Input event contains a kinematic array shorter than required");
     // Cut setting
     std::array<Double_t, 3> distNeutralCharged = {KchrecFit[6] - KnerecFit[6],
@@ -478,8 +509,45 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
           double weight = 1.0;
           if (cfg.eventWeights.applySignal)
           {
-            weight = signalWeightsHist->Interpolate(Dttri);
-            if (weight <= 0 || !std::isfinite(weight))
+            double interpolatedWeight = 0.0;
+            bool hasEnabledComponent = false;
+            bool hasExcessiveRelativeError = false;
+            const double rCharged = std::sqrt(std::pow(Kchrec[6] - ip[0], 2) +
+                                              std::pow(Kchrec[7] - ip[1], 2) +
+                                              std::pow(Kchrec[8] - ip[2], 2));
+            for (const auto &component : signalWeightObjects)
+            {
+              hasEnabledComponent = true;
+              double correction = component.second.correction->Interpolate(Dttri);
+              const double ratio = component.second.ratio->Eval(rCharged);
+
+              if (cfg.eventWeights.signalMaxRelativeError > 0.0)
+              {
+                const int weightBin = component.second.correction->FindFixBin(Dttri);
+                const double binContent = component.second.correction->GetBinContent(weightBin);
+                const double binError = component.second.correction->GetBinError(weightBin);
+                const double relativeError = binContent > 0.0 && std::isfinite(binContent) &&
+                                                     std::isfinite(binError) && binError >= 0.0
+                                                 ? binError / binContent
+                                                 : std::numeric_limits<double>::infinity();
+                if (!std::isfinite(relativeError) ||
+                    relativeError > cfg.eventWeights.signalMaxRelativeError)
+                {
+                  correction = 1.0;
+                  hasExcessiveRelativeError = true;
+                  ++signalLargeErrorCountByComponent[component.first];
+                }
+              }
+
+              interpolatedWeight += ratio * correction;
+            }
+
+            if (hasExcessiveRelativeError)
+              ++signalLargeErrorCount;
+
+            if (!hasEnabledComponent)
+              weight = 1.0;
+            else if (!std::isfinite(interpolatedWeight) || interpolatedWeight <= 0.0)
             {
               ++signalInvalidWeightCount;
               weight = 1.0;
@@ -489,19 +557,8 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
               ++signalOutsideRadiusCount;
               weight = 1.0;
             }
-            else if (cfg.eventWeights.signalMaxRelativeError > 0.0)
-            {
-              const int weightBin = signalWeightsHist->FindFixBin(Dttri);
-              const double binContent = signalWeightsHist->GetBinContent(weightBin);
-              const double relativeError = binContent > 0.0
-                                               ? signalWeightsHist->GetBinError(weightBin) / binContent
-                                               : std::numeric_limits<double>::infinity();
-              if (relativeError > cfg.eventWeights.signalMaxRelativeError)
-              {
-                ++signalLargeErrorCount;
-                weight = 1.0;
-              }
-            }
+            else
+              weight = interpolatedWeight;
           }
 
           event.signal_event_weights.push_back(weight);
@@ -512,11 +569,12 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
         if (*mctruth == 2)
         {
           event.time_diff["Regeneration"].push_back(baseKin.Dtboostlor);
-          const double weight = cfg.eventWeights.applyRegeneration
+          double weight = cfg.eventWeights.applyRegeneration
                                     ? regen_weights->GetContinuousRegenerationWeight(baseKin.Dtboostlor, radiusMap)
                                     : 1.0;
           if (!std::isfinite(weight) || weight < 0.0)
-            throw std::runtime_error("Invalid regeneration weight");
+            weight = 0.0;
+            // throw std::runtime_error("Invalid regeneration weight");
           event.regen_event_weights.push_back(weight);
         }
 
@@ -574,9 +632,12 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   validateWeightCount("Regeneration", event.regen_event_weights);
   if (event.signal_event_weights.empty() || event.time_diff["Data"].empty())
     throw std::runtime_error("CP fit requires selected Signal MC and Data events");
-  std::cout << "INFO: Signal weights replaced by 1: invalid=" << signalInvalidWeightCount
-            << ", outside charged-radius limit=" << signalOutsideRadiusCount
-            << ", relative error above limit=" << signalLargeErrorCount << std::endl;
+  std::cout << "INFO: Signal weight fallbacks/substitutions: invalid composed weights="
+            << signalInvalidWeightCount << ", outside charged-radius limit=" << signalOutsideRadiusCount
+            << ", events with high-error component substitutions=" << signalLargeErrorCount;
+  for (const auto &component : signalLargeErrorCountByComponent)
+    std::cout << ", " << component.first << "=" << component.second;
+  std::cout << std::endl;
 
   const bool fitSucceeded = minimum->Minimize();
   if (!fitSucceeded || minimum->Status() != 0)
@@ -769,6 +830,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
     result["signalWeights"]["invalidReplaced"] = signalInvalidWeightCount;
     result["signalWeights"]["outsideRadiusReplaced"] = signalOutsideRadiusCount;
     result["signalWeights"]["largeRelativeErrorReplaced"] = signalLargeErrorCount;
+    result["signalWeights"]["largeRelativeErrorReplacedByComponent"] = signalLargeErrorCountByComponent;
     result["signalWeights"]["mean"] = event.signal_event_weights.empty()
                                             ? json(nullptr)
                                             : json(sumWeights / event.signal_event_weights.size());

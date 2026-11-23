@@ -1,12 +1,12 @@
 {
   "deltaT": {
-    "rangeX": [-200.0, 200.0],
-    "xRangeDisplay": [-200.0, 200.0],
+    "rangeX": [-200.0, 400.0],
+    "xRangeDisplay": [-20.0, 20.0],
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
-  "luminosityFactor": 1.1349,
-  "signalNormalizationInRangeOnly": true,
+  "luminosityFactor": 1.00,
+  "signalNormalizationInRangeOnly": false,
   "branchingRatioCorrection": {
     "Signal": true,
     "Regeneration": true,
@@ -71,12 +71,40 @@
       "threePi0": true,
       "regeneration": true
     },
-    "signalCorrectionFile": "config/efficiency_purity_plots/eff_pur_corr_factor.root",
-    "signalCorrectionHistogram": "corr_factor/corr_factor_Delta_t_tri_fit",
-    "threePi0": 0.9375,
-    "semileptonic": 0.9272,
-    "signalMaxChargedRadius": 20.0,
-    "signalMaxRelativeError": 0.1
+    "signalComponents": {
+      "ks_pm": {
+        "enabled": true,
+        "correctionFile": "config/efficiency_purity_plots/ks_pm_corr_factor.root",
+        "correctionHistogram": "corr_factor/corr_factor_Delta_t_tri_fit",
+        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_splines_and_ratios.root",
+        "ratioSpline": "spline_1"
+      },
+      "kl_pm": {
+        "enabled": true,
+        "correctionFile": "config/efficiency_purity_plots/kl_pm_corr_factor.root",
+        "correctionHistogram": "corr_factor/corr_factor_Delta_t_fit",
+        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_splines_and_ratios.root",
+        "ratioSpline": "spline_2"
+      },
+      "ks_00": {
+        "enabled": false,
+        "correctionFile": "",
+        "correctionHistogram": "",
+        "ratioFile": "",
+        "ratioSpline": ""
+      },
+      "kl_00": {
+        "enabled": false,
+        "correctionFile": "",
+        "correctionHistogram": "",
+        "ratioFile": "",
+        "ratioSpline": ""
+      }
+    },
+    "threePi0": 0.8868,
+    "semileptonic": 0.9844,
+    "signalMaxChargedRadius": 300.0,
+    "signalMaxRelativeError": 100.0
   },
   "regenerationShapeCorrection": {
     "correctionFile": "config/regeneration_cross_section_corr_factors.root",
@@ -132,7 +160,7 @@
       "limitUpper": 2.5,
       "step": 0.01,
       "channels": ["Regeneration"],
-      "fixed": false
+      "fixed": true
     },
     "A_three": {
       "enabled": false,
@@ -141,7 +169,7 @@
       "limitUpper": 2.5,
       "step": 0.01,
       "channels": ["3pi0"],
-      "fixed": false
+      "fixed": true
     },
     "A_omega": {
       "enabled": true,
@@ -159,7 +187,7 @@
       "limitUpper": 2.5,
       "step": 0.01,
       "channels": ["Semileptonic"],
-      "fixed": false
+      "fixed": true
     },
     "A_other": {
       "enabled": false,
@@ -168,7 +196,7 @@
       "limitUpper": 2.5,
       "step": 0.01,
       "channels": ["Other"],
-      "fixed": false
+      "fixed": true
     },
     "A_bcg_group": {
       "enabled": true,
@@ -178,7 +206,7 @@
       "limitLower": 1.0,
       "limitUpper": 1.0,
       "channels": ["Semileptonic", "3pi0", "Other"],
-      "fixed": false
+      "fixed": true
     }
   }
 }

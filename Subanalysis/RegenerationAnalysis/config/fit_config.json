@@ -71,10 +71,41 @@
     }
   },
   "generalSettings": {
-    "isSignalWeighted": true,
+    "isSignalWeighted": false,
+    "signalWeightComponents": {
+      "ks_pm": {
+        "enabled": true,
+        "correctionFile": "config/efficiency_purity_plots/ks_pm_corr_factor.root",
+        "correctionHistogram": "corr_factor/corr_factor_Delta_t_tri_fit",
+        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_splines_and_ratios.root",
+        "ratioSpline": "spline_1"
+      },
+      "kl_pm": {
+        "enabled": true,
+        "correctionFile": "config/efficiency_purity_plots/kl_pm_corr_factor.root",
+        "correctionHistogram": "corr_factor/corr_factor_Delta_t_fit",
+        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_splines_and_ratios.root",
+        "ratioSpline": "spline_2"
+      },
+      "ks_00": {
+        "enabled": false,
+        "correctionFile": "",
+        "correctionHistogram": "",
+        "ratioFile": "",
+        "ratioSpline": ""
+      },
+      "kl_00": {
+        "enabled": false,
+        "correctionFile": "",
+        "correctionHistogram": "",
+        "ratioFile": "",
+        "ratioSpline": ""
+      }
+    },
+    "signalWeightRelativeErrorLimit": 100.0,
     "isRegenerationWeighted": true,
     "onlyKLong": false,
-    "lumiFactor": 1.079,
+    "lumiFactor": 1.00,
     "weightErrorLimit": 100.0
   }
 }

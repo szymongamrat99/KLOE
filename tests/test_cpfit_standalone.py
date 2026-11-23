@@ -26,8 +26,12 @@ class CPFitStandaloneTest(unittest.TestCase):
         cls.config["eventWeights"]["apply"] = dict.fromkeys(cls.config["eventWeights"]["apply"], False)
         cls.config["eventWeights"]["signalMaxRelativeError"] = 0.0
         cls.config["signalNormalizationInRangeOnly"] = False
-        cls.config["eventWeights"]["signalCorrectionFile"] = str(cls.path / "signal.root")
-        cls.config["eventWeights"]["signalCorrectionHistogram"] = "weights"
+        for name, component in cls.config["eventWeights"]["signalComponents"].items():
+            component["enabled"] = name in ("ks_pm", "kl_pm")
+            component["correctionFile"] = str(cls.path / "signal.root")
+            component["correctionHistogram"] = "{}_weights".format(name)
+            component["ratioFile"] = str(cls.path / "signal_ratios.root")
+            component["ratioSpline"] = "spline_1" if name.startswith("ks_") else "spline_2"
         cls.config["regenerationShapeCorrection"]["weightFunctionsFile"] = str(cls.path / "regen.root")
         for cut in cls.config["cuts"].values():
             cut["enabled"] = False
@@ -71,15 +75,17 @@ class CPFitStandaloneTest(unittest.TestCase):
         baseline = self.run_fit(self.config)
         for key, channel, factor in [
             ("signal", "Signal", 0.96),
-            ("semileptonic", "Semileptonic", 0.9272),
-            ("threePi0", "3pi0", 0.9375),
+            ("semileptonic", "Semileptonic", self.config["eventWeights"]["semileptonic"]),
+            ("threePi0", "3pi0", self.config["eventWeights"]["threePi0"]),
             ("regeneration", "Regeneration", 0.8),
         ]:
             config = copy.deepcopy(self.config)
             config["eventWeights"]["apply"][key] = True
+            if key == "signal":
+                config["eventWeights"]["signalComponents"]["kl_pm"]["enabled"] = False
             result = self.run_fit(config)
             if key == "signal":
-                self.assertAlmostEqual(result["signalWeights"]["sum"], 560 * factor)
+                self.assertAlmostEqual(result["signalWeights"]["sum"], 560 * factor * 1.1)
             else:
                 ratio = (result["channels"][channel]["fittedIntegral"] /
                          baseline["channels"][channel]["fittedIntegral"])
@@ -95,12 +101,49 @@ class CPFitStandaloneTest(unittest.TestCase):
     def test_signal_weight_relative_error_cut(self):
         config = copy.deepcopy(self.config)
         config["eventWeights"]["apply"]["signal"] = True
+        config["eventWeights"]["signalComponents"]["kl_pm"]["enabled"] = False
         config["eventWeights"]["signalMaxRelativeError"] = 0.1
         weights = self.run_fit(config)["signalWeights"]
         replaced = weights["largeRelativeErrorReplaced"]
         self.assertGreater(replaced, 0)
         self.assertLess(replaced, 560)
-        self.assertAlmostEqual(weights["sum"], (560 - replaced) * 0.96 + replaced)
+        self.assertEqual(weights["largeRelativeErrorReplacedByComponent"]["ks_pm"], replaced)
+        self.assertAlmostEqual(weights["sum"], (560 - replaced) * 0.96 * 1.1 + replaced * 1.1)
+
+    def test_signal_weight_error_replaces_only_the_affected_component(self):
+        config = copy.deepcopy(self.config)
+        config["eventWeights"]["apply"]["signal"] = True
+        config["eventWeights"]["signalMaxRelativeError"] = 0.1
+        weights = self.run_fit(config)["signalWeights"]
+        replaced = weights["largeRelativeErrorReplaced"]
+        self.assertGreater(replaced, 0)
+        self.assertLess(replaced, 560)
+        self.assertEqual(weights["largeRelativeErrorReplacedByComponent"]["ks_pm"], replaced)
+        self.assertNotIn("kl_pm", weights["largeRelativeErrorReplacedByComponent"])
+        nominal_component_sum = 0.96 * 1.1 + 0.8 * 0.6
+        substituted_component_sum = 1.1 + 0.8 * 0.6
+        self.assertAlmostEqual(
+            weights["sum"], (560 - replaced) * nominal_component_sum + replaced * substituted_component_sum)
+
+    def test_signal_component_weight_composition(self):
+        config = copy.deepcopy(self.config)
+        config["eventWeights"]["apply"]["signal"] = True
+        config["eventWeights"]["signalMaxRelativeError"] = 0.0
+        combined = self.run_fit(config)["signalWeights"]["sum"]
+        self.assertAlmostEqual(combined, 560 * (0.96 * 1.1 + 0.8 * 0.6))
+
+        config["eventWeights"]["signalComponents"]["kl_pm"]["enabled"] = False
+        ks_only = self.run_fit(config)["signalWeights"]["sum"]
+        self.assertAlmostEqual(ks_only, 560 * 0.96 * 1.1)
+
+        config["eventWeights"]["signalComponents"]["ks_pm"]["enabled"] = False
+        config["eventWeights"]["signalComponents"]["kl_pm"]["enabled"] = False
+        no_components = self.run_fit(config)["signalWeights"]["sum"]
+        self.assertAlmostEqual(no_components, 560.0)
+
+        config["eventWeights"]["signalComponents"]["ks_00"].update(
+            enabled=True, correctionFile="", correctionHistogram="", ratioFile="", ratioSpline="")
+        self.assertIn("incomplete ROOT object configuration: ks_00", self.run_fit(config, expected=1))
 
     def test_luminosity_factor(self):
         base = copy.deepcopy(self.config)
@@ -164,11 +207,11 @@ class CPFitStandaloneTest(unittest.TestCase):
 
     def test_missing_regeneration_file(self):
         config = copy.deepcopy(self.config)
-        config["eventWeights"]["signalCorrectionFile"] = str(self.path / "missing_signal.root")
+        config["eventWeights"]["signalComponents"]["ks_pm"]["correctionFile"] = str(self.path / "missing_signal.root")
         config["regenerationShapeCorrection"]["weightFunctionsFile"] = str(self.path / "missing.root")
         self.run_fit(config)
         config["eventWeights"]["apply"]["signal"] = True
-        self.assertIn("Could not open signal correction file", self.run_fit(config, expected=1))
+        self.assertIn("Could not open signal correction file for ks_pm", self.run_fit(config, expected=1))
         config["eventWeights"]["apply"]["signal"] = False
         config["eventWeights"]["apply"]["regeneration"] = True
         self.assertIn("Could not open regeneration weight file", self.run_fit(config, expected=1))

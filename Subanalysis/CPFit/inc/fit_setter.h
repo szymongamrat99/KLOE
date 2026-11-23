@@ -2,7 +2,11 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <array>
 #include <cmath>
+#include <map>
+#include <string>
+#include <vector>
 
 #include "TMath.h"
 #include "nlohmann/json.hpp"
@@ -72,12 +76,20 @@ struct RegenShapeCorrectionConfig
 
 struct EventWeightConfig
 {
+  struct SignalComponent
+  {
+    bool enabled = false;
+    std::string correctionFile;
+    std::string correctionHistogram;
+    std::string ratioFile;
+    std::string ratioSpline;
+  };
+
   bool applySignal = true;
   bool applySemileptonic = true;
   bool applyThreePi0 = true;
   bool applyRegeneration = true;
-  std::string signalCorrectionFile;
-  std::string signalCorrectionHistogram;
+  std::map<std::string, SignalComponent> signalComponents;
   Double_t threePi0 = 0.9375;
   Double_t semileptonic = 0.9272;
   Double_t signalMaxChargedRadius = 20.0;
@@ -208,8 +220,25 @@ public:
       fitConfig.eventWeights.applySemileptonic = applyWeights.at("semileptonic").get<bool>();
       fitConfig.eventWeights.applyThreePi0 = applyWeights.at("threePi0").get<bool>();
       fitConfig.eventWeights.applyRegeneration = applyWeights.at("regeneration").get<bool>();
-      fitConfig.eventWeights.signalCorrectionFile = weights.at("signalCorrectionFile").get<std::string>();
-      fitConfig.eventWeights.signalCorrectionHistogram = weights.at("signalCorrectionHistogram").get<std::string>();
+      const auto &signalComponents = weights.at("signalComponents");
+      const std::array<std::string, 4> componentNames = {"ks_pm", "kl_pm", "ks_00", "kl_00"};
+      for (const auto &name : componentNames)
+      {
+        EventWeightConfig::SignalComponent component;
+        if (signalComponents.contains(name))
+        {
+          const auto &entry = signalComponents.at(name);
+          component.enabled = entry.value("enabled", false);
+          component.correctionFile = entry.value("correctionFile", "");
+          component.correctionHistogram = entry.value("correctionHistogram", "");
+          component.ratioFile = entry.value("ratioFile", "");
+          component.ratioSpline = entry.value("ratioSpline", "");
+        }
+        fitConfig.eventWeights.signalComponents.emplace(name, std::move(component));
+      }
+      for (auto it = signalComponents.begin(); it != signalComponents.end(); ++it)
+        if (std::find(componentNames.begin(), componentNames.end(), it.key()) == componentNames.end())
+          throw std::runtime_error("Unknown signal weight component: " + it.key());
       fitConfig.eventWeights.threePi0 = weights.at("threePi0").get<Double_t>();
       fitConfig.eventWeights.semileptonic = weights.at("semileptonic").get<Double_t>();
       fitConfig.eventWeights.signalMaxChargedRadius = weights.at("signalMaxChargedRadius").get<Double_t>();
@@ -266,6 +295,12 @@ public:
         !std::isfinite(fitConfig.eventWeights.signalMaxRelativeError) ||
         fitConfig.eventWeights.signalMaxRelativeError < 0)
       throw std::runtime_error("ERROR: Invalid event weight settings");
+    for (const auto &component : fitConfig.eventWeights.signalComponents)
+      if (component.second.enabled &&
+          (component.second.correctionFile.empty() || component.second.correctionHistogram.empty() ||
+           component.second.ratioFile.empty() || component.second.ratioSpline.empty()))
+        throw std::runtime_error("ERROR: Enabled signal weight component has incomplete ROOT object configuration: " +
+                                 component.first);
     if (!std::isfinite(fitConfig.regenerationExclusion.beamPipeBoundary) ||
         fitConfig.regenerationExclusion.beamPipeBoundary < 0 ||
         !std::isfinite(fitConfig.regenerationExclusion.meanCharged) ||
