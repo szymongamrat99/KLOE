@@ -1,8 +1,8 @@
 {
   "deltaT": {
     "rangeX": [-200.0, 200.0],
-    "xRangeDisplay": [-200.0, 200.0],
-    "resolution": 1.5
+    "xRangeDisplay": [-50.0, 50.0],
+    "resolution": 1.0
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
   "luminosityFactor": 1.00,
@@ -16,6 +16,11 @@
     "Other": true
   },
   "diagnostics": {
+    "signalWeightPlots": {
+      "enabled": true,
+      "weightBins": 100,
+      "deltaTBins": 100
+    },
     "profile": {
       "enabled": false,
       "points": 11,
@@ -72,22 +77,24 @@
       "regeneration": true
     },
     "crossChannelMeanWeights": {
-      "threePi0FromKsPm": true,
+      "threePi0FromKsPm": false,
       "semileptonicFromKs00": false
     },
     "signalComponents": {
-      "ks_pm": {
+    "ks_pm": {
         "enabled": true,
-        "correctionFile": "config/efficiency_purity_plots/ks_pm_corr_factor.root",
-        "correctionHistogram": "corr_factor/corr_factor_Delta_t_tri_fit",
-        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_splines_and_ratios.root",
+        "correctionFile": "config/efficiency_purity_plots/k_pm_correction_factors.root",
+        "correctionHistogram": "correction_factors/h0_distribution_rebinned",
+        "correctionSpline": "correction_factors/h0_spline3_0",
+        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_weights.root",
         "ratioSpline": "spline_1"
       },
       "kl_pm": {
         "enabled": true,
-        "correctionFile": "config/efficiency_purity_plots/kl_pm_corr_factor.root",
-        "correctionHistogram": "corr_factor/corr_factor_Delta_t_fit",
-        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_splines_and_ratios.root",
+        "correctionFile": "config/efficiency_purity_plots/k_pm_correction_factors.root",
+        "correctionHistogram": "correction_factors/h1_distribution_rebinned",
+        "correctionSpline": "correction_factors/h1_spline3_0",
+        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_weights.root",
         "ratioSpline": "spline_2"
       },
       "ks_00": {
@@ -108,7 +115,7 @@
     "threePi0": 0.8868,
     "semileptonic": 0.9844,
     "signalMaxChargedRadius": 300.0,
-    "signalMaxRelativeError": 100.0
+    "signalMaxRelativeError": 0.1
   },
   "regenerationShapeCorrection": {
     "correctionFile": "config/regeneration_cross_section_corr_factors.root",
@@ -182,7 +189,7 @@
       "limitUpper": 2.5,
       "step": 0.01,
       "channels": ["Omega"],
-      "fixed": false
+      "fixed": true
     },
     "A_semileptonic": {
       "enabled": false,

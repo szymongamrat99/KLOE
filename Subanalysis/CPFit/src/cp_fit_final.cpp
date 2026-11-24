@@ -14,6 +14,7 @@
 #include <Math/Factory.h>
 #include <Math/Functor.h>
 #include <TCanvas.h>
+#include <TProfile.h>
 #include <TMath.h>
 #include <TRatioPlot.h>
 #include <TStyle.h>
@@ -42,6 +43,120 @@
 
 #include "../inc/cpfit.hpp"
 
+struct SignalWeightPlotEvent
+{
+  double dt;
+  double total;
+  double ks;
+  double kl;
+  double fallback;
+};
+
+static json saveSignalWeightPlots(const std::vector<SignalWeightPlotEvent> &events,
+                                  const std::string &outputPath, int weightBins,
+                                  int dtBins, double dtMin, double dtMax)
+{
+  if (events.empty())
+    throw std::runtime_error("Cannot plot signal weights without selected Signal events");
+
+  const boost::filesystem::path output(outputPath);
+  const std::string prefix = (output.parent_path() / (output.stem().string() + "_signal_weights")).string();
+  const std::string rootPath = prefix + ".root";
+  const std::string distributionPath = prefix + "_1d.pdf";
+  const std::string dtPath = prefix + "_dt.pdf";
+  for (const auto &path : {rootPath, distributionPath, dtPath})
+    if (boost::filesystem::exists(path))
+      throw std::runtime_error("Signal weight plot output already exists: " + path);
+
+  double minWeight = 0.0, maxWeight = 0.0;
+  for (const auto &entry : events)
+  {
+    if (!std::isfinite(entry.dt) || !std::isfinite(entry.total) ||
+        !std::isfinite(entry.ks) || !std::isfinite(entry.kl) || !std::isfinite(entry.fallback))
+      throw std::runtime_error("Non-finite signal weight diagnostic input");
+    minWeight = std::min({minWeight, entry.total, entry.ks, entry.kl, entry.fallback});
+    maxWeight = std::max({maxWeight, entry.total, entry.ks, entry.kl, entry.fallback});
+  }
+  const double margin = std::max((maxWeight - minWeight) * 0.05, 0.05);
+  minWeight -= margin;
+  maxWeight += margin;
+  if (!std::isfinite(minWeight) || !std::isfinite(maxWeight) || !(maxWeight > minWeight))
+    throw std::runtime_error("Invalid range for signal weight plots");
+
+  TDirectory::TContext directoryContext;
+  TH1D total("signal_weight_total", "Signal event corrections;Correction weight;Events", weightBins, minWeight, maxWeight);
+  TH1D ks("signal_weight_ks", "KS contribution;Correction weight;Events", weightBins, minWeight, maxWeight);
+  TH1D kl("signal_weight_kl", "KL contribution;Correction weight;Events", weightBins, minWeight, maxWeight);
+  TH1D fallback("signal_weight_fallback", "Whole-weight fallback contribution;Correction weight;Events",
+                weightBins, minWeight, maxWeight);
+  TH2D dtWeights("signal_weight_vs_dt", "Signal event corrections;#Delta t_{boostlor} [#tau_{S}];Correction weight",
+                 dtBins, dtMin, dtMax, weightBins, minWeight, maxWeight);
+  TProfile mean("signal_weight_mean_vs_dt", "Mean signal correction;#Delta t_{boostlor} [#tau_{S}];Mean correction weight",
+                dtBins, dtMin, dtMax);
+  total.SetDirectory(nullptr);
+  ks.SetDirectory(nullptr);
+  kl.SetDirectory(nullptr);
+  fallback.SetDirectory(nullptr);
+  dtWeights.SetDirectory(nullptr);
+  mean.SetDirectory(nullptr);
+  for (const auto &entry : events)
+  {
+    total.Fill(entry.total);
+    ks.Fill(entry.ks);
+    kl.Fill(entry.kl);
+    fallback.Fill(entry.fallback);
+    dtWeights.Fill(entry.dt, entry.total);
+    mean.Fill(entry.dt, entry.total);
+  }
+
+  {
+    TFile file(rootPath.c_str(), "CREATE");
+    if (file.IsZombie())
+      throw std::runtime_error("Could not create signal weight ROOT file: " + rootPath);
+    if (total.Write() <= 0 || ks.Write() <= 0 || kl.Write() <= 0 || fallback.Write() <= 0 ||
+        dtWeights.Write() <= 0 || mean.Write() <= 0)
+      throw std::runtime_error("Could not write signal weight ROOT histograms: " + rootPath);
+    file.Close();
+    if (file.TestBit(TFile::kWriteError))
+      throw std::runtime_error("Could not finish signal weight ROOT file: " + rootPath);
+  }
+
+  {
+    TCanvas canvas("signal_weight_distribution_canvas", "Signal correction weights", 900, 700);
+    total.SetLineColor(kBlack);
+    ks.SetLineColor(kBlue + 1);
+    kl.SetLineColor(kRed + 1);
+    total.SetLineWidth(2);
+    ks.SetLineWidth(2);
+    kl.SetLineWidth(2);
+    total.SetMaximum(1.15 * std::max({total.GetMaximum(), ks.GetMaximum(), kl.GetMaximum()}));
+    total.Draw("HIST");
+    ks.Draw("HIST SAME");
+    kl.Draw("HIST SAME");
+    TLegend legend(0.65, 0.7, 0.88, 0.88);
+    legend.AddEntry(&total, "Total applied", "l");
+    legend.AddEntry(&ks, "KS contribution", "l");
+    legend.AddEntry(&kl, "KL contribution", "l");
+    legend.Draw();
+    canvas.SaveAs(distributionPath.c_str());
+  }
+  {
+    TCanvas canvas("signal_weight_dt_canvas", "Signal correction versus delta t", 900, 700);
+    canvas.SetRightMargin(0.14);
+    dtWeights.Draw("COLZ");
+    mean.SetLineColor(kRed + 1);
+    mean.SetMarkerColor(kRed + 1);
+    mean.SetMarkerStyle(20);
+    mean.Draw("E1 SAME");
+    canvas.SaveAs(dtPath.c_str());
+  }
+  for (const auto &path : {distributionPath, dtPath})
+    if (!boost::filesystem::is_regular_file(path) || boost::filesystem::file_size(path) == 0)
+      throw std::runtime_error("Could not save signal weight plot: " + path);
+
+  return {{"root", rootPath}, {"distribution", distributionPath}, {"deltaT", dtPath}};
+}
+
 static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm00 &Obj,
                           const std::string &config_path, const std::string &output_path,
                           bool standaloneRun = false)
@@ -68,6 +183,17 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
 
   FitSetter setter(config_path);
   FitConfig cfg = setter.getFitConfig();
+  const json diagnosticsConfig = setter.getRawConfig().value("diagnostics", json::object());
+  const json weightPlotConfig = diagnosticsConfig.value("signalWeightPlots", json::object());
+  const bool plotSignalWeights = weightPlotConfig.value("enabled", false);
+  const int weightPlotBins = weightPlotConfig.value("weightBins", 100);
+  const int weightPlotDtBins = weightPlotConfig.value("deltaTBins", 100);
+  if (plotSignalWeights && (weightPlotBins <= 0 || weightPlotBins > 1000 ||
+                            weightPlotDtBins <= 0 || weightPlotDtBins > 1000))
+    throw std::runtime_error("Signal weight plot bin counts must be between 1 and 1000");
+  if (plotSignalWeights && output_path.empty())
+    throw std::runtime_error("Signal weight plots require an output path");
+  std::vector<SignalWeightPlotEvent> signalWeightPlotEvents;
 
   const double lumiFactor = setter.getRawConfig().value("luminosityFactor", 1.07906);
   if (!std::isfinite(lumiFactor) || lumiFactor <= 0.0)
@@ -542,6 +668,8 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
           event.time_diff_gen.push_back(baseKin.Dtmc);
           event.time_diff["Signal"].push_back(baseKin.Dtboostlor);
           double weight = 1.0;
+          double ksContribution = 0.0, klContribution = 0.0;
+          bool usedComponents = false;
           if (cfg.eventWeights.applySignal)
           {
             double interpolatedWeight = 0.0;
@@ -575,11 +703,19 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
                 }
               }
 
+              std::cout << "Component: " << component.first << ", Ratio: " << ratio << ", Correction: " << correction << std::endl;
               const double componentWeight = ratio * correction;
               if (component.second.applyToSignal)
               {
                 hasAppliedComponent = true;
                 interpolatedWeight += componentWeight;
+                if (plotSignalWeights)
+                {
+                  if (component.first == "ks_pm" || component.first == "ks_00")
+                    ksContribution += componentWeight;
+                  else
+                    klContribution += componentWeight;
+                }
               }
             }
 
@@ -599,10 +735,21 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
               weight = 1.0;
             }
             else if (cfg.eventWeights.applySignal && hasAppliedComponent)
+            {
               weight = interpolatedWeight;
+              std::cout << "Final interpolated weight: " << weight << std::endl << std::endl;
+              usedComponents = true;
+            }
           }
 
           event.signal_event_weights.push_back(weight);
+          if (plotSignalWeights)
+          {
+            if (!usedComponents)
+              ksContribution = klContribution = 0.0;
+            signalWeightPlotEvents.push_back(
+                {baseKin.Dtboostlor, weight, ksContribution, klContribution, usedComponents ? 0.0 : weight});
+          }
 
           sig_pass->Fill(baseKin.Dtboostlor);
         }
@@ -740,6 +887,11 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
     par[pm.second] = minimum->X()[pm.second];
     parErr[pm.second] = minimum->Errors()[pm.second];
   }
+
+  json signalWeightPlotOutputs;
+  if (plotSignalWeights)
+    signalWeightPlotOutputs = saveSignalWeightPlots(signalWeightPlotEvents, output_path,
+                                                    weightPlotBins, weightPlotDtBins, x_min, x_max);
 
   if (!output_path.empty())
   {
@@ -918,6 +1070,8 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
     result["signalWeights"]["outsideRadiusReplaced"] = signalOutsideRadiusCount;
     result["signalWeights"]["largeRelativeErrorReplaced"] = signalLargeErrorCount;
     result["signalWeights"]["largeRelativeErrorReplacedByComponent"] = signalLargeErrorCountByComponent;
+    if (plotSignalWeights)
+      result["signalWeights"]["plots"] = signalWeightPlotOutputs;
     result["crossChannelMeanWeights"]["values"] = crossChannelMeanWeights;
     result["crossChannelMeanWeights"]["relativeErrorReplacementsByComponent"] =
         crossChannelMeanErrorCountByComponent;

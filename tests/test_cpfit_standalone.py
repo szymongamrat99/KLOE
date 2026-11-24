@@ -129,6 +129,62 @@ class CPFitStandaloneTest(unittest.TestCase):
         self.assertAlmostEqual(
             weights["sum"], (560 - replaced) * nominal_component_sum + replaced * substituted_component_sum)
 
+    def test_signal_weight_plots_and_delta_t_profile(self):
+        config = copy.deepcopy(self.config)
+        config["eventWeights"]["apply"]["signal"] = True
+        config["eventWeights"]["signalMaxRelativeError"] = 0.1
+        config["diagnostics"]["signalWeightPlots"] = {
+            "enabled": True, "weightBins": 40, "deltaTBins": 6}
+        result = self.run_fit(config)
+        without_plots = copy.deepcopy(config)
+        without_plots["diagnostics"]["signalWeightPlots"]["enabled"] = False
+        baseline = self.run_fit(without_plots)
+        self.assertNotIn("plots", baseline["signalWeights"])
+        self.assertAlmostEqual(result["signalWeights"]["sum"], baseline["signalWeights"]["sum"])
+        self.assertAlmostEqual(result["fit"]["chi2"], baseline["fit"]["chi2"])
+        plots = result["signalWeights"]["plots"]
+        for path in plots.values():
+            self.assertGreater(Path(path).stat().st_size, 0)
+        expected_mean = result["signalWeights"]["mean"]
+        replaced = result["signalWeights"]["largeRelativeErrorReplaced"]
+        ks_mean = ((560 - replaced) * 0.96 * 1.1 + replaced * 1.1) / 560
+        code = """
+        TFile f(%s, "READ");
+        auto total = static_cast<TH1*>(f.Get("signal_weight_total"));
+        auto ks = static_cast<TH1*>(f.Get("signal_weight_ks"));
+        auto kl = static_cast<TH1*>(f.Get("signal_weight_kl"));
+        auto fallback = static_cast<TH1*>(f.Get("signal_weight_fallback"));
+        auto h2 = static_cast<TH2*>(f.Get("signal_weight_vs_dt"));
+        auto p = static_cast<TProfile*>(f.Get("signal_weight_mean_vs_dt"));
+        if (!total || !ks || !kl || !fallback || !h2 || !p ||
+            total->GetEntries() != 560 || h2->GetEntries() != 560 || p->GetEntries() != 560 ||
+            std::abs(total->GetMean() - %r) > 1e-8 ||
+            std::abs(ks->GetMean() - %r) > 1e-8 ||
+            std::abs(kl->GetMean() - 0.48) > 1e-8 ||
+            std::abs(fallback->GetMean()) > 1e-8 ||
+            std::abs(p->GetBinContent(1) - (0.96 * 1.1 + 0.48)) > 1e-8 ||
+            std::abs(p->GetBinContent(6) - (1.1 + 0.48)) > 1e-8)
+          gSystem->Exit(1);
+        gSystem->Exit(0);
+        """ % (json.dumps(plots["root"]), expected_mean, ks_mean)
+        subprocess.run(["root", "-n", "-l", "-b", "-q", "-e", code], check=True)
+
+        config["eventWeights"]["apply"]["signal"] = False
+        fallback_result = self.run_fit(config)
+        fallback_root = fallback_result["signalWeights"]["plots"]["root"]
+        code = """
+        TFile f(%s, "READ");
+        auto ks = static_cast<TH1*>(f.Get("signal_weight_ks"));
+        auto kl = static_cast<TH1*>(f.Get("signal_weight_kl"));
+        auto fallback = static_cast<TH1*>(f.Get("signal_weight_fallback"));
+        if (!ks || !kl || !fallback || ks->GetEntries() != 560 ||
+            ks->GetMean() != 0 || kl->GetMean() != 0 ||
+            std::abs(fallback->GetMean() - 1.0) > 1e-8)
+          gSystem->Exit(1);
+        gSystem->Exit(0);
+        """ % json.dumps(fallback_root)
+        subprocess.run(["root", "-n", "-l", "-b", "-q", "-e", code], check=True)
+
     def test_cross_channel_weights_use_each_channel_kinematics(self):
         baseline_config = copy.deepcopy(self.config)
         baseline_config["eventWeights"]["apply"]["threePi0"] = True

@@ -145,6 +145,21 @@ without recompiling:
   relative-error substitution. The component's files are required even if its
   direct Signal weighting is disabled. Both switches default to `false`;
   calculated means are written to `crossChannelMeanWeights`.
+- `diagnostics.signalWeightPlots.enabled` enables Signal correction-weight
+  diagnostics for both standalone and menu runs. `weightBins` and `deltaTBins`
+  set the histogram bin counts (1–1000); the weight axis is chosen from the
+  data and the Δt axis uses `deltaT.rangeX`. Output alongside the result JSON:
+  `_signal_weights_1d.pdf`, `_signal_weights_dt.pdf`, and
+  `_signal_weights.root`. The 1D curves show the applied total, the sum of
+  enabled `ks_pm`/`ks_00` contributions, and the sum of enabled
+  `kl_pm`/`kl_00` contributions, each including its ratio spline. The 2D
+  plot shows event counts versus `Dtboostlor` and applied total weight, with
+  the mean per Δt bin overlaid; the ROOT file also contains the profile.
+  When the entire event weight falls back to 1, KS and KL are both 0 and
+  `signal_weight_fallback` records the remaining 1, so that total = KS + KL
+  + fallback. These are correction weights before interference, luminosity,
+  branching-ratio and fitted normalization factors. ROOT underflow/overflow
+  bins retain events outside the configured Δt range.
 - `regenerationExclusion.enabled` controls the regeneration veto for both data
   and MC; it is disabled by default. The current veto uses the spherical means
   and sigmas together with `beamPipeBoundary` and `sigmaMultiplier`. The

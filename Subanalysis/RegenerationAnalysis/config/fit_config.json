@@ -71,7 +71,7 @@
     }
   },
   "generalSettings": {
-    "isSignalWeighted": true,
+    "isSignalWeighted": false,
     "crossChannelMeanWeights": {
       "threePi0FromKsPm": true,
       "semileptonicFromKs00": false
@@ -79,16 +79,18 @@
     "signalWeightComponents": {
       "ks_pm": {
         "enabled": true,
-        "correctionFile": "config/efficiency_purity_plots/ks_pm_corr_factor.root",
-        "correctionHistogram": "corr_factor/corr_factor_Delta_t_tri_fit",
-        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_splines_and_ratios.root",
+        "correctionFile": "config/efficiency_purity_plots/k_pm_correction_factors.root",
+        "correctionHistogram": "correction_factors/h0_distribution_rebinned",
+        "correctionSpline": "correction_factors/h0_spline3_0",
+        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_weights.root",
         "ratioSpline": "spline_1"
       },
       "kl_pm": {
         "enabled": true,
-        "correctionFile": "config/efficiency_purity_plots/kl_pm_corr_factor.root",
-        "correctionHistogram": "corr_factor/corr_factor_Delta_t_fit",
-        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_splines_and_ratios.root",
+        "correctionFile": "config/efficiency_purity_plots/k_pm_correction_factors.root",
+        "correctionHistogram": "correction_factors/h1_distribution_rebinned",
+        "correctionSpline": "correction_factors/h1_spline3_0",
+        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_weights.root",
         "ratioSpline": "spline_2"
       },
       "ks_00": {
@@ -106,10 +108,10 @@
         "ratioSpline": ""
       }
     },
-    "signalWeightRelativeErrorLimit": 100.0,
+    "signalWeightRelativeErrorLimit": 0.1,
     "isRegenerationWeighted": true,
     "onlyKLong": false,
     "lumiFactor": 1.00,
-    "weightErrorLimit": 100.0
+    "weightErrorLimit": 10.0
   }
 }
