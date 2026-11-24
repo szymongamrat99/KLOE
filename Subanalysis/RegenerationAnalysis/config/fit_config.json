@@ -71,7 +71,11 @@
     }
   },
   "generalSettings": {
-    "isSignalWeighted": false,
+    "isSignalWeighted": true,
+    "crossChannelMeanWeights": {
+      "threePi0FromKsPm": true,
+      "semileptonicFromKs00": false
+    },
     "signalWeightComponents": {
       "ks_pm": {
         "enabled": true,

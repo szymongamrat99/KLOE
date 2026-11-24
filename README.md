@@ -136,6 +136,15 @@ without recompiling:
   reports the number of substituted components. `regenerationShapeCorrection.weightFunctionsFile`
   is relative to `Subanalysis/RegenerationAnalysis/results/` and also accepts
   absolute paths.
+- `eventWeights.crossChannelMeanWeights.threePi0FromKsPm` and
+  `.semileptonicFromKs00` optionally multiply the existing 3pi0 and
+  Semileptonic weights by the corresponding component's event-weighted mean
+  over selected events of that same channel. Each 3pi0 event is weighted with
+  `ks_pm`, and each Semileptonic event with `ks_00`, using that event's own
+  `R_ch` and `Delta_t_tri`; the mean is taken after applying the configured
+  relative-error substitution. The component's files are required even if its
+  direct Signal weighting is disabled. Both switches default to `false`;
+  calculated means are written to `crossChannelMeanWeights`.
 - `regenerationExclusion.enabled` controls the regeneration veto for both data
   and MC; it is disabled by default. The current veto uses the spherical means
   and sigmas together with `beamPipeBoundary` and `sigmaMultiplier`. The
@@ -158,6 +167,14 @@ only that component's correction histogram factor is set to 1, preserving its
 ratio spline contribution and the other components. A non-finite/non-positive
 composed weight is still replaced with 1. `isSignalWeighted` separately
 controls multiplication by the interference weight.
+`generalSettings.crossChannelMeanWeights.threePi0FromKsPm` and
+`.semileptonicFromKs00` optionally scale the 3pi0 and Semileptonic histograms
+by the corresponding component's mean weight over selected events in that
+same channel. Each event's own `R_ch` and `Delta_t_tri` are used for
+`ratioSpline(R_ch) * correctionHistogram(Delta_t_tri)`, with the same
+relative-error substitution. The required component files must be configured
+even if that component is disabled for direct Signal weighting. Both switches
+default to `false`.
 
 The JSON result contains the complete configuration, initialized physics
 constants, branching-ratio corrections, luminosity factor, fit status, chi-square,
@@ -264,3 +281,5 @@ Plik wynikowy JSON zawiera sekcję `diagnostics`:
 - `profile.<parametr>` – profil chi2 (`deltaChi2` w funkcji wartości, pozostałe parametry reminimalizowane); włączany w konfiguracji: `"diagnostics": {"profile": {"enabled": true, "points": 11, "nSigma": 3.0}}`.
 
 Gdy względny błąd binu histogramu składnika Signal (`GetBinError/GetBinContent`) przekracza `eventWeights.signalMaxRelativeError` (domyślnie w `config.json` 0.1; 0 wyłącza), tylko czynnik tego histogramu jest zastępowany przez 1; jego składnik nadal wynosi `ratio × 1`, a inne komponenty pozostają bez zmian. JSON podaje liczbę zdarzeń z taką zamianą w `signalWeights.largeRelativeErrorReplaced` oraz liczniki per komponent w `signalWeights.largeRelativeErrorReplacedByComponent`.
+
+`eventWeights.crossChannelMeanWeights.threePi0FromKsPm` oraz `.semileptonicFromKs00` włączają dodatkowe skalowanie odpowiednio 3pi0 średnią wagą `ks_pm` i Semileptonic średnią wagą `ks_00`. Dla każdego zdarzenia danego kanału liczony jest jego własny iloczyn `ratio × correction` z jego `R_ch` i `Δt_tri`, a następnie średnia po zaakceptowanych zdarzeniach tego kanału. Przełączniki domyślnie są wyłączone; wyliczone wartości trafiają do `crossChannelMeanWeights` w JSON.

@@ -69,15 +69,19 @@ void cpfit_test_data(const char *directory)
 
     TH1D ksPM("ks_pm_weights", "ks_pm_weights", 10, -5, 5);
     TH1D klPM("kl_pm_weights", "kl_pm_weights", 10, -5, 5);
+    TH1D ks00("ks_00_weights", "ks_00_weights", 10, -5, 5);
     for (int i = 1; i <= 10; ++i)
     {
       ksPM.SetBinContent(i, 0.96);
       ksPM.SetBinError(i, i > 5 ? 0.5 : 0.01);
       klPM.SetBinContent(i, 0.8);
       klPM.SetBinError(i, 0.01);
+      ks00.SetBinContent(i, 0.7);
+      ks00.SetBinError(i, 0.01);
     }
     ksPM.Write();
     klPM.Write();
+    ks00.Write();
   }
   {
     TFile file((base + "/signal_ratios.root").c_str(), "RECREATE");

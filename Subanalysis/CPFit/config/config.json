@@ -1,7 +1,7 @@
 {
   "deltaT": {
-    "rangeX": [-200.0, 400.0],
-    "xRangeDisplay": [-20.0, 20.0],
+    "rangeX": [-200.0, 200.0],
+    "xRangeDisplay": [-200.0, 200.0],
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
@@ -70,6 +70,10 @@
       "semileptonic": true,
       "threePi0": true,
       "regeneration": true
+    },
+    "crossChannelMeanWeights": {
+      "threePi0FromKsPm": true,
+      "semileptonicFromKs00": false
     },
     "signalComponents": {
       "ks_pm": {

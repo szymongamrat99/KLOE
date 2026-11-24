@@ -89,6 +89,8 @@ struct EventWeightConfig
   bool applySemileptonic = true;
   bool applyThreePi0 = true;
   bool applyRegeneration = true;
+  bool scaleThreePi0ByKsPmMean = false;
+  bool scaleSemileptonicByKs00Mean = false;
   std::map<std::string, SignalComponent> signalComponents;
   Double_t threePi0 = 0.9375;
   Double_t semileptonic = 0.9272;
@@ -220,6 +222,11 @@ public:
       fitConfig.eventWeights.applySemileptonic = applyWeights.at("semileptonic").get<bool>();
       fitConfig.eventWeights.applyThreePi0 = applyWeights.at("threePi0").get<bool>();
       fitConfig.eventWeights.applyRegeneration = applyWeights.at("regeneration").get<bool>();
+      const auto meanWeights = weights.value("crossChannelMeanWeights", json::object());
+      fitConfig.eventWeights.scaleThreePi0ByKsPmMean =
+          meanWeights.value("threePi0FromKsPm", false);
+      fitConfig.eventWeights.scaleSemileptonicByKs00Mean =
+          meanWeights.value("semileptonicFromKs00", false);
       const auto &signalComponents = weights.at("signalComponents");
       const std::array<std::string, 4> componentNames = {"ks_pm", "kl_pm", "ks_00", "kl_00"};
       for (const auto &name : componentNames)
@@ -296,10 +303,12 @@ public:
         fitConfig.eventWeights.signalMaxRelativeError < 0)
       throw std::runtime_error("ERROR: Invalid event weight settings");
     for (const auto &component : fitConfig.eventWeights.signalComponents)
-      if (component.second.enabled &&
+      if ((component.second.enabled ||
+           (component.first == "ks_pm" && fitConfig.eventWeights.scaleThreePi0ByKsPmMean) ||
+           (component.first == "ks_00" && fitConfig.eventWeights.scaleSemileptonicByKs00Mean)) &&
           (component.second.correctionFile.empty() || component.second.correctionHistogram.empty() ||
            component.second.ratioFile.empty() || component.second.ratioSpline.empty()))
-        throw std::runtime_error("ERROR: Enabled signal weight component has incomplete ROOT object configuration: " +
+        throw std::runtime_error("ERROR: Required signal weight component has incomplete ROOT object configuration: " +
                                  component.first);
     if (!std::isfinite(fitConfig.regenerationExclusion.beamPipeBoundary) ||
         fitConfig.regenerationExclusion.beamPipeBoundary < 0 ||

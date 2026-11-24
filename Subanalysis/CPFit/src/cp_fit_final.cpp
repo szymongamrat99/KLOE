@@ -95,54 +95,58 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   {
     std::unique_ptr<TH1> correction;
     std::unique_ptr<TSpline3> ratio;
+    bool applyToSignal = false;
   };
   std::map<std::string, SignalWeightObjects> signalWeightObjects;
-  if (cfg.eventWeights.applySignal)
+  const bool needsKsPmMean = cfg.eventWeights.scaleThreePi0ByKsPmMean;
+  const bool needsKs00Mean = cfg.eventWeights.scaleSemileptonicByKs00Mean;
+  const auto resolveCPFitPath = [](const std::string &configuredPath)
   {
-    const auto resolveCPFitPath = [](const std::string &configuredPath)
-    {
-      const boost::filesystem::path path(configuredPath);
-      return (path.is_absolute() ? path : boost::filesystem::path((std::string)Paths::cpfit_dir) / path).string();
-    };
-    for (const auto &component : cfg.eventWeights.signalComponents)
-    {
-      if (!component.second.enabled)
-        continue;
+    const boost::filesystem::path path(configuredPath);
+    return (path.is_absolute() ? path : boost::filesystem::path((std::string)Paths::cpfit_dir) / path).string();
+  };
+  for (const auto &component : cfg.eventWeights.signalComponents)
+  {
+    const bool neededForMean =
+        (component.first == "ks_pm" && needsKsPmMean) ||
+        (component.first == "ks_00" && needsKs00Mean);
+    if ((!cfg.eventWeights.applySignal || !component.second.enabled) && !neededForMean)
+      continue;
 
-      SignalWeightObjects objects;
-      const std::string correctionPath = resolveCPFitPath(component.second.correctionFile);
-      {
-        TDirectory::TContext directoryContext;
-        std::unique_ptr<TFile> correctionFile(TFile::Open(correctionPath.c_str(), "READ"));
-        if (!correctionFile || correctionFile->IsZombie())
-          throw std::runtime_error("Could not open signal correction file for " + component.first + ": " +
-                                   correctionPath);
-        TH1 *source = dynamic_cast<TH1 *>(correctionFile->Get(component.second.correctionHistogram.c_str()));
-        if (!source)
-          throw std::runtime_error("Could not find signal correction histogram for " + component.first + ": " +
-                                   component.second.correctionHistogram);
-        objects.correction.reset(dynamic_cast<TH1 *>(source->Clone(("cpfit_" + component.first + "_correction").c_str())));
-        if (!objects.correction)
-          throw std::runtime_error("Could not clone signal correction histogram for " + component.first);
-        objects.correction->SetDirectory(nullptr);
-      }
-
-      const std::string ratioPath = resolveCPFitPath(component.second.ratioFile);
-      {
-        TDirectory::TContext directoryContext;
-        std::unique_ptr<TFile> ratioFile(TFile::Open(ratioPath.c_str(), "READ"));
-        if (!ratioFile || ratioFile->IsZombie())
-          throw std::runtime_error("Could not open signal ratio file for " + component.first + ": " + ratioPath);
-        TSpline3 *source = dynamic_cast<TSpline3 *>(ratioFile->Get(component.second.ratioSpline.c_str()));
-        if (!source)
-          throw std::runtime_error("Could not find signal ratio spline for " + component.first + ": " +
-                                   component.second.ratioSpline);
-        objects.ratio.reset(dynamic_cast<TSpline3 *>(source->Clone(("cpfit_" + component.first + "_ratio").c_str())));
-        if (!objects.ratio)
-          throw std::runtime_error("Could not clone signal ratio spline for " + component.first);
-      }
-      signalWeightObjects.emplace(component.first, std::move(objects));
+    SignalWeightObjects objects;
+    objects.applyToSignal = cfg.eventWeights.applySignal && component.second.enabled;
+    const std::string correctionPath = resolveCPFitPath(component.second.correctionFile);
+    {
+      TDirectory::TContext directoryContext;
+      std::unique_ptr<TFile> correctionFile(TFile::Open(correctionPath.c_str(), "READ"));
+      if (!correctionFile || correctionFile->IsZombie())
+        throw std::runtime_error("Could not open signal correction file for " + component.first + ": " +
+                                 correctionPath);
+      TH1 *source = dynamic_cast<TH1 *>(correctionFile->Get(component.second.correctionHistogram.c_str()));
+      if (!source)
+        throw std::runtime_error("Could not find signal correction histogram for " + component.first + ": " +
+                                 component.second.correctionHistogram);
+      objects.correction.reset(dynamic_cast<TH1 *>(source->Clone(("cpfit_" + component.first + "_correction").c_str())));
+      if (!objects.correction)
+        throw std::runtime_error("Could not clone signal correction histogram for " + component.first);
+      objects.correction->SetDirectory(nullptr);
     }
+
+    const std::string ratioPath = resolveCPFitPath(component.second.ratioFile);
+    {
+      TDirectory::TContext directoryContext;
+      std::unique_ptr<TFile> ratioFile(TFile::Open(ratioPath.c_str(), "READ"));
+      if (!ratioFile || ratioFile->IsZombie())
+        throw std::runtime_error("Could not open signal ratio file for " + component.first + ": " + ratioPath);
+      TSpline3 *source = dynamic_cast<TSpline3 *>(ratioFile->Get(component.second.ratioSpline.c_str()));
+      if (!source)
+        throw std::runtime_error("Could not find signal ratio spline for " + component.first + ": " +
+                                 component.second.ratioSpline);
+      objects.ratio.reset(dynamic_cast<TSpline3 *>(source->Clone(("cpfit_" + component.first + "_ratio").c_str())));
+      if (!objects.ratio)
+        throw std::runtime_error("Could not clone signal ratio spline for " + component.first);
+    }
+    signalWeightObjects.emplace(component.first, std::move(objects));
   }
 
   // Preparation of the RegenerationFractionFit object to calculate regeneration weights
@@ -388,6 +392,37 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   Long64_t entriesRead = 0;
   size_t signalInvalidWeightCount = 0, signalOutsideRadiusCount = 0, signalLargeErrorCount = 0;
   std::map<std::string, size_t> signalLargeErrorCountByComponent;
+  std::map<std::string, size_t> crossChannelMeanErrorCountByComponent;
+  double threePi0KsPmMeanWeightSum = 0.0, semileptonicKs00MeanWeightSum = 0.0;
+  size_t threePi0MeanSampleCount = 0, semileptonicMeanSampleCount = 0;
+  std::map<std::string, double> crossChannelMeanWeights;
+  const auto evaluateCrossChannelMeanWeight =
+      [&signalWeightObjects, &cfg, &crossChannelMeanErrorCountByComponent](
+          const std::string &name, double dttri, double rCharged)
+  {
+    const auto component = signalWeightObjects.find(name);
+    if (component == signalWeightObjects.end())
+      throw std::runtime_error("Signal weight component is not loaded for cross-channel mean: " + name);
+    double correction = component->second.correction->Interpolate(dttri);
+    const double ratio = component->second.ratio->Eval(rCharged);
+    if (cfg.eventWeights.signalMaxRelativeError > 0.0)
+    {
+      const int bin = component->second.correction->FindFixBin(dttri);
+      const double content = component->second.correction->GetBinContent(bin);
+      const double error = component->second.correction->GetBinError(bin);
+      const double relativeError = content > 0.0 && std::isfinite(content) &&
+                                           std::isfinite(error) && error >= 0.0
+                                       ? error / content
+                                       : std::numeric_limits<double>::infinity();
+      if (!std::isfinite(relativeError) || relativeError > cfg.eventWeights.signalMaxRelativeError)
+      {
+        correction = 1.0;
+        ++crossChannelMeanErrorCountByComponent[name];
+      }
+    }
+    const double weight = ratio * correction;
+    return std::isfinite(weight) && weight > 0.0 ? weight : 1.0;
+  };
 
   struct RegenKinVars
   {
@@ -510,14 +545,15 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
           if (cfg.eventWeights.applySignal)
           {
             double interpolatedWeight = 0.0;
-            bool hasEnabledComponent = false;
+            bool hasAppliedComponent = false;
             bool hasExcessiveRelativeError = false;
             const double rCharged = std::sqrt(std::pow(Kchrec[6] - ip[0], 2) +
                                               std::pow(Kchrec[7] - ip[1], 2) +
                                               std::pow(Kchrec[8] - ip[2], 2));
             for (const auto &component : signalWeightObjects)
             {
-              hasEnabledComponent = true;
+              if (!component.second.applyToSignal)
+                continue;
               double correction = component.second.correction->Interpolate(Dttri);
               const double ratio = component.second.ratio->Eval(rCharged);
 
@@ -539,25 +575,30 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
                 }
               }
 
-              interpolatedWeight += ratio * correction;
+              const double componentWeight = ratio * correction;
+              if (component.second.applyToSignal)
+              {
+                hasAppliedComponent = true;
+                interpolatedWeight += componentWeight;
+              }
             }
 
             if (hasExcessiveRelativeError)
               ++signalLargeErrorCount;
 
-            if (!hasEnabledComponent)
-              weight = 1.0;
-            else if (!std::isfinite(interpolatedWeight) || interpolatedWeight <= 0.0)
+            if (cfg.eventWeights.applySignal && hasAppliedComponent &&
+                (!std::isfinite(interpolatedWeight) || interpolatedWeight <= 0.0))
             {
               ++signalInvalidWeightCount;
               weight = 1.0;
             }
-            else if (rhoCharged > cfg.eventWeights.signalMaxChargedRadius)
+            else if (cfg.eventWeights.applySignal && hasAppliedComponent &&
+                     rhoCharged > cfg.eventWeights.signalMaxChargedRadius)
             {
               ++signalOutsideRadiusCount;
               weight = 1.0;
             }
-            else
+            else if (cfg.eventWeights.applySignal && hasAppliedComponent)
               weight = interpolatedWeight;
           }
 
@@ -587,12 +628,30 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
         {
           event.time_diff["3pi0"].push_back(baseKin.Dtboostlor);
           event.three_pi0_weights.push_back(cfg.eventWeights.applyThreePi0 ? avgThreePi0Weight : 1.0);
+          if (needsKsPmMean)
+          {
+            const double rCharged = std::sqrt(std::pow(Kchrec[6] - ip[0], 2) +
+                                              std::pow(Kchrec[7] - ip[1], 2) +
+                                              std::pow(Kchrec[8] - ip[2], 2));
+
+            double tmpWeight = evaluateCrossChannelMeanWeight("ks_pm", Dttri, rCharged) <= 1.0 ? evaluateCrossChannelMeanWeight("ks_pm", Dttri, rCharged) : 1.0;
+            threePi0KsPmMeanWeightSum += tmpWeight;
+            ++threePi0MeanSampleCount;
+          }
         }
 
         if (*mctruth == 5)
         {
           event.time_diff["Semileptonic"].push_back(baseKin.Dtboostlor);
           event.semileptonic_weights.push_back(cfg.eventWeights.applySemileptonic ? avgSemileptonicWeight : 1.0);
+          if (needsKs00Mean)
+          {
+            const double rCharged = std::sqrt(std::pow(Kchrec[6] - ip[0], 2) +
+                                              std::pow(Kchrec[7] - ip[1], 2) +
+                                              std::pow(Kchrec[8] - ip[2], 2));
+            semileptonicKs00MeanWeightSum += evaluateCrossChannelMeanWeight("ks_00", Dttri, rCharged);
+            ++semileptonicMeanSampleCount;
+          }
         }
 
         if (*mctruth == 6)
@@ -616,6 +675,34 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
        reader.GetEntryStatus() != TTreeReader::kEntryNotFound))
     throw std::runtime_error("Could not read the complete input chain (TTreeReader status " +
                              std::to_string(reader.GetEntryStatus()) + ")");
+
+  if (needsKsPmMean || needsKs00Mean)
+  {
+    if (needsKsPmMean)
+    {
+      if (threePi0MeanSampleCount == 0)
+        throw std::runtime_error("Cannot calculate ks_pm mean weight: no selected 3pi0 events");
+      const double mean = threePi0KsPmMeanWeightSum / threePi0MeanSampleCount;
+      if (!std::isfinite(mean) || mean <= 0.0)
+        throw std::runtime_error("Invalid selected-3pi0 mean weight for ks_pm");
+      crossChannelMeanWeights["threePi0FromKsPm"] = mean;
+      for (double &weight : event.three_pi0_weights)
+        weight *= mean;
+      std::cout << "INFO: Applying selected-3pi0 ks_pm mean weight " << mean << std::endl;
+    }
+    if (needsKs00Mean)
+    {
+      if (semileptonicMeanSampleCount == 0)
+        throw std::runtime_error("Cannot calculate ks_00 mean weight: no selected Semileptonic events");
+      const double mean = semileptonicKs00MeanWeightSum / semileptonicMeanSampleCount;
+      if (!std::isfinite(mean) || mean <= 0.0)
+        throw std::runtime_error("Invalid selected-Semileptonic mean weight for ks_00");
+      crossChannelMeanWeights["semileptonicFromKs00"] = mean;
+      for (double &weight : event.semileptonic_weights)
+        weight *= mean;
+      std::cout << "INFO: Applying selected-Semileptonic ks_00 mean weight " << mean << std::endl;
+    }
+  }
 
   const auto validateWeightCount = [&event](const TString &channel, const std::vector<Double_t> &weights)
   {
@@ -831,6 +918,9 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
     result["signalWeights"]["outsideRadiusReplaced"] = signalOutsideRadiusCount;
     result["signalWeights"]["largeRelativeErrorReplaced"] = signalLargeErrorCount;
     result["signalWeights"]["largeRelativeErrorReplacedByComponent"] = signalLargeErrorCountByComponent;
+    result["crossChannelMeanWeights"]["values"] = crossChannelMeanWeights;
+    result["crossChannelMeanWeights"]["relativeErrorReplacementsByComponent"] =
+        crossChannelMeanErrorCountByComponent;
     result["signalWeights"]["mean"] = event.signal_event_weights.empty()
                                             ? json(nullptr)
                                             : json(sumWeights / event.signal_event_weights.size());

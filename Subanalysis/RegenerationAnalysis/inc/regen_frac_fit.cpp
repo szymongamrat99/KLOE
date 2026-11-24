@@ -59,9 +59,14 @@ RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(
     const boost::filesystem::path path(configuredPath);
     return (path.is_absolute() ? path : boost::filesystem::path((std::string)Paths::cpfit_dir) / path).string();
   };
+  const bool needsKsPmMean = fConfig.scaleThreePi0ByKsPmMean;
+  const bool needsKs00Mean = fConfig.scaleSemileptonicByKs00Mean;
   for (const auto &component : fConfig.signalWeightComponents)
   {
-    if (!component.second.enabled)
+    const bool neededForMean =
+        (component.first == "ks_pm" && needsKsPmMean) ||
+        (component.first == "ks_00" && needsKs00Mean);
+    if (!component.second.enabled && !neededForMean)
       continue;
 
     const std::string correctionPath = resolveCPFitPath(component.second.correctionFile);
@@ -332,6 +337,9 @@ void RegenerationFractionFit::LoadConfig()
     fConfig.lumiFactor = generalSettingsConfig.at("lumiFactor");
     fConfig.weightErrorLimit = generalSettingsConfig.at("weightErrorLimit");
     fConfig.signalWeightRelativeErrorLimit = generalSettingsConfig.at("signalWeightRelativeErrorLimit");
+    const auto meanWeights = generalSettingsConfig.value("crossChannelMeanWeights", json::object());
+    fConfig.scaleThreePi0ByKsPmMean = meanWeights.value("threePi0FromKsPm", false);
+    fConfig.scaleSemileptonicByKs00Mean = meanWeights.value("semileptonicFromKs00", false);
 
     const auto &signalComponents = generalSettingsConfig.at("signalWeightComponents");
     const std::array<std::string, 4> componentNames = {"ks_pm", "kl_pm", "ks_00", "kl_00"};
@@ -359,10 +367,12 @@ void RegenerationFractionFit::LoadConfig()
       !std::isfinite(fConfig.signalWeightRelativeErrorLimit) || fConfig.signalWeightRelativeErrorLimit < 0.0)
     throw std::runtime_error("Signal and regeneration relative-error limits must be finite and non-negative");
   for (const auto &component : fConfig.signalWeightComponents)
-    if (component.second.enabled &&
+    if ((component.second.enabled ||
+         (component.first == "ks_pm" && fConfig.scaleThreePi0ByKsPmMean) ||
+         (component.first == "ks_00" && fConfig.scaleSemileptonicByKs00Mean)) &&
         (component.second.correctionFile.empty() || component.second.correctionHistogram.empty() ||
          component.second.ratioFile.empty() || component.second.ratioSpline.empty()))
-      throw std::runtime_error("Enabled signal weight component has incomplete ROOT object configuration: " +
+      throw std::runtime_error("Required signal weight component has incomplete ROOT object configuration: " +
                                component.first);
 
   configFile.close();
@@ -406,6 +416,36 @@ void RegenerationFractionFit::_FillHistograms()
   std::size_t excessiveSignalWeightErrorCount = 0;
   std::size_t nonFiniteFinalSignalWeightCount = 0;
   std::map<std::string, std::size_t> excessiveSignalWeightErrorCountByComponent;
+  std::map<std::string, std::size_t> crossChannelMeanErrorCountByComponent;
+  double threePi0KsPmMeanWeightSum = 0.0, semileptonicKs00MeanWeightSum = 0.0;
+  std::size_t threePi0MeanSampleCount = 0, semileptonicMeanSampleCount = 0;
+  const auto evaluateCrossChannelMeanWeight =
+      [this, &crossChannelMeanErrorCountByComponent](const std::string &name, double dt, double radius)
+  {
+    const auto histogram = signalWeightHistograms.find(name);
+    const auto ratioSpline = signalWeightRatios.find(name);
+    if (histogram == signalWeightHistograms.end() || ratioSpline == signalWeightRatios.end())
+      throw std::runtime_error("Signal weight component is not loaded for cross-channel mean: " + name);
+    double correction = histogram->second->Interpolate(dt);
+    const double ratio = ratioSpline->second->Eval(radius);
+    if (fConfig.signalWeightRelativeErrorLimit > 0.0)
+    {
+      const int bin = histogram->second->FindFixBin(dt);
+      const double content = histogram->second->GetBinContent(bin);
+      const double error = histogram->second->GetBinError(bin);
+      const double relativeError = content > 0.0 && std::isfinite(content) &&
+                                           std::isfinite(error) && error >= 0.0
+                                       ? error / content
+                                       : std::numeric_limits<double>::infinity();
+      if (!std::isfinite(relativeError) || relativeError > fConfig.signalWeightRelativeErrorLimit)
+      {
+        correction = 1.0;
+        ++crossChannelMeanErrorCountByComponent[name];
+      }
+    }
+    const double weight = ratio * correction;
+    return std::isfinite(weight) && weight > 0.0 ? weight : 1.0;
+  };
 
   while (fReader->Next())
   {
@@ -438,7 +478,8 @@ void RegenerationFractionFit::_FillHistograms()
       interpWeight = 0.0;
       for (const auto &component : signalWeightHistograms)
       {
-        hasEnabledSignalWeight = true;
+        if (!fConfig.signalWeightComponents.at(component.first).enabled)
+          continue;
         double correction = component.second->Interpolate(dttri);
         const double ratio = signalWeightRatios.at(component.first)->Eval(R_ch);
 
@@ -459,7 +500,9 @@ void RegenerationFractionFit::_FillHistograms()
           }
         }
 
-        interpWeight += ratio * correction;
+        const double componentWeight = ratio * correction;
+        hasEnabledSignalWeight = true;
+        interpWeight += componentWeight;
       }
 
       if (!hasEnabledSignalWeight)
@@ -493,6 +536,17 @@ void RegenerationFractionFit::_FillHistograms()
         for (const auto &component : excessiveSignalWeightComponents)
           ++excessiveSignalWeightErrorCountByComponent[component];
       }
+    }
+    else if (channelName_str == "3pi0" && fConfig.scaleThreePi0ByKsPmMean)
+    {
+      double tmpWeight = evaluateCrossChannelMeanWeight("ks_pm", dttri, R_ch) <= 1.0 ? evaluateCrossChannelMeanWeight("ks_pm", dttri, R_ch) : 1.0;
+      threePi0KsPmMeanWeightSum += tmpWeight;
+      ++threePi0MeanSampleCount;
+    }
+    else if (channelName_str == "Semileptonic" && fConfig.scaleSemileptonicByKs00Mean)
+    {
+      semileptonicKs00MeanWeightSum += evaluateCrossChannelMeanWeight("ks_00", dttri, R_ch);
+      ++semileptonicMeanSampleCount;
     }
 
     if (fConfig.isSignalWeighted)
@@ -591,6 +645,40 @@ void RegenerationFractionFit::_FillHistograms()
       fRhovsRChargedHist[channelName_str]->Fill(RCharged, rhoCharged);
       fRhovsRNeutralHist[channelName_str]->Fill(RNeutral, rhoNeutral);
     }
+  }
+
+  const auto scaleChannel = [this](const std::string &channel, double factor)
+  {
+    for (const auto &histType : _histTypesIterative)
+      fHistos[histType][channel]->Scale(factor);
+    fTimeDiffHist[channel]->Scale(factor);
+    fRhovsRChargedHist[channel]->Scale(factor);
+    fRhovsRNeutralHist[channel]->Scale(factor);
+  };
+  if (fConfig.scaleThreePi0ByKsPmMean || fConfig.scaleSemileptonicByKs00Mean)
+  {
+    if (fConfig.scaleThreePi0ByKsPmMean)
+    {
+      if (threePi0MeanSampleCount == 0)
+        throw std::runtime_error("Cannot calculate ks_pm mean weight: no selected 3pi0 events");
+      const double mean = threePi0KsPmMeanWeightSum / threePi0MeanSampleCount;
+      if (!std::isfinite(mean) || mean <= 0.0)
+        throw std::runtime_error("Invalid selected-3pi0 mean weight for ks_pm");
+      scaleChannel("3pi0", mean);
+      std::cout << "Applying selected-3pi0 ks_pm mean weight " << mean << std::endl;
+    }
+    if (fConfig.scaleSemileptonicByKs00Mean)
+    {
+      if (semileptonicMeanSampleCount == 0)
+        throw std::runtime_error("Cannot calculate ks_00 mean weight: no selected Semileptonic events");
+      const double mean = semileptonicKs00MeanWeightSum / semileptonicMeanSampleCount;
+      if (!std::isfinite(mean) || mean <= 0.0)
+        throw std::runtime_error("Invalid selected-Semileptonic mean weight for ks_00");
+      scaleChannel("Semileptonic", mean);
+      std::cout << "Applying selected-Semileptonic ks_00 mean weight " << mean << std::endl;
+    }
+    for (const auto &component : crossChannelMeanErrorCountByComponent)
+      std::cout << "Cross-channel " << component.first << " error substitutions=" << component.second << std::endl;
   }
 
   std::cout << "Signal weight corrections substituted with 1: invalid composed weights="

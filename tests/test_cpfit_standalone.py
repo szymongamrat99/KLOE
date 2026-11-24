@@ -24,6 +24,10 @@ class CPFitStandaloneTest(unittest.TestCase):
         cls.config = json.loads((ROOT / "Subanalysis/CPFit/config/config.json").read_text())
         cls.config["deltaT"].update(rangeX=[-3.0, 3.0], xRangeDisplay=[-3.0, 3.0], resolution=1.0)
         cls.config["eventWeights"]["apply"] = dict.fromkeys(cls.config["eventWeights"]["apply"], False)
+        cls.config["eventWeights"]["crossChannelMeanWeights"] = {
+            "threePi0FromKsPm": False,
+            "semileptonicFromKs00": False,
+        }
         cls.config["eventWeights"]["signalMaxRelativeError"] = 0.0
         cls.config["signalNormalizationInRangeOnly"] = False
         for name, component in cls.config["eventWeights"]["signalComponents"].items():
@@ -124,6 +128,38 @@ class CPFitStandaloneTest(unittest.TestCase):
         substituted_component_sum = 1.1 + 0.8 * 0.6
         self.assertAlmostEqual(
             weights["sum"], (560 - replaced) * nominal_component_sum + replaced * substituted_component_sum)
+
+    def test_cross_channel_weights_use_each_channel_kinematics(self):
+        baseline_config = copy.deepcopy(self.config)
+        baseline_config["eventWeights"]["apply"]["threePi0"] = True
+        baseline_config["eventWeights"]["apply"]["semileptonic"] = True
+        baseline = self.run_fit(baseline_config)
+
+        ks_pm_config = copy.deepcopy(baseline_config)
+        ks_pm_config["eventWeights"]["crossChannelMeanWeights"]["threePi0FromKsPm"] = True
+        ks_pm = self.run_fit(ks_pm_config)
+        ks_pm_mean = 0.96 * 1.05
+        self.assertAlmostEqual(ks_pm["crossChannelMeanWeights"]["values"]["threePi0FromKsPm"], ks_pm_mean)
+        self.assertAlmostEqual(
+            ks_pm["channels"]["3pi0"]["fittedIntegral"] / baseline["channels"]["3pi0"]["fittedIntegral"],
+            ks_pm_mean)
+        self.assertAlmostEqual(
+            ks_pm["channels"]["Semileptonic"]["fittedIntegral"],
+            baseline["channels"]["Semileptonic"]["fittedIntegral"])
+
+        ks_00_config = copy.deepcopy(baseline_config)
+        ks_00_config["eventWeights"]["crossChannelMeanWeights"]["semileptonicFromKs00"] = True
+        ks_00 = self.run_fit(ks_00_config)
+        ks_00_mean = 0.7 * 1.05
+        self.assertAlmostEqual(
+            ks_00["crossChannelMeanWeights"]["values"]["semileptonicFromKs00"], ks_00_mean)
+        self.assertAlmostEqual(
+            ks_00["channels"]["Semileptonic"]["fittedIntegral"] /
+            baseline["channels"]["Semileptonic"]["fittedIntegral"],
+            ks_00_mean)
+        self.assertAlmostEqual(
+            ks_00["channels"]["3pi0"]["fittedIntegral"],
+            baseline["channels"]["3pi0"]["fittedIntegral"])
 
     def test_signal_component_weight_composition(self):
         config = copy.deepcopy(self.config)

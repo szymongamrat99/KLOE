@@ -79,6 +79,8 @@ struct Config
   bool isSignalWeighted;
   bool isRegenerationWeighted;
   bool onlyKLong;
+  bool scaleThreePi0ByKsPmMean = false;
+  bool scaleSemileptonicByKs00Mean = false;
   std::map<std::string, SignalWeightComponent> signalWeightComponents;
 
   double lumiFactor;
