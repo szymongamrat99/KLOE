@@ -217,6 +217,16 @@ the final 1D histograms and `MC sum` by `a_B` (Regeneration too, when the weight
 are divided by `a_B`), so Data/MC plots and chi2 are consistent with the fit; the
 time-difference and 2D histograms are not rescaled. If the fit fails, that
 histogram falls back to the luminosity method. Fitted scales are printed.
+`"regenerationBinFit"` is a third `regenerationNormalization` mode: the
+luminosity-normalized background is held fixed (`a_B = 1`) and the Regeneration
+template multiplier `w_i` is fitted in each bin, `Data_i = Bkg_i + w_i * Regen_i`
+with `w_i >= 0`; the `w_i` are the weights, so no cap or negative weights occur.
+Data, background and Regeneration errors are combined; bins with an empty
+Regeneration template keep weight 0 and use the default 1. The background-scale
+options above do not apply in this mode.
+`generalSettings.avgWeights.threePi0` and `.semileptonic` set the constant
+average correction weights for 3pi0 and Semileptonic (defaults 0.8868 and
+0.9844); they must be finite and positive.
 `generalSettings.crossChannelMeanWeights.threePi0FromKsPm` and
 `.semileptonicFromKs00` optionally scale the 3pi0 and Semileptonic histograms
 by the corresponding component's mean weight over selected events in that

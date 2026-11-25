@@ -85,12 +85,15 @@ struct Config
   bool scaleSemileptonicByKs00Mean = false;
   std::map<std::string, SignalWeightComponent> signalWeightComponents;
 
-  enum class Normalization { Luminosity, Fit };
+  enum class Normalization { Luminosity, Fit, RegenerationBinFit };
   Normalization regenerationNormalization = Normalization::Luminosity;
   bool backgroundFitExcludesRegenerationBins = true;
   bool backgroundFitNonNegativeCap = true;
   bool divideWeightByBackgroundScale = false;
   bool applyBackgroundScaleToMCSum = true;
+
+  double avgThreePi0Weight = 0.8868;
+  double avgSemileptonicWeight = 0.9844;
 
   double lumiFactor;
   double weightErrorLimit;
@@ -141,6 +144,7 @@ private:
   void _RenormalizeSignalHistogram();
   void _RenormalizeMCToLumi();
   void _ApplyBackgroundScaleToHistograms();
+  void _FitRegenerationBinMultipliers(HistogramType histType, const TH1 *backgroundTemplate);
   bool _FitBackgroundScale(HistogramType histType, const TH1 *regenerationTemplate,
                            const TH1 *backgroundTemplate, double &backgroundScale) const;
   void _ResetHistograms();

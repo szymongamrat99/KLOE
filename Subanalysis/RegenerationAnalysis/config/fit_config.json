@@ -118,7 +118,11 @@
     "isRegenerationWeighted": true,
     "onlyKLong": false,
     "lumiFactor": 1.00,
-    "regenerationNormalization": "fit",
+    "avgWeights": {
+      "threePi0": 0.8868,
+      "semileptonic": 0.9844
+    },
+    "regenerationNormalization": "regenerationBinFit",
     "backgroundFitBins": "nonRegeneration",
     "backgroundFitNonNegativeCap": false,
     "divideWeightByBackgroundScale": false,
