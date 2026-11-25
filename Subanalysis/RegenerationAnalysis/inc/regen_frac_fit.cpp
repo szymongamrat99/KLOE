@@ -56,12 +56,12 @@ RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(
   // semileptonicWeightsHist = (TH1*)c->FindObject("correction_factors")->Clone();
 
   // TFitResultPtr threePi0WeightResult = threePi0WeightsHist->Fit("pol0", "QS");
-  avgThreePi0Weight = 0.8868;//threePi0WeightResult->Parameter(0);
+  avgThreePi0Weight = fConfig.avgThreePi0Weight;
 
   std::cout << "Average Three Pi0 Weight: " << avgThreePi0Weight << std::endl;
 
   // TFitResultPtr semileptonicWeightResult = semileptonicWeightsHist->Fit("pol0", "QS");
-  avgSemileptonicWeight = 0.9844; //semileptonicWeightResult->Parameter(0);
+  avgSemileptonicWeight = fConfig.avgSemileptonicWeight;
 
   std::cout << "Average Semileptonic Weight: " << avgSemileptonicWeight << std::endl;
 
@@ -360,8 +360,30 @@ void RegenerationFractionFit::LoadConfig()
     fConfig.isRegenerationWeighted = generalSettingsConfig.at("isRegenerationWeighted");
     fConfig.onlyKLong = generalSettingsConfig.at("onlyKLong");
     fConfig.lumiFactor = generalSettingsConfig.at("lumiFactor");
+    const std::string normalization = generalSettingsConfig.value("regenerationNormalization", "luminosity");
+    if (normalization == "luminosity")
+      fConfig.regenerationNormalization = Config::Normalization::Luminosity;
+    else if (normalization == "fit")
+      fConfig.regenerationNormalization = Config::Normalization::Fit;
+    else if (normalization == "regenerationBinFit")
+      fConfig.regenerationNormalization = Config::Normalization::RegenerationBinFit;
+    else
+      throw std::runtime_error("regenerationNormalization must be \"luminosity\", \"fit\" or \"regenerationBinFit\", got: " + normalization);
     fConfig.weightErrorLimit = generalSettingsConfig.at("weightErrorLimit");
     fConfig.signalWeightRelativeErrorLimit = generalSettingsConfig.at("signalWeightRelativeErrorLimit");
+    const std::string fitBins = generalSettingsConfig.value("backgroundFitBins", "nonRegeneration");
+    if (fitBins != "nonRegeneration" && fitBins != "all")
+      throw std::runtime_error("backgroundFitBins must be \"nonRegeneration\" or \"all\", got: " + fitBins);
+    fConfig.backgroundFitExcludesRegenerationBins = fitBins == "nonRegeneration";
+    fConfig.backgroundFitNonNegativeCap = generalSettingsConfig.value("backgroundFitNonNegativeCap", true);
+    fConfig.divideWeightByBackgroundScale = generalSettingsConfig.value("divideWeightByBackgroundScale", false);
+    fConfig.applyBackgroundScaleToMCSum = generalSettingsConfig.value("applyBackgroundScaleToMCSum", true);
+    const auto avgWeights = generalSettingsConfig.value("avgWeights", json::object());
+    fConfig.avgThreePi0Weight = avgWeights.value("threePi0", fConfig.avgThreePi0Weight);
+    fConfig.avgSemileptonicWeight = avgWeights.value("semileptonic", fConfig.avgSemileptonicWeight);
+    if (!std::isfinite(fConfig.avgThreePi0Weight) || fConfig.avgThreePi0Weight <= 0.0 ||
+        !std::isfinite(fConfig.avgSemileptonicWeight) || fConfig.avgSemileptonicWeight <= 0.0)
+      throw std::runtime_error("avgWeights must be finite and positive");
     const auto meanWeights = generalSettingsConfig.value("crossChannelMeanWeights", json::object());
     fConfig.scaleThreePi0ByKsPmMean = meanWeights.value("threePi0FromKsPm", false);
     fConfig.scaleSemileptonicByKs00Mean = meanWeights.value("semileptonicFromKs00", false);
@@ -778,6 +800,58 @@ void RegenerationFractionFit::_RenormalizeMCToLumi()
   }
 }
 
+// Scales the 1D histograms by the fitted background scale so that the final MC sum is consistent with the
+// fit. Regeneration is scaled only if its weights were divided by the same scale.
+void RegenerationFractionFit::_ApplyBackgroundScaleToHistograms()
+{
+  if (fConfig.regenerationNormalization != Config::Normalization::Fit || !fConfig.applyBackgroundScaleToMCSum)
+    return;
+
+  for (const auto &histType : _histTypesIterative)
+  {
+    const auto scale = _backgroundScale.find(histType);
+    if (scale == _backgroundScale.end() || scale->second == 1.0)
+      continue;
+
+    for (const auto &channel : KLOE::channName)
+    {
+      const std::string name = (std::string)channel.second;
+      if (name == "Data" || name == "MC sum")
+        continue;
+      if (name == "Regeneration" && !(fConfig.divideWeightByBackgroundScale && fConfig.isRegenerationWeighted))
+        continue;
+      fHistos[histType][name]->Scale(scale->second);
+    }
+  }
+}
+
+// Background (all channels but Regeneration, luminosity-normalized) is held fixed. For every bin the
+// multiplier w_i of the Regeneration template is fitted to Data_i = Bkg_i + w_i * Regen_i with w_i >= 0.
+void RegenerationFractionFit::_FitRegenerationBinMultipliers(HistogramType histType, const TH1 *backgroundTemplate)
+{
+  const TH1 *data = fHistos.at(histType).at("Data");
+  const TH1 *regeneration = fHistos.at(histType).at("Regeneration");
+  TH1D *weights = fRegenerationWeights.at(histType);
+
+  for (int i = 1; i <= data->GetNbinsX(); ++i)
+  {
+    const double r = regeneration->GetBinContent(i);
+    if (!(r > 0.0) || !std::isfinite(r))
+      continue;
+
+    const double residual = data->GetBinContent(i) - backgroundTemplate->GetBinContent(i);
+    const double eD = data->GetBinError(i), eB = backgroundTemplate->GetBinError(i),
+                 eR = regeneration->GetBinError(i);
+    const double w = std::max(0.0, residual / r);
+    const double error = std::sqrt((eD * eD + eB * eB) / (r * r) + w * w * (eR * eR) / (r * r));
+    if (!std::isfinite(w) || !std::isfinite(error))
+      continue;
+
+    weights->SetBinContent(i, w);
+    weights->SetBinError(i, error);
+  }
+}
+
 void RegenerationFractionFit::_ResetHistograms()
 {
   for (const auto &histType : _histTypesIterative)
@@ -1045,10 +1119,28 @@ void RegenerationFractionFit::_calculateRegenerationWeights()
   for (const auto &histType : _histTypesIterative)
   {
     TH1 *dataRegenerationHist = (TH1*)(fHistos[histType]["Data"]->Clone("DataRegeneration"));
-    dataRegenerationHist->Add(fHistos[histType]["MC sum"], -1);
+    TH1 *regenerationTemplate = fHistos[histType]["Regeneration"];
+    double backgroundScale = 1.0;
+
+    if (fConfig.regenerationNormalization == Config::Normalization::Fit &&
+        !_FitBackgroundScale(histType, regenerationTemplate, fHistos[histType]["MC sum"], backgroundScale))
+    {
+      std::cout << "WARNING: " << _HistTypeToString(histType)
+                << ": background fit failed, falling back to luminosity normalization" << std::endl;
+      backgroundScale = 1.0;
+    }
+    _backgroundScale[histType] = backgroundScale;
+
+    dataRegenerationHist->Add(fHistos[histType]["MC sum"], -backgroundScale);
 
     fRegenerationWeights[histType]->Reset("ICESM");
-    fRegenerationWeights[histType]->Divide(dataRegenerationHist, fHistos[histType]["Regeneration"], 1.0, 1.0);
+    if (fConfig.regenerationNormalization == Config::Normalization::RegenerationBinFit)
+      _FitRegenerationBinMultipliers(histType, fHistos[histType]["MC sum"]);
+    else
+      fRegenerationWeights[histType]->Divide(dataRegenerationHist, regenerationTemplate, 1.0, 1.0);
+    if (fConfig.regenerationNormalization == Config::Normalization::Fit &&
+        fConfig.divideWeightByBackgroundScale && backgroundScale > 0.0)
+      fRegenerationWeights[histType]->Scale(1.0 / backgroundScale);
       
     for (int i = 1; i <= fRegenerationWeights[histType]->GetNbinsX(); ++i)
     {
@@ -1069,6 +1161,56 @@ void RegenerationFractionFit::_calculateRegenerationWeights()
 
     dataRegenerationHist->Delete();
   }
+}
+
+// Bin-by-bin least squares fit of one background scale: Data_i ~ Regen_i + a_B * Bkg_i, with Regen fixed.
+// By default only bins outside the regeneration regions enter the fit.
+// a_B is capped at min_i(Data_i / Bkg_i) so that Data - a_B * Bkg has no negative bins.
+bool RegenerationFractionFit::_FitBackgroundScale(HistogramType histType, const TH1 *regenerationTemplate,
+                                                  const TH1 *backgroundTemplate, double &backgroundScale) const
+{
+  const TH1 *data = fHistos.at(histType).at("Data");
+  const int nBins = data->GetNbinsX();
+  double sBB = 0, sNB = 0;
+  double maxBackgroundScale = std::numeric_limits<double>::infinity();
+  int usedBins = 0;
+
+  for (int i = 1; i <= nBins; ++i)
+  {
+    const double d = data->GetBinContent(i), r = regenerationTemplate->GetBinContent(i),
+                 b = backgroundTemplate->GetBinContent(i);
+    if (b > 0.0)
+      maxBackgroundScale = std::min(maxBackgroundScale, d / b);
+
+    const double eD = data->GetBinError(i), eR = regenerationTemplate->GetBinError(i),
+                 eB = backgroundTemplate->GetBinError(i);
+    const double variance = eD * eD + eR * eR + eB * eB;
+    if (!(variance > 0.0) || !std::isfinite(variance) || b <= 0.0)
+      continue;
+    if (fConfig.backgroundFitExcludesRegenerationBins &&
+        _checkRegenerationLimits(data->GetXaxis()->GetBinLowEdge(i), data->GetXaxis()->GetBinUpEdge(i)))
+      continue;
+
+    const double w = 1.0 / variance;
+    sBB += w * b * b;
+    sNB += w * (d - r) * b;
+    ++usedBins;
+  }
+
+  if (usedBins < 1 || !(sBB > 0.0))
+    return false;
+
+  double aB = sNB / sBB;
+  if (fConfig.backgroundFitNonNegativeCap)
+    aB = std::min(aB, maxBackgroundScale);
+  if (!std::isfinite(aB) || aB <= 0.0)
+    return false;
+
+  std::cout << "Background fit " << _HistTypeToString(histType) << ": scale = " << aB
+            << " (non-negative cap " << (fConfig.backgroundFitNonNegativeCap ? "on" : "off")
+            << ", max allowed " << maxBackgroundScale << ", bins used " << usedBins << ")" << std::endl;
+  backgroundScale = aB;
+  return true;
 }
 
 std::pair<double, double> RegenerationFractionFit::GetRegenerationWeight(HistogramType histType, double radius) const
@@ -1194,6 +1336,7 @@ void RegenerationFractionFit::SaveHistograms()
   }
 
   _RenormalizeMCToLumi();
+  _ApplyBackgroundScaleToHistograms();
   // 4. Budujemy finalny sumaryczny histogram "MC sum" (zawierający już wagi i lumi) do pliku ROOT
   _FillMCSumHistogram(true);
 
