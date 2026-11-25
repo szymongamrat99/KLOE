@@ -186,7 +186,9 @@ namespace KLOE
         if (ToLower(name.second) == "signal")
         {
           double weight = fit_function(time_diff_gen[j], 0, xx) * signal_event_weights[j];
-          signal_event_weights_sum += signal_event_weights[j];
+          const Double_t dt_reco = time_diff[name.second][j];
+          if (!signal_norm_in_range_only || (dt_reco >= _x_min && dt_reco < _x_max))
+            signal_event_weights_sum += signal_event_weights[j];
 
           _frac_tmp[name.second]->Fill(time_diff[name.second][j], weight); //! Filling Signal
         }
@@ -205,7 +207,12 @@ namespace KLOE
       //! Using correction factor and efficiency
       if (ToLower(name.second) == "signal")
       {
-        _frac_tmp[name.second]->Scale(signal_event_weights_sum / _frac_tmp[name.second]->Integral(0, _bin_number + 1));
+        const Double_t integral = signal_norm_in_range_only
+                                      ? _frac_tmp[name.second]->Integral(1, _bin_number)
+                                      : _frac_tmp[name.second]->Integral(0, _bin_number + 1);
+        if (!std::isfinite(integral) || integral <= 0.0)
+          throw std::runtime_error("Invalid signal integral in CP fit");
+        _frac_tmp[name.second]->Scale(signal_event_weights_sum / integral);
 
         for (UInt_t j = 0; j < _bin_number; j++)
         {
@@ -213,7 +220,7 @@ namespace KLOE
         }
       }
 
-      _frac_tmp[name.second]->Scale(1.07906);
+      _frac_tmp[name.second]->Scale(luminosity_factor);
 
       interference::bin_extraction(name.second, _frac_tmp[name.second]);
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -256,8 +263,9 @@ namespace KLOE
         weight = get_weight(name.second, dt_bin, xx);
 
 
-        Double_t brcf_val = BRCF.BRcorrectionFactors[name.second];
-        Double_t brcf_err = BRCF.BRcorrectionFactors_err[name.second];
+        const Bool_t apply_br = ApplyBrCorrection(name.second);
+        Double_t brcf_val = apply_br ? BRCF.BRcorrectionFactors[name.second] : 1.0;
+        Double_t brcf_err = apply_br ? BRCF.BRcorrectionFactors_err[name.second] : 0.0;
 
         // Zewnętrzna stała skalująca per-split dla regeneracji
         Double_t s_val = 1.0, s_err = 0.0;
@@ -290,7 +298,12 @@ namespace KLOE
 
     for (Int_t i = 0; i < _bin_number; i++)
     {
-      value += std::pow(b["Data"][i] - b["MC sum"][i], 2) / (std::pow(e["Data"][i], 2) + e["MC sum"][i]);
+      const Double_t variance = std::pow(e["Data"][i], 2) + e["MC sum"][i];
+      const Double_t residual = b["Data"][i] - b["MC sum"][i];
+      if (variance > 0.0)
+        value += residual * residual / variance;
+      else if (variance != 0.0 || residual != 0.0)
+        throw std::runtime_error("Invalid variance in CP fit bin " + std::to_string(i + 1));
 
       _frac_tmp["Data"]->SetBinContent(i + 1, b["Data"][i]);
       _frac_tmp["Data"]->SetBinError(i + 1, e["Data"][i]);

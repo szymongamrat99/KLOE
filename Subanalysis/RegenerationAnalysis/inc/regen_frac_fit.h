@@ -2,6 +2,8 @@
 #define REGEN_ANALYSIS_H
 
 #include <map>
+#include <memory>
+#include <string>
 #include <nlohmann/json.hpp>
 
 #include <TTreeReader.h>
@@ -13,6 +15,7 @@
 #include <TTreeReaderArray.h>
 
 #include <TF1.h>
+#include <TSpline.h>
 
 #include <const.h>
 #include <interference.h>
@@ -28,6 +31,17 @@ enum class HistogramType
 
 struct Config
 {
+  struct SignalWeightComponent
+  {
+    bool enabled = false;
+    std::string correctionFile;
+    std::string correctionHistogram;
+    std::string correctionSpline;
+    bool useCorrectionSpline = false;
+    std::string ratioFile;
+    std::string ratioSpline;
+  };
+
   double beamPipeBound;
   double driftChamberBound;
   std::map<HistogramType, std::pair<double, double>> histRanges;
@@ -67,9 +81,13 @@ struct Config
   bool isSignalWeighted;
   bool isRegenerationWeighted;
   bool onlyKLong;
+  bool scaleThreePi0ByKsPmMean = false;
+  bool scaleSemileptonicByKs00Mean = false;
+  std::map<std::string, SignalWeightComponent> signalWeightComponents;
 
   double lumiFactor;
   double weightErrorLimit;
+  double signalWeightRelativeErrorLimit = 0.1;
 };
 
 class RegenerationFractionFit
@@ -150,7 +168,10 @@ private:
   HistogramType _checkRegenerationLimitsTypesDeltaT(double dt) const;
   TFile *fFileWeights;
 
-  TH1 *threePi0WeightsHist, *semileptonicWeightsHist, *signalWeightsHist;
+  TH1 *threePi0WeightsHist = nullptr, *semileptonicWeightsHist = nullptr;
+  std::map<std::string, std::unique_ptr<TH1>> signalWeightHistograms;
+  std::map<std::string, std::unique_ptr<TSpline3>> signalWeightCorrectionSplines;
+  std::map<std::string, std::unique_ptr<TSpline3>> signalWeightRatios;
   double avgThreePi0Weight, avgSemileptonicWeight;
   double _sumSignalInterpWeights = 0.0;
 

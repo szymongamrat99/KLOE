@@ -73,6 +73,169 @@ When run without `initialAnalysisExec` forced in the config, `KLSPM00` prompts f
 
 then executes the corresponding sub-analysis chain. See [app/CPVAnalysis.md](app/CPVAnalysis.md) for the full parameter/flow description.
 
+### Standalone CP fit and systematic scans
+
+Build the standalone executable with:
+
+```bash
+cmake --build build --target cpfit_standalone -j2
+```
+
+Set the same environment variables as for the main application:
+`WORKDIR`, `KLOE_PROPERTIES_PATH`, `KLOE_LOGS_PATH`, `KLOE_DBV26_DK0`,
+`KLOE_DBV26_MK0`, `ANALYSIS_CONFIG_FILE`, and `ROOT_RESULTS_PATH`. These are
+used by the framework while libraries load, even if a particular input is not
+used by the fit. `WORKDIR` must point to the repository. The files
+`KLOE_PROPERTIES_PATH/paths-extensions.json` and
+`KLOE_PROPERTIES_PATH/pdg_api/pdg_cache/pdg_cache_{S011,S012,S013}_2025.json`
+must exist. Standalone initializes constants from this local PDG cache, as in
+the menu, and does not download missing cache files.
+
+The fit accepts any number of ROOT files containing the same tree:
+
+```bash
+build/Subanalysis/CPFit/cpfit_standalone \
+  Subanalysis/CPFit/config/config.json result.json TREE_NAME file1.root file2.root
+```
+
+`result.json` must not already exist. The executable runs in batch mode, does
+not produce plots or update global `properties.json`, and writes initialization
+logs under `cpfit_logs/` next to the result. It exits nonzero on input,
+configuration, or minimizer failure. Python (including a future Jupyter
+notebook) can pass a list of paths without PyROOT:
+
+```python
+import subprocess
+
+paths = ["file1.root", "file2.root"]
+subprocess.run(
+    ["build/Subanalysis/CPFit/cpfit_standalone",
+     "Subanalysis/CPFit/config/config.json", "result.json", "TREE_NAME", *paths],
+    check=True,
+)
+```
+
+Edit a copy of [the CP-fit configuration](Subanalysis/CPFit/config/config.json)
+without recompiling:
+
+- `eventWeights.apply.signal`, `.semileptonic`, `.threePi0`, and
+  `.regeneration` independently enable event corrections. A disabled correction
+  uses weight 1; the corresponding Signal or Regeneration file is not opened.
+  Signal corrections are configured independently for `ks_pm`, `kl_pm`,
+  `ks_00`, and `kl_00` under `eventWeights.signalComponents`. Each enabled
+  component contributes `ratio(R_ch) * correction(Delta_t_tri)` to its mode
+  sum; if `ratioFile` is empty, the ratio factor is 1. The final Signal weight
+  is `(ks_pm + kl_pm) * (ks_00 + kl_00)`, where each term denotes its complete
+  ratio-times-correction weight. A mode with no enabled components contributes
+  the identity factor 1. Set `useCorrectionSpline` per component to choose
+  the configured `correctionSpline`; `false` uses ROOT
+  histogram linear interpolation (`TH1::Interpolate`). Relative errors are
+  always evaluated from the configured correction histogram. A correction
+  spline evaluated outside its knot range (or at a non-finite coordinate)
+  contributes `1`; ratio spline behavior is unchanged. The current
+  `ks_pm` and `kl_pm` entries select their correction splines. The `ks_pm` and
+  `kl_pm` components are enabled by default; `ks_00` and `kl_00` are disabled
+  until their correction files are available; ratio data is optional.
+  Correction and ratio
+  file paths are relative to `Subanalysis/CPFit/` and also accept absolute
+  paths. `signalMaxRelativeError` is checked independently for each enabled
+  correction histogram; only a high-error component's histogram factor is set
+  to 1, so that component still contributes its ratio factor (or 1 if omitted)
+  and other components remain unchanged. `signalWeights.largeRelativeErrorReplacedByComponent`
+  reports the number of substituted components. `regenerationShapeCorrection.weightFunctionsFile`
+  is relative to `Subanalysis/RegenerationAnalysis/results/` and also accepts
+  absolute paths.
+- `eventWeights.crossChannelMeanWeights.threePi0FromKsPm` and
+  `.semileptonicFromKs00` optionally multiply the existing 3pi0 and
+  Semileptonic weights by the corresponding component's event-weighted mean
+  over selected events of that same channel. Each 3pi0 event is weighted with
+  `ks_pm`, and each Semileptonic event with `ks_00`, using that event's own
+  `R_ch` and `Delta_t_tri`; the mean is taken after applying the configured
+  relative-error substitution. The component's files are required even if its
+  direct Signal weighting is disabled. Both switches default to `false`;
+  calculated means are written to `crossChannelMeanWeights`.
+- `diagnostics.signalWeightPlots.enabled` enables Signal correction-weight
+  diagnostics for both standalone and menu runs. `weightBins` and `deltaTBins`
+  set the histogram bin counts (1–1000); the weight axis is chosen from the
+  data and the Δt axis uses `deltaT.rangeX`. Output alongside the result JSON:
+  `_signal_weights_1d.pdf`, `_signal_weights_dt.pdf`, and
+  `_signal_weights.root`. The 1D curves show the applied total and the two
+  mode factors (`ks_pm + kl_pm`, `ks_00 + kl_00`), each including configured
+  ratio factors. The 2D
+  plot shows event counts versus `Dtboostlor` and applied total weight, with
+  the mean per Δt bin overlaid; the ROOT file also contains the profile.
+  When the entire event weight falls back to 1, both mode factors are recorded
+  as 0 and `signal_weight_fallback` records the fallback. These are correction weights before interference, luminosity,
+  branching-ratio and fitted normalization factors. ROOT underflow/overflow
+  bins retain events outside the configured Δt range.
+- `regenerationExclusion.enabled` controls the regeneration veto for both data
+  and MC; it is disabled by default. The current veto uses the spherical means
+  and sigmas together with `beamPipeBoundary` and `sigmaMultiplier`. The
+  `cylindrical` settings are not used by this veto.
+- `cuts.ellipse`, `cuts.trackAngle`, and `cuts.closeVertex` have `enabled`
+  switches and numerical thresholds. Copy these sections when migrating an
+  older CP-fit JSON. `deltaT` configures the histogram and fit range.
+- `regenerationShapeCorrection.correctionFile` and `corrections` do not control
+  the current CP-fit regeneration weights; the fitted functions from
+  `weightFunctionsFile` are used instead.
+
+For the RegenerationAnalysis fit, [fit_config.json](Subanalysis/RegenerationAnalysis/config/fit_config.json)
+has independent `generalSettings.signalWeightComponents` switches for `ks_pm`,
+`kl_pm`, `ks_00`, and `kl_00`. The Signal weight is the product of the
+`ks_pm + kl_pm` mode sum and the `ks_00 + kl_00` mode sum; an empty mode uses
+the identity factor 1. Each component has `correctionHistogram`,
+`correctionSpline`, and `useCorrectionSpline`; the switch chooses spline
+evaluation or histogram linear interpolation. Relative errors are always
+measured from the histogram. A correction spline evaluated outside its knot
+range (or at a non-finite coordinate) contributes `1`; ratio spline behavior
+is unchanged. Each enabled component's `ratio(R_ch) * correction(Delta_t_tri)`
+is added to its mode sum; an empty `ratioFile` skips ratio loading and uses 1.
+The two `00` components are off and have empty correction paths until their
+inputs are available.
+`signalWeightRelativeErrorLimit`
+uses a relative fraction (for example, `0.1` for 10%; `0` disables the error
+cut). The error limit is checked independently for each enabled component;
+only that component's correction histogram factor is set to 1, preserving its
+ratio spline contribution and the other components. A non-finite/non-positive
+composed weight is still replaced with 1. `isSignalWeighted` separately
+controls multiplication by the interference weight.
+`generalSettings.crossChannelMeanWeights.threePi0FromKsPm` and
+`.semileptonicFromKs00` optionally scale the 3pi0 and Semileptonic histograms
+by the corresponding component's mean weight over selected events in that
+same channel. Each event's own `R_ch` and `Delta_t_tri` are used for
+`ratioSpline(R_ch) * correction(Delta_t_tri)`, using the configured histogram
+interpolation or correction spline and the same
+relative-error substitution. The required component files must be configured
+even if that component is disabled for direct Signal weighting. Both switches
+default to `false`.
+
+The JSON result contains the complete configuration, initialized physics
+constants, branching-ratio corrections, luminosity factor, fit status, chi-square,
+parameter errors and correlations, selected counts and fitted integrals by
+channel, and Signal weight sum, sum of squares and replacement counts.
+Disabling event weights does **not** disable the independent branching-ratio or
+luminosity corrections. The Signal template is normalized to the sum of its
+event weights before the fitted Signal amplitude is applied; that amplitude
+alone is therefore not a direct measurement of the average weight.
+
+For a one-parameter scan, use a **new** output directory:
+
+```bash
+python3 Subanalysis/CPFit/app/scan_cuts.py \
+  --runner build/Subanalysis/CPFit/cpfit_standalone \
+  --config Subanalysis/CPFit/config/config.json \
+  --output-dir ellipse_scan --tree TREE_NAME \
+  --key cuts.ellipse.nSigma --values '[2.0, 2.5, 3.0]' file1.root file2.root
+```
+
+The key may also name a boolean switch, for example
+`--key eventWeights.apply.signal --values '[false, true]'`. Each variant runs
+in a separate process and rereads all input events. The directory contains a
+manifest, `summary.csv`, and, for each variant, its full configuration,
+`result.json`, and `run.log`. Failed variants remain in the summary with a
+nonzero return code; the scanner also returns nonzero. The scanner varies one
+key at a time; it does not calculate systematic uncertainties automatically.
+
 ### Parallel batch jobs
 
 ```bash
@@ -111,6 +274,14 @@ ctest
 
 Tests live in [tests/](tests) (e.g. `test_charged_vtx_rec.cpp`) and are registered via CTest when the `tests` subdirectory is enabled in [CMakeLists.txt](CMakeLists.txt).
 
+The standalone CP-fit integration test creates synthetic ROOT inputs in a
+temporary directory. After building `cpfit_standalone` and setting the
+environment and local PDG cache described above, run:
+
+```bash
+python3 tests/test_cpfit_standalone.py
+```
+
 ## Debugging
 
 ```bash
@@ -128,3 +299,20 @@ gdb --args ./bin/KLSPM00
 ## Deployment
 
 `copy_libs.sh` copies the built binary and all `*.so` libraries to the shared experiment software area (`/opt/exp_software/kloe/users/.../KLSPM00/`). It runs automatically at the end of `execute_analysis.sh` when executed on host `ui-tier1.cr.cnaf.infn.it`.
+
+Czynnik świetlności MC → Data ustawia `luminosityFactor` na górze `config.json` (domyślnie 1.07906 przy braku klucza); trafia do JSON wyniku.
+
+`signalNormalizationInRangeOnly` (domyślnie `false`): `true` normalizuje Signal do sumy wag tylko zdarzeń z Δt w zakresie fitu (`deltaT.rangeX`), zamiast wszystkich wybranych zdarzeń.
+
+`branchingRatioCorrection`: obiekt `{kanał: true/false}` (kanały: Signal, Regeneration, Omega, 3pi0, Semileptonic, Other; brak klucza = włączone); `false` daje czynnik 1 i zerowy błąd BR dla tego kanału. Pojedyncze `true`/`false` działa dla wszystkich kanałów. JSON zawiera `branchingRatioCorrectionApplied` per kanał.
+
+### Diagnostyka fitu CP
+
+Plik wynikowy JSON zawiera sekcję `diagnostics`:
+- `parameters.<nazwa>.atLowerBound/atUpperBound` – parametr na granicy limitu;
+- `degeneracy` – wartości własne macierzy korelacji, `conditionNumber`, `weakestDirection` (składowe najsłabiej wyznaczonej kombinacji parametrów) i pary o `|corr| > 0.9`;
+- `profile.<parametr>` – profil chi2 (`deltaChi2` w funkcji wartości, pozostałe parametry reminimalizowane); włączany w konfiguracji: `"diagnostics": {"profile": {"enabled": true, "points": 11, "nSigma": 3.0}}`.
+
+Gdy względny błąd binu histogramu składnika Signal (`GetBinError/GetBinContent`) przekracza `eventWeights.signalMaxRelativeError` (domyślnie w `config.json` 0.1; 0 wyłącza), tylko czynnik tego histogramu jest zastępowany przez 1; jego składnik nadal wynosi `ratio × 1`, a inne komponenty pozostają bez zmian. JSON podaje liczbę zdarzeń z taką zamianą w `signalWeights.largeRelativeErrorReplaced` oraz liczniki per komponent w `signalWeights.largeRelativeErrorReplacedByComponent`.
+
+`eventWeights.crossChannelMeanWeights.threePi0FromKsPm` oraz `.semileptonicFromKs00` włączają dodatkowe skalowanie odpowiednio 3pi0 średnią wagą `ks_pm` i Semileptonic średnią wagą `ks_00`. Dla każdego zdarzenia danego kanału liczony jest jego własny iloczyn `ratio × correction` z jego `R_ch` i `Δt_tri`, a następnie średnia po zaakceptowanych zdarzeniach tego kanału. Przełączniki domyślnie są wyłączone; wyliczone wartości trafiają do `crossChannelMeanWeights` w JSON.

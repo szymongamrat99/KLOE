@@ -1,13 +1,61 @@
 {
   "deltaT": {
     "rangeX": [-250.0, 250.0],
-    "xRangeDisplay": [-100.0, 100.0],
+    "xRangeDisplay": [-250.0, 250.0],
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
+  "luminosityFactor": 1.00,
+  "signalNormalizationInRangeOnly": false,
+  "branchingRatioCorrection": {
+    "Signal": true,
+    "Regeneration": true,
+    "Omega": true,
+    "3pi0": true,
+    "Semileptonic": true,
+    "Other": true
+  },
+  "diagnostics": {
+    "signalWeightPlots": {
+      "enabled": true,
+      "weightBins": 100,
+      "deltaTBins": 100
+    },
+    "profile": {
+      "enabled": false,
+      "points": 11,
+      "nSigma": 3.0
+    }
+  },
+  "cuts": {
+    "ellipse": {
+      "enabled": true,
+      "u0": -92.9524,
+      "v0": 7.1644,
+      "sigmaU": 33.7633,
+      "sigmaV": 42.0163,
+      "rho": 0.556,
+      "nSigma": 2.5
+    },
+    "trackAngle": {
+      "enabled": true,
+      "vertexDistanceXY": 2.05,
+      "vertexDistanceZ": 2.45,
+      "maxCosine": 0.8
+    },
+    "closeVertex": {
+      "enabled": true,
+      "neutralRadius": 1.5,
+      "chargedRadius": 2.0,
+      "neutralZ": 1.5,
+      "chargedZ": 1.5,
+      "minCombinedRadius": 1.5
+    }
+  },
   "regenerationExclusion": {
-    "enabled": true,
+    "enabled": false,
     "beamPipeBoundary": 10.0,
+    "sigmaMultiplier": 1.5,
     "spherical": {
       "meanCharged": 10.4941,
       "sigmaCharged": 0.957544,
@@ -21,9 +69,63 @@
       "sigmaNeutral": 0.703466
     }
   },
+  "eventWeights": {
+    "apply": {
+      "signal": true,
+      "semileptonic": true,
+      "threePi0": true,
+      "regeneration": true
+    },
+    "crossChannelMeanWeights": {
+      "threePi0FromKsPm": true,
+      "semileptonicFromKs00": false
+    },
+    "signalComponents": {
+      "ks_pm": {
+        "enabled": true,
+        "correctionFile": "config/efficiency_purity_plots/k_pm_correction_factors.root",
+        "correctionHistogram": "correction_factors/h0_distribution_rebinned",
+        "correctionSpline": "correction_factors/h0_spline3_0",
+        "useCorrectionSpline": true,
+        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_weights.root",
+        "ratioSpline": "spline_1"
+      },
+      "kl_pm": {
+        "enabled": true,
+        "correctionFile": "config/efficiency_purity_plots/k_pm_correction_factors.root",
+        "correctionHistogram": "correction_factors/h1_distribution_rebinned",
+        "correctionSpline": "correction_factors/h1_spline3_0",
+        "useCorrectionSpline": true,
+        "ratioFile": "config/efficiency_purity_plots/k_pm_correction_weights.root",
+        "ratioSpline": "spline_2"
+      },
+      "ks_00": {
+        "enabled": false,
+        "correctionFile": "config/efficiency_purity_plots/k_00_correction_factors.root",
+        "correctionHistogram": "correction_factors/h0_distribution_rebinned",
+        "correctionSpline": "correction_factors/h0_spline3_0",
+        "useCorrectionSpline": true,
+        "ratioFile": "",
+        "ratioSpline": ""
+      },
+      "kl_00": {
+        "enabled": false,
+        "correctionFile": "",
+        "correctionHistogram": "",
+        "correctionSpline": "",
+        "useCorrectionSpline": false,
+        "ratioFile": "",
+        "ratioSpline": ""
+      }
+    },
+    "threePi0": 0.8868,
+    "semileptonic": 0.9844,
+    "signalMaxChargedRadius": 300.0,
+    "signalMaxRelativeError": 0.1
+  },
   "regenerationShapeCorrection": {
-    "enabled": true,
     "correctionFile": "config/regeneration_cross_section_corr_factors.root",
+    "weightFunctionsFile": "regeneration_analysis_results.root",
     "corrections": [
         { "histName": "h_ratio_R_charged_dt",   "variable": "R_Charged",   "rangeMin": 5.57729, "rangeMax": 15.3962  },
         { "histName": "h_ratio_R_neutral_dt",   "variable": "R_Neutral",   "rangeMin": 5.91582, "rangeMax": 15.334   },
@@ -61,7 +163,7 @@
     },
     "A_signal": {
       "enabled": true,
-      "initialValue": 1.00,
+      "initialValue": 1.0,
       "limitLower": 3.0,
       "limitUpper": 3.0,
       "step": 0.01,
@@ -93,7 +195,7 @@
       "limitUpper": 2.5,
       "step": 0.01,
       "channels": ["Omega"],
-      "fixed": false
+      "fixed": true
     },
     "A_semileptonic": {
       "enabled": true,
@@ -111,7 +213,7 @@
       "limitUpper": 2.5,
       "step": 0.01,
       "channels": ["Other"],
-      "fixed": false
+      "fixed": true
     },
     "A_bcg_group": {
       "enabled": false,
@@ -119,7 +221,7 @@
       "initialValue": 1.00,
       "step": 0.01,
       "limitLower": 1.0,
-      "limitUpper": 10.0,
+      "limitUpper": 1.0,
       "channels": ["Semileptonic", "3pi0", "Other"],
       "fixed": false
     }

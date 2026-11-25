@@ -167,7 +167,6 @@ namespace KLOE
             dirnamedata,
             filenamedata,
             extension = Paths::ext_root,
-            path = (std::string)Utils::properties["variables"]["rootFiles"]["pathOldAna"],
             base_path = (std::string)filePaths["analyzed"]["signal"]["basePath"],
             datestamp = (std::string)filePaths["analyzed"]["signal"]["dateStamp"],
             mc_dir = "MONTE_CARLO",
@@ -205,14 +204,6 @@ namespace KLOE
 
     dirnamedata = base_path + "Signal/" + (std::string)filePaths["analyzed"]["signal"]["Data"]["path"];
     filenamedata = (std::string)filePaths["analyzed"]["signal"]["Data"]["baseName"];
-
-    //////////////////////////////////////////////
-    // Przygotuj nazwy plików dla starej analizy
-    TString dirnamemcOld = path + mc_dir;
-    TString filenamemcOld = (std::string)filePaths["MC"]["filenameBaseOldAna"];
-    Int_t fileNumMCOld[2] = {Utils::properties["variables"]["rootFiles"]["firstFileOld"],
-                            Utils::properties["variables"]["rootFiles"]["lastFileOld"]};
-    //////////////////////////////////////////////
 
     switch (dataTypeOpt)
     {
@@ -264,6 +255,15 @@ namespace KLOE
       }
       else
       {
+        std::string path = (std::string)Utils::properties["variables"]["rootFiles"]["pathOldAna"];
+        //////////////////////////////////////////////
+        // Przygotuj nazwy plików dla starej analizy
+        TString dirnamemcOld = path + mc_dir;
+        TString filenamemcOld = (std::string)filePaths["MC"]["filenameBaseOldAna"];
+        Int_t fileNumMCOld[2] = {Utils::properties["variables"]["rootFiles"]["firstFileOld"],
+                                Utils::properties["variables"]["rootFiles"]["lastFileOld"]};
+        //////////////////////////////////////////////
+
         for (Int_t j = fileNumMCOld[0]; j <= fileNumMCOld[1]; j++)
         {
 

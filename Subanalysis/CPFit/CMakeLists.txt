@@ -25,6 +25,9 @@ target_link_libraries(CPFit PRIVATE
     LibRec # Jeśli AnalysisALib zależy od SubanalysisLib
 )
 
+add_executable(cpfit_standalone app/cpfit_standalone.cpp)
+target_link_libraries(cpfit_standalone PRIVATE CPFit RegenAnalysis LibRec ${Boost_LIBRARIES} ${CURL_LIBRARIES} ${ROOT_LIBRARIES})
+
 # Możesz tu także zdefiniować lokalny program wykonawczy, np. do testów.
 # add_executable(run_analysis_A AnalysisA.cpp)
 # target_link_libraries(run_analysis_A PRIVATE AnalysisALib ${ROOT_LIBRARIES})
