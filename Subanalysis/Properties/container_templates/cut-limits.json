@@ -1,0 +1,46 @@
+{
+  "analysisCode": 7,
+  "analysisDescription": "This analysis applies cuts to select events that match the signal hypothesis.",
+  "listOfCuts": {
+    "FOUR_PI": [
+    ],
+    "SIGNAL": [
+      {
+        "order": 0,
+        "cutDescription": "K->pi+pi- decay invariant mass.",
+        "cutId": "InvMassKch",
+        "cutType": "T",
+        "cutValue": 2.637,
+        "cutCondition": "<="
+      },
+      {
+        "order": 1,
+        "cutDescription": "Chi2 of signal kin fit",
+        "cutId": "Chi2SignalKinFit",
+        "cutType": "O",
+        "cutValue": 30,
+        "cutCondition": "<="
+      },
+      {
+        "order": 2,
+        "cutDescription": "Plane of Pi0 Mass after kin fit U",
+        "cutId": "Pi0MassPlane_u",
+        "cutType": "T",
+        "cutValue": 8.085754304,
+        "cutCondition": "<="
+      },
+      {
+        "order": 3,
+        "cutDescription": "Plane of Pi0 Mass after kin fit V",
+        "cutId": "Pi0MassPlane_v",
+        "cutType": "T",
+        "cutValue": 11.514665004,
+        "cutCondition": "<="
+      }
+    ],
+    "THREE_PI0": [
+    ],
+    "SEMILEPTONIC": [
+    ]
+  }
+}
