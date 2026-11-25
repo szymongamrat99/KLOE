@@ -85,6 +85,13 @@ struct Config
   bool scaleSemileptonicByKs00Mean = false;
   std::map<std::string, SignalWeightComponent> signalWeightComponents;
 
+  enum class Normalization { Luminosity, Fit };
+  Normalization regenerationNormalization = Normalization::Luminosity;
+  bool backgroundFitExcludesRegenerationBins = true;
+  bool backgroundFitNonNegativeCap = true;
+  bool divideWeightByBackgroundScale = false;
+  bool applyBackgroundScaleToMCSum = true;
+
   double lumiFactor;
   double weightErrorLimit;
   double signalWeightRelativeErrorLimit = 0.1;
@@ -133,6 +140,9 @@ private:
   void _FillMCSumHistogram(bool addRegeneration);
   void _RenormalizeSignalHistogram();
   void _RenormalizeMCToLumi();
+  void _ApplyBackgroundScaleToHistograms();
+  bool _FitBackgroundScale(HistogramType histType, const TH1 *regenerationTemplate,
+                           const TH1 *backgroundTemplate, double &backgroundScale) const;
   void _ResetHistograms();
   void _SetupJson(json &inputConfig,json &outputConfig, std::string section) const;
 
@@ -174,6 +184,7 @@ private:
   std::map<std::string, std::unique_ptr<TSpline3>> signalWeightRatios;
   double avgThreePi0Weight, avgSemileptonicWeight;
   double _sumSignalInterpWeights = 0.0;
+  std::map<HistogramType, double> _backgroundScale;
 
   void _calculateRegenerationWeights();
 

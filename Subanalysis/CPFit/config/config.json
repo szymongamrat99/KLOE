@@ -1,7 +1,7 @@
 {
   "deltaT": {
-    "rangeX": [-250.0, 250.0],
-    "xRangeDisplay": [-250.0, 250.0],
+    "rangeX": [-200.0, 200.0],
+    "xRangeDisplay": [-200.0, 200.0],
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],

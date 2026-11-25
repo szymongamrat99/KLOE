@@ -199,6 +199,24 @@ only that component's correction histogram factor is set to 1, preserving its
 ratio spline contribution and the other components. A non-finite/non-positive
 composed weight is still replaced with 1. `isSignalWeighted` separately
 controls multiplication by the interference weight.
+`generalSettings.regenerationNormalization` selects how regeneration weights
+are derived: `"luminosity"` (default) uses `(Data - MC background) / Regeneration`
+with the configured `lumiFactor`; `"fit"` keeps Regeneration unchanged and
+fits one background scale per histogram, `Data ~ Regeneration + a_B * MC background`
+(bin-by-bin weighted least squares; background = all channels except
+Regeneration). `generalSettings.backgroundFitBins` chooses the bins entering
+the fit: `"nonRegeneration"` (default) excludes bins inside the regeneration
+regions, `"all"` uses every bin. With `backgroundFitNonNegativeCap` (default `true`), `a_B` is capped at
+`min_i(Data_i / Background_i)` over all bins so that `Data - a_B * Background`
+has no negative bins; set it to `false` to remove the cap. The weight is
+`(Data - a_B * Background) / Regeneration`; with
+`divideWeightByBackgroundScale` (default `false`) it is additionally divided by
+`a_B`, assuming `a_B` measures only the luminosity mismatch.
+`applyBackgroundScaleToMCSum` (default `true`) scales the background channels of
+the final 1D histograms and `MC sum` by `a_B` (Regeneration too, when the weights
+are divided by `a_B`), so Data/MC plots and chi2 are consistent with the fit; the
+time-difference and 2D histograms are not rescaled. If the fit fails, that
+histogram falls back to the luminosity method. Fitted scales are printed.
 `generalSettings.crossChannelMeanWeights.threePi0FromKsPm` and
 `.semileptonicFromKs00` optionally scale the 3pi0 and Semileptonic histograms
 by the corresponding component's mean weight over selected events in that
