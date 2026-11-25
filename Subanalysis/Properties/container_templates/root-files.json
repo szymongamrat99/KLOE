@@ -1,0 +1,62 @@
+{
+  "MC": {
+    "path": [
+      "/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys/",
+      "/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys2/",
+      [
+      "/data/tape_dump/gamrat/PROD2ROOT/MC/MK0/all_phys3/",
+      "/data/ssd/gamrat/PROD2ROOT/MC/MK0/all_phys3/"      
+      ]
+    ],
+    "filenameBase": [
+      "mk0_initial_analysis_all_phys",
+      "mk0_initial_analysis_all_phys2",
+      "mk0_initial_analysis_all_phys3"
+    ],
+    "filenameBaseOldAna": "mc_stream62_mccard2",
+    "extension": ".root"
+
+  },
+  "Data": {
+    "path": "/data/ssd/gamrat/PROD2ROOT/DK0/",
+    "filenameBase": "dk0_initial_analysis",
+    "filenameBaseOldAna": "data_stream42",
+    "extension": ".root"
+  },
+  "analyzed":
+  {
+    "signal":
+    {
+      "basePath": "/data/ssd/gamrat/CNAF_Produced_Files/root_files/",
+      "dateStamp": "2026-09-06",
+      "MC" :
+      {
+        "all_phys": {
+          "firstFile": 1,
+          "lastFile": 206,
+          "path": "ALL_PHYS_SIGNAL_NoSmearing/",
+          "baseName": "mk0_initial_analysis_all_phys_SIGNAL_NoSmearing_Signal_FINAL_SIGNAL"
+        },
+        "all_phys2": {
+          "firstFile": 1,
+          "lastFile": 76,
+          "path": "ALL_PHYS2_SIGNAL_NoSmearing/",
+          "baseName": "mk0_initial_analysis_all_phys2_SIGNAL_NoSmearing_Signal_FINAL_SIGNAL"
+        },
+        "all_phys3": {
+          "firstFile": 1,
+          "lastFile": 87,
+          "path": "ALL_PHYS3_SIGNAL_NoSmearing/",
+          "baseName": "mk0_initial_analysis_all_phys3_SIGNAL_NoSmearing_Signal_FINAL_SIGNAL"
+        }
+      },
+      "Data" :
+      {
+        "firstFile": 1,
+        "lastFile": 420,
+        "path": "DATA_SIGNAL_NoSmearing/",
+        "baseName": "dk0_initial_analysis_SIGNAL_NoSmearing_Signal_FINAL_SIGNAL"
+       }
+    }
+  }
+}

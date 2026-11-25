@@ -1,0 +1,20 @@
+{
+  "date": "2026-02-14",
+  "general":
+  {
+    "rootFileDir": "/workspace/KLOE/src/Subanalysis/InitAnalysis/root_files",
+    "imgDir": "img"
+  },
+  "analysisProperties":
+  {
+    "PDGConst": "/workspace/KLOE/src/Subanalysis/Properties/pdg_const.json",
+    "properties": "/workspace/KLOE/src/Subanalysis/Properties/properties.json",
+    "analysisConfig": "/workspace/KLOE/src/Subanalysis/Properties/analysis_config.json"
+  },
+  "cutLimits": "/workspace/KLOE/src/Subanalysis/Properties/cut-limits.json",
+  "extensions":
+  {
+    "img": ".pdf",
+    "root": ".root"
+  }
+}
