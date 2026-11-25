@@ -47,10 +47,18 @@ struct SignalWeightPlotEvent
 {
   double dt;
   double total;
-  double ks;
-  double kl;
+  double chargedMode;
+  double neutralMode;
   double fallback;
 };
+
+static double evaluateCorrectionSpline(const TSpline3 &spline, double x)
+{
+  if (!std::isfinite(x) || x < spline.GetXmin() || x > spline.GetXmax())
+    return 1.0;
+  const double value = spline.Eval(x);
+  return std::isfinite(value) ? value : 1.0;
+}
 
 static json saveSignalWeightPlots(const std::vector<SignalWeightPlotEvent> &events,
                                   const std::string &outputPath, int weightBins,
@@ -72,10 +80,11 @@ static json saveSignalWeightPlots(const std::vector<SignalWeightPlotEvent> &even
   for (const auto &entry : events)
   {
     if (!std::isfinite(entry.dt) || !std::isfinite(entry.total) ||
-        !std::isfinite(entry.ks) || !std::isfinite(entry.kl) || !std::isfinite(entry.fallback))
+        !std::isfinite(entry.chargedMode) || !std::isfinite(entry.neutralMode) ||
+        !std::isfinite(entry.fallback))
       throw std::runtime_error("Non-finite signal weight diagnostic input");
-    minWeight = std::min({minWeight, entry.total, entry.ks, entry.kl, entry.fallback});
-    maxWeight = std::max({maxWeight, entry.total, entry.ks, entry.kl, entry.fallback});
+    minWeight = std::min({minWeight, entry.total, entry.chargedMode, entry.neutralMode, entry.fallback});
+    maxWeight = std::max({maxWeight, entry.total, entry.chargedMode, entry.neutralMode, entry.fallback});
   }
   const double margin = std::max((maxWeight - minWeight) * 0.05, 0.05);
   minWeight -= margin;
@@ -85,8 +94,10 @@ static json saveSignalWeightPlots(const std::vector<SignalWeightPlotEvent> &even
 
   TDirectory::TContext directoryContext;
   TH1D total("signal_weight_total", "Signal event corrections;Correction weight;Events", weightBins, minWeight, maxWeight);
-  TH1D ks("signal_weight_ks", "KS contribution;Correction weight;Events", weightBins, minWeight, maxWeight);
-  TH1D kl("signal_weight_kl", "KL contribution;Correction weight;Events", weightBins, minWeight, maxWeight);
+  TH1D chargedMode("signal_weight_pm", "#pi^{+}#pi^{-} mode factor;Correction weight;Events",
+                   weightBins, minWeight, maxWeight);
+  TH1D neutralMode("signal_weight_00", "#pi^{0}#pi^{0} mode factor;Correction weight;Events",
+                   weightBins, minWeight, maxWeight);
   TH1D fallback("signal_weight_fallback", "Whole-weight fallback contribution;Correction weight;Events",
                 weightBins, minWeight, maxWeight);
   TH2D dtWeights("signal_weight_vs_dt", "Signal event corrections;#Delta t_{boostlor} [#tau_{S}];Correction weight",
@@ -94,16 +105,16 @@ static json saveSignalWeightPlots(const std::vector<SignalWeightPlotEvent> &even
   TProfile mean("signal_weight_mean_vs_dt", "Mean signal correction;#Delta t_{boostlor} [#tau_{S}];Mean correction weight",
                 dtBins, dtMin, dtMax);
   total.SetDirectory(nullptr);
-  ks.SetDirectory(nullptr);
-  kl.SetDirectory(nullptr);
+  chargedMode.SetDirectory(nullptr);
+  neutralMode.SetDirectory(nullptr);
   fallback.SetDirectory(nullptr);
   dtWeights.SetDirectory(nullptr);
   mean.SetDirectory(nullptr);
   for (const auto &entry : events)
   {
     total.Fill(entry.total);
-    ks.Fill(entry.ks);
-    kl.Fill(entry.kl);
+    chargedMode.Fill(entry.chargedMode);
+    neutralMode.Fill(entry.neutralMode);
     fallback.Fill(entry.fallback);
     dtWeights.Fill(entry.dt, entry.total);
     mean.Fill(entry.dt, entry.total);
@@ -113,7 +124,7 @@ static json saveSignalWeightPlots(const std::vector<SignalWeightPlotEvent> &even
     TFile file(rootPath.c_str(), "CREATE");
     if (file.IsZombie())
       throw std::runtime_error("Could not create signal weight ROOT file: " + rootPath);
-    if (total.Write() <= 0 || ks.Write() <= 0 || kl.Write() <= 0 || fallback.Write() <= 0 ||
+    if (total.Write() <= 0 || chargedMode.Write() <= 0 || neutralMode.Write() <= 0 || fallback.Write() <= 0 ||
         dtWeights.Write() <= 0 || mean.Write() <= 0)
       throw std::runtime_error("Could not write signal weight ROOT histograms: " + rootPath);
     file.Close();
@@ -124,19 +135,19 @@ static json saveSignalWeightPlots(const std::vector<SignalWeightPlotEvent> &even
   {
     TCanvas canvas("signal_weight_distribution_canvas", "Signal correction weights", 900, 700);
     total.SetLineColor(kBlack);
-    ks.SetLineColor(kBlue + 1);
-    kl.SetLineColor(kRed + 1);
+    chargedMode.SetLineColor(kBlue + 1);
+    neutralMode.SetLineColor(kRed + 1);
     total.SetLineWidth(2);
-    ks.SetLineWidth(2);
-    kl.SetLineWidth(2);
-    total.SetMaximum(1.15 * std::max({total.GetMaximum(), ks.GetMaximum(), kl.GetMaximum()}));
+    chargedMode.SetLineWidth(2);
+    neutralMode.SetLineWidth(2);
+    total.SetMaximum(1.15 * std::max({total.GetMaximum(), chargedMode.GetMaximum(), neutralMode.GetMaximum()}));
     total.Draw("HIST");
-    ks.Draw("HIST SAME");
-    kl.Draw("HIST SAME");
+    chargedMode.Draw("HIST SAME");
+    neutralMode.Draw("HIST SAME");
     TLegend legend(0.65, 0.7, 0.88, 0.88);
     legend.AddEntry(&total, "Total applied", "l");
-    legend.AddEntry(&ks, "KS contribution", "l");
-    legend.AddEntry(&kl, "KL contribution", "l");
+    legend.AddEntry(&chargedMode, "#pi^{+}#pi^{-} factor", "l");
+    legend.AddEntry(&neutralMode, "#pi^{0}#pi^{0} factor", "l");
     legend.Draw();
     canvas.SaveAs(distributionPath.c_str());
   }
@@ -220,7 +231,9 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
   struct SignalWeightObjects
   {
     std::unique_ptr<TH1> correction;
+    std::unique_ptr<TSpline3> correctionSpline;
     std::unique_ptr<TSpline3> ratio;
+    bool useCorrectionSpline = false;
     bool applyToSignal = false;
   };
   std::map<std::string, SignalWeightObjects> signalWeightObjects;
@@ -240,6 +253,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
       continue;
 
     SignalWeightObjects objects;
+    objects.useCorrectionSpline = component.second.useCorrectionSpline;
     objects.applyToSignal = cfg.eventWeights.applySignal && component.second.enabled;
     const std::string correctionPath = resolveCPFitPath(component.second.correctionFile);
     {
@@ -256,10 +270,22 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
       if (!objects.correction)
         throw std::runtime_error("Could not clone signal correction histogram for " + component.first);
       objects.correction->SetDirectory(nullptr);
+      if (component.second.useCorrectionSpline)
+      {
+        TSpline3 *spline = dynamic_cast<TSpline3 *>(correctionFile->Get(component.second.correctionSpline.c_str()));
+        if (!spline)
+          throw std::runtime_error("Could not find signal correction spline for " + component.first + ": " +
+                                   component.second.correctionSpline);
+        objects.correctionSpline.reset(dynamic_cast<TSpline3 *>(
+            spline->Clone(("cpfit_" + component.first + "_correction_spline").c_str())));
+        if (!objects.correctionSpline)
+          throw std::runtime_error("Could not clone signal correction spline for " + component.first);
+      }
     }
 
-    const std::string ratioPath = resolveCPFitPath(component.second.ratioFile);
+    if (!component.second.ratioFile.empty())
     {
+      const std::string ratioPath = resolveCPFitPath(component.second.ratioFile);
       TDirectory::TContext directoryContext;
       std::unique_ptr<TFile> ratioFile(TFile::Open(ratioPath.c_str(), "READ"));
       if (!ratioFile || ratioFile->IsZombie())
@@ -529,8 +555,10 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
     const auto component = signalWeightObjects.find(name);
     if (component == signalWeightObjects.end())
       throw std::runtime_error("Signal weight component is not loaded for cross-channel mean: " + name);
-    double correction = component->second.correction->Interpolate(dttri);
-    const double ratio = component->second.ratio->Eval(rCharged);
+    double correction = component->second.useCorrectionSpline
+                            ? evaluateCorrectionSpline(*component->second.correctionSpline, dttri)
+                            : component->second.correction->Interpolate(dttri);
+    const double ratio = component->second.ratio ? component->second.ratio->Eval(rCharged) : 1.0;
     if (cfg.eventWeights.signalMaxRelativeError > 0.0)
     {
       const int bin = component->second.correction->FindFixBin(dttri);
@@ -668,11 +696,12 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
           event.time_diff_gen.push_back(baseKin.Dtmc);
           event.time_diff["Signal"].push_back(baseKin.Dtboostlor);
           double weight = 1.0;
-          double ksContribution = 0.0, klContribution = 0.0;
+          double chargedModeWeight = 1.0, neutralModeWeight = 1.0;
           bool usedComponents = false;
           if (cfg.eventWeights.applySignal)
           {
-            double interpolatedWeight = 0.0;
+            double chargedModeSum = 0.0, neutralModeSum = 0.0;
+            bool hasChargedMode = false, hasNeutralMode = false;
             bool hasAppliedComponent = false;
             bool hasExcessiveRelativeError = false;
             const double rCharged = std::sqrt(std::pow(Kchrec[6] - ip[0], 2) +
@@ -682,12 +711,14 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
             {
               if (!component.second.applyToSignal)
                 continue;
-              double correction = component.second.correction->Interpolate(Dttri);
-              const double ratio = component.second.ratio->Eval(rCharged);
+              double correction = component.second.useCorrectionSpline
+                                      ? evaluateCorrectionSpline(*component.second.correctionSpline, baseKin.Dtboostlor)
+                                      : component.second.correction->Interpolate(baseKin.Dtboostlor);
+              const double ratio = component.second.ratio ? component.second.ratio->Eval(rCharged) : 1.0;
 
               if (cfg.eventWeights.signalMaxRelativeError > 0.0)
               {
-                const int weightBin = component.second.correction->FindFixBin(Dttri);
+                const int weightBin = component.second.correction->FindFixBin(baseKin.Dtboostlor);
                 const double binContent = component.second.correction->GetBinContent(weightBin);
                 const double binError = component.second.correction->GetBinError(weightBin);
                 const double relativeError = binContent > 0.0 && std::isfinite(binContent) &&
@@ -703,18 +734,19 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
                 }
               }
 
-              std::cout << "Component: " << component.first << ", Ratio: " << ratio << ", Correction: " << correction << std::endl;
               const double componentWeight = ratio * correction;
               if (component.second.applyToSignal)
               {
                 hasAppliedComponent = true;
-                interpolatedWeight += componentWeight;
-                if (plotSignalWeights)
+                if (component.first == "ks_pm" || component.first == "kl_pm")
                 {
-                  if (component.first == "ks_pm" || component.first == "ks_00")
-                    ksContribution += componentWeight;
-                  else
-                    klContribution += componentWeight;
+                  chargedModeSum += componentWeight;
+                  hasChargedMode = true;
+                }
+                else
+                {
+                  neutralModeSum += componentWeight;
+                  hasNeutralMode = true;
                 }
               }
             }
@@ -722,8 +754,11 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
             if (hasExcessiveRelativeError)
               ++signalLargeErrorCount;
 
+            chargedModeWeight = hasChargedMode ? chargedModeSum : 1.0;
+            neutralModeWeight = hasNeutralMode ? neutralModeSum : 1.0;
+            const double composedWeight = chargedModeWeight * neutralModeWeight;
             if (cfg.eventWeights.applySignal && hasAppliedComponent &&
-                (!std::isfinite(interpolatedWeight) || interpolatedWeight <= 0.0))
+                (!std::isfinite(composedWeight) || composedWeight <= 0.0))
             {
               ++signalInvalidWeightCount;
               weight = 1.0;
@@ -736,8 +771,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
             }
             else if (cfg.eventWeights.applySignal && hasAppliedComponent)
             {
-              weight = interpolatedWeight;
-              std::cout << "Final interpolated weight: " << weight << std::endl << std::endl;
+              weight = composedWeight;
               usedComponents = true;
             }
           }
@@ -746,9 +780,10 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
           if (plotSignalWeights)
           {
             if (!usedComponents)
-              ksContribution = klContribution = 0.0;
+              chargedModeWeight = neutralModeWeight = 0.0;
             signalWeightPlotEvents.push_back(
-                {baseKin.Dtboostlor, weight, ksContribution, klContribution, usedComponents ? 0.0 : weight});
+                {baseKin.Dtboostlor, weight, chargedModeWeight, neutralModeWeight,
+                 usedComponents ? 0.0 : weight});
           }
 
           sig_pass->Fill(baseKin.Dtboostlor);
@@ -781,7 +816,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
                                               std::pow(Kchrec[7] - ip[1], 2) +
                                               std::pow(Kchrec[8] - ip[2], 2));
 
-            double tmpWeight = evaluateCrossChannelMeanWeight("ks_pm", Dttri, rCharged) <= 1.0 ? evaluateCrossChannelMeanWeight("ks_pm", Dttri, rCharged) : 1.0;
+            double tmpWeight = evaluateCrossChannelMeanWeight("ks_pm", baseKin.Dtboostlor, rCharged) <= 1.0 ? evaluateCrossChannelMeanWeight("ks_pm", baseKin.Dtboostlor, rCharged) : 1.0;
             threePi0KsPmMeanWeightSum += tmpWeight;
             ++threePi0MeanSampleCount;
           }
@@ -796,7 +831,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
             const double rCharged = std::sqrt(std::pow(Kchrec[6] - ip[0], 2) +
                                               std::pow(Kchrec[7] - ip[1], 2) +
                                               std::pow(Kchrec[8] - ip[2], 2));
-            semileptonicKs00MeanWeightSum += evaluateCrossChannelMeanWeight("ks_00", Dttri, rCharged);
+            semileptonicKs00MeanWeightSum += evaluateCrossChannelMeanWeight("ks_00", baseKin.Dtboostlor, rCharged);
             ++semileptonicMeanSampleCount;
           }
         }

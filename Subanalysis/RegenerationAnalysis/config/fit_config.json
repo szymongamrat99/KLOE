@@ -82,6 +82,7 @@
         "correctionFile": "config/efficiency_purity_plots/k_pm_correction_factors.root",
         "correctionHistogram": "correction_factors/h0_distribution_rebinned",
         "correctionSpline": "correction_factors/h0_spline3_0",
+        "useCorrectionSpline": true,
         "ratioFile": "config/efficiency_purity_plots/k_pm_correction_weights.root",
         "ratioSpline": "spline_1"
       },
@@ -90,13 +91,16 @@
         "correctionFile": "config/efficiency_purity_plots/k_pm_correction_factors.root",
         "correctionHistogram": "correction_factors/h1_distribution_rebinned",
         "correctionSpline": "correction_factors/h1_spline3_0",
+        "useCorrectionSpline": true,
         "ratioFile": "config/efficiency_purity_plots/k_pm_correction_weights.root",
         "ratioSpline": "spline_2"
       },
       "ks_00": {
         "enabled": false,
-        "correctionFile": "",
-        "correctionHistogram": "",
+        "correctionFile": "config/efficiency_purity_plots/k_00_correction_factors.root",
+        "correctionHistogram": "correction_factors/h0_distribution_rebinned",
+        "correctionSpline": "correction_factors/h0_spline3_0",
+        "useCorrectionSpline": true,
         "ratioFile": "",
         "ratioSpline": ""
       },
@@ -104,6 +108,8 @@
         "enabled": false,
         "correctionFile": "",
         "correctionHistogram": "",
+        "correctionSpline": "",
+        "useCorrectionSpline": false,
         "ratioFile": "",
         "ratioSpline": ""
       }

@@ -34,6 +34,8 @@ class CPFitStandaloneTest(unittest.TestCase):
             component["enabled"] = name in ("ks_pm", "kl_pm")
             component["correctionFile"] = str(cls.path / "signal.root")
             component["correctionHistogram"] = "{}_weights".format(name)
+            component["correctionSpline"] = "{}_correction_spline".format(name)
+            component["useCorrectionSpline"] = False
             component["ratioFile"] = str(cls.path / "signal_ratios.root")
             component["ratioSpline"] = "spline_1" if name.startswith("ks_") else "spline_2"
         cls.config["regenerationShapeCorrection"]["weightFunctionsFile"] = str(cls.path / "regen.root")
@@ -147,26 +149,27 @@ class CPFitStandaloneTest(unittest.TestCase):
             self.assertGreater(Path(path).stat().st_size, 0)
         expected_mean = result["signalWeights"]["mean"]
         replaced = result["signalWeights"]["largeRelativeErrorReplaced"]
-        ks_mean = ((560 - replaced) * 0.96 * 1.1 + replaced * 1.1) / 560
+        pm_mean = ((560 - replaced) * (0.96 * 1.1 + 0.8 * 0.6) +
+                   replaced * (1.1 + 0.8 * 0.6)) / 560
         code = """
         TFile f(%s, "READ");
         auto total = static_cast<TH1*>(f.Get("signal_weight_total"));
-        auto ks = static_cast<TH1*>(f.Get("signal_weight_ks"));
-        auto kl = static_cast<TH1*>(f.Get("signal_weight_kl"));
+        auto pm = static_cast<TH1*>(f.Get("signal_weight_pm"));
+        auto zeroZero = static_cast<TH1*>(f.Get("signal_weight_00"));
         auto fallback = static_cast<TH1*>(f.Get("signal_weight_fallback"));
         auto h2 = static_cast<TH2*>(f.Get("signal_weight_vs_dt"));
         auto p = static_cast<TProfile*>(f.Get("signal_weight_mean_vs_dt"));
-        if (!total || !ks || !kl || !fallback || !h2 || !p ||
+        if (!total || !pm || !zeroZero || !fallback || !h2 || !p ||
             total->GetEntries() != 560 || h2->GetEntries() != 560 || p->GetEntries() != 560 ||
             std::abs(total->GetMean() - %r) > 1e-8 ||
-            std::abs(ks->GetMean() - %r) > 1e-8 ||
-            std::abs(kl->GetMean() - 0.48) > 1e-8 ||
+            std::abs(pm->GetMean() - %r) > 1e-8 ||
+            std::abs(zeroZero->GetMean() - 1.0) > 1e-8 ||
             std::abs(fallback->GetMean()) > 1e-8 ||
             std::abs(p->GetBinContent(1) - (0.96 * 1.1 + 0.48)) > 1e-8 ||
             std::abs(p->GetBinContent(6) - (1.1 + 0.48)) > 1e-8)
           gSystem->Exit(1);
         gSystem->Exit(0);
-        """ % (json.dumps(plots["root"]), expected_mean, ks_mean)
+        """ % (json.dumps(plots["root"]), expected_mean, pm_mean)
         subprocess.run(["root", "-n", "-l", "-b", "-q", "-e", code], check=True)
 
         config["eventWeights"]["apply"]["signal"] = False
@@ -174,11 +177,11 @@ class CPFitStandaloneTest(unittest.TestCase):
         fallback_root = fallback_result["signalWeights"]["plots"]["root"]
         code = """
         TFile f(%s, "READ");
-        auto ks = static_cast<TH1*>(f.Get("signal_weight_ks"));
-        auto kl = static_cast<TH1*>(f.Get("signal_weight_kl"));
+        auto pm = static_cast<TH1*>(f.Get("signal_weight_pm"));
+        auto zeroZero = static_cast<TH1*>(f.Get("signal_weight_00"));
         auto fallback = static_cast<TH1*>(f.Get("signal_weight_fallback"));
-        if (!ks || !kl || !fallback || ks->GetEntries() != 560 ||
-            ks->GetMean() != 0 || kl->GetMean() != 0 ||
+        if (!pm || !zeroZero || !fallback || pm->GetEntries() != 560 ||
+            pm->GetMean() != 0 || zeroZero->GetMean() != 0 ||
             std::abs(fallback->GetMean() - 1.0) > 1e-8)
           gSystem->Exit(1);
         gSystem->Exit(0);
@@ -194,7 +197,7 @@ class CPFitStandaloneTest(unittest.TestCase):
         ks_pm_config = copy.deepcopy(baseline_config)
         ks_pm_config["eventWeights"]["crossChannelMeanWeights"]["threePi0FromKsPm"] = True
         ks_pm = self.run_fit(ks_pm_config)
-        ks_pm_mean = 0.96 * 1.05
+        ks_pm_mean = 1.0
         self.assertAlmostEqual(ks_pm["crossChannelMeanWeights"]["values"]["threePi0FromKsPm"], ks_pm_mean)
         self.assertAlmostEqual(
             ks_pm["channels"]["3pi0"]["fittedIntegral"] / baseline["channels"]["3pi0"]["fittedIntegral"],
@@ -236,6 +239,64 @@ class CPFitStandaloneTest(unittest.TestCase):
         config["eventWeights"]["signalComponents"]["ks_00"].update(
             enabled=True, correctionFile="", correctionHistogram="", ratioFile="", ratioSpline="")
         self.assertIn("incomplete ROOT object configuration: ks_00", self.run_fit(config, expected=1))
+
+    def test_signal_weight_is_product_of_independent_decay_modes(self):
+        config = copy.deepcopy(self.config)
+        config["eventWeights"]["apply"]["signal"] = True
+        config["eventWeights"]["signalMaxRelativeError"] = 0.0
+        config["eventWeights"]["signalComponents"]["ks_00"].update(
+            enabled=True,
+            correctionFile=str(self.path / "signal.root"),
+            correctionHistogram="ks_00_weights",
+            correctionSpline="ks_00_correction_spline",
+            useCorrectionSpline=False,
+            ratioFile=str(self.path / "signal_ratios.root"),
+            ratioSpline="spline_1")
+        weights = self.run_fit(config)["signalWeights"]
+        charged_mode = 0.96 * 1.1 + 0.8 * 0.6
+        neutral_mode = 0.7 * 1.1
+        self.assertAlmostEqual(weights["sum"], 560 * charged_mode * neutral_mode)
+
+    def test_signal_correction_can_use_configured_spline(self):
+        config = copy.deepcopy(self.config)
+        config["eventWeights"]["apply"]["signal"] = True
+        config["eventWeights"]["signalMaxRelativeError"] = 0.0
+        config["eventWeights"]["signalComponents"]["ks_pm"]["useCorrectionSpline"] = True
+        config["eventWeights"]["signalComponents"]["kl_pm"]["useCorrectionSpline"] = True
+        weights = self.run_fit(config)["signalWeights"]
+        self.assertAlmostEqual(weights["sum"], 560 * (1.1 * 0.5 + 0.6 * 0.4))
+
+        config["eventWeights"]["signalComponents"]["kl_pm"]["enabled"] = False
+        config["eventWeights"]["signalMaxRelativeError"] = 0.1
+        weights = self.run_fit(config)["signalWeights"]
+        replaced = weights["largeRelativeErrorReplaced"]
+        self.assertGreater(replaced, 0)
+        self.assertAlmostEqual(weights["sum"], (560 - replaced) * 1.1 * 0.5 + replaced * 1.1)
+
+    def test_signal_correction_spline_outside_domain_uses_unity(self):
+        config = copy.deepcopy(self.config)
+        config["eventWeights"]["apply"]["signal"] = True
+        config["eventWeights"]["signalMaxRelativeError"] = 0.0
+        config["eventWeights"]["signalComponents"]["ks_pm"]["useCorrectionSpline"] = True
+        config["eventWeights"]["signalComponents"]["ks_pm"]["correctionSpline"] = \
+            "ks_pm_narrow_correction_spline"
+        config["eventWeights"]["signalComponents"]["kl_pm"]["enabled"] = False
+        weights = self.run_fit(config)["signalWeights"]
+        self.assertAlmostEqual(weights["sum"], 240 * 1.1 * 0.5 + 320 * 1.1)
+
+    def test_signal_component_without_ratio_uses_unity_factor(self):
+        config = copy.deepcopy(self.config)
+        config["eventWeights"]["apply"]["signal"] = True
+        config["eventWeights"]["signalComponents"]["ks_pm"]["ratioFile"] = ""
+        config["eventWeights"]["signalComponents"]["ks_pm"].pop("ratioSpline")
+        config["eventWeights"]["signalComponents"]["kl_pm"]["enabled"] = False
+        weights = self.run_fit(config)["signalWeights"]
+        self.assertAlmostEqual(weights["sum"], 560 * 0.96)
+
+        config["eventWeights"]["signalComponents"]["ks_pm"]["ratioFile"] = str(
+            self.path / "signal_ratios.root")
+        output = self.run_fit(config, expected=1)
+        self.assertIn("Signal ratio spline name is missing for component: ks_pm", output)
 
     def test_luminosity_factor(self):
         base = copy.deepcopy(self.config)

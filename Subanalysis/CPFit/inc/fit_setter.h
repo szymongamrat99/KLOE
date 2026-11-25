@@ -81,6 +81,8 @@ struct EventWeightConfig
     bool enabled = false;
     std::string correctionFile;
     std::string correctionHistogram;
+    std::string correctionSpline;
+    bool useCorrectionSpline = false;
     std::string ratioFile;
     std::string ratioSpline;
   };
@@ -238,6 +240,8 @@ public:
           component.enabled = entry.value("enabled", false);
           component.correctionFile = entry.value("correctionFile", "");
           component.correctionHistogram = entry.value("correctionHistogram", "");
+          component.correctionSpline = entry.value("correctionSpline", "");
+          component.useCorrectionSpline = entry.value("useCorrectionSpline", false);
           component.ratioFile = entry.value("ratioFile", "");
           component.ratioSpline = entry.value("ratioSpline", "");
         }
@@ -303,13 +307,18 @@ public:
         fitConfig.eventWeights.signalMaxRelativeError < 0)
       throw std::runtime_error("ERROR: Invalid event weight settings");
     for (const auto &component : fitConfig.eventWeights.signalComponents)
-      if ((component.second.enabled ||
-           (component.first == "ks_pm" && fitConfig.eventWeights.scaleThreePi0ByKsPmMean) ||
-           (component.first == "ks_00" && fitConfig.eventWeights.scaleSemileptonicByKs00Mean)) &&
+    {
+      const bool required = component.second.enabled ||
+                            (component.first == "ks_pm" && fitConfig.eventWeights.scaleThreePi0ByKsPmMean) ||
+                            (component.first == "ks_00" && fitConfig.eventWeights.scaleSemileptonicByKs00Mean);
+      if (required &&
           (component.second.correctionFile.empty() || component.second.correctionHistogram.empty() ||
-           component.second.ratioFile.empty() || component.second.ratioSpline.empty()))
-        throw std::runtime_error("ERROR: Required signal weight component has incomplete ROOT object configuration: " +
+           (component.second.useCorrectionSpline && component.second.correctionSpline.empty())))
+        throw std::runtime_error("ERROR: Required signal correction component has incomplete ROOT object configuration: " +
                                  component.first);
+      if (required && !component.second.ratioFile.empty() && component.second.ratioSpline.empty())
+        throw std::runtime_error("ERROR: Signal ratio spline name is missing for component: " + component.first);
+    }
     if (!std::isfinite(fitConfig.regenerationExclusion.beamPipeBoundary) ||
         fitConfig.regenerationExclusion.beamPipeBoundary < 0 ||
         !std::isfinite(fitConfig.regenerationExclusion.meanCharged) ||

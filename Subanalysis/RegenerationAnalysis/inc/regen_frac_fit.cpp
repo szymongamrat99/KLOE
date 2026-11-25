@@ -29,6 +29,17 @@
 
 using json = nlohmann::json;
 
+namespace
+{
+double evaluateCorrectionSpline(const TSpline3 &spline, double x)
+{
+  if (!std::isfinite(x) || x < spline.GetXmin() || x > spline.GetXmax())
+    return 1.0;
+  const double value = spline.Eval(x);
+  return std::isfinite(value) ? value : 1.0;
+}
+}
+
 RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(reader), fInterf()
 {
   LoadConfig();
@@ -86,10 +97,24 @@ RegenerationFractionFit::RegenerationFractionFit(TTreeReader *reader) : fReader(
         throw std::runtime_error("Could not clone signal correction histogram for " + component.first);
       correction->SetDirectory(nullptr);
       signalWeightHistograms.emplace(component.first, std::move(correction));
+      if (component.second.useCorrectionSpline)
+      {
+        TSpline3 *sourceSpline =
+            dynamic_cast<TSpline3 *>(correctionFile->Get(component.second.correctionSpline.c_str()));
+        if (!sourceSpline)
+          throw std::runtime_error("Could not find signal correction spline for " + component.first + ": " +
+                                   component.second.correctionSpline);
+        std::unique_ptr<TSpline3> correctionSpline(dynamic_cast<TSpline3 *>(
+            sourceSpline->Clone(("regen_" + component.first + "_correction_spline").c_str())));
+        if (!correctionSpline)
+          throw std::runtime_error("Could not clone signal correction spline for " + component.first);
+        signalWeightCorrectionSplines.emplace(component.first, std::move(correctionSpline));
+      }
     }
 
-    const std::string ratioPath = resolveCPFitPath(component.second.ratioFile);
+    if (!component.second.ratioFile.empty())
     {
+      const std::string ratioPath = resolveCPFitPath(component.second.ratioFile);
       TDirectory::TContext directoryContext;
       std::unique_ptr<TFile> ratioFile(TFile::Open(ratioPath.c_str(), "READ"));
       if (!ratioFile || ratioFile->IsZombie())
@@ -350,8 +375,10 @@ void RegenerationFractionFit::LoadConfig()
       component.enabled = entry.at("enabled").get<bool>();
       component.correctionFile = entry.at("correctionFile").get<std::string>();
       component.correctionHistogram = entry.at("correctionHistogram").get<std::string>();
-      component.ratioFile = entry.at("ratioFile").get<std::string>();
-      component.ratioSpline = entry.at("ratioSpline").get<std::string>();
+      component.correctionSpline = entry.value("correctionSpline", "");
+      component.useCorrectionSpline = entry.value("useCorrectionSpline", false);
+      component.ratioFile = entry.value("ratioFile", "");
+      component.ratioSpline = entry.value("ratioSpline", "");
       fConfig.signalWeightComponents.emplace(name, std::move(component));
     }
     for (auto it = signalComponents.begin(); it != signalComponents.end(); ++it)
@@ -367,13 +394,18 @@ void RegenerationFractionFit::LoadConfig()
       !std::isfinite(fConfig.signalWeightRelativeErrorLimit) || fConfig.signalWeightRelativeErrorLimit < 0.0)
     throw std::runtime_error("Signal and regeneration relative-error limits must be finite and non-negative");
   for (const auto &component : fConfig.signalWeightComponents)
-    if ((component.second.enabled ||
-         (component.first == "ks_pm" && fConfig.scaleThreePi0ByKsPmMean) ||
-         (component.first == "ks_00" && fConfig.scaleSemileptonicByKs00Mean)) &&
+  {
+    const bool required = component.second.enabled ||
+                          (component.first == "ks_pm" && fConfig.scaleThreePi0ByKsPmMean) ||
+                          (component.first == "ks_00" && fConfig.scaleSemileptonicByKs00Mean);
+    if (required &&
         (component.second.correctionFile.empty() || component.second.correctionHistogram.empty() ||
-         component.second.ratioFile.empty() || component.second.ratioSpline.empty()))
-      throw std::runtime_error("Required signal weight component has incomplete ROOT object configuration: " +
+         (component.second.useCorrectionSpline && component.second.correctionSpline.empty())))
+      throw std::runtime_error("Required signal correction component has incomplete ROOT object configuration: " +
                                component.first);
+    if (required && !component.second.ratioFile.empty() && component.second.ratioSpline.empty())
+      throw std::runtime_error("Signal ratio spline name is missing for component: " + component.first);
+  }
 
   configFile.close();
 
@@ -423,11 +455,14 @@ void RegenerationFractionFit::_FillHistograms()
       [this, &crossChannelMeanErrorCountByComponent](const std::string &name, double dt, double radius)
   {
     const auto histogram = signalWeightHistograms.find(name);
-    const auto ratioSpline = signalWeightRatios.find(name);
-    if (histogram == signalWeightHistograms.end() || ratioSpline == signalWeightRatios.end())
+    if (histogram == signalWeightHistograms.end())
       throw std::runtime_error("Signal weight component is not loaded for cross-channel mean: " + name);
-    double correction = histogram->second->Interpolate(dt);
-    const double ratio = ratioSpline->second->Eval(radius);
+    const auto spline = signalWeightCorrectionSplines.find(name);
+    double correction = spline != signalWeightCorrectionSplines.end()
+                            ? evaluateCorrectionSpline(*spline->second, dt)
+                            : histogram->second->Interpolate(dt);
+    const auto ratioSpline = signalWeightRatios.find(name);
+    const double ratio = ratioSpline != signalWeightRatios.end() ? ratioSpline->second->Eval(radius) : 1.0;
     if (fConfig.signalWeightRelativeErrorLimit > 0.0)
     {
       const int bin = histogram->second->FindFixBin(dt);
@@ -468,9 +503,11 @@ void RegenerationFractionFit::_FillHistograms()
 
     double R_ch = sqrt(pow(Kchrec[6] - ip[0],2) + pow(Kchrec[7] - ip[1],2) + pow(Kchrec[8] - ip[2],2));
     double dttri = tch_tri - tne_tri;
+    double dtfit = tch_fit - tne_fit;
 
     double interpWeight = 1.0;
-    bool hasEnabledSignalWeight = false;
+    double chargedModeWeight = 0.0, neutralModeWeight = 0.0;
+    bool hasChargedMode = false, hasNeutralMode = false;
     bool excessiveSignalWeightError = false;
     std::vector<std::string> excessiveSignalWeightComponents;
     if (mctruth == 1)
@@ -480,12 +517,16 @@ void RegenerationFractionFit::_FillHistograms()
       {
         if (!fConfig.signalWeightComponents.at(component.first).enabled)
           continue;
-        double correction = component.second->Interpolate(dttri);
-        const double ratio = signalWeightRatios.at(component.first)->Eval(R_ch);
+        const auto correctionSpline = signalWeightCorrectionSplines.find(component.first);
+        double correction = correctionSpline != signalWeightCorrectionSplines.end()
+                                ? evaluateCorrectionSpline(*correctionSpline->second, dtfit)
+                                : component.second->Interpolate(dtfit);
+        const auto ratioSpline = signalWeightRatios.find(component.first);
+        const double ratio = ratioSpline != signalWeightRatios.end() ? ratioSpline->second->Eval(R_ch) : 1.0;
 
         if (fConfig.signalWeightRelativeErrorLimit > 0.0)
         {
-          const int bin = component.second->FindFixBin(dttri);
+          const int bin = component.second->FindFixBin(dtfit);
           const double content = component.second->GetBinContent(bin);
           const double error = component.second->GetBinError(bin);
           const double relativeError = content > 0.0 && std::isfinite(content) &&
@@ -501,12 +542,23 @@ void RegenerationFractionFit::_FillHistograms()
         }
 
         const double componentWeight = ratio * correction;
-        hasEnabledSignalWeight = true;
-        interpWeight += componentWeight;
+        if (component.first == "ks_pm" || component.first == "kl_pm")
+        {
+          chargedModeWeight += componentWeight;
+          hasChargedMode = true;
+        }
+        else
+        {
+          neutralModeWeight += componentWeight;
+          hasNeutralMode = true;
+        }
       }
 
-      if (!hasEnabledSignalWeight)
-        interpWeight = 1.0;
+      if (!hasChargedMode)
+        chargedModeWeight = 1.0;
+      if (!hasNeutralMode)
+        neutralModeWeight = 1.0;
+      interpWeight = chargedModeWeight * neutralModeWeight;
     }
 
     bool invalidSignalWeight = mctruth == 1 && (!std::isfinite(interpWeight) || interpWeight <= 0.0);
@@ -539,13 +591,13 @@ void RegenerationFractionFit::_FillHistograms()
     }
     else if (channelName_str == "3pi0" && fConfig.scaleThreePi0ByKsPmMean)
     {
-      double tmpWeight = evaluateCrossChannelMeanWeight("ks_pm", dttri, R_ch) <= 1.0 ? evaluateCrossChannelMeanWeight("ks_pm", dttri, R_ch) : 1.0;
+      double tmpWeight = evaluateCrossChannelMeanWeight("ks_pm", dtfit, R_ch) <= 1.0 ? evaluateCrossChannelMeanWeight("ks_pm", dtfit, R_ch) : 1.0;
       threePi0KsPmMeanWeightSum += tmpWeight;
       ++threePi0MeanSampleCount;
     }
     else if (channelName_str == "Semileptonic" && fConfig.scaleSemileptonicByKs00Mean)
     {
-      semileptonicKs00MeanWeightSum += evaluateCrossChannelMeanWeight("ks_00", dttri, R_ch);
+      semileptonicKs00MeanWeightSum += evaluateCrossChannelMeanWeight("ks_00", dtfit, R_ch);
       ++semileptonicMeanSampleCount;
     }
 

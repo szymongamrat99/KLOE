@@ -82,6 +82,27 @@ void cpfit_test_data(const char *directory)
     ksPM.Write();
     klPM.Write();
     ks00.Write();
+    const double splineX[] = {-5.0, 0.0, 5.0};
+    const double ksPmCorrection[] = {0.5, 0.5, 0.5};
+    const double klPmCorrection[] = {0.4, 0.4, 0.4};
+    const double ks00Correction[] = {0.3, 0.3, 0.3};
+    const double kl00Correction[] = {0.2, 0.2, 0.2};
+    const double narrowSplineX[] = {-1.0, 0.0, 1.0};
+    TGraph ksPmGraph(3, splineX, ksPmCorrection);
+    TGraph ksPmNarrowGraph(3, narrowSplineX, ksPmCorrection);
+    TGraph klPmGraph(3, splineX, klPmCorrection);
+    TGraph ks00Graph(3, splineX, ks00Correction);
+    TGraph kl00Graph(3, splineX, kl00Correction);
+    TSpline3 ksPmSpline("ks_pm_correction_spline", &ksPmGraph);
+    TSpline3 ksPmNarrowSpline("ks_pm_narrow_correction_spline", &ksPmNarrowGraph);
+    TSpline3 klPmSpline("kl_pm_correction_spline", &klPmGraph);
+    TSpline3 ks00Spline("ks_00_correction_spline", &ks00Graph);
+    TSpline3 kl00Spline("kl_00_correction_spline", &kl00Graph);
+    ksPmSpline.Write("ks_pm_correction_spline");
+    ksPmNarrowSpline.Write("ks_pm_narrow_correction_spline");
+    klPmSpline.Write("kl_pm_correction_spline");
+    ks00Spline.Write("ks_00_correction_spline");
+    kl00Spline.Write("kl_00_correction_spline");
   }
   {
     TFile file((base + "/signal_ratios.root").c_str(), "RECREATE");

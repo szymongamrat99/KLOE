@@ -123,16 +123,25 @@ without recompiling:
   uses weight 1; the corresponding Signal or Regeneration file is not opened.
   Signal corrections are configured independently for `ks_pm`, `kl_pm`,
   `ks_00`, and `kl_00` under `eventWeights.signalComponents`. Each enabled
-  component contributes `ratioSpline(R_ch) * correctionHistogram(Delta_t_tri)`
-  to the Signal event weight; the enabled contributions are summed, matching
-  the composition in `RegenerationFractionFit`. The `ks_pm` and `kl_pm`
-  components are enabled by default; `ks_00` and `kl_00` are disabled until
-  their correction files and ratio splines are available. Correction and ratio
+  component contributes `ratio(R_ch) * correction(Delta_t_tri)` to its mode
+  sum; if `ratioFile` is empty, the ratio factor is 1. The final Signal weight
+  is `(ks_pm + kl_pm) * (ks_00 + kl_00)`, where each term denotes its complete
+  ratio-times-correction weight. A mode with no enabled components contributes
+  the identity factor 1. Set `useCorrectionSpline` per component to choose
+  the configured `correctionSpline`; `false` uses ROOT
+  histogram linear interpolation (`TH1::Interpolate`). Relative errors are
+  always evaluated from the configured correction histogram. A correction
+  spline evaluated outside its knot range (or at a non-finite coordinate)
+  contributes `1`; ratio spline behavior is unchanged. The current
+  `ks_pm` and `kl_pm` entries select their correction splines. The `ks_pm` and
+  `kl_pm` components are enabled by default; `ks_00` and `kl_00` are disabled
+  until their correction files are available; ratio data is optional.
+  Correction and ratio
   file paths are relative to `Subanalysis/CPFit/` and also accept absolute
   paths. `signalMaxRelativeError` is checked independently for each enabled
   correction histogram; only a high-error component's histogram factor is set
-  to 1, so that component still contributes its ratio spline and other
-  components remain unchanged. `signalWeights.largeRelativeErrorReplacedByComponent`
+  to 1, so that component still contributes its ratio factor (or 1 if omitted)
+  and other components remain unchanged. `signalWeights.largeRelativeErrorReplacedByComponent`
   reports the number of substituted components. `regenerationShapeCorrection.weightFunctionsFile`
   is relative to `Subanalysis/RegenerationAnalysis/results/` and also accepts
   absolute paths.
@@ -150,14 +159,13 @@ without recompiling:
   set the histogram bin counts (1–1000); the weight axis is chosen from the
   data and the Δt axis uses `deltaT.rangeX`. Output alongside the result JSON:
   `_signal_weights_1d.pdf`, `_signal_weights_dt.pdf`, and
-  `_signal_weights.root`. The 1D curves show the applied total, the sum of
-  enabled `ks_pm`/`ks_00` contributions, and the sum of enabled
-  `kl_pm`/`kl_00` contributions, each including its ratio spline. The 2D
+  `_signal_weights.root`. The 1D curves show the applied total and the two
+  mode factors (`ks_pm + kl_pm`, `ks_00 + kl_00`), each including configured
+  ratio factors. The 2D
   plot shows event counts versus `Dtboostlor` and applied total weight, with
   the mean per Δt bin overlaid; the ROOT file also contains the profile.
-  When the entire event weight falls back to 1, KS and KL are both 0 and
-  `signal_weight_fallback` records the remaining 1, so that total = KS + KL
-  + fallback. These are correction weights before interference, luminosity,
+  When the entire event weight falls back to 1, both mode factors are recorded
+  as 0 and `signal_weight_fallback` records the fallback. These are correction weights before interference, luminosity,
   branching-ratio and fitted normalization factors. ROOT underflow/overflow
   bins retain events outside the configured Δt range.
 - `regenerationExclusion.enabled` controls the regeneration veto for both data
@@ -173,9 +181,18 @@ without recompiling:
 
 For the RegenerationAnalysis fit, [fit_config.json](Subanalysis/RegenerationAnalysis/config/fit_config.json)
 has independent `generalSettings.signalWeightComponents` switches for `ks_pm`,
-`kl_pm`, `ks_00`, and `kl_00`. Enabled components contribute the sum of
-`ratioSpline(R_ch) * correctionHistogram(Delta_t_tri)`; the two `00` components
-are off until their inputs are available. `signalWeightRelativeErrorLimit`
+`kl_pm`, `ks_00`, and `kl_00`. The Signal weight is the product of the
+`ks_pm + kl_pm` mode sum and the `ks_00 + kl_00` mode sum; an empty mode uses
+the identity factor 1. Each component has `correctionHistogram`,
+`correctionSpline`, and `useCorrectionSpline`; the switch chooses spline
+evaluation or histogram linear interpolation. Relative errors are always
+measured from the histogram. A correction spline evaluated outside its knot
+range (or at a non-finite coordinate) contributes `1`; ratio spline behavior
+is unchanged. Each enabled component's `ratio(R_ch) * correction(Delta_t_tri)`
+is added to its mode sum; an empty `ratioFile` skips ratio loading and uses 1.
+The two `00` components are off and have empty correction paths until their
+inputs are available.
+`signalWeightRelativeErrorLimit`
 uses a relative fraction (for example, `0.1` for 10%; `0` disables the error
 cut). The error limit is checked independently for each enabled component;
 only that component's correction histogram factor is set to 1, preserving its
@@ -186,7 +203,8 @@ controls multiplication by the interference weight.
 `.semileptonicFromKs00` optionally scale the 3pi0 and Semileptonic histograms
 by the corresponding component's mean weight over selected events in that
 same channel. Each event's own `R_ch` and `Delta_t_tri` are used for
-`ratioSpline(R_ch) * correctionHistogram(Delta_t_tri)`, with the same
+`ratioSpline(R_ch) * correction(Delta_t_tri)`, using the configured histogram
+interpolation or correction spline and the same
 relative-error substitution. The required component files must be configured
 even if that component is disabled for direct Signal weighting. Both switches
 default to `false`.
