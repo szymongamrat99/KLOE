@@ -707,18 +707,26 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
             const double rCharged = std::sqrt(std::pow(Kchrec[6] - ip[0], 2) +
                                               std::pow(Kchrec[7] - ip[1], 2) +
                                               std::pow(Kchrec[8] - ip[2], 2));
+            const double rNeutral = std::sqrt(std::pow(Knerec[6] - ip[0], 2) +
+                                              std::pow(Knerec[7] - ip[1], 2) +
+                                              std::pow(Knerec[8] - ip[2], 2));
             for (const auto &component : signalWeightObjects)
             {
               if (!component.second.applyToSignal)
                 continue;
               double correction = component.second.useCorrectionSpline
-                                      ? evaluateCorrectionSpline(*component.second.correctionSpline, baseKin.Dtboostlor)
-                                      : component.second.correction->Interpolate(baseKin.Dtboostlor);
-              const double ratio = component.second.ratio ? component.second.ratio->Eval(rCharged) : 1.0;
+                                      ? evaluateCorrectionSpline(*component.second.correctionSpline, Dttri)
+                                      : component.second.correction->Interpolate(Dttri);
+              double ratio = 1.0;
+              
+              if (component.first == "ks_pm" || component.first == "kl_pm")
+                ratio = component.second.ratio ? component.second.ratio->Eval(rCharged) : 1.0;
+              if (component.first == "ks_00" || component.first == "kl_00")
+                ratio = component.second.ratio ? component.second.ratio->Eval(rNeutral) : 1.0;
 
               if (cfg.eventWeights.signalMaxRelativeError > 0.0)
               {
-                const int weightBin = component.second.correction->FindFixBin(baseKin.Dtboostlor);
+                const int weightBin = component.second.correction->FindFixBin(Dttri);
                 const double binContent = component.second.correction->GetBinContent(weightBin);
                 const double binError = component.second.correction->GetBinError(weightBin);
                 const double relativeError = binContent > 0.0 && std::isfinite(binContent) &&
@@ -782,7 +790,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
             if (!usedComponents)
               chargedModeWeight = neutralModeWeight = 0.0;
             signalWeightPlotEvents.push_back(
-                {baseKin.Dtboostlor, weight, chargedModeWeight, neutralModeWeight,
+                {Dttri, weight, chargedModeWeight, neutralModeWeight,
                  usedComponents ? 0.0 : weight});
           }
 
@@ -816,7 +824,7 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
                                               std::pow(Kchrec[7] - ip[1], 2) +
                                               std::pow(Kchrec[8] - ip[2], 2));
 
-            double tmpWeight = evaluateCrossChannelMeanWeight("ks_pm", baseKin.Dtboostlor, rCharged) <= 1.0 ? evaluateCrossChannelMeanWeight("ks_pm", baseKin.Dtboostlor, rCharged) : 1.0;
+            double tmpWeight = evaluateCrossChannelMeanWeight("ks_pm", Dttri, rCharged) <= 1.0 ? evaluateCrossChannelMeanWeight("ks_pm", Dttri, rCharged) : 1.0;
             threePi0KsPmMeanWeightSum += tmpWeight;
             ++threePi0MeanSampleCount;
           }
@@ -828,10 +836,10 @@ static int cp_fit_execute(TChain &chain, TString mode, bool check_corr, KLOE::pm
           event.semileptonic_weights.push_back(cfg.eventWeights.applySemileptonic ? avgSemileptonicWeight : 1.0);
           if (needsKs00Mean)
           {
-            const double rCharged = std::sqrt(std::pow(Kchrec[6] - ip[0], 2) +
-                                              std::pow(Kchrec[7] - ip[1], 2) +
-                                              std::pow(Kchrec[8] - ip[2], 2));
-            semileptonicKs00MeanWeightSum += evaluateCrossChannelMeanWeight("ks_00", baseKin.Dtboostlor, rCharged);
+            const double rNeutral = std::sqrt(std::pow(Knerec[6] - ip[0], 2) +
+                                              std::pow(Knerec[7] - ip[1], 2) +
+                                              std::pow(Knerec[8] - ip[2], 2));
+            semileptonicKs00MeanWeightSum += evaluateCrossChannelMeanWeight("ks_00", Dttri, rNeutral);
             ++semileptonicMeanSampleCount;
           }
         }

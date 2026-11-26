@@ -518,12 +518,14 @@ void RegenerationFractionFit::_FillHistograms()
 
     auto &minv4gam = **fReaderFloat.at("minv4gam");
     auto &Kchrec = *fReaderFloatArray.at("Kchrec");
+    auto &Knerec = *fReaderFloatArray.at("Knerec");
     auto &ip = *fReaderFloatArray.at("ip");
 
     if (Kchrec.GetSize() < 9 || ip.GetSize() < 3)
       throw std::runtime_error("Signal weight input requires Kchrec[9] and ip[3]");
 
     double R_ch = sqrt(pow(Kchrec[6] - ip[0],2) + pow(Kchrec[7] - ip[1],2) + pow(Kchrec[8] - ip[2],2));
+    double R_ne = sqrt(pow(Knerec[6] - ip[0],2) + pow(Knerec[7] - ip[1],2) + pow(Knerec[8] - ip[2],2));
     double dttri = tch_tri - tne_tri;
     double dtfit = tch_fit - tne_fit;
 
@@ -541,14 +543,19 @@ void RegenerationFractionFit::_FillHistograms()
           continue;
         const auto correctionSpline = signalWeightCorrectionSplines.find(component.first);
         double correction = correctionSpline != signalWeightCorrectionSplines.end()
-                                ? evaluateCorrectionSpline(*correctionSpline->second, dtfit)
-                                : component.second->Interpolate(dtfit);
+                                ? evaluateCorrectionSpline(*correctionSpline->second, dttri)
+                                : component.second->Interpolate(dttri);
         const auto ratioSpline = signalWeightRatios.find(component.first);
-        const double ratio = ratioSpline != signalWeightRatios.end() ? ratioSpline->second->Eval(R_ch) : 1.0;
+        double ratio = 1.0;
+        
+        if (component.first == "ks_pm" || component.first == "kl_pm")
+          ratio = ratioSpline != signalWeightRatios.end() ? ratioSpline->second->Eval(R_ch) : 1.0;
+        if (component.first == "ks_00" || component.first == "kl_00")
+          ratio = ratioSpline != signalWeightRatios.end() ? ratioSpline->second->Eval(R_ne) : 1.0;
 
         if (fConfig.signalWeightRelativeErrorLimit > 0.0)
         {
-          const int bin = component.second->FindFixBin(dtfit);
+          const int bin = component.second->FindFixBin(dttri);
           const double content = component.second->GetBinContent(bin);
           const double error = component.second->GetBinError(bin);
           const double relativeError = content > 0.0 && std::isfinite(content) &&
@@ -613,13 +620,13 @@ void RegenerationFractionFit::_FillHistograms()
     }
     else if (channelName_str == "3pi0" && fConfig.scaleThreePi0ByKsPmMean)
     {
-      double tmpWeight = evaluateCrossChannelMeanWeight("ks_pm", dtfit, R_ch) <= 1.0 ? evaluateCrossChannelMeanWeight("ks_pm", dtfit, R_ch) : 1.0;
+      double tmpWeight = evaluateCrossChannelMeanWeight("ks_pm", dttri, R_ch) <= 1.0 ? evaluateCrossChannelMeanWeight("ks_pm", dttri, R_ch) : 1.0;
       threePi0KsPmMeanWeightSum += tmpWeight;
       ++threePi0MeanSampleCount;
     }
     else if (channelName_str == "Semileptonic" && fConfig.scaleSemileptonicByKs00Mean)
     {
-      semileptonicKs00MeanWeightSum += evaluateCrossChannelMeanWeight("ks_00", dtfit, R_ch);
+      semileptonicKs00MeanWeightSum += evaluateCrossChannelMeanWeight("ks_00", dttri, R_ne);
       ++semileptonicMeanSampleCount;
     }
 

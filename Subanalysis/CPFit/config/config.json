@@ -1,7 +1,7 @@
 {
   "deltaT": {
-    "rangeX": [-200.0, 200.0],
-    "xRangeDisplay": [-200.0, 200.0],
+    "rangeX": [-220.0, 220.0],
+    "xRangeDisplay": [-220.0, 220.0],
     "resolution": 1.5
   },
   "regenerationSplit": [-30.0, 0.0, 30.0],
@@ -17,7 +17,7 @@
   },
   "diagnostics": {
     "signalWeightPlots": {
-      "enabled": true,
+      "enabled": false,
       "weightBins": 100,
       "deltaTBins": 100
     },
@@ -77,7 +77,7 @@
       "regeneration": true
     },
     "crossChannelMeanWeights": {
-      "threePi0FromKsPm": true,
+      "threePi0FromKsPm": false,
       "semileptonicFromKs00": false
     },
     "signalComponents": {
@@ -151,7 +151,7 @@
       "limitLower": 100.0,
       "limitUpper": 100.0,
       "step": 1e-4,
-      "fixed": false
+      "fixed": true
     },
     "Im": {
       "enabled": true,
@@ -171,7 +171,7 @@
       "fixed": false
     },
     "A_regen": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 3.0,
       "limitUpper": 2.5,
@@ -180,7 +180,7 @@
       "fixed": true
     },
     "A_three": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -195,10 +195,10 @@
       "limitUpper": 2.5,
       "step": 0.01,
       "channels": ["Omega"],
-      "fixed": true
+      "fixed": false
     },
     "A_semileptonic": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -207,7 +207,7 @@
       "fixed": true
     },
     "A_other": {
-      "enabled": true,
+      "enabled": false,
       "initialValue": 1.0,
       "limitLower": 1.0,
       "limitUpper": 2.5,
@@ -216,14 +216,14 @@
       "fixed": true
     },
     "A_bcg_group": {
-      "enabled": false,
+      "enabled": true,
       "groupName": "A_bcg",
       "initialValue": 1.00,
       "step": 0.01,
       "limitLower": 1.0,
       "limitUpper": 1.0,
-      "channels": ["Semileptonic", "3pi0", "Other"],
-      "fixed": false
+      "channels": ["Semileptonic", "3pi0", "Other", "Regeneration"],
+      "fixed": true
     }
   }
 }
