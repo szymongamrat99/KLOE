@@ -2,8 +2,8 @@
   "histogramConfiguration": {
     "rhoNeutral": {
       "resolution": 1.0,
-      "range": [0.0, 50.0],
-      "displayRange": [0.0, 50.0],
+      "range": [0.0, 70.0],
+      "displayRange": [0.0, 70.0],
       "title": "#rho_{neutral}",
       "xAxisTitle": "#rho_{neutral}",
       "yAxisTitle": "Entries",
@@ -11,8 +11,8 @@
     },
     "rhoCharged": {
       "resolution": 1.0,
-      "range": [0.0, 50.0],
-      "displayRange": [0.0, 50.0],
+      "range": [0.0, 70.0],
+      "displayRange": [0.0, 70.0],
       "title": "#rho_{charged}",
       "xAxisTitle": "#rho_{charged}",
       "yAxisTitle": "Entries",
@@ -20,8 +20,8 @@
     },
     "RNeutral": {
       "resolution": 1.0,
-      "range": [0.0, 50.0],
-      "displayRange": [0.0, 50.0],
+      "range": [0.0, 70.0],
+      "displayRange": [0.0, 70.0],
       "title": "R_{neutral}",
       "xAxisTitle": "R_{neutral}",
       "yAxisTitle": "Entries",
@@ -29,8 +29,8 @@
     },
     "RCharged": {
       "resolution": 1.0,
-      "range": [0.0, 50.0],
-      "displayRange": [0.0, 50.0],
+      "range": [0.0, 70.0],
+      "displayRange": [0.0, 70.0],
       "title": "R_{charged}",
       "xAxisTitle": "R_{charged}",
       "yAxisTitle": "Entries",
@@ -73,7 +73,7 @@
   "generalSettings": {
     "isSignalWeighted": false,
     "crossChannelMeanWeights": {
-      "threePi0FromKsPm": true,
+      "threePi0FromKsPm": false,
       "semileptonicFromKs00": false
     },
     "signalWeightComponents": {
@@ -127,6 +127,6 @@
     "backgroundFitNonNegativeCap": false,
     "divideWeightByBackgroundScale": false,
     "applyBackgroundScaleToMCSum": true,
-    "weightErrorLimit": 10.0
+    "weightErrorLimit": 1.0
   }
 }
